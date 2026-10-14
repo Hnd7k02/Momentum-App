@@ -1,0 +1,234 @@
+{
+ "era": "legacy",
+ "origin": "2026-09-07",
+ "rank": "contender",
+ "peakRank": "contender",
+ "progress": 2.011157809,
+ "lifetimeXp": 90,
+ "points": [
+  [
+   2.011157809,
+   261.673671356,
+   0
+  ]
+ ],
+ "changes": [],
+ "domains": [
+  {
+   "domain": "mental",
+   "momentum": 273.347342712,
+   "peakMomentum": 273.347342712,
+   "progress": 2.088982285,
+   "started": true,
+   "series": [
+    2.088982285
+   ],
+   "active": [
+    true
+   ]
+  },
+  {
+   "domain": "gym",
+   "momentum": 250,
+   "peakMomentum": 250,
+   "progress": 1.928571429,
+   "started": false,
+   "series": [
+    1.928571429
+   ],
+   "active": [
+    false
+   ]
+  },
+  {
+   "domain": "running",
+   "momentum": 250,
+   "peakMomentum": 250,
+   "progress": 1.928571429,
+   "started": false,
+   "series": [
+    1.928571429
+   ],
+   "active": [
+    false
+   ]
+  },
+  {
+   "domain": "food",
+   "momentum": 250,
+   "peakMomentum": 250,
+   "progress": 1.928571429,
+   "started": false,
+   "series": [
+    1.928571429
+   ],
+   "active": [
+    false
+   ]
+  }
+ ],
+ "gym": {
+  "rating": 250,
+  "sessionsThisWeek": 0,
+  "weeklyTarget": 0,
+  "endurance": {
+   "progress": 0,
+   "unlocked": false
+  },
+  "ytdChange": null,
+  "performance": {
+   "score": null,
+   "components": []
+  },
+  "decayFraction": 0,
+  "maintenance": false,
+  "abstinence": null
+ },
+ "running": {
+  "rating": 250,
+  "sessionsThisWeek": 0,
+  "weeklyTarget": 0,
+  "endurance": {
+   "progress": 0,
+   "unlocked": false
+  },
+  "ytdChange": null,
+  "performance": {
+   "score": null,
+   "components": []
+  },
+  "decayFraction": 0,
+  "maintenance": false,
+  "abstinence": null,
+  "attendanceOnlyRuns": 0
+ },
+ "history": {
+  "days": [
+   [
+    "2026-09-07",
+    "scored",
+    49.166666667,
+    49.166666667,
+    9,
+    9
+   ]
+  ],
+  "overall": [
+   49.166666667
+  ],
+  "mental": [
+   73.333333333
+  ],
+  "gym": [
+   null
+  ],
+  "running": [
+   null
+  ],
+  "food": [
+   null
+  ],
+  "sports": [
+   25
+  ],
+  "paused": [
+   false
+  ],
+  "activity": [
+   true
+  ],
+  "questions": [
+   [
+    "q_9f156fff-0488-4910-8f55-d24593ad1035",
+    "eigene",
+    "active",
+    [
+     70
+    ]
+   ],
+   [
+    "q_fba70da4-2c6f-4467-af25-69247c939e22",
+    "eigene",
+    "active",
+    [
+     80
+    ]
+   ],
+   [
+    "q_4a23c0ee-0512-44cf-bf89-cee593b331a6",
+    "eigene",
+    "active",
+    [
+     80
+    ]
+   ],
+   [
+    "q_30981472-926f-4ce5-a019-c269b47b0c5b",
+    "eigene",
+    "active",
+    [
+     0
+    ]
+   ],
+   [
+    "q_ac3a3c7b-f22f-4078-b843-0eb8c9b046ed",
+    "eigene",
+    "active",
+    [
+     100
+    ]
+   ],
+   [
+    "q_34917b5d-cfc2-4843-99d2-995431094e0d",
+    "eigene",
+    "active",
+    [
+     100
+    ]
+   ],
+   [
+    "q_92155dee-f60e-49bf-8f25-2a99180478c6",
+    "eigene",
+    "active",
+    [
+     100
+    ]
+   ],
+   [
+    "q_9584da3a-407a-4571-a75b-7a21e140de17",
+    "eigene",
+    "active",
+    [
+     60
+    ]
+   ],
+   [
+    "q_70ed79f5-c4f9-47d1-a530-9a8023a15542",
+    "eigene",
+    "active",
+    [
+     70
+    ]
+   ]
+  ],
+  "weeks": [
+   [
+    "2026-W37",
+    4,
+    1,
+    false,
+    [
+     [
+      "sports",
+      4,
+      1,
+      false
+     ]
+    ]
+   ]
+  ]
+ },
+ "legacy": [
+  261.673671356
+ ]
+}

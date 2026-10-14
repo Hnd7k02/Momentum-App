@@ -1,0 +1,2706 @@
+{
+ "7": {
+  "days": [
+   [
+    "2026-08-24",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    375000,
+    {
+     "id": "set_2026-08-24_0",
+     "reps": 5,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-24",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    425000,
+    {
+     "id": "set_2026-08-24_1",
+     "reps": 5,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-26",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    525000,
+    {
+     "id": "set_2026-08-26_0",
+     "reps": 7,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-26",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    595000,
+    {
+     "id": "set_2026-08-26_1",
+     "reps": 7,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-28",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    450000,
+    {
+     "id": "set_2026-08-28_0",
+     "reps": 6,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-28",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    510000,
+    {
+     "id": "set_2026-08-28_1",
+     "reps": 6,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ]
+  ],
+  "comparisons": [
+   [
+    "ex_bench_press",
+    "2026-08-28",
+    "declined",
+    510000,
+    595000,
+    "2026-08-26",
+    0.857142857,
+    -85000
+   ],
+   [
+    "ex_squat",
+    "2026-08-28",
+    "declined",
+    450000,
+    525000,
+    "2026-08-26",
+    0.857142857,
+    -75000
+   ]
+  ],
+  "recent": {
+   "ratio": 0.857142857,
+   "muscles": [
+    [
+     "chest",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "back",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "shoulders",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "biceps",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "triceps",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "core",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "quadriceps",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "hamstringsGlutes",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "calves",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "forearms",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ]
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "overall": {
+   "ratio": 1.2,
+   "muscles": [
+    [
+     "chest",
+     "measured",
+     1.2,
+     1,
+     1,
+     510000,
+     "improved",
+     20
+    ],
+    [
+     "back",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "shoulders",
+     "measured",
+     1.2,
+     1,
+     1,
+     510000,
+     "improved",
+     20
+    ],
+    [
+     "biceps",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "triceps",
+     "measured",
+     1.2,
+     1,
+     1,
+     510000,
+     "improved",
+     20
+    ],
+    [
+     "core",
+     "measured",
+     1.2,
+     1,
+     1,
+     450000,
+     "improved",
+     20
+    ],
+    [
+     "quadriceps",
+     "measured",
+     1.2,
+     1,
+     1,
+     450000,
+     "improved",
+     20
+    ],
+    [
+     "hamstringsGlutes",
+     "measured",
+     1.2,
+     1,
+     1,
+     450000,
+     "improved",
+     20
+    ],
+    [
+     "calves",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "forearms",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ]
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "names": [],
+  "awaitingBodyweight": []
+ },
+ "30": {
+  "days": [
+   [
+    "2026-08-03",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    350000,
+    {
+     "id": "set_2026-08-03_0",
+     "reps": 5,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-03",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    400000,
+    {
+     "id": "set_2026-08-03_1",
+     "reps": 5,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-05",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    490000,
+    {
+     "id": "set_2026-08-05_0",
+     "reps": 7,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-05",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    560000,
+    {
+     "id": "set_2026-08-05_1",
+     "reps": 7,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-07",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    420000,
+    {
+     "id": "set_2026-08-07_0",
+     "reps": 6,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-07",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    480000,
+    {
+     "id": "set_2026-08-07_1",
+     "reps": 6,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-10",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    435000,
+    {
+     "id": "set_2026-08-10_0",
+     "reps": 6,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-10",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    495000,
+    {
+     "id": "set_2026-08-10_1",
+     "reps": 6,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-12",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    362500,
+    {
+     "id": "set_2026-08-12_0",
+     "reps": 5,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-12",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    412500,
+    {
+     "id": "set_2026-08-12_1",
+     "reps": 5,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-14",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    507500,
+    {
+     "id": "set_2026-08-14_0",
+     "reps": 7,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-14",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    577500,
+    {
+     "id": "set_2026-08-14_1",
+     "reps": 7,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-17",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    507500,
+    {
+     "id": "set_2026-08-17_0",
+     "reps": 7,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-17",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    577500,
+    {
+     "id": "set_2026-08-17_1",
+     "reps": 7,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-19",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    435000,
+    {
+     "id": "set_2026-08-19_0",
+     "reps": 6,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-19",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    495000,
+    {
+     "id": "set_2026-08-19_1",
+     "reps": 6,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-21",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    362500,
+    {
+     "id": "set_2026-08-21_0",
+     "reps": 5,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-21",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    412500,
+    {
+     "id": "set_2026-08-21_1",
+     "reps": 5,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-24",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    375000,
+    {
+     "id": "set_2026-08-24_0",
+     "reps": 5,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-24",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    425000,
+    {
+     "id": "set_2026-08-24_1",
+     "reps": 5,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-26",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    525000,
+    {
+     "id": "set_2026-08-26_0",
+     "reps": 7,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-26",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    595000,
+    {
+     "id": "set_2026-08-26_1",
+     "reps": 7,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-28",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    450000,
+    {
+     "id": "set_2026-08-28_0",
+     "reps": 6,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-28",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    510000,
+    {
+     "id": "set_2026-08-28_1",
+     "reps": 6,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ]
+  ],
+  "comparisons": [
+   [
+    "ex_bench_press",
+    "2026-08-28",
+    "declined",
+    510000,
+    595000,
+    "2026-08-26",
+    0.857142857,
+    -85000
+   ],
+   [
+    "ex_squat",
+    "2026-08-28",
+    "declined",
+    450000,
+    525000,
+    "2026-08-26",
+    0.857142857,
+    -75000
+   ]
+  ],
+  "recent": {
+   "ratio": 0.857142857,
+   "muscles": [
+    [
+     "chest",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "back",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "shoulders",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "biceps",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "triceps",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "core",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "quadriceps",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "hamstringsGlutes",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "calves",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "forearms",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ]
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "overall": {
+   "ratio": 1.280357143,
+   "muscles": [
+    [
+     "chest",
+     "measured",
+     1.275,
+     1,
+     1,
+     510000,
+     "improved",
+     27.5
+    ],
+    [
+     "back",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "shoulders",
+     "measured",
+     1.275,
+     1,
+     1,
+     510000,
+     "improved",
+     27.5
+    ],
+    [
+     "biceps",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "triceps",
+     "measured",
+     1.275,
+     1,
+     1,
+     510000,
+     "improved",
+     27.5
+    ],
+    [
+     "core",
+     "measured",
+     1.285714286,
+     1,
+     1,
+     450000,
+     "improved",
+     28.571428571
+    ],
+    [
+     "quadriceps",
+     "measured",
+     1.285714286,
+     1,
+     1,
+     450000,
+     "improved",
+     28.571428571
+    ],
+    [
+     "hamstringsGlutes",
+     "measured",
+     1.285714286,
+     1,
+     1,
+     450000,
+     "improved",
+     28.571428571
+    ],
+    [
+     "calves",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "forearms",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ]
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "names": [],
+  "awaitingBodyweight": []
+ },
+ "90": {
+  "days": [
+   [
+    "2026-06-01",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    300000,
+    {
+     "id": "set_2026-06-01_0",
+     "reps": 5,
+     "weightGrams": 60000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-01",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    350000,
+    {
+     "id": "set_2026-06-01_1",
+     "reps": 5,
+     "weightGrams": 70000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-03",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    420000,
+    {
+     "id": "set_2026-06-03_0",
+     "reps": 7,
+     "weightGrams": 60000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-03",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    490000,
+    {
+     "id": "set_2026-06-03_1",
+     "reps": 7,
+     "weightGrams": 70000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-05",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    360000,
+    {
+     "id": "set_2026-06-05_0",
+     "reps": 6,
+     "weightGrams": 60000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-05",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    420000,
+    {
+     "id": "set_2026-06-05_1",
+     "reps": 6,
+     "weightGrams": 70000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-08",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    360000,
+    {
+     "id": "set_2026-06-08_0",
+     "reps": 6,
+     "weightGrams": 60000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-08",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    420000,
+    {
+     "id": "set_2026-06-08_1",
+     "reps": 6,
+     "weightGrams": 70000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-10",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    300000,
+    {
+     "id": "set_2026-06-10_0",
+     "reps": 5,
+     "weightGrams": 60000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-10",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    350000,
+    {
+     "id": "set_2026-06-10_1",
+     "reps": 5,
+     "weightGrams": 70000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-12",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    420000,
+    {
+     "id": "set_2026-06-12_0",
+     "reps": 7,
+     "weightGrams": 60000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-12",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    490000,
+    {
+     "id": "set_2026-06-12_1",
+     "reps": 7,
+     "weightGrams": 70000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-15",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    437500,
+    {
+     "id": "set_2026-06-15_0",
+     "reps": 7,
+     "weightGrams": 62500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-15",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    507500,
+    {
+     "id": "set_2026-06-15_1",
+     "reps": 7,
+     "weightGrams": 72500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-17",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    375000,
+    {
+     "id": "set_2026-06-17_0",
+     "reps": 6,
+     "weightGrams": 62500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-17",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    435000,
+    {
+     "id": "set_2026-06-17_1",
+     "reps": 6,
+     "weightGrams": 72500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-19",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    312500,
+    {
+     "id": "set_2026-06-19_0",
+     "reps": 5,
+     "weightGrams": 62500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-19",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    362500,
+    {
+     "id": "set_2026-06-19_1",
+     "reps": 5,
+     "weightGrams": 72500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-22",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    312500,
+    {
+     "id": "set_2026-06-22_0",
+     "reps": 5,
+     "weightGrams": 62500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-22",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    362500,
+    {
+     "id": "set_2026-06-22_1",
+     "reps": 5,
+     "weightGrams": 72500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-06-29",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    390000,
+    {
+     "id": "set_2026-06-29_0",
+     "reps": 6,
+     "weightGrams": 65000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-06-29",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    450000,
+    {
+     "id": "set_2026-06-29_1",
+     "reps": 6,
+     "weightGrams": 75000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-01",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    325000,
+    {
+     "id": "set_2026-07-01_0",
+     "reps": 5,
+     "weightGrams": 65000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-01",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    375000,
+    {
+     "id": "set_2026-07-01_1",
+     "reps": 5,
+     "weightGrams": 75000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-03",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    455000,
+    {
+     "id": "set_2026-07-03_0",
+     "reps": 7,
+     "weightGrams": 65000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-03",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    525000,
+    {
+     "id": "set_2026-07-03_1",
+     "reps": 7,
+     "weightGrams": 75000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-06",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    455000,
+    {
+     "id": "set_2026-07-06_0",
+     "reps": 7,
+     "weightGrams": 65000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-06",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    525000,
+    {
+     "id": "set_2026-07-06_1",
+     "reps": 7,
+     "weightGrams": 75000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-08",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    390000,
+    {
+     "id": "set_2026-07-08_0",
+     "reps": 6,
+     "weightGrams": 65000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-08",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    450000,
+    {
+     "id": "set_2026-07-08_1",
+     "reps": 6,
+     "weightGrams": 75000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-10",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    325000,
+    {
+     "id": "set_2026-07-10_0",
+     "reps": 5,
+     "weightGrams": 65000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-10",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    375000,
+    {
+     "id": "set_2026-07-10_1",
+     "reps": 5,
+     "weightGrams": 75000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-13",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    337500,
+    {
+     "id": "set_2026-07-13_0",
+     "reps": 5,
+     "weightGrams": 67500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-13",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    387500,
+    {
+     "id": "set_2026-07-13_1",
+     "reps": 5,
+     "weightGrams": 77500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-15",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    472500,
+    {
+     "id": "set_2026-07-15_0",
+     "reps": 7,
+     "weightGrams": 67500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-15",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    542500,
+    {
+     "id": "set_2026-07-15_1",
+     "reps": 7,
+     "weightGrams": 77500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-17",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    405000,
+    {
+     "id": "set_2026-07-17_0",
+     "reps": 6,
+     "weightGrams": 67500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-17",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    465000,
+    {
+     "id": "set_2026-07-17_1",
+     "reps": 6,
+     "weightGrams": 77500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-20",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    405000,
+    {
+     "id": "set_2026-07-20_0",
+     "reps": 6,
+     "weightGrams": 67500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-20",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    465000,
+    {
+     "id": "set_2026-07-20_1",
+     "reps": 6,
+     "weightGrams": 77500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-22",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    337500,
+    {
+     "id": "set_2026-07-22_0",
+     "reps": 5,
+     "weightGrams": 67500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-22",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    387500,
+    {
+     "id": "set_2026-07-22_1",
+     "reps": 5,
+     "weightGrams": 77500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-24",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    472500,
+    {
+     "id": "set_2026-07-24_0",
+     "reps": 7,
+     "weightGrams": 67500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-24",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    542500,
+    {
+     "id": "set_2026-07-24_1",
+     "reps": 7,
+     "weightGrams": 77500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-07-27",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    490000,
+    {
+     "id": "set_2026-07-27_0",
+     "reps": 7,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-07-27",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    560000,
+    {
+     "id": "set_2026-07-27_1",
+     "reps": 7,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-03",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    350000,
+    {
+     "id": "set_2026-08-03_0",
+     "reps": 5,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-03",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    400000,
+    {
+     "id": "set_2026-08-03_1",
+     "reps": 5,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-05",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    490000,
+    {
+     "id": "set_2026-08-05_0",
+     "reps": 7,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-05",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    560000,
+    {
+     "id": "set_2026-08-05_1",
+     "reps": 7,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-07",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    420000,
+    {
+     "id": "set_2026-08-07_0",
+     "reps": 6,
+     "weightGrams": 70000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-07",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    480000,
+    {
+     "id": "set_2026-08-07_1",
+     "reps": 6,
+     "weightGrams": 80000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-10",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    435000,
+    {
+     "id": "set_2026-08-10_0",
+     "reps": 6,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-10",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    495000,
+    {
+     "id": "set_2026-08-10_1",
+     "reps": 6,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-12",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    362500,
+    {
+     "id": "set_2026-08-12_0",
+     "reps": 5,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-12",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    412500,
+    {
+     "id": "set_2026-08-12_1",
+     "reps": 5,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-14",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    507500,
+    {
+     "id": "set_2026-08-14_0",
+     "reps": 7,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-14",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    577500,
+    {
+     "id": "set_2026-08-14_1",
+     "reps": 7,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-17",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    507500,
+    {
+     "id": "set_2026-08-17_0",
+     "reps": 7,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-17",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    577500,
+    {
+     "id": "set_2026-08-17_1",
+     "reps": 7,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-19",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    435000,
+    {
+     "id": "set_2026-08-19_0",
+     "reps": 6,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-19",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    495000,
+    {
+     "id": "set_2026-08-19_1",
+     "reps": 6,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-21",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    362500,
+    {
+     "id": "set_2026-08-21_0",
+     "reps": 5,
+     "weightGrams": 72500,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-21",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    412500,
+    {
+     "id": "set_2026-08-21_1",
+     "reps": 5,
+     "weightGrams": 82500,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-24",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    375000,
+    {
+     "id": "set_2026-08-24_0",
+     "reps": 5,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-24",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    425000,
+    {
+     "id": "set_2026-08-24_1",
+     "reps": 5,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-26",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    525000,
+    {
+     "id": "set_2026-08-26_0",
+     "reps": 7,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-26",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    595000,
+    {
+     "id": "set_2026-08-26_1",
+     "reps": 7,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ],
+   [
+    "2026-08-28",
+    "ex_squat",
+    [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    [
+     "quadriceps"
+    ],
+    450000,
+    {
+     "id": "set_2026-08-28_0",
+     "reps": 6,
+     "weightGrams": 75000,
+     "order": 0
+    }
+   ],
+   [
+    "2026-08-28",
+    "ex_bench_press",
+    [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    [
+     "chest"
+    ],
+    510000,
+    {
+     "id": "set_2026-08-28_1",
+     "reps": 6,
+     "weightGrams": 85000,
+     "order": 1
+    }
+   ]
+  ],
+  "comparisons": [
+   [
+    "ex_bench_press",
+    "2026-08-28",
+    "declined",
+    510000,
+    595000,
+    "2026-08-26",
+    0.857142857,
+    -85000
+   ],
+   [
+    "ex_squat",
+    "2026-08-28",
+    "declined",
+    450000,
+    525000,
+    "2026-08-26",
+    0.857142857,
+    -75000
+   ]
+  ],
+  "recent": {
+   "ratio": 0.857142857,
+   "muscles": [
+    [
+     "chest",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "back",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "shoulders",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "biceps",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "triceps",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     510000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "core",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "quadriceps",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "hamstringsGlutes",
+     "measured",
+     0.857142857,
+     1,
+     1,
+     450000,
+     "declined",
+     -14.285714286
+    ],
+    [
+     "calves",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "forearms",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ]
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "overall": {
+   "ratio": 1.478571429,
+   "muscles": [
+    [
+     "chest",
+     "measured",
+     1.457142857,
+     1,
+     1,
+     510000,
+     "improved",
+     45.714285714
+    ],
+    [
+     "back",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "shoulders",
+     "measured",
+     1.457142857,
+     1,
+     1,
+     510000,
+     "improved",
+     45.714285714
+    ],
+    [
+     "biceps",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "triceps",
+     "measured",
+     1.457142857,
+     1,
+     1,
+     510000,
+     "improved",
+     45.714285714
+    ],
+    [
+     "core",
+     "measured",
+     1.5,
+     1,
+     1,
+     450000,
+     "improved",
+     50
+    ],
+    [
+     "quadriceps",
+     "measured",
+     1.5,
+     1,
+     1,
+     450000,
+     "improved",
+     50
+    ],
+    [
+     "hamstringsGlutes",
+     "measured",
+     1.5,
+     1,
+     1,
+     450000,
+     "improved",
+     50
+    ],
+    [
+     "calves",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ],
+    [
+     "forearms",
+     "noData",
+     null,
+     0,
+     0,
+     null,
+     "noData",
+     null
+    ]
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "names": [],
+  "awaitingBodyweight": []
+ }
+}

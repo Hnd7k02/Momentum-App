@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
 import { addDays, type DateKey } from '../../core/dates';
@@ -84,9 +84,24 @@ function outputsOf(boss: BossProgression) {
   };
 }
 
-async function fingerprint(): Promise<{ md5: string; values: number }> {
+/**
+ * `WP3_GOLDEN_DIR=<dir>` also writes every serialised output, pretty-printed,
+ * one file per profile and kind, so a moved hash can be diffed value by
+ * value against the frozen WP3 baseline in `.github/fixtures/wp3-golden/`.
+ */
+function writeGolden(name: string, kind: 'boss' | 'gym', value: unknown): void {
+  const dir = process.env.WP3_GOLDEN_DIR;
+  if (!dir) return;
+  mkdirSync(dir, { recursive: true });
+  const slug = name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+  writeFileSync(`${dir}/${slug}.${kind}.json`, JSON.stringify(value, null, 1) + '\n');
+}
+
+async function fingerprint(name = ''): Promise<{ md5: string; values: number }> {
   const boss = await loadBossProgression();
-  const json = JSON.stringify(outputsOf(boss));
+  const outputs = outputsOf(boss);
+  writeGolden(name, 'boss', outputs);
+  const json = JSON.stringify(outputs);
   return { md5: createHash('md5').update(json).digest('hex'), values: (json.match(/-?\d/g) ?? []).length };
 }
 
@@ -122,11 +137,12 @@ function gymOutputsOf(history: GymHistory) {
 /** The windows the workspace offers, plus the whole synthetic span. */
 const GYM_RANGES = [7, 30, 90] as const;
 
-async function gymFingerprint(clock: DateKey): Promise<{ md5: string; values: number }> {
+async function gymFingerprint(clock: DateKey, name = ''): Promise<{ md5: string; values: number }> {
   const outputs: Record<number, unknown> = {};
   for (const range of GYM_RANGES) {
     outputs[range] = gymOutputsOf(await loadGymHistory(addDays(clock, -(range - 1)), clock));
   }
+  writeGolden(name, 'gym', outputs);
   const json = JSON.stringify(outputs);
   return { md5: createHash('md5').update(json).digest('hex'), values: (json.match(/-?\d/g) ?? []).length };
 }
@@ -149,7 +165,7 @@ describe('domain outputs are the same before and after presentation work', () =>
       setClock({ now: () => at(profile.clock) });
       const result = await importBackup(profile.load());
       if (!result.ok) throw new Error(result.details.join('; '));
-      const { md5, values } = await fingerprint();
+      const { md5, values } = await fingerprint(profile.name);
       // Printed so a changed hash comes with the size of what it covers.
       console.log(`fingerprint: ${profile.name}: ${md5} over ${values} values`);
       expect(values).toBeGreaterThan(100);
@@ -168,7 +184,7 @@ describe('domain outputs are the same before and after presentation work', () =>
       setClock({ now: () => at(profile.clock) });
       const result = await importBackup(profile.load());
       if (!result.ok) throw new Error(result.details.join('; '));
-      const { md5, values } = await gymFingerprint(profile.clock as DateKey);
+      const { md5, values } = await gymFingerprint(profile.clock as DateKey, profile.name);
       console.log(`gym fingerprint: ${profile.name}: ${md5} over ${values} values`);
       expect(values).toBe(profile.gym.values);
       expect(md5).toBe(profile.gym.md5);
