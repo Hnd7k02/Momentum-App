@@ -1,22 +1,27 @@
 import { useCallback } from 'react';
-import { today as currentDay } from '../../core/clock';
 import { Button, Card, Section } from '../../components';
 import { PlusIcon } from '../../components/Icons';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
+import { useDataVersion } from '../../app/useDataVersion';
 import { useLoadable } from '../../app/useLoadable';
+import { useToday } from '../../app/useToday';
+import { loadTrainingWeek } from '../../storage/services/checkInService';
 import { existingSessionForDay, latestGymSession } from '../../storage/services/gymService';
 import { listTrainingPlans } from '../../storage/services/trainingPlanService';
-import type { GymRatingView } from './useGymRating';
 import './gymHub.css';
 
 /**
  * The top of the Gym hub: where training stands, and the one button.
  *
- * Three lines of existing facts — this week's attendance from the rating
- * state, the last session from the session log, and how many plans are
+ * Three lines of existing facts — this week's sessions against the weekly
+ * target, the last session from the session log, and how many plans are
  * saved — and the primary action. Nothing is computed here that the app
  * does not already compute; nothing is shown that is not stored.
+ *
+ * The week is read exactly as Heute reads it (WP3, B4), so the two screens
+ * can never disagree about it, and the card reloads when the day turns and
+ * after any committed write (B2) — finishing a workout updates it in place.
  */
 export function weekSentence(t: ReturnType<typeof useT>, done: number, target: number): string {
   if (done < target) return t('gymHub.training.thisWeek', { done, target });
@@ -25,48 +30,38 @@ export function weekSentence(t: ReturnType<typeof useT>, done: number, target: n
 }
 
 export function TrainingCard({
-  rating,
   onStart,
   onManagePlans,
-  reloadKey,
 }: {
-  rating: GymRatingView | null;
   onStart(): void;
   onManagePlans(): void;
-  /** Changes when a workout closes, so the facts here are read again. */
-  reloadKey: number;
 }) {
   const t = useT();
   const { language } = useI18n();
-  const date = currentDay();
+  const date = useToday();
+  const version = useDataVersion();
   const load = useCallback(
     async () => ({
       latest: await latestGymSession(),
       today: await existingSessionForDay(date),
       plans: (await listTrainingPlans()).length,
-      // Read on every reload: the key is the trigger, not a value.
-      key: reloadKey,
+      week: await loadTrainingWeek('gym', date),
     }),
-    [date, reloadKey],
+    [date],
   );
-  const { state } = useLoadable(load);
+  const { state } = useLoadable(load, [date, version]);
   const facts = state.status === 'ready' ? state.value : null;
 
   // The same two stored values, read three ways: a fraction only while the
   // target is ahead, because "7 von 3" reads as a bounded progress figure
-  // that it is not. No number here changes; only the sentence does.
-  //
-  // Whether a session exists is the session log's fact, not the ledger's:
-  // the Boss ledger counts Gym as started only from its first *scored* day,
-  // and a user's first session is logged on a day that has not closed yet.
-  // Gating on the ledger said "no session yet" right above "one logged
-  // today". While either is still loading the line says nothing — loading
-  // is not "none".
+  // that it is not. No number here changes; only the sentence does. Before
+  // the first session ever there is nothing to count, and the card says so.
+  // While the facts are loading the line says nothing — loading is not "none".
   const weekLine =
-    facts === null || rating === null
+    facts === null
       ? null
-      : facts.latest
-        ? weekSentence(t, rating.state.sessionsThisWeek, rating.state.weeklyTarget)
+      : facts.latest && facts.week
+        ? weekSentence(t, facts.week.progress.completed, facts.week.progress.target)
         : t('gymHub.training.none');
   const lastLine = facts?.latest
     ? facts.today

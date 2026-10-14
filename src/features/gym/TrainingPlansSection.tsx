@@ -26,7 +26,8 @@ import './gym.css';
 export function TrainingPlansSection() {
   const t = useT();
   const load = useCallback(() => listTrainingPlans(), []);
-  const { state, reload } = useLoadable(load);
+  // The section reloads itself after each of its own writes.
+  const { state, reload } = useLoadable(load, []);
   const [editing, setEditing] = useState<TrainingPlanRecord | null | 'new'>(null);
 
   const plans = state.status === 'ready' ? state.value : [];

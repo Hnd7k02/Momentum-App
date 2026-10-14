@@ -85,22 +85,42 @@ function outputsOf(boss: BossProgression) {
 }
 
 /**
- * `WP3_GOLDEN_DIR=<dir>` also writes every serialised output, pretty-printed,
- * one file per profile and kind, so a moved hash can be diffed value by
- * value against the frozen WP3 baseline in `.github/fixtures/wp3-golden/`.
+ * The golden baseline (WP3, frozen on e30becd).
+ *
+ * Every serialised output is compared, value by value, with the files in
+ * `.github/fixtures/wp3-golden/`. The hashes below say *whether* anything
+ * moved; this says *what* moved, so a failure names the value and its path.
+ * The files are re-frozen only as a deliberate commit at a stage's STOP,
+ * with the moved values summarised in that stage's report:
+ *
+ *   WP3_GOLDEN_DIR=.github/fixtures/wp3-golden npx vitest run src/storage/services/domainOutputs.test.ts
+ *
+ * Setting `WP3_GOLDEN_DIR` writes the current outputs there instead of
+ * comparing, so the command above re-freezes and `git diff` shows the moves.
  */
-function writeGolden(name: string, kind: 'boss' | 'gym', value: unknown): void {
+const GOLDEN_DIR = new URL('../../../.github/fixtures/wp3-golden/', import.meta.url);
+
+function goldenSlug(name: string): string {
+  return name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+}
+
+function checkGolden(name: string, kind: 'boss' | 'gym', value: unknown): void {
   const dir = process.env.WP3_GOLDEN_DIR;
-  if (!dir) return;
-  mkdirSync(dir, { recursive: true });
-  const slug = name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
-  writeFileSync(`${dir}/${slug}.${kind}.json`, JSON.stringify(value, null, 1) + '\n');
+  const file = `${goldenSlug(name)}.${kind}.json`;
+  if (dir) {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(`${dir}/${file}`, JSON.stringify(value, null, 1) + '\n');
+    return;
+  }
+  const frozen = JSON.parse(readFileSync(new URL(file, GOLDEN_DIR), 'utf8')) as unknown;
+  // Round-tripped through JSON so `undefined` and key order read as the file does.
+  expect(JSON.parse(JSON.stringify(value)), `${file} against the frozen baseline`).toEqual(frozen);
 }
 
 async function fingerprint(name = ''): Promise<{ md5: string; values: number }> {
   const boss = await loadBossProgression();
   const outputs = outputsOf(boss);
-  writeGolden(name, 'boss', outputs);
+  checkGolden(name, 'boss', outputs);
   const json = JSON.stringify(outputs);
   return { md5: createHash('md5').update(json).digest('hex'), values: (json.match(/-?\d/g) ?? []).length };
 }
@@ -142,7 +162,7 @@ async function gymFingerprint(clock: DateKey, name = ''): Promise<{ md5: string;
   for (const range of GYM_RANGES) {
     outputs[range] = gymOutputsOf(await loadGymHistory(addDays(clock, -(range - 1)), clock));
   }
-  writeGolden(name, 'gym', outputs);
+  checkGolden(name, 'gym', outputs);
   const json = JSON.stringify(outputs);
   return { md5: createHash('md5').update(json).digest('hex'), values: (json.match(/-?\d/g) ?? []).length };
 }

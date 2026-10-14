@@ -17,6 +17,7 @@ import { isValidScaleValue } from '../../core/scoring/scale';
 import type {
   AnswerRecord,
   AnswerValue,
+  DomainRecord,
   FoodEntryRecord,
   QuestionRecord,
   StoredDomainType,
@@ -226,6 +227,46 @@ async function loadWeek(domain: StoredDomainType, weekKey: WeekKey): Promise<Tra
 }
 
 /**
+ * One training domain's week as Today shows it: the sessions logged in the
+ * ISO week of `date` against the domain's current weekly target, or `null`
+ * when the domain is not tracked.
+ */
+async function trainingWeekOf(
+  type: StoredDomainType,
+  domains: readonly DomainRecord[],
+  date: DateKey,
+): Promise<TrainingDayView | null> {
+  const domain = domains.find((entry) => entry.type === type);
+  const target = domain ? weeklyTargetOf(domain) : null;
+  if (!domain || target === null) return null;
+  const weekKey = weekKeyOf(date);
+  const sessions = await loadWeek(type, weekKey);
+  return {
+    domain: type,
+    weekKey,
+    progress: weekProgress(sessions.length, target, weekKey),
+    sessions,
+    sessionsToday: sessions.filter((session) => session.date === date),
+  };
+}
+
+/**
+ * The week of one training domain, read exactly as Today reads it (WP3, B4).
+ *
+ * The Gym hub said "0 Sessions diese Woche · Ziel erreicht" after a first
+ * session because it read the week from the rating ledger, and the ledger
+ * gives the week a domain starts in no target at all (D127). The week line is
+ * a count against the target the user set, not a scoring input, so every
+ * screen that states it reads this.
+ */
+export async function loadTrainingWeek(
+  type: StoredDomainType,
+  date: DateKey = today(),
+): Promise<TrainingDayView | null> {
+  return trainingWeekOf(type, await domainsRepository.list(), date);
+}
+
+/**
  * Reads everything due on a day.
  *
  * Active questions are due, full stop — there is no schedule to evaluate.
@@ -260,20 +301,10 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
     };
   }
 
-  const weekKey = weekKeyOf(date);
   const training: TrainingDayView[] = [];
   for (const type of WEEKLY_DOMAIN_TYPES) {
-    const domain = domains.find((entry) => entry.type === type);
-    const target = domain ? weeklyTargetOf(domain) : null;
-    if (!domain || target === null) continue;
-    const sessions = await loadWeek(type, weekKey);
-    training.push({
-      domain: type,
-      weekKey,
-      progress: weekProgress(sessions.length, target, weekKey),
-      sessions,
-      sessionsToday: sessions.filter((session) => session.date === date),
-    });
+    const view = await trainingWeekOf(type, domains, date);
+    if (view) training.push(view);
   }
 
   const foodDomain = domains.find((entry) => entry.type === 'food');

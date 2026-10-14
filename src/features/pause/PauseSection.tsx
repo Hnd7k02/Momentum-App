@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useState } from 'react';
-import { today as currentDay } from '../../core/clock';
+import { useToday } from '../../app/useToday';
 import { PAUSE } from '../../core/config/constants';
 import { addDays, type DateKey } from '../../core/dates';
 import { validateDraft, type PauseProblem } from '../../core/pause';
@@ -51,7 +51,8 @@ const PROBLEM_KEYS: Record<PauseProblem, TranslationKey> = {
 export function PauseSection() {
   const t = useT();
   const { language } = useI18n();
-  const reference = currentDay();
+  // The day the pause rules are judged against moves with the clock (B3).
+  const reference = useToday();
 
   const [overview, setOverview] = useState<PauseOverview | null>(null);
   const [failed, setFailed] = useState(false);

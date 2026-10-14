@@ -17,6 +17,7 @@ import {
   type AppConfiguration,
 } from '../../storage/services/configurationService';
 import { useLoadable } from '../../app/useLoadable';
+import { useToday } from '../../app/useToday';
 import { BossWeights } from './BossWeights';
 import { RankBadge } from './RankBadge';
 import './rank.css';
@@ -96,8 +97,9 @@ export function RankScreen({
    * write fails the reveal simply plays again next time; it must not turn a
    * working Rank screen into an error.
    */
+  const date = useToday();
   const load = useCallback(async () => {
-    const boss = await loadBossProgression();
+    const boss = await loadBossProgression(date);
     const settings = await settingsRepository.getOrCreate();
     const seen = settings.acknowledgedRankId ?? null;
     const seenIndex = seen ? rankById(seen).index : -1;
@@ -111,9 +113,15 @@ export function RankScreen({
       }
     }
     return { boss, promoted };
-  }, []);
+  }, [date]);
 
-  const { state, reload } = useLoadable(load);
+  /*
+   * Again when the day turns (WP3, B3), but not on the store's change signal:
+   * the load itself records the acknowledgement, and reloading on that write
+   * would end the badge's reveal a moment after it started. Nothing else is
+   * written while Rang is the screen on show.
+   */
+  const { state, reload } = useLoadable(load, [date]);
   const promoted = state.status === 'ready' && state.value.promoted;
   const [revealSpent, setRevealSpent] = useState(false);
   const reveal = promoted && !revealSpent;

@@ -53,6 +53,16 @@ p {
   margin: 0;
 }
 
+/* Every list in the app is a styled one (WP3, B5). Left to the browser a
+   list gets a 40px start inset and 1em block margins; the muscle rows sat
+   indented by exactly that on the phone. */
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

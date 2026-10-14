@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { QUESTION_CATEGORIES, type QuestionCategory, type QuestionRecord, type QuestionType } from '../../core/model';
-import { Button, Segmented, Sheet } from '../../components';
+import { Button, SHEET_INITIAL_FOCUS, Segmented, Sheet } from '../../components';
 import { ArchiveIcon, PauseIcon, PlayIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
 import { CATEGORY_LABEL_KEYS } from './questionLibrary';
@@ -82,6 +82,7 @@ export function QuestionSheet({
           {t('question.textLabel')}
         </label>
         <input
+          {...SHEET_INITIAL_FOCUS}
           id="question-text"
           className="field"
           value={text}

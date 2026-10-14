@@ -1,3 +1,4 @@
+import { noteCommittedWrite } from './changes';
 import { SCHEMA_VERSION } from '../core/model';
 import type { LegacySportMigration, QuestionCategory, Sensitivity } from '../core/model';
 
@@ -553,5 +554,7 @@ export async function runTransaction<T>(
     throw error;
   }
   await done;
+  // Committed: tell the screens that read the whole store (WP3, B2).
+  if (mode === 'readwrite') noteCommittedWrite();
   return result;
 }

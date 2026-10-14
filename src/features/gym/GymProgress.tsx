@@ -12,7 +12,7 @@ import { ExerciseDetail } from './ExerciseDetail';
 import { useExerciseNamer } from './exerciseNames';
 import { MuscleModule } from './MuscleModule';
 import { toMuscleAnalytics } from './muscleAnalytics';
-import { muscleStateOf } from './muscleState';
+import { muscleStateOf, shownTrend } from './muscleState';
 import './gym.css';
 
 /**
@@ -191,7 +191,11 @@ export function GymProgress({ history }: { history: GymHistory }) {
           ) : (
             exercises.map((entry) => {
               const change = changeText(entry.comparison?.ratio ?? null, t as never);
-              const kind = entry.comparison?.kind ?? 'noBaseline';
+              // The colour follows the rounded figure, as the text does (B6).
+              const kind =
+                !entry.comparison || entry.comparison.kind === 'noBaseline'
+                  ? 'noBaseline'
+                  : (shownTrend(entry.comparison.ratio) ?? 'noBaseline');
               return (
                 <button
                   key={entry.id}

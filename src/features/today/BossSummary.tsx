@@ -6,6 +6,8 @@ import { useT } from '../../i18n/I18nProvider';
 import { RankBadge } from '../ranking/RankBadge';
 import { loadBossProgression } from '../../storage/services/bossService';
 import { useLoadable } from '../../app/useLoadable';
+import { useDataVersion } from '../../app/useDataVersion';
+import { useToday } from '../../app/useToday';
 import './bossSummary.css';
 
 /**
@@ -18,11 +20,16 @@ import './bossSummary.css';
  *
  * It fails quietly. A replay that will not load must not take the daily
  * check-in down with it, so the card simply is not there.
+ *
+ * It reloads when the day turns and after any committed write (WP3, B2): an
+ * answer, a session or a restored backup can all move the Boss.
  */
 export function BossSummary({ onOpen }: { onOpen(): void }) {
   const t = useT();
-  const load = useCallback(() => loadBossProgression(), []);
-  const { state } = useLoadable(load);
+  const date = useToday();
+  const version = useDataVersion();
+  const load = useCallback(() => loadBossProgression(date), [date]);
+  const { state } = useLoadable(load, [date, version]);
 
   if (state.status !== 'ready') return null;
 

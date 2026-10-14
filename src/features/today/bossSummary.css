@@ -3,6 +3,9 @@
  * hero uses, so the Boss reads as the same object in both places.
  */
 .boss-summary {
+  /* It is not inside a Section, so it takes the sections' own rhythm
+     (WP3, B10): the label below sat flush on the card. */
+  margin-bottom: var(--space-7);
   display: flex;
   align-items: center;
   gap: var(--space-3);

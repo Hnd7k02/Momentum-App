@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { exerciseDetail, exerciseDisplayName } from '../../core/gym/catalogue';
 import { useI18n } from '../../i18n/I18nProvider';
+import type { Language } from '../../i18n';
 
 /**
  * How an exercise is named on screen (WP2-1, decision 4).
@@ -24,12 +25,26 @@ export function useExerciseNamer(): {
   );
   const detail = useCallback((id: string) => exerciseDetail(id, language), [language]);
   const describe = useCallback(
-    (id: string, groupLabels: readonly string[]) => {
-      const label = exerciseDetail(id, language);
-      const repeats = label !== null && groupLabels.some((group) => group.toLowerCase() === label.toLowerCase());
-      return [...(label && !repeats ? [label] : []), ...groupLabels].join(' · ');
-    },
+    (id: string, groupLabels: readonly string[]) => describeExercise(id, groupLabels, language),
     [language],
   );
   return { name, detail, describe };
+}
+
+/**
+ * "obere Brust · Brust · Schultern": the catalogue detail first, then the
+ * groups. A detail that one of the group labels already contains is dropped
+ * — "Beinbeuger" says nothing that "Beinbeuger und Gesäss" does not (WP3,
+ * B11); the comparison ignores case.
+ */
+export function describeExercise(
+  id: string,
+  groupLabels: readonly string[],
+  language: Language,
+): string {
+  const label = exerciseDetail(id, language);
+  const repeats =
+    label !== null &&
+    groupLabels.some((group) => group.toLowerCase().includes(label.toLowerCase()));
+  return [...(label && !repeats ? [label] : []), ...groupLabels].join(' · ');
 }

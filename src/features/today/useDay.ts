@@ -34,18 +34,24 @@ export type DayState = Loadable<DayView>;
  */
 export function useDay(date: string = today()) {
   const load = useCallback(() => loadDay(date), [date]);
-  const { state, reload } = useLoadable(load);
+  // A new day is a new load (WP3, B3). Until it arrives the view still holds
+  // the old one, and `state.value.date` says so — Today checks it before it
+  // offers a single control.
+  const { state, reload } = useLoadable(load, [date]);
 
   const run = useCallback(
-    (operation: () => Promise<unknown>) => {
-      operation()
-        .then(reload)
-        .catch((error: unknown) => {
-          // A rejected write means a rule refused it — the edit window, or a
-          // closed week. Reloading puts the screen back on the truth.
-          console.warn('Check-in write refused', error);
-          void reload();
-        });
+    async <T,>(operation: () => Promise<T>): Promise<T | undefined> => {
+      try {
+        const result = await operation();
+        await reload();
+        return result;
+      } catch (error: unknown) {
+        // A rejected write means a rule refused it — the edit window, or a
+        // closed week. Reloading puts the screen back on the truth.
+        console.warn('Check-in write refused', error);
+        await reload();
+        return undefined;
+      }
     },
     [reload],
   );
@@ -53,7 +59,7 @@ export function useDay(date: string = today()) {
   return {
     state,
     answer: (questionId: string, value: AnswerValue | null) =>
-      run(() =>
+      run<unknown>(() =>
         value === null ? clearAnswer(date, questionId) : saveAnswer(date, questionId, value),
       ),
     logSession: (domain: StoredDomainType) => run(() => logSession(domain, date)),

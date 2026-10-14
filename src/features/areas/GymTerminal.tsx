@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useRef, type RefObject } from 'react';
 import { TREND_RANGES } from '../../core/config/constants';
-import { today as currentDay } from '../../core/clock';
+import { useToday } from '../../app/useToday';
 import { GymOverview } from '../gym/GymOverview';
 import { MuscleEntryCard } from '../gym/MuscleEntryCard';
 import { TrainingCard } from '../gym/TrainingCard';
@@ -26,10 +26,7 @@ import { useTrainingLauncher } from '../gym/useTrainingLauncher';
  * when the muscle destination opens.
  */
 export function GymTerminal({ onOpenMuscles }: { onOpenMuscles(): void }) {
-  const range = TREND_RANGES[TREND_RANGES.length - 1]!;
-  const [reloadKey, setReloadKey] = useState(0);
-  const gymRating = useGymRating();
-  const gym = useGymHistory(range);
+  const date = useToday();
   const plansRef = useRef<HTMLDivElement>(null);
 
   // The area's own scroller moves, not the document: scrolling the page
@@ -41,20 +38,54 @@ export function GymTerminal({ onOpenMuscles }: { onOpenMuscles(): void }) {
     const offset = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
     scroller.scrollTo({ top: scroller.scrollTop + offset - 8, behavior: 'smooth' });
   };
+  // The cards read the store's change version (WP3, B2), so a finished
+  // workout reaches them without a reload key of its own.
   const launcher = useTrainingLauncher({
-    date: currentDay(),
-    onClosed: () => setReloadKey((key) => key + 1),
+    date,
+    onClosed: () => undefined,
     onManagePlans: scrollToPlans,
   });
 
+  /*
+   * While a workout is open the hub is underneath it, so its cards are not
+   * kept mounted: every saved set is a committed write, and the rating and
+   * the muscle history behind a full-screen workout would replay the Boss
+   * after each one. Today does the same. When the workout closes the cards
+   * mount again and load what the workout wrote.
+   */
+  if (launcher.open) return <>{launcher.overlay}</>;
+
   return (
     <>
-      <TrainingCard
-        rating={gymRating}
+      <HubCards
         onStart={() => launcher.start()}
         onManagePlans={scrollToPlans}
-        reloadKey={reloadKey}
+        onOpenMuscles={onOpenMuscles}
+        plansRef={plansRef}
       />
+      {launcher.overlay}
+    </>
+  );
+}
+
+/** The hub's cards, and the two replays behind them. */
+function HubCards({
+  onStart,
+  onManagePlans,
+  onOpenMuscles,
+  plansRef,
+}: {
+  onStart(): void;
+  onManagePlans(): void;
+  onOpenMuscles(): void;
+  plansRef: RefObject<HTMLDivElement>;
+}) {
+  const range = TREND_RANGES[TREND_RANGES.length - 1]!;
+  const gymRating = useGymRating();
+  const gym = useGymHistory(range);
+  return (
+    <>
+      <TrainingCard onStart={onStart} onManagePlans={onManagePlans} />
       <MuscleEntryCard history={gym} rangeDays={range} onOpen={onOpenMuscles} />
       {gymRating ? (
         <GymOverview state={gymRating.state} started={gymRating.started} />
@@ -62,7 +93,6 @@ export function GymTerminal({ onOpenMuscles }: { onOpenMuscles(): void }) {
       <div ref={plansRef}>
         <TrainingPlansSection />
       </div>
-      {launcher.overlay}
     </>
   );
 }

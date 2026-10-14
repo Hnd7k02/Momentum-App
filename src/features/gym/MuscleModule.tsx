@@ -1,6 +1,6 @@
 import { Suspense, useMemo } from 'react';
 import type { MuscleGroup } from '../../core/model';
-import { today as currentDay } from '../../core/clock';
+import { useToday } from '../../app/useToday';
 import type { MusclePerformance } from '../../core/gym/performance';
 import { BodyRenderer, type MuscleView } from '../../components/BodyRenderer';
 import { BodyBoundary, BodyViewer, toBodyVisuals, visualsByMuscle } from '../body';
@@ -50,6 +50,8 @@ export function MuscleModule({
   /** A tap on a row: the list's own semantics, which include deselecting. */
   onToggle: (muscle: MuscleGroup) => void;
 }) {
+  // "Vor 3 Tagen" counts from the day the app shows, which moves (B3).
+  const today = useToday();
   const visuals = useMemo(() => visualsByMuscle(toBodyVisuals(muscles)), [muscles]);
 
   // One figure, whichever way it is drawn: the SVG stands in for the canvas
@@ -75,7 +77,7 @@ export function MuscleModule({
         </Suspense>
       </BodyBoundary>
 
-      <MuscleRows views={analytics} today={currentDay()} selected={selected} onSelect={onToggle} />
+      <MuscleRows views={analytics} today={today} selected={selected} onSelect={onToggle} />
     </div>
   );
 }

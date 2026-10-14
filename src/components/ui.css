@@ -486,6 +486,12 @@
   animation: sheet-rise var(--duration-base) var(--ease-standard);
 }
 
+/* The dialog takes focus only when it has no field to offer (WP3, B1); the
+   title is what a screen reader announces, so no ring is drawn round it. */
+.sheet:focus {
+  outline: none;
+}
+
 .sheet__grabber {
   width: 36px;
   height: 5px;

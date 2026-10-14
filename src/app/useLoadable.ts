@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type DependencyList } from 'react';
 
 /**
  * The one way a screen loads something.
@@ -25,6 +25,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * **Content already on screen survives a failed refresh.** Reloading after a
  * write is not a reason to throw away what the user was reading; the view is
  * marked stale instead, and the screen decides how quietly to say so.
+ *
+ * **It loads again whenever its inputs change** (WP3, B2). The caller names
+ * them in `deps`, exactly as for an effect: the range a chart covers, the day
+ * a screen shows, the store's change version. The first version loaded once
+ * and never again, so a new range or a new day kept the old numbers on
+ * screen. While the new load is in flight the previous value stays — a
+ * toggle does not blank the page — and the ticket guarantees that only the
+ * newest load is ever shown. A screen for which an outdated value would be
+ * misleading compares it with what it asked for (Today checks the day).
  */
 export type Loadable<T> =
   | { status: 'loading' }
@@ -32,7 +41,7 @@ export type Loadable<T> =
   /** `refreshFailed` means the value is real but no longer known to be current. */
   | { status: 'ready'; value: T; refreshFailed: boolean };
 
-export function useLoadable<T>(load: () => Promise<T>): {
+export function useLoadable<T>(load: () => Promise<T>, deps: DependencyList): {
   state: Loadable<T>;
   reload: () => Promise<void>;
 } {
@@ -73,7 +82,10 @@ export function useLoadable<T>(load: () => Promise<T>): {
 
   useEffect(() => {
     void reload();
-  }, [reload]);
+    // `deps` are the caller's inputs; the loader itself is read through the
+    // ref, so it is deliberately not one of them.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 
   return { state, reload };
 }

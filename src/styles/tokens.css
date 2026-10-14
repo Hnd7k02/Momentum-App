@@ -234,6 +234,13 @@
   --tab-bar-material: rgba(255, 255, 255, 0.82);
   --tab-bar-blur: saturate(180%) blur(20px);
 
+  /* The toast (WP3, B9): a dark pill above the tab bar, so it reads as
+     transient over any light card. The action is a light indigo, the accent
+     family on a dark ground; `contrast.test.ts` holds both at 4.5:1. */
+  --toast-surface: #1c1c1e;
+  --toast-text: #ffffff;
+  --toast-action: #b4b3ff;
+
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);

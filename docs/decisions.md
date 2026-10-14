@@ -2627,3 +2627,32 @@ not jump to its natural rank; it confirms Challenger, then Contender, then
 Elite, seven eligible days each. Pinned by `confirmation.test.ts` and the
 fresh-install service test.
 
+## D127 — The week a training domain starts in carries no target
+
+**Decision.** A week's training targets are those of the configuration
+snapshot in force on that week's **Monday**. The week in which a training
+domain starts — the install week, or the week Gym or Running is switched on
+— therefore has no target for that domain whenever the start falls after
+the Monday: the partial week is **no data**, never a met or a missed week.
+Its sessions are still stored, shown and counted as attendance evidence;
+they simply have nothing to be measured against in the weekly ledger. The
+ledger (`historyService.ts`, `resolveSnapshot(snapshots, monday)`) stays
+exactly as it is.
+
+**Why it is written down now (WP3, B4).** The Gym hub read its week line
+from that ledger, so a user's first session on a Wednesday showed
+"0 Sessions diese Woche · Ziel erreicht": no sessions and a target of zero
+from a week with no target entry. Heute showed "1 / 3" from the session log
+against the user's own target. The two screens answered two different
+questions with the same sentence. The fix is presentational: every screen
+that states the week against the user's target reads it the way Heute does
+(`loadTrainingWeek` in `checkInService.ts`), and the ledger keeps answering
+the scoring question.
+
+**What was not done, and why.** Giving the start week the target the user
+just chose would make a partial week count — one session on a Saturday
+would be a missed week of three, which is exactly the "absence is a zero"
+error the product refuses, and it would move every replayed fingerprint.
+Prorating a target is a product decision nobody has made. Treating the
+partial week as no data is what the replay already does; this records it.
+

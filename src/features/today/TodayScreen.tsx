@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { today as currentDay } from '../../core/clock';
+import { useRef, useState } from 'react';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
+import { useToday } from '../../app/useToday';
+import { useToast } from '../../components/Toast';
 import { Button, Card, EmptyState, LoadFailure, Row, Section, StaleNotice } from '../../components';
 import { ChevronRightIcon, PlusIcon, SparkIcon } from '../../components/Icons';
 import { SessionSheet } from '../../domains/sports/SessionSheet';
@@ -47,7 +48,10 @@ export function TodayScreen({
 }) {
   const t = useT();
   const { language } = useI18n();
-  const date = currentDay();
+  // One "today" for the whole app (WP3, B3): it moves at local midnight, when
+  // the app comes back to the foreground, and at the start of any input.
+  const date = useToday();
+  const toast = useToast();
   const {
     state,
     answer,
@@ -61,6 +65,31 @@ export function TodayScreen({
     reload,
   } = useDay(date);
   const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
+  /*
+   * One-tap logging is one write per tap (WP3, B9). A double tap logged two
+   * runs and called the week met; the ref turns the second tap away before
+   * React has re-rendered the disabled button, and the toast makes the one
+   * that did land reversible.
+   */
+  const logging = useRef(false);
+  const [loggingDomain, setLoggingDomain] = useState<StoredDomainType | null>(null);
+  const logOnce = async (domain: StoredDomainType) => {
+    if (logging.current) return;
+    logging.current = true;
+    setLoggingDomain(domain);
+    try {
+      const session = await logSession(domain);
+      if (session && domain === 'running') {
+        toast({
+          message: t('today.running.logged'),
+          action: { label: t('toast.undo'), run: () => void deleteSession(domain, session.id) },
+        });
+      }
+    } finally {
+      logging.current = false;
+      setLoggingDomain(null);
+    }
+  };
   /*
    * A gym session is not a diary line with a note on it — it holds exercises
    * and sets — so tapping one opens the logging screen rather than the sheet
@@ -76,13 +105,17 @@ export function TodayScreen({
 
   // Three states, never collapsed into one: still loading, failed outright,
   // or loaded. What is *empty* is decided further down, from the day itself.
-  if (state.status !== 'ready') {
+  // A view loaded for another day is not "loaded" (WP3, B3): after midnight
+  // yesterday's answers stay in memory until today's arrive, and not one
+  // control is offered on them in the meantime.
+  const current = state.status === 'ready' && state.value.date === date;
+  if (!current) {
     return (
       <div className="screen">
         <header className="screen__header">
           <h1 className="screen__title">{t('nav.today')}</h1>
         </header>
-        <div className="today__scroll" aria-busy={state.status === 'loading'}>
+        <div className="today__scroll" aria-busy={state.status !== 'failed'}>
           {state.status === 'failed' ? (
             <LoadFailure title={t('error.day.title')} onRetry={reload} />
           ) : null}
@@ -302,10 +335,12 @@ export function TodayScreen({
                   <button
                     type="button"
                     className="week__log"
+                    disabled={loggingDomain === training.domain}
+                    aria-busy={loggingDomain === training.domain}
                     onClick={() =>
                       // Gym opens the session it just created, so logging and
                       // filling it in are one gesture rather than two screens.
-                      training.domain === 'gym' ? openGym() : logSession(training.domain)
+                      training.domain === 'gym' ? openGym() : void logOnce(training.domain)
                     }
                   >
                     <PlusIcon size={19} />

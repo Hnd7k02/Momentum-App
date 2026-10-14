@@ -418,7 +418,7 @@ export function GymSessionScreen({
     );
     return { session: null, ...view };
   }, [draft?.planId, date]);
-  const { state, reload } = useLoadable(load);
+  const { state, reload } = useLoadable(load, [draft?.planId, date]);
 
   // A draft edited on the page — an exercise added or removed before any
   // set exists — is reloaded like a write would be.

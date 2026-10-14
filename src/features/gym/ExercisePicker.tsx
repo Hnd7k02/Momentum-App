@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   MUSCLE_GROUPS,
   type ExerciseLoadType,
   type ExerciseRecord,
   type MuscleGroup,
 } from '../../core/model';
-import { Button, Sheet } from '../../components';
+import { Button, SHEET_INITIAL_FOCUS, Sheet } from '../../components';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { catalogueEntry } from '../../core/gym/catalogue';
 import { useT } from '../../i18n/I18nProvider';
@@ -53,6 +53,14 @@ export function ExercisePicker({
   const [muscles, setMuscles] = useState<MuscleGroup[]>([]);
   const [primary, setPrimary] = useState<MuscleGroup[]>([]);
   const [loadType, setLoadType] = useState<ExerciseLoadType>('external');
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  // The sheet focuses the search when it opens (WP3, B1). Switching to the
+  // custom form inside the open sheet is the picker's own change of view, so
+  // the picker moves focus to the name field itself.
+  useEffect(() => {
+    if (creating) nameRef.current?.focus({ preventScroll: true });
+  }, [creating]);
 
   /**
    * Every exercise the user may pick, under the name they see it by. A
@@ -156,6 +164,7 @@ export function ExercisePicker({
               {t('gym.picker.customName')}
             </label>
             <input
+              ref={nameRef}
               id="exercise-name"
               className="field"
               value={name}
@@ -228,6 +237,7 @@ export function ExercisePicker({
               {t('gym.picker.search')}
             </label>
             <input
+              {...SHEET_INITIAL_FOCUS}
               id="exercise-search"
               className="field"
               value={query}

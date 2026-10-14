@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import { useLoadable } from '../../app/useLoadable';
+import { useDataVersion } from '../../app/useDataVersion';
+import { useToday } from '../../app/useToday';
 import type { DomainType } from '../../core/model';
 import { loadBossProgression } from '../../storage/services/bossService';
 
@@ -20,11 +22,14 @@ export interface DomainStanding {
  * domain has no rank; the Boss is the only one.
  */
 export function useDomainStanding(domain: DomainType): DomainStanding | null {
+  const date = useToday();
+  const version = useDataVersion();
   const load = useCallback(async (): Promise<DomainStanding> => {
-    const boss = await loadBossProgression();
+    const boss = await loadBossProgression(date);
     const ledger = boss.domains.find((entry) => entry.domain === domain)!;
     return { momentum: ledger.momentum, started: ledger.started };
-  }, [domain]);
-  const { state } = useLoadable(load);
+  }, [domain, date]);
+  // A new area, a new day or a committed write (WP3, B2).
+  const { state } = useLoadable(load, [domain, date, version]);
   return state.status === 'ready' ? state.value : null;
 }

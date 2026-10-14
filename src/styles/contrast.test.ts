@@ -95,6 +95,12 @@ describe('ink on its own tint', () => {
   });
 });
 
+describe('the toast', () => {
+  it.each(['--toast-text', '--toast-action'])('%s reads on the toast surface', (name) => {
+    expect(contrast(hex(name), hex('--toast-surface'))).toBeGreaterThanOrEqual(BODY);
+  });
+});
+
 describe('white on a filled control', () => {
   it.each(['--accent', '--accent-pressed', '--lilac-ink', '--mint-ink'])(
     'white label reads on %s',

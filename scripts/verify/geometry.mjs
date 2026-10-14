@@ -267,6 +267,24 @@ for (const [width, height] of [
   await audit(page, 'bereiche-gym-muskeln-top', width);
   await scrollTo(page, '.muscle-rows');
   await audit(page, 'bereiche-gym-muskeln', width);
+  /* WP3, B5: the rows sit on the card's content edge — no browser list inset. */
+  const inset = await page.locator('.muscle-rows').evaluate((ul) => {
+    const card = ul.closest('.card');
+    const box = card.getBoundingClientRect();
+    const style = getComputedStyle(card);
+    const list = getComputedStyle(ul);
+    const row = ul.querySelector('.muscle-row').getBoundingClientRect();
+    return {
+      paddingStart: list.paddingInlineStart,
+      marginBlock: `${list.marginBlockStart}/${list.marginBlockEnd}`,
+      offset: Math.round(row.left - (box.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft))),
+    };
+  });
+  check(
+    `${width} · muscle rows start on the card's content edge, with no list inset`,
+    inset.paddingStart === '0px' && inset.marginBlock === '0px/0px' && Math.abs(inset.offset) <= 1,
+    JSON.stringify(inset),
+  );
   await page.getByRole('button', { name: 'Zurück' }).click();
   await page.waitForTimeout(1200);
   /* Laufen, inside the Gym workspace, and a sheet opened from its tile. */

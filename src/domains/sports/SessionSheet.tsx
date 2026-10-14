@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { today } from '../../core/clock';
+import { useToday } from '../../app/useToday';
 import { daysOfWeek, type DateKey } from '../../core/dates';
 
 import { Button, Sheet } from '../../components';
@@ -61,14 +61,18 @@ export function SessionSheet({
   const [note, setNote] = useState('');
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
-  const [date, setDate] = useState<DateKey>(today());
+  // The week's days are offered against the app's one "today" (B3).
+  const current = useToday();
+  const [date, setDate] = useState<DateKey>(current);
 
   useEffect(() => {
     if (!open) return;
     setNote(session?.note ?? '');
     setDuration(session?.durationMinutes ? String(session.durationMinutes) : '');
     setDistance(session?.distanceMetres ? kmText(session.distanceMetres) : '');
-    setDate(session?.date ?? today());
+    setDate(session?.date ?? current);
+    // Reset when the sheet opens for a session, not when the day turns.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, session]);
 
   const parsedDuration = Number.parseInt(duration, 10);
@@ -116,8 +120,8 @@ export function SessionSheet({
       <div>
         <span className="field-label">{t('sports.day')}</span>
         <div className="session-days" role="radiogroup" aria-label={t('sports.day')}>
-          {daysOfWeek(session?.date ?? today()).map((option) => {
-            const future = option > today();
+          {daysOfWeek(session?.date ?? current).map((option) => {
+            const future = option > current;
             return (
               <button
                 key={option}

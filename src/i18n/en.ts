@@ -49,6 +49,8 @@ export const en: Translations = {
   'common.add': 'Add',
   'common.skip': 'Skip',
   'common.close': 'Close',
+  'toast.undo': 'Undo',
+  'today.running.logged': 'Run logged.',
   'common.moreInfo': 'More about this',
 
   'status.weak': 'Weak',

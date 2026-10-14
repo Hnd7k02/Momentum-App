@@ -324,8 +324,25 @@ export function StaleNotice({ onRetry }: { onRetry(): void | Promise<void> }) {
 }
 
 /**
+ * Marks the field a sheet focuses when it opens (WP3, B1).
+ *
+ * Spread onto one input: `<input {...SHEET_INITIAL_FOCUS} />`. A sheet with
+ * no marked field focuses the dialog itself, never its first button — that
+ * is the close button, and landing there invites closing by accident.
+ */
+export const SHEET_INITIAL_FOCUS = { 'data-sheet-initial-focus': '' } as const;
+
+/**
  * Bottom sheet. Focus moves into it on open and Escape closes it, so it
  * behaves like a modal for a keyboard and a screen reader too.
+ *
+ * Focus moves in, and back to where it came from, only when `open` changes
+ * (WP3, B1). The effect used to depend on `onClose` as well, and every caller
+ * passes an inline one, so each keystroke that re-rendered the caller re-ran
+ * it: its cleanup put focus back behind the sheet and the next run moved it
+ * to the close button — after one letter, typing went nowhere. `onClose` is
+ * now read through a ref, so the effect sees the latest one without
+ * depending on it.
  */
 export function Sheet({
   open,
@@ -341,21 +358,25 @@ export function Sheet({
   footer?: ReactNode;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const t = useT();
 
   useEffect(() => {
     if (!open) return undefined;
     const previous = document.activeElement as HTMLElement | null;
-    panelRef.current?.querySelector<HTMLElement>('input, button, textarea')?.focus();
+    const panel = panelRef.current;
+    const initial = panel?.querySelector<HTMLElement>('[data-sheet-initial-focus]');
+    (initial ?? panel)?.focus({ preventScroll: true });
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      previous?.focus();
+      previous?.focus({ preventScroll: true });
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -367,6 +388,9 @@ export function Sheet({
         aria-modal="true"
         aria-label={title}
         ref={panelRef}
+        // Focusable from script only, so a sheet with no marked field can
+        // still take focus without adding a tab stop.
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="sheet__grabber" aria-hidden="true" />

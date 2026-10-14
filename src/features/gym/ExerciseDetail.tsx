@@ -4,6 +4,7 @@ import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
 import { percentChange, type ExerciseComparison, type ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
+import { roundShown, shownTrend } from './muscleState';
 import './gym.css';
 
 /**
@@ -42,6 +43,8 @@ export function ExerciseDetail({
 
   const latest = days[0] ?? null;
   const change = percentChange(comparison?.ratio ?? null);
+  const shown =
+    !comparison || comparison.kind === 'noBaseline' ? null : shownTrend(comparison.ratio);
   const oldest = days[days.length - 1] ?? null;
   const peak = days.reduce((max, day) => Math.max(max, day.best.score), 0);
 
@@ -91,19 +94,16 @@ export function ExerciseDetail({
                 </div>
                 <div className="gym-detail__figure">
                   <span className="gym-detail__label">{t('gym.detail.change')}</span>
-                  <span
-                    className={`gym-detail__value gym-detail__value--${comparison?.kind ?? 'noBaseline'}`}
-                  >
-                    {comparison === undefined || comparison.kind === 'noBaseline' || change === null
+                  {/* Text and colour from the one rounded figure (WP3, B6): a
+                      +0.4 % change is "Gehalten", not a green "+0 %". */}
+                  <span className={`gym-detail__value gym-detail__value--${shown ?? 'noBaseline'}`}>
+                    {shown === null || change === null
                       ? t('gym.progress.noBaseline')
-                      : comparison.kind === 'unchanged'
+                      : shown === 'unchanged'
                         ? t('gym.change.unchanged')
-                        : t(
-                            comparison.kind === 'improved'
-                              ? 'gym.change.improved'
-                              : 'gym.change.declined',
-                            { percent: Math.round(change) },
-                          )}
+                        : t(shown === 'improved' ? 'gym.change.improved' : 'gym.change.declined', {
+                            percent: roundShown(change) ?? 0,
+                          })}
                   </span>
                 </div>
               </div>

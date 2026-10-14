@@ -6,6 +6,7 @@ import { useT } from '../../i18n/I18nProvider';
 import type { Translator } from '../../i18n';
 import type { MuscleAnalyticsView } from './muscleAnalytics';
 import { Sparkline } from './Sparkline';
+import { shownChangeText } from './muscleState';
 
 /**
  * The ten muscle groups as one analytical list.
@@ -74,10 +75,8 @@ export function MuscleRows({
          * "what did I do for this muscle", for whichever group is selected.
          */
         const sub = lastTrainedText(view.lastTrainedAt, today, t);
-        const delta =
-          view.delta === null
-            ? null
-            : `${view.delta > 0 ? '+' : ''}${Math.round(view.delta)} %`;
+        // Sign, number and colour from the one rounded figure (B6).
+        const delta = shownChangeText(view.delta);
 
         return (
           <li key={view.id} className="muscle-row">

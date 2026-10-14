@@ -51,6 +51,8 @@ export const de = {
   'common.add': 'Hinzufügen',
   'common.skip': 'Überspringen',
   'common.close': 'Schliessen',
+  'toast.undo': 'Rückgängig',
+  'today.running.logged': 'Lauf eingetragen.',
   'common.moreInfo': 'Mehr dazu',
 
   'status.weak': 'Schwach',

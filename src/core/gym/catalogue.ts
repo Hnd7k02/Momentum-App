@@ -95,6 +95,9 @@ export const EXERCISE_CATALOGUE: CatalogueExercise[] = [
   /* ── Shoulders ─────────────────────────────────────────────────────── */
   { id: 'ex_overhead_press', names: de('Overhead Press', 'Overhead Press'), detail: de('vordere Schulter', 'Front delts'), muscles: ['shoulders', 'triceps', 'core'], primary: ['shoulders'], equipment: 'barbell' },
   { id: 'ex_lateral_raise', names: de('Seitheben', 'Lateral Raise'), detail: de('seitliche Schulter', 'Side delts'), muscles: ['shoulders'], primary: ['shoulders'], equipment: 'dumbbell' },
+  // WP3 (B12): the front raise was missing. Shoulders only, like the
+  // lateral raise: the front delt is the one head it isolates.
+  { id: 'ex_front_raise', names: de('Frontheben', 'Front Raise'), detail: de('vordere Schulter', 'Front delts'), muscles: ['shoulders'], primary: ['shoulders'], equipment: 'dumbbell' },
   { id: 'ex_cable_lateral_raise', names: de('Seitheben Kabel', 'Cable Lateral Raise'), detail: de('seitliche Schulter', 'Side delts'), muscles: ['shoulders'], primary: ['shoulders'], equipment: 'cable' },
   { id: 'ex_lean_away_lateral_raise', names: de('Seitheben Kurzhantel lean-away', 'Lean-Away Lateral Raise'), detail: de('seitliche Schulter', 'Side delts'), muscles: ['shoulders'], primary: ['shoulders'], equipment: 'dumbbell' },
   { id: 'ex_reverse_fly_machine', names: de('Reverse Flys Maschine', 'Reverse Fly Machine'), detail: de('hintere Schulter', 'Rear delts'), muscles: ['shoulders', 'back'], primary: ['shoulders'], equipment: 'machine' },

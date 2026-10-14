@@ -15,6 +15,13 @@ import { URL_APP, check, clipped, onboard, phone, smallTargets, summary } from '
 const OUT = process.env.OUT ?? 'docs/design/wp2-1';
 mkdirSync(OUT, { recursive: true });
 const WIDTHS = (process.env.WIDTHS ?? '393,360').split(',').map(Number);
+/*
+ * A fixed day, so nothing here depends on the weekday it is run (WP3): the
+ * hub check after the first session failed on every day but a Monday
+ * before B4. CLOCK=YYYY-MM-DD runs it as of another day, in Europe/Berlin,
+ * at 10:00 UTC (11:00 or 12:00 local, the same calendar day either way).
+ */
+const CLOCK = process.env.CLOCK ?? '2026-10-14';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 
 const idb = async (page, store) =>
@@ -67,7 +74,8 @@ async function createPlan(page, name, queries) {
 
 for (const width of WIDTHS) {
   const tag = (letter, slug) => `${OUT}/${width}-${letter}-${slug}.png`;
-  const ctx = await browser.newContext({ ...phone, viewport: { width, height: 852 } });
+  const ctx = await browser.newContext({ ...phone, viewport: { width, height: 852 }, timezoneId: 'Europe/Berlin' });
+  await ctx.clock.setSystemTime(new Date(`${CLOCK}T10:00:00Z`));
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(String(error)));

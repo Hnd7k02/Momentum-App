@@ -11,8 +11,9 @@ import {
 } from './catalogue';
 
 /**
- * The catalogue after WP2-1: 48 entries, and the 29 that iteration 2
- * shipped are still exactly what they were where it matters.
+ * The catalogue after WP3 Stage 1: 49 entries — the 48 of WP2-1 plus the
+ * front raise (B12) — and the 29 that iteration 2 shipped are still exactly
+ * what they were where it matters.
  *
  * What a built-in *counts for* — its groups, its roles, its load type — and
  * the English name its seeded record carries are pinned here verbatim. A
@@ -79,6 +80,11 @@ const WP2_1: Pinned[] = [
   ['ex_seated_calf_raise', 'Seated Calf Raise', ['calves'], ['calves']],
 ];
 
+/** Added in WP3 Stage 1 (B12). */
+const WP3: Pinned[] = [
+  ['ex_front_raise', 'Front Raise', ['shoulders'], ['shoulders']],
+];
+
 /** The 34 names the brief lists, after the approved corrections. */
 const BRIEF_NAMES_DE = [
   'Bankdrücken', 'Schrägbank Kurzhantel', 'Cable Fly bottom-up', 'Seitheben Kabel', 'Trizeps Überkopf Kabel', 'Pushdown Seil',
@@ -90,10 +96,25 @@ const BRIEF_NAMES_DE = [
 ];
 
 describe('the catalogue after WP2-1', () => {
-  it('has 48 entries with unique ids', () => {
-    expect(EXERCISE_CATALOGUE).toHaveLength(48);
-    expect(new Set(EXERCISE_CATALOGUE.map((entry) => entry.id)).size).toBe(48);
-    expect(EXERCISE_CATALOGUE).toHaveLength(ITERATION_2.length + WP2_1.length);
+  it('has 49 entries with unique ids', () => {
+    expect(EXERCISE_CATALOGUE).toHaveLength(49);
+    expect(new Set(EXERCISE_CATALOGUE.map((entry) => entry.id)).size).toBe(49);
+    expect(EXERCISE_CATALOGUE).toHaveLength(ITERATION_2.length + WP2_1.length + WP3.length);
+  });
+
+  it('adds the front raise with the approved mapping (WP3, B12)', () => {
+    for (const [id, en, muscles, primary, loadType] of WP3) {
+      const entry = catalogueEntry(id);
+      expect(entry, id).toBeDefined();
+      expect(entry!.names.en, id).toBe(en);
+      expect(entry!.muscles, id).toEqual(muscles);
+      expect(entry!.primary, id).toEqual(primary);
+      expect(entry!.loadType, id).toBe(loadType);
+    }
+    const front = catalogueEntry('ex_front_raise')!;
+    expect(front.names.de).toBe('Frontheben');
+    expect(front.detail).toEqual({ de: 'vordere Schulter', en: 'Front delts' });
+    expect(front.equipment).toBe('dumbbell');
   });
 
   it('keeps every iteration-2 entry exactly as it was scored', () => {
