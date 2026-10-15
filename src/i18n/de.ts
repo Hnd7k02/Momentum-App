@@ -466,6 +466,7 @@ export const de = {
   'gym.attendance.value': '{sessions} von {target} Sessions',
   'gym.attendance.thisWeek': 'Diese Woche',
   'gym.attendance.startWeek': 'Startwoche · zählt ab Montag',
+  'gym.attendance.off': 'Ausgeschaltet · kein Wochenziel',
   'gym.attendance.explain':
     'Mehr Sessions als dein Wochenziel bringen hier nichts zusätzlich. Laufen zählt nicht zum Gym.',
 
@@ -564,6 +565,7 @@ export const de = {
   'running.attendance.value': '{sessions} von {target} Läufen',
   'running.attendance.thisWeek': 'Diese Woche',
   'running.attendance.startWeek': 'Startwoche · zählt ab Montag',
+  'running.attendance.off': 'Ausgeschaltet · kein Wochenziel',
   'running.attendance.explain':
     'Mehr Läufe als dein Wochenziel bringen hier nichts zusätzlich. Gym zählt nicht zum Laufen.',
 

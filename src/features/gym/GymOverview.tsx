@@ -54,10 +54,13 @@ type Detail = 'rating' | 'ytd' | 'attendance' | 'endurance' | 'decay';
 export function GymOverview({
   state,
   started,
+  enabled = true,
 }: {
   state: GymRatingState;
   /** False until a session has actually been logged. */
   started: boolean;
+  /** Switched on today; a switched-off domain has no weekly target either. */
+  enabled?: boolean;
 }) {
   const t = useT();
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -82,14 +85,15 @@ export function GymOverview({
       : 0;
   const ratingLabel = t('gym.rating.value', { value: ratingValue });
   /*
-   * The week the domain started in carries no target (D127), so the ledger
-   * has none for it and the attendance half of the rating is no data there —
-   * never "0 von 0". The minimum target is 1, so a zero target means exactly
-   * that week.
+   * A week with no ledger target is no data for the attendance half of the
+   * rating — never "0 von 0". The minimum target is 1, so a zero target means
+   * one of two things: the week the domain started in (D127), or a domain
+   * that is switched off today.
    */
   const startWeek = state.weeklyTarget === 0;
+  const noTargetLine = enabled ? t('gym.attendance.startWeek') : t('gym.attendance.off');
   const attendanceLabel = startWeek
-    ? t('gym.attendance.startWeek')
+    ? noTargetLine
     : t('gym.attendance.value', {
         sessions: state.sessionsThisWeek,
         target: state.weeklyTarget,
@@ -162,7 +166,7 @@ export function GymOverview({
           value={startWeek ? '–' : state.sessionsThisWeek}
           scale={startWeek ? undefined : t('gym.attendance.scale', { target: state.weeklyTarget })}
           bar={startWeek ? undefined : attendanceBar}
-          line={startWeek ? t('gym.attendance.startWeek') : t('gym.attendance.thisWeek')}
+          line={startWeek ? noTargetLine : t('gym.attendance.thisWeek')}
           span={locked ? 'half' : 'full'}
           onOpen={() => setDetail('attendance')}
         />

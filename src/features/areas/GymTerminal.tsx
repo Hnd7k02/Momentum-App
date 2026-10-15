@@ -88,7 +88,7 @@ function HubCards({
       <TrainingCard onStart={onStart} onManagePlans={onManagePlans} />
       <MuscleEntryCard history={gym} rangeDays={range} onOpen={onOpenMuscles} />
       {gymRating ? (
-        <GymOverview state={gymRating.state} started={gymRating.started} />
+        <GymOverview state={gymRating.state} started={gymRating.started} enabled={gymRating.enabled} />
       ) : null}
       <div ref={plansRef}>
         <TrainingPlansSection />

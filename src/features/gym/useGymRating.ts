@@ -3,11 +3,14 @@ import { useLoadable } from '../../app/useLoadable';
 import { useDataVersion } from '../../app/useDataVersion';
 import { useToday } from '../../app/useToday';
 import { loadBossProgression } from '../../storage/services/bossService';
+import { loadTrainingWeek } from '../../storage/services/checkInService';
 import type { GymRatingState } from '../../storage/services/gymRatingService';
 
 export interface GymRatingView {
   state: GymRatingState;
   started: boolean;
+  /** Whether the domain is switched on today, so it has a weekly target. */
+  enabled: boolean;
 }
 
 /**
@@ -28,7 +31,8 @@ export function useGymRating(): GymRatingView | null {
   const load = useCallback(async (): Promise<GymRatingView> => {
     const boss = await loadBossProgression(date);
     const ledger = boss.domains.find((domain) => domain.domain === 'gym')!;
-    return { state: boss.gym, started: ledger.started };
+    const week = await loadTrainingWeek('gym', date);
+    return { state: boss.gym, started: ledger.started, enabled: week !== null };
   }, [date]);
   const { state } = useLoadable(load, [date], [version]);
   return state.status === 'ready' ? state.value : null;

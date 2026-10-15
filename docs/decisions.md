@@ -2651,12 +2651,19 @@ What that means in the replay, precisely:
   start week's days after the switch-on are scored against the new target:
   a Wednesday start with one session shows a Gym day score of 33 in the
   history, and with none, 0. The rating does not read those days (the
-  training fold skips them), but the history does. Whether the daily fold
-  should follow the ledger is an open product question; changing it would
-  be a scoring change and a new snapshot era, so it is not done here.
+  training fold skips them), but the history does — and so does the Boss's
+  participation: a domain joins the Boss's weighting from its first scored
+  day with a session (`startedByDay` in `bossService.ts`), which can be a
+  start-week day, with no movement until its rating moves. Whether the daily
+  fold should follow the ledger is an open product question; changing it
+  would be a scoring change and a new snapshot era, so it is not done here.
 - **Mid-week target change.** For the same reason a target changed during a
   week is scored against Monday's target by the ledger, while Heute and the
   hub's Training card state the week against the target in force today.
+- **No target, two readings.** A zero ledger target on a rating board means
+  the start week while the domain is switched on, and nothing to aim at
+  while it is switched off: the tile says which ("Startwoche · zählt ab
+  Montag" or "Ausgeschaltet · kein Wochenziel"), never "0 von 0".
 
 **Why it is written down now (WP3, B4).** The Gym hub read its week line
 from the ledger, so a user's first session on a Wednesday showed

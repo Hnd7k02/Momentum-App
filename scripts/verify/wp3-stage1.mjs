@@ -621,6 +621,39 @@ for (const [width, height] of SIZES) {
     await page.waitForTimeout(300);
     await page.screenshot({ path: shotPath(width, 'hub-start-week') });
     await layoutChecks(page, `${W} hub in the start week`);
+
+    /*
+     * A week on, Gym is switched off; a week after that it has no target
+     * again — and the tile says the domain is off rather than calling it a
+     * start week. The rating has started, so the board still shows.
+     */
+    const later = (days) => {
+      const d = new Date(`${CLOCK_DAY}T12:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + days);
+      return berlinNoon(d.toISOString().slice(0, 10)).instant;
+    };
+    await ctx.clock.setSystemTime(later(7));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(1200);
+    await page.getByRole('switch', { name: 'Gym', exact: true }).click();
+    await page.waitForTimeout(1200);
+    const nextWeek = await textOf(tile.locator('.metric-tile__line'));
+    check(`${W}: D127 the week Gym is switched off keeps Monday's target`, nextWeek === 'Diese Woche', String(nextWeek));
+    await ctx.clock.setSystemTime(later(14));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(1200);
+    const offLine = await until(() => textOf(tile.locator('.metric-tile__line')), (v) => v === 'Ausgeschaltet · kein Wochenziel');
+    check(`${W}: D127 a switched-off Gym says "Ausgeschaltet · kein Wochenziel"`, offLine === 'Ausgeschaltet · kein Wochenziel', String(offLine));
+    check(`${W}: D127 and its number is no data`, (await textOf(tile.locator('.metric-tile__number'))) === '–', String(await textOf(tile.locator('.metric-tile__number'))));
+    check(`${W}: D127 the Training card states no week while Gym is off`, (await page.locator('.gym-hub__week').count()) === 0, String(await textOf(page.locator('.gym-hub__week'))));
+    await page.evaluate(() => {
+      const board = document.querySelector('[data-metric="gym-rating"]');
+      const scroller = board?.closest('.areas__scroll');
+      if (board && scroller) scroller.scrollTop += board.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 48;
+    });
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: shotPath(width, 'hub-gym-off') });
+    await layoutChecks(page, `${W} hub with Gym switched off`);
     check(`${W} A2: no page errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

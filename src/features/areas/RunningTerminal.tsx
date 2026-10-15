@@ -16,5 +16,5 @@ import { useRunningRating } from '../running/useRunningRating';
 export function RunningTerminal() {
   const rating = useRunningRating();
   if (!rating?.started) return null;
-  return <RunningOverview state={rating.state} started={rating.started} />;
+  return <RunningOverview state={rating.state} started={rating.started} enabled={rating.enabled} />;
 }

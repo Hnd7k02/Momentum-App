@@ -458,6 +458,7 @@ export const en: Translations = {
   'gym.attendance.value': '{sessions} of {target} sessions',
   'gym.attendance.thisWeek': 'This week',
   'gym.attendance.startWeek': 'Starting week · counts from Monday',
+  'gym.attendance.off': 'Switched off · no weekly target',
   'gym.attendance.explain':
     'Sessions beyond your weekly target add nothing here. Running does not count towards the gym.',
 
@@ -556,6 +557,7 @@ export const en: Translations = {
   'running.attendance.value': '{sessions} of {target} runs',
   'running.attendance.thisWeek': 'This week',
   'running.attendance.startWeek': 'Starting week · counts from Monday',
+  'running.attendance.off': 'Switched off · no weekly target',
   'running.attendance.explain':
     'Runs beyond your weekly target add nothing here. The gym does not count towards running.',
 
