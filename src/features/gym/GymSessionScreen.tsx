@@ -30,6 +30,7 @@ import {
   openSessionForDay,
   removeExerciseFromSession,
   removeSet,
+  repeatLastSet,
   restoreExercise,
   restoreSet,
   startSessionFromDraft,
@@ -137,6 +138,15 @@ function SetRow({
   const [weight, setWeight] = useState(weights.format(set.weightGrams));
   const editingReps = useRef(false);
   const editingWeight = useRef(false);
+  /*
+   * What each field last stored or sent, as text. A blur writes when the
+   * text differs from this — not from the props, which lag behind a write
+   * still in the queue: typing 10, leaving, and typing the stored 8 back
+   * before the 10 had come back would otherwise compare 8 with 8, write
+   * nothing, and let the 10 land.
+   */
+  const sentReps = useRef(String(set.reps));
+  const sentWeight = useRef(weights.format(set.weightGrams));
 
   /*
    * A reload after a write brings the stored values back, and each field
@@ -146,9 +156,11 @@ function SetRow({
    * half-typed weight with the stored one (WP3, Stage 2).
    */
   useEffect(() => {
+    sentReps.current = String(set.reps);
     if (!editingReps.current) setReps(String(set.reps));
   }, [set.id, set.reps]);
   useEffect(() => {
+    sentWeight.current = weights.format(set.weightGrams);
     if (!editingWeight.current) setWeight(weights.format(set.weightGrams));
   }, [set.id, set.weightGrams, weights]);
 
@@ -175,7 +187,9 @@ function SetRow({
             editingReps.current = false;
             // Only what was changed is written: leaving a field untouched is
             // not an edit.
-            if (reps !== String(set.reps)) onChange({ reps: Number(reps || 0) });
+            if (reps === sentReps.current) return;
+            sentReps.current = reps;
+            onChange({ reps: Number(reps || 0) });
           }}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -205,7 +219,9 @@ function SetRow({
             // Only a changed weight is written. In lb the text is rounded to
             // one decimal, so re-parsing an untouched field would move the
             // stored grams (60 000 g → 60 010 g) — a fact the rating replays.
-            if (weight !== weights.format(set.weightGrams)) onChange({ weightGrams: weights.parse(weight) ?? 0 });
+            if (weight === sentWeight.current) return;
+            sentWeight.current = weight;
+            onChange({ weightGrams: weights.parse(weight) ?? 0 });
           }}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -273,8 +289,19 @@ function PendingSetRow({
     }
   };
 
+  /*
+   * Saved when the focus leaves the row, not a field: moving from the reps
+   * to the weight is still typing the one set. Saving on the reps' blur
+   * stored a bodyweight set without its added load and replaced the row —
+   * and the field being typed into — with the saved set.
+   */
+  const onRowBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+    tryCommit();
+  };
+
   return (
-    <div className="gym-set gym-set--pending">
+    <div className="gym-set gym-set--pending" onBlur={onRowBlur}>
       <span className="gym-set__number" aria-hidden="true">
         1
       </span>
@@ -291,7 +318,6 @@ function PendingSetRow({
           enterKeyHint="done"
           disabled={!editable}
           onChange={(event) => setReps(event.target.value.replace(/[^0-9]/g, ''))}
-          onBlur={tryCommit}
           onKeyDown={onKeyDown}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -315,7 +341,6 @@ function PendingSetRow({
           enterKeyHint="done"
           disabled={!editable}
           onChange={(event) => setWeight(event.target.value.replace(/[^0-9.,]/g, ''))}
-          onBlur={tryCommit}
           onKeyDown={onKeyDown}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -560,6 +585,8 @@ export function GymSessionScreen({
   const closed = useRef(false);
   /** The write in flight, if any — the one a tap's blur may just have started. */
   const pending = useRef<Promise<unknown> | null>(null);
+  /** Whether this screen has offered an undo, which must not outlive it. */
+  const showedToast = useRef(false);
   const dismissToast = useDismissToast();
   // The undo toast rises above the bar at the foot of the screen (P5).
   useToastLift('calc(var(--workout-bar-height) - var(--tab-bar-height))');
@@ -574,6 +601,8 @@ export function GymSessionScreen({
     return () => {
       closed.current = true;
       release();
+      // Gone without "Zurück" — the host moved on: its undo goes with it.
+      if (showedToast.current) dismissToast();
     };
   }, [dismissToast]);
   /*
@@ -724,22 +753,27 @@ export function GymSessionScreen({
       setDraftVersion((version) => version + 1);
       return;
     }
-    if (sessionRef.current === null) {
+    // Decided in the queue: the first set may be making the draft a session
+    // right now, and a line added to the draft after the session copied it
+    // would be lost.
+    void run(async () => {
+      const id = sessionRef.current;
+      if (id) {
+        // A plan session names its exercises itself; an added one is an
+        // extra, its first set typed into the pending row. The plan is
+        // never touched.
+        await addSessionExercise(id, exercise.id);
+        return;
+      }
       // A planned draft grows, and the session it becomes will carry this
-      // line as an extra. Read from the ref: the draft may have become a
-      // session since this render.
+      // line as an extra.
       if (!draftRef.current.some((entry) => entry.exerciseId === exercise.id)) {
         draftRef.current = [
           ...draftRef.current,
           { exerciseId: exercise.id, name: exercise.name, order: draftRef.current.length, source: 'extra' },
         ];
       }
-      setDraftVersion((version) => version + 1);
-      return;
-    }
-    // A plan session names its exercises itself; an added one is an extra,
-    // its first set typed into the pending row. The plan is never touched.
-    void tap(() => addSessionExercise(sessionRef.current!, exercise.id));
+    });
   };
 
   const createAndAdd = (input: NewExerciseInput) => {
@@ -754,17 +788,26 @@ export function GymSessionScreen({
   const undone = (stored: boolean) => {
     if (!stored) toast({ message: t('gym.undoRefused') });
   };
+  /** An undo for what this screen just removed — unless the screen has gone. */
+  const offerUndo = (message: string, undo: () => void) => {
+    if (closed.current) return;
+    showedToast.current = true;
+    toast({ message, action: { label: t('toast.undo'), run: undo } });
+  };
 
   /*
-   * Removing an exercise (P5). What is only on the page goes from the page;
-   * what is stored is deleted. Either way the toast's undo puts back exactly
-   * what went: the sets, the line and its place.
+   * Removing an exercise (P5). What is decided here is decided in the queue,
+   * after every write before it: the tap that removes an exercise first takes
+   * the focus from a field, and that blur may just have saved the
+   * exercise's first set — or made the draft a session. So what is stored is
+   * deleted and what is only on the page goes from the page, as things stand
+   * when the removal's turn comes; and the undo puts back exactly what went,
+   * read from what was removed, never from the render (D131).
    */
-  const removeExercise = (entry: SessionExercise, name: string) => {
-    const exerciseId = entry.exercise.id;
-    const message = t('gym.removed.exercise', { exercise: name });
-    const keptAt = keptRef.current.findIndex((kept) => kept.exerciseId === exerciseId);
-    const kept = keptRef.current[keptAt];
+  const removeExercise = (exerciseId: string, name: string) => {
+    let removed: { sets: GymSetRecord[]; line: GymSessionExerciseSnapshot | null } | null = null;
+    let keptAt = -1;
+    let kept: { exerciseId: string; name: string } | undefined;
     const forget = () => {
       keptRef.current = keptRef.current.filter((item) => item.exerciseId !== exerciseId);
     };
@@ -775,66 +818,54 @@ export function GymSessionScreen({
       keptRef.current = next;
     };
 
-    if (entry.sets.length === 0 && (freeMode || isDraft)) {
-      const draftAt = draftRef.current.findIndex((line) => line.exerciseId === exerciseId);
-      const draftLine = draftRef.current[draftAt];
-      forget();
-      draftRef.current = draftRef.current
-        .filter((line) => line.exerciseId !== exerciseId)
-        .map((line, index) => ({ ...line, order: index }));
-      setDraftVersion((version) => version + 1);
-      toast({
-        message,
-        action: {
-          label: t('toast.undo'),
-          run: () => {
-            keepAgain();
-            if (draftLine && !draftRef.current.some((line) => line.exerciseId === exerciseId)) {
-              const next = [...draftRef.current];
-              next.splice(Math.min(draftAt, next.length), 0, draftLine);
-              draftRef.current = next.map((line, index) => ({ ...line, order: index }));
-            }
-            setDraftVersion((version) => version + 1);
-          },
-        },
-      });
-      return;
-    }
-
-    const sessionId = sessionRef.current!;
-    const sets = entry.sets;
-    const line = view.session?.exercises?.find((item) => item.exerciseId === exerciseId) ?? null;
     void tap(async () => {
-      await removeExerciseFromSession(sessionId, exerciseId);
+      keptAt = keptRef.current.findIndex((item) => item.exerciseId === exerciseId);
+      kept = keptRef.current[keptAt];
+      const id = sessionRef.current;
+      if (id) {
+        removed = await removeExerciseFromSession(id, exerciseId);
+      } else {
+        // Nothing stored yet: the line leaves the draft.
+        const line = draftRef.current.find((entry) => entry.exerciseId === exerciseId) ?? null;
+        draftRef.current = draftRef.current
+          .filter((entry) => entry.exerciseId !== exerciseId)
+          .map((entry, index) => ({ ...entry, order: index }));
+        removed = { sets: [], line };
+      }
       forget();
-    }).then((removed) => {
-      if (!removed) return;
-      toast({
-        message,
-        action: {
-          label: t('toast.undo'),
-          run: () => {
-            keepAgain();
-            void run(() => restoreExercise(sessionId, sets, line)).then((stored) => {
-              if (!stored) forget();
-              undone(stored);
-            });
-          },
-        },
+    }).then((ok) => {
+      const what = removed;
+      if (!ok || !what) return;
+      offerUndo(t('gym.removed.exercise', { exercise: name }), () => {
+        void run(async () => {
+          keepAgain();
+          // The session as it is now: a draft may have become one since.
+          const id = sessionRef.current;
+          if (id) {
+            await restoreExercise(id, what.sets, what.line);
+          } else if (what.line && !draftRef.current.some((entry) => entry.exerciseId === exerciseId)) {
+            const next = [...draftRef.current];
+            next.splice(Math.min(what.line.order, next.length), 0, what.line);
+            draftRef.current = next.map((entry, index) => ({ ...entry, order: index }));
+          }
+        }).then((stored) => {
+          if (!stored) forget();
+          undone(stored);
+        });
       });
     });
   };
 
-  /** Removing a set (P5), with the same undo. */
-  const removeOneSet = (set: GymSetRecord, index: number, name: string) => {
-    void tap(() => removeSet(set.id)).then((removed) => {
-      if (!removed) return;
-      toast({
-        message: t('gym.removed.set', { number: index + 1, exercise: name }),
-        action: {
-          label: t('toast.undo'),
-          run: () => void run(() => restoreSet(set)).then(undone),
-        },
+  /** Removing a set (P5): the undo puts back the set as it was stored when it went. */
+  const removeOneSet = (setId: string, index: number, name: string) => {
+    let removed: GymSetRecord | undefined;
+    void tap(async () => {
+      removed = await removeSet(setId);
+    }).then((ok) => {
+      const what = removed;
+      if (!ok || !what) return;
+      offerUndo(t('gym.removed.set', { number: index + 1, exercise: name }), () => {
+        void run(() => restoreSet(what)).then(undone);
       });
     });
   };
@@ -888,7 +919,6 @@ export function GymSessionScreen({
           </Card>
         ) : (
           view.exercises.map((entry) => {
-            const last = entry.sets[entry.sets.length - 1];
             const name = namer.name(entry.exercise.id, entry.exercise.name);
             const loadType = entry.exercise.loadType ?? 'external';
             // An exercise without a stored set is typed into once, then saved
@@ -922,7 +952,7 @@ export function GymSessionScreen({
                       className="gym-exercise__remove"
                       aria-label={t('gym.removeExercise', { exercise: name })}
                       disabled={!editable}
-                      onClick={() => removeExercise(entry, name)}
+                      onClick={() => removeExercise(entry.exercise.id, name)}
                     >
                       {t('gym.removeExercise.short')}
                     </button>
@@ -939,7 +969,7 @@ export function GymSessionScreen({
                       loadType={loadType}
                       editable={editable}
                       onChange={(patch) => void run(() => updateSet(set.id, patch))}
-                      onRemove={() => removeOneSet(set, index, name)}
+                      onRemove={() => removeOneSet(set.id, index, name)}
                     />
                   ))}
 
@@ -982,16 +1012,9 @@ export function GymSessionScreen({
                       disabled={!editable}
                       aria-label={t('gym.addSetFor', { exercise: name })}
                       onClick={() =>
-                        void tap(() =>
-                          addSet({
-                            sessionId: sessionRef.current!,
-                            exerciseId: entry.exercise.id,
-                            // The set before it, because the next set is almost
-                            // always the same one again.
-                            reps: last?.reps ?? 0,
-                            weightGrams: last?.weightGrams ?? 0,
-                          }),
-                        )
+                        // The set before it, as stored when the tap's turn
+                        // comes — an edit its blur just saved included.
+                        void tap(() => repeatLastSet(sessionRef.current!, entry.exercise.id))
                       }
                     >
                       <PlusIcon size={18} />

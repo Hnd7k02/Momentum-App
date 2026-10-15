@@ -411,7 +411,7 @@ function groupSets(
     sources.set(entry.exerciseId, entry.source);
     snapshotNames.set(entry.exerciseId, entry.name);
   }
-  for (const set of [...sets].sort((a, b) => a.order - b.order)) {
+  for (const set of [...sets].sort(bySetOrder)) {
     const list = grouped.get(set.exerciseId);
     if (list) list.push(set);
     else {
@@ -522,7 +522,9 @@ export async function addSet(
     date: session.date,
     weightGrams: Math.max(0, Math.round(input.weightGrams)),
     reps: Math.max(0, Math.round(input.reps)),
-    order: existing.length,
+    // After the highest order, not at the count: with a set removed, the
+    // count is an order a remaining set already has.
+    order: existing.reduce((max, set) => Math.max(max, set.order), -1) + 1,
     muscles: exercise?.muscles ?? [],
     // Roles and load type are copied **now**, for the same reason the groups
     // are: remapping or reclassifying an exercise later changes what it counts
@@ -533,6 +535,31 @@ export async function addSet(
   };
   await gymSetsRepository.put(record);
   return record;
+}
+
+/**
+ * Another set of an exercise, the same as the one before it — what "+ Satz"
+ * does, because the next set is almost always the same one again. The set
+ * before is read when this runs, so an edit saved a moment earlier is
+ * copied too. With no set before it, nothing is added: a 0×0 set is never
+ * stored (D128).
+ */
+export async function repeatLastSet(
+  sessionId: string,
+  exerciseId: string,
+  reference: DateKey = today(),
+): Promise<GymSetRecord | null> {
+  const sets = (await gymSetsRepository.listBySession(sessionId))
+    .filter((set) => set.exerciseId === exerciseId)
+    .sort(bySetOrder);
+  const last = sets[sets.length - 1];
+  if (!last) return null;
+  return addSet({ sessionId, exerciseId, reps: last.reps, weightGrams: last.weightGrams }, reference);
+}
+
+/** A session's sets in the order they were done: by order, then by when they were stored. */
+function bySetOrder(a: GymSetRecord, b: GymSetRecord): number {
+  return a.order - b.order || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id);
 }
 
 export async function updateSet(
@@ -553,11 +580,16 @@ export async function updateSet(
   return next;
 }
 
-export async function removeSet(id: string, reference: DateKey = today()): Promise<void> {
+/** Removes a set and returns it as it was stored, for an undo to put back. */
+export async function removeSet(
+  id: string,
+  reference: DateKey = today(),
+): Promise<GymSetRecord | undefined> {
   const set = await gymSetsRepository.get(id);
-  if (!set) return;
+  if (!set) return undefined;
   assertEditable(set.date, reference);
   await gymSetsRepository.remove(id);
+  return set;
 }
 
 /**
@@ -597,22 +629,36 @@ export async function restoreExercise(
   }
 }
 
-/** Removes an exercise and every set of it, within the session's own week. */
+/** What removing an exercise took away: its sets as stored, and its line. */
+export interface RemovedExercise {
+  sets: GymSetRecord[];
+  /** The session's own line for it, with the place it had; `null` in a bare session. */
+  line: GymSessionExerciseSnapshot | null;
+}
+
+/**
+ * Removes an exercise and every set of it, within the session's own week,
+ * and returns exactly what went, for an undo to put back (D131). Every rule
+ * is checked before anything is deleted, so a refusal removes nothing.
+ */
 export async function removeExerciseFromSession(
   sessionId: string,
   exerciseId: string,
   reference: DateKey = today(),
-): Promise<void> {
-  const sets = await gymSetsRepository.listBySession(sessionId);
-  for (const set of sets.filter((entry) => entry.exerciseId === exerciseId)) {
-    assertEditable(set.date, reference);
-    await gymSetsRepository.remove(set.id);
-  }
+): Promise<RemovedExercise> {
+  const [session, all] = await Promise.all([
+    gymSessionsRepository.get(sessionId),
+    gymSetsRepository.listBySession(sessionId),
+  ]);
+  const sets = all.filter((set) => set.exerciseId === exerciseId).sort(bySetOrder);
+  const line = session?.exercises?.find((entry) => entry.exerciseId === exerciseId) ?? null;
+  for (const set of sets) assertEditable(set.date, reference);
+  if (session && line) assertEditable(session.date, reference);
+
+  for (const set of sets) await gymSetsRepository.remove(set.id);
   // The session's own snapshot forgets it too, so a planned exercise the
   // user removed does not come back as an empty line. The plan is untouched.
-  const session = await gymSessionsRepository.get(sessionId);
-  if (session?.exercises?.some((entry) => entry.exerciseId === exerciseId)) {
-    assertEditable(session.date, reference);
+  if (session?.exercises && line) {
     await gymSessionsRepository.put({
       ...session,
       exercises: session.exercises
@@ -621,6 +667,7 @@ export async function removeExerciseFromSession(
       updatedAt: nowIso(),
     });
   }
+  return { sets, line };
 }
 
 /**
