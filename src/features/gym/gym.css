@@ -109,8 +109,11 @@
 .gym-session__bar {
   flex: none;
   min-height: var(--workout-bar-height);
-  padding: var(--space-3) calc(var(--safe-right) + var(--space-4))
-    calc(var(--space-3) + var(--safe-bottom)) calc(var(--safe-left) + var(--space-4));
+  /* Edge to edge across the screen's own side padding, with the button
+     lined up with the cards in the scroll above. */
+  margin: 0 calc(-1 * (var(--safe-right) + var(--space-5))) 0 calc(-1 * (var(--safe-left) + var(--space-5)));
+  padding: var(--space-3) calc(2 * var(--safe-right) + var(--space-5) + var(--space-4))
+    calc(var(--space-3) + var(--safe-bottom)) calc(2 * var(--safe-left) + var(--space-5) + var(--space-4));
   background: var(--surface-base);
   border-top: 1px solid var(--separator);
 }

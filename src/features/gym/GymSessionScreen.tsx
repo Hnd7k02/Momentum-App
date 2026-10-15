@@ -173,7 +173,9 @@ function SetRow({
           onChange={(event) => setReps(event.target.value.replace(/[^0-9]/g, ''))}
           onBlur={() => {
             editingReps.current = false;
-            onChange({ reps: Number(reps || 0) });
+            // Only what was changed is written: leaving a field untouched is
+            // not an edit.
+            if (reps !== String(set.reps)) onChange({ reps: Number(reps || 0) });
           }}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -200,7 +202,10 @@ function SetRow({
           onChange={(event) => setWeight(event.target.value.replace(/[^0-9.,]/g, ''))}
           onBlur={() => {
             editingWeight.current = false;
-            onChange({ weightGrams: weights.parse(weight) ?? 0 });
+            // Only a changed weight is written. In lb the text is rounded to
+            // one decimal, so re-parsing an untouched field would move the
+            // stored grams (60 000 g → 60 010 g) — a fact the rating replays.
+            if (weight !== weights.format(set.weightGrams)) onChange({ weightGrams: weights.parse(weight) ?? 0 });
           }}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -373,7 +378,10 @@ function BodyweightCard({
     setValue(current === null ? '' : weights.formatBodyweight(current));
   }, [current, weights]);
 
-  const parsed = weights.parseBodyweight(value);
+  // An unchanged value saves the weight in force exactly: re-parsing its
+  // rounded lb text would record 80.014 kg for 80 kg.
+  const parsed =
+    current !== null && value === weights.formatBodyweight(current) ? current : weights.parseBodyweight(value);
   const valid = parsed !== null && parsed > 0;
 
   return (
@@ -578,6 +586,9 @@ export function GymSessionScreen({
     if (closed.current) return;
     closed.current = true;
     await pending.current;
+    // An undo belongs to the workout it came from; it does not follow the
+    // user back to Heute.
+    dismissToast();
     releaseChanges.current?.();
     onClose();
   };
