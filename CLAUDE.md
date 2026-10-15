@@ -149,7 +149,10 @@ Never conflate them.
   on screen. Write a weight only when its text changed — re-parsing rounded
   pounds moves stored grams.
 - **An undo puts back what was removed** (D131): the same rows, the same
-  line in the same place, within the edit window — never a re-add.
+  line in the same place, within the edit window — never a re-add. A
+  workout action decides from what is stored when its turn in the write
+  queue comes, never from the render it was tapped on: the tap's own blur
+  may just have saved something.
 - **Food is ranked on the 1–10 adherence the user entered, never on calories
   or macros.** Entries are logged and totalled because a log is useful; none
   of it reaches the score. What a person's targets should be is a product

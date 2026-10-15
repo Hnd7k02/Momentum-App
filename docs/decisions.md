@@ -2772,3 +2772,22 @@ session stays an extra, and the plan itself never changes.
 Writes in the workout run one after another and none is turned away — a
 weight typed while the reps are saving waits its turn — while a tapped
 action keeps its double-tap guard.
+
+**Every action decides when its turn comes, not when it is tapped**
+(Stage 2 review). A tap first takes the focus from the field being typed
+in, so that field's write is queued a moment before the tap's action; the
+render the finger landed on is one write behind. Reading it removed a set
+the same tap had saved and then restored an empty list, restored a set
+without the edit its blur had saved, left an exercise on the page under a
+toast saying it was gone, and put a draft line back into a draft that had
+meanwhile become a session. So the removal services return what they
+removed (`removeSet`, `removeExerciseFromSession` → `RemovedExercise`), the
+undo restores exactly that, the branch between "stored" and "only on the
+page" is taken on `sessionRef` inside the queue, and "+ Satz" copies the
+set before it as stored when it runs (`repeatLastSet`, which never stores a
+0×0 set). A saved set row compares a blur against what it last sent, not
+against props that lag behind a queued write. An exercise's pending
+row saves when the focus leaves the row, not a field: a bodyweight set is
+otherwise stored without its added load. A new set's `order` follows the
+highest, not the count; a set an undo put back may share an order with one
+added meanwhile, and such sets sort by `createdAt`.
