@@ -304,6 +304,14 @@ records (answers, sessions, sets, snapshots)
 - Gates: the 3D timing suites (`gym-muscles`, `body`, `body-reach`) run
   alone, never in parallel (`scripts/verify/README.md`).
 
+**WP3 Stage 3a — the edit window gate** (no production code)
+- The analysis is in `docs/design/wp3/stage3a-window.md`: every consumer of
+  the day window and the week clock, what moves under each variant
+  (measured), the midnight drops a P8 backfill would reverse, and the
+  proposal — the window as an era (`editWindowDays` read per day, a new
+  optional `scoring.sessionWindowDays` marker, the P8 snapshot appended on
+  first load, one write rule). Waiting for the decisions at STOP 3a.
+
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
   repositories exist, no logic and no UI. **Weight entries are now reachable**
