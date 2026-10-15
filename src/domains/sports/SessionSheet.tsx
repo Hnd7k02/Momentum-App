@@ -49,12 +49,15 @@ export function SessionSheet({
   onClose,
   onSave,
   onDelete,
+  returnFocus,
 }: {
   open: boolean;
   session: TrainingSession | null;
   onClose(): void;
   onSave(input: SessionInput): void;
   onDelete(): void;
+  /** See `Sheet`: where focus goes if the opener is gone. */
+  returnFocus?: () => HTMLElement | null;
 }) {
   const t = useT();
   const { language } = useI18n();
@@ -89,6 +92,7 @@ export function SessionSheet({
       open={open}
       title={t('sports.session')}
       onClose={onClose}
+      returnFocus={returnFocus}
       footer={
         <>
           <Button

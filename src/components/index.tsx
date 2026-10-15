@@ -58,6 +58,11 @@ export function Section({
   );
 }
 
+/** The row a sheet was opened from, found again by its `focusKey`. */
+export function focusTarget(key: string): HTMLElement | null {
+  return document.querySelector<HTMLElement>(`[data-focus-key="${key}"]`);
+}
+
 export function Row({
   title,
   subtitle,
@@ -66,6 +71,7 @@ export function Row({
   onClick,
   muted = false,
   ariaLabel,
+  focusKey,
 }: {
   title: ReactNode;
   subtitle?: ReactNode;
@@ -74,6 +80,8 @@ export function Row({
   onClick?: () => void;
   muted?: boolean;
   ariaLabel?: string;
+  /** A stable name a sheet can find this row by again (`focusTarget`). */
+  focusKey?: string;
 }) {
   const className = `row ${onClick ? 'row--tappable' : ''} ${muted ? 'row--muted' : ''}`.trim();
   const content = (
@@ -89,7 +97,7 @@ export function Row({
 
   if (!onClick) return <div className={className}>{content}</div>;
   return (
-    <button type="button" className={className} onClick={onClick} aria-label={ariaLabel}>
+    <button type="button" className={className} onClick={onClick} aria-label={ariaLabel} data-focus-key={focusKey}>
       {content}
     </button>
   );
@@ -352,16 +360,25 @@ export function Sheet({
   onClose,
   children,
   footer,
+  returnFocus,
 }: {
   open: boolean;
   title: string;
   onClose(): void;
   children: ReactNode;
   footer?: ReactNode;
+  /**
+   * Where focus goes on close when the control that opened the sheet is no
+   * longer in the document — Heute re-renders its day under an open sheet
+   * at midnight, and the opener is a new node by the time the sheet closes.
+   */
+  returnFocus?: () => HTMLElement | null;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const returnFocusRef = useRef(returnFocus);
+  returnFocusRef.current = returnFocus;
   const t = useT();
   const dismissToast = useDismissToast();
 
@@ -380,7 +397,8 @@ export function Sheet({
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      previous?.focus({ preventScroll: true });
+      const target = previous?.isConnected ? previous : (returnFocusRef.current?.() ?? null);
+      target?.focus({ preventScroll: true });
     };
   }, [open, dismissToast]);
 

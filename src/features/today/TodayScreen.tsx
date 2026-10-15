@@ -1,9 +1,9 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
 import { useToday } from '../../app/useToday';
 import { useToast } from '../../components/Toast';
-import { Button, Card, EmptyState, LoadFailure, Row, Section, StaleNotice } from '../../components';
+import { Button, Card, EmptyState, LoadFailure, Row, Section, StaleNotice, focusTarget } from '../../components';
 import { ChevronRightIcon, PlusIcon, SparkIcon } from '../../components/Icons';
 import { SessionSheet } from '../../domains/sports/SessionSheet';
 import { formatDayAndMonth, formatTime, formatWeekday } from '../../i18n/format';
@@ -70,6 +70,8 @@ export function TodayScreen({
   } = useDay(date);
   const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
   const [addingFood, setAddingFood] = useState(false);
+  /** The run the sheet was last opened for, so focus can find its row again. */
+  const lastEdited = useRef<string | null>(null);
   /*
    * One-tap logging is one write per tap (WP3, B9). A double tap logged two
    * runs and called the week met; the ref turns the second tap away before
@@ -126,6 +128,19 @@ export function TodayScreen({
   });
 
   /*
+   * Where the user was in the day. The gate below empties the scroll port
+   * while a new day loads, and the browser puts it back at the top; a sheet
+   * kept open across midnight would otherwise close onto the top of the
+   * list. The same goes for the list coming back after a workout.
+   */
+  const scrollPort = useRef<HTMLDivElement>(null);
+  const savedScroll = useRef(0);
+  const showsToday = state.status === 'ready' && state.value.date === date;
+  useLayoutEffect(() => {
+    if (showsToday && !gym.open && scrollPort.current) scrollPort.current.scrollTop = savedScroll.current;
+  }, [showsToday, gym.open]);
+
+  /*
    * The workout belongs to its own session, not to the day on show, so it is
    * never behind the gate below: a day turning under an open workout must
    * not unmount it (WP3, B3).
@@ -147,6 +162,7 @@ export function TodayScreen({
         key="run-sheet"
         open={editingSession !== null}
         session={editingSession}
+        returnFocus={() => (lastEdited.current ? focusTarget(`session-${lastEdited.current}`) : null)}
         onClose={() => setEditingSession(null)}
         // A write the edit window refuses — the run's week closed while the
         // sheet was open — is said out loud rather than dropped silently.
@@ -170,6 +186,7 @@ export function TodayScreen({
       <FoodEntrySheet
         key="food-sheet"
         open={addingFood}
+        returnFocus={() => document.querySelector<HTMLElement>('button.food__add')}
         onClose={() => setAddingFood(false)}
         onAdd={(input) => void addFoodEntry(input)}
       />
@@ -182,8 +199,7 @@ export function TodayScreen({
   // yesterday's answers stay in memory until today's arrive, and not one
   // control is offered on them in the meantime. If today's load fails, that
   // is a failure with a retry, never an endless wait.
-  const current = state.status === 'ready' && state.value.date === date;
-  if (!current) {
+  if (!showsToday) {
     return (
       <div className="screen">
         <header className="screen__header">
@@ -243,7 +259,13 @@ export function TodayScreen({
         ) : null}
       </header>
 
-      <div className="today__scroll">
+      <div
+        className="today__scroll"
+        ref={scrollPort}
+        onScroll={(event) => {
+          savedScroll.current = event.currentTarget.scrollTop;
+        }}
+      >
         {state.refreshFailed ? <StaleNotice onRetry={reload} /> : null}
 
         {/*
@@ -376,11 +398,15 @@ export function TodayScreen({
                         {session.note ? ` · ${session.note}` : ''}
                       </span>
                     }
-                    onClick={() =>
-                      training.domain === 'gym'
-                        ? openGym(session.id)
-                        : setEditingSession(session)
-                    }
+                    focusKey={`session-${session.id}`}
+                    onClick={() => {
+                      if (training.domain === 'gym') {
+                        openGym(session.id);
+                        return;
+                      }
+                      lastEdited.current = session.id;
+                      setEditingSession(session);
+                    }}
                     trailing={<ChevronRightIcon size={18} />}
                   />
                 ))}

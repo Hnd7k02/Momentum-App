@@ -22,10 +22,13 @@ export function FoodEntrySheet({
   open,
   onClose,
   onAdd,
+  returnFocus,
 }: {
   open: boolean;
   onClose(): void;
   onAdd(input: FoodEntryInput): void;
+  /** See `Sheet`: where focus goes if the opener is gone. */
+  returnFocus?: () => HTMLElement | null;
 }) {
   const t = useT();
   const { language } = useI18n();
@@ -79,7 +82,7 @@ export function FoodEntrySheet({
   };
 
   return (
-    <Sheet open={open} title={t('food.sheet.title')} onClose={close}>
+    <Sheet open={open} title={t('food.sheet.title')} onClose={close} returnFocus={returnFocus}>
       <div className="food-sheet">
         <h3 className="food-sheet__heading">{t('food.sheet.suggestions')}</h3>
         {DEMO_FOODS.map((food) => (

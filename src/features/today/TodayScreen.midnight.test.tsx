@@ -149,13 +149,41 @@ describe('Heute across midnight', () => {
   it('keeps the food entry sheet open, with what was typed into it', async () => {
     mounted = await mount(tree());
     await settle();
-    await act(async () => document.querySelector<HTMLButtonElement>('button.food__add')!.click());
+    // Opened from the keyboard: the opener has focus when the sheet opens.
+    await act(async () => {
+      const opener = document.querySelector<HTMLButtonElement>('button.food__add')!;
+      opener.focus();
+      opener.click();
+    });
     const name = () => document.querySelector<HTMLInputElement>('.sheet input');
     await type(name()!, 'Pasta');
 
     await pastMidnight();
     expect(document.querySelector('.today__date')?.textContent).toContain('15.');
     expect(name()?.value).toBe('Pasta');
+
+    // The opener was replaced while the new day loaded; focus finds the new one.
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(document.querySelector('.sheet')).toBeNull();
+    expect(document.activeElement?.className).toContain('food__add');
+  });
+
+  it('returns focus to the run row when the run sheet closes after midnight', async () => {
+    mounted = await mount(tree());
+    await settle();
+    await act(async () => {
+      const opener = document.querySelector<HTMLButtonElement>('button.row')!;
+      opener.focus();
+      opener.click();
+    });
+    await pastMidnight();
+    expect(distance()).not.toBeNull();
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(document.activeElement?.getAttribute('data-focus-key')).toBe('session-run-1');
   });
 
   it('never unmounts an open workout when the day turns', async () => {
