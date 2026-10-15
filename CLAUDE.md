@@ -146,8 +146,8 @@ Never conflate them.
   a session recorded before the field — which is finished. Never backfill it.
 - **The weight unit is a display preference** (D130). Sets stay grams and
   weight entries kilograms; kg and lb exist only in `core/gym/weight.ts` and
-  on screen. Write a weight only when its text changed — re-parsing rounded
-  pounds moves stored grams.
+  on screen. Write a weight only when its value changed — re-parsing rounded
+  pounds moves stored grams — and never read an emptied field as zero.
 - **An undo puts back what was removed** (D131): the same rows, the same
   line in the same place, within the edit window — never a re-add. A
   workout action decides from what is stored when its turn in the write

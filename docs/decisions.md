@@ -2753,8 +2753,21 @@ whole grams, pounds shown with at most one decimal, kilograms as before.
 **Only a changed value is written.** Pounds are shown rounded, so
 re-parsing a field the user only focused would move the stored grams
 (60 000 g → 60 010 g) — a fact the rating replays. A set's field writes only
-when its text changed, and an unchanged bodyweight saves the weight in
-force exactly.
+when its **value** changed — "132,3" is the 132.3 lb a 60 000 g set shows,
+so typing it again is no edit (Stage 2 review: comparing text missed the
+decimal comma) — and an unchanged bodyweight saves the weight in force
+exactly.
+
+**An emptied field is not zero.** Clearing a barbell set's load or a set's
+reps and leaving is retyping abandoned: the stored value stays and the
+field shows it again. A pending row whose load does not read as a number
+("." alone) is not a set and creates no session. On a bodyweight or
+assisted exercise an empty load is no added weight, as it always was. This
+is the parser's own contract — `parseWeight` returns `null` so a caller can
+tell an empty field from a typed zero.
+
+The preference is written like the language: the screen follows at once,
+and a write that fails puts the screen back on what is stored.
 
 ## D131 — Removing in a workout is undoable, by putting back what was removed
 
