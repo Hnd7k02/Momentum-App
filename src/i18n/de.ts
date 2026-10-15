@@ -53,6 +53,7 @@ export const de = {
   'common.close': 'Schliessen',
   'toast.undo': 'Rückgängig',
   'today.running.logged': 'Lauf eingetragen.',
+  'today.running.undoRefused': 'Rückgängig ging nicht mehr – der Lauf bleibt eingetragen.',
   'common.moreInfo': 'Mehr dazu',
 
   'status.weak': 'Schwach',
@@ -462,6 +463,7 @@ export const de = {
   'gym.attendance.title': 'Anwesenheit',
   'gym.attendance.value': '{sessions} von {target} Sessions',
   'gym.attendance.thisWeek': 'Diese Woche',
+  'gym.attendance.startWeek': 'Startwoche · zählt ab Montag',
   'gym.attendance.explain':
     'Mehr Sessions als dein Wochenziel bringen hier nichts zusätzlich. Laufen zählt nicht zum Gym.',
 
@@ -559,6 +561,7 @@ export const de = {
   'running.attendance.title': 'Anwesenheit',
   'running.attendance.value': '{sessions} von {target} Läufen',
   'running.attendance.thisWeek': 'Diese Woche',
+  'running.attendance.startWeek': 'Startwoche · zählt ab Montag',
   'running.attendance.explain':
     'Mehr Läufe als dein Wochenziel bringen hier nichts zusätzlich. Gym zählt nicht zum Laufen.',
 

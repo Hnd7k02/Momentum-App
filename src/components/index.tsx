@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CheckIcon, CloseIcon } from './Icons';
 import { useT } from '../i18n/I18nProvider';
+import { useDismissToast } from './Toast';
 import './ui.css';
 
 /**
@@ -361,9 +362,13 @@ export function Sheet({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const t = useT();
+  const dismissToast = useDismissToast();
 
   useEffect(() => {
     if (!open) return undefined;
+    // A sheet is a new task: an undo left floating beside it could change
+    // the very record the sheet is editing (WP3, B9).
+    dismissToast();
     const previous = document.activeElement as HTMLElement | null;
     const panel = panelRef.current;
     const initial = panel?.querySelector<HTMLElement>('[data-sheet-initial-focus]');
@@ -376,7 +381,7 @@ export function Sheet({
       document.removeEventListener('keydown', onKeyDown);
       previous?.focus({ preventScroll: true });
     };
-  }, [open]);
+  }, [open, dismissToast]);
 
   if (!open) return null;
 

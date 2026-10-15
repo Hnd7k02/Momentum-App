@@ -13,6 +13,7 @@ import { ChevronLeftIcon, MinusIcon, PlusIcon } from '../../components/Icons';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useLoadable } from '../../app/useLoadable';
+import { holdChanges } from '../../storage/changes';
 import {
   addSessionExercise,
   addSet,
@@ -375,6 +376,7 @@ export function GymSessionScreen({
   draft = null,
   planName = null,
   date,
+  onSessionCreated,
   onClose,
 }: {
   /** An existing session, or `null` to start from `draft`. */
@@ -383,7 +385,13 @@ export function GymSessionScreen({
   draft?: SessionDraft | null;
   /** Shown under the title while the draft is open, so the user knows which plan this is. */
   planName?: string | null;
+  /**
+   * The day a draft or a new session belongs to. An existing session is
+   * shown on its own day, whatever this says.
+   */
   date: DateKey;
+  /** Told the id the moment the draft becomes a session. */
+  onSessionCreated?(id: string): void;
   onClose(): void;
 }) {
   const t = useT();
@@ -419,6 +427,26 @@ export function GymSessionScreen({
     return { session: null, ...view };
   }, [draft?.planId, date]);
   const { state, reload } = useLoadable(load, [draft?.planId, date]);
+  /** The day this workout is on: the session's own once there is one. */
+  const day = state.status === 'ready' && state.value.session ? state.value.session.date : date;
+
+  /*
+   * Nothing behind a full-screen workout is on show, so the store's change
+   * signal is held while it is open (WP3, B2): otherwise every saved set
+   * would replay the Boss for screens nobody can see. Closing releases it
+   * before the host re-renders, so the screen underneath loads once, against
+   * everything the workout wrote.
+   */
+  const releaseChanges = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    const release = holdChanges();
+    releaseChanges.current = release;
+    return release;
+  }, []);
+  const close = () => {
+    releaseChanges.current?.();
+    onClose();
+  };
 
   // A draft edited on the page — an exercise added or removed before any
   // set exists — is reloaded like a write would be.
@@ -433,8 +461,8 @@ export function GymSessionScreen({
   // The weight in force on the session's own day, not today's: a session
   // opened inside the edit window still reads the body that performed it.
   useEffect(() => {
-    void bodyweightFor(date).then(setBodyweight);
-  }, [date]);
+    void bodyweightFor(day).then(setBodyweight);
+  }, [day]);
 
   /** Writes are serialised so a fast tapper cannot interleave two reloads. */
   const run = useCallback(
@@ -465,6 +493,7 @@ export function GymSessionScreen({
     );
     sessionRef.current = session.id;
     setActiveSessionId(session.id);
+    onSessionCreated?.(session.id);
     return session.id;
   };
 
@@ -475,7 +504,7 @@ export function GymSessionScreen({
           <button
             type="button"
             className="button button--quiet gym-session__back"
-            onClick={onClose}
+            onClick={close}
             aria-label={t('common.back')}
           >
             <ChevronLeftIcon />
@@ -552,7 +581,7 @@ export function GymSessionScreen({
         <button
           type="button"
           className="button button--quiet gym-session__back"
-          onClick={onClose}
+          onClick={close}
           aria-label={t('common.back')}
         >
           <ChevronLeftIcon />
@@ -560,7 +589,7 @@ export function GymSessionScreen({
         <div>
           <h1 className="screen__title">{t('gym.session')}</h1>
           <p className="gym-session__date">
-            {t('gym.sessionOn', { date: formatDayAndMonth(language, date) })}
+            {t('gym.sessionOn', { date: formatDayAndMonth(language, day) })}
             {planName ? ` · ${planName}` : ''}
           </p>
         </div>
@@ -575,13 +604,13 @@ export function GymSessionScreen({
 
         {needsBodyweight ? (
           <BodyweightCard
-            date={date}
+            date={day}
             current={bodyweight}
             editable={editable}
             needed
             onSave={(kg) =>
               run(async () => {
-                await recordBodyweight(kg, date);
+                await recordBodyweight(kg, day);
                 setBodyweight(kg);
               })
             }
@@ -723,7 +752,7 @@ export function GymSessionScreen({
           </Button>
         ) : null}
 
-        <Button variant="primary" block onClick={onClose}>
+        <Button variant="primary" block onClick={close}>
           {t('gym.done')}
         </Button>
       </div>

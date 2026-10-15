@@ -29,7 +29,7 @@ export function BossSummary({ onOpen }: { onOpen(): void }) {
   const date = useToday();
   const version = useDataVersion();
   const load = useCallback(() => loadBossProgression(date), [date]);
-  const { state } = useLoadable(load, [date, version]);
+  const { state } = useLoadable(load, [date], [version]);
 
   if (state.status !== 'ready') return null;
 

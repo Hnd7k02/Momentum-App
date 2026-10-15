@@ -34,14 +34,17 @@ afterEach(async () => {
 
 function Probe({
   input,
+  version = 0,
   load,
   seen,
 }: {
   input: string;
+  /** A refresh trigger, as the store's change version is. */
+  version?: number;
   load(input: string): Promise<string>;
   seen: Loadable<string>[];
 }) {
-  const { state } = useLoadable(() => load(input), [input]);
+  const { state } = useLoadable(() => load(input), [input], [version]);
   seen.push(state);
   return null;
 }
@@ -111,6 +114,23 @@ describe('useLoadable reloads when its inputs change', () => {
 
   it('marks a failed refresh stale without dropping what is shown', async () => {
     const seen: Loadable<string>[] = [];
+    let broken = false;
+    const load = async (input: string) => {
+      if (broken) throw new Error('no');
+      return input;
+    };
+    mounted = await mount(<Probe input="fine" load={load} seen={seen} />);
+    await settle();
+    broken = true;
+    await mounted.rerender(<Probe input="fine" version={1} load={load} seen={seen} />);
+    await settle();
+    expect(last(seen)).toEqual({ status: 'ready', value: 'fine', refreshFailed: true });
+  });
+
+  it('reports a failed load for new inputs as a failure, never as the old value', async () => {
+    // Yesterday's day, last range's figures: the value on screen answers a
+    // question nobody is asking any more, so it is not offered as stale.
+    const seen: Loadable<string>[] = [];
     const load = async (input: string) => {
       if (input === 'broken') throw new Error('no');
       return input;
@@ -119,7 +139,22 @@ describe('useLoadable reloads when its inputs change', () => {
     await settle();
     await mounted.rerender(<Probe input="broken" load={load} seen={seen} />);
     await settle();
-    expect(last(seen)).toEqual({ status: 'ready', value: 'fine', refreshFailed: true });
+    expect(last(seen).status).toBe('failed');
+  });
+
+  it('keeps a new input a failure through a refresh that fails as well', async () => {
+    const seen: Loadable<string>[] = [];
+    const load = async (input: string) => {
+      if (input === 'broken') throw new Error('no');
+      return input;
+    };
+    mounted = await mount(<Probe input="fine" load={load} seen={seen} />);
+    await settle();
+    await mounted.rerender(<Probe input="broken" load={load} seen={seen} />);
+    await settle();
+    await mounted.rerender(<Probe input="broken" version={1} load={load} seen={seen} />);
+    await settle();
+    expect(last(seen).status).toBe('failed');
   });
 
   it('reports a first load that fails as a failure, not as empty', async () => {

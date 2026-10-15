@@ -57,9 +57,10 @@ export function ExercisePicker({
 
   // The sheet focuses the search when it opens (WP3, B1). Switching to the
   // custom form inside the open sheet is the picker's own change of view, so
-  // the picker moves focus to the name field itself.
+  // the picker moves focus to the name field itself — and scrolls it into
+  // view, since the form opens below the list the user had scrolled.
   useEffect(() => {
-    if (creating) nameRef.current?.focus({ preventScroll: true });
+    if (creating) nameRef.current?.focus();
   }, [creating]);
 
   /**

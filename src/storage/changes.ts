@@ -22,12 +22,13 @@ export const CHANGE_SETTLE_MS = 60;
 
 let committed = 0;
 let published = 0;
+let holds = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<() => void>();
 
 function publish(): void {
   timer = null;
-  if (published === committed) return;
+  if (holds > 0 || published === committed) return;
   published = committed;
   for (const listener of [...listeners]) listener();
 }
@@ -57,6 +58,32 @@ export function subscribeToChanges(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
+  };
+}
+
+/**
+ * Holds the signal back until the returned release is called.
+ *
+ * A full-screen workout writes on every saved set, and nothing behind it is
+ * on show: the Boss, the ratings and the hub's cards would each replay the
+ * whole history after every set, on the phone's main thread, while the user
+ * types the next one. The workout holds the signal for as long as it is open
+ * and releases it when it closes; the writes made meanwhile are published
+ * then, once, and synchronously — so the screen the user returns to renders
+ * against the new version rather than loading twice.
+ *
+ * Holds nest. Release is idempotent.
+ */
+export function holdChanges(): () => void {
+  holds += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    holds -= 1;
+    if (holds > 0) return;
+    if (timer !== null) clearTimeout(timer);
+    publish();
   };
 }
 

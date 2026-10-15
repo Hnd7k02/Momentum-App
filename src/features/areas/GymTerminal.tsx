@@ -48,10 +48,10 @@ export function GymTerminal({ onOpenMuscles }: { onOpenMuscles(): void }) {
 
   /*
    * While a workout is open the hub is underneath it, so its cards are not
-   * kept mounted: every saved set is a committed write, and the rating and
-   * the muscle history behind a full-screen workout would replay the Boss
-   * after each one. Today does the same. When the workout closes the cards
-   * mount again and load what the workout wrote.
+   * kept mounted; when the workout closes they mount again and load what it
+   * wrote. What stays mounted elsewhere on the page — Running's board — is
+   * kept quiet by the workout holding the change signal (`holdChanges`), so
+   * no saved set replays the Boss behind it.
    */
   if (launcher.open) return <>{launcher.overlay}</>;
 

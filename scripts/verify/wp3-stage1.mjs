@@ -421,7 +421,80 @@ for (const [width, height] of SIZES) {
     const runs3 = await idb(page, 'runs');
     check(`${W}: B9 and the run stays`, runs3.length === 1, String(runs3.length));
 
+    // The toast never floats beside a sheet: it is stacked under the sheet
+    // layer, and opening a sheet dismisses it (review of Stage 1 — its undo
+    // sat over the run sheet's Sichern and could delete the run being edited).
+    await page.getByRole('button', { name: 'Lauf eintragen' }).click();
+    await page.locator('.toast').waitFor({ timeout: 3000 }).catch(() => undefined);
+    check(`${W}: B9 the third log shows the toast`, (await page.locator('.toast').count()) === 1);
+    const layers = await page.evaluate(() => ({
+      toast: Number(getComputedStyle(document.querySelector('.toast-anchor')).zIndex),
+    }));
+    await runningSection(page).locator('.row').last().click();
+    await page.locator('.sheet').waitFor({ timeout: 3000 });
+    const scrim = await page.evaluate(() => Number(getComputedStyle(document.querySelector('.sheet-scrim')).zIndex));
+    check(`${W}: B9 the toast is stacked below the sheet layer`, layers.toast < scrim, short({ ...layers, scrim }));
+    check(`${W}: B9 opening the run sheet dismisses the toast`, (await page.locator('.toast').count()) === 0, String(await page.locator('.toast').count()));
+    const save = await page.locator('.sheet__footer button.button--primary').boundingBox();
+    const onSave = save
+      ? await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('.sheet') !== null, [save.x + save.width / 2, save.y + save.height - 4])
+      : false;
+    check(`${W}: B9 nothing covers the sheet's Sichern`, onSave, short(save));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(600);
+    check(`${W}: B9 both runs are still stored`, (await idb(page, 'runs')).length === 2, String((await idb(page, 'runs')).length));
+
     check(`${W} B: no page errors`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* ── A2: the start week on the Gym board — D127 ─────────────────────── */
+  /*
+   * Gym only, installed mid-week, one session: the board starts the same day
+   * (no daily obligation holds it open), and the week has no ledger target.
+   * The attendance tile says so instead of "0 von 0" (review of Stage 1).
+   */
+  if (new Date(`${CLOCK_DAY}T12:00:00Z`).getUTCDay() !== 1) {
+    const { ctx, page, errors } = await newPage(width, height);
+    await onboard(page, { gym: 3, running: 0, wellbeing: false });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(900);
+    await page.getByRole('button', { name: 'Gym öffnen' }).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button', { name: 'Training erfassen' }).click();
+    await page.waitForTimeout(900);
+    await openPicker(page);
+    await search(page, 'Kniebeuge');
+    const squat = (await pickerRows(page)).find((r) => r.name === 'Kniebeuge');
+    check(`${W}: B11 Kniebeuge drops a two-part detail its groups both say`, squat?.groups === 'Quadrizeps · Beinbeuger und Gesäss · Rumpf', squat?.groups ?? 'missing');
+    await page.locator('.gym-picker__row').filter({ has: page.locator('.gym-picker__name', { hasText: /^Kniebeuge$/ }) }).first().click();
+    await page.waitForTimeout(900);
+    const squatSet = exerciseCard(page, 'Kniebeuge').locator('.gym-set').first();
+    await commitField(page, squatSet.locator('input').nth(0), '5');
+    await commitField(page, squatSet.locator('input').nth(1), '80');
+    await page.getByRole('button', { name: 'Fertig' }).click();
+    await page.waitForTimeout(1500);
+    const hubWeek = await until(() => textOf(page.locator('.gym-hub__week')), (v) => v === '1 von 3 Sessions diese Woche');
+    check(`${W}: D127 the Training card states the week against the user's target`, hubWeek === '1 von 3 Sessions diese Woche', String(hubWeek));
+    const tile = page.locator('[data-metric="gym-attendance"]');
+    await tile.waitFor({ timeout: 6000 }).catch(() => undefined);
+    const shown = (await tile.count()) === 1
+      ? {
+          number: await textOf(tile.locator('.metric-tile__number')),
+          scale: await tile.locator('.metric-tile__scale').count(),
+          line: await textOf(tile.locator('.metric-tile__line')),
+          bar: await tile.locator('[role="meter"], [role="progressbar"], .metric-bar').count(),
+        }
+      : null;
+    check(`${W}: D127 the start week's attendance tile is no data — "–", no scale, no bar`,
+      shown !== null && shown.number === '–' && shown.scale === 0 && shown.bar === 0, short(shown));
+    check(`${W}: D127 it says "Startwoche · zählt ab Montag"`, shown?.line === 'Startwoche · zählt ab Montag', short(shown));
+    check(`${W}: D127 nothing on the board reads "0 von 0"`, !/\b0 von 0\b/.test((await page.locator('.areas__scroll').textContent()) ?? ''));
+    await tile.scrollIntoViewIfNeeded().catch(() => undefined);
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: shotPath(width, 'hub-start-week') });
+    await layoutChecks(page, `${W} hub in the start week`);
+    check(`${W} A2: no page errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
 

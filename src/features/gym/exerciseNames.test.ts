@@ -20,6 +20,21 @@ describe('describeExercise', () => {
     );
   });
 
+  it('drops a detail of several parts when every part is a group', () => {
+    expect(
+      describeExercise('ex_squat', ['Quadrizeps', 'Beinbeuger und Gesäss', 'Rumpf'], 'de'),
+    ).toBe('Quadrizeps · Beinbeuger und Gesäss · Rumpf');
+    expect(
+      describeExercise('ex_deadlift', ['Rücken', 'Beinbeuger und Gesäss', 'Unterarme'], 'de'),
+    ).toBe('Rücken · Beinbeuger und Gesäss · Unterarme');
+  });
+
+  it('keeps a detail of several parts when one part adds something', () => {
+    expect(describeExercise('ex_dip', ['Trizeps', 'Brust', 'Schultern'], 'de')).toBe(
+      'Brust unten / Trizeps · Trizeps · Brust · Schultern',
+    );
+  });
+
   it('describes a custom exercise by its groups alone', () => {
     expect(describeExercise('custom-1', ['Rücken'], 'de')).toBe('Rücken');
   });

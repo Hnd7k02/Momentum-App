@@ -250,7 +250,8 @@
   background: var(--surface-secondary);
 }
 
-.week__log:disabled {
+.week__log:disabled,
+.week__log[aria-disabled='true'] {
   color: var(--text-tertiary);
 }
 

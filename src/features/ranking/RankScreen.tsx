@@ -116,12 +116,13 @@ export function RankScreen({
   }, [date]);
 
   /*
-   * Again when the day turns (WP3, B3), but not on the store's change signal:
-   * the load itself records the acknowledgement, and reloading on that write
-   * would end the badge's reveal a moment after it started. Nothing else is
-   * written while Rang is the screen on show.
+   * Again when the day turns (WP3, B3) and when the Boss weights move on this
+   * screen — `configuration` is replaced after that write — but not on the
+   * store's change signal: the load itself records the acknowledgement, and
+   * reloading on that write would end the badge's reveal a moment after it
+   * started.
    */
-  const { state, reload } = useLoadable(load, [date]);
+  const { state, reload } = useLoadable(load, [date], [configuration]);
   const promoted = state.status === 'ready' && state.value.promoted;
   const [revealSpent, setRevealSpent] = useState(false);
   const reveal = promoted && !revealSpent;

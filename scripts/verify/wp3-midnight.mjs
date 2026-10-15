@@ -31,6 +31,12 @@ import { URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
  *                            leave Monday showing Sunday until 01:00)
  *   6  a missing midnight    São Paulo, 03.11.2018 → 04.11.2018, where clocks
  *                            jumped from 00:00 to 01:00
+ *   7  a workout from Heute  a plan workout opened at 23:5x, one set saved,
+ *      across midnight       midnight passes: the screen is not replaced, it
+ *                            stays on 14.10, and the next set goes to the
+ *                            same session — never a second one on 15.10
+ *   8  a workout from the    the same for a free session opened on the Gym
+ *      hub across midnight   hub, whose host reads the live day
  *
  * Onboarding runs through lib.mjs `onboard()` unchanged: under
  * `clock.install` the page clock flows with real time, so its transitions
@@ -49,6 +55,7 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const short = (value, n = 300) => {
   const s = typeof value === 'string' ? value : JSON.stringify(value);
   return s.length > n ? `${s.slice(0, n)}…` : s;
@@ -116,6 +123,8 @@ async function setUp(page) {
  * message, never a crash of the suite; page errors are a check of their own.
  */
 async function scenario(name, { tz, time, viewport }, body) {
+  // ONLY=7,8 runs the named scenarios alone, for a quick re-check.
+  if (process.env.ONLY && !process.env.ONLY.split(',').some((id) => name.startsWith(id))) return;
   const ctx = await browser.newContext({ ...phone, ...(viewport ? { viewport } : {}), timezoneId: tz });
   await ctx.clock.install({ time });
   const page = await ctx.newPage();
@@ -337,6 +346,151 @@ await scenario('6 São Paulo 03→04.11.2018', { tz: SAO_PAULO, time: '2018-11-0
   const stored = await answers(page);
   check(`${W}: the answer is stored under 2018-11-04`, stored.length === 1 && stored[0].date === '2018-11-04', short(stored));
   check(`${W}: the label stays on Sonntag, 4. November`, (await label(page)) === 'Sonntag, 4. November', String(await label(page)));
+});
+
+/* ── 7 / 8 — an open workout across midnight ─────────────────────────── */
+/*
+ * The day turning is the host's business, not the workout's: the workout
+ * belongs to its session. Before the review of Stage 1 Heute's day gate sat
+ * above the workout, so midnight unmounted it; the plan draft then came back
+ * without its saved set and the next set created a second session on the
+ * new day.
+ */
+const PLAN = {
+  id: 'wp3-midnight-plan',
+  kind: 'userTrainingPlan',
+  version: 1,
+  name: 'Push',
+  exercises: [
+    { exerciseId: 'ex_bench_press', name: 'Bankdrücken', order: 0 },
+    { exerciseId: 'ex_overhead_press', name: 'Overhead Press', order: 1 },
+  ],
+  createdAt: '2026-10-01T10:00:00.000Z',
+  updatedAt: '2026-10-01T10:00:00.000Z',
+};
+
+async function putRecord(page, store, record) {
+  await page.evaluate(async ([s, r]) => {
+    const db = await new Promise((res, rej) => { const q = indexedDB.open('momentum'); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+    await new Promise((res, rej) => { const tx = db.transaction([s], 'readwrite'); tx.objectStore(s).put(r); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+    db.close();
+  }, [store, record]);
+}
+
+/**
+ * Types reps and kg into a set row and leaves it, at a person's pace. (A
+ * stored set commits each field on blur, and the workout drops a write that
+ * arrives while the previous one is still in flight — typed faster than
+ * that, the kg are lost. Pre-existing; reported with Stage 1.)
+ */
+async function fillSet(row, reps, kg) {
+  await row.locator('input').nth(0).fill(String(reps));
+  await row.locator('input').nth(0).blur();
+  await row.page().waitForTimeout(500);
+  await row.locator('input').nth(1).fill(String(kg));
+  await row.locator('input').nth(1).blur();
+}
+
+async function workoutFacts(page) {
+  const sessions = await idbAll(page, 'gymSessions');
+  const sets = await idbAll(page, 'gymSets');
+  return {
+    sessions: sessions.map((x) => ({ id: x.id, date: x.date })),
+    sets: sets.map((x) => ({ session: x.sessionId, exercise: x.exerciseId, reps: x.reps, kg: x.weightGrams / 1000 })),
+    marked: await page.evaluate(() => document.querySelector('.gym-session')?.dataset.wp3 ?? null),
+    header: await page.evaluate(() => (document.querySelector('.gym-session__date')?.textContent ?? '').replace(/\s+/g, ' ').trim()),
+    logged: await page.locator('.gym-session .gym-set:not(.gym-set--pending)').count(),
+  };
+}
+
+await scenario('7 plan workout from Heute across midnight', { tz: BERLIN, time: '2026-10-14T23:54:00+02:00' }, async ({ ctx, page, W }) => {
+  await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await onboard(page, { gym: 3, running: 0, food: false, wellbeing: true });
+  await putRecord(page, 'gymPlans', PLAN);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('.today__date').waitFor({ timeout: 10000 });
+  await startsOn(page, W, '2026-10-14 23:5', 'Mittwoch, 14. Oktober');
+
+  await page.getByRole('button', { name: 'Session eintragen' }).click();
+  await page.waitForTimeout(700);
+  await page.locator('.plan-chooser .row').filter({ hasText: 'Push' }).first().click();
+  await page.waitForTimeout(900);
+  check(`${W}: the plan draft is open`, (await page.locator('.gym-session').count()) === 1);
+  await fillSet(page.locator('.gym-set--pending').first(), 8, 60);
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => { document.querySelector('.gym-session').dataset.wp3 = 'before-midnight'; });
+  const before = await workoutFacts(page);
+  check(`${W}: before midnight one session on 14.10 holds the one set`, before.sessions.length === 1 && before.sessions[0].date === '2026-10-14' && before.sets.length === 1, short(before));
+  check(`${W}: (precondition) the clock has not passed midnight yet`, (await pageNow(page)).startsWith('2026-10-14 23:5'), await pageNow(page));
+
+  await fastForwardTo(ctx, page, '2026-10-15T00:01:00+02:00');
+  await ctx.clock.runFor('00:30');
+  // The first tap after midnight is also a day check; it must not cost the workout.
+  await page.locator('.gym-session__date').tap();
+  await page.waitForTimeout(1200);
+  const after = await workoutFacts(page);
+  check(`${W}: (precondition) the clock is past midnight`, (await pageNow(page)).startsWith('2026-10-15 00:0'), await pageNow(page));
+  check(`${W}: after midnight the same workout screen is on show, never remounted`, after.marked === 'before-midnight', String(after.marked));
+  check(`${W}: it still says Session vom 14. Oktober · Push`, after.header === 'Session vom 14. Oktober · Push', after.header);
+  check(`${W}: the set saved before midnight is still on screen`, after.logged === 1, String(after.logged));
+  await page.screenshot({ path: `${OUT}/wp3-midnight-393-workout.png` });
+
+  await fillSet(page.locator('.gym-set--pending').first(), 8, 40);
+  await page.waitForTimeout(1200);
+  const next = await workoutFacts(page);
+  check(`${W}: the next set goes to the same session — still exactly one`, next.sessions.length === 1 && next.sessions[0].date === '2026-10-14', short(next.sessions));
+  check(`${W}: both sets belong to it`, next.sets.length === 2 && next.sets.every((x) => x.session === next.sessions[0].id), short(next.sets));
+
+  await page.getByRole('button', { name: 'Fertig' }).click();
+  const moved = await waitForLabel(page, 'Donnerstag, 15. Oktober');
+  check(`${W}: Fertig returns to Heute on the new day`, moved.ok, short(moved.seen));
+  const week = await page.locator('.week__value').first().textContent();
+  check(`${W}: Heute counts the one session this week`, /^1\b/.test((week ?? '').trim()), String(week));
+});
+
+await scenario('8 free workout from the hub across midnight', { tz: BERLIN, time: '2026-10-14T23:54:00+02:00' }, async ({ ctx, page, W }) => {
+  await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await onboard(page, { gym: 3, running: 0, food: false, wellbeing: true });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('.today__date').waitFor({ timeout: 10000 });
+  await page.getByRole('button', { name: 'Bereiche' }).click();
+  await page.waitForTimeout(600);
+  await page.getByRole('radio', { name: 'Gym', exact: true }).click();
+  await page.waitForTimeout(900);
+  await page.getByRole('button', { name: 'Training erfassen' }).click();
+  await page.waitForTimeout(1000);
+  check(`${W}: the free session is open`, (await page.locator('.gym-session').count()) === 1);
+  await page.getByRole('button', { name: /Übung hinzufügen/ }).first().click();
+  await page.waitForTimeout(500);
+  await page.getByRole('textbox', { name: 'Suchen' }).fill('Bankdrücken');
+  await page.waitForTimeout(350);
+  await page.locator('.gym-picker__row').filter({ has: page.locator('.gym-picker__name', { hasText: /^Bankdrücken$/ }) }).first().click();
+  await page.waitForTimeout(900);
+  await fillSet(page.locator('.gym-session .gym-set').first(), 8, 60);
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => { document.querySelector('.gym-session').dataset.wp3 = 'before-midnight'; });
+  check(`${W}: (precondition) the clock has not passed midnight yet`, (await pageNow(page)).startsWith('2026-10-14 23:5'), await pageNow(page));
+
+  await fastForwardTo(ctx, page, '2026-10-15T00:01:00+02:00');
+  await ctx.clock.runFor('00:30');
+  await page.locator('.gym-session__date').tap();
+  await page.waitForTimeout(1200);
+  const after = await workoutFacts(page);
+  check(`${W}: after midnight the same workout screen is on show`, after.marked === 'before-midnight', String(after.marked));
+  check(`${W}: it still says Session vom 14. Oktober`, after.header === 'Session vom 14. Oktober', after.header);
+
+  await page.getByRole('button', { name: 'Satz zu Bankdrücken hinzufügen' }).click();
+  await page.waitForTimeout(900);
+  await fillSet(page.locator('.gym-session .gym-set').nth(1), 6, 65);
+  await page.waitForTimeout(1200);
+  const next = await workoutFacts(page);
+  check(`${W}: still exactly one session, on 14.10`, next.sessions.length === 1 && next.sessions[0].date === '2026-10-14', short(next.sessions));
+  check(`${W}: both sets belong to it, as typed`, next.sets.length === 2 && next.sets.every((x) => x.session === next.sessions[0].id) && same(next.sets.map((x) => [x.reps, x.kg]).sort(), [[6, 65], [8, 60]]), short(next.sets));
+  await page.getByRole('button', { name: 'Fertig' }).click();
+  await page.waitForTimeout(1500);
+  check(`${W}: Fertig returns to the hub`, (await page.locator('.gym-session').count()) === 0 && (await page.getByRole('button', { name: 'Training erfassen' }).count()) === 1);
 });
 
 await browser.close();

@@ -127,11 +127,15 @@ Never conflate them.
 - Wellbeing questions are asked **daily**. There is no rhythm engine, no
   per-question schedule, and there never will be.
 - Gym and Running are independent weekly quotas, never a combined one.
-- **The week a training domain starts in carries no target** (D127). A week's
-  targets are the snapshot's in force on its Monday, so a domain that starts
-  after that Monday has none there: the partial week is no data, never a miss.
-  The ledger is the scoring rule and stays as it is; a screen that states the
-  week against the user's target reads it as Heute does (`loadTrainingWeek`).
+- **The week a training domain starts in carries no target** (D127). The
+  weekly ledger takes a week's targets from the snapshot in force on its
+  Monday, so a domain that starts after that Monday has no entry there: for
+  attendance, Endurance, XP and streaks the partial week is no data, never a
+  miss. The ledger stays as it is. The daily history fold resolves each day's
+  own snapshot and so does score those days — a known divergence, recorded in
+  D127, not something to "fix" in passing. A screen that states the week
+  against the user's target reads it as Heute does (`loadTrainingWeek`); a
+  rating figure shows the start week as no data.
 - **Food is ranked on the 1–10 adherence the user entered, never on calories
   or macros.** Entries are logged and totalled because a log is useful; none
   of it reaches the score. What a person's targets should be is a product

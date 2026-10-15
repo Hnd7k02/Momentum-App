@@ -30,6 +30,6 @@ export function useDomainStanding(domain: DomainType): DomainStanding | null {
     return { momentum: ledger.momentum, started: ledger.started };
   }, [domain, date]);
   // A new area, a new day or a committed write (WP3, B2).
-  const { state } = useLoadable(load, [domain, date, version]);
+  const { state } = useLoadable(load, [domain, date], [version]);
   return state.status === 'ready' ? state.value : null;
 }

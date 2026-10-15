@@ -81,10 +81,19 @@ export function GymOverview({
       ? Math.min(100, (state.sessionsThisWeek / state.weeklyTarget) * 100)
       : 0;
   const ratingLabel = t('gym.rating.value', { value: ratingValue });
-  const attendanceLabel = t('gym.attendance.value', {
-    sessions: state.sessionsThisWeek,
-    target: state.weeklyTarget,
-  });
+  /*
+   * The week the domain started in carries no target (D127), so the ledger
+   * has none for it and the attendance half of the rating is no data there —
+   * never "0 von 0". The minimum target is 1, so a zero target means exactly
+   * that week.
+   */
+  const startWeek = state.weeklyTarget === 0;
+  const attendanceLabel = startWeek
+    ? t('gym.attendance.startWeek')
+    : t('gym.attendance.value', {
+        sessions: state.sessionsThisWeek,
+        target: state.weeklyTarget,
+      });
   const enduranceLabel = t('gym.endurance.progress', {
     progress: state.endurance.progress.toFixed(1),
     required: state.endurance.required,
@@ -150,10 +159,10 @@ export function GymOverview({
         <MetricTile
           id="gym-attendance"
           title={t('gym.attendance.title')}
-          value={state.sessionsThisWeek}
-          scale={t('gym.attendance.scale', { target: state.weeklyTarget })}
-          bar={attendanceBar}
-          line={t('gym.attendance.thisWeek')}
+          value={startWeek ? '–' : state.sessionsThisWeek}
+          scale={startWeek ? undefined : t('gym.attendance.scale', { target: state.weeklyTarget })}
+          bar={startWeek ? undefined : attendanceBar}
+          line={startWeek ? t('gym.attendance.startWeek') : t('gym.attendance.thisWeek')}
           span={locked ? 'half' : 'full'}
           onOpen={() => setDetail('attendance')}
         />
@@ -227,7 +236,7 @@ export function GymOverview({
         title={t('gym.attendance.title')}
         value={attendanceLabel}
         scale={t('gym.attendance.thisWeek')}
-        bar={attendanceBar}
+        bar={startWeek ? undefined : attendanceBar}
         onClose={close}
       >
         <p>{t('gym.attendance.explain')}</p>

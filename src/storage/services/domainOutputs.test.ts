@@ -104,17 +104,26 @@ function goldenSlug(name: string): string {
   return name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
 }
 
+/**
+ * JSON writes NaN and ±Infinity as `null`, which would let a figure that
+ * became NaN pass against a baseline that froze a genuine `null`. Non-finite
+ * numbers are therefore spelled out; the frozen files hold none, so they read
+ * exactly as they were written.
+ */
+const spellNonFinite = (_key: string, value: unknown): unknown =>
+  typeof value === 'number' && !Number.isFinite(value) ? `<${String(value)}>` : value;
+
 function checkGolden(name: string, kind: 'boss' | 'gym', value: unknown): void {
   const dir = process.env.WP3_GOLDEN_DIR;
   const file = `${goldenSlug(name)}.${kind}.json`;
   if (dir) {
     mkdirSync(dir, { recursive: true });
-    writeFileSync(`${dir}/${file}`, JSON.stringify(value, null, 1) + '\n');
+    writeFileSync(`${dir}/${file}`, JSON.stringify(value, spellNonFinite, 1) + '\n');
     return;
   }
   const frozen = JSON.parse(readFileSync(new URL(file, GOLDEN_DIR), 'utf8')) as unknown;
   // Round-tripped through JSON so `undefined` and key order read as the file does.
-  expect(JSON.parse(JSON.stringify(value)), `${file} against the frozen baseline`).toEqual(frozen);
+  expect(JSON.parse(JSON.stringify(value, spellNonFinite)), `${file} against the frozen baseline`).toEqual(frozen);
 }
 
 async function fingerprint(name = ''): Promise<{ md5: string; values: number }> {

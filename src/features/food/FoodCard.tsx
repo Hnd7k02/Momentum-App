@@ -1,12 +1,10 @@
-import { useState } from 'react';
 import { ADHERENCE_MAX, adherenceBandOf } from '../../core/food';
 import { STATUS_LABEL_KEYS } from '../../core/scoring/scale';
 import { Card, EmptyState, Row, Section } from '../../components';
 import { PlusIcon, SparkIcon } from '../../components/Icons';
 import { ScaleAnswer } from '../../domains/mental/AnswerControls';
 import { useT } from '../../i18n/I18nProvider';
-import type { FoodDayView, FoodEntryInput } from '../../storage/services/checkInService';
-import { FoodEntrySheet } from './FoodEntrySheet';
+import type { FoodDayView } from '../../storage/services/checkInService';
 import './food.css';
 
 /**
@@ -28,18 +26,22 @@ export function FoodCard({
   editable,
   onRate,
   onClearRating,
-  onAddEntry,
+  onOpenEntry,
   onRemoveEntry,
 }: {
   food: FoodDayView;
   editable: boolean;
   onRate(value: number): void;
   onClearRating(): void;
-  onAddEntry(input: FoodEntryInput): void;
+  /**
+   * Opens the entry sheet. The host owns it (WP3, B3): Heute keeps its sheets
+   * mounted while a new day loads, so what is typed into one survives
+   * midnight, and this card is part of the day that reloads.
+   */
+  onOpenEntry(): void;
   onRemoveEntry(id: string): void;
 }) {
   const t = useT();
-  const [adding, setAdding] = useState(false);
   const band = food.adherence === null ? null : adherenceBandOf(food.adherence);
 
   return (
@@ -127,7 +129,7 @@ export function FoodCard({
           )}
 
           {editable ? (
-            <button type="button" className="food__add" onClick={() => setAdding(true)}>
+            <button type="button" className="food__add" onClick={onOpenEntry}>
               <PlusIcon size={19} />
               {t('food.entries.add')}
             </button>
@@ -138,12 +140,6 @@ export function FoodCard({
           <p className="food__note">{t('food.entries.note')}</p>
         </div>
       </Card>
-
-      <FoodEntrySheet
-        open={adding}
-        onClose={() => setAdding(false)}
-        onAdd={(input) => onAddEntry(input)}
-      />
     </Section>
   );
 }

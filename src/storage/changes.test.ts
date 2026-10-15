@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setClock } from '../core/clock';
 import { closeDatabase, deleteDatabase, runTransaction } from './db';
-import { changeVersion, committedWrites, flushChanges, subscribeToChanges } from './changes';
+import { changeVersion, committedWrites, flushChanges, holdChanges, subscribeToChanges } from './changes';
 import { importBackup } from './services/backupService';
 import { loadBossProgression } from './services/bossService';
 import { loadDay, loadTrainingWeek } from './services/checkInService';
@@ -79,6 +79,46 @@ describe('the change signal', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('is held while a workout is open and published once, at once, on release', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      await deleteDatabase();
+      flushChanges();
+      const heard: number[] = [];
+      const stop = subscribeToChanges(() => heard.push(changeVersion()));
+      const release = holdChanges();
+      const nested = holdChanges();
+      for (const id of ['s1', 's2', 's3']) {
+        await runTransaction(['answers'], 'readwrite', (tx) =>
+          tx.objectStore('answers').put({ id, date: '2026-10-14', questionId: 'q', value: 5 }),
+        );
+        vi.advanceTimersByTime(1000);
+      }
+      flushChanges();
+      expect(heard).toHaveLength(0);
+      nested();
+      expect(heard).toHaveLength(0);
+      release();
+      // Synchronous: the screen the workout closes onto already reads it.
+      expect(heard).toEqual([committedWrites()]);
+      release();
+      vi.advanceTimersByTime(1000);
+      expect(heard).toHaveLength(1);
+      stop();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('releases with nothing written without telling anyone', () => {
+    flushChanges();
+    const heard: number[] = [];
+    const stop = subscribeToChanges(() => heard.push(changeVersion()));
+    holdChanges()();
+    expect(heard).toHaveLength(0);
+    stop();
   });
 });
 

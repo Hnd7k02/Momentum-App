@@ -318,6 +318,15 @@ async function runSheet(page, w, { shot }) {
     const add = page.locator('.sheet__footer').getByRole('button', { name: 'Hinzufügen' });
     check(`${L}: the typed text enables Hinzufügen`, (await add.count()) === 1 && (await add.isEnabled()));
     await assertEscapeReturns(page, L, opener);
+
+    // Editing a question opens on the dialog, not the field: editing is as
+    // often a pause or an archive, and a keyboard over those is in the way.
+    const E = `${w} question edit`;
+    const row = page.locator('.areas__scroll').getByRole('button', { name: /Wie gut hast du gesch/ }).first();
+    await row.click();
+    await page.waitForTimeout(500);
+    await assertDialogFocused(page, E, { title: 'Frage bearbeiten' });
+    await assertEscapeReturns(page, E, row);
   }
 
   // 5: the food entry sheet.

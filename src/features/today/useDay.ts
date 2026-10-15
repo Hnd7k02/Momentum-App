@@ -65,7 +65,12 @@ export function useDay(date: string = today()) {
     logSession: (domain: StoredDomainType) => run(() => logSession(domain, date)),
     updateSession: (domain: StoredDomainType, id: string, input: SessionInput) =>
       run(() => updateSession(domain, id, input)),
-    deleteSession: (domain: StoredDomainType, id: string) => run(() => deleteSession(domain, id)),
+    /** `true` once deleted; `undefined` when a rule refused it (a closed week). */
+    deleteSession: (domain: StoredDomainType, id: string) =>
+      run(async () => {
+        await deleteSession(domain, id);
+        return true as const;
+      }),
     /*
      * Food goes through the same write-then-reload path as everything else,
      * so what is on screen is what is on disk and the edit-window rule is

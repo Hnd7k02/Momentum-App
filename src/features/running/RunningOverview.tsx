@@ -68,10 +68,19 @@ export function RunningOverview({
       ? Math.min(100, (state.sessionsThisWeek / state.weeklyTarget) * 100)
       : 0;
   const ratingLabel = t('running.rating.value', { value: ratingValue });
-  const attendanceLabel = t('running.attendance.value', {
-    sessions: state.sessionsThisWeek,
-    target: state.weeklyTarget,
-  });
+  /*
+   * The week the domain started in carries no target (D127), so the ledger
+   * has none for it and the attendance half of the rating is no data there —
+   * never "0 von 0". The minimum target is 1, so a zero target means exactly
+   * that week.
+   */
+  const startWeek = state.weeklyTarget === 0;
+  const attendanceLabel = startWeek
+    ? t('running.attendance.startWeek')
+    : t('running.attendance.value', {
+        sessions: state.sessionsThisWeek,
+        target: state.weeklyTarget,
+      });
   const enduranceLabel = t('running.endurance.progress', {
     progress: state.endurance.progress.toFixed(1),
     required: state.endurance.required,
@@ -135,10 +144,10 @@ export function RunningOverview({
         <MetricTile
           id="running-attendance"
           title={t('running.attendance.title')}
-          value={state.sessionsThisWeek}
-          scale={t('running.attendance.scale', { target: state.weeklyTarget })}
-          bar={attendanceBar}
-          line={t('running.attendance.thisWeek')}
+          value={startWeek ? '–' : state.sessionsThisWeek}
+          scale={startWeek ? undefined : t('running.attendance.scale', { target: state.weeklyTarget })}
+          bar={startWeek ? undefined : attendanceBar}
+          line={startWeek ? t('running.attendance.startWeek') : t('running.attendance.thisWeek')}
           span={locked ? 'half' : 'full'}
           onOpen={() => setDetail('attendance')}
         />
@@ -210,7 +219,7 @@ export function RunningOverview({
         title={t('running.attendance.title')}
         value={attendanceLabel}
         scale={t('running.attendance.thisWeek')}
-        bar={attendanceBar}
+        bar={startWeek ? undefined : attendanceBar}
         onClose={close}
       >
         <p>{t('running.attendance.explain')}</p>

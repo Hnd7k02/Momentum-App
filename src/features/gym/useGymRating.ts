@@ -30,6 +30,6 @@ export function useGymRating(): GymRatingView | null {
     const ledger = boss.domains.find((domain) => domain.domain === 'gym')!;
     return { state: boss.gym, started: ledger.started };
   }, [date]);
-  const { state } = useLoadable(load, [date, version]);
+  const { state } = useLoadable(load, [date], [version]);
   return state.status === 'ready' ? state.value : null;
 }

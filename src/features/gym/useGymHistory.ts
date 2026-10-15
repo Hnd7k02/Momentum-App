@@ -24,6 +24,6 @@ export function useGymHistory(rangeDays: number): GymHistory | null {
     () => loadGymHistory(addDays(to, -(rangeDays - 1)), to),
     [rangeDays, to],
   );
-  const { state } = useLoadable(load, [rangeDays, to, version]);
+  const { state } = useLoadable(load, [rangeDays, to], [version]);
   return state.status === 'ready' ? state.value : null;
 }

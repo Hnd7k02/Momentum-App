@@ -24,6 +24,13 @@ import { PlanChooserSheet } from './PlanChooserSheet';
  * The host renders `overlay` — the chooser sheet and, while a workout is
  * open, the logging screen — and is told when the screen closes so it can
  * reload whatever it shows.
+ *
+ * The workout's day is fixed when it opens (WP3, B3). The host's `date` is
+ * live and turns at midnight; a workout begun at 23:50 is still that day's
+ * workout at 00:10, so its draft, its header and the bodyweight typed into
+ * it stay on the day it was opened for. And once the draft has become a
+ * session the launcher holds the session's id, so a host that has to mount
+ * the screen again resumes the session instead of the draft.
  */
 export function useTrainingLauncher({
   date,
@@ -43,26 +50,36 @@ export function useTrainingLauncher({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ draft: SessionDraft; planName: string } | null>(null);
   const [plans, setPlans] = useState<TrainingPlanRecord[] | null>(null);
+  /** The day the open workout belongs to, fixed when it opened. */
+  const [openedFor, setOpenedFor] = useState<DateKey>(date);
+
+  const openSession = useCallback((id: string, day: DateKey) => {
+    setOpenedFor(day);
+    setSessionId(id);
+  }, []);
 
   /** A free session, created on opening — exactly as before WP2-1. */
   const openFree = useCallback(() => {
     setPlans(null);
-    void openSessionForDay(date)
-      .then((session) => setSessionId(session.id))
+    const day = date;
+    void openSessionForDay(day)
+      .then((session) => openSession(session.id, day))
       .catch(() => onClosed());
-  }, [date, onClosed]);
+  }, [date, onClosed, openSession]);
 
   const start = useCallback(
     (id?: string) => {
       if (id) {
-        setSessionId(id);
+        // The screen reads an existing session's own day from the session.
+        openSession(id, date);
         return;
       }
-      void existingSessionForDay(date)
+      const day = date;
+      void existingSessionForDay(day)
         .then(async (existing) => {
           // One session per calendar day: continued, whichever way it began.
           if (existing) {
-            setSessionId(existing.id);
+            openSession(existing.id, day);
             return;
           }
           const saved = await listTrainingPlans();
@@ -71,7 +88,7 @@ export function useTrainingLauncher({
         })
         .catch(() => openFree());
     },
-    [date, openFree],
+    [date, openFree, openSession],
   );
 
   const close = () => {
@@ -89,7 +106,8 @@ export function useTrainingLauncher({
           sessionId={sessionId}
           draft={draft?.draft ?? null}
           planName={draft?.planName ?? null}
-          date={date}
+          date={openedFor}
+          onSessionCreated={setSessionId}
           onClose={close}
         />
       ) : null}
@@ -99,6 +117,7 @@ export function useTrainingLauncher({
         onClose={() => setPlans(null)}
         onChoosePlan={(plan) => {
           setPlans(null);
+          setOpenedFor(date);
           setDraft({ draft: draftFromPlan(plan), planName: plan.name });
         }}
         onFreeSession={openFree}

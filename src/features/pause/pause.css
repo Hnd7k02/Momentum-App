@@ -171,6 +171,9 @@
 /* ── Today's restrained status line ─────────────────────────────────────── */
 
 .today__paused {
+  /* Like the Boss card above it, it sits outside a Section, so it takes the
+     sections' rhythm itself (WP3, B10). */
+  margin-bottom: var(--space-7);
   display: flex;
   flex-direction: column;
   gap: var(--space-1);

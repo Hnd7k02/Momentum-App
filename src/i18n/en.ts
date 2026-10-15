@@ -51,6 +51,7 @@ export const en: Translations = {
   'common.close': 'Close',
   'toast.undo': 'Undo',
   'today.running.logged': 'Run logged.',
+  'today.running.undoRefused': "Couldn't undo — the run stays logged.",
   'common.moreInfo': 'More about this',
 
   'status.weak': 'Weak',
@@ -454,6 +455,7 @@ export const en: Translations = {
   'gym.attendance.title': 'Attendance',
   'gym.attendance.value': '{sessions} of {target} sessions',
   'gym.attendance.thisWeek': 'This week',
+  'gym.attendance.startWeek': 'Starting week · counts from Monday',
   'gym.attendance.explain':
     'Sessions beyond your weekly target add nothing here. Running does not count towards the gym.',
 
@@ -551,6 +553,7 @@ export const en: Translations = {
   'running.attendance.title': 'Attendance',
   'running.attendance.value': '{sessions} of {target} runs',
   'running.attendance.thisWeek': 'This week',
+  'running.attendance.startWeek': 'Starting week · counts from Monday',
   'running.attendance.explain':
     'Runs beyond your weekly target add nothing here. The gym does not count towards running.',
 

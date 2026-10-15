@@ -49,20 +49,24 @@ export function TrainingCard({
     }),
     [date],
   );
-  const { state } = useLoadable(load, [date, version]);
+  const { state } = useLoadable(load, [date], [version]);
   const facts = state.status === 'ready' ? state.value : null;
 
   // The same two stored values, read three ways: a fraction only while the
   // target is ahead, because "7 von 3" reads as a bounded progress figure
   // that it is not. No number here changes; only the sentence does. Before
   // the first session ever there is nothing to count, and the card says so.
-  // While the facts are loading the line says nothing — loading is not "none".
+  // While the facts are loading the line holds its place and says nothing —
+  // loading is not "none". With Gym switched off there is no weekly quota to
+  // state, and sessions logged before still are not "none": no line at all.
   const weekLine =
     facts === null
-      ? null
-      : facts.latest && facts.week
-        ? weekSentence(t, facts.week.progress.completed, facts.week.progress.target)
-        : t('gymHub.training.none');
+      ? undefined
+      : !facts.latest
+        ? t('gymHub.training.none')
+        : facts.week
+          ? weekSentence(t, facts.week.progress.completed, facts.week.progress.target)
+          : null;
   const lastLine = facts?.latest
     ? facts.today
       ? t('gymHub.training.today')
@@ -82,7 +86,7 @@ export function TrainingCard({
   return (
     <Section label={t('gymHub.training.title')}>
       <Card className="gym-hub__training">
-        <p className="gym-hub__week">{weekLine ?? '\u00A0'}</p>
+        {weekLine === null ? null : <p className="gym-hub__week">{weekLine ?? '\u00A0'}</p>}
         {lastLine ? <p className="gym-hub__last">{lastLine}</p> : null}
         <div className="gym-hub__action">
           <Button variant="primary" block onClick={onStart}>

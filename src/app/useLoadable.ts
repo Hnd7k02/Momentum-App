@@ -34,6 +34,13 @@ import { useCallback, useEffect, useRef, useState, type DependencyList } from 'r
  * toggle does not blank the page — and the ticket guarantees that only the
  * newest load is ever shown. A screen for which an outdated value would be
  * misleading compares it with what it asked for (Today checks the day).
+ *
+ * `deps` say *what* is loaded and `refreshOn` only *when* to load it again.
+ * The difference is what a failure means: a refresh of the same thing that
+ * fails leaves the value on screen, marked stale; a load for different
+ * inputs that fails is a failure, because the value still on screen answers
+ * a question nobody is asking any more — yesterday's day, last range's
+ * figures. The store's change version belongs in `refreshOn`.
  */
 export type Loadable<T> =
   | { status: 'loading' }
@@ -41,7 +48,11 @@ export type Loadable<T> =
   /** `refreshFailed` means the value is real but no longer known to be current. */
   | { status: 'ready'; value: T; refreshFailed: boolean };
 
-export function useLoadable<T>(load: () => Promise<T>, deps: DependencyList): {
+export function useLoadable<T>(
+  load: () => Promise<T>,
+  deps: DependencyList,
+  refreshOn: DependencyList = [],
+): {
   state: Loadable<T>;
   reload: () => Promise<void>;
 } {
@@ -55,6 +66,11 @@ export function useLoadable<T>(load: () => Promise<T>, deps: DependencyList): {
 
   const attempt = useRef(0);
   const alive = useRef(true);
+  // Which inputs the newest attempt and the value on screen were loaded
+  // for: a generation moves only when `deps` do.
+  const generation = useRef(0);
+  const shownGeneration = useRef(-1);
+  const lastDeps = useRef<DependencyList | null>(null);
 
   useEffect(() => {
     alive.current = true;
@@ -65,15 +81,18 @@ export function useLoadable<T>(load: () => Promise<T>, deps: DependencyList): {
 
   const reload = useCallback(async () => {
     const ticket = (attempt.current += 1);
+    const loadingFor = generation.current;
     try {
       const value = await loadRef.current();
       if (!alive.current || attempt.current !== ticket) return;
+      shownGeneration.current = loadingFor;
       setState({ status: 'ready', value, refreshFailed: false });
     } catch (error: unknown) {
       if (!alive.current || attempt.current !== ticket) return;
       const failure = error instanceof Error ? error : new Error(String(error));
+      const sameInputs = shownGeneration.current === loadingFor;
       setState((previous) =>
-        previous.status === 'ready'
+        previous.status === 'ready' && sameInputs
           ? { ...previous, refreshFailed: true }
           : { status: 'failed', error: failure },
       );
@@ -81,11 +100,16 @@ export function useLoadable<T>(load: () => Promise<T>, deps: DependencyList): {
   }, []);
 
   useEffect(() => {
+    const previous = lastDeps.current;
+    if (previous === null || previous.some((value, index) => !Object.is(value, deps[index]))) {
+      generation.current += 1;
+      lastDeps.current = deps;
+    }
     void reload();
-    // `deps` are the caller's inputs; the loader itself is read through the
-    // ref, so it is deliberately not one of them.
+    // `deps` and `refreshOn` are the caller's inputs; the loader itself is
+    // read through the ref, so it is deliberately not one of them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [...deps, ...refreshOn]);
 
   return { state, reload };
 }

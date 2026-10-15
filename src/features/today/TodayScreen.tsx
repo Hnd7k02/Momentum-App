@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
 import { useToday } from '../../app/useToday';
@@ -11,6 +11,7 @@ import { useI18n, useT } from '../../i18n/I18nProvider';
 import type { TrainingSession } from '../../storage/services/checkInService';
 import type { TranslationKey } from '../../i18n';
 import { FoodCard } from '../food/FoodCard';
+import { FoodEntrySheet } from '../food/FoodEntrySheet';
 import '../pause/pause.css';
 import { useTrainingLauncher } from '../gym/useTrainingLauncher';
 import { BossSummary } from './BossSummary';
@@ -65,6 +66,7 @@ export function TodayScreen({
     reload,
   } = useDay(date);
   const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
+  const [addingFood, setAddingFood] = useState(false);
   /*
    * One-tap logging is one write per tap (WP3, B9). A double tap logged two
    * runs and called the week met; the ref turns the second tap away before
@@ -82,7 +84,15 @@ export function TodayScreen({
       if (session && domain === 'running') {
         toast({
           message: t('today.running.logged'),
-          action: { label: t('toast.undo'), run: () => void deleteSession(domain, session.id) },
+          action: {
+            label: t('toast.undo'),
+            // An undo tapped just after Sunday midnight meets a closed week;
+            // it says so rather than leaving the run in place silently.
+            run: () =>
+              void deleteSession(domain, session.id).then((deleted) => {
+                if (!deleted) toast({ message: t('today.running.undoRefused') });
+              }),
+          },
         });
       }
     } finally {
@@ -103,11 +113,53 @@ export function TodayScreen({
     onManagePlans: () => onGoToAreas('gym'),
   });
 
+  /*
+   * The workout belongs to its own session, not to the day on show, so it is
+   * never behind the gate below: a day turning under an open workout must
+   * not unmount it (WP3, B3).
+   */
+  if (gym.open) return <>{gym.overlay}</>;
+
+  /*
+   * The same holds for what floats over the day: the plan chooser, the run
+   * sheet and the food entry sheet. They are rendered in both branches under
+   * the same keys, so React keeps them — and whatever has been typed into
+   * them — when the gate closes and opens again around midnight. The run
+   * sheet edits a run by id; a food entry is saved to the day the screen
+   * shows when it is saved, as every write here is (B3).
+   */
+  const floating = (
+    <>
+      <Fragment key="gym-overlay">{gym.overlay}</Fragment>
+      <SessionSheet
+        key="run-sheet"
+        open={editingSession !== null}
+        session={editingSession}
+        onClose={() => setEditingSession(null)}
+        onSave={(input) => {
+          if (editingSession) updateSession(editingSession.domain, editingSession.id, input);
+          setEditingSession(null);
+        }}
+        onDelete={() => {
+          if (editingSession) deleteSession(editingSession.domain, editingSession.id);
+          setEditingSession(null);
+        }}
+      />
+      <FoodEntrySheet
+        key="food-sheet"
+        open={addingFood}
+        onClose={() => setAddingFood(false)}
+        onAdd={(input) => void addFoodEntry(input)}
+      />
+    </>
+  );
+
   // Three states, never collapsed into one: still loading, failed outright,
   // or loaded. What is *empty* is decided further down, from the day itself.
   // A view loaded for another day is not "loaded" (WP3, B3): after midnight
   // yesterday's answers stay in memory until today's arrive, and not one
-  // control is offered on them in the meantime.
+  // control is offered on them in the meantime. If today's load fails, that
+  // is a failure with a retry, never an endless wait.
   const current = state.status === 'ready' && state.value.date === date;
   if (!current) {
     return (
@@ -120,6 +172,7 @@ export function TodayScreen({
             <LoadFailure title={t('error.day.title')} onRetry={reload} />
           ) : null}
         </div>
+        {floating}
       </div>
     );
   }
@@ -147,8 +200,6 @@ export function TodayScreen({
     (mental?.answeredCount ?? 0) + (day.food?.adherence !== null && day.food ? 1 : 0);
 
   const openGym = (sessionId?: string) => gym.start(sessionId);
-
-  if (gym.open) return <>{gym.overlay}</>;
 
   return (
     <div className="screen">
@@ -335,7 +386,10 @@ export function TodayScreen({
                   <button
                     type="button"
                     className="week__log"
-                    disabled={loggingDomain === training.domain}
+                    // aria-disabled rather than disabled: a disabled button
+                    // drops keyboard focus to the page, and the ref in
+                    // logOnce already turns the second tap away.
+                    aria-disabled={loggingDomain === training.domain}
                     aria-busy={loggingDomain === training.domain}
                     onClick={() =>
                       // Gym opens the session it just created, so logging and
@@ -363,27 +417,13 @@ export function TodayScreen({
             editable={day.editable}
             onRate={rateFood}
             onClearRating={clearFoodRating}
-            onAddEntry={addFoodEntry}
+            onOpenEntry={() => setAddingFood(true)}
             onRemoveEntry={removeFoodEntry}
           />
         ) : null}
       </div>
 
-      {gym.overlay}
-
-      <SessionSheet
-        open={editingSession !== null}
-        session={editingSession}
-        onClose={() => setEditingSession(null)}
-        onSave={(input) => {
-          if (editingSession) updateSession(editingSession.domain, editingSession.id, input);
-          setEditingSession(null);
-        }}
-        onDelete={() => {
-          if (editingSession) deleteSession(editingSession.domain, editingSession.id);
-          setEditingSession(null);
-        }}
-      />
+      {floating}
     </div>
   );
 }

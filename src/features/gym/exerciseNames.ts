@@ -33,9 +33,11 @@ export function useExerciseNamer(): {
 
 /**
  * "obere Brust · Brust · Schultern": the catalogue detail first, then the
- * groups. A detail that one of the group labels already contains is dropped
- * — "Beinbeuger" says nothing that "Beinbeuger und Gesäss" does not (WP3,
- * B11); the comparison ignores case.
+ * groups. A detail the group labels already say is dropped — "Beinbeuger"
+ * says nothing that "Beinbeuger und Gesäss" does not (WP3, B11). A detail of
+ * several parts ("Quadrizeps / Gesäss") is dropped only when every part is
+ * said by some group; one part that adds something ("Brust unten / Trizeps")
+ * keeps it. The comparison ignores case.
  */
 export function describeExercise(
   id: string,
@@ -43,8 +45,12 @@ export function describeExercise(
   language: Language,
 ): string {
   const label = exerciseDetail(id, language);
+  const groups = groupLabels.map((group) => group.toLowerCase());
   const repeats =
     label !== null &&
-    groupLabels.some((group) => group.toLowerCase().includes(label.toLowerCase()));
+    label
+      .split('/')
+      .map((part) => part.trim().toLowerCase())
+      .every((part) => groups.some((group) => group.includes(part)));
   return [...(label && !repeats ? [label] : []), ...groupLabels].join(' · ');
 }

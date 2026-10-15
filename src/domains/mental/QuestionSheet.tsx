@@ -82,7 +82,9 @@ export function QuestionSheet({
           {t('question.textLabel')}
         </label>
         <input
-          {...SHEET_INITIAL_FOCUS}
+          // Only a new question starts in the field. Editing one is as often
+          // a pause or an archive, and a keyboard over those is in the way.
+          {...(isEdit ? {} : SHEET_INITIAL_FOCUS)}
           id="question-text"
           className="field"
           value={text}

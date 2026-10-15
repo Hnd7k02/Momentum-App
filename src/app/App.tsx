@@ -6,7 +6,7 @@ import { TodayScreen } from '../features/today/TodayScreen';
 import { OnboardingFlow } from '../features/onboarding/OnboardingFlow';
 import { I18nProvider, useT } from '../i18n/I18nProvider';
 import { Button } from '../components';
-import { ToastProvider } from '../components/Toast';
+import { ToastOutlet, ToastProvider } from '../components/Toast';
 import type { BossWeights } from '../core/boss';
 import type { StorageFailure } from '../storage/db';
 import { registerServiceWorker, type UpdateHandle } from './serviceWorker';
@@ -39,8 +39,8 @@ function MainApp({
 
   return (
     <div className="app">
-      {/* Inside `.app`, so the toast is placed against the shell and its tab
-          bar rather than the document. */}
+      {/* The outlet sits in the shell's flow above the banners and the tab
+          bar, so the toast clears whichever of them is showing. */}
       <ToastProvider>
       <main className="app__content">
         {tab === 'today' ? (
@@ -69,6 +69,7 @@ function MainApp({
           />
         ) : null}
       </main>
+      <ToastOutlet />
       {actionFailed ? <ActionFailureBanner onDismiss={onDismissFailure} /> : null}
       {update ? <UpdateBanner onApply={update.apply} /> : null}
       <TabBar active={tab} onSelect={(next) => navigate({ tab: next })} />

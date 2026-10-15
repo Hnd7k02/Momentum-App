@@ -28,6 +28,6 @@ export function useRunningRating(): RunningRatingView | null {
     const ledger = boss.domains.find((domain) => domain.domain === 'running')!;
     return { state: boss.running, started: ledger.started };
   }, [date]);
-  const { state } = useLoadable(load, [date, version]);
+  const { state } = useLoadable(load, [date], [version]);
   return state.status === 'ready' ? state.value : null;
 }
