@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { CheckIcon, CloseIcon } from './Icons';
 import { useT } from '../i18n/I18nProvider';
 import { useDismissToast } from './Toast';
@@ -385,7 +386,13 @@ export function Sheet({
 
   if (!open) return null;
 
-  return (
+  /*
+   * Rendered into <body>, not in place: a sheet opened inside the workout or
+   * another full-screen overlay (z 30, each a stacking context of its own)
+   * would otherwise stack its scrim inside that overlay, below the toast
+   * (z 35) — and a toast's action would sit on top of the sheet.
+   */
+  return createPortal(
     <div className="sheet-scrim" onClick={onClose} role="presentation">
       <div
         className="sheet"
@@ -413,7 +420,8 @@ export function Sheet({
         <div className="sheet__body">{children}</div>
         {footer ? <div className="sheet__footer">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

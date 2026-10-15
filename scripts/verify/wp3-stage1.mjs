@@ -462,6 +462,27 @@ for (const [width, height] of SIZES) {
     await page.waitForTimeout(1200);
     check(`${W}: B9 a quick double Enter logs one run`, (await idb(page, 'runs')).length === 4, String((await idb(page, 'runs')).length));
 
+    // Opening a workout is a new task too: the toast goes, and the workout's
+    // own sheets stack at the shell, above where a toast would be.
+    await page.getByRole('button', { name: 'Lauf eintragen' }).click();
+    await page.locator('.toast').waitFor({ timeout: 3000 }).catch(() => undefined);
+    check(`${W}: B9 (precondition) the toast is up`, (await page.locator('.toast').count()) === 1);
+    await page.getByRole('button', { name: 'Session eintragen' }).click();
+    await page.waitForTimeout(700);
+    if ((await page.locator('[role="dialog"]').getByRole('button', { name: 'Freie Session' }).count()) > 0) {
+      await page.locator('[role="dialog"]').getByRole('button', { name: 'Freie Session' }).click();
+    }
+    await page.locator('.gym-session').waitFor({ timeout: 5000 });
+    check(`${W}: B9 opening the workout dismisses the toast`, (await page.locator('.toast').count()) === 0, String(await page.locator('.toast').count()));
+    await page.getByRole('button', { name: /Übung hinzufügen/ }).first().click();
+    await page.locator('.sheet').waitFor({ timeout: 3000 });
+    const shellLevel = await page.evaluate(() => document.querySelector('.sheet-scrim')?.parentElement === document.body);
+    check(`${W}: B9 the workout's picker sheet stacks at the shell, not inside the workout`, shellLevel);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+    await page.getByRole('button', { name: 'Fertig' }).click();
+    await page.waitForTimeout(1000);
+
     /* B10 on a paused day: the pause line sits between the Boss card and
        the first section, and takes the same 28px rhythm on both sides. */
     await page.evaluate(async (from) => {

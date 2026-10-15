@@ -70,6 +70,44 @@ describe('the toast', () => {
     expect(region().style.getPropertyValue('--toast-lift')).toBe('');
   });
 
+  it('keeps the screen on top on top when the one underneath changes its lift', async () => {
+    let setLower: (lift: string) => void = () => undefined;
+    let setUpperShown: (shown: boolean) => void = () => undefined;
+    function Lower() {
+      const [lift, set] = useState('72px');
+      setLower = set;
+      useToastLift(lift);
+      return null;
+    }
+    function Upper() {
+      useToastLift('120px');
+      return null;
+    }
+    function Stack() {
+      const [upper, setUpper] = useState(false);
+      setUpperShown = setUpper;
+      return (
+        <>
+          <Lower />
+          {upper ? <Upper /> : null}
+        </>
+      );
+    }
+    mounted = await mount(
+      <ToastProvider>
+        <Stack />
+        <ToastOutlet />
+      </ToastProvider>,
+    );
+    expect(region().style.getPropertyValue('--toast-lift')).toBe('72px');
+    await act(async () => setUpperShown(true));
+    expect(region().style.getPropertyValue('--toast-lift')).toBe('120px');
+    await act(async () => setLower('80px'));
+    expect(region().style.getPropertyValue('--toast-lift')).toBe('120px');
+    await act(async () => setUpperShown(false));
+    expect(region().style.getPropertyValue('--toast-lift')).toBe('80px');
+  });
+
   it('runs its action once', async () => {
     await render();
     let runs = 0;

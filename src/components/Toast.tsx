@@ -48,8 +48,8 @@ export const TOAST_DURATION_MS = 5000;
 interface Toaster {
   show(spec: ToastSpec): void;
   dismiss(): void;
-  /** Sets the extra lift and returns the function that withdraws it. */
-  lift(value: string): () => void;
+  /** Adds a lift on top of the stack; returns how to change or withdraw it. */
+  lift(value: string): { withdraw(): void; set(value: string): void };
 }
 
 interface ShownToast extends ToastSpec {
@@ -59,7 +59,7 @@ interface ShownToast extends ToastSpec {
 const ToastContext = createContext<Toaster>({
   show: () => undefined,
   dismiss: () => undefined,
-  lift: () => () => undefined,
+  lift: () => ({ withdraw: () => undefined, set: () => undefined }),
 });
 const ShownContext = createContext<{
   toast: ShownToast | null;
@@ -86,7 +86,27 @@ export function useDismissToast(): () => void {
  */
 export function useToastLift(value: string | null): void {
   const { lift } = useContext(ToastContext);
-  useEffect(() => (value === null ? undefined : lift(value)), [lift, value]);
+  const entry = useRef<{ withdraw(): void; set(value: string): void } | null>(null);
+  // One place in the stack per screen, taken when it first lifts: a later
+  // change of value updates it in place, so a screen underneath that
+  // changes its lift never jumps above the screen on top.
+  useEffect(() => {
+    if (value === null) {
+      entry.current?.withdraw();
+      entry.current = null;
+    } else if (entry.current) {
+      entry.current.set(value);
+    } else {
+      entry.current = lift(value);
+    }
+  }, [lift, value]);
+  useEffect(
+    () => () => {
+      entry.current?.withdraw();
+      entry.current = null;
+    },
+    [],
+  );
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -114,7 +134,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     counter.current += 1;
     const id = counter.current;
     setLifts((current) => [...current, { id, value }]);
-    return () => setLifts((current) => current.filter((entry) => entry.id !== id));
+    return {
+      withdraw: () => setLifts((current) => current.filter((entry) => entry.id !== id)),
+      set: (next: string) =>
+        setLifts((current) => current.map((entry) => (entry.id === id ? { id, value: next } : entry))),
+    };
   }, []);
 
   const arm = useCallback(

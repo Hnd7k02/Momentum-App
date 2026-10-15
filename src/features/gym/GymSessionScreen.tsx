@@ -15,6 +15,7 @@ import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useLoadable } from '../../app/useLoadable';
 import { useToday } from '../../app/useToday';
 import { holdChanges } from '../../storage/changes';
+import { useDismissToast } from '../../components/Toast';
 import {
   addSessionExercise,
   addSet,
@@ -454,16 +455,20 @@ export function GymSessionScreen({
   const closed = useRef(false);
   /** The write in flight, if any — the one a tap's blur may just have started. */
   const pending = useRef<Promise<unknown> | null>(null);
+  const dismissToast = useDismissToast();
   useEffect(() => {
     // Mounted (again, under StrictMode's double effect in development).
     closed.current = false;
+    // Opening the workout is a new task, as opening a sheet is: an undo
+    // left floating over its bottom bar could be hit instead of it.
+    dismissToast();
     const release = holdChanges();
     releaseChanges.current = release;
     return () => {
       closed.current = true;
       release();
     };
-  }, []);
+  }, [dismissToast]);
   /*
    * Closing waits for the write in flight. Tapping "Fertig" with the cursor
    * still in a set's field saves that set on blur, a moment before the tap
