@@ -435,6 +435,15 @@ await scenario('7 plan workout from Heute across midnight', { tz: BERLIN, time: 
   check(`${W}: it still says Session vom 14. Oktober · Push`, after.header === 'Session vom 14. Oktober · Push', after.header);
   check(`${W}: the set saved before midnight is still on screen`, after.logged === 1, String(after.logged));
   await page.screenshot({ path: `${OUT}/wp3-midnight-393-workout.png` });
+  for (const [width, height] of [[430, 932], [320, 693]]) {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(500);
+    const cut = await clipped(page);
+    check(`${W} ${width}: nothing on the workout screen is clipped`, cut.length === 0, cut.slice(0, 3).join('; '));
+    await page.screenshot({ path: `${OUT}/wp3-midnight-${width}-workout.png` });
+  }
+  await page.setViewportSize(phone.viewport);
+  await page.waitForTimeout(500);
 
   await fillSet(page.locator('.gym-set--pending').first(), 8, 40);
   await page.waitForTimeout(1200);

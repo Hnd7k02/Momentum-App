@@ -23,8 +23,8 @@ import { URL_APP, check, onboard, phone, summary } from './lib.mjs';
  * close each sheet and put focus back on the control that opened it; where
  * it lands elsewhere, the check says where.
  *
- * Screenshots go to docs/design/wp3/stage1: every sheet mid-typing at 393,
- * and the workout picker and the run sheet again at 430 and 320.
+ * Every sheet is typed into at 393, 430 and 320; screenshots of each one
+ * mid-typing go to docs/design/wp3/stage1.
  */
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage1';
 mkdirSync(OUT, { recursive: true });
@@ -261,11 +261,10 @@ async function runSheet(page, w, { shot }) {
   return assertEscapeReturns(page, L, opener);
 }
 
-/* ══ 393 × 852: every sheet ═════════════════════════════════════════════ */
-{
-  const w = 393;
+/* ══ 393 × 852, 430 × 932 and 320 × 693: every sheet ════════════════════ */
+for (const [w, h] of [[393, 852], [430, 932], [320, 693]]) {
   const shot = (n, slug) => `${OUT}/wp3-sheets-${w}-${n}-${slug}.png`;
-  const { ctx, page, errors } = await boot(w, 852);
+  const { ctx, page, errors } = await boot(w, h);
 
   // 1 and 3: the workout picker, then its custom-exercise form.
   await workoutPicker(page, w, {
@@ -360,16 +359,6 @@ async function runSheet(page, w, { shot }) {
   // 6: the run sheet.
   await runSheet(page, w, { shot: shot(6, 'run-sheet') });
 
-  check(`${w}: no page errors`, errors.length === 0, errors.join(' | '));
-  await ctx.close();
-}
-
-/* ══ 430 × 932 and 320 × 693: the workout picker and the run sheet ══════ */
-for (const [w, h] of [[430, 932], [320, 693]]) {
-  const shot = (n, slug) => `${OUT}/wp3-sheets-${w}-${n}-${slug}.png`;
-  const { ctx, page, errors } = await boot(w, h);
-  await workoutPicker(page, w, { shot: shot(1, 'workout-search') });
-  await runSheet(page, w, { shot: shot(6, 'run-sheet') });
   check(`${w}: no page errors`, errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
