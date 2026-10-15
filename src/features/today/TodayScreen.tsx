@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
 import { useToday } from '../../app/useToday';
@@ -18,6 +18,9 @@ import { BossSummary } from './BossSummary';
 import { CheckInItem } from './CheckInItem';
 import { useDay } from './useDay';
 import './today.css';
+
+/** How long a one-tap log stays busy after its write has landed. */
+const LOG_SETTLE_MS = 600;
 
 /** Titles and log labels per training domain, including the retired one. */
 const TRAINING_COPY: Record<StoredDomainType, { title: TranslationKey; log: TranslationKey }> = {
@@ -70,10 +73,16 @@ export function TodayScreen({
   /*
    * One-tap logging is one write per tap (WP3, B9). A double tap logged two
    * runs and called the week met; the ref turns the second tap away before
-   * React has re-rendered the disabled button, and the toast makes the one
-   * that did land reversible.
+   * React has re-rendered the busy button, and the toast makes the one that
+   * did land reversible. The guard outlasts the write by a moment: a write
+   * and its reload can finish within one key repeat, and a double press or a
+   * held Enter would otherwise log again.
    */
   const logging = useRef(false);
+  const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (settle.current !== null) clearTimeout(settle.current);
+  }, []);
   const [loggingDomain, setLoggingDomain] = useState<StoredDomainType | null>(null);
   const logOnce = async (domain: StoredDomainType) => {
     if (logging.current) return;
@@ -96,8 +105,11 @@ export function TodayScreen({
         });
       }
     } finally {
-      logging.current = false;
-      setLoggingDomain(null);
+      settle.current = setTimeout(() => {
+        settle.current = null;
+        logging.current = false;
+        setLoggingDomain(null);
+      }, LOG_SETTLE_MS);
     }
   };
   /*
@@ -136,12 +148,22 @@ export function TodayScreen({
         open={editingSession !== null}
         session={editingSession}
         onClose={() => setEditingSession(null)}
+        // A write the edit window refuses — the run's week closed while the
+        // sheet was open — is said out loud rather than dropped silently.
         onSave={(input) => {
-          if (editingSession) updateSession(editingSession.domain, editingSession.id, input);
+          if (editingSession) {
+            void updateSession(editingSession.domain, editingSession.id, input).then((saved) => {
+              if (!saved) toast({ message: t('today.session.saveRefused') });
+            });
+          }
           setEditingSession(null);
         }}
         onDelete={() => {
-          if (editingSession) deleteSession(editingSession.domain, editingSession.id);
+          if (editingSession) {
+            void deleteSession(editingSession.domain, editingSession.id).then((deleted) => {
+              if (!deleted) toast({ message: t('today.session.deleteRefused') });
+            });
+          }
           setEditingSession(null);
         }}
       />
@@ -391,6 +413,10 @@ export function TodayScreen({
                     // logOnce already turns the second tap away.
                     aria-disabled={loggingDomain === training.domain}
                     aria-busy={loggingDomain === training.domain}
+                    // A held key repeats; only the first press logs.
+                    onKeyDown={(event) => {
+                      if (event.repeat && (event.key === 'Enter' || event.key === ' ')) event.preventDefault();
+                    }}
                     onClick={() =>
                       // Gym opens the session it just created, so logging and
                       // filling it in are one gesture rather than two screens.

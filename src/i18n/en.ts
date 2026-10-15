@@ -52,6 +52,8 @@ export const en: Translations = {
   'toast.undo': 'Undo',
   'today.running.logged': 'Run logged.',
   'today.running.undoRefused': "Couldn't undo — the run stays logged.",
+  'today.session.saveRefused': 'Not saved — the training stays as it was.',
+  'today.session.deleteRefused': 'Not deleted — the training stays logged.',
   'common.moreInfo': 'More about this',
 
   'status.weak': 'Weak',

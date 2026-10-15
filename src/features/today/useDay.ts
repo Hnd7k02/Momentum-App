@@ -63,8 +63,12 @@ export function useDay(date: string = today()) {
         value === null ? clearAnswer(date, questionId) : saveAnswer(date, questionId, value),
       ),
     logSession: (domain: StoredDomainType) => run(() => logSession(domain, date)),
+    /** `true` once saved; `undefined` when a rule refused it (a closed week). */
     updateSession: (domain: StoredDomainType, id: string, input: SessionInput) =>
-      run(() => updateSession(domain, id, input)),
+      run(async () => {
+        await updateSession(domain, id, input);
+        return true as const;
+      }),
     /** `true` once deleted; `undefined` when a rule refused it (a closed week). */
     deleteSession: (domain: StoredDomainType, id: string) =>
       run(async () => {

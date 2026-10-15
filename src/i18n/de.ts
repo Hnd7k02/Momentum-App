@@ -54,6 +54,8 @@ export const de = {
   'toast.undo': 'Rückgängig',
   'today.running.logged': 'Lauf eingetragen.',
   'today.running.undoRefused': 'Rückgängig ging nicht mehr – der Lauf bleibt eingetragen.',
+  'today.session.saveRefused': 'Nicht gespeichert – das Training bleibt, wie es war.',
+  'today.session.deleteRefused': 'Nicht gelöscht – das Training bleibt eingetragen.',
   'common.moreInfo': 'Mehr dazu',
 
   'status.weak': 'Schwach',
