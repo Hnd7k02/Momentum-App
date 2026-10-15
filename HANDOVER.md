@@ -281,7 +281,14 @@ records (answers, sessions, sets, snapshots)
   `workoutFlow.test.ts` and `app/useMomentum.test.tsx`.
 - Verification: `wp3-stage2` (see `scripts/verify/README.md`), the service
   tests in `workoutFlow.test.ts` and `weight.test.ts`, the screen tests in
-  `workoutScreen.test.tsx`; screenshots in `docs/design/wp3/stage2/`. `release`, `phase4-a11y`, `phase8` and
+  `workoutScreen.test.tsx`; screenshots in `docs/design/wp3/stage2/`. At
+  STOP 2: `tsc -b` clean, `npm run test` exit 0 (96 files, 1426 tests),
+  build clean, every browser suite green — `wp3-stage2` 198/198 on the
+  Wednesday, Sunday and Monday clocks, `release` 82/82. `gym-muscles` is
+  72/72 run alone (twice); under three suites in parallel two of its
+  frame-timing checks each missed once (89° for 90°, 3 hidden frames for 9
+  watched), in the 3D viewer Stage 2 does not touch. Golden files and
+  fingerprints byte-identical; no scoring file changed. `release`, `phase4-a11y`, `phase8` and
   `wp3-sheets` now log a real set where they used to count an opened
   workout.
 
