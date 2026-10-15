@@ -392,7 +392,7 @@ export function Sheet({
    * would otherwise stack its scrim inside that overlay, below the toast
    * (z 35) — and a toast's action would sit on top of the sheet.
    */
-  return createPortal(
+  const scrim = (
     <div className="sheet-scrim" onClick={onClose} role="presentation">
       <div
         className="sheet"
@@ -420,9 +420,11 @@ export function Sheet({
         <div className="sheet__body">{children}</div>
         {footer ? <div className="sheet__footer">{footer}</div> : null}
       </div>
-    </div>,
-    document.body,
+    </div>
   );
+  // Without a document — the static-markup tests render on the server — it
+  // stays in place; the app itself always has one.
+  return typeof document === 'undefined' ? scrim : createPortal(scrim, document.body);
 }
 
 /** A round check used by selectable cards. */
