@@ -2724,12 +2724,16 @@ STOP 2 rather than decided here.
 - `null` — the session was started in the app under P7 and not finished;
   `openSessionForDay` writes it on creation;
 - **absent** — recorded before the field existed, and treated as finished.
-  The absence is the era and is never backfilled.
+  The absence is the era and is never backfilled — not even by "Fertig":
+  tapping it on such a session (opened from Heute's list to look at it)
+  leaves the field absent, since a time recorded then would be days after
+  the workout (Stage 2 review).
 
 Heute shows today's workout at the top while its session has at least one
 saved set and `finishedAt === null`; the Gym hub's Training card states the
 same in its own line. A plan session is stated as the share of planned
-exercises with a saved set (extras excluded); anything else as counts.
+exercises with a saved set (extras excluded), each exercise once even when
+the plan lists it twice, as the workout shows it; anything else as counts.
 Reopening a finished session and adding a set does not make it running
 again. Outside the session's week "Fertig" leaves the record as it is and
 still closes the screen.
