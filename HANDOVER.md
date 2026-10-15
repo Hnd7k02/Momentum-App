@@ -235,6 +235,11 @@ records (answers, sessions, sets, snapshots)
   list reset, spacing, picker details, `ex_front_raise`.
 - Verification: `wp3-sheets`, `wp3-reload`, `wp3-midnight`, `wp3-stage1`
   (see `scripts/verify/README.md`); screenshots in `docs/design/wp3/stage1/`.
+- **For Stage 3 (decided at STOP 1):** once yesterday stays editable, drop
+  the Sunday→Monday move for drafts (`draftDate` in `GymSessionScreen.tsx`):
+  a draft keeps the day it was opened for, like a workout.
+- Real-device preview: the Stage 1 build is published to Momentum-preview
+  (`aa32127`, https://hnd7k02.github.io/Momentum-preview/).
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +

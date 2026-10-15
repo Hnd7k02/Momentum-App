@@ -440,7 +440,7 @@ export const en: Translations = {
     'Made up of 40 % attendance and 60 % personal performance development. The comparison is always against your own history.',
   'gym.rating.movesGradually':
     'The rating moves towards its target step by step rather than in one jump.',
-  'gym.rating.notStarted': 'No gym training recorded yet.',
+  'gym.rating.notStarted': 'The gym rating starts once a day with training is complete.',
 
   'gym.ytd.title': 'Performance year to date',
   'gym.ytd.explain':
@@ -538,7 +538,7 @@ export const en: Translations = {
   'running.rating.value': '{value} of 1000',
   'running.rating.explain':
     'Made up of 40 % attendance and 60 % pace development over comparable distances. The comparison is always against your own history.',
-  'running.rating.notStarted': 'No runs recorded yet.',
+  'running.rating.notStarted': 'The running rating starts once a day with a run is complete.',
 
   'running.ytd.title': 'Pace year to date',
   'running.ytd.explain':

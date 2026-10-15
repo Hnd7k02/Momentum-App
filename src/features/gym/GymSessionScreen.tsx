@@ -423,6 +423,10 @@ export function GymSessionScreen({
    * while that day's week is open. A Sunday draft still open after Monday
    * 00:00 moves to today: kept on Sunday, every set would be refused by the
    * closed week.
+   *
+   * Temporary, by decision (WP3, STOP 1): once Stage 3 keeps yesterday
+   * editable, this move goes and a draft keeps the day it was opened for,
+   * exactly as a workout does.
    */
   const now = useToday();
   const draftDate = isSameWeek(date, now) ? date : now;

@@ -448,7 +448,7 @@ export const de = {
     'Setzt sich zusammen aus 40 % Anwesenheit und 60 % persönlicher Leistungsentwicklung. Verglichen wird immer mit deiner eigenen Historie.',
   'gym.rating.movesGradually':
     'Das Rating bewegt sich schrittweise auf den Zielwert zu, nicht in einem Sprung.',
-  'gym.rating.notStarted': 'Noch kein Gym-Training aufgezeichnet.',
+  'gym.rating.notStarted': 'Das Gym-Rating startet, sobald ein Tag mit Training abgeschlossen ist.',
 
   'gym.ytd.title': 'Leistung seit Jahresbeginn',
   'gym.ytd.explain':
@@ -546,7 +546,7 @@ export const de = {
   'running.rating.value': '{value} von 1000',
   'running.rating.explain':
     'Setzt sich zusammen aus 40 % Anwesenheit und 60 % Tempoentwicklung auf vergleichbaren Distanzen. Verglichen wird immer mit deiner eigenen Historie.',
-  'running.rating.notStarted': 'Noch keine Läufe aufgezeichnet.',
+  'running.rating.notStarted': 'Das Lauf-Rating startet, sobald ein Tag mit einem Lauf abgeschlossen ist.',
 
   'running.ytd.title': 'Tempo seit Jahresbeginn',
   'running.ytd.explain':
