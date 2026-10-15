@@ -444,6 +444,37 @@ for (const [width, height] of SIZES) {
     await page.waitForTimeout(600);
     check(`${W}: B9 both runs are still stored`, (await idb(page, 'runs')).length === 2, String((await idb(page, 'runs')).length));
 
+    /* B10 on a paused day: the pause line sits between the Boss card and
+       the first section, and takes the same 28px rhythm on both sides. */
+    await page.evaluate(async (from) => {
+      const db = await new Promise((res, rej) => { const q = indexedDB.open('momentum'); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+      await new Promise((res, rej) => {
+        const tx = db.transaction(['pausePeriods'], 'readwrite');
+        const stamp = new Date().toISOString();
+        tx.objectStore('pausePeriods').put({ id: 'wp3-stage1-pause', from, to: from, reason: null, createdAt: stamp, updatedAt: stamp });
+        tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+      });
+      db.close();
+    }, CLOCK_DAY);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.locator('.today__paused').waitFor({ timeout: 8000 });
+    await page.locator('.boss-summary').waitFor({ timeout: 8000 });
+    const pausedGaps = await page.evaluate(() => {
+      const boss = document.querySelector('.boss-summary').getBoundingClientRect();
+      const pause = document.querySelector('.today__paused').getBoundingClientRect();
+      const next = [...document.querySelectorAll('.today__scroll .section__label')]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.height > 0 && r.top >= pause.bottom - 0.5)
+        .sort((a, b) => a.top - b.top)[0];
+      return { above: pause.top - boss.bottom, below: next ? next.top - pause.bottom : null };
+    });
+    check(`${W}: B10 on a paused day 28px between the Boss card and the pause line`, Math.abs(pausedGaps.above - 28) <= 1, short(pausedGaps));
+    check(`${W}: B10 on a paused day 28px between the pause line and the next section label`, pausedGaps.below !== null && Math.abs(pausedGaps.below - 28) <= 1, short(pausedGaps));
+    await page.locator('.today__scroll').evaluate((el) => { el.scrollTop = 0; });
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: shotPath(width, 'heute-paused') });
+    await layoutChecks(page, `${W} Heute on a paused day`);
+
     check(`${W} B: no page errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
