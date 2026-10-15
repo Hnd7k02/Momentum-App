@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D126). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D127). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,6 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. Stage 2 (B7, B8, the workout screen) is next and not started. **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -204,6 +205,36 @@ records (answers, sessions, sets, snapshots)
   *Pläne verwalten* link sits 4px right of its label; the Training card's
   footer keeps the 44px link's air; the session screen's title repeats
   "Session"; two-word exercise names wrap at 360px behind the 44px controls.
+
+**WP3 Stage 1 — bug fixes** (branch `claude/momentum-wp3`, not merged)
+- One "today" (`app/useToday.ts`): it moves at local midnight (a calendar
+  timer, correct across DST and a missing midnight), when the app comes back
+  into view, and at the start of any input. Heute withholds every control
+  until the new day has loaded, shows a retry if that load fails, and keeps
+  what floats over the day — the workout, the plan chooser, the run sheet,
+  the food entry sheet, with what was typed — mounted across the change;
+  focus and scroll come back to where they were.
+- One change signal (`storage/changes.ts`): raised after a committed
+  read-write transaction, once per burst. The Boss card, the Gym and Running
+  boards, the hub's cards and the domain standings reload on it and on the
+  day changing; `useLoadable(load, deps, refreshOn)` keeps a failed refresh
+  stale and makes a failed load for new inputs a failure. A full-screen
+  workout holds the signal and releases it when it closes, after the write
+  in flight has landed.
+- The workout's day is fixed when it opens; an existing session shows its
+  own day; a draft carried past Sunday midnight moves to today. Bodyweight
+  entries obey the same weekly edit window as sets.
+- One toast (`components/Toast.tsx`): an outlet above the banners and tab
+  bar, `useToastLift` for a screen with its own bar (the workout's sticky bar
+  in Stage 2), below the sheet layer — sheets render into `<body>` — and
+  dismissed when a sheet or a workout opens. One-tap run logging is one write
+  per press, with undo; refused writes are said out loud.
+- Presentation: the hub's week line reads Heute's weekly progress (D127),
+  the attendance tile reads a zero target as the start week or a switched-off
+  domain, number/sign/state agree on the rounded figure (`muscleState.ts`),
+  list reset, spacing, picker details, `ex_front_raise`.
+- Verification: `wp3-sheets`, `wp3-reload`, `wp3-midnight`, `wp3-stage1`
+  (see `scripts/verify/README.md`); screenshots in `docs/design/wp3/stage1/`.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
