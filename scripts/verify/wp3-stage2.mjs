@@ -137,10 +137,13 @@ async function openWorkout(page) {
     await free.click();
     await page.waitForTimeout(700);
   }
-  await page.locator('.gym-session').waitFor({ timeout: 5000 });
+  await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
 }
 
 const back = (page) => page.locator('.gym-session .gym-session__back').first().click();
+// The bar is drawn only once the workout has loaded: before it, an empty
+// list of cards would read as "nothing kept" without having been checked.
+
 
 for (const [width, height] of SIZES) {
   const W = `${width}`;
@@ -267,7 +270,7 @@ for (const [width, height] of SIZES) {
     await page.screenshot({ path: shotPath(width, 'heute-running-free') });
     await layoutChecks(page, `${W} Heute with a running workout`);
     await widget.click();
-    await page.locator('.gym-session').waitFor({ timeout: 5000 });
+    await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
     check(`${W}: P7 one tap continues the same workout`, JSON.stringify(await cardNames(page)) === '["Bankdrücken"]', short(await cardNames(page)));
     await back(page);
     await page.waitForTimeout(900);
@@ -281,7 +284,7 @@ for (const [width, height] of SIZES) {
     await layoutChecks(page, `${W} hub with a running workout`);
 
     await page.getByRole('button', { name: 'Training fortsetzen' }).click();
-    await page.locator('.gym-session').waitFor({ timeout: 5000 });
+    await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
     await page.getByRole('button', { name: 'Fertig' }).click();
     await page.waitForTimeout(1500);
     const finished = (await idb(page, 'gymSessions'))[0];
@@ -315,7 +318,7 @@ for (const [width, height] of SIZES) {
     await page.getByRole('button', { name: 'Session eintragen' }).click();
     await page.waitForTimeout(700);
     await page.locator('.plan-chooser .row').filter({ hasText: 'Push' }).first().click();
-    await page.locator('.gym-session').waitFor({ timeout: 5000 });
+    await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
     const planned = await cardNames(page);
     await logPending(page, planned[0], 8, 60);
     await pick(page, 'Frontheben');
@@ -333,7 +336,7 @@ for (const [width, height] of SIZES) {
     await page.screenshot({ path: shotPath(width, 'heute-running-plan') });
     await layoutChecks(page, `${W} Heute with a running plan`);
     await page.locator('.running-workout').click();
-    await page.locator('.gym-session').waitFor({ timeout: 5000 });
+    await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
     await logPending(page, planned[1], 10, 40);
     await back(page);
     await page.waitForTimeout(1200);
@@ -389,11 +392,6 @@ for (const [width, height] of SIZES) {
     check(`${W}: P4 and reads back as 135`, shown === '135', shown);
     const best = await textOf(exerciseCard(page, 'Bankdrücken').locator('.gym-exercise__best'));
     check(`${W}: P4 the best set reads in lb`, best === 'Bester Satz · 5 × 135 lb', String(best));
-    const weightField = exerciseCard(page, 'Bankdrücken').locator('.gym-set:not(.gym-set--pending) input').nth(1);
-    await weightField.focus();
-    await weightField.blur();
-    await page.waitForTimeout(800);
-    check(`${W}: P4 an untouched field keeps its grams`, (await idb(page, 'gymSets')).filter((s) => s.date === CLOCK_DAY)[0]?.weightGrams === 61235);
 
     await pick(page, 'Klimmzüge');
     const bodyweight = page.getByLabel('Körpergewicht in Pfund');
@@ -443,6 +441,29 @@ for (const [width, height] of SIZES) {
     const kgSets = (await idb(page, 'gymSets')).filter((s) => s.date === CLOCK_DAY && s.exerciseId === 'ex_bench_press').map((s) => s.weightGrams).sort((a, b) => a - b);
     check(`${W}: P4 62.5 kg is 62 500 g`, JSON.stringify(kgSets) === '[61235,62500]', short(kgSets));
     check(`${W}: P4 and reads 62.5`, (await third.locator('input').nth(1).inputValue()) === '62.5');
+    await page.getByRole('button', { name: 'Fertig' }).click();
+    await page.waitForTimeout(1000);
+
+    // In lb, 62.5 kg reads 137.8 — and 137.8 lb would be 62 505 g. A field
+    // only visited, or the same value typed with a comma, is not an edit (D130).
+    await page.goto(`${URL_APP}#/areas/mental`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(900);
+    await page.locator('.areas__scroll').evaluate((el) => { el.scrollTop = el.scrollHeight; });
+    await page.waitForTimeout(300);
+    await page.getByRole('group', { name: 'Gewichtseinheit' }).getByRole('button', { name: 'lb', exact: true }).click();
+    await page.waitForTimeout(500);
+    await tab(page, 'Heute').click();
+    await page.waitForTimeout(800);
+    await openWorkout(page);
+    const offGrid = exerciseCard(page, 'Bankdrücken').locator('.gym-set:not(.gym-set--pending)').nth(1).locator('input').nth(1);
+    check(`${W}: P4 62.5 kg reads 137.8 lb`, (await offGrid.inputValue()) === '137.8', await offGrid.inputValue());
+    await offGrid.focus();
+    await offGrid.blur();
+    await offGrid.fill('137,8');
+    await offGrid.blur();
+    await page.waitForTimeout(1000);
+    const kept = (await idb(page, 'gymSets')).filter((s) => s.date === CLOCK_DAY && s.exerciseId === 'ex_bench_press').map((s) => s.weightGrams).sort((a, b) => a - b);
+    check(`${W}: P4 an untouched weight keeps its grams, typed again with a comma too`, JSON.stringify(kept) === '[61235,62500]', short(kept));
     check(`${W} C: no page errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

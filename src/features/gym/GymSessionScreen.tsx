@@ -20,7 +20,7 @@ import { useDismissToast, useToast, useToastLift } from '../../components/Toast'
 import {
   addSessionExercise,
   addSet,
-  bodyweightFor,
+  bodyweightEntryFor,
   createExercise,
   ensureExerciseCatalogue,
   loadDraftView,
@@ -186,10 +186,15 @@ function SetRow({
           onBlur={() => {
             editingReps.current = false;
             // Only what was changed is written: leaving a field untouched is
-            // not an edit.
-            if (reps === sentReps.current) return;
-            sentReps.current = reps;
-            onChange({ reps: Number(reps || 0) });
+            // not an edit, and neither is leaving it empty — that is retyping
+            // abandoned, not zero reps.
+            const value = reps === '' ? null : Number(reps);
+            if (value === null || value === Number(sentReps.current)) {
+              setReps(sentReps.current);
+              return;
+            }
+            sentReps.current = String(value);
+            onChange({ reps: value });
           }}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -216,12 +221,20 @@ function SetRow({
           onChange={(event) => setWeight(event.target.value.replace(/[^0-9.,]/g, ''))}
           onBlur={() => {
             editingWeight.current = false;
-            // Only a changed weight is written. In lb the text is rounded to
-            // one decimal, so re-parsing an untouched field would move the
-            // stored grams (60 000 g → 60 010 g) — a fact the rating replays.
-            if (weight === sentWeight.current) return;
-            sentWeight.current = weight;
-            onChange({ weightGrams: weights.parse(weight) ?? 0 });
+            // Only a changed weight is written (D130). In lb the text is
+            // rounded to one decimal, so re-parsing an untouched field would
+            // move the stored grams (60 000 g → 60 010 g) — a fact the rating
+            // replays. "Changed" is the value, not the text: 132,3 is 132.3.
+            // An empty field on a barbell is retyping abandoned, not a load of
+            // zero; on a bodyweight exercise it is no added weight.
+            const grams = weights.parse(weight);
+            const next = grams ?? (loadType === 'external' ? null : 0);
+            if (next === null || next === weights.parse(sentWeight.current)) {
+              setWeight(sentWeight.current);
+              return;
+            }
+            sentWeight.current = weights.format(next);
+            onChange({ weightGrams: next });
           }}
         />
         <span className="gym-set__unit" aria-hidden="true">
@@ -275,10 +288,12 @@ function PendingSetRow({
   const tryCommit = () => {
     if (committed.current) return;
     const repsValue = Number(reps || 0);
-    const weightKnown = weight.trim() !== '' || loadType !== 'external';
+    // Known when it reads as a number: "." or "," is not a load.
+    const grams = weights.parse(weight);
+    const weightKnown = grams !== null || loadType !== 'external';
     if (repsValue <= 0 || !weightKnown) return;
     committed.current = true;
-    void onCommit({ reps: repsValue, weightGrams: weights.parse(weight) ?? 0 }).then((stored) => {
+    void onCommit({ reps: repsValue, weightGrams: grams ?? 0 }).then((stored) => {
       if (!stored) committed.current = false;
     });
   };
@@ -382,13 +397,14 @@ function LastTimeLine({ last }: { last: LastRecorded | null }) {
  * insists when a bodyweight exercise is actually in the session.
  */
 function BodyweightCard({
-  date,
+  asOf,
   current,
   editable,
   needed,
   onSave,
 }: {
-  date: DateKey;
+  /** The day the weight in force was entered. */
+  asOf: DateKey | null;
   current: number | null;
   editable: boolean;
   needed: boolean;
@@ -404,9 +420,13 @@ function BodyweightCard({
   }, [current, weights]);
 
   // An unchanged value saves the weight in force exactly: re-parsing its
-  // rounded lb text would record 80.014 kg for 80 kg.
+  // rounded lb text would record 80.014 kg for 80 kg. Unchanged is the
+  // value, whichever decimal mark it was typed with.
+  const typed = weights.parseBodyweight(value);
   const parsed =
-    current !== null && value === weights.formatBodyweight(current) ? current : weights.parseBodyweight(value);
+    current !== null && typed !== null && typed === weights.parseBodyweight(weights.formatBodyweight(current))
+      ? current
+      : typed;
   const valid = parsed !== null && parsed > 0;
 
   return (
@@ -435,9 +455,9 @@ function BodyweightCard({
           </Button>
         </label>
         <p className="gym-exercise__best">
-          {current === null
+          {current === null || asOf === null
             ? t('gym.bodyweight.none')
-            : t('gym.bodyweight.asOf', { date: formatDayAndMonth(language, date) })}
+            : t('gym.bodyweight.asOf', { date: formatDayAndMonth(language, asOf) })}
         </p>
         {needed && current === null ? (
           <p className="gym-session__closed" role="status">
@@ -488,7 +508,8 @@ export function GymSessionScreen({
   const namer = useExerciseNamer();
   const [picking, setPicking] = useState(false);
   const [exercises, setExercises] = useState<ExerciseRecord[]>([]);
-  const [bodyweight, setBodyweight] = useState<number | null>(null);
+  /** The weight entry in force on the session's day, and the day it was entered. */
+  const [bodyweight, setBodyweight] = useState<{ date: DateKey; kg: number } | null>(null);
   const toast = useToast();
   /** The writes, one after another; nothing typed is ever turned away. */
   const queue = useRef<Promise<unknown>>(Promise.resolve());
@@ -635,7 +656,7 @@ export function GymSessionScreen({
   // The weight in force on the session's own day, not today's: a session
   // opened inside the edit window still reads the body that performed it.
   useEffect(() => {
-    void bodyweightFor(day).then(setBodyweight);
+    void bodyweightEntryFor(day).then(setBodyweight);
   }, [day]);
 
   /**
@@ -899,14 +920,14 @@ export function GymSessionScreen({
 
         {needsBodyweight ? (
           <BodyweightCard
-            date={day}
-            current={bodyweight}
+            asOf={bodyweight?.date ?? null}
+            current={bodyweight?.kg ?? null}
             editable={editable}
             needed
             onSave={(kg) =>
               run(async () => {
                 await recordBodyweight(kg, day);
-                setBodyweight(kg);
+                setBodyweight({ date: day, kg });
               })
             }
           />

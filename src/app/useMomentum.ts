@@ -100,9 +100,13 @@ export function useMomentum() {
             }
           : previous,
       );
-      void settingsRepository.setLanguage(language).catch(() => setActionFailed(true));
+      // A failed write puts the screen back on what is stored.
+      void settingsRepository.setLanguage(language).catch(() => {
+        setActionFailed(true);
+        void refresh();
+      });
     },
-    [],
+    [refresh],
   );
 
   const setWeightUnit = useCallback((weightUnit: WeightUnit) => {
@@ -119,8 +123,11 @@ export function useMomentum() {
           }
         : previous,
     );
-    void settingsRepository.setWeightUnit(weightUnit).catch(() => setActionFailed(true));
-  }, []);
+    void settingsRepository.setWeightUnit(weightUnit).catch(() => {
+      setActionFailed(true);
+      void refresh();
+    });
+  }, [refresh]);
 
   const finishOnboarding = useCallback(
     (selection: OnboardingSelection) => {

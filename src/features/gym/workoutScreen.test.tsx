@@ -6,14 +6,17 @@ import { setClock } from '../../core/clock';
 import type { GymSetRecord } from '../../core/model';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import { ToastOutlet, ToastProvider } from '../../components/Toast';
+import { WeightUnitProvider } from '../../app/useWeights';
+import type { WeightUnit } from '../../core/gym/weight';
 import { closeDatabase, deleteDatabase } from '../../storage/db';
-import { gymSessionsRepository, gymSetsRepository } from '../../storage/repositories';
+import { gymSessionsRepository, gymSetsRepository, weightEntriesRepository } from '../../storage/repositories';
 import { applyOnboarding } from '../../storage/services/configurationService';
 import {
   addSet,
   draftFromPlan,
   ensureExerciseCatalogue,
   loadSession,
+  recordBodyweight,
   removeSet,
   restoreSet,
   startSessionFromDraft,
@@ -53,21 +56,28 @@ afterEach(async () => {
   await closeDatabase();
 });
 
-async function open(props: { sessionId?: string | null; draft?: SessionDraft | null; free?: boolean }) {
+async function open(props: {
+  sessionId?: string | null;
+  draft?: SessionDraft | null;
+  free?: boolean;
+  unit?: WeightUnit;
+}) {
   mounted = await mount(
     <I18nProvider language="de" setLanguage={() => undefined}>
-      <ToastProvider>
-        <GymSessionScreen
-          sessionId={props.sessionId ?? null}
-          draft={props.draft ?? null}
-          free={props.free ?? false}
-          date={WEDNESDAY}
-          onClose={() => {
-            closedCount += 1;
-          }}
-        />
-        <ToastOutlet />
-      </ToastProvider>
+      <WeightUnitProvider unit={props.unit ?? 'kg'}>
+        <ToastProvider>
+          <GymSessionScreen
+            sessionId={props.sessionId ?? null}
+            draft={props.draft ?? null}
+            free={props.free ?? false}
+            date={WEDNESDAY}
+            onClose={() => {
+              closedCount += 1;
+            }}
+          />
+          <ToastOutlet />
+        </ToastProvider>
+      </WeightUnitProvider>
     </I18nProvider>,
   );
   await until(() => document.querySelector('.gym-session .gym-exercise__name') !== null || document.querySelector('.gym-session .empty-state') !== null);
@@ -328,5 +338,110 @@ describe('set order', () => {
     await restoreSet(second);
     const view = await loadSession(session.id);
     expect(view!.exercises[0]!.sets.map((set) => set.id)).toEqual([first.id, second.id, added.id]);
+  });
+});
+
+/*
+ * A weight is written only when it changed (D130). In lb the text on screen
+ * is rounded to a tenth of a pound, so re-parsing what is shown would move
+ * the stored grams: 60 000 g reads 132.3 lb, and 132.3 lb is 60 010 g.
+ */
+describe('a weight nobody changed, in lb', () => {
+  async function benchAt60kg() {
+    const session = await startSessionFromDraft(await planDraft(['ex_bench_press']), WEDNESDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: 60000 });
+    await open({ sessionId: session.id, unit: 'lb' });
+    return session;
+  }
+
+  it('keeps its grams when the field is only visited', async () => {
+    await benchAt60kg();
+    const [, weight] = setInputs('Bankdrücken', 0);
+    expect(weight!.value).toBe('132.3');
+    await act(async () => {
+      weight!.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      leave(weight!);
+    });
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => set.weightGrams)).toEqual([60000]);
+  });
+
+  it('keeps its grams when the same value is typed again, with a comma', async () => {
+    await benchAt60kg();
+    const [, weight] = setInputs('Bankdrücken', 0);
+    await act(async () => type(weight!, '132,3'));
+    await act(async () => leave(weight!));
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => set.weightGrams)).toEqual([60000]);
+  });
+
+  it('is written when it did change', async () => {
+    await benchAt60kg();
+    const [, weight] = setInputs('Bankdrücken', 0);
+    await act(async () => type(weight!, '135'));
+    await act(async () => leave(weight!));
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => set.weightGrams)).toEqual([61235]);
+  });
+});
+
+describe('a field left empty', () => {
+  async function benchSession() {
+    const session = await startSessionFromDraft(await planDraft(['ex_bench_press']), WEDNESDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: 60000 });
+    await open({ sessionId: session.id });
+  }
+
+  it("is not a weight of zero: a barbell set's load stays what it was", async () => {
+    await benchSession();
+    const [, weight] = setInputs('Bankdrücken', 0);
+    await act(async () => type(weight!, ''));
+    await act(async () => leave(weight!));
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => set.weightGrams)).toEqual([60000]);
+    expect(setInputs('Bankdrücken', 0)[1]!.value).toBe('60');
+  });
+
+  it('is not zero reps either', async () => {
+    await benchSession();
+    const [reps] = setInputs('Bankdrücken', 0);
+    await act(async () => type(reps!, ''));
+    await act(async () => leave(reps!));
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => set.reps)).toEqual([8]);
+    expect(setInputs('Bankdrücken', 0)[0]!.value).toBe('8');
+  });
+
+  it('a pending barbell row with only a decimal point stores nothing', async () => {
+    await open({ draft: await planDraft(['ex_bench_press']) });
+    const [reps, weight] = pendingInputs('Bankdrücken');
+    await act(async () => type(reps!, '8'));
+    await act(async () => leave(reps!, weight!));
+    await act(async () => type(weight!, '.'));
+    await act(async () => leave(weight!));
+    await quiet();
+    expect(await gymSessionsRepository.getAll()).toHaveLength(0);
+  });
+});
+
+describe('the bodyweight card', () => {
+  it('saves an unchanged weight exactly, in lb, whichever decimal mark', async () => {
+    await recordBodyweight(80, WEDNESDAY);
+    await open({ draft: await planDraft(['ex_pull_up']), unit: 'lb' });
+    const field = document.querySelector<HTMLInputElement>('.gym-bodyweight__input')!;
+    await until(() => field.value !== '');
+    expect(field.value).toBe('176.4');
+    await act(async () => type(field, '176,4'));
+    await act(async () => [...document.querySelectorAll('button')].find((b) => b.textContent === 'Gewicht sichern')!.click());
+    await quiet();
+    expect((await weightEntriesRepository.getAll()).map((entry) => entry.kg)).toEqual([80]);
+  });
+
+  it('says when the weight in force was entered, not the day of the session', async () => {
+    await recordBodyweight(80, '2026-09-23', '2026-09-23');
+    await open({ draft: await planDraft(['ex_pull_up']) });
+    const text = () => document.querySelector('.gym-bodyweight')?.closest('.card')?.textContent ?? '';
+    await until(() => text().includes('Zuletzt gewogen'));
+    expect(text()).toContain('Zuletzt gewogen am 23. September');
   });
 });

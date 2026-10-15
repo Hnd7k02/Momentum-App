@@ -103,6 +103,24 @@ describe('a running workout', () => {
     });
   });
 
+  it('counts an exercise a plan lists twice once, as the workout shows it', async () => {
+    const plan = await createTrainingPlan({
+      name: 'Push',
+      exercises: ['ex_bench_press', 'ex_bench_press', 'ex_squat'].map((exerciseId) => ({ exerciseId })),
+    });
+    const session = await startSessionFromDraft(draftFromPlan(plan), WEDNESDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    expect(await loadRunningWorkout(WEDNESDAY)).toMatchObject({ kind: 'plan', done: 1, planned: 2, percent: 50 });
+  });
+
+  it('leaves the field absent on a session recorded before it, whatever "Fertig" says', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const { finishedAt: _dropped, ...legacy } = (await gymSessionsRepository.get(session.id))!;
+    await gymSessionsRepository.put(legacy);
+    await finishSession(session.id);
+    expect('finishedAt' in (await gymSessionsRepository.get(session.id))!).toBe(false);
+  });
+
   it('leaves a session outside its week as it was when "Fertig" is tapped late', async () => {
     freezeAt(SUNDAY);
     const session = await openSessionForDay(SUNDAY);

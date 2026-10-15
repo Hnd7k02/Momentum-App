@@ -164,8 +164,15 @@ export async function recordBodyweight(kg: number, date: DateKey = today(), refe
 
 /** The bodyweight in force on a day, in kilograms, or `null` if none is. */
 export async function bodyweightFor(date: DateKey = today()): Promise<number | null> {
+  return (await bodyweightEntryFor(date))?.kg ?? null;
+}
+
+/** The weight entry in force on `date` — its kilograms and the day it was entered. */
+export async function bodyweightEntryFor(
+  date: DateKey = today(),
+): Promise<{ date: DateKey; kg: number } | null> {
   const entry = await weightEntriesRepository.latestOnOrBefore(date);
-  return entry?.kg ?? null;
+  return entry ? { date: entry.date, kg: entry.kg } : null;
 }
 
 /* ── A session and what it contains ─────────────────────────────────────── */
@@ -701,6 +708,9 @@ export async function finishSession(
 ): Promise<GymSessionRecord | undefined> {
   const session = await gymSessionsRepository.get(sessionId);
   if (!session || !isSameWeek(session.date, reference)) return session;
+  // A session recorded before the field is finished already, and its
+  // absence is the era (D129): "Fertig" on it is not a time to record.
+  if (session.finishedAt === undefined) return session;
   const next: GymSessionRecord = { ...session, finishedAt: nowIso(), updatedAt: nowIso() };
   await gymSessionsRepository.put(next);
   return next;
@@ -738,11 +748,15 @@ export async function loadRunningWorkout(date: DateKey = today()): Promise<Runni
   const sets = await gymSetsRepository.listBySession(session.id);
   if (sets.length === 0) return null;
   const trained = new Set(sets.map((set) => set.exerciseId));
-  const planned = (session.exercises ?? []).filter((entry) => entry.source === 'plan');
+  // Each planned exercise once, as the workout shows it: a plan may list one
+  // twice, and the screen groups by exercise.
+  const planned = [
+    ...new Set((session.exercises ?? []).filter((entry) => entry.source === 'plan').map((entry) => entry.exerciseId)),
+  ];
   if (planned.length === 0) {
     return { sessionId: session.id, kind: 'free', done: 0, planned: 0, percent: null, exercises: trained.size, sets: sets.length };
   }
-  const done = planned.filter((entry) => trained.has(entry.exerciseId)).length;
+  const done = planned.filter((exerciseId) => trained.has(exerciseId)).length;
   return {
     sessionId: session.id,
     kind: 'plan',
