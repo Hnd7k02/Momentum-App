@@ -210,7 +210,7 @@ async function fresh(seed: number): Promise<void> {
   freezeAt(START, 8);
   await applyOnboarding({ questions: [], gymTargetPerWeek: 3 });
   await ensureExerciseCatalogue();
-  await recordBodyweight(80, START);
+  await recordBodyweight(80, START, START);
 }
 
 async function manual(): Promise<void> {

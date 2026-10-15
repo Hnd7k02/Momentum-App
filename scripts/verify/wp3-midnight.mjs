@@ -40,6 +40,9 @@ import { URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
  *   9  a run sheet across    the sheet keeps what was typed through Sunday
  *      Sunday midnight       midnight; saving into the now closed week is
  *                            refused, and the screen says so
+ *  10  a plan draft across   a draft that has written nothing moves to
+ *      Sunday midnight       Monday, and its first set is stored there —
+ *                            never refused by Sunday's closed week
  *
  * Onboarding runs through lib.mjs `onboard()` unchanged: under
  * `clock.install` the page clock flows with real time, so its transitions
@@ -534,6 +537,35 @@ await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-1
   check(`${W}: the closed week's run is unchanged`, after.length === 1 && after[0].distance === null, short(after));
   const moved = await waitForLabel(page, 'Montag, 19. Oktober');
   check(`${W}: Heute shows Montag, 19. Oktober`, moved.ok, short(moved.seen));
+});
+
+await scenario('10 plan draft across Sunday midnight', { tz: BERLIN, time: '2026-10-18T23:55:00+02:00' }, async ({ ctx, page, W }) => {
+  await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await onboard(page, { gym: 3, running: 0, food: false, wellbeing: true });
+  await putRecord(page, 'gymPlans', PLAN);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('.today__date').waitFor({ timeout: 10000 });
+  await startsOn(page, W, '2026-10-18 23:5', 'Sonntag, 18. Oktober');
+  await page.getByRole('button', { name: 'Session eintragen' }).click();
+  await page.waitForTimeout(700);
+  await page.locator('.plan-chooser .row').filter({ hasText: 'Push' }).first().click();
+  await page.waitForTimeout(900);
+  const header = () => page.evaluate(() => (document.querySelector('.gym-session__date')?.textContent ?? '').replace(/\s+/g, ' ').trim());
+  check(`${W}: the draft opens on Sonntag`, (await header()) === 'Session vom 18. Oktober · Push', await header());
+
+  await fastForwardTo(ctx, page, '2026-10-19T00:05:00+02:00');
+  await ctx.clock.runFor('00:30');
+  await page.locator('.gym-session__date').tap();
+  await page.waitForTimeout(1200);
+  check(`${W}: (precondition) the clock is past Sunday midnight`, (await pageNow(page)).startsWith('2026-10-19 00:0'), await pageNow(page));
+  check(`${W}: the draft has moved to Montag`, (await header()) === 'Session vom 19. Oktober · Push', await header());
+  await fillSet(page.locator('.gym-set--pending').first(), 8, 60);
+  await page.waitForTimeout(1500);
+  const facts = await workoutFacts(page);
+  check(`${W}: its first set is stored, in one session on 19.10`, facts.sessions.length === 1 && facts.sessions[0].date === '2026-10-19' && facts.sets.length === 1 && facts.sets[0].reps === 8 && facts.sets[0].kg === 60, short(facts));
+  check(`${W}: the set is on screen`, facts.logged === 1, String(facts.logged));
+  check(`${W}: no closed-week notice`, (await page.locator('.gym-session__closed').count()) === 0);
 });
 
 await browser.close();

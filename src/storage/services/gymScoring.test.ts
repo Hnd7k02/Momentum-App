@@ -20,6 +20,7 @@ import {
   ensureExerciseCatalogue,
   loadGymHistory,
   openSessionForDay,
+  bodyweightFor,
   recordBodyweight,
   remapExercise,
 } from './gymService';
@@ -206,7 +207,7 @@ describe('the Endurance Phase, end to end', () => {
 
 describe('bodyweight exercises through the replay', () => {
   it('scores a pull-up as the body that did it', async () => {
-    await recordBodyweight(85, START);
+    await recordBodyweight(85, START, START);
     freezeAt(START);
     const session = await openSessionForDay(START);
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 8, weightGrams: 0 });
@@ -216,7 +217,7 @@ describe('bodyweight exercises through the replay', () => {
   });
 
   it('adds the weight the user hung off themselves', async () => {
-    await recordBodyweight(85, START);
+    await recordBodyweight(85, START, START);
     freezeAt(START);
     const session = await openSessionForDay(START);
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 5, weightGrams: kg(15) });
@@ -227,7 +228,7 @@ describe('bodyweight exercises through the replay', () => {
   });
 
   it('subtracts the machine on an assisted exercise', async () => {
-    await recordBodyweight(85, START);
+    await recordBodyweight(85, START, START);
     freezeAt(START);
     const session = await openSessionForDay(START);
     await addSet({
@@ -243,7 +244,7 @@ describe('bodyweight exercises through the replay', () => {
   });
 
   it('uses the latest bodyweight before the session, never a later one', async () => {
-    await recordBodyweight(80, START);
+    await recordBodyweight(80, START, START);
     freezeAt(addDays(START, 3));
     const session = await openSessionForDay(addDays(START, 3));
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 5, weightGrams: 0 });
@@ -252,10 +253,18 @@ describe('bodyweight exercises through the replay', () => {
     expect(before.days[0]?.best.score).toBe(5 * kg(80));
 
     // Weighing in heavier next month must not rewrite that session.
-    await recordBodyweight(90, addDays(START, 30));
+    await recordBodyweight(90, addDays(START, 30), addDays(START, 30));
     const after = await loadGymHistory(START, addDays(START, 40));
     const session1 = after.days.find((entry) => entry.date === addDays(START, 3));
     expect(session1?.best.score).toBe(5 * kg(80));
+  });
+
+  it('refuses a weigh-in dated into a closed week, exactly as a set is refused', async () => {
+    // START is a Monday: its week closes when the next Monday begins.
+    await expect(recordBodyweight(80, START, addDays(START, 7))).rejects.toThrow();
+    expect(await bodyweightFor(START)).toBeNull();
+    await recordBodyweight(80, START, addDays(START, 6));
+    expect(await bodyweightFor(START)).toBe(80);
   });
 
   it('drops a bodyweight set logged before any weigh-in, rather than scoring zero', async () => {
@@ -270,7 +279,7 @@ describe('bodyweight exercises through the replay', () => {
   });
 
   it('handles assistance heavier than the user deterministically', async () => {
-    await recordBodyweight(60, START);
+    await recordBodyweight(60, START, START);
     freezeAt(START);
     const session = await openSessionForDay(START);
     await addSet({
@@ -287,8 +296,8 @@ describe('bodyweight exercises through the replay', () => {
   });
 
   it('replaces the day rather than keeping two weights for it', async () => {
-    await recordBodyweight(85, START);
-    await recordBodyweight(86, START);
+    await recordBodyweight(85, START, START);
+    await recordBodyweight(86, START, START);
     freezeAt(START);
     const session = await openSessionForDay(START);
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 5, weightGrams: 0 });

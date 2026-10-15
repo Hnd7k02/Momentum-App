@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatDayAndMonth } from '../../i18n/format';
-import type { DateKey } from '../../core/dates';
+import { isSameWeek, type DateKey } from '../../core/dates';
 import type {
   ExerciseLoadType,
   ExerciseRecord,
@@ -13,6 +13,7 @@ import { ChevronLeftIcon, MinusIcon, PlusIcon } from '../../components/Icons';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useLoadable } from '../../app/useLoadable';
+import { useToday } from '../../app/useToday';
 import { holdChanges } from '../../storage/changes';
 import {
   addSessionExercise,
@@ -204,7 +205,8 @@ function PendingSetRow({
   /** What the user did last time, shown greyed until they type. */
   placeholder: { reps: number; weightGrams: number } | null;
   editable: boolean;
-  onCommit(values: { reps: number; weightGrams: number }): void;
+  /** Resolves `false` when the set was not stored, so the row can be committed again. */
+  onCommit(values: { reps: number; weightGrams: number }): Promise<boolean>;
 }) {
   const t = useT();
   const [reps, setReps] = useState('');
@@ -217,7 +219,9 @@ function PendingSetRow({
     const weightKnown = weight.trim() !== '' || loadType !== 'external';
     if (repsValue <= 0 || !weightKnown) return;
     committed.current = true;
-    onCommit({ reps: repsValue, weightGrams: grams(weight) });
+    void onCommit({ reps: repsValue, weightGrams: grams(weight) }).then((stored) => {
+      if (!stored) committed.current = false;
+    });
   };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -413,6 +417,14 @@ export function GymSessionScreen({
   const draftRef = useRef<GymSessionExerciseSnapshot[]>(draft?.exercises ?? []);
   const [draftVersion, setDraftVersion] = useState(0);
 
+  /*
+   * A draft has written nothing, so it holds the day it was opened for only
+   * while that day's week is open. A Sunday draft still open after Monday
+   * 00:00 moves to today: kept on Sunday, every set would be refused by the
+   * closed week.
+   */
+  const now = useToday();
+  const draftDate = isSameWeek(date, now) ? date : now;
   const load = useCallback(async (): Promise<ScreenView> => {
     const id = sessionRef.current;
     if (id) {
@@ -422,13 +434,13 @@ export function GymSessionScreen({
     }
     const view = await loadDraftView(
       { planId: draft?.planId ?? null, exercises: draftRef.current },
-      date,
+      draftDate,
     );
     return { session: null, ...view };
-  }, [draft?.planId, date]);
-  const { state, reload } = useLoadable(load, [draft?.planId, date]);
+  }, [draft?.planId, draftDate]);
+  const { state, reload } = useLoadable(load, [draft?.planId, draftDate]);
   /** The day this workout is on: the session's own once there is one. */
-  const day = state.status === 'ready' && state.value.session ? state.value.session.date : date;
+  const day = state.status === 'ready' && state.value.session ? state.value.session.date : draftDate;
 
   /*
    * Nothing behind a full-screen workout is on show, so the store's change
@@ -482,17 +494,27 @@ export function GymSessionScreen({
     void bodyweightFor(day).then(setBodyweight);
   }, [day]);
 
-  /** Writes are serialised so a fast tapper cannot interleave two reloads. */
+  /**
+   * Writes are serialised so a fast tapper cannot interleave two reloads.
+   * Resolves `true` once the write is stored, `false` when it was refused or
+   * turned away because another was in flight.
+   */
   const run = useCallback(
-    (operation: () => Promise<unknown>) => {
-      if (busy.current) return;
+    (operation: () => Promise<unknown>): Promise<boolean> => {
+      if (busy.current) return Promise.resolve(false);
       busy.current = true;
-      pending.current = operation()
-        .catch(() => undefined)
-        .then(() => {
+      const task = operation()
+        .then(
+          () => true,
+          () => false,
+        )
+        .then(async (stored) => {
           busy.current = false;
-          return reload();
+          await reload();
+          return stored;
         });
+      pending.current = task;
+      return task;
     },
     [reload],
   );
@@ -507,7 +529,7 @@ export function GymSessionScreen({
     if (existing) return existing;
     const session = await startSessionFromDraft(
       { planId: draft?.planId ?? null, exercises: draftRef.current },
-      date,
+      draftDate,
     );
     sessionRef.current = session.id;
     setActiveSessionId(session.id);

@@ -144,7 +144,11 @@ export async function remapExercise(
  * next one. One entry per day — weighing yourself twice on a Tuesday replaces
  * Tuesday's number rather than creating a second history.
  */
-export async function recordBodyweight(kg: number, date: DateKey = today()) {
+export async function recordBodyweight(kg: number, date: DateKey = today(), reference: DateKey = today()) {
+  // The same weekly rule as a set: a bodyweight set replays the latest entry
+  // on or before its own day, so an entry dated into a closed week would
+  // change how that week's sets replay.
+  assertEditable(date, reference);
   const existing = (await weightEntriesRepository.listByDateRange(date, date))[0];
   const stamp = nowIso();
   const record = {
