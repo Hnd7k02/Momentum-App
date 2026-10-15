@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Button, Card, Section } from '../../components';
-import { PlusIcon } from '../../components/Icons';
+import { PlayIcon, PlusIcon } from '../../components/Icons';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useDataVersion } from '../../app/useDataVersion';
@@ -97,7 +97,8 @@ export function TrainingCard({
         {lastLine ? <p className="gym-hub__last">{lastLine}</p> : null}
         <div className="gym-hub__action">
           <Button variant="primary" block onClick={onStart}>
-            <PlusIcon size={18} />
+            {/* Continuing is not adding: a plus would promise a second session. */}
+            {facts?.today ? <PlayIcon size={18} /> : <PlusIcon size={18} />}
             {facts?.today ? t('gymHub.training.continue') : t('gymHub.training.log')}
           </Button>
         </div>

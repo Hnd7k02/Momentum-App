@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D127). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D131). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. Stage 2 (B7, B8, the workout screen) is next and not started. **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. Stage 3 is next and not started. **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -240,6 +240,39 @@ records (answers, sessions, sets, snapshots)
   a draft keeps the day it was opened for, like a workout.
 - Real-device preview: the Stage 1 build is published to Momentum-preview
   (`aa32127`, https://hnd7k02.github.io/Momentum-preview/).
+
+**WP3 Stage 2 — the workout flow** (branch `claude/momentum-wp3`, not merged)
+- A free workout is a draft until its first saved set (D128): opening,
+  picking and leaving store nothing; a picked exercise waits in a pending
+  row (no 0×0 set); picked exercises stay on screen until the workout is
+  left; the first saved set creates one bare session (`openSessionForDay`),
+  as a planned workout's first set always created its session
+  (`ensureSession` in `GymSessionScreen.tsx`).
+- "Übung hinzufügen" lives in a bar at the foot of the workout
+  (`.gym-session__bar`, `--workout-bar-height`, safe-area aware). Removing an
+  exercise is a worded "Entfernen" control; a set keeps its minus. Both
+  removals undo for 5 s by putting the same rows back (`restoreSet`,
+  `restoreExercise`; D131), refused once the week has closed. Every write of
+  the screen goes through one queue (`run`), double taps through `tap`; a set
+  row writes only the field whose text changed.
+- "Fertig" stores `finishedAt` (D129): `null` while running, a timestamp
+  once finished, absent on every session before the field — read as
+  finished, never backfilled, read by nothing that scores. Heute shows the
+  running workout above the Boss card (`RunningWorkoutCard`,
+  `loadRunningWorkout`): a plan as the share of planned exercises with a
+  saved set (extras excluded), a free workout as "n Übungen · m Sätze",
+  with a placeholder slot for the Gym companion; the hub's Training card
+  says the same and offers "Training fortsetzen".
+- Gewichtseinheit kg | lb in Einstellungen (D130): `settings.weightUnit`, a
+  display preference, never a snapshot. One formatter and parser
+  (`core/gym/weight.ts`, `app/useWeights.tsx`): 1 lb = 453.59237 g, typed lb
+  rounded to whole grams, lb shown with at most one decimal; sets, the
+  last-time line, best set, bodyweight, exercise detail and progress figures.
+- Verification: `wp3-stage2` (see `scripts/verify/README.md`), the service
+  tests in `workoutFlow.test.ts` and `weight.test.ts`; screenshots in
+  `docs/design/wp3/stage2/`. `release`, `phase4-a11y`, `phase8` and
+  `wp3-sheets` now log a real set where they used to count an opened
+  workout.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
