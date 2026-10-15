@@ -231,6 +231,9 @@
   --touch-min: 44px;
 
   --tab-bar-height: 52px;
+  /* The workout's sticky bottom bar (WP3, P5): one 50px button with a 12px
+     margin above and below, plus the safe area, which the bar adds itself. */
+  --workout-bar-height: calc(50px + 2 * var(--space-3));
   --tab-bar-material: rgba(255, 255, 255, 0.82);
   --tab-bar-blur: saturate(180%) blur(20px);
 

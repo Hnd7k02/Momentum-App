@@ -6,7 +6,7 @@ import { changeVersion, committedWrites, flushChanges, holdChanges, subscribeToC
 import { importBackup } from './services/backupService';
 import { loadBossProgression } from './services/bossService';
 import { loadDay, loadTrainingWeek } from './services/checkInService';
-import { existingSessionForDay, latestGymSession, loadGymHistory } from './services/gymService';
+import { existingSessionForDay, latestGymSession, loadGymHistory, loadRunningWorkout } from './services/gymService';
 import { loadProgression } from './services/ratingService';
 import { listTrainingPlans } from './services/trainingPlanService';
 import { addDays, type DateKey } from '../core/dates';
@@ -139,6 +139,7 @@ describe('loadsDoNotWrite', () => {
     await loadTrainingWeek('running', date);
     await latestGymSession();
     await existingSessionForDay(date);
+    await loadRunningWorkout(date);
     await listTrainingPlans();
   }
 

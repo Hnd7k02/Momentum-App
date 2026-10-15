@@ -560,6 +560,43 @@ export async function removeSet(id: string, reference: DateKey = today()): Promi
   await gymSetsRepository.remove(id);
 }
 
+/**
+ * Puts a removed set back exactly as it was — same id, same order, same
+ * facts — for the workout's undo (WP3, P5). Within the set's own week only.
+ */
+export async function restoreSet(record: GymSetRecord, reference: DateKey = today()): Promise<void> {
+  assertEditable(record.date, reference);
+  const session = await gymSessionsRepository.get(record.sessionId);
+  if (!session) throw new Error(`Unknown session ${record.sessionId}`);
+  await gymSetsRepository.put(record);
+}
+
+/**
+ * Puts a removed exercise back: its sets exactly as they were, and — in a
+ * session that owns its structure — its line at the place it had (WP3, P5).
+ */
+export async function restoreExercise(
+  sessionId: string,
+  sets: readonly GymSetRecord[],
+  line: GymSessionExerciseSnapshot | null,
+  reference: DateKey = today(),
+): Promise<void> {
+  const session = await gymSessionsRepository.get(sessionId);
+  if (!session) throw new Error(`Unknown session ${sessionId}`);
+  assertEditable(session.date, reference);
+  for (const set of sets) await gymSetsRepository.put(set);
+  if (line && session.exercises && !session.exercises.some((entry) => entry.exerciseId === line.exerciseId)) {
+    const at = Math.min(Math.max(line.order, 0), session.exercises.length);
+    const exercises = [...session.exercises];
+    exercises.splice(at, 0, line);
+    await gymSessionsRepository.put({
+      ...session,
+      exercises: exercises.map((entry, index) => ({ ...entry, order: index })),
+      updatedAt: nowIso(),
+    });
+  }
+}
+
 /** Removes an exercise and every set of it, within the session's own week. */
 export async function removeExerciseFromSession(
   sessionId: string,
@@ -602,7 +639,72 @@ export async function openSessionForDay(
   if (last) return last;
   assertEditable(date, reference);
   const snapshot = await ensureCurrentSnapshot();
-  return gymSessionsRepository.create({ date, configSnapshotId: snapshot.id });
+  // Started in the app, so it is running until "Fertig" says otherwise (P7).
+  return gymSessionsRepository.create({ date, configSnapshotId: snapshot.id, finishedAt: null });
+}
+
+/**
+ * Records that the user finished the workout (WP3, P7): "Fertig" was tapped.
+ * A fact about the session, read by nothing that scores. A session outside
+ * the edit window is left as it is.
+ */
+export async function finishSession(
+  sessionId: string,
+  reference: DateKey = today(),
+): Promise<GymSessionRecord | undefined> {
+  const session = await gymSessionsRepository.get(sessionId);
+  if (!session || !isSameWeek(session.date, reference)) return session;
+  const next: GymSessionRecord = { ...session, finishedAt: nowIso(), updatedAt: nowIso() };
+  await gymSessionsRepository.put(next);
+  return next;
+}
+
+/** Today's workout while it is under way, as Heute and the Gym hub state it. */
+export interface RunningWorkout {
+  sessionId: string;
+  /**
+   * `plan`: a session with planned exercises, stated as the share of them
+   * that has a saved set. `free`: everything else, stated as counts.
+   */
+  kind: 'plan' | 'free';
+  /** Planned exercises with at least one saved set (plan only). */
+  done: number;
+  /** Planned exercises still in the session (plan only; extras excluded). */
+  planned: number;
+  /** done ÷ planned as a whole percent (plan only, else `null`). */
+  percent: number | null;
+  /** Exercises with at least one saved set. */
+  exercises: number;
+  /** Saved sets. */
+  sets: number;
+}
+
+/**
+ * The day's workout if it is running: it has at least one saved set and was
+ * started under P7 without being finished (`finishedAt === null`). A session
+ * from before the field existed is finished; so is one the user tapped
+ * "Fertig" on. Read only.
+ */
+export async function loadRunningWorkout(date: DateKey = today()): Promise<RunningWorkout | null> {
+  const session = await existingSessionForDay(date);
+  if (!session || session.finishedAt !== null) return null;
+  const sets = await gymSetsRepository.listBySession(session.id);
+  if (sets.length === 0) return null;
+  const trained = new Set(sets.map((set) => set.exerciseId));
+  const planned = (session.exercises ?? []).filter((entry) => entry.source === 'plan');
+  if (planned.length === 0) {
+    return { sessionId: session.id, kind: 'free', done: 0, planned: 0, percent: null, exercises: trained.size, sets: sets.length };
+  }
+  const done = planned.filter((entry) => trained.has(entry.exerciseId)).length;
+  return {
+    sessionId: session.id,
+    kind: 'plan',
+    done,
+    planned: planned.length,
+    percent: Math.round((done / planned.length) * 100),
+    exercises: trained.size,
+    sets: sets.length,
+  };
 }
 
 /** The day's session if one exists — read only, never created. */

@@ -1,7 +1,11 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
 import { useToday } from '../../app/useToday';
+import { useDataVersion } from '../../app/useDataVersion';
+import { useLoadable } from '../../app/useLoadable';
+import { loadRunningWorkout } from '../../storage/services/gymService';
+import { RunningWorkoutCard } from '../gym/RunningWorkoutCard';
 import { useToast } from '../../components/Toast';
 import { Button, Card, EmptyState, LoadFailure, Row, Section, StaleNotice, focusTarget } from '../../components';
 import { ChevronRightIcon, PlusIcon, SparkIcon } from '../../components/Icons';
@@ -68,6 +72,15 @@ export function TodayScreen({
     removeFoodEntry,
     reload,
   } = useDay(date);
+  /*
+   * Today's workout while it is under way (WP3, P7). Read only, from the
+   * session itself; it moves when a workout writes, which reaches here
+   * through the change signal once the workout closes.
+   */
+  const version = useDataVersion();
+  const loadWorkout = useCallback(() => loadRunningWorkout(date), [date]);
+  const { state: workoutState } = useLoadable(loadWorkout, [date], [version]);
+  const runningWorkout = workoutState.status === 'ready' ? workoutState.value : null;
   const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
   const [addingFood, setAddingFood] = useState(false);
   /** The run the sheet was last opened for, so focus can find its row again. */
@@ -267,6 +280,11 @@ export function TodayScreen({
         }}
       >
         {state.refreshFailed ? <StaleNotice onRetry={reload} /> : null}
+
+        {/* A workout under way comes first: one tap continues it (P7). */}
+        {runningWorkout ? (
+          <RunningWorkoutCard workout={runningWorkout} onContinue={() => openGym(runningWorkout.sessionId)} />
+        ) : null}
 
         {/*
           The Boss Rank, and nothing more than the Boss Rank.

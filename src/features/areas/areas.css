@@ -233,3 +233,8 @@
   color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
+
+/* A second setting under the first, in the same card (WP3, P4). */
+.areas__settingLabel {
+  margin-top: var(--space-5);
+}

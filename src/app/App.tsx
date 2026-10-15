@@ -13,6 +13,8 @@ import { registerServiceWorker, type UpdateHandle } from './serviceWorker';
 import { TabBar } from './TabBar';
 import { useRoute } from './route';
 import { useMomentum } from './useMomentum';
+import { WeightUnitProvider } from './useWeights';
+import { weightUnitOf } from '../core/gym/weight';
 import type { AppConfiguration } from '../storage/services/configurationService';
 import type { AreasActions } from '../features/areas/AreasScreen';
 import './appShell.css';
@@ -174,14 +176,16 @@ export function App() {
       ) : state.configuration.settings.onboardingCompletedAt === null ? (
         <OnboardingFlow onFinish={finishOnboarding} failed={actionFailed} />
       ) : (
-        <MainApp
-          configuration={state.configuration}
-          actions={areasActions}
-          onSetBossWeights={setBossWeights}
-          update={update}
-          actionFailed={actionFailed}
-          onDismissFailure={dismissActionFailure}
-        />
+        <WeightUnitProvider unit={weightUnitOf(state.configuration.settings.weightUnit)}>
+          <MainApp
+            configuration={state.configuration}
+            actions={areasActions}
+            onSetBossWeights={setBossWeights}
+            update={update}
+            actionFailed={actionFailed}
+            onDismissFailure={dismissActionFailure}
+          />
+        </WeightUnitProvider>
       )}
     </I18nProvider>
   );

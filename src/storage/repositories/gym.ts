@@ -80,6 +80,8 @@ export interface NewGymSessionInput {
   /** True only for sessions carried over from RC2's Sport log. */
   legacyCarryOver?: boolean;
   configSnapshotId: string;
+  /** `null` for a workout started in the app (WP3, P7); left out otherwise. */
+  finishedAt?: null;
 }
 
 export const gymSessionsRepository = {
@@ -113,6 +115,7 @@ export const gymSessionsRepository = {
       note: input.note ?? null,
       legacyCarryOver: input.legacyCarryOver ?? false,
       configSnapshotId: input.configSnapshotId,
+      ...(input.finishedAt === undefined ? {} : { finishedAt: input.finishedAt }),
       createdAt: stamp,
       updatedAt: stamp,
     };

@@ -100,6 +100,27 @@
   gap: var(--space-4);
 }
 
+/*
+ * "Übung hinzufügen" within reach for the whole workout (WP3, P5): a bar at
+ * the foot of the workout screen, outside the scroll, clear of the home
+ * indicator. The scroll above it ends at its top edge, so nothing is hidden
+ * under it; the toast is lifted above it (`useToastLift`).
+ */
+.gym-session__bar {
+  flex: none;
+  min-height: var(--workout-bar-height);
+  padding: var(--space-3) calc(var(--safe-right) + var(--space-4))
+    calc(var(--space-3) + var(--safe-bottom)) calc(var(--safe-left) + var(--space-4));
+  background: var(--surface-base);
+  border-top: 1px solid var(--separator);
+}
+
+/* Inside the workout the bar holds the safe area, so the scroll needs none. */
+.gym-session__bar ~ .gym-session__scroll,
+.gym-session__scroll:has(+ .gym-session__bar) {
+  padding-bottom: var(--space-6);
+}
+
 /* A scrolling column scrolls; it never squeezes what is in it. A card with
    `overflow: hidden` has an automatic minimum height of 0 as a flex item, so
    once the column grew past the viewport the plan editor's name card was
@@ -141,7 +162,6 @@
   color: var(--text-secondary);
 }
 
-.gym-exercise__remove,
 .gym-set__remove {
   width: 40px;
   height: 40px;
@@ -155,15 +175,34 @@
   position: relative;
 }
 
-.gym-exercise__remove::before,
 .gym-set__remove::before {
   content: '';
   position: absolute;
   inset: -2px;
 }
 
-.gym-exercise__remove:disabled,
 .gym-set__remove:disabled {
+  opacity: 0.35;
+}
+
+/*
+ * Removing a whole exercise is a different act from removing one set, and
+ * it reads differently (WP3, P5): a worded control in the card's header,
+ * not the row's minus. Undo follows either way.
+ */
+.gym-exercise__remove {
+  flex: none;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--separator-strong);
+  background: transparent;
+  color: var(--rose-ink);
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+}
+
+.gym-exercise__remove:disabled {
   opacity: 0.35;
 }
 

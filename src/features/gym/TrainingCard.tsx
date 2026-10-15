@@ -7,9 +7,10 @@ import { useDataVersion } from '../../app/useDataVersion';
 import { useLoadable } from '../../app/useLoadable';
 import { useToday } from '../../app/useToday';
 import { loadTrainingWeek } from '../../storage/services/checkInService';
-import { existingSessionForDay, latestGymSession } from '../../storage/services/gymService';
+import { existingSessionForDay, latestGymSession, loadRunningWorkout } from '../../storage/services/gymService';
 import { listTrainingPlans } from '../../storage/services/trainingPlanService';
 import './gymHub.css';
+import { useRunningWorkoutDetail } from './RunningWorkoutCard';
 
 /**
  * The top of the Gym hub: where training stands, and the one button.
@@ -46,6 +47,7 @@ export function TrainingCard({
       today: await existingSessionForDay(date),
       plans: (await listTrainingPlans()).length,
       week: await loadTrainingWeek('gym', date),
+      running: await loadRunningWorkout(date),
     }),
     [date],
   );
@@ -67,7 +69,12 @@ export function TrainingCard({
         : facts.week
           ? weekSentence(t, facts.week.progress.completed, facts.week.progress.target)
           : null;
-  const lastLine = facts?.latest
+  const detail = useRunningWorkoutDetail();
+  // A workout under way reads as one here too — the same state as Heute's
+  // card, said in the card's own line rather than as a second widget (P7).
+  const lastLine = facts?.running
+    ? t('gymHub.training.running', { detail: detail(facts.running) })
+    : facts?.latest
     ? facts.today
       ? t('gymHub.training.today')
       : t('gymHub.training.last', {

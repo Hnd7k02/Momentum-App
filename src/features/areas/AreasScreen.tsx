@@ -55,6 +55,7 @@ import '../food/food.css';
 import '../progress/progress.css';
 import './areas.css';
 import './domainTerminal.css';
+import { WEIGHT_UNITS, weightUnitOf, type WeightUnit } from '../../core/gym/weight';
 
 /**
  * Asking a migrated user, once, what their RC2 Sport sessions were.
@@ -223,6 +224,7 @@ export interface AreasActions {
   /** Food's whole setup: the user's own sentence, or '' to clear it. */
   setFoodFocus(focus: string): void;
   setLanguage(language: Language): void;
+  setWeightUnit(unit: WeightUnit): void;
 }
 
 const DOMAIN_COPY: Record<DomainType, { name: TranslationKey; description: TranslationKey; off: TranslationKey }> = {
@@ -573,6 +575,15 @@ export function AreasScreen({
                   value: option,
                   label: option === 'de' ? 'Deutsch' : 'English',
                 }))}
+              />
+              {/* How weights are shown and typed (WP3, P4). Sets are stored
+                  in grams whatever this says. */}
+              <span className="field-label areas__settingLabel">{t('settings.weightUnit')}</span>
+              <Segmented<WeightUnit>
+                label={t('settings.weightUnit')}
+                value={weightUnitOf(configuration.settings.weightUnit)}
+                onChange={actions.setWeightUnit}
+                options={WEIGHT_UNITS.map((option) => ({ value: option, label: t(`unit.${option}`) }))}
               />
             </Card>
           </Section>

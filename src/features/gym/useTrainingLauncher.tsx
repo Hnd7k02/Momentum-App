@@ -1,12 +1,7 @@
 import { useCallback, useState, type ReactNode } from 'react';
 import type { DateKey } from '../../core/dates';
 import type { TrainingPlanRecord } from '../../core/model';
-import {
-  draftFromPlan,
-  existingSessionForDay,
-  openSessionForDay,
-  type SessionDraft,
-} from '../../storage/services/gymService';
+import { draftFromPlan, existingSessionForDay, type SessionDraft } from '../../storage/services/gymService';
 import { listTrainingPlans } from '../../storage/services/trainingPlanService';
 import { GymSessionScreen } from './GymSessionScreen';
 import { PlanChooserSheet } from './PlanChooserSheet';
@@ -17,9 +12,10 @@ import { PlanChooserSheet } from './PlanChooserSheet';
  * Today's quick-log action and the Gym hub's primary action are the same
  * flow, so it lives once: the day's existing session is continued; failing
  * that, saved plans are offered (with the free session second) or, with no
- * plan saved, the free session opens directly as it always has. Choosing a
- * plan opens a draft and writes nothing; the session is persisted inside
- * the logging screen with the first saved set (WP2-1).
+ * plan saved, the free session opens directly. Choosing a plan or the free
+ * session opens a draft and writes nothing; the session is persisted inside
+ * the logging screen with the first saved set (WP2-1; free sessions since
+ * WP3, P6).
  *
  * The host renders `overlay` — the chooser sheet and, while a workout is
  * open, the logging screen — and is told when the screen closes so it can
@@ -50,7 +46,7 @@ export function useTrainingLauncher({
   open: boolean;
 } {
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<{ draft: SessionDraft; planName: string } | null>(null);
+  const [draft, setDraft] = useState<{ draft: SessionDraft; planName: string | null; free: boolean } | null>(null);
   const [plans, setPlans] = useState<TrainingPlanRecord[] | null>(null);
   /** The day the open workout belongs to, fixed when it opened. */
   const [openedFor, setOpenedFor] = useState<DateKey>(date);
@@ -60,14 +56,16 @@ export function useTrainingLauncher({
     setSessionId(id);
   }, []);
 
-  /** A free session, created on opening — exactly as before WP2-1. */
+  /**
+   * A free workout: a draft with nothing in it (WP3, P6). Opening it writes
+   * nothing; it becomes the day's session with its first saved set, as a
+   * planned draft does.
+   */
   const openFree = useCallback(() => {
     setPlans(null);
-    const day = date;
-    void openSessionForDay(day)
-      .then((session) => openSession(session.id, day))
-      .catch(() => onClosed());
-  }, [date, onClosed, openSession]);
+    setOpenedFor(date);
+    setDraft({ draft: { planId: null, exercises: [] }, planName: null, free: true });
+  }, [date]);
 
   const start = useCallback(
     (id?: string) => {
@@ -108,6 +106,7 @@ export function useTrainingLauncher({
           sessionId={sessionId}
           draft={draft?.draft ?? null}
           planName={draft?.planName ?? null}
+          free={draft?.free ?? false}
           date={openedFor}
           onSessionCreated={setSessionId}
           onClose={close}
@@ -120,7 +119,7 @@ export function useTrainingLauncher({
         onChoosePlan={(plan) => {
           setPlans(null);
           setOpenedFor(date);
-          setDraft({ draft: draftFromPlan(plan), planName: plan.name });
+          setDraft({ draft: draftFromPlan(plan), planName: plan.name, free: false });
         }}
         onFreeSession={openFree}
         onManagePlans={() => {

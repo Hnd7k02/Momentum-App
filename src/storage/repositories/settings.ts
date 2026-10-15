@@ -1,6 +1,7 @@
 import { nowIso, today } from '../../core/clock';
 import type { RankId } from '../../core/config/constants';
 import type { Language, SettingsRecord } from '../../core/model';
+import type { WeightUnit } from '../../core/gym/weight';
 import { canonicalConfirmation } from '../../core/ranks/confirmation';
 import { STORES } from '../db';
 import { createRepository } from './base';
@@ -51,6 +52,10 @@ export const settingsRepository = {
 
   async setLanguage(language: Language): Promise<SettingsRecord> {
     return settingsRepository.update({ language });
+  },
+
+  async setWeightUnit(weightUnit: WeightUnit): Promise<SettingsRecord> {
+    return settingsRepository.update({ weightUnit });
   },
 
   /** Records that a promotion reveal has been played. */

@@ -24,6 +24,7 @@ import {
 import { applyLegacySportChoice } from '../storage/services/legacySportService';
 import type { LegacySportChoice } from '../core/migration/legacySport';
 import type { AreasActions } from '../features/areas/AreasScreen';
+import type { WeightUnit } from '../core/gym/weight';
 
 export type MomentumState =
   | { status: 'loading' }
@@ -104,6 +105,23 @@ export function useMomentum() {
     [],
   );
 
+  const setWeightUnit = useCallback((weightUnit: WeightUnit) => {
+    // A display preference (WP3, P4), like the language: no revision, and
+    // the screen follows at once.
+    setState((previous) =>
+      previous.status === 'ready'
+        ? {
+            status: 'ready',
+            configuration: {
+              ...previous.configuration,
+              settings: { ...previous.configuration.settings, weightUnit },
+            },
+          }
+        : previous,
+    );
+    void settingsRepository.setWeightUnit(weightUnit).catch(() => setActionFailed(true));
+  }, []);
+
   const finishOnboarding = useCallback(
     (selection: OnboardingSelection) => {
       run(() => applyOnboarding(selection));
@@ -143,6 +161,7 @@ export function useMomentum() {
     setFoodFocus: (focus: string) => run(() => setFoodFocus(focus)),
     reload: () => void refresh(),
     setLanguage,
+    setWeightUnit,
   };
 
   return {

@@ -14,8 +14,9 @@ import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useLoadable } from '../../app/useLoadable';
 import { useToday } from '../../app/useToday';
+import { useWeights } from '../../app/useWeights';
 import { holdChanges } from '../../storage/changes';
-import { useDismissToast } from '../../components/Toast';
+import { useDismissToast, useToast, useToastLift } from '../../components/Toast';
 import {
   addSessionExercise,
   addSet,
@@ -25,8 +26,12 @@ import {
   loadDraftView,
   loadSession,
   recordBodyweight,
+  finishSession,
+  openSessionForDay,
   removeExerciseFromSession,
   removeSet,
+  restoreExercise,
+  restoreSet,
   startSessionFromDraft,
   updateSet,
   type LastRecorded,
@@ -67,20 +72,28 @@ import './gym.css';
  * snapshot. Opening a plan and walking away therefore leaves no session
  * behind and credits nothing.
  *
- * A free session is unchanged: it is created when it is opened, exactly as
- * it was, and every exercise arrives with one set.
+ * ## A free workout (WP3, P6)
+ *
+ * A free workout is a draft too, until its first saved set: opening it and
+ * leaving writes nothing, and a picked exercise arrives with the pending row
+ * rather than a stored 0×0 set. At the first saved set it becomes the day's
+ * session exactly as before — a bare session, rendering from its sets — and
+ * the exercises picked but not yet logged stay on the page, in the order
+ * they were picked, until the workout is left.
+ *
+ * ## Within reach, and undoable (WP3, P5)
+ *
+ * "Übung hinzufügen" sits in a bar at the foot of the screen for the whole
+ * workout. Removing an exercise is a worded control in its card, unlike the
+ * row's minus for a set, and both removals offer an undo that puts back the
+ * sets, the order and the line.
+ *
+ * ## Running, then finished (WP3, P7)
+ *
+ * "Fertig" records that the workout is finished. Going back leaves it
+ * running, and Heute offers to continue it.
  */
 
-const grams = (text: string): number => {
-  const value = Number.parseFloat(text.replace(',', '.'));
-  return Number.isFinite(value) ? Math.round(value * 1000) : 0;
-};
-
-const kgText = (weightGrams: number): string => {
-  const kg = weightGrams / 1000;
-  // Whole numbers read as whole numbers; 62.5 keeps its half, 60.25 its quarter.
-  return Number.isInteger(kg) ? String(kg) : String(Number(kg.toFixed(3)));
-};
 
 /**
  * What the weight box on a set actually means, which is not always "weight".
@@ -119,15 +132,25 @@ function SetRow({
   onRemove(): void;
 }) {
   const t = useT();
+  const weights = useWeights();
   const [reps, setReps] = useState(String(set.reps));
-  const [weight, setWeight] = useState(kgText(set.weightGrams));
+  const [weight, setWeight] = useState(weights.format(set.weightGrams));
+  const editingReps = useRef(false);
+  const editingWeight = useRef(false);
 
-  // A reload after a write brings the stored values back; the fields follow
-  // them rather than holding whatever was half-typed before.
+  /*
+   * A reload after a write brings the stored values back, and each field
+   * follows its own value — never the other's, and never while it is being
+   * typed into. Re-syncing both on any change lost the weight typed right
+   * after the reps: the reps' write reloaded the row and overwrote the
+   * half-typed weight with the stored one (WP3, Stage 2).
+   */
   useEffect(() => {
-    setReps(String(set.reps));
-    setWeight(kgText(set.weightGrams));
-  }, [set.id, set.reps, set.weightGrams]);
+    if (!editingReps.current) setReps(String(set.reps));
+  }, [set.id, set.reps]);
+  useEffect(() => {
+    if (!editingWeight.current) setWeight(weights.format(set.weightGrams));
+  }, [set.id, set.weightGrams, weights]);
 
   return (
     <div className="gym-set">
@@ -144,8 +167,14 @@ function SetRow({
           value={reps}
           inputMode="numeric"
           disabled={!editable}
+          onFocus={() => {
+            editingReps.current = true;
+          }}
           onChange={(event) => setReps(event.target.value.replace(/[^0-9]/g, ''))}
-          onBlur={() => onChange({ reps: Number(reps || 0) })}
+          onBlur={() => {
+            editingReps.current = false;
+            onChange({ reps: Number(reps || 0) });
+          }}
         />
         <span className="gym-set__unit" aria-hidden="true">
           {t('gym.reps')}
@@ -157,6 +186,7 @@ function SetRow({
           {`${t(LOAD_LABEL_KEYS[loadType])} — ${t('gym.weightFor', {
             exercise: exerciseName,
             number: index + 1,
+            unitName: t(`unit.${weights.unit}.name`),
           })}`}
         </span>
         <input
@@ -164,11 +194,17 @@ function SetRow({
           value={weight}
           inputMode="decimal"
           disabled={!editable}
+          onFocus={() => {
+            editingWeight.current = true;
+          }}
           onChange={(event) => setWeight(event.target.value.replace(/[^0-9.,]/g, ''))}
-          onBlur={() => onChange({ weightGrams: grams(weight) })}
+          onBlur={() => {
+            editingWeight.current = false;
+            onChange({ weightGrams: weights.parse(weight) ?? 0 });
+          }}
         />
         <span className="gym-set__unit" aria-hidden="true">
-          {t('gym.weightUnit')}
+          {weights.unitLabel}
         </span>
       </label>
 
@@ -210,6 +246,7 @@ function PendingSetRow({
   onCommit(values: { reps: number; weightGrams: number }): Promise<boolean>;
 }) {
   const t = useT();
+  const weights = useWeights();
   const [reps, setReps] = useState('');
   const [weight, setWeight] = useState('');
   const committed = useRef(false);
@@ -220,7 +257,7 @@ function PendingSetRow({
     const weightKnown = weight.trim() !== '' || loadType !== 'external';
     if (repsValue <= 0 || !weightKnown) return;
     committed.current = true;
-    void onCommit({ reps: repsValue, weightGrams: grams(weight) }).then((stored) => {
+    void onCommit({ reps: repsValue, weightGrams: weights.parse(weight) ?? 0 }).then((stored) => {
       if (!stored) committed.current = false;
     });
   };
@@ -259,12 +296,16 @@ function PendingSetRow({
 
       <label className="gym-set__field">
         <span className="visually-hidden">
-          {`${t(LOAD_LABEL_KEYS[loadType])} — ${t('gym.weightFor', { exercise: exerciseName, number: 1 })}`}
+          {`${t(LOAD_LABEL_KEYS[loadType])} — ${t('gym.weightFor', {
+            exercise: exerciseName,
+            number: 1,
+            unitName: t(`unit.${weights.unit}.name`),
+          })}`}
         </span>
         <input
           className="field gym-set__input"
           value={weight}
-          placeholder={placeholder ? kgText(placeholder.weightGrams) : undefined}
+          placeholder={placeholder ? weights.format(placeholder.weightGrams) : undefined}
           inputMode="decimal"
           enterKeyHint="done"
           disabled={!editable}
@@ -273,7 +314,7 @@ function PendingSetRow({
           onKeyDown={onKeyDown}
         />
         <span className="gym-set__unit" aria-hidden="true">
-          {t('gym.weightUnit')}
+          {weights.unitLabel}
         </span>
       </label>
 
@@ -287,9 +328,12 @@ function PendingSetRow({
 function LastTimeLine({ last }: { last: LastRecorded | null }) {
   const t = useT();
   const { language } = useI18n();
+  const weights = useWeights();
   if (!last || last.sets.length === 0) return null;
   const sets = last.sets
-    .map((set) => t('gym.lastTime.set', { reps: set.reps, weight: kgText(set.weightGrams) }))
+    .map((set) =>
+      t('gym.lastTime.set', { reps: set.reps, weight: weights.format(set.weightGrams), unit: weights.unitLabel }),
+    )
     .join(' · ');
   return (
     <p className="gym-exercise__last">
@@ -322,20 +366,23 @@ function BodyweightCard({
 }) {
   const t = useT();
   const { language } = useI18n();
-  const [value, setValue] = useState(current === null ? '' : String(current));
+  const weights = useWeights();
+  const [value, setValue] = useState(current === null ? '' : weights.formatBodyweight(current));
 
   useEffect(() => {
-    setValue(current === null ? '' : String(current));
-  }, [current]);
+    setValue(current === null ? '' : weights.formatBodyweight(current));
+  }, [current, weights]);
 
-  const parsed = Number.parseFloat(value.replace(',', '.'));
-  const valid = Number.isFinite(parsed) && parsed > 0;
+  const parsed = weights.parseBodyweight(value);
+  const valid = parsed !== null && parsed > 0;
 
   return (
     <Section label={t('gym.bodyweight.title')}>
       <Card>
         <label className="gym-bodyweight">
-          <span className="visually-hidden">{t('gym.bodyweight.label')}</span>
+          <span className="visually-hidden">
+            {t('gym.bodyweight.label', { unitName: t(`unit.${weights.unit}.name`) })}
+          </span>
           <input
             className="field gym-bodyweight__input"
             value={value}
@@ -344,12 +391,12 @@ function BodyweightCard({
             onChange={(event) => setValue(event.target.value.replace(/[^0-9.,]/g, ''))}
           />
           <span className="gym-set__unit" aria-hidden="true">
-            {t('gym.weightUnit')}
+            {weights.unitLabel}
           </span>
           <Button
             variant="secondary"
             disabled={!editable || !valid}
-            onClick={() => valid && onSave(parsed)}
+            onClick={() => valid && parsed !== null && onSave(parsed)}
           >
             {t('gym.bodyweight.save')}
           </Button>
@@ -381,6 +428,7 @@ export function GymSessionScreen({
   draft = null,
   planName = null,
   date,
+  free = false,
   onSessionCreated,
   onClose,
 }: {
@@ -388,6 +436,8 @@ export function GymSessionScreen({
   sessionId: string | null;
   /** A planned workout that has not been persisted yet. */
   draft?: SessionDraft | null;
+  /** A free workout that has not been persisted yet: no plan, nothing picked. */
+  free?: boolean;
   /** Shown under the title while the draft is open, so the user knows which plan this is. */
   planName?: string | null;
   /**
@@ -401,11 +451,23 @@ export function GymSessionScreen({
 }) {
   const t = useT();
   const { language } = useI18n();
+  const weights = useWeights();
   const namer = useExerciseNamer();
   const [picking, setPicking] = useState(false);
   const [exercises, setExercises] = useState<ExerciseRecord[]>([]);
   const [bodyweight, setBodyweight] = useState<number | null>(null);
-  const busy = useRef(false);
+  const toast = useToast();
+  /** The writes, one after another; nothing typed is ever turned away. */
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+  /** A tapped action in flight: a second tap meanwhile is the same tap. */
+  const tapping = useRef(false);
+  /**
+   * A free workout's exercises as the page shows them, in the order they
+   * were picked or first shown. A stored set is not needed to be here, so a
+   * picked exercise — and one whose last set was removed — stays on the
+   * page until the workout is left (P6).
+   */
+  const keptRef = useRef<{ exerciseId: string; name: string }[]>([]);
 
   /*
    * The session id lives in a ref as well as in state: the loader reads the
@@ -430,20 +492,51 @@ export function GymSessionScreen({
    */
   const now = useToday();
   const draftDate = isSameWeek(date, now) ? date : now;
+  /**
+   * A free workout's entries: the stored ones, plus every kept exercise
+   * without a set, each where it was kept. An exercise shown once is kept.
+   */
+  const withKept = useCallback(async (stored: SessionExercise[], day: DateKey): Promise<SessionExercise[]> => {
+    for (const entry of stored) {
+      if (!keptRef.current.some((kept) => kept.exerciseId === entry.exercise.id)) {
+        keptRef.current = [...keptRef.current, { exerciseId: entry.exercise.id, name: entry.exercise.name }];
+      }
+    }
+    const missing = keptRef.current.filter((kept) => !stored.some((entry) => entry.exercise.id === kept.exerciseId));
+    const waiting =
+      missing.length === 0
+        ? []
+        : (
+            await loadDraftView(
+              {
+                planId: null,
+                exercises: missing.map((kept, order) => ({ ...kept, order, source: 'extra' as const })),
+              },
+              day,
+            )
+          ).exercises.map((entry) => ({ ...entry, source: null }));
+    const byId = new Map([...stored, ...waiting].map((entry) => [entry.exercise.id, entry]));
+    return keptRef.current.flatMap((kept) => byId.get(kept.exerciseId) ?? []);
+  }, []);
+
   const load = useCallback(async (): Promise<ScreenView> => {
     const id = sessionRef.current;
     if (id) {
       const view = await loadSession(id);
       if (!view) throw new Error(`Unknown session ${id}`);
-      return view;
+      // A session that owns its structure lists it; a bare one lists its sets
+      // and whatever the user picked here and has not logged yet.
+      if (view.session.exercises !== undefined) return view;
+      return { ...view, exercises: await withKept(view.exercises, view.session.date) };
     }
+    if (free) return { session: null, editable: true, exercises: await withKept([], draftDate) };
     const view = await loadDraftView(
       { planId: draft?.planId ?? null, exercises: draftRef.current },
       draftDate,
     );
     return { session: null, ...view };
-  }, [draft?.planId, draftDate]);
-  const { state, reload } = useLoadable(load, [draft?.planId, draftDate]);
+  }, [draft?.planId, draftDate, free, withKept]);
+  const { state, reload } = useLoadable(load, [draft?.planId, draftDate, free]);
   /** The day this workout is on: the session's own once there is one. */
   const day = state.status === 'ready' && state.value.session ? state.value.session.date : draftDate;
 
@@ -460,6 +553,8 @@ export function GymSessionScreen({
   /** The write in flight, if any — the one a tap's blur may just have started. */
   const pending = useRef<Promise<unknown> | null>(null);
   const dismissToast = useDismissToast();
+  // The undo toast rises above the bar at the foot of the screen (P5).
+  useToastLift('calc(var(--workout-bar-height) - var(--tab-bar-height))');
   useEffect(() => {
     // Mounted (again, under StrictMode's double effect in development).
     closed.current = false;
@@ -504,28 +599,40 @@ export function GymSessionScreen({
   }, [day]);
 
   /**
-   * Writes are serialised so a fast tapper cannot interleave two reloads.
-   * Resolves `true` once the write is stored, `false` when it was refused or
-   * turned away because another was in flight.
+   * Writes run one after another, each followed by its reload, so two never
+   * interleave — and none is turned away: a weight typed while the reps are
+   * still saving waits its turn instead of being dropped (WP3, Stage 2).
+   * Resolves `true` once stored, `false` when a rule refused it.
    */
   const run = useCallback(
     (operation: () => Promise<unknown>): Promise<boolean> => {
-      if (busy.current) return Promise.resolve(false);
-      busy.current = true;
-      const task = operation()
+      const task = queue.current
+        .then(operation)
         .then(
           () => true,
           () => false,
         )
         .then(async (stored) => {
-          busy.current = false;
           await reload();
           return stored;
         });
+      queue.current = task;
       pending.current = task;
       return task;
     },
     [reload],
+  );
+
+  /** A tapped action — add a set, remove one: a double tap is one tap. */
+  const tap = useCallback(
+    (operation: () => Promise<unknown>): Promise<boolean> => {
+      if (tapping.current) return Promise.resolve(false);
+      tapping.current = true;
+      return run(operation).finally(() => {
+        tapping.current = false;
+      });
+    },
+    [run],
   );
 
   /**
@@ -536,15 +643,30 @@ export function GymSessionScreen({
   const ensureSession = async (): Promise<string> => {
     const existing = sessionRef.current;
     if (existing) return existing;
-    const session = await startSessionFromDraft(
-      { planId: draft?.planId ?? null, exercises: draftRef.current },
-      draftDate,
-    );
+    // A free workout becomes a bare session, exactly as one always was; a
+    // planned one carries its draft as the session's own snapshot.
+    const session = free
+      ? await openSessionForDay(draftDate)
+      : await startSessionFromDraft({ planId: draft?.planId ?? null, exercises: draftRef.current }, draftDate);
     sessionRef.current = session.id;
     setActiveSessionId(session.id);
     // A screen that has already gone must not reopen the workout it left.
     if (!closed.current) onSessionCreated?.(session.id);
     return session.id;
+  };
+
+  /** "Fertig": the workout is finished (P7), once the write in flight is stored. */
+  const finishing = useRef(false);
+  const finish = async () => {
+    if (finishing.current || closed.current) return;
+    finishing.current = true;
+    // Read when its turn comes: a set saved on the tap's blur, queued first,
+    // may be what creates the session.
+    await run(async () => {
+      const id = sessionRef.current;
+      if (id) await finishSession(id);
+    });
+    await close();
   };
 
   if (state.status !== 'ready' || !state.value) {
@@ -573,8 +695,8 @@ export function GymSessionScreen({
   const view = state.value;
   const editable = view.editable;
   const isDraft = view.session === null;
-  /** A session that owns its exercise list: a plan session, or the draft. */
-  const structured = isDraft || view.session?.exercises !== undefined;
+  /** A free workout: the free draft, or a session that renders from its sets. */
+  const freeMode = isDraft ? free : view.session?.exercises === undefined;
   /* Only asked for when a set in this session actually depends on it. */
   const needsBodyweight = view.exercises.some(
     (entry) => entry.exercise.loadType === 'bodyweight' || entry.exercise.loadType === 'assisted',
@@ -582,9 +704,19 @@ export function GymSessionScreen({
 
   const addExercise = (exercise: ExerciseRecord) => {
     setPicking(false);
-    if (isDraft) {
-      // Nothing to store yet: the draft grows, and the session it becomes
-      // will carry this line as an extra.
+    if (freeMode) {
+      // A free workout keeps it on the page with the pending row; nothing is
+      // stored until a set is (P6). Picking it twice changes nothing.
+      if (!keptRef.current.some((kept) => kept.exerciseId === exercise.id)) {
+        keptRef.current = [...keptRef.current, { exerciseId: exercise.id, name: exercise.name }];
+      }
+      setDraftVersion((version) => version + 1);
+      return;
+    }
+    if (sessionRef.current === null) {
+      // A planned draft grows, and the session it becomes will carry this
+      // line as an extra. Read from the ref: the draft may have become a
+      // session since this render.
       if (!draftRef.current.some((entry) => entry.exerciseId === exercise.id)) {
         draftRef.current = [
           ...draftRef.current,
@@ -594,16 +726,9 @@ export function GymSessionScreen({
       setDraftVersion((version) => version + 1);
       return;
     }
-    if (structured) {
-      // A plan session names its exercises itself; the first set is typed
-      // into the pending row rather than created empty.
-      run(() => addSessionExercise(sessionRef.current!, exercise.id));
-      return;
-    }
-    // A free session, exactly as before: a picked exercise arrives with one
-    // empty set ready to type into, so choosing an exercise and logging its
-    // first set is one gesture.
-    run(() => addSet({ sessionId: sessionRef.current!, exerciseId: exercise.id, reps: 0, weightGrams: 0 }));
+    // A plan session names its exercises itself; an added one is an extra,
+    // its first set typed into the pending row. The plan is never touched.
+    void tap(() => addSessionExercise(sessionRef.current!, exercise.id));
   };
 
   const createAndAdd = (input: NewExerciseInput) => {
@@ -614,15 +739,93 @@ export function GymSessionScreen({
     });
   };
 
-  const removeExercise = (exerciseId: string) => {
-    if (isDraft) {
+  /** An undo that a closed week refused says so (P5). */
+  const undone = (stored: boolean) => {
+    if (!stored) toast({ message: t('gym.undoRefused') });
+  };
+
+  /*
+   * Removing an exercise (P5). What is only on the page goes from the page;
+   * what is stored is deleted. Either way the toast's undo puts back exactly
+   * what went: the sets, the line and its place.
+   */
+  const removeExercise = (entry: SessionExercise, name: string) => {
+    const exerciseId = entry.exercise.id;
+    const message = t('gym.removed.exercise', { exercise: name });
+    const keptAt = keptRef.current.findIndex((kept) => kept.exerciseId === exerciseId);
+    const kept = keptRef.current[keptAt];
+    const forget = () => {
+      keptRef.current = keptRef.current.filter((item) => item.exerciseId !== exerciseId);
+    };
+    const keepAgain = () => {
+      if (!kept || keptRef.current.some((item) => item.exerciseId === exerciseId)) return;
+      const next = [...keptRef.current];
+      next.splice(Math.min(keptAt, next.length), 0, kept);
+      keptRef.current = next;
+    };
+
+    if (entry.sets.length === 0 && (freeMode || isDraft)) {
+      const draftAt = draftRef.current.findIndex((line) => line.exerciseId === exerciseId);
+      const draftLine = draftRef.current[draftAt];
+      forget();
       draftRef.current = draftRef.current
-        .filter((entry) => entry.exerciseId !== exerciseId)
-        .map((entry, index) => ({ ...entry, order: index }));
+        .filter((line) => line.exerciseId !== exerciseId)
+        .map((line, index) => ({ ...line, order: index }));
       setDraftVersion((version) => version + 1);
+      toast({
+        message,
+        action: {
+          label: t('toast.undo'),
+          run: () => {
+            keepAgain();
+            if (draftLine && !draftRef.current.some((line) => line.exerciseId === exerciseId)) {
+              const next = [...draftRef.current];
+              next.splice(Math.min(draftAt, next.length), 0, draftLine);
+              draftRef.current = next.map((line, index) => ({ ...line, order: index }));
+            }
+            setDraftVersion((version) => version + 1);
+          },
+        },
+      });
       return;
     }
-    run(() => removeExerciseFromSession(sessionRef.current!, exerciseId));
+
+    const sessionId = sessionRef.current!;
+    const sets = entry.sets;
+    const line = view.session?.exercises?.find((item) => item.exerciseId === exerciseId) ?? null;
+    void tap(async () => {
+      await removeExerciseFromSession(sessionId, exerciseId);
+      forget();
+    }).then((removed) => {
+      if (!removed) return;
+      toast({
+        message,
+        action: {
+          label: t('toast.undo'),
+          run: () => {
+            keepAgain();
+            void run(() => restoreExercise(sessionId, sets, line)).then((stored) => {
+              if (!stored) forget();
+              undone(stored);
+            });
+          },
+        },
+      });
+    });
+  };
+
+  /** Removing a set (P5), with the same undo. */
+  const removeOneSet = (set: GymSetRecord, index: number, name: string) => {
+    void tap(() => removeSet(set.id)).then((removed) => {
+      if (!removed) return;
+      toast({
+        message: t('gym.removed.set', { number: index + 1, exercise: name }),
+        action: {
+          label: t('toast.undo'),
+          run: () => void run(() => restoreSet(set)).then(undone),
+        },
+      });
+    });
   };
 
   return (
@@ -669,23 +872,17 @@ export function GymSessionScreen({
 
         {view.exercises.length === 0 ? (
           <Card>
-            <EmptyState
-              title={t('gym.emptyTitle')}
-              body={t('gym.emptyBody')}
-              action={
-                <Button variant="secondary" onClick={() => setPicking(true)}>
-                  <PlusIcon size={18} />
-                  {t('gym.addExercise')}
-                </Button>
-              }
-            />
+            {/* "Übung hinzufügen" is the bar below, always in reach. */}
+            <EmptyState title={t('gym.emptyTitle')} body={t('gym.emptyBody')} />
           </Card>
         ) : (
           view.exercises.map((entry) => {
             const last = entry.sets[entry.sets.length - 1];
             const name = namer.name(entry.exercise.id, entry.exercise.name);
             const loadType = entry.exercise.loadType ?? 'external';
-            const pending = structured && entry.sets.length === 0;
+            // An exercise without a stored set is typed into once, then saved
+            // — in a plan, a draft and a free workout alike (P6).
+            const pending = entry.sets.length === 0;
             return (
               <Section key={entry.exercise.id}>
                 <Card>
@@ -714,9 +911,9 @@ export function GymSessionScreen({
                       className="gym-exercise__remove"
                       aria-label={t('gym.removeExercise', { exercise: name })}
                       disabled={!editable}
-                      onClick={() => removeExercise(entry.exercise.id)}
+                      onClick={() => removeExercise(entry, name)}
                     >
-                      <MinusIcon size={18} />
+                      {t('gym.removeExercise.short')}
                     </button>
                   </div>
 
@@ -730,8 +927,8 @@ export function GymSessionScreen({
                       exerciseName={name}
                       loadType={loadType}
                       editable={editable}
-                      onChange={(patch) => run(() => updateSet(set.id, patch))}
-                      onRemove={() => run(() => removeSet(set.id))}
+                      onChange={(patch) => void run(() => updateSet(set.id, patch))}
+                      onRemove={() => removeOneSet(set, index, name)}
                     />
                   ))}
 
@@ -759,7 +956,8 @@ export function GymSessionScreen({
                       {t('gym.bestSet')} ·{' '}
                       {t('gym.bestSetValue', {
                         reps: bestOf(entry.sets).reps,
-                        weight: kgText(bestOf(entry.sets).weightGrams),
+                        weight: weights.format(bestOf(entry.sets).weightGrams),
+                        unit: weights.unitLabel,
                       })}
                     </p>
                   ) : (
@@ -773,7 +971,7 @@ export function GymSessionScreen({
                       disabled={!editable}
                       aria-label={t('gym.addSetFor', { exercise: name })}
                       onClick={() =>
-                        run(() =>
+                        void tap(() =>
                           addSet({
                             sessionId: sessionRef.current!,
                             exerciseId: entry.exercise.id,
@@ -795,15 +993,15 @@ export function GymSessionScreen({
           })
         )}
 
-        {view.exercises.length > 0 ? (
-          <Button variant="secondary" block disabled={!editable} onClick={() => setPicking(true)}>
-            <PlusIcon size={18} />
-            {t('gym.addExercise')}
-          </Button>
-        ) : null}
-
-        <Button variant="primary" block onClick={() => void close()}>
+        <Button variant="primary" block onClick={() => void finish()}>
           {t('gym.done')}
+        </Button>
+      </div>
+
+      <div className="gym-session__bar">
+        <Button variant="secondary" block disabled={!editable} onClick={() => setPicking(true)}>
+          <PlusIcon size={18} />
+          {t('gym.addExercise')}
         </Button>
       </div>
 

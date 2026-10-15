@@ -4,6 +4,7 @@ import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
 import { percentChange, type ExerciseComparison, type ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
+import { useWeights } from '../../app/useWeights';
 import { roundShown, shownTrend } from './muscleState';
 import './gym.css';
 
@@ -16,15 +17,6 @@ import './gym.css';
  * is the part that is supposed to be easy. The sets of each day are
  * underneath, where they answer "how did I get there".
  */
-
-const kgText = (weightGrams: number): string => {
-  const kg = weightGrams / 1000;
-  return Number.isInteger(kg) ? String(kg) : String(Number(kg.toFixed(3)));
-};
-
-/** kg-reps, the unit the score is in, rendered as the set that produced it. */
-const scoreText = (day: ExerciseDay): string =>
-  `${day.best.set.reps} × ${kgText(day.best.set.weightGrams)}`;
 
 export function ExerciseDetail({
   name,
@@ -40,6 +32,14 @@ export function ExerciseDetail({
 }) {
   const t = useT();
   const { language } = useI18n();
+  const weights = useWeights();
+  /** The day's score, rendered as the set that produced it, in the user's unit. */
+  const scoreText = (day: ExerciseDay): string =>
+    t('gym.bestSetValue', {
+      reps: day.best.set.reps,
+      weight: weights.format(day.best.set.weightGrams),
+      unit: weights.unitLabel,
+    });
 
   const latest = days[0] ?? null;
   const change = percentChange(comparison?.ratio ?? null);
@@ -107,7 +107,7 @@ export function ExerciseDetail({
                   </span>
                 </div>
               </div>
-              <p className="gym-detail__note">{t('gym.progress.explainMetric')}</p>
+              <p className="gym-detail__note">{t('gym.progress.explainMetric', { unit: weights.unitLabel })}</p>
             </Card>
 
             <Section label={t('gym.detail.history')}>

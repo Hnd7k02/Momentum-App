@@ -14,6 +14,7 @@ import { MuscleModule } from './MuscleModule';
 import { toMuscleAnalytics } from './muscleAnalytics';
 import { muscleStateOf, shownTrend } from './muscleState';
 import './gym.css';
+import { useWeights } from '../../app/useWeights';
 
 /**
  * Gym's detail, below the overview.
@@ -50,6 +51,7 @@ const changeText = (
 
 export function GymProgress({ history }: { history: GymHistory }) {
   const t = useT();
+  const weights = useWeights();
   const namer = useExerciseNamer();
   const [selected, setSelected] = useState<MuscleGroup | null>(null);
   const [openExercise, setOpenExercise] = useState<string | null>(null);
@@ -159,7 +161,7 @@ export function GymProgress({ history }: { history: GymHistory }) {
         onClose={() => setOverallOpen(false)}
       >
         <p>{t('gym.progress.explainGroups')}</p>
-        <p>{t('gym.progress.explainMetric')}</p>
+        <p>{t('gym.progress.explainMetric', { unit: weights.unitLabel })}</p>
         <p>{t('gym.progress.ratingNote')}</p>
         <p className="metric-sheet__note">{t('gym.tombstone.boundary')}</p>
       </MetricDetailSheet>

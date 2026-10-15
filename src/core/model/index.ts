@@ -1,3 +1,4 @@
+import type { WeightUnit } from '../gym/weight';
 import type { DateKey, WeekKey } from '../dates/types';
 import type { RankId } from '../config/constants';
 
@@ -351,6 +352,13 @@ export interface SettingsRecord {
   language: Language;
   /** The first day the app was used — the origin of every history range. */
   firstUseDate: DateKey;
+  /**
+   * The unit weights are shown and typed in (WP3, P4). A display
+   * preference, never a config snapshot: sets stay integer grams and weight
+   * entries kilograms whatever it says, so nothing scored can read it.
+   * Absent means kilograms, which is what every record before it meant.
+   */
+  weightUnit?: WeightUnit;
   onboardingCompletedAt: string | null;
   /**
    * The highest rank the user has already been shown.
@@ -658,6 +666,19 @@ export interface GymSessionRecord {
    * structure, including exercises that have no set yet.
    */
   exercises?: GymSessionExerciseSnapshot[];
+  /**
+   * When the user tapped "Fertig" (WP3, P7) — a fact; a later "Fertig"
+   * overwrites it.
+   *
+   * - a timestamp — finished then;
+   * - `null` — started under P7 and not finished yet (left by going back);
+   * - **absent — recorded before the field existed, and treated as
+   *   finished.** The absence is the era, never something to backfill.
+   *
+   * Nothing in scoring or replay reads it. It decides only whether Heute and
+   * the Gym hub offer to continue today's workout.
+   */
+  finishedAt?: string | null;
   note: string | null;
   /**
    * A session carried over from RC2's generic Sport domain.
