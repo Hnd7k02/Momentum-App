@@ -646,8 +646,10 @@ for (const [width, height] of SIZES) {
     check(`${W}: D127 a switched-off Gym says "Ausgeschaltet · kein Wochenziel"`, offLine === 'Ausgeschaltet · kein Wochenziel', String(offLine));
     check(`${W}: D127 and its number is no data`, (await textOf(tile.locator('.metric-tile__number'))) === '–', String(await textOf(tile.locator('.metric-tile__number'))));
     check(`${W}: D127 the Training card states no week while Gym is off`, (await page.locator('.gym-hub__week').count()) === 0, String(await textOf(page.locator('.gym-hub__week'))));
+    // Framed on the attendance tile itself: with the Endurance Phase over it
+    // spans the width and sits below the fold at 320.
     await page.evaluate(() => {
-      const board = document.querySelector('[data-metric="gym-rating"]');
+      const board = document.querySelector('[data-metric="gym-attendance"]');
       const scroller = board?.closest('.areas__scroll');
       if (board && scroller) scroller.scrollTop += board.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 48;
     });
