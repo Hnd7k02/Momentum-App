@@ -191,7 +191,7 @@ async function workoutPicker(page, w, { custom, shot }) {
   }
   check(`${L}: the workout screen is open`, (await page.locator('.gym-session').count()) === 1);
 
-  const opener = page.locator('.gym-session__scroll').getByRole('button', { name: 'Übung hinzufügen' }).first();
+  const opener = page.locator('.gym-session__bar').getByRole('button', { name: 'Übung hinzufügen' });
   await opener.click();
   await page.waitForTimeout(500);
   const search = page.locator('.sheet #exercise-search');

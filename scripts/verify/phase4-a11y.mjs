@@ -39,6 +39,13 @@ await page.getByRole('textbox', { name: 'Suchen' }).fill('Bench');
 await page.waitForTimeout(300);
 await page.locator('.gym-picker__row').first().click();
 await page.waitForTimeout(700);
+// A picked exercise arrives with a pending row (D128); its first set is typed there.
+await page.locator('.gym-set--pending input').first().fill('8');
+await page.locator('.gym-set--pending input').first().blur();
+await page.waitForTimeout(300);
+await page.locator('.gym-set--pending input').nth(1).fill('60');
+await page.locator('.gym-set--pending input').nth(1).blur();
+await page.waitForTimeout(900);
 await page.getByRole('button', { name: /Satz zu .* hinzufügen/ }).click();
 await page.waitForTimeout(600);
 

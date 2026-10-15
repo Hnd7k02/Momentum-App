@@ -227,7 +227,20 @@ async function fillPause(page, from, to, reason = '') {
       !(await page.locator('.week__log').first().isDisabled()));
 
   // And logging really does work while paused.
+  // A workout is stored with its first saved set (D128), so log one.
   await page.locator('.week__log').first().click();
+  await page.waitForTimeout(900);
+  await page.locator('.gym-session__bar').getByRole('button', { name: 'Übung hinzufügen' }).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('textbox', { name: 'Suchen' }).fill('Bankdrücken');
+  await page.waitForTimeout(350);
+  await page.locator('.gym-picker__row', { hasText: 'Bankdrücken' }).first().click();
+  await page.waitForTimeout(700);
+  // A barbell set is complete once its load is known.
+  await page.locator('.gym-set--pending input').nth(0).fill('8');
+  await page.locator('.gym-set--pending input').nth(0).blur();
+  await page.locator('.gym-set--pending input').nth(1).fill('60');
+  await page.locator('.gym-set--pending input').nth(1).blur();
   await page.waitForTimeout(900);
   const logged = await page.evaluate(async () => {
     const db = await new Promise((res, rej) => {

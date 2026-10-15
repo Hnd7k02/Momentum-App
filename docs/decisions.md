@@ -2683,3 +2683,92 @@ would be a missed week of three, which is exactly the "absence is a zero"
 error the product refuses, and it would move every replayed fingerprint.
 Prorating a target is a product decision nobody has made. The ledger
 already treats the partial week as no data; this records it.
+
+## D128 — A free workout is a draft until its first saved set
+
+**Decision (WP3, P6).** Opening a free session writes nothing. The launcher
+opens a *free draft* — no plan, nothing picked — and the workout screen
+creates the day's session only when the first set is saved, through
+`openSessionForDay`: a **bare** session with no `exercises` snapshot, which
+renders from its sets exactly as free sessions always have. A picked
+exercise arrives with the pending row, never as a stored 0×0 set, and stays
+on the page — held in screen state, in the order it was picked — until the
+workout is left; so does an exercise whose last set was removed. Picking an
+exercise that is already on the page changes nothing.
+
+**Overrides** HANDOVER's WP2-1 note that a free session "is created when it
+is opened, and every exercise arrives with one set" (the B7 finding: opening
+and leaving counted as a training).
+
+**History stays history.** Bare sessions already stored — empty ones, and
+0×0 sets — are facts of their time and keep counting for the weeks they
+are in. Nothing cleans them up.
+
+**Why a bare session rather than a snapshot.** A snapshot on a free session
+would mark every exercise "Zusätzlich", blur the line between a plan and a
+free workout that P7 needs, and break the model's documented invariant
+(`exercises` absent on every free session). The bare session is also what
+`planEquivalence.test.ts`'s manual path already writes, so the test stays
+both green and a true description of the screen.
+
+**Open.** Removing every set of a session leaves the session row, and an
+empty row still counts for attendance. That was already so for a plan
+session since WP2-1; whether an emptied session should go is asked at
+STOP 2 rather than decided here.
+
+## D129 — "Fertig" records `finishedAt`; a workout without it on record is finished
+
+**Decision (WP3, P7).** `GymSessionRecord.finishedAt` has three states:
+
+- a timestamp — "Fertig" was tapped then (a later "Fertig" overwrites it);
+- `null` — the session was started in the app under P7 and not finished;
+  `openSessionForDay` writes it on creation;
+- **absent** — recorded before the field existed, and treated as finished.
+  The absence is the era and is never backfilled.
+
+Heute shows today's workout at the top while its session has at least one
+saved set and `finishedAt === null`; the Gym hub's Training card states the
+same in its own line. A plan session is stated as the share of planned
+exercises with a saved set (extras excluded); anything else as counts.
+Reopening a finished session and adding a set does not make it running
+again. Outside the session's week "Fertig" leaves the record as it is and
+still closes the screen.
+
+**Nothing scores it.** No replay, rating, Boss or history path reads the
+field; it decides only whether to offer "continue". The golden fixtures and
+`planEquivalence` are untouched by it.
+
+## D130 — The weight unit is a display preference
+
+**Decision (WP3, P4).** `settings.weightUnit` is `kg` or `lb`, set in
+Einstellungen, and absent means kg. It is a preference like the language,
+never part of a config snapshot: sets stay integer grams and weight entries
+kilograms whatever it says (D84 anticipated exactly this: "pounds a later
+change to one formatter rather than to the data").
+
+There is one formatter and one parser (`core/gym/weight.ts`, bound to the
+preference by `useWeights`): 1 lb = 453.59237 g, typed pounds rounded to
+whole grams, pounds shown with at most one decimal, kilograms as before.
+
+**Only a changed value is written.** Pounds are shown rounded, so
+re-parsing a field the user only focused would move the stored grams
+(60 000 g → 60 010 g) — a fact the rating replays. A set's field writes only
+when its text changed, and an unchanged bodyweight saves the weight in
+force exactly.
+
+## D131 — Removing in a workout is undoable, by putting back what was removed
+
+**Decision (WP3, P5).** Removing an exercise (a worded control, unlike a
+set's minus) and removing a set both offer an undo for about five seconds.
+The undo puts back **the rows that were removed** — the same ids, order,
+`createdAt`, muscles, roles and load type — and, in a session that owns its
+structure, the snapshot line at the place it had (`restoreSet`,
+`restoreExercise`). It never re-adds: new rows would mint new ids and copy
+today's catalogue roles onto a set logged under older ones, which is the
+backfilling CLAUDE.md forbids. An undo obeys the same weekly edit window as
+the removal and says so when it is refused. An exercise added to a plan
+session stays an extra, and the plan itself never changes.
+
+Writes in the workout run one after another and none is turned away — a
+weight typed while the reps are saving waits its turn — while a tapped
+action keeps its double-tap guard.

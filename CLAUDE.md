@@ -136,6 +136,20 @@ Never conflate them.
   D127, not something to "fix" in passing. A screen that states the week
   against the user's target reads it as Heute does (`loadTrainingWeek`); a
   rating figure shows the start week as no data.
+- **A workout counts from its first saved set** (D128). Opening a workout,
+  free or planned, writes nothing; the session is created with the first set
+  — a free one as a bare session, a planned one with its snapshot — and a
+  picked exercise is a pending row, never a stored 0×0 set. Sessions stored
+  before this stay history.
+- **`finishedAt` is a fact nothing scores** (D129): a timestamp after
+  "Fertig", `null` while a workout started in the app is running, absent for
+  a session recorded before the field — which is finished. Never backfill it.
+- **The weight unit is a display preference** (D130). Sets stay grams and
+  weight entries kilograms; kg and lb exist only in `core/gym/weight.ts` and
+  on screen. Write a weight only when its text changed — re-parsing rounded
+  pounds moves stored grams.
+- **An undo puts back what was removed** (D131): the same rows, the same
+  line in the same place, within the edit window — never a re-add.
 - **Food is ranked on the 1–10 adherence the user entered, never on calories
   or macros.** Entries are logged and totalled because a log is useful; none
   of it reaches the score. What a person's targets should be is a product

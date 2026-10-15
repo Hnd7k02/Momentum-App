@@ -85,13 +85,24 @@ const tab = async (page, name) => {
   await page.waitForTimeout(600);
 
   // Training: one gym session and one run.
+  // A workout is stored with its first saved set (D128), so log one.
   await page.locator('.week__log', { hasText: 'Session eintragen' }).click();
   await page.waitForTimeout(900);
-  const back = page.getByRole('button', { name: /Fertig|Zurück|Schliessen/ }).first();
-  if (await back.count()) {
-    await back.click();
-    await page.waitForTimeout(700);
-  }
+  await page.locator('.gym-session__bar').getByRole('button', { name: 'Übung hinzufügen' }).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('textbox', { name: 'Suchen' }).fill('Bankdrücken');
+  await page.waitForTimeout(350);
+  await page.locator('.gym-picker__row', { hasText: 'Bankdrücken' }).first().click();
+  await page.waitForTimeout(700);
+  // A barbell set is complete once its load is known.
+  const pendingFields = page.locator('.gym-set--pending input');
+  await pendingFields.nth(0).fill('8');
+  await pendingFields.nth(0).blur();
+  await pendingFields.nth(1).fill('60');
+  await pendingFields.nth(1).blur();
+  await page.waitForTimeout(900);
+  await page.getByRole('button', { name: 'Fertig' }).click();
+  await page.waitForTimeout(700);
   await page.locator('.week__log', { hasText: 'Lauf eintragen' }).click();
   await page.waitForTimeout(900);
 
