@@ -37,6 +37,9 @@ import { URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
  *                            same session — never a second one on 15.10
  *   8  a workout from the    the same for a free session opened on the Gym
  *      hub across midnight   hub, whose host reads the live day
+ *   9  a run sheet across    the sheet keeps what was typed through Sunday
+ *      Sunday midnight       midnight; saving into the now closed week is
+ *                            refused, and the screen says so
  *
  * Onboarding runs through lib.mjs `onboard()` unchanged: under
  * `clock.install` the page clock flows with real time, so its transitions
@@ -500,6 +503,37 @@ await scenario('8 free workout from the hub across midnight', { tz: BERLIN, time
   await page.getByRole('button', { name: 'Fertig' }).click();
   await page.waitForTimeout(1500);
   check(`${W}: Fertig returns to the hub`, (await page.locator('.gym-session').count()) === 0 && (await page.getByRole('button', { name: 'Training erfassen' }).count()) === 1);
+});
+
+await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-10-18T23:55:00+02:00' }, async ({ ctx, page, W }) => {
+  await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await onboard(page, { gym: 0, running: 2, food: false, wellbeing: true });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('.today__date').waitFor({ timeout: 10000 });
+  await startsOn(page, W, '2026-10-18 23:5', 'Sonntag, 18. Oktober');
+  await page.getByRole('button', { name: 'Lauf eintragen' }).click();
+  await page.waitForTimeout(1200);
+  const runs = async () => (await idbAll(page, 'runs')).map((r) => ({ date: r.date, distance: r.distanceMetres ?? null }));
+  const before = await runs();
+  check(`${W}: one run on 18.10 before midnight`, before.length === 1 && before[0].date === '2026-10-18', short(before));
+  await page.locator('section.section').filter({ has: page.locator('h2.section__label', { hasText: /^Laufen$/ }) }).locator('.row').last().click();
+  await page.locator('.sheet').waitFor({ timeout: 3000 });
+  await page.locator('#session-distance').fill('5.2');
+
+  await fastForwardTo(ctx, page, '2026-10-19T00:01:00+02:00');
+  await ctx.clock.runFor('00:30');
+  await page.waitForTimeout(800);
+  check(`${W}: (precondition) the clock is past Sunday midnight`, (await pageNow(page)).startsWith('2026-10-19 00:0'), await pageNow(page));
+  check(`${W}: the run sheet is still open with 5.2`, (await page.locator('#session-distance').count()) === 1 && (await page.locator('#session-distance').inputValue()) === '5.2');
+  await page.locator('.sheet__footer button.button--primary').click();
+  await page.locator('.toast').waitFor({ timeout: 3000 }).catch(() => undefined);
+  const message = await page.locator('.toast__message').textContent().catch(() => null);
+  check(`${W}: the refused save is said out loud`, message === 'Nicht gespeichert – das Training bleibt, wie es war.', String(message));
+  const after = await runs();
+  check(`${W}: the closed week's run is unchanged`, after.length === 1 && after[0].distance === null, short(after));
+  const moved = await waitForLabel(page, 'Montag, 19. Oktober');
+  check(`${W}: Heute shows Montag, 19. Oktober`, moved.ok, short(moved.seen));
 });
 
 await browser.close();

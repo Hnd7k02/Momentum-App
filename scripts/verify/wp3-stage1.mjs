@@ -444,6 +444,24 @@ for (const [width, height] of SIZES) {
     await page.waitForTimeout(600);
     check(`${W}: B9 both runs are still stored`, (await idb(page, 'runs')).length === 2, String((await idb(page, 'runs')).length));
 
+    // From the keyboard: a held Enter repeats, a quick double press is two
+    // presses. Either is one run (review of the Stage 1 fixes).
+    const logButton = page.getByRole('button', { name: 'Lauf eintragen' });
+    await logButton.focus();
+    for (let i = 0; i < 20; i += 1) {
+      await page.keyboard.down('Enter');
+      await sleep(30);
+    }
+    await page.keyboard.up('Enter');
+    await page.waitForTimeout(1200);
+    check(`${W}: B9 a held Enter logs one run`, (await idb(page, 'runs')).length === 3, String((await idb(page, 'runs')).length));
+    check(`${W}: B9 the log button keeps focus`, await logButton.evaluate((el) => el === document.activeElement));
+    await page.keyboard.press('Enter');
+    await sleep(120);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1200);
+    check(`${W}: B9 a quick double Enter logs one run`, (await idb(page, 'runs')).length === 4, String((await idb(page, 'runs')).length));
+
     /* B10 on a paused day: the pause line sits between the Boss card and
        the first section, and takes the same 28px rhythm on both sides. */
     await page.evaluate(async (from) => {
