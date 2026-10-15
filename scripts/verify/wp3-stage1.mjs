@@ -479,6 +479,58 @@ for (const [width, height] of SIZES) {
     await ctx.close();
   }
 
+  /* ── A3: Fertig while the draft's first set is still saving ────────── */
+  /*
+   * The cursor is still in the kg field when "Fertig" is tapped: the blur
+   * saves the set — and turns the draft into a session — a moment before the
+   * tap lands. The workout closes once that write is stored and stays closed
+   * (review of the Stage 1 fixes: a late session id reopened it, without the
+   * set on screen).
+   */
+  {
+    const { ctx, page, errors } = await newPage(width, height);
+    await onboard(page, { gym: 3, running: 0 });
+    await page.evaluate(async () => {
+      const db = await new Promise((res, rej) => { const q = indexedDB.open('momentum'); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+      await new Promise((res, rej) => {
+        const tx = db.transaction(['gymPlans'], 'readwrite');
+        tx.objectStore('gymPlans').put({ id: 'wp3-stage1-plan', kind: 'userTrainingPlan', version: 1, name: 'Push',
+          exercises: [{ exerciseId: 'ex_bench_press', name: 'Bankdrücken', order: 0 }],
+          createdAt: '2026-10-01T10:00:00.000Z', updatedAt: '2026-10-01T10:00:00.000Z' });
+        tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+      });
+      db.close();
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(900);
+    await page.getByRole('button', { name: 'Session eintragen' }).click();
+    await page.waitForTimeout(700);
+    await page.locator('.plan-chooser .row').filter({ hasText: 'Push' }).first().click();
+    await page.waitForTimeout(900);
+    check(`${W}: A3 the plan draft is open`, (await page.locator('.gym-session').count()) === 1);
+    const pendingRow = page.locator('.gym-set--pending').first();
+    await pendingRow.locator('input').nth(0).fill('8');
+    await pendingRow.locator('input').nth(1).fill('60');
+    await page.getByRole('button', { name: 'Fertig' }).click();
+    const closedAfter = await until(() => page.locator('.gym-session').count(), (n) => n === 0, { timeout: 2000, gap: 50 });
+    const open = [];
+    for (let i = 0; i < 8; i += 1) {
+      await sleep(250);
+      open.push(await page.locator('.gym-session').count());
+    }
+    check(`${W}: A3 the workout closes once the set is stored`, closedAfter === 0, String(closedAfter));
+    check(`${W}: A3 and stays closed for the next 2 s`, open.every((n) => n === 0), short(open));
+    const sessions = await idb(page, 'gymSessions');
+    const sets = await idb(page, 'gymSets');
+    check(`${W}: A3 the set typed before Fertig is stored, in one session`,
+      sessions.length === 1 && sets.length === 1 && sets[0].reps === 8 && sets[0].weightGrams === 60000 && sets[0].sessionId === sessions[0].id,
+      short({ sessions: sessions.length, sets: sets.map((x) => [x.reps, x.weightGrams]) }));
+    const week = await until(() => textOf(gymSection(page).locator('.week__value')), (v) => /^1 \/ 3/.test(v ?? ''));
+    check(`${W}: A3 Heute counts the session at once`, /^1 \/ 3 /.test(week ?? ''), String(week));
+    check(`${W} A3: no page errors`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
   /* ── A2: the start week on the Gym board — D127 ─────────────────────── */
   /*
    * Gym only, installed mid-week, one session: the board starts the same day
@@ -521,7 +573,12 @@ for (const [width, height] of SIZES) {
       shown !== null && shown.number === '–' && shown.scale === 0 && shown.bar === 0, short(shown));
     check(`${W}: D127 it says "Startwoche · zählt ab Montag"`, shown?.line === 'Startwoche · zählt ab Montag', short(shown));
     check(`${W}: D127 nothing on the board reads "0 von 0"`, !/\b0 von 0\b/.test((await page.locator('.areas__scroll').textContent()) ?? ''));
-    await tile.scrollIntoViewIfNeeded().catch(() => undefined);
+    // The whole board in view: its rating tile at the top of the scroller.
+    await page.evaluate(() => {
+      const board = document.querySelector('[data-metric="gym-rating"]');
+      const scroller = board?.closest('.areas__scroll');
+      if (board && scroller) scroller.scrollTop += board.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 48;
+    });
     await page.waitForTimeout(300);
     await page.screenshot({ path: shotPath(width, 'hub-start-week') });
     await layoutChecks(page, `${W} hub in the start week`);

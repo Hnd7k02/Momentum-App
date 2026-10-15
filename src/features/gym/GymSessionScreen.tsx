@@ -438,12 +438,30 @@ export function GymSessionScreen({
    * everything the workout wrote.
    */
   const releaseChanges = useRef<(() => void) | null>(null);
+  /** Set once the screen is closing or gone; nothing is reported after it. */
+  const closed = useRef(false);
+  /** The write in flight, if any — the one a tap's blur may just have started. */
+  const pending = useRef<Promise<unknown> | null>(null);
   useEffect(() => {
+    // Mounted (again, under StrictMode's double effect in development).
+    closed.current = false;
     const release = holdChanges();
     releaseChanges.current = release;
-    return release;
+    return () => {
+      closed.current = true;
+      release();
+    };
   }, []);
-  const close = () => {
+  /*
+   * Closing waits for the write in flight. Tapping "Fertig" with the cursor
+   * still in a set's field saves that set on blur, a moment before the tap
+   * lands; closing at once would let the host reload before the set — and,
+   * for a draft, the session — was stored.
+   */
+  const close = async () => {
+    if (closed.current) return;
+    closed.current = true;
+    await pending.current;
     releaseChanges.current?.();
     onClose();
   };
@@ -469,7 +487,7 @@ export function GymSessionScreen({
     (operation: () => Promise<unknown>) => {
       if (busy.current) return;
       busy.current = true;
-      operation()
+      pending.current = operation()
         .catch(() => undefined)
         .then(() => {
           busy.current = false;
@@ -493,7 +511,8 @@ export function GymSessionScreen({
     );
     sessionRef.current = session.id;
     setActiveSessionId(session.id);
-    onSessionCreated?.(session.id);
+    // A screen that has already gone must not reopen the workout it left.
+    if (!closed.current) onSessionCreated?.(session.id);
     return session.id;
   };
 
@@ -504,7 +523,7 @@ export function GymSessionScreen({
           <button
             type="button"
             className="button button--quiet gym-session__back"
-            onClick={close}
+            onClick={() => void close()}
             aria-label={t('common.back')}
           >
             <ChevronLeftIcon />
@@ -581,7 +600,7 @@ export function GymSessionScreen({
         <button
           type="button"
           className="button button--quiet gym-session__back"
-          onClick={close}
+          onClick={() => void close()}
           aria-label={t('common.back')}
         >
           <ChevronLeftIcon />
@@ -752,7 +771,7 @@ export function GymSessionScreen({
           </Button>
         ) : null}
 
-        <Button variant="primary" block onClick={close}>
+        <Button variant="primary" block onClick={() => void close()}>
           {t('gym.done')}
         </Button>
       </div>

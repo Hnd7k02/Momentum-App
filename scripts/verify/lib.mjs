@@ -1,4 +1,5 @@
-export const URL_APP = 'http://127.0.0.1:4173/Momentum-App/';
+// URL_APP=http://127.0.0.1:<port>/Momentum-App/ points a suite at another preview.
+export const URL_APP = process.env.URL_APP ?? 'http://127.0.0.1:4173/Momentum-App/';
 export const results = [];
 export const check = (n, p, d = '') => {
   results.push({ n, p, d });
