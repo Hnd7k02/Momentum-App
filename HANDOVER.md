@@ -268,9 +268,20 @@ records (answers, sessions, sets, snapshots)
   (`core/gym/weight.ts`, `app/useWeights.tsx`): 1 lb = 453.59237 g, typed lb
   rounded to whole grams, lb shown with at most one decimal; sets, the
   last-time line, best set, bodyweight, exercise detail and progress figures.
+- Review (four reviewers, each finding verified): every workout action now
+  decides from what is stored when its turn in the write queue comes, not
+  from the render it was tapped on (D131) — the tap's own blur may just have
+  saved a set or made the draft a session. Removals return what they
+  removed and the undo restores exactly that; "+ Satz" copies the stored set
+  before it (`repeatLastSet`); a pending row saves when the focus leaves the
+  row; a weight is unchanged by value, and an emptied field is not zero
+  (D130); a repeated plan line counts once; "Fertig" never stamps a
+  pre-field session (D129); a unit or language that failed to store goes
+  back. All reproduced first in `workoutScreen.test.tsx`,
+  `workoutFlow.test.ts` and `app/useMomentum.test.tsx`.
 - Verification: `wp3-stage2` (see `scripts/verify/README.md`), the service
-  tests in `workoutFlow.test.ts` and `weight.test.ts`; screenshots in
-  `docs/design/wp3/stage2/`. `release`, `phase4-a11y`, `phase8` and
+  tests in `workoutFlow.test.ts` and `weight.test.ts`, the screen tests in
+  `workoutScreen.test.tsx`; screenshots in `docs/design/wp3/stage2/`. `release`, `phase4-a11y`, `phase8` and
   `wp3-sheets` now log a real set where they used to count an opened
   workout.
 
