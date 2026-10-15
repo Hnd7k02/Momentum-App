@@ -16,6 +16,12 @@ npx vite preview --port 4173 &          # the scripts expect this exact port
 node scripts/verify/phase4.mjs          # exits 0 only if every check passes
 ```
 
+**The 3D timing suites run alone** — `gym-muscles`, `body` and `body-reach`
+count animation frames, wait for a rotation to settle or tap a grid over the
+canvas. Under other browsers running in parallel they can miss a frame
+budget, which says nothing about the code; a gate is green only when each
+of them passes on its own. Every other suite may run in parallel.
+
 Chromium comes from the image at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`,
 which each script names explicitly — Playwright's own default path is not
 populated here. If that directory moves, change `executablePath` in the

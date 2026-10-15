@@ -292,6 +292,18 @@ records (answers, sessions, sets, snapshots)
   `wp3-sheets` now log a real set where they used to count an opened
   workout.
 
+- Real-device preview: the Stage 2 build (`fbd4942`) is published to
+  Momentum-preview (`cf81a3b`, https://hnd7k02.github.io/Momentum-preview/).
+- **Decided at STOP 2, built in Stage 3b:** (1) a session the user empties —
+  its last set or exercise removed — is deleted, since a session without
+  sets should not exist (P6); bare sessions stored before P6 stay history;
+  (2) a finished workout runs again only when a *new* set is added to it,
+  never when an existing set is corrected; (3) an assisted exercise needs
+  its load typed — an explicit 0 stays allowed for "no assistance"; (4) the
+  global double-tap guard stays; (5) the bundle growth is accepted.
+- Gates: the 3D timing suites (`gym-muscles`, `body`, `body-reach`) run
+  alone, never in parallel (`scripts/verify/README.md`).
+
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
   repositories exist, no logic and no UI. **Weight entries are now reachable**
