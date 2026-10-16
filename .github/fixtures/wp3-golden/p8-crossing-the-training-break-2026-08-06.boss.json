@@ -4,7 +4,7 @@
   "origin": "2026-06-01",
   "rank": "master",
   "peakRank": "master",
-  "progress": 5.555796264,
+  "progress": 5.546751911,
   "lifetimeXp": 4395,
   "points": [
    [
@@ -323,24 +323,24 @@
     0.018240308
    ],
    [
-    5.550589701,
-    771.576661152,
-    -0.052096474
+    5.553359407,
+    771.936722877,
+    -0.049326769
    ],
    [
-    5.57859755,
-    775.217681549,
-    0.028007849
+    5.576895626,
+    774.996431351,
+    0.023536219
    ],
    [
-    5.599244424,
-    777.901775157,
-    0.020646874
+    5.593621986,
+    777.170858128,
+    0.01672636
    ],
    [
-    5.555796264,
-    772.253514318,
-    -0.04344816
+    5.546751911,
+    771.077748403,
+    -0.046870075
    ]
   ],
   "changes": [
@@ -363,9 +363,9 @@
   "domains": [
    {
     "domain": "mental",
-    "momentum": 709.962465091,
-    "peakMomentum": 724.297607388,
-    "progress": 5.076634347,
+    "momentum": 706.952486576,
+    "peakMomentum": 722.157128807,
+    "progress": 5.053480666,
     "started": true,
     "series": [
      1.928571429,
@@ -432,9 +432,9 @@
      5.013690994,
      5.086021824,
      5.086021824,
-     5.127806461,
-     5.186904672,
-     5.076634347
+     5.119024128,
+     5.170439452,
+     5.053480666
     ],
     "active": [
      false,
@@ -653,9 +653,9 @@
    },
    {
     "domain": "running",
-    "momentum": 785.883474043,
-    "peakMomentum": 785.883474043,
-    "progress": 5.660642108,
+    "momentum": 787.422091524,
+    "peakMomentum": 787.422091524,
+    "progress": 5.672477627,
     "started": true,
     "series": [
      2.433333333,
@@ -721,10 +721,10 @@
      5.591146778,
      5.606583272,
      5.621198211,
-     5.621198211,
      5.635046739,
      5.648179295,
-     5.660642108
+     5.660642108,
+     5.672477627
     ],
     "active": [
      true,
@@ -798,9 +798,9 @@
    },
    {
     "domain": "food",
-    "momentum": 678.08122053,
-    "peakMomentum": 688.513340676,
-    "progress": 4.843437289,
+    "momentum": 675.071242015,
+    "peakMomentum": 687.37163732,
+    "progress": 4.821937443,
     "started": true,
     "series": [
      1.928571429,
@@ -867,9 +867,9 @@
      4.816445592,
      4.832709545,
      4.832709545,
-     4.917952433,
-     4.861763216,
-     4.843437289
+     4.909797409,
+     4.846474084,
+     4.821937443
     ],
     "active": [
      false,
@@ -963,7 +963,7 @@
    "abstinence": 10
   },
   "running": {
-   "rating": 785.883474043,
+   "rating": 787.422091524,
    "sessionsThisWeek": 2,
    "weeklyTarget": 2,
    "endurance": {
@@ -1491,8 +1491,8 @@
     ],
     [
      "2026-08-03",
-     "open",
-     null,
+     "scored",
+     33.333333333,
      100,
      4,
      0
@@ -1586,7 +1586,7 @@
     57.083333333,
     68.958333333,
     72.708333333,
-    null,
+    33.333333333,
     90,
     78.333333333,
     66.666666667
@@ -1655,7 +1655,7 @@
     45,
     82.5,
     87.5,
-    null,
+    0,
     80,
     85,
     40
@@ -1793,7 +1793,7 @@
     100,
     100,
     100,
-    null,
+    100,
     100,
     100,
     100
@@ -1862,7 +1862,7 @@
     50,
     60,
     70,
-    null,
+    0,
     90,
     50,
     60
@@ -2143,7 +2143,7 @@
       80,
       90,
       100,
-      null,
+      0,
       50,
       60,
       70
@@ -2217,7 +2217,7 @@
       0,
       100,
       100,
-      null,
+      0,
       100,
       100,
       0
@@ -2291,7 +2291,7 @@
       100,
       40,
       50,
-      null,
+      0,
       70,
       80,
       90
@@ -2365,7 +2365,7 @@
       0,
       100,
       100,
-      null,
+      0,
       100,
       100,
       0
@@ -2640,9 +2640,9 @@
    772.704782995,
    771.536679877,
    771.536679877,
-   778.883784256,
-   780.338336731,
-   776.177448108
+   777.7420809,
+   778.197858149,
+   773.167469593
   ]
  },
  "pending": null,
@@ -3304,20 +3304,20 @@
     "rating": 767.725416334,
     "streak": 0,
     "streakBonus": 0,
-    "weight": 1,
+    "weight": 0,
     "decay": 0,
     "calibrating": false,
-    "skipped": false
+    "skipped": true
    },
    {
     "date": "2026-08-06",
     "rating": 767.725416334,
     "streak": 0,
     "streakBonus": 0,
-    "weight": 1,
+    "weight": 0,
     "decay": 0,
     "calibrating": false,
-    "skipped": false
+    "skipped": true
    }
   ],
   "detail": [
@@ -4106,24 +4106,24 @@
     "rating": 767.725416334,
     "target": null,
     "attendance": 0,
-    "performance": 995.876220495,
+    "performance": null,
     "movement": 0,
     "decayFraction": 0.25,
-    "decaying": true,
+    "decaying": false,
     "maintenance": false,
-    "skipped": false
+    "skipped": true
    },
    {
     "date": "2026-08-06",
     "rating": 767.725416334,
     "target": null,
     "attendance": 0,
-    "performance": 995.876220495,
+    "performance": null,
     "movement": 0,
     "decayFraction": 0.25,
-    "decaying": true,
+    "decaying": false,
     "maintenance": false,
-    "skipped": false
+    "skipped": true
    }
   ],
   "rating": 767.725416334,
@@ -5118,16 +5118,6 @@
    },
    {
     "date": "2026-08-03",
-    "rating": 780.75576749,
-    "streak": 0,
-    "streakBonus": 0,
-    "weight": 0,
-    "decay": 0,
-    "calibrating": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-08-04",
     "rating": 782.556076115,
     "streak": 0,
     "streakBonus": 0,
@@ -5137,7 +5127,7 @@
     "skipped": false
    },
    {
-    "date": "2026-08-05",
+    "date": "2026-08-04",
     "rating": 784.263308398,
     "streak": 0,
     "streakBonus": 0,
@@ -5147,8 +5137,18 @@
     "skipped": false
    },
    {
-    "date": "2026-08-06",
+    "date": "2026-08-05",
     "rating": 785.883474043,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-08-06",
+    "rating": 787.422091524,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -5916,18 +5916,6 @@
    },
    {
     "date": "2026-08-03",
-    "rating": 780.75576749,
-    "target": null,
-    "attendance": 0,
-    "performance": null,
-    "movement": 0,
-    "decayFraction": 0,
-    "decaying": false,
-    "maintenance": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-08-04",
     "rating": 782.556076115,
     "target": 821.812916515,
     "attendance": 1000,
@@ -5939,7 +5927,7 @@
     "skipped": false
    },
    {
-    "date": "2026-08-05",
+    "date": "2026-08-04",
     "rating": 784.263308398,
     "target": 821.812916515,
     "attendance": 1000,
@@ -5951,7 +5939,7 @@
     "skipped": false
    },
    {
-    "date": "2026-08-06",
+    "date": "2026-08-05",
     "rating": 785.883474043,
     "target": 821.812916515,
     "attendance": 1000,
@@ -5961,10 +5949,22 @@
     "decaying": false,
     "maintenance": false,
     "skipped": false
+   },
+   {
+    "date": "2026-08-06",
+    "rating": 787.422091524,
+    "target": 821.812916515,
+    "attendance": 1000,
+    "performance": 703.021527525,
+    "movement": 0.042823305,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
    }
   ],
-  "rating": 785.883474043,
-  "peak": 785.883474043,
+  "rating": 787.422091524,
+  "peak": 787.422091524,
   "model": "attendancePerformance",
   "origin": "2026-06-02",
   "ageMonths": 2,

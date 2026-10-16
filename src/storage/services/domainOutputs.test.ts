@@ -234,8 +234,10 @@ describe('domain outputs are the same before and after presentation work', () =>
  * question 7). One crosses into the P8 era in the middle of the training
  * break profile; the other has promotion confirmation active (D126) and
  * crosses into P8 too. Each is replayed at the clocks where a P8 rule
- * decides something — the files are the pre-P8 replay, and the Stage 3b
- * report names every value that moves against them, and why.
+ * decides something. First frozen as the pre-P8 replay; re-frozen at STOP 3b
+ * under the P8 rules, once every value that moved had been explained
+ * (`docs/design/wp3/stage3b-golden.md`) — every one of them on a day of the
+ * P8 era.
  *
  * Beyond the usual outputs these serialise the whole Gym and Running rating
  * states (every day's attendance, abstinence and decay) and the
@@ -254,7 +256,7 @@ const P8_PROFILES: { name: string; load(): string; clocks: readonly string[] }[]
   { name: 'p8 with promotion confirmation', load: confirmationProfile, clocks: CONFIRMATION_CLOCKS },
 ];
 
-describe('the P8 golden profiles (frozen before Stage 3b)', () => {
+describe('the P8 golden profiles (re-frozen at STOP 3b under the P8 rules)', () => {
   afterEach(async () => {
     setClock(null);
     await closeDatabase();

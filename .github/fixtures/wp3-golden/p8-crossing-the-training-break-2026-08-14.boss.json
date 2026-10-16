@@ -4,7 +4,7 @@
   "origin": "2026-06-01",
   "rank": "master",
   "peakRank": "master",
-  "progress": 5.627945003,
+  "progress": 5.622277834,
   "lifetimeXp": 4785,
   "points": [
    [
@@ -368,19 +368,19 @@
     0.016995857
    ],
    [
-    5.541809926,
-    770.435290355,
-    0
+    5.544592982,
+    770.797087701,
+    0.002783057
    ],
    [
-    5.580144679,
-    775.418808323,
-    0.038334754
+    5.578461259,
+    775.19996366,
+    0.033868277
    ],
    [
-    5.627945003,
-    781.632850379,
-    0.047800324
+    5.622277834,
+    780.896118369,
+    0.043816575
    ]
   ],
   "changes": [
@@ -403,9 +403,9 @@
   "domains": [
    {
     "domain": "mental",
-    "momentum": 739.061992483,
-    "peakMomentum": 739.061992483,
-    "progress": 5.300476865,
+    "momentum": 736.921513902,
+    "peakMomentum": 736.921513902,
+    "progress": 5.284011645,
     "started": true,
     "series": [
      1.928571429,
@@ -481,8 +481,8 @@
      5.090599226,
      5.131346835,
      5.131346835,
-     5.208099629,
-     5.300476865
+     5.199317295,
+     5.284011645
     ],
     "active": [
      false,
@@ -725,9 +725,9 @@
    },
    {
     "domain": "running",
-    "momentum": 797.649745742,
-    "peakMomentum": 797.649745742,
-    "progress": 5.75115189,
+    "momentum": 799.284942609,
+    "peakMomentum": 799.284942609,
+    "progress": 5.763730328,
     "started": true,
     "series": [
      2.433333333,
@@ -802,9 +802,9 @@
      5.701223728,
      5.709358569,
      5.724011531,
-     5.724011531,
      5.737926814,
-     5.75115189
+     5.75115189,
+     5.763730328
     ],
     "active": [
      true,
@@ -886,9 +886,9 @@
    },
    {
     "domain": "food",
-    "momentum": 701.234971611,
-    "peakMomentum": 701.234971611,
-    "progress": 5.009499782,
+    "momentum": 699.09449303,
+    "peakMomentum": 699.09449303,
+    "progress": 4.993532093,
     "started": true,
     "series": [
      1.928571429,
@@ -964,8 +964,8 @@
      4.901287641,
      4.87894985,
      4.87894985,
-     4.927455646,
-     5.009499782
+     4.919300622,
+     4.993532093
     ],
     "active": [
      false,
@@ -1067,7 +1067,7 @@
    "abstinence": 18
   },
   "running": {
-   "rating": 797.649745742,
+   "rating": 799.284942609,
    "sessionsThisWeek": 2,
    "weeklyTarget": 2,
    "endurance": {
@@ -1667,8 +1667,8 @@
     ],
     [
      "2026-08-12",
-     "open",
-     null,
+     "scored",
+     33.333333333,
      100,
      4,
      0
@@ -1763,7 +1763,7 @@
     56.875,
     75,
     80,
-    null,
+    33.333333333,
     90,
     95
    ],
@@ -1840,7 +1840,7 @@
     37.5,
     75,
     80,
-    null,
+    0,
     90,
     95
    ],
@@ -1994,7 +1994,7 @@
     100,
     100,
     100,
-    null,
+    100,
     100,
     100
    ],
@@ -2071,7 +2071,7 @@
     90,
     50,
     60,
-    null,
+    0,
     80,
     90
    ],
@@ -2384,7 +2384,7 @@
       100,
       40,
       50,
-      null,
+      0,
       70,
       80
      ]
@@ -2466,7 +2466,7 @@
       0,
       100,
       100,
-      null,
+      0,
       100,
       100
      ]
@@ -2548,7 +2548,7 @@
       50,
       60,
       70,
-      null,
+      0,
       90,
       100
      ]
@@ -2630,7 +2630,7 @@
       0,
       100,
       100,
-      null,
+      0,
       100,
       100
      ]
@@ -2933,8 +2933,8 @@
    733.584672929,
    737.828489169,
    737.828489169,
-   746.803862542,
-   757.858838558
+   745.662159185,
+   755.718359976
   ]
  },
  "pending": null,
@@ -3676,20 +3676,20 @@
     "rating": 745.150277556,
     "streak": 0,
     "streakBonus": 0,
-    "weight": 1,
+    "weight": 0,
     "decay": 0,
     "calibrating": false,
-    "skipped": false
+    "skipped": true
    },
    {
     "date": "2026-08-14",
     "rating": 745.150277556,
     "streak": 0,
     "streakBonus": 0,
-    "weight": 1,
+    "weight": 0,
     "decay": 0,
     "calibrating": false,
-    "skipped": false
+    "skipped": true
    }
   ],
   "detail": [
@@ -4574,24 +4574,24 @@
     "rating": 745.150277556,
     "target": null,
     "attendance": 0,
-    "performance": 912.275142422,
+    "performance": null,
     "movement": 0,
     "decayFraction": 0.5,
-    "decaying": true,
+    "decaying": false,
     "maintenance": false,
-    "skipped": false
+    "skipped": true
    },
    {
     "date": "2026-08-14",
     "rating": 745.150277556,
     "target": null,
     "attendance": 0,
-    "performance": 991.890656013,
+    "performance": null,
     "movement": 0,
     "decayFraction": 0.5,
-    "decaying": true,
+    "decaying": false,
     "maintenance": false,
-    "skipped": false
+    "skipped": true
    }
   ],
   "rating": 745.150277556,
@@ -5690,16 +5690,6 @@
    },
    {
     "date": "2026-08-12",
-    "rating": 794.121499055,
-    "streak": 0,
-    "streakBonus": 0,
-    "weight": 0,
-    "decay": 0,
-    "calibrating": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-08-13",
     "rating": 795.930485789,
     "streak": 0,
     "streakBonus": 0,
@@ -5709,8 +5699,18 @@
     "skipped": false
    },
    {
-    "date": "2026-08-14",
+    "date": "2026-08-13",
     "rating": 797.649745742,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-08-14",
+    "rating": 799.284942609,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -6586,18 +6586,6 @@
    },
    {
     "date": "2026-08-12",
-    "rating": 794.121499055,
-    "target": null,
-    "attendance": 0,
-    "performance": null,
-    "movement": 0,
-    "decayFraction": 0,
-    "decaying": false,
-    "maintenance": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-08-13",
     "rating": 795.930485789,
     "target": 838.054856004,
     "attendance": 1000,
@@ -6609,7 +6597,7 @@
     "skipped": false
    },
    {
-    "date": "2026-08-14",
+    "date": "2026-08-13",
     "rating": 797.649745742,
     "target": 838.054856004,
     "attendance": 1000,
@@ -6619,10 +6607,22 @@
     "decaying": false,
     "maintenance": false,
     "skipped": false
+   },
+   {
+    "date": "2026-08-14",
+    "rating": 799.284942609,
+    "target": 838.054856004,
+    "attendance": 1000,
+    "performance": 730.091426673,
+    "movement": 0.040470051,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
    }
   ],
-  "rating": 797.649745742,
-  "peak": 797.649745742,
+  "rating": 799.284942609,
+  "peak": 799.284942609,
   "model": "attendancePerformance",
   "origin": "2026-06-02",
   "ageMonths": 2,

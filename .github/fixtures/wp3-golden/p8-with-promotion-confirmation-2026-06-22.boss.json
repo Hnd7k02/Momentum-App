@@ -4,8 +4,8 @@
   "origin": "2026-06-01",
   "rank": "contender",
   "peakRank": "contender",
-  "progress": 4.781223243,
-  "lifetimeXp": 1570,
+  "progress": 4.835438788,
+  "lifetimeXp": 1450,
   "points": [
    [
     2.433333333,
@@ -98,24 +98,24 @@
     0.088480415
    ],
    [
-    4.761477421,
-    666.606838975,
-    0
+    4.764973128,
+    667.096237918,
+    0.003495707
    ],
    [
-    4.821075022,
-    674.95050309,
-    0.059597601
+    4.820523043,
+    674.873225998,
+    0.055549915
    ],
    [
-    4.871606356,
-    682.02488987,
-    0.050531334
+    4.867502831,
+    681.450396401,
+    0.046979789
    ],
    [
-    4.781223243,
-    669.371254011,
-    -0.090383113
+    4.835438788,
+    676.961430385,
+    -0.032064043
    ]
   ],
   "changes": [
@@ -133,9 +133,9 @@
   "domains": [
    {
     "domain": "mental",
-    "momentum": 541.088555746,
-    "peakMomentum": 554.465721846,
-    "progress": 3.873923705,
+    "momentum": 538.078577231,
+    "peakMomentum": 552.325243265,
+    "progress": 3.853857182,
     "started": true,
     "series": [
      1.928571429,
@@ -157,9 +157,9 @@
      3.604997557,
      3.740473303,
      3.740473303,
-     3.845959619,
-     3.963104812,
-     3.873923705
+     3.838348263,
+     3.948834955,
+     3.853857182
     ],
     "active": [
      false,
@@ -188,9 +188,9 @@
    },
    {
     "domain": "gym",
-    "momentum": 751.094776578,
-    "peakMomentum": 777.670526195,
-    "progress": 5.393036743,
+    "momentum": 777.749575704,
+    "peakMomentum": 777.749575704,
+    "progress": 5.598073659,
     "started": true,
     "series": [
      2.433333333,
@@ -211,10 +211,10 @@
      5.43670135,
      5.520579184,
      5.596799337,
-     5.596799337,
      5.597140072,
      5.597465586,
-     5.393036743
+     5.597776564,
+     5.598073659
     ],
     "active": [
      true,
@@ -243,9 +243,9 @@
    },
    {
     "domain": "running",
-    "momentum": 692.187809704,
-    "peakMomentum": 692.187809704,
-    "progress": 4.944198641,
+    "momentum": 694.104222343,
+    "peakMomentum": 694.104222343,
+    "progress": 4.957887302,
     "started": true,
     "series": [
      2.433333333,
@@ -266,10 +266,10 @@
      4.858816401,
      4.878497107,
      4.896760435,
-     4.896760435,
      4.913727865,
      4.929508088,
-     4.944198641
+     4.944198641,
+     4.957887302
     ],
     "active": [
      true,
@@ -298,9 +298,9 @@
    },
    {
     "domain": "food",
-    "momentum": 518.78308632,
-    "peakMomentum": 518.78308632,
-    "progress": 3.725220575,
+    "momentum": 515.773107805,
+    "peakMomentum": 515.773107805,
+    "progress": 3.705154052,
     "started": true,
     "series": [
      1.928571429,
@@ -322,9 +322,9 @@
      3.467438548,
      3.545152598,
      3.545152598,
-     3.684226274,
-     3.688421855,
-     3.725220575
+     3.676614919,
+     3.674151998,
+     3.705154052
     ],
     "active": [
      false,
@@ -353,11 +353,11 @@
    }
   ],
   "gym": {
-   "rating": 751.094776578,
+   "rating": 777.749575704,
    "sessionsThisWeek": 1,
    "weeklyTarget": 3,
    "endurance": {
-    "progress": 3,
+    "progress": 2,
     "unlocked": false
    },
    "ytdChange": 3.869047619,
@@ -373,11 +373,11 @@
    "abstinence": null
   },
   "running": {
-   "rating": 692.187809704,
+   "rating": 694.104222343,
    "sessionsThisWeek": 2,
    "weeklyTarget": 2,
    "endurance": {
-    "progress": 3,
+    "progress": 2,
     "unlocked": false
    },
    "ytdChange": 1.123595506,
@@ -541,8 +541,8 @@
     ],
     [
      "2026-06-19",
-     "open",
-     null,
+     "scored",
+     50,
      100,
      4,
      0
@@ -566,8 +566,8 @@
     [
      "2026-06-22",
      "scored",
-     54.583333333,
-     54.583333333,
+     71.25,
+     71.25,
      4,
      4
     ]
@@ -591,10 +591,10 @@
     70,
     86.25,
     90,
-    null,
+    50,
     93.125,
     84.375,
-    54.583333333
+    71.25
    ],
    "mental": [
     0,
@@ -615,7 +615,7 @@
     30,
     85,
     90,
-    null,
+    0,
     82.5,
     87.5,
     25
@@ -639,10 +639,10 @@
     100,
     100,
     100,
-    null,
     100,
     100,
-    33.333333333
+    100,
+    100
    ],
    "running": [
     100,
@@ -663,7 +663,7 @@
     100,
     100,
     100,
-    null,
+    100,
     100,
     100,
     100
@@ -687,7 +687,7 @@
     50,
     60,
     70,
-    null,
+    0,
     90,
     50,
     60
@@ -788,7 +788,7 @@
       50,
       60,
       70,
-      null,
+      0,
       90,
       100,
       40
@@ -817,7 +817,7 @@
       0,
       100,
       100,
-      null,
+      0,
       100,
       100,
       0
@@ -846,7 +846,7 @@
       70,
       80,
       90,
-      null,
+      0,
       40,
       50,
       60
@@ -875,7 +875,7 @@
       0,
       100,
       100,
-      null,
+      0,
       100,
       100,
       0
@@ -985,34 +985,20 @@
    568.559880736,
    585.605679011,
    585.605679011,
-   603.443678405,
-   616.291256188,
-   614.217801012
+   602.301975049,
+   614.150777606,
+   619.258630328
   ]
  },
  "pending": {
   "targetRankId": "elite",
-  "eligibleDates": [
-   "2026-06-15",
-   "2026-06-16",
-   "2026-06-17",
-   "2026-06-18",
-   "2026-06-20",
-   "2026-06-21"
-  ],
+  "eligibleDates": [],
   "required": 7
  },
  "confirmation": {
   "from": "2026-06-01",
   "targetRankId": "elite",
-  "eligibleDates": [
-   "2026-06-15",
-   "2026-06-16",
-   "2026-06-17",
-   "2026-06-18",
-   "2026-06-20",
-   "2026-06-21"
-  ]
+  "eligibleDates": []
  },
  "gym": {
   "points": [
@@ -1198,16 +1184,6 @@
    },
    {
     "date": "2026-06-19",
-    "rating": 777.583913782,
-    "streak": 0,
-    "streakBonus": 0,
-    "weight": 0,
-    "decay": 0,
-    "calibrating": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-06-20",
     "rating": 777.628209409,
     "streak": 0,
     "streakBonus": 0,
@@ -1217,7 +1193,7 @@
     "skipped": false
    },
    {
-    "date": "2026-06-21",
+    "date": "2026-06-20",
     "rating": 777.670526195,
     "streak": 0,
     "streakBonus": 0,
@@ -1227,8 +1203,18 @@
     "skipped": false
    },
    {
+    "date": "2026-06-21",
+    "rating": 777.710953275,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
     "date": "2026-06-22",
-    "rating": 751.094776578,
+    "rating": 777.749575704,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -1456,18 +1442,6 @@
    },
    {
     "date": "2026-06-19",
-    "rating": 777.583913782,
-    "target": null,
-    "attendance": 0,
-    "performance": null,
-    "movement": 0,
-    "decayFraction": 0,
-    "decaying": false,
-    "maintenance": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-06-20",
     "rating": 777.628209409,
     "target": 778.579696689,
     "attendance": 1000,
@@ -1479,7 +1453,7 @@
     "skipped": false
    },
    {
-    "date": "2026-06-21",
+    "date": "2026-06-20",
     "rating": 777.670526195,
     "target": 778.579696689,
     "attendance": 1000,
@@ -1491,29 +1465,41 @@
     "skipped": false
    },
    {
-    "date": "2026-06-22",
-    "rating": 751.094776578,
-    "target": 511.913030022,
-    "attendance": 333.333333333,
+    "date": "2026-06-21",
+    "rating": 777.710953275,
+    "target": 778.579696689,
+    "attendance": 1000,
     "performance": 630.966161148,
-    "movement": 0.1,
+    "movement": 0.044465895,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 777.749575704,
+    "target": 778.579696689,
+    "attendance": 1000,
+    "performance": 630.966161148,
+    "movement": 0.044457809,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
     "skipped": false
    }
   ],
-  "rating": 751.094776578,
-  "peak": 777.670526195,
+  "rating": 777.749575704,
+  "peak": 777.749575704,
   "model": "attendancePerformance",
   "origin": "2026-06-01",
   "ageMonths": 0,
   "endurance": {
-   "progress": 3,
+   "progress": 2,
    "required": 4,
    "unlocked": false,
    "unlockedAt": null,
-   "remaining": 1,
+   "remaining": 2,
    "points": [
     {
      "weekKey": "2026-W23",
@@ -1525,12 +1511,6 @@
      "weekKey": "2026-W24",
      "met": true,
      "progress": 2,
-     "unlocked": false
-    },
-    {
-     "weekKey": "2026-W25",
-     "met": true,
-     "progress": 3,
      "unlocked": false
     }
    ]
@@ -1960,16 +1940,6 @@
    },
    {
     "date": "2026-06-19",
-    "rating": 685.546460918,
-    "streak": 0,
-    "streakBonus": 0,
-    "weight": 0,
-    "decay": 0,
-    "calibrating": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-06-20",
     "rating": 687.921901157,
     "streak": 0,
     "streakBonus": 0,
@@ -1979,7 +1949,7 @@
     "skipped": false
    },
    {
-    "date": "2026-06-21",
+    "date": "2026-06-20",
     "rating": 690.131132307,
     "streak": 0,
     "streakBonus": 0,
@@ -1989,8 +1959,18 @@
     "skipped": false
    },
    {
-    "date": "2026-06-22",
+    "date": "2026-06-21",
     "rating": 692.187809704,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 694.104222343,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -2218,18 +2198,6 @@
    },
    {
     "date": "2026-06-19",
-    "rating": 685.546460918,
-    "target": null,
-    "attendance": 0,
-    "performance": null,
-    "movement": 0,
-    "decayFraction": 0,
-    "decaying": false,
-    "maintenance": false,
-    "skipped": true
-   },
-   {
-    "date": "2026-06-20",
     "rating": 687.921901157,
     "target": 723.317386421,
     "attendance": 1000,
@@ -2241,7 +2209,7 @@
     "skipped": false
    },
    {
-    "date": "2026-06-21",
+    "date": "2026-06-20",
     "rating": 690.131132307,
     "target": 723.317386421,
     "attendance": 1000,
@@ -2253,7 +2221,7 @@
     "skipped": false
    },
    {
-    "date": "2026-06-22",
+    "date": "2026-06-21",
     "rating": 692.187809704,
     "target": 723.317386421,
     "attendance": 1000,
@@ -2263,19 +2231,31 @@
     "decaying": false,
     "maintenance": false,
     "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 694.104222343,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.061562438,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
    }
   ],
-  "rating": 692.187809704,
-  "peak": 692.187809704,
+  "rating": 694.104222343,
+  "peak": 694.104222343,
   "model": "attendancePerformance",
   "origin": "2026-06-02",
   "ageMonths": 0,
   "endurance": {
-   "progress": 3,
+   "progress": 2,
    "required": 4,
    "unlocked": false,
    "unlockedAt": null,
-   "remaining": 1,
+   "remaining": 2,
    "points": [
     {
      "weekKey": "2026-W23",
@@ -2287,12 +2267,6 @@
      "weekKey": "2026-W24",
      "met": true,
      "progress": 2,
-     "unlocked": false
-    },
-    {
-     "weekKey": "2026-W25",
-     "met": true,
-     "progress": 3,
      "unlocked": false
     }
    ]
