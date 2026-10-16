@@ -83,9 +83,19 @@ const pageNow = (page) =>
   });
 const pageEpoch = (page) => page.evaluate(() => Date.now());
 
-/** Heute's date label, or null while Heute is in its loading state. */
+/**
+ * Heute's date label, or null while Heute is in its loading state.
+ *
+ * The date stands above the load gate since Stage 3b (D138), so it names a
+ * new day while that day is still loading. Read alone it would let a check
+ * go on before the day has mounted — and the loaded day mounting re-reads
+ * the clock (useToday's subscribe), so a clock moved in that window shows up
+ * as a label that moved with no event. The busy scroll area is the loading
+ * state.
+ */
 const label = (page) =>
   page.evaluate(() => {
+    if (document.querySelector('.today__scroll[aria-busy="true"]')) return null;
     const el = document.querySelector('.today__date');
     return el ? (el.textContent ?? '').replace(/\s+/g, ' ').trim() : null;
   });
