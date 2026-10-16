@@ -438,7 +438,12 @@ describe('the bodyweight card', () => {
   });
 
   it('says when the weight in force was entered, not the day of the session', async () => {
-    await recordBodyweight(80, '2026-09-23', '2026-09-23');
+    // A weigh-in from three weeks ago, as stored history (no write window
+    // reaches that far back any more, D133).
+    await weightEntriesRepository.put({
+      id: 'wt_old', date: '2026-09-23', kg: 80,
+      createdAt: '2026-09-23T07:00:00.000Z', updatedAt: '2026-09-23T07:00:00.000Z',
+    });
     await open({ draft: await planDraft(['ex_pull_up']) });
     const text = () => document.querySelector('.gym-bodyweight')?.closest('.card')?.textContent ?? '';
     await until(() => text().includes('Zuletzt gewogen'));

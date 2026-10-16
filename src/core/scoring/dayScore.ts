@@ -58,6 +58,13 @@ export interface WeeklyDayInput {
   sessionsInWeek: number;
   /** A week still running cannot have missed its target yet. */
   weekInProgress: boolean;
+  /**
+   * P8 (D134): the target is judged when the week is over. While such a
+   * week is still in progress and anything has been logged, it counts as
+   * met; nothing logged is still no data. Absent on every week before P8,
+   * which reports its running progress as it always did.
+   */
+  judgedAtClose?: boolean;
 }
 
 /**
@@ -250,6 +257,8 @@ function scoreMental(input: MentalDayInput, countUnansweredAsMissed: boolean): M
  */
 function scoreWeekly(input: WeeklyDayInput): number | null {
   if (input.weekInProgress && input.sessionsInWeek === 0) return null;
+  // Judged once its Sunday can no longer be written; until then, met.
+  if (input.weekInProgress && input.judgedAtClose === true) return 100;
   const target = Math.max(1, input.target);
   return Math.min(100, (input.sessionsInWeek / target) * 100);
 }

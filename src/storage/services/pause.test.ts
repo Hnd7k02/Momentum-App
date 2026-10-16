@@ -376,10 +376,17 @@ describe('a pause and the training model', () => {
     const partial = await run([1, 8, 15, 22]);
     const full = await run([1, 4, 8, 11, 15, 18, 22, 25]);
 
-    // Turning up a little costs exactly nothing.
-    expect(partial.gym.rating).toBeCloseTo(nothing.gym.rating, 6);
+    // Turning up a little costs exactly nothing once a week is judged: the
+    // last judged day (Sunday 8 March, judged on the 10th) is identical.
+    const judged = (boss: typeof nothing) => boss.gym.points.find((point) => point.date === '2026-03-08')!.rating;
+    expect(judged(partial)).toBeCloseTo(judged(nothing), 6);
+    // The last week is still in progress on its Sunday, and its target is
+    // judged when it is over (D134): until then a session in it counts as
+    // met. So turning up never costs, and for now even shows.
+    expect(partial.gym.rating).toBeGreaterThanOrEqual(nothing.gym.rating);
     // And turning up properly still climbs — a pause is not a ceiling.
     expect(full.gym.rating).toBeGreaterThan(nothing.gym.rating);
+    expect(judged(full)).toBeGreaterThan(judged(nothing));
   });
 
   it('is not attendance, and is not a saved session', async () => {

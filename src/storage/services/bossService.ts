@@ -1,4 +1,5 @@
 import { today } from '../../core/clock';
+import { dayClosed, daySettled, snapshotOn, weekWindows } from '../../core/config/closure';
 import type { DateKey } from '../../core/dates';
 import {
   BOSS_PROGRESS_MAX,
@@ -156,7 +157,11 @@ function eraByDate(
  * in June without June's ledger being dragged down by a spring it was not
  * asked about.
  */
-function domainDayStates(history: History, domain: DomainType): DayState[] {
+function domainDayStates(
+  history: History,
+  domain: DomainType,
+  p8Week: (date: DateKey) => boolean = () => false,
+): DayState[] {
   return history.days.map((day, index) => {
     const paused = history.paused[index] === true;
     const entry = day.domains.find((candidate) => candidate.domain === domain);
@@ -168,6 +173,26 @@ function domainDayStates(history: History, domain: DomainType): DayState[] {
         recordedScore: null,
         dueItems: 0,
         answeredItems: 0,
+        recorded: false,
+        complete: false,
+        paused,
+      };
+    }
+    /*
+     * P8 (D134): a training domain with nothing logged in a week that can
+     * still take a session has no data on this day, whatever else the day
+     * scored. Inheriting the day's 'scored' charged zero attendance for a
+     * week whose Sunday could still be written — a charge the first session
+     * of the week then took back. A week before P8 keeps the old reading.
+     */
+    if (entry.score === null && p8Week(day.date)) {
+      return {
+        date: day.date,
+        status: 'neutral',
+        score: null,
+        recordedScore: null,
+        dueItems: entry.itemsDue,
+        answeredItems: entry.itemsAnswered,
         recorded: false,
         complete: false,
         paused,
@@ -233,7 +258,9 @@ export async function loadBossProgression(
    * it reads every other domain's.
    */
   const gymSessions = await gymSessionsRepository.getAll();
-  const gymDayStates = domainDayStates(history, 'gym');
+  const weekWindowOf = weekWindows(snapshots);
+  const p8Week = (date: DateKey): boolean => weekWindowOf(date) !== null;
+  const gymDayStates = domainDayStates(history, 'gym', p8Week);
   const firstDate = dates[0];
   const lastDate = dates[dates.length - 1];
   const gym = buildGymRating({
@@ -249,7 +276,7 @@ export async function loadBossProgression(
   /* Running is replayed from its runs the same way, and by the same shared
      scoring code once its own evidence has been reduced to a percentage. */
   const runs = await runsRepository.getAll();
-  const runningDayStates = domainDayStates(history, 'running');
+  const runningDayStates = domainDayStates(history, 'running', p8Week);
   const running = buildRunningRating({
     history,
     dayStates: runningDayStates,
@@ -314,6 +341,13 @@ export async function loadBossProgression(
    */
   const settings = await settingsRepository.get();
   const activation = settings?.promotionConfirmation ?? null;
+  const p8Closure = (date: DateKey): { closed?: boolean; settled?: boolean } => {
+    const dayConfig = snapshotOn(snapshots, date);
+    const weekWindow = weekWindowOf(date);
+    const closed = dayClosed(date, reference, dayConfig, weekWindow);
+    const settled = daySettled(date, reference, dayConfig, weekWindow);
+    return closed === null || settled === null ? {} : { closed, settled };
+  };
   const walk = activation
     ? confirmedRankHistory(
         points.map((point, index) => ({
@@ -321,6 +355,8 @@ export async function loadBossProgression(
           rating: point.rating,
           scored: history.days[index]!.status === 'scored',
           paused: history.paused[index] === true,
+          // P8 (D136): when a day may count. Absent before P8.
+          ...p8Closure(dates[index]!),
         })),
         { from: activation.from, today: reference },
       )

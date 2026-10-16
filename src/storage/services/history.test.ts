@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
 import { closeDatabase, deleteDatabase } from '../db';
+import { configSnapshotsRepository } from '../repositories';
 import {
   addQuestion,
   applyOnboarding,
@@ -67,13 +68,31 @@ describe('reconstructing past days', () => {
     freezeAt('2025-03-03');
     await applyOnboarding({ questions: [{ text: 'A', type: 'boolean', category: 'eigene' }], gymTargetPerWeek: null });
 
-    // On 8 March the window covers the 5th to the 8th; the 4th has closed.
+    // On 8 March the window covers the 7th and the 8th (P8, D132); the 6th
+    // has closed.
+    freezeAt('2025-03-08');
+    const history = await loadHistory('2025-03-03', '2025-03-08');
+    expect(history.days[at(history, '2025-03-07')]?.status).toBe('open');
+    expect(history.overall[at(history, '2025-03-07')]).toBeNull();
+    expect(history.days[at(history, '2025-03-06')]?.status).toBe('scored');
+    expect(history.overall[at(history, '2025-03-06')]).toBe(0);
+  });
+
+  it('closes a day lived before P8 by its own three-day window (D132)', async () => {
+    freezeAt('2025-03-03');
+    await applyOnboarding({ questions: [{ text: 'A', type: 'boolean', category: 'eigene' }], gymTargetPerWeek: null });
+    // The profile was set up by a build before P8: its snapshot has neither
+    // the one-day window nor the P8 marker.
+    const [snapshot] = await configSnapshotsRepository.list();
+    const { sessionWindowDays: _marker, ...scoring } = snapshot!.config.scoring;
+    await configSnapshotsRepository.replaceAll([
+      { ...snapshot!, config: { ...snapshot!.config, scoring: { ...scoring, editWindowDays: 3 } } },
+    ]);
+
     freezeAt('2025-03-08');
     const history = await loadHistory('2025-03-03', '2025-03-08');
     expect(history.days[at(history, '2025-03-05')]?.status).toBe('open');
-    expect(history.overall[at(history, '2025-03-05')]).toBeNull();
     expect(history.days[at(history, '2025-03-04')]?.status).toBe('scored');
-    expect(history.overall[at(history, '2025-03-04')]).toBe(0);
   });
 
   it('leaves days before the app was ever configured neutral', async () => {

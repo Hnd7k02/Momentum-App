@@ -52,6 +52,17 @@ export interface ConfirmationDay {
   /** `history.days[i].status === 'scored'`: the day was evaluated. */
   scored: boolean;
   paused: boolean;
+  /**
+   * P8 (D136), absent on a day before P8: nothing about the day can be
+   * written any more. Only such a day moves the demotion counter.
+   */
+  closed?: boolean;
+  /**
+   * P8 (D136), absent on a day before P8: closed, and — for a day with a
+   * weekly target — its week judged, so its rating is final. Only such a day
+   * counts towards a promotion.
+   */
+  settled?: boolean;
 }
 
 export interface PendingConfirmation {
@@ -122,8 +133,9 @@ export function confirmedRankHistory(
 
     const before = state.current;
     const natural = rankForRating(day.rating);
-    const eligibleDay =
-      compareDateKeys(day.date, options.today) < 0 && !day.paused && day.scored;
+    // Before P8: strictly before today. From P8: once its rating is final.
+    const past = day.settled ?? compareDateKeys(day.date, options.today) < 0;
+    const eligibleDay = past && !day.paused && day.scored;
 
     let promoted = false;
     if (eligibleDay && target !== null) {
@@ -155,8 +167,10 @@ export function confirmedRankHistory(
     }
 
     // The demotion step, on every point that did not confirm — exactly the
-    // legacy walk's, with its counter carried in from the prefix.
-    if (!promoted) rankWalkDemotionStep(state, day, natural, sustainDays);
+    // legacy walk's, with its counter carried in from the prefix. From P8 a
+    // day that can still be written is transparent to it (D136): a dip a
+    // backfill of that day could lift never counts towards a demotion.
+    if (!promoted && day.closed !== false) rankWalkDemotionStep(state, day, natural, sustainDays);
     if (state.current !== before && !promoted) retarget();
 
     if (state.current.index > state.peak.index) state.peak = state.current;

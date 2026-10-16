@@ -1,8 +1,6 @@
 import { nowIso, today } from '../../core/clock';
-import { EDIT_WINDOW_DAYS } from '../../core/config/constants';
+import { checkInWritable, sessionWritable, snapshotOn, weekWindows } from '../../core/config/closure';
 import {
-  dayEditState,
-  isSameWeek,
   weekKeyOf,
   type DateKey,
   type DayEditState,
@@ -17,6 +15,7 @@ import { isValidScaleValue } from '../../core/scoring/scale';
 import type {
   AnswerRecord,
   AnswerValue,
+  AppConfigSnapshot,
   DomainRecord,
   FoodEntryRecord,
   QuestionRecord,
@@ -26,6 +25,7 @@ import { weekProgress, type WeekProgress } from '../../domains/sports/weekProgre
 import { ensureCurrentSnapshot } from '../configService';
 import {
   answersRepository,
+  configSnapshotsRepository,
   domainsRepository,
   foodDaysRepository,
   foodEntriesRepository,
@@ -180,9 +180,53 @@ export interface DayView {
   empty: boolean;
 }
 
-function assertEditable(date: DateKey, reference: DateKey): void {
-  const state = dayEditState(date, reference, EDIT_WINDOW_DAYS);
-  if (state !== 'open') throw new EditWindowError(date, state);
+/**
+ * The one write rule, for a check-in answer or a Food rating (D133): today
+ * or yesterday, on a day of the P8 era. A day lived before the update keeps
+ * its own window for scoring but is never reopened by a write — so nothing
+ * can be written for a day once it may have been charged.
+ */
+async function assertEditable(date: DateKey, reference: DateKey, domain: StoredDomainType): Promise<void> {
+  const dayConfig = snapshotOn(await configSnapshotsRepository.list(), date);
+  if (!checkInWritable(date, reference, dayConfig)) {
+    throw new EditWindowError(date, date > reference ? 'future' : 'closed');
+  }
+  assertEnabledOn(dayConfig, domain, date);
+}
+
+/**
+ * A backfill may not reach a day on which its domain was not enabled (D133,
+ * STOP 3a question 10): it would date the domain's start before the user
+ * switched it on, and score a day that was never asked for.
+ */
+function assertEnabledOn(dayConfig: AppConfigSnapshot | null, domain: StoredDomainType, date: DateKey): void {
+  const enabled = dayConfig?.domains.some((entry) => entry.type === domain && entry.enabled) ?? false;
+  if (!enabled) throw new InvalidAnswerError(`${domain} was not enabled on ${date}`);
+}
+
+/** Whether a session, set, run or weight entry may be written for `date` (D133). */
+export async function sessionWritableOn(date: DateKey, reference: DateKey): Promise<boolean> {
+  const snapshots = await configSnapshotsRepository.list();
+  return sessionWritable(date, reference, snapshotOn(snapshots, date), weekWindows(snapshots)(date));
+}
+
+/**
+ * The one write rule for sessions, sets, runs and weight entries (D133):
+ * today or yesterday, on a day of the P8 era, in a week whose Sunday can
+ * still be written. `domain` adds the check that the domain was enabled on
+ * that day.
+ */
+export async function assertSessionWritable(
+  date: DateKey,
+  reference: DateKey,
+  domain?: StoredDomainType,
+): Promise<void> {
+  const snapshots = await configSnapshotsRepository.list();
+  const dayConfig = snapshotOn(snapshots, date);
+  if (!sessionWritable(date, reference, dayConfig, weekWindows(snapshots)(date))) {
+    throw new EditWindowError(date, date > reference ? 'future' : 'closed');
+  }
+  if (domain) assertEnabledOn(dayConfig, domain, date);
 }
 
 const minutesFromSeconds = (seconds: number | null): number | null =>
@@ -324,11 +368,15 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
     };
   }
 
-  const editState = dayEditState(date, reference, EDIT_WINDOW_DAYS);
+  // What the day view offers is the write rule, not the scoring window: a
+  // day lived before the update may still be open for scoring and already
+  // read-only (D133).
+  const writable = checkInWritable(date, reference, snapshotOn(await configSnapshotsRepository.list(), date));
+  const editState: DayEditState = writable ? 'open' : date > reference ? 'future' : 'closed';
   return {
     date,
     editState,
-    editable: editState === 'open',
+    editable: writable,
     mental,
     training,
     food,
@@ -380,7 +428,7 @@ export async function saveAnswer(
   value: AnswerValue,
   reference: DateKey = today(),
 ): Promise<AnswerRecord> {
-  assertEditable(date, reference);
+  await assertEditable(date, reference, 'mental');
   const question = await questionsRepository.get(questionId);
   if (!question) throw new InvalidAnswerError(`Unknown question ${questionId}`);
   const snapshot = await ensureCurrentSnapshot();
@@ -404,7 +452,7 @@ export async function clearAnswer(
   questionId: string,
   reference: DateKey = today(),
 ): Promise<void> {
-  assertEditable(date, reference);
+  await assertEditable(date, reference, 'mental');
   await answersRepository.clear(date, questionId);
 }
 
@@ -417,7 +465,10 @@ export interface SessionInput {
    * is what unlocks performance (D102).
    */
   distanceMetres?: number | null;
-  /** Moving a session within its own week — the day it actually happened. */
+  /**
+   * Moving a run to the day it actually happened: today or yesterday, across
+   * a week boundary too (D133). A Gym session keeps its day.
+   */
   date?: DateKey;
 }
 
@@ -427,20 +478,13 @@ function metresFrom(value: number | null | undefined): number | null {
   return Math.round(value);
 }
 
-/** A session may be logged for any day of the week it belongs to. */
-function assertSessionWeekEditable(date: DateKey, reference: DateKey): void {
-  if (!isSameWeek(date, reference)) {
-    throw new EditWindowError(date, 'closed');
-  }
-}
-
 export async function logSession(
   domain: StoredDomainType,
   date: DateKey = today(),
   input: SessionInput = {},
   reference: DateKey = today(),
 ): Promise<TrainingSession> {
-  assertSessionWeekEditable(date, reference);
+  await assertSessionWritable(date, reference, domain);
   const record = await domainsRepository.findByType(domain);
   if (!record || !record.enabled) {
     throw new InvalidAnswerError(`${domain} is not enabled`);
@@ -516,24 +560,24 @@ export async function updateSession(
   if (domain === 'gym') {
     const session = await gymSessionsRepository.get(id);
     if (!session) return;
-    assertSessionWeekEditable(session.date, reference);
-    const date = input.date ?? session.date;
-    if (date !== session.date) assertSessionWeekEditable(date, reference);
-    await gymSessionsRepository.put({
-      ...session,
-      date,
-      weekKey: weekKeyOf(date),
-      note: input.note ?? null,
-    });
+    await assertSessionWritable(session.date, reference);
+    // A Gym session keeps its day (D133, STOP 3a question 9): its sets carry
+    // their own date, so moving the session alone would split its attendance
+    // and its performance across two days, or two weeks.
+    if (input.date !== undefined && input.date !== session.date) {
+      throw new InvalidAnswerError('A Gym session keeps the day it was logged for');
+    }
+    await gymSessionsRepository.put({ ...session, note: input.note ?? null });
     return;
   }
 
   if (domain === 'running') {
     const run = await runsRepository.get(id);
     if (!run) return;
-    assertSessionWeekEditable(run.date, reference);
+    await assertSessionWritable(run.date, reference);
     const date = input.date ?? run.date;
-    if (date !== run.date) assertSessionWeekEditable(date, reference);
+    // Between today and yesterday only, across a week boundary too (D133).
+    if (date !== run.date) await assertSessionWritable(date, reference, 'running');
     await runsRepository.put({
       ...run,
       date,
@@ -552,9 +596,9 @@ export async function updateSession(
 
   const session = await sportsSessionsRepository.get(id);
   if (!session) return;
-  assertSessionWeekEditable(session.date, reference);
+  await assertSessionWritable(session.date, reference);
   const date = input.date ?? session.date;
-  if (date !== session.date) assertSessionWeekEditable(date, reference);
+  if (date !== session.date) await assertSessionWritable(date, reference);
   await sportsSessionsRepository.update(id, {
     date,
     note: input.note ?? null,
@@ -570,20 +614,20 @@ export async function deleteSession(
   if (domain === 'gym') {
     const session = await gymSessionsRepository.get(id);
     if (!session) return;
-    assertSessionWeekEditable(session.date, reference);
+    await assertSessionWritable(session.date, reference);
     await gymSessionsRepository.remove(id);
     return;
   }
   if (domain === 'running') {
     const run = await runsRepository.get(id);
     if (!run) return;
-    assertSessionWeekEditable(run.date, reference);
+    await assertSessionWritable(run.date, reference);
     await runsRepository.remove(id);
     return;
   }
   const session = await sportsSessionsRepository.get(id);
   if (!session) return;
-  assertSessionWeekEditable(session.date, reference);
+  await assertSessionWritable(session.date, reference);
   await sportsSessionsRepository.remove(id);
 }
 
@@ -606,7 +650,7 @@ export async function saveAdherence(
   note: string | null = null,
   reference: DateKey = today(),
 ): Promise<void> {
-  assertEditable(date, reference);
+  await assertEditable(date, reference, 'food');
   if (!isValidAdherence(adherence)) {
     throw new InvalidAnswerError('Adherence is a whole number from 1 to 10');
   }
@@ -624,7 +668,7 @@ export async function clearAdherence(
   date: DateKey,
   reference: DateKey = today(),
 ): Promise<void> {
-  assertEditable(date, reference);
+  await assertEditable(date, reference, 'food');
   await foodDaysRepository.clear(date);
 }
 
@@ -651,7 +695,7 @@ export async function addFoodEntry(
   input: FoodEntryInput,
   reference: DateKey = today(),
 ): Promise<FoodEntryRecord> {
-  assertEditable(date, reference);
+  await assertEditable(date, reference, 'food');
   const label = input.label.trim();
   if (label === '') throw new InvalidAnswerError('A food entry needs a name');
   if (!Number.isFinite(input.kcal) || input.kcal < 0) {
@@ -685,7 +729,7 @@ export async function removeFoodEntry(
   id: string,
   reference: DateKey = today(),
 ): Promise<void> {
-  assertEditable(date, reference);
+  await assertEditable(date, reference, 'food');
   const existing = await foodEntriesRepository.get(id);
   // A stale screen could ask to delete something from a day it is not on.
   if (!existing || existing.date !== date) return;

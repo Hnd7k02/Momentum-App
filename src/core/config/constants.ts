@@ -7,8 +7,30 @@
  * threshold, a weight or a window length.
  */
 
-/** Days after a day on which its check-ins may still be edited (today + 3). */
-export const EDIT_WINDOW_DAYS = 3;
+/**
+ * Days after a day on which it may still be written (P8, D132): today and
+ * yesterday. Written into every snapshot this build appends as
+ * `scoring.editWindowDays`, and read back per day by the replay, so a day
+ * lived under the old window keeps it (D132).
+ */
+export const EDIT_WINDOW_DAYS = 1;
+
+/**
+ * The window every snapshot before P8 carries (`editWindowDays: 3`), and the
+ * one a snapshot without the field is read with. Never written again, and
+ * never `EDIT_WINDOW_DAYS`: a snapshot restored without the field must not
+ * silently take today's window.
+ */
+export const LEGACY_EDIT_WINDOW_DAYS = 3;
+
+/**
+ * Days after a day on which a session, set, run or weight entry may still be
+ * written for it (P8: today and yesterday), and so how long a week stays in
+ * progress after its Sunday. Written as `scoring.sessionWindowDays`; a
+ * snapshot without it is the pre-P8 era — sessions within their ISO week, the
+ * week judged at Sunday midnight, abstinence and D126 as they were (D132).
+ */
+export const SESSION_WINDOW_DAYS = 1;
 
 /** Scale questions are answered on this inclusive integer range. */
 export const SCALE_MIN = 1;

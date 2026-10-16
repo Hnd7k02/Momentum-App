@@ -1,3 +1,4 @@
+import { sessionDayOpen, weekWindows } from '../../core/config/closure';
 import { RATING, TRAINING_RATING } from '../../core/config/constants';
 import { addDays, compareDateKeys, weekKeyOf, type DateKey, type WeekKey } from '../../core/dates';
 import type {
@@ -267,10 +268,14 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
       ? Infinity
       : dates.findIndex((date) => weekKeyOf(date) > endurance.unlockedAt!);
 
+  /* Each week's era (D132): a P8 week waits for its Sunday to close. */
+  const weekWindowOf = weekWindows(snapshots);
+
   const modernDays: TrainingRatingDay[] = [];
   for (let index = legacyEnd; index < dates.length; index += 1) {
     const date = dates[index]!;
     const state = dayStates[index];
+    const weekWindow = weekWindowOf(date);
     const week = weeks.get(weekKeyOf(date));
     const performance = performanceFor(date);
     modernDays.push({
@@ -287,13 +292,25 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
         state?.status === 'scored' &&
         week !== undefined &&
         !(pausedOn(date) && (week?.sessions ?? 0) === 0),
-      sessionsInWeek: week?.sessions ?? 0,
+      /*
+       * The weekly target is judged when the week is over (D134): while a
+       * P8 week can still take a session, anything logged in it counts as
+       * met, so a session written for yesterday can never lift a day this
+       * replay already charged. Performance moves daily all the same. The
+       * real count lands once the week's Sunday can no longer be written.
+       */
+      sessionsInWeek:
+        weekWindow !== null && week?.inProgress === true && (week?.sessions ?? 0) > 0
+          ? Math.max(week.sessions, week.target)
+          : week?.sessions ?? 0,
       weeklyTarget: week?.target ?? 1,
       sessionToday: runDates.has(date),
       paused: pausedOn(date),
       performance: performance.score,
       performanceChange: aggregateChange(performance),
       abstinentDays: abstinentDays[index] ?? 0,
+      // P8 (D135): a day that can still take a session is carried, not charged.
+      ...(sessionDayOpen(date, input.reference, weekWindow) ? { open: true } : {}),
       ageMonths: origin ? trainingAgeMonths(origin, date) : 0,
       // A week is only known to have been met once it is over.
       enduranceUnlocked: index >= unlockedFrom,

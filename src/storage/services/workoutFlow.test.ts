@@ -18,6 +18,7 @@ import {
   restoreExercise,
   restoreSet,
   startSessionFromDraft,
+  updateSet,
 } from './gymService';
 import { createTrainingPlan } from './trainingPlanService';
 
@@ -35,6 +36,7 @@ import { createTrainingPlan } from './trainingPlanService';
 const WEDNESDAY = '2026-10-14';
 const SUNDAY = '2026-10-18';
 const MONDAY = '2026-10-19';
+const TUESDAY = '2026-10-20';
 
 function freezeAt(day: string, hour = 9): void {
   const [y, m, d] = day.split('-').map(Number) as [number, number, number];
@@ -121,12 +123,61 @@ describe('a running workout', () => {
     expect('finishedAt' in (await gymSessionsRepository.get(session.id))!).toBe(false);
   });
 
-  it('leaves a session outside its week as it was when "Fertig" is tapped late', async () => {
+  it('records "Fertig" on yesterday\'s workout, across the week boundary, and not after its window', async () => {
     freezeAt(SUNDAY);
-    const session = await openSessionForDay(SUNDAY);
+    const sunday = await openSessionForDay(SUNDAY);
     freezeAt(MONDAY);
-    const after = await finishSession(session.id);
-    expect(after?.finishedAt).toBeNull();
+    expect(typeof (await finishSession(sunday.id))?.finishedAt).toBe('string');
+
+    freezeAt(SUNDAY);
+    const late = await openSessionForDay(SUNDAY);
+    await addSet({ sessionId: late.id, exerciseId: 'ex_bench_press', reps: 5, weightGrams: kg(60) });
+    freezeAt(TUESDAY);
+    expect((await finishSession(late.id))?.finishedAt).toBeNull();
+  });
+
+  it('runs again when a new set is added, and not when a set is corrected (STOP 2, decision 2)', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const set = await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    await finishSession(session.id);
+
+    await updateSet(set.id, { reps: 9 });
+    expect(typeof (await gymSessionsRepository.get(session.id))?.finishedAt).toBe('string');
+    expect(await loadRunningWorkout(WEDNESDAY)).toBeNull();
+
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    expect((await gymSessionsRepository.get(session.id))?.finishedAt).toBeNull();
+    expect(await loadRunningWorkout(WEDNESDAY)).toMatchObject({ sessionId: session.id, sets: 2 });
+  });
+});
+
+describe('a session the user empties (STOP 2, decision 1)', () => {
+  it('goes with its last set, and an undo brings it back as itself', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const set = await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    const stored = (await gymSessionsRepository.get(session.id))!;
+
+    const removed = await removeSet(set.id);
+    expect(removed?.session).toEqual(stored);
+    expect(await gymSessionsRepository.get(session.id)).toBeUndefined();
+
+    await restoreSet(removed!.set, undefined, removed!.session);
+    expect(await gymSessionsRepository.get(session.id)).toEqual(stored);
+    expect(await gymSetsRepository.get(set.id)).toEqual(set);
+  });
+
+  it('stays while it still has a set', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const first = await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    await addSet({ sessionId: session.id, exerciseId: 'ex_squat', reps: 5, weightGrams: kg(100) });
+    expect((await removeSet(first.id))?.session).toBeNull();
+    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
+  });
+
+  it('leaves a session stored empty before P6 alone', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    // Nothing removes a set from it, so nothing deletes it.
+    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
   });
 });
 
@@ -134,9 +185,9 @@ describe('undo', () => {
   it('puts a removed set back exactly as it was', async () => {
     const session = await openSessionForDay(WEDNESDAY);
     const set = await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
-    await removeSet(set.id);
+    const removed = await removeSet(set.id);
     expect(await gymSetsRepository.get(set.id)).toBeUndefined();
-    await restoreSet(set);
+    await restoreSet(set, undefined, removed!.session);
     expect(await gymSetsRepository.get(set.id)).toEqual(set);
   });
 
@@ -151,11 +202,13 @@ describe('undo', () => {
     const before = await loadSession(session.id);
     const line = before!.session.exercises!.find((entry) => entry.exerciseId === 'ex_incline_press')!;
 
-    await removeExerciseFromSession(session.id, 'ex_incline_press');
-    const removed = await loadSession(session.id);
-    expect(removed!.session.exercises!.map((entry) => entry.exerciseId)).toEqual(['ex_bench_press', 'ex_dip']);
+    const removed = await removeExerciseFromSession(session.id, 'ex_incline_press');
+    // Its sets were the session's only sets, so the session went too (D137),
+    // as it was without the line.
+    expect(await loadSession(session.id)).toBeNull();
+    expect(removed.session!.exercises!.map((entry) => entry.exerciseId)).toEqual(['ex_bench_press', 'ex_dip']);
 
-    await restoreExercise(session.id, [first, second], line);
+    await restoreExercise(session.id, [first, second], line, undefined, removed.session);
     const after = await loadSession(session.id);
     expect(after!.session.exercises).toEqual(before!.session.exercises);
     expect(after!.exercises.map((entry) => [entry.exercise.id, entry.sets.length])).toEqual([
@@ -169,19 +222,26 @@ describe('undo', () => {
   it("restores a free workout's exercise from its sets alone", async () => {
     const session = await openSessionForDay(WEDNESDAY);
     const set = await addSet({ sessionId: session.id, exerciseId: 'ex_squat', reps: 5, weightGrams: kg(100) });
-    await removeExerciseFromSession(session.id, 'ex_squat');
-    await restoreExercise(session.id, [set], null);
+    const removed = await removeExerciseFromSession(session.id, 'ex_squat');
+    await restoreExercise(session.id, [set], null, undefined, removed.session);
     expect((await gymSessionsRepository.get(session.id))!.exercises).toBeUndefined();
     expect(await gymSetsRepository.get(set.id)).toEqual(set);
   });
 
-  it('refuses an undo once the week has closed', async () => {
+  it('takes an undo of yesterday, and refuses it once the day can no longer be written', async () => {
     freezeAt(SUNDAY);
     const session = await openSessionForDay(SUNDAY);
     const set = await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    const keep = await addSet({ sessionId: session.id, exerciseId: 'ex_squat', reps: 5, weightGrams: kg(100) });
     await removeSet(set.id);
     freezeAt(MONDAY);
+    await restoreSet(set);
+    expect(await gymSetsRepository.get(set.id)).toEqual(set);
+
+    await removeSet(set.id);
+    freezeAt(TUESDAY);
     await expect(restoreSet(set)).rejects.toThrow();
     expect(await gymSetsRepository.get(set.id)).toBeUndefined();
+    expect(await gymSetsRepository.get(keep.id)).toEqual(keep);
   });
 });

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatDayAndMonth } from '../../i18n/format';
-import { isSameWeek, type DateKey } from '../../core/dates';
+import { type DateKey } from '../../core/dates';
 import type {
   ExerciseLoadType,
   ExerciseRecord,
@@ -28,6 +28,7 @@ import {
   recordBodyweight,
   finishSession,
   openSessionForDay,
+  reinstateSession,
   removeExerciseFromSession,
   removeSet,
   repeatLastSet,
@@ -35,8 +36,10 @@ import {
   restoreSet,
   startSessionFromDraft,
   updateSet,
+  workoutWritable,
   type LastRecorded,
   type NewExerciseInput,
+  type RemovedSet,
   type SessionDraft,
   type SessionExercise,
 } from '../../storage/services/gymService';
@@ -225,10 +228,11 @@ function SetRow({
             // rounded to one decimal, so re-parsing an untouched field would
             // move the stored grams (60 000 g → 60 010 g) — a fact the rating
             // replays. "Changed" is the value, not the text: 132,3 is 132.3.
-            // An empty field on a barbell is retyping abandoned, not a load of
-            // zero; on a bodyweight exercise it is no added weight.
+            // An empty field is retyping abandoned, not a load of zero — on
+            // a barbell and on an assisted exercise alike; only on a
+            // bodyweight exercise is it no added weight.
             const grams = weights.parse(weight);
-            const next = grams ?? (loadType === 'external' ? null : 0);
+            const next = grams ?? (loadType === 'bodyweight' ? 0 : null);
             if (next === null || next === weights.parse(sentWeight.current)) {
               setWeight(sentWeight.current);
               return;
@@ -288,9 +292,12 @@ function PendingSetRow({
   const tryCommit = () => {
     if (committed.current) return;
     const repsValue = Number(reps || 0);
-    // Known when it reads as a number: "." or "," is not a load.
+    // Known when it reads as a number: "." or "," is not a load. Only a
+    // bodyweight exercise may leave it empty — that is no added weight. An
+    // assisted one needs its assistance typed, an explicit 0 included
+    // (STOP 2, decision 3): left empty, it would score as no assistance.
     const grams = weights.parse(weight);
-    const weightKnown = grams !== null || loadType !== 'external';
+    const weightKnown = grams !== null || loadType === 'bodyweight';
     if (repsValue <= 0 || !weightKnown) return;
     committed.current = true;
     void onCommit({ reps: repsValue, weightGrams: grams ?? 0 }).then((stored) => {
@@ -530,22 +537,25 @@ export function GymSessionScreen({
    */
   const sessionRef = useRef<string | null>(sessionId);
   const [, setActiveSessionId] = useState<string | null>(sessionId);
+  /**
+   * The session this screen showed until the user emptied it (D137). It is
+   * deleted — a session without sets does not exist — and the page carries
+   * on as its draft, on its own day: the next set, or the undo, brings it
+   * back with the same id, so one workout is never counted twice.
+   */
+  const goneRef = useRef<GymSessionRecord | null>(null);
   /** The draft's exercises, held here until the first set makes them a snapshot. */
   const draftRef = useRef<GymSessionExerciseSnapshot[]>(draft?.exercises ?? []);
   const [draftVersion, setDraftVersion] = useState(0);
 
   /*
-   * A draft has written nothing, so it holds the day it was opened for only
-   * while that day's week is open. A Sunday draft still open after Monday
-   * 00:00 moves to today: kept on Sunday, every set would be refused by the
-   * closed week.
-   *
-   * Temporary, by decision (WP3, STOP 1): once Stage 3 keeps yesterday
-   * editable, this move goes and a draft keeps the day it was opened for,
-   * exactly as a workout does.
+   * A draft keeps the day it was opened for, exactly as a workout does (WP3,
+   * decided at STOP 1, built with P8). Once that day can no longer be
+   * written, the page says so and refuses its first set; it never moves to
+   * another day. The day turning is read so the page reloads into that state.
    */
   const now = useToday();
-  const draftDate = isSameWeek(date, now) ? date : now;
+  const draftDate = date;
   /**
    * A free workout's entries: the stored ones, plus every kept exercise
    * without a set, each where it was kept. An exercise shown once is kept.
@@ -577,22 +587,32 @@ export function GymSessionScreen({
     const id = sessionRef.current;
     if (id) {
       const view = await loadSession(id);
-      if (!view) throw new Error(`Unknown session ${id}`);
-      // A session that owns its structure lists it; a bare one lists its sets
-      // and whatever the user picked here and has not logged yet.
-      if (view.session.exercises !== undefined) return view;
-      return { ...view, exercises: await withKept(view.exercises, view.session.date) };
+      if (view) {
+        // A session that owns its structure lists it; a bare one lists its
+        // sets and whatever the user picked here and has not logged yet.
+        if (view.session.exercises !== undefined) return view;
+        return { ...view, exercises: await withKept(view.exercises, view.session.date) };
+      }
+      // Gone underneath the screen: carry on as its draft.
+      sessionRef.current = null;
     }
-    if (free) return { session: null, editable: true, exercises: await withKept([], draftDate) };
+    const gone = goneRef.current;
+    const day = gone?.date ?? draftDate;
+    if (gone ? gone.exercises === undefined : free) {
+      return { session: null, editable: await workoutWritable(day), exercises: await withKept([], day) };
+    }
     const view = await loadDraftView(
-      { planId: draft?.planId ?? null, exercises: draftRef.current },
-      draftDate,
+      { planId: gone?.planId ?? draft?.planId ?? null, exercises: draftRef.current },
+      day,
     );
     return { session: null, ...view };
   }, [draft?.planId, draftDate, free, withKept]);
-  const { state, reload } = useLoadable(load, [draft?.planId, draftDate, free]);
+  const { state, reload } = useLoadable(load, [draft?.planId, draftDate, free, now]);
   /** The day this workout is on: the session's own once there is one. */
-  const day = state.status === 'ready' && state.value.session ? state.value.session.date : draftDate;
+  const day =
+    state.status === 'ready' && state.value.session
+      ? state.value.session.date
+      : goneRef.current?.date ?? draftDate;
 
   /*
    * Nothing behind a full-screen workout is on show, so the store's change
@@ -704,11 +724,20 @@ export function GymSessionScreen({
   const ensureSession = async (): Promise<string> => {
     const existing = sessionRef.current;
     if (existing) return existing;
-    // A free workout becomes a bare session, exactly as one always was; a
-    // planned one carries its draft as the session's own snapshot.
-    const session = free
-      ? await openSessionForDay(draftDate)
-      : await startSessionFromDraft({ planId: draft?.planId ?? null, exercises: draftRef.current }, draftDate);
+    const gone = goneRef.current;
+    // An emptied session comes back as itself, with the lines the draft has
+    // now (D137); otherwise a free workout becomes a bare session, exactly as
+    // one always was, and a planned one carries its draft as its snapshot.
+    const session = gone
+      ? await reinstateSession(
+          gone.exercises === undefined
+            ? gone
+            : { ...gone, exercises: draftRef.current.map((entry, order) => ({ ...entry, order })) },
+        )
+      : free
+        ? await openSessionForDay(draftDate)
+        : await startSessionFromDraft({ planId: draft?.planId ?? null, exercises: draftRef.current }, draftDate);
+    goneRef.current = null;
     sessionRef.current = session.id;
     setActiveSessionId(session.id);
     // A screen that has already gone must not reopen the workout it left.
@@ -755,9 +784,12 @@ export function GymSessionScreen({
 
   const view = state.value;
   const editable = view.editable;
-  const isDraft = view.session === null;
-  /** A free workout: the free draft, or a session that renders from its sets. */
-  const freeMode = isDraft ? free : view.session?.exercises === undefined;
+  /** A free workout: the free draft, a session that renders from its sets, or one emptied. */
+  const freeMode = view.session
+    ? view.session.exercises === undefined
+    : goneRef.current
+      ? goneRef.current.exercises === undefined
+      : free;
   /* Only asked for when a set in this session actually depends on it. */
   const needsBodyweight = view.exercises.some(
     (entry) => entry.exercise.loadType === 'bodyweight' || entry.exercise.loadType === 'assisted',
@@ -825,8 +857,28 @@ export function GymSessionScreen({
    * when the removal's turn comes; and the undo puts back exactly what went,
    * read from what was removed, never from the render (D131).
    */
+  /** The session went with its last set (D137): the page carries on as its draft. */
+  const sessionWent = (session: GymSessionRecord | null) => {
+    if (!session) return;
+    goneRef.current = session;
+    sessionRef.current = null;
+    setActiveSessionId(null);
+    if (session.exercises !== undefined) draftRef.current = session.exercises;
+  };
+  /** An undo put the session back: the page is that session again. */
+  const sessionBack = (session: GymSessionRecord | null) => {
+    if (!session) return;
+    goneRef.current = null;
+    sessionRef.current = session.id;
+    setActiveSessionId(session.id);
+  };
+
   const removeExercise = (exerciseId: string, name: string) => {
-    let removed: { sets: GymSetRecord[]; line: GymSessionExerciseSnapshot | null } | null = null;
+    let removed: {
+      sets: GymSetRecord[];
+      line: GymSessionExerciseSnapshot | null;
+      session: GymSessionRecord | null;
+    } | null = null;
     let keptAt = -1;
     let kept: { exerciseId: string; name: string } | undefined;
     const forget = () => {
@@ -845,13 +897,14 @@ export function GymSessionScreen({
       const id = sessionRef.current;
       if (id) {
         removed = await removeExerciseFromSession(id, exerciseId);
+        sessionWent(removed.session);
       } else {
         // Nothing stored yet: the line leaves the draft.
         const line = draftRef.current.find((entry) => entry.exerciseId === exerciseId) ?? null;
         draftRef.current = draftRef.current
           .filter((entry) => entry.exerciseId !== exerciseId)
           .map((entry, index) => ({ ...entry, order: index }));
-        removed = { sets: [], line };
+        removed = { sets: [], line, session: null };
       }
       forget();
     }).then((ok) => {
@@ -860,10 +913,12 @@ export function GymSessionScreen({
       offerUndo(t('gym.removed.exercise', { exercise: name }), () => {
         void run(async () => {
           keepAgain();
-          // The session as it is now: a draft may have become one since.
-          const id = sessionRef.current;
+          // The session as it is now: a draft may have become one since, and
+          // a session the removal emptied comes back as itself (D137).
+          const id = sessionRef.current ?? what.session?.id ?? null;
           if (id) {
-            await restoreExercise(id, what.sets, what.line);
+            await restoreExercise(id, what.sets, what.line, undefined, what.session);
+            sessionBack(what.session);
           } else if (what.line && !draftRef.current.some((entry) => entry.exerciseId === exerciseId)) {
             const next = [...draftRef.current];
             next.splice(Math.min(what.line.order, next.length), 0, what.line);
@@ -879,14 +934,18 @@ export function GymSessionScreen({
 
   /** Removing a set (P5): the undo puts back the set as it was stored when it went. */
   const removeOneSet = (setId: string, index: number, name: string) => {
-    let removed: GymSetRecord | undefined;
+    let removed: RemovedSet | undefined;
     void tap(async () => {
       removed = await removeSet(setId);
+      sessionWent(removed?.session ?? null);
     }).then((ok) => {
       const what = removed;
       if (!ok || !what) return;
       offerUndo(t('gym.removed.set', { number: index + 1, exercise: name }), () => {
-        void run(() => restoreSet(what)).then(undone);
+        void run(async () => {
+          await restoreSet(what.set, undefined, what.session);
+          sessionBack(what.session);
+        }).then(undone);
       });
     });
   };

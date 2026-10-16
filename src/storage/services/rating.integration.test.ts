@@ -97,7 +97,8 @@ describe('historical integrity', () => {
       gymTargetPerWeek: 2,
     });
     await recordGoodDays(20);
-    freezeAt(addDays(ORIGIN, 24));
+    // Logged the next day, as P8 allows (D133).
+    freezeAt(addDays(ORIGIN, 23));
     await logSession('gym', addDays(ORIGIN, 22));
 
     freezeAt(addDays(ORIGIN, 30));

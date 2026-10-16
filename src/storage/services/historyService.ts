@@ -20,6 +20,7 @@ import type {
 import type { WeekKey } from '../../core/dates';
 import { WEEKLY_DOMAIN_TYPES, weeklyTargetsIn } from '../../core/domains';
 import { pausedFlags } from '../../core/pause';
+import { editWindowOf, weekInProgress, weekWindows } from '../../core/config/closure';
 import {
   scoreDay,
   type DayScore,
@@ -260,6 +261,14 @@ export async function loadHistory(
    *  one that simply did not exist yet. */
   const dueByDate = new Map<DateKey, Set<string>>();
 
+  /*
+   * Each week's era, from the snapshot in force on its Monday (D132): a week
+   * of the P8 era stays in progress until its Sunday can no longer be
+   * written — Monday midnight — and is judged only then; a week before it is
+   * judged at Sunday midnight, as it always was.
+   */
+  const weekWindowOf = weekWindows(snapshots);
+
   const days: DayScore[] = dates.map((date) => {
     const config = resolveSnapshot(snapshots, date);
     const due = config ? mentalDueOn(config) : [];
@@ -275,13 +284,16 @@ export async function loadHistory(
 
     const weekKey = weekKeyOf(date);
     // A week that has not finished yet cannot have missed its target.
-    const weekInProgress = compareDateKeys(endOfWeek(date), reference) >= 0;
+    const weekWindow = weekWindowOf(date);
+    const inProgress = weekInProgress(date, reference, weekWindow);
     const weekly: WeeklyDayInput[] = config
       ? weeklyTargetsIn(config).map(({ domain, target }) => ({
           domain,
           target,
           sessionsInWeek: sessionsIn(domain, weekKey),
-          weekInProgress,
+          weekInProgress: inProgress,
+          // P8 (D134): the target is judged when the week is over.
+          ...(weekWindow === null ? {} : { judgedAtClose: true }),
         }))
       : [];
 
@@ -292,7 +304,8 @@ export async function loadHistory(
 
     return scoreDay({
       date,
-      editState: dayEditState(date, reference),
+      // The window of the day's own era: 3 before P8, 1 from it (D132).
+      editState: dayEditState(date, reference, editWindowOf(config)),
       mental: config
         ? {
             due,
@@ -372,7 +385,7 @@ export async function loadHistory(
       target: legacy?.target ?? null,
       sessions: legacy?.sessions ?? 0,
       met: legacy?.met ?? false,
-      inProgress: compareDateKeys(endOfWeek(monday), reference) >= 0,
+      inProgress: weekInProgress(monday, reference, weekWindowOf(monday)),
       domains: perDomain,
     };
   });

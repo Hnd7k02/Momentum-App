@@ -260,7 +260,8 @@ describe('the Endurance Phase for Running', () => {
     await runWeek(addDays(START, 7), 5000, 5.4);
     await logRun(addDays(START, 14), 5000, 5.3); // one run against a target of two
     await runWeek(addDays(START, 21), 5000, 5.2);
-    const { state } = await stateAt(addDays(START, 28));
+    // The fourth week is judged once its Sunday can no longer be written (D134).
+    const { state } = await stateAt(addDays(START, 29));
     expect(state.endurance.progress).toBeCloseTo(2.5, 6);
     expect(state.endurance.unlocked).toBe(false);
   });
@@ -268,7 +269,7 @@ describe('the Endurance Phase for Running', () => {
   it('uses Running\'s own weekly target, not Gym\'s', async () => {
     // Two runs a week meets a target of two; the requirement is still 4 weeks.
     for (let week = 0; week < 4; week += 1) await runWeek(addDays(START, week * 7), 5000, 5.5);
-    const { state } = await stateAt(addDays(START, 28));
+    const { state } = await stateAt(addDays(START, 29));
     expect(state.weeklyTarget).toBe(2);
     expect(state.endurance.progress).toBeCloseTo(4, 6);
   });
@@ -290,10 +291,13 @@ describe('abstinence decay for Running', () => {
     expect(state.decayFraction).toBe(0);
   });
 
-  it('decays at seven', async () => {
-    const { state } = await unlockThenStop(7);
-    expect(state.endurance.unlocked).toBe(true);
-    expect(state.abstinence?.days).toBe(7);
+  it('decays at seven, once the seventh silent day can no longer be written (D135)', async () => {
+    const today = await unlockThenStop(7);
+    expect(today.state.endurance.unlocked).toBe(true);
+    expect(today.state.abstinence?.days).toBe(7);
+    expect(today.state.decayFraction).toBe(0);
+    // Two days on, day seven is closed and the decay lands, once.
+    const { state } = await stateAt(addDays(START, 24 + 9));
     expect(state.decayFraction).toBeGreaterThan(0);
   });
 

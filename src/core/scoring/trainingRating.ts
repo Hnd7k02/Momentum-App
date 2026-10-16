@@ -220,6 +220,14 @@ export interface TrainingRatingDay {
    * against what was.
    */
   paused?: boolean;
+  /**
+   * P8 (D135): a session can still be written for this day. If the
+   * abstinence rule would decay it, the day is carried instead — no decay
+   * and no gap step, never both (D96) — and the charge lands once the day
+   * can no longer be backfilled. Absent on every day of a week before P8,
+   * which keeps the rule it was lived under.
+   */
+  open?: boolean;
   /** Gym training age in whole months on this day. */
   ageMonths: number;
   /** True once the Endurance Phase has been completed, on this day. */
@@ -304,6 +312,8 @@ export function computeTrainingRating(
    * is promoted or demoted by it (`decayTier.ts`).
    */
   let heldTier: DecayTier | null = null;
+  /** The episode's share removed so far, which a carried day reports unchanged. */
+  let carriedFraction = 0;
 
   for (const day of days) {
     // Any saved session ends the episode immediately. What was lost stays
@@ -326,6 +336,28 @@ export function computeTrainingRating(
       !day.sessionToday &&
       day.paused !== true &&
       day.abstinentDays >= TRAINING_RATING.ABSTINENCE_BLOCK_DAYS;
+
+    /*
+     * A day that would decay but can still receive a session is carried:
+     * charging it now is a charge a backfill of that very day would take
+     * back (D135). The episode does not begin, and nothing moves, until the
+     * day closes — then the replay charges it, once, for good.
+     */
+    if (decaying && day.open === true) {
+      points.push({
+        date: day.date,
+        rating,
+        target: null,
+        attendance: 0,
+        performance: null,
+        movement: 0,
+        decayFraction: carriedFraction,
+        decaying: false,
+        maintenance: false,
+        skipped: true,
+      });
+      continue;
+    }
 
     if (!day.scored && !decaying) {
       points.push({
@@ -368,8 +400,10 @@ export function computeTrainingRating(
         ageMonths: episode.ageMonths,
       });
       decayFraction = result.fraction;
+      carriedFraction = result.fraction;
       rating = clamp(result.rating);
     } else {
+      carriedFraction = 0;
       if (!day.sessionToday && day.abstinentDays === 0) episode = null;
       target = targetRating({ attendance, performance });
       if (

@@ -172,7 +172,7 @@ describe('logging a session', () => {
 });
 
 describe('the edit window, which Gym does not get its own version of', () => {
-  it('lets a set be changed within the week it belongs to', async () => {
+  it('lets a set be changed the next day, and not the day after (D133)', async () => {
     await ensureExerciseCatalogue();
     const session = await openSessionForDay(MONDAY);
     const set = await addSet({
@@ -181,9 +181,12 @@ describe('the edit window, which Gym does not get its own version of', () => {
       reps: 5,
       weightGrams: kg(100),
     });
-    // Thursday of the same week.
-    freezeAt('2026-03-05');
+    // Tuesday: Monday is yesterday.
+    freezeAt('2026-03-03');
     await expect(updateSet(set.id, { reps: 6 })).resolves.toBeDefined();
+    // Wednesday of the same week: no longer.
+    freezeAt('2026-03-04');
+    await expect(updateSet(set.id, { reps: 7 })).rejects.toThrow(EditWindowError);
   });
 
   it('refuses once that week has passed', async () => {

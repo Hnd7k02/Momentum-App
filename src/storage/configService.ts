@@ -1,4 +1,5 @@
 import { today } from '../core/clock';
+import { EDIT_WINDOW_DAYS, SESSION_WINDOW_DAYS } from '../core/config/constants';
 import { buildConfigSnapshot, configSnapshotsEqual } from '../core/config/snapshot';
 import type { DateKey } from '../core/dates';
 import type { AppConfigSnapshot, ConfigSnapshotRecord } from '../core/model';
@@ -48,4 +49,40 @@ export async function ensureCurrentSnapshot(
 export async function configForDate(date: DateKey): Promise<AppConfigSnapshot | undefined> {
   const record = await configSnapshotsRepository.resolveForDate(date);
   return record?.config;
+}
+
+/**
+ * The P8 era begins on the first load after the update (D132) — not on the
+ * first configuration write, which may never come, and which a write guard
+ * that refuses pre-P8 days would refuse anyway before it could append.
+ *
+ * Appends, effective today, the latest snapshot again with the one-day window
+ * and the P8 marker and nothing else new: it starts this era and no other (a
+ * device that skipped releases starts the Boss or model eras on its next real
+ * configuration change, exactly as it always did). On a day that already has
+ * a snapshot, that one is carried over with the two fields added. A snapshot
+ * dated after today — a clock that was ahead — is not in force yet and takes
+ * the fields too, so the era cannot flip back on its date. A profile with no
+ * snapshot at all is left alone: its first snapshot is written with the
+ * fields. Idempotent: once the latest snapshot carries the marker, nothing
+ * is written.
+ */
+export async function ensureSessionWindowEra(
+  effectiveFrom: DateKey = today(),
+): Promise<'unchanged' | 'appended'> {
+  const all = await configSnapshotsRepository.list();
+  const latest = all[all.length - 1];
+  if (!latest || latest.config.scoring.sessionWindowDays !== undefined) return 'unchanged';
+  const withMarker = (config: AppConfigSnapshot): AppConfigSnapshot => ({
+    ...config,
+    scoring: { ...config.scoring, editWindowDays: EDIT_WINDOW_DAYS, sessionWindowDays: SESSION_WINDOW_DAYS },
+  });
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? latest;
+  await configSnapshotsRepository.append(withMarker(inForce.config), effectiveFrom);
+  for (const later of all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom)) {
+    if (later.config.scoring.sessionWindowDays === undefined) {
+      await configSnapshotsRepository.append(withMarker(later.config), later.effectiveFrom);
+    }
+  }
+  return 'appended';
 }

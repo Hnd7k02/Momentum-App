@@ -325,6 +325,15 @@ export interface AppConfigSnapshot {
     gymModel?: GymScoringModel;
     /** Absent means `attendance`: the snapshot predates Running performance scoring. */
     runningModel?: RunningScoringModel;
+    /**
+     * P8 (D132): days after a day on which a session may still be written
+     * for it. Its presence is the P8 era — one write window for everything,
+     * a week judged once its Sunday can no longer be written, abstinence and
+     * promotions counted on closed days. Absent means the era before:
+     * sessions within their ISO week, the week judged at Sunday midnight.
+     * Never backfilled.
+     */
+    sessionWindowDays?: number;
   };
   /** Absent on every snapshot RC2 wrote. Absence means the RC2 era. */
   boss?: BossConfigSnapshot;

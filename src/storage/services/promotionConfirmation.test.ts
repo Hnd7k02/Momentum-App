@@ -7,7 +7,8 @@ import { addDays, type DateKey } from '../../core/dates';
 import { confirmationIndicator, confirmedRankHistory, canonicalConfirmation } from '../../core/ranks/confirmation';
 import { canonicalJson } from '../../testing/canonical';
 import { closeDatabase, deleteDatabase } from '../db';
-import { questionsRepository, settingsRepository } from '../repositories';
+import { dayClosed, daySettled, snapshotOn, weekWindows } from '../../core/config/closure';
+import { configSnapshotsRepository, questionsRepository, settingsRepository } from '../repositories';
 import { exportBackup, importBackup } from './backupService';
 import { loadBossProgression, type BossProgression } from './bossService';
 import { saveAnswer } from './checkInService';
@@ -31,15 +32,29 @@ const settingsJson = async () => JSON.stringify((await settingsRepository.get())
 /** The persisted shape, straight from the settings record. */
 const persisted = async () => (await settingsRepository.get())!.promotionConfirmation!;
 
-/** What the fold says about the loaded replay, recomputed from its inputs. */
-function recomputed(boss: BossProgression, today: DateKey) {
+/**
+ * What the fold says about the loaded replay, recomputed from its inputs —
+ * the day closure included, read from the snapshots as the service does
+ * (D136): a P8 day counts once it is settled, and moves the demotion counter
+ * once it is closed.
+ */
+async function recomputed(boss: BossProgression, today: DateKey) {
+  const snapshots = await configSnapshotsRepository.list();
+  const weekWindowOf = weekWindows(snapshots);
   const walk = confirmedRankHistory(
-    boss.points.map((point, index) => ({
-      date: boss.history.days[index]!.date,
-      rating: point.rating,
-      scored: boss.history.days[index]!.status === 'scored',
-      paused: boss.history.paused[index] === true,
-    })),
+    boss.points.map((point, index) => {
+      const date = boss.history.days[index]!.date;
+      const dayConfig = snapshotOn(snapshots, date);
+      const closed = dayClosed(date, today, dayConfig, weekWindowOf(date));
+      const settled = daySettled(date, today, dayConfig, weekWindowOf(date));
+      return {
+        date,
+        rating: point.rating,
+        scored: boss.history.days[index]!.status === 'scored',
+        paused: boss.history.paused[index] === true,
+        ...(closed === null || settled === null ? {} : { closed, settled }),
+      };
+    }),
     { from: boss.confirmation!.from, today },
   );
   return canonicalConfirmation(boss.confirmation!.from, walk.pending);
@@ -101,19 +116,28 @@ describe('a fresh install under the confirmation rule', () => {
     expect(confirmationIndicator(lastRating(boss), boss.pending)).toEqual({ targetRankId: 'challenger', count: 0, required: 7 });
     expect(await persisted()).toEqual({ from: D0, targetRankId: 'challenger', eligibleDates: [] });
 
-    // The next day, day one is past and counts.
+    // The next day, day one is yesterday: it can still be written, so it
+    // does not count yet (P8, D136).
     await climbUntil(D(1), climb);
+    boss = await loadBossProgression();
+    expect(boss.pending?.eligibleDates).toEqual([]);
+
+    // The day after, it can no longer be written, and it counts.
+    await climbUntil(D(2), climb);
     boss = await loadBossProgression();
     expect(boss.pending?.eligibleDates).toEqual([D0]);
   });
 
-  it('5, 6, 22, 23 — promotes one rank per confirmation, on the seventh past day, and starts the next from nothing', async () => {
-    await climbUntil(D(6), climb);
+  it('5, 6, 22, 23 — promotes one rank per confirmation, on the seventh settled day, and starts the next from nothing', async () => {
+    // A day counts once it can no longer be written — two days on (D136) —
+    // so each promotion lands one day later than under D126 alone, with
+    // the same date.
+    await climbUntil(D(7), climb);
     let boss = await loadBossProgression();
     expect(boss.rank.id).toBe('rookie');
     expect(boss.pending?.eligibleDates).toEqual([D(0), D(1), D(2), D(3), D(4), D(5)]);
 
-    await climbUntil(D(7), climb);
+    await climbUntil(D(8), climb);
     boss = await loadBossProgression();
     expect(boss.rank.id).toBe('challenger');
     expect(boss.changes).toEqual([
@@ -123,14 +147,14 @@ describe('a fresh install under the confirmation rule', () => {
     expect(boss.pending).toEqual({ targetRankId: 'contender', eligibleDates: [], required: 7 });
     expect(confirmationIndicator(lastRating(boss), boss.pending)).toEqual({ targetRankId: 'contender', count: 0, required: 7 });
 
-    await climbUntil(D(14), climb);
+    await climbUntil(D(15), climb);
     boss = await loadBossProgression();
     expect(boss.rank.id).toBe('contender');
     expect(boss.changes.map((c) => [c.to, c.date])).toEqual([['challenger', D(6)], ['contender', D(13)]]);
     expect(boss.pending).toEqual({ targetRankId: 'elite', eligibleDates: [], required: 7 });
     expect(boss.peakRank.id).toBe('contender');
 
-    await climbUntil(D(21), climb);
+    await climbUntil(D(22), climb);
     boss = await loadBossProgression();
     expect(boss.rank.id).toBe('elite');
     expect(boss.changes.map((c) => [c.to, c.date])).toEqual([['challenger', D(6)], ['contender', D(13)], ['elite', D(20)]]);
@@ -142,7 +166,8 @@ describe('a fresh install under the confirmation rule', () => {
     // The set is reconciled by the replay, so it is current after a load.
     await loadBossProgression();
     const first = await settingsJson();
-    expect(JSON.parse(first).eligibleDates).toEqual([D(7), D(8), D(9), D(10)]);
+    // D10 is yesterday and does not count yet (D136).
+    expect(JSON.parse(first).eligibleDates).toEqual([D(7), D(8), D(9)]);
     expect(Object.keys(JSON.parse(first))).toEqual(['from', 'targetRankId', 'eligibleDates']);
 
     await loadBossProgression();
@@ -165,27 +190,38 @@ describe('a fresh install under the confirmation rule', () => {
     expect(canonicalJson(again.changes)).toBe(canonicalJson(boss.changes));
   });
 
-  it('14, 15 — an edit inside the window corrects the sequence from history, not from the edit', async () => {
-    await climbUntil(D(20), steady); // Elite crossed on D17; today D20: [D17, D18, D19]
+  it('14, 15 — an edit inside the window never touches a counted day; the sequence follows history', async () => {
+    await climbUntil(D(20), steady); // Elite crossed on D17; today D20: [D17, D18], D19 pending
     let boss = await loadBossProgression();
     expect(boss.rank.id).toBe('contender');
-    expect(boss.pending?.eligibleDates).toEqual([D(17), D(18), D(19)]);
-
-    // D17 is three days back, still editable. Both answers to 1: the day
-    // falls below Elite, and the two after it, replayed from the lower
-    // rating, no longer clear it either.
+    expect(boss.pending?.eligibleDates).toEqual([D(17), D(18)]);
     const questions = await questionsRepository.list();
-    for (const question of questions) await saveAnswer(D(17), question.id, 1);
-    boss = await loadBossProgression();
-    expect(boss.points[17]!.rating).toBeLessThan(410);
-    expect(boss.pending?.eligibleDates).toEqual([]);
-    expect(await persisted()).toEqual(recomputed(boss, D(20)));
 
-    // And back: the sequence is rebuilt, not patched.
-    for (const question of questions) await saveAnswer(D(17), question.id, 5);
+    // A counted day can no longer be written: that is what makes it count
+    // (P8, D136). Nothing an edit does can reach it.
+    await expect(saveAnswer(D(17), questions[0]!.id, 1)).rejects.toThrow();
+
+    // Yesterday can. Both answers to 1: D19 falls below Elite — it has not
+    // been counted, so the set is unchanged while it can still be written.
+    for (const question of questions) await saveAnswer(D(19), question.id, 1);
     boss = await loadBossProgression();
-    expect(boss.pending?.eligibleDates).toEqual([D(17), D(18), D(19)]);
-    expect(await persisted()).toEqual(recomputed(boss, D(20)));
+    expect(boss.points[19]!.rating).toBeLessThan(410);
+    expect(boss.pending?.eligibleDates).toEqual([D(17), D(18)]);
+    expect(await persisted()).toEqual(await recomputed(boss, D(20)));
+
+    // And back, before it closes: the sequence is rebuilt, not patched.
+    for (const question of questions) await saveAnswer(D(19), question.id, 5);
+    boss = await loadBossProgression();
+    expect(boss.pending?.eligibleDates).toEqual([D(17), D(18)]);
+    expect(await persisted()).toEqual(await recomputed(boss, D(20)));
+
+    // Down again, and left: once D19 closes below the threshold, it resets.
+    for (const question of questions) await saveAnswer(D(19), question.id, 1);
+    freezeAt(D(21));
+    for (const question of questions) await saveAnswer(D(21), question.id, 5);
+    boss = await loadBossProgression();
+    expect(boss.pending?.eligibleDates).toEqual([]);
+    expect(await persisted()).toEqual(await recomputed(boss, D(21)));
   });
 
   it('20 / D — a newer backup keeps its boundary and reconciles its dates from history', async () => {
@@ -193,7 +229,7 @@ describe('a fresh install under the confirmation rule', () => {
     await loadBossProgression(); // the replay is what reconciles the set
     const exported = JSON.stringify(await exportBackup());
     expect(JSON.parse(exported).data.settings.promotionConfirmation).toEqual({
-      from: D0, targetRankId: 'contender', eligibleDates: [D(7), D(8), D(9), D(10)],
+      from: D0, targetRankId: 'contender', eligibleDates: [D(7), D(8), D(9)],
     });
 
     await deleteDatabase();
@@ -205,7 +241,7 @@ describe('a fresh install under the confirmation rule', () => {
     const boss = await loadBossProgression();
     expect(boss.confirmation?.from).toBe(D0);
     expect(await persisted()).toEqual(boss.confirmation);
-    expect(await persisted()).toEqual(recomputed(boss, '2026-02-10'));
+    expect(await persisted()).toEqual(await recomputed(boss, '2026-02-10'));
     // The boundary the file carried is where the walk still splits, and the
     // legacy prefix is empty: nothing was seeded from the import date.
     expect(boss.changes[0]).toMatchObject({ to: 'challenger', date: D(6) });

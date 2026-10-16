@@ -348,8 +348,10 @@ describe('an extra exercise during a planned session', () => {
   it('is removed from the snapshot with its sets, and the plan stays whole', async () => {
     const plan = await createTrainingPlan(PUSH);
     const session = await startSessionFromDraft(draftFromPlan(plan), MONDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
     await addSet({ sessionId: session.id, exerciseId: 'ex_incline_press', reps: 8, weightGrams: kg(24) });
     await removeExerciseFromSession(session.id, 'ex_incline_press');
+    // The bench press keeps the session (an emptied one would go, D137).
     const stored = (await gymSessionsRepository.get(session.id))!;
     expect(stored.exercises?.map((entry) => [entry.exerciseId, entry.order])).toEqual([
       ['ex_bench_press', 0],
@@ -416,6 +418,11 @@ describe('idempotency', () => {
 
 describe('what the user did last time', () => {
   it('reads the most recent earlier day, in set order, and never the session on screen', async () => {
+    // Set up a week earlier, so those days can be logged as they happen.
+    await deleteDatabase();
+    freezeAt('2026-02-20');
+    await applyOnboarding({ questions: [], gymTargetPerWeek: 3 });
+    await ensureExerciseCatalogue();
     freezeAt('2026-02-23');
     const earlier = await openSessionForDay('2026-02-23');
     await addSet({ sessionId: earlier.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(55) });

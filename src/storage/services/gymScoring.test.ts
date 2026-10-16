@@ -180,9 +180,9 @@ describe('the Endurance Phase, end to end', () => {
     for (let week = 0; week < 4; week += 1) {
       await trainWeek(addDays(START, week * 7), 100);
     }
-    // The fourth week closes on day 27, so the gate is only known to be open
-    // from day 28 — a week is not met until it is over.
-    const { state } = await gymOf(addDays(START, 28));
+    // The fourth week ends on day 27 and is judged once its Sunday can no
+    // longer be written — on day 29 (D134). Only then is the gate known open.
+    const { state } = await gymOf(addDays(START, 29));
     const unlockWeek = state.endurance.unlockedAt!;
     const points = state.detail;
     // No step in the series larger than one ordinary movement.
@@ -259,11 +259,12 @@ describe('bodyweight exercises through the replay', () => {
     expect(session1?.best.score).toBe(5 * kg(80));
   });
 
-  it('refuses a weigh-in dated into a closed week, exactly as a set is refused', async () => {
-    // START is a Monday: its week closes when the next Monday begins.
-    await expect(recordBodyweight(80, START, addDays(START, 7))).rejects.toThrow();
+  it('refuses a weigh-in dated into a closed day, exactly as a set is refused (D133)', async () => {
+    // Two days on, START can no longer be written.
+    await expect(recordBodyweight(80, START, addDays(START, 2))).rejects.toThrow();
     expect(await bodyweightFor(START)).toBeNull();
-    await recordBodyweight(80, START, addDays(START, 6));
+    // The next day it still can.
+    await recordBodyweight(80, START, addDays(START, 1));
     expect(await bodyweightFor(START)).toBe(80);
   });
 
@@ -401,10 +402,15 @@ describe('abstinence decay through the replay', () => {
     expect(state.decayFraction).toBe(0);
   });
 
-  it('decays at seven', async () => {
-    const { state } = await unlockThenStop(7);
-    expect(state.endurance.unlocked).toBe(true);
-    expect(state.abstinence?.days).toBe(7);
+  it('decays at seven, once the seventh silent day can no longer be written (D135)', async () => {
+    // Day seven is today: it counts as seven, but a session could still be
+    // logged for it, so nothing is charged yet.
+    const today = await unlockThenStop(7);
+    expect(today.state.endurance.unlocked).toBe(true);
+    expect(today.state.abstinence?.days).toBe(7);
+    expect(today.state.decayFraction).toBe(0);
+    // Two days on, day seven is closed and the decay lands, once.
+    const { state } = await gymOf(addDays(START, LAST_SESSION + 9));
     expect(state.decayFraction).toBeGreaterThan(0);
   });
 

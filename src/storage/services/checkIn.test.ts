@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
 import { closeDatabase, deleteDatabase } from '../db';
-import { answersRepository, gymSessionsRepository } from '../repositories';
+import { answersRepository, gymSessionsRepository, runsRepository } from '../repositories';
 import { addQuestion, applyOnboarding, archiveQuestion, pauseQuestion } from './configurationService';
 import {
   EditWindowError,
@@ -33,14 +33,22 @@ afterEach(async () => {
   await closeDatabase();
 });
 
-async function setup() {
+/**
+ * Onboards on `since` (default today) and returns to today. A backfill can
+ * only reach a day the app was already set up on — before that, no domain
+ * existed (D133).
+ */
+async function setup(since: string = TODAY, runningTargetPerWeek: number | null = null) {
+  freezeAt(since);
   await applyOnboarding({
     questions: [
       { text: 'Hast du dein Bett gemacht?', type: 'boolean', category: 'eigene' },
       { text: 'Wie gut hast du geschlafen?', type: 'scale', category: 'eigene' },
     ],
     gymTargetPerWeek: 3,
+    runningTargetPerWeek,
   });
+  freezeAt(TODAY);
   const day = await loadDay();
   return {
     boolQuestion: day.mental!.items[0]!.question,
@@ -152,19 +160,19 @@ describe('answering', () => {
   });
 });
 
-describe('the three-day edit window', () => {
-  it('accepts today and the three preceding days', async () => {
-    const { boolQuestion } = await setup();
-    for (const date of ['2025-03-31', '2025-03-30', '2025-03-29', '2025-03-28']) {
+describe('the edit window: today and yesterday (P8, D133)', () => {
+  it('accepts today and yesterday', async () => {
+    const { boolQuestion } = await setup('2025-03-27');
+    for (const date of ['2025-03-31', '2025-03-30']) {
       await saveAnswer(date, boolQuestion.id, true);
       expect((await answersRepository.get(date, boolQuestion.id))?.value).toBe(true);
     }
   });
 
-  it('refuses the fourth preceding day', async () => {
-    const { boolQuestion } = await setup();
-    await expect(saveAnswer('2025-03-27', boolQuestion.id, true)).rejects.toThrow(EditWindowError);
-    expect(await answersRepository.get('2025-03-27', boolQuestion.id)).toBeUndefined();
+  it('refuses the second preceding day', async () => {
+    const { boolQuestion } = await setup('2025-03-27');
+    await expect(saveAnswer('2025-03-29', boolQuestion.id, true)).rejects.toThrow(EditWindowError);
+    expect(await answersRepository.get('2025-03-29', boolQuestion.id)).toBeUndefined();
   });
 
   it('refuses a future day', async () => {
@@ -172,32 +180,39 @@ describe('the three-day edit window', () => {
     await expect(saveAnswer('2025-04-01', boolQuestion.id, true)).rejects.toThrow(EditWindowError);
   });
 
-  it('refuses to clear an answer on a closed day', async () => {
+  it('refuses a day before the app was set up', async () => {
     const { boolQuestion } = await setup();
-    await saveAnswer('2025-03-28', boolQuestion.id, true);
+    // Yesterday, but nothing was enabled yet then.
+    await expect(saveAnswer('2025-03-30', boolQuestion.id, true)).rejects.toThrow();
+    expect(await answersRepository.get('2025-03-30', boolQuestion.id)).toBeUndefined();
+  });
+
+  it('refuses to clear an answer on a closed day', async () => {
+    const { boolQuestion } = await setup('2025-03-27');
+    await saveAnswer('2025-03-30', boolQuestion.id, true);
     // Two days later that day has closed and the record is final.
-    freezeAt('2025-04-02');
-    await expect(clearAnswer('2025-03-28', boolQuestion.id)).rejects.toThrow(EditWindowError);
-    expect(await answersRepository.get('2025-03-28', boolQuestion.id)).toBeDefined();
+    freezeAt('2025-04-01');
+    await expect(clearAnswer('2025-03-30', boolQuestion.id)).rejects.toThrow(EditWindowError);
+    expect(await answersRepository.get('2025-03-30', boolQuestion.id)).toBeDefined();
   });
 
   it('reports the state of a day it will not let you edit', async () => {
-    await setup();
-    const closed = await loadDay('2025-03-20');
+    await setup('2025-03-27');
+    const closed = await loadDay('2025-03-29');
     expect(closed.editState).toBe('closed');
     expect(closed.editable).toBe(false);
 
-    const open = await loadDay('2025-03-29');
+    const open = await loadDay('2025-03-30');
     expect(open.editState).toBe('open');
     expect(open.editable).toBe(true);
   });
 
   it('closes a day as the window rolls forward, without touching its data', async () => {
-    const { boolQuestion } = await setup();
+    const { boolQuestion } = await setup('2025-03-27');
     await saveAnswer('2025-03-30', boolQuestion.id, true);
     expect((await loadDay('2025-03-30')).editable).toBe(true);
 
-    freezeAt('2025-04-03');
+    freezeAt('2025-04-01');
     const day = await loadDay('2025-03-30');
     expect(day.editable).toBe(false);
     expect(day.mental?.items[0]?.answer?.value).toBe(true);
@@ -224,7 +239,7 @@ describe('training sessions', () => {
   });
 
   it('does not count last week towards this week', async () => {
-    await setup();
+    await setup('2025-03-27');
     // Sunday 30 March belongs to the previous Monday-to-Sunday week.
     freezeAt('2025-03-30');
     await logSession('gym', '2025-03-30');
@@ -249,44 +264,62 @@ describe('training sessions', () => {
     expect((await loadDay())?.training[0]?.progress.completed).toBe(0);
   });
 
-  it('moves a session to the day it actually happened, within its week', async () => {
-    await setup();
-    // Logged on Wednesday, but the run was on Monday.
-    freezeAt('2025-04-02');
-    const session = await logSession('gym', '2025-04-02');
-    await updateSession('gym', session.id, { date: '2025-03-31', note: 'Laufen' });
-
-    const moved = await gymSessionsRepository.get(session.id);
-    expect(moved?.date).toBe('2025-03-31');
-    expect(moved?.weekKey).toBe('2025-W14');
-    // Still one session in the same week, counted once.
-    expect((await loadDay('2025-04-02'))?.training[0]?.progress.completed).toBe(1);
-  });
-
-  it('refuses to move a session out of its week', async () => {
-    await setup();
+  it('keeps a Gym session on the day it was logged for (STOP 3a, question 9)', async () => {
+    await setup('2025-03-27');
     const session = await logSession('gym', TODAY);
-    // Sunday 30 March belongs to the previous week.
-    await expect(updateSession('gym', session.id, { date: '2025-03-30' })).rejects.toThrow(
-      EditWindowError,
+    await expect(updateSession('gym', session.id, { date: '2025-03-30', note: 'Laufen' })).rejects.toThrow(
+      InvalidAnswerError,
     );
     expect((await gymSessionsRepository.get(session.id))?.date).toBe(TODAY);
   });
 
-  it('refuses to change a session once its week has passed', async () => {
-    await setup();
+  it('moves a run to the day it actually happened: yesterday, across the week boundary', async () => {
+    await setup('2025-03-27', 2);
+    const run = await logSession('running', TODAY);
+    // Logged on Monday, but the run was on Sunday — the week before.
+    await updateSession('running', run.id, { date: '2025-03-30' });
+    const moved = await runsRepository.get(run.id);
+    expect(moved?.date).toBe('2025-03-30');
+    expect(moved?.weekKey).toBe('2025-W13');
+    // It now counts for last week, not this one.
+    expect((await loadDay())?.training.find((entry) => entry.domain === 'running')?.progress.completed).toBe(0);
+  });
+
+  it('refuses to move a run further back than yesterday', async () => {
+    await setup('2025-03-27', 2);
+    const run = await logSession('running', TODAY);
+    await expect(updateSession('running', run.id, { date: '2025-03-29' })).rejects.toThrow(EditWindowError);
+    expect((await runsRepository.get(run.id))?.date).toBe(TODAY);
+  });
+
+  it('lets yesterday be changed today, and refuses it once its window has passed', async () => {
+    await setup('2025-03-27');
     freezeAt('2025-03-30');
     const session = await logSession('gym', '2025-03-30');
 
+    // Monday: Sunday is yesterday, still writable although its week is over.
     freezeAt(TODAY);
+    await updateSession('gym', session.id, { note: 'am Sonntag' });
+    expect((await gymSessionsRepository.get(session.id))?.note).toBe('am Sonntag');
+
+    // Tuesday: it can no longer be written.
+    freezeAt('2025-04-01');
     await expect(deleteSession('gym', session.id)).rejects.toThrow(EditWindowError);
     await expect(updateSession('gym', session.id, { note: 'zu spät' })).rejects.toThrow(EditWindowError);
     expect(await gymSessionsRepository.get(session.id)).toBeDefined();
   });
 
-  it('refuses to log a session into a past week', async () => {
-    await setup();
-    await expect(logSession('gym', '2025-03-30')).rejects.toThrow(EditWindowError);
+  it('refuses to log a session older than yesterday', async () => {
+    await setup('2025-03-27');
+    await expect(logSession('gym', '2025-03-29')).rejects.toThrow(EditWindowError);
+  });
+
+  it('refuses to backfill a day on which the domain was not enabled (STOP 3a, question 10)', async () => {
+    await setup('2025-03-27');
+    // Running is switched on today; yesterday it did not exist.
+    await applyOnboarding({ questions: [], gymTargetPerWeek: 3, runningTargetPerWeek: 2 });
+    await expect(logSession('running', '2025-03-30')).rejects.toThrow(InvalidAnswerError);
+    await logSession('running', TODAY);
   });
 
   it('refuses to log when sports is not enabled', async () => {

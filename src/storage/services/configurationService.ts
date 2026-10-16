@@ -15,7 +15,7 @@ import type {
   SettingsRecord,
 } from '../../core/model';
 import { normaliseWeights, type BossWeights } from '../../core/boss';
-import { ensureCurrentSnapshot } from '../configService';
+import { ensureCurrentSnapshot, ensureSessionWindowEra } from '../configService';
 import { ensurePromotionConfirmation } from './promotionConfirmationService';
 import { legacySportPrompt, type LegacySportPrompt } from './legacySportService';
 import {
@@ -66,6 +66,8 @@ export interface AppConfiguration {
 export async function loadConfiguration(): Promise<AppConfiguration> {
   // Activates the promotion-confirmation era once, prospectively (D126).
   await ensurePromotionConfirmation();
+  // The one-day window begins on this load, effective today (D132).
+  await ensureSessionWindowEra();
   const [settings, domains, questions, legacySportChoice] = await Promise.all([
     settingsRepository.getOrCreate(),
     domainsRepository.list(),

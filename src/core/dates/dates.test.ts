@@ -291,19 +291,23 @@ describe('ISO week keys', () => {
   });
 });
 
-describe('three-day edit window', () => {
+describe('the edit window (P8: today and yesterday, D132)', () => {
   const today = '2025-03-31';
 
-  it('keeps today and the three preceding days open', () => {
+  it('keeps today and yesterday open, by default', () => {
     expect(dayEditState('2025-03-31', today)).toBe('open');
     expect(dayEditState('2025-03-30', today)).toBe('open');
-    expect(dayEditState('2025-03-29', today)).toBe('open');
-    expect(dayEditState('2025-03-28', today)).toBe('open');
+    expect(dayEditState('2025-03-29', today)).toBe('closed');
   });
 
-  it('closes the fourth preceding day', () => {
-    expect(dayEditState('2025-03-27', today)).toBe('closed');
-    expect(isEditableDay('2025-03-27', today)).toBe(false);
+  it('still reads a day lived before P8 with its own three-day window', () => {
+    expect(dayEditState('2025-03-28', today, 3)).toBe('open');
+    expect(dayEditState('2025-03-27', today, 3)).toBe('closed');
+  });
+
+  it('closes the second preceding day', () => {
+    expect(dayEditState('2025-03-29', today)).toBe('closed');
+    expect(isEditableDay('2025-03-29', today)).toBe(false);
   });
 
   it('marks future days as future, never editable', () => {
@@ -311,15 +315,16 @@ describe('three-day edit window', () => {
     expect(isEditableDay('2025-04-01', today)).toBe(false);
   });
 
-  it('stays exactly four days wide across DST and month ends', () => {
+  it('stays exactly two days wide across DST and month ends', () => {
     for (const day of ['2025-03-30', '2025-10-26', '2025-03-01', '2026-01-01']) {
       const window = editableDays(day);
-      expect(window).toHaveLength(4);
-      expect(window[3]).toBe(day);
+      expect(window).toHaveLength(2);
+      expect(window[1]).toBe(day);
       expect(window[0]).toBe(oldestEditableDay(day));
-      expect(diffInDays(window[0]!, day)).toBe(3);
+      expect(diffInDays(window[0]!, day)).toBe(1);
       expect(window.every((d) => isEditableDay(d, day))).toBe(true);
-      expect(isEditableDay(addDays(day, -4), day)).toBe(false);
+      expect(isEditableDay(addDays(day, -2), day)).toBe(false);
     }
   });
 });
+

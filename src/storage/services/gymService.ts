@@ -1,5 +1,5 @@
 import { nowIso, today } from '../../core/clock';
-import { isSameWeek, type DateKey } from '../../core/dates';
+import { type DateKey } from '../../core/dates';
 import { catalogueRecords } from '../../core/gym/catalogue';
 import { bodyweightOn, effectiveLoadGrams, type BodyweightPoint } from '../../core/gym/load';
 import {
@@ -31,7 +31,7 @@ import {
   gymSetsRepository,
   weightEntriesRepository,
 } from '../repositories';
-import { EditWindowError } from './checkInService';
+import { assertSessionWritable, sessionWritableOn } from './checkInService';
 
 /**
  * Everything the Gym screens read and write.
@@ -145,10 +145,10 @@ export async function remapExercise(
  * Tuesday's number rather than creating a second history.
  */
 export async function recordBodyweight(kg: number, date: DateKey = today(), reference: DateKey = today()) {
-  // The same weekly rule as a set: a bodyweight set replays the latest entry
-  // on or before its own day, so an entry dated into a closed week would
-  // change how that week's sets replay.
-  assertEditable(date, reference);
+  // The same rule as a set (D133): a bodyweight set replays the latest entry
+  // on or before its own day, so an entry dated into a closed day would
+  // change how sets already judged replay.
+  await assertEditable(date, reference);
   const existing = (await weightEntriesRepository.listByDateRange(date, date))[0];
   const stamp = nowIso();
   const record = {
@@ -208,14 +208,12 @@ export interface GymSessionView {
 }
 
 /**
- * The same rule sessions already follow, applied to what is inside them.
- *
- * A training session is a diary entry rather than a daily check-in, so it is
- * editable for the week it belongs to — `checkInService` established that and
- * a set is part of a session, not a thing with a policy of its own.
+ * The one write rule (D133), applied to what is inside a session: today or
+ * yesterday, on a day of the P8 era, in a week that is still in progress. A
+ * set is part of a session, not a thing with a policy of its own.
  */
-function assertEditable(date: DateKey, reference: DateKey): void {
-  if (!isSameWeek(date, reference)) throw new EditWindowError(date, 'closed');
+async function assertEditable(date: DateKey, reference: DateKey): Promise<void> {
+  await assertSessionWritable(date, reference);
 }
 
 export async function loadSession(
@@ -235,7 +233,7 @@ export async function loadSession(
   return {
     session,
     exercises: await withLastRecorded(grouped, session.id, session.date),
-    editable: isSameWeek(session.date, reference),
+    editable: await sessionWritableOn(session.date, reference),
   };
 }
 
@@ -275,12 +273,15 @@ export function draftFromPlan(plan: TrainingPlanRecord): SessionDraft {
 export async function loadDraftView(
   draft: SessionDraft,
   date: DateKey = today(),
+  reference: DateKey = today(),
 ): Promise<Omit<GymSessionView, 'session'>> {
   const exercises = await listExercises();
   const grouped = groupSets([], exercises, null, draft.exercises);
   return {
     exercises: await withLastRecorded(grouped, null, date),
-    editable: true,
+    // A draft keeps the day it was opened for; once that day can no longer
+    // be written, neither can its first set (D133).
+    editable: await sessionWritableOn(date, reference),
   };
 }
 
@@ -328,7 +329,7 @@ export async function addSessionExercise(
   if (!session) throw new Error(`Unknown session ${sessionId}`);
   if (session.exercises === undefined) return session;
   if (session.exercises.some((entry) => entry.exerciseId === exerciseId)) return session;
-  assertEditable(session.date, reference);
+  await assertEditable(session.date, reference);
   const exercise = await exercisesRepository.get(exerciseId);
   const next: GymSessionRecord = {
     ...session,
@@ -515,7 +516,7 @@ export async function addSet(
 ): Promise<GymSetRecord> {
   const session = await gymSessionsRepository.get(input.sessionId);
   if (!session) throw new Error(`Unknown session ${input.sessionId}`);
-  assertEditable(session.date, reference);
+  await assertEditable(session.date, reference);
 
   const [exercise, existing] = await Promise.all([
     exercisesRepository.get(input.exerciseId),
@@ -541,6 +542,11 @@ export async function addSet(
     createdAt: nowIso(),
   };
   await gymSetsRepository.put(record);
+  // A new set reopens a finished workout (STOP 2, decision 2): it is running
+  // again until "Fertig". Correcting a set already there does not reopen it.
+  if (typeof session.finishedAt === 'string') {
+    await gymSessionsRepository.put({ ...session, finishedAt: null, updatedAt: nowIso() });
+  }
   return record;
 }
 
@@ -576,7 +582,7 @@ export async function updateSet(
 ): Promise<GymSetRecord | undefined> {
   const set = await gymSetsRepository.get(id);
   if (!set) return undefined;
-  assertEditable(set.date, reference);
+  await assertEditable(set.date, reference);
   const next: GymSetRecord = {
     ...set,
     reps: patch.reps === undefined ? set.reps : Math.max(0, Math.round(patch.reps)),
@@ -587,26 +593,76 @@ export async function updateSet(
   return next;
 }
 
-/** Removes a set and returns it as it was stored, for an undo to put back. */
+/** What removing a set took away: the set as stored, and the session if it went too. */
+export interface RemovedSet {
+  set: GymSetRecord;
+  /** The session, as it was, when this was its last set (D137); otherwise `null`. */
+  session: GymSessionRecord | null;
+}
+
+/**
+ * Removes a set and returns what went, for an undo to put back. A session the
+ * user empties goes with its last set (D137): a session without sets should
+ * not exist, so it no longer counts towards the week either. A session that
+ * was stored empty before P6 is not touched by anything here.
+ */
 export async function removeSet(
   id: string,
   reference: DateKey = today(),
-): Promise<GymSetRecord | undefined> {
+): Promise<RemovedSet | undefined> {
   const set = await gymSetsRepository.get(id);
   if (!set) return undefined;
-  assertEditable(set.date, reference);
+  await assertEditable(set.date, reference);
   await gymSetsRepository.remove(id);
-  return set;
+  return { set, session: await removeIfEmptied(set.sessionId) };
+}
+
+/** Whether a workout on `date` may still take a set (D133) — for a draft's editable flag. */
+export function workoutWritable(date: DateKey, reference: DateKey = today()): Promise<boolean> {
+  return sessionWritableOn(date, reference);
+}
+
+/**
+ * Brings back a session the user emptied, same id and same fields (D137) —
+ * when the workout screen saves the next set into it. A session already back
+ * (an undo got there first) is returned as it is.
+ */
+export async function reinstateSession(
+  record: GymSessionRecord,
+  reference: DateKey = today(),
+): Promise<GymSessionRecord> {
+  const existing = await gymSessionsRepository.get(record.id);
+  if (existing) return existing;
+  await assertSessionWritable(record.date, reference, 'gym');
+  await gymSessionsRepository.put(record);
+  return record;
+}
+
+/** Deletes a session the user has just emptied, returning it as it was. */
+async function removeIfEmptied(sessionId: string): Promise<GymSessionRecord | null> {
+  if ((await gymSetsRepository.listBySession(sessionId)).length > 0) return null;
+  const session = await gymSessionsRepository.get(sessionId);
+  if (!session) return null;
+  await gymSessionsRepository.remove(sessionId);
+  return session;
 }
 
 /**
  * Puts a removed set back exactly as it was — same id, same order, same
- * facts — for the workout's undo (WP3, P5). Within the set's own week only.
+ * facts — for the workout's undo (WP3, P5). A session that went with it is
+ * put back first, same id and same fields (D137). Within the write window.
  */
-export async function restoreSet(record: GymSetRecord, reference: DateKey = today()): Promise<void> {
-  assertEditable(record.date, reference);
+export async function restoreSet(
+  record: GymSetRecord,
+  reference: DateKey = today(),
+  removedSession: GymSessionRecord | null = null,
+): Promise<void> {
+  await assertEditable(record.date, reference);
   const session = await gymSessionsRepository.get(record.sessionId);
-  if (!session) throw new Error(`Unknown session ${record.sessionId}`);
+  if (!session) {
+    if (removedSession?.id !== record.sessionId) throw new Error(`Unknown session ${record.sessionId}`);
+    await gymSessionsRepository.put(removedSession);
+  }
   await gymSetsRepository.put(record);
 }
 
@@ -619,10 +675,18 @@ export async function restoreExercise(
   sets: readonly GymSetRecord[],
   line: GymSessionExerciseSnapshot | null,
   reference: DateKey = today(),
+  removedSession: GymSessionRecord | null = null,
 ): Promise<void> {
-  const session = await gymSessionsRepository.get(sessionId);
-  if (!session) throw new Error(`Unknown session ${sessionId}`);
-  assertEditable(session.date, reference);
+  let session = await gymSessionsRepository.get(sessionId);
+  if (!session) {
+    // The session went with this exercise's last set (D137): it comes back
+    // first, as it was, and the line and sets go back into it.
+    if (removedSession?.id !== sessionId) throw new Error(`Unknown session ${sessionId}`);
+    await assertEditable(removedSession.date, reference);
+    await gymSessionsRepository.put(removedSession);
+    session = removedSession;
+  }
+  await assertEditable(session.date, reference);
   for (const set of sets) await gymSetsRepository.put(set);
   if (line && session.exercises && !session.exercises.some((entry) => entry.exerciseId === line.exerciseId)) {
     const at = Math.min(Math.max(line.order, 0), session.exercises.length);
@@ -636,11 +700,13 @@ export async function restoreExercise(
   }
 }
 
-/** What removing an exercise took away: its sets as stored, and its line. */
+/** What removing an exercise took away: its sets as stored, its line, and the session if it went too. */
 export interface RemovedExercise {
   sets: GymSetRecord[];
   /** The session's own line for it, with the place it had; `null` in a bare session. */
   line: GymSessionExerciseSnapshot | null;
+  /** The session, as it was without this line, when no set was left in it (D137). */
+  session: GymSessionRecord | null;
 }
 
 /**
@@ -659,8 +725,8 @@ export async function removeExerciseFromSession(
   ]);
   const sets = all.filter((set) => set.exerciseId === exerciseId).sort(bySetOrder);
   const line = session?.exercises?.find((entry) => entry.exerciseId === exerciseId) ?? null;
-  for (const set of sets) assertEditable(set.date, reference);
-  if (session && line) assertEditable(session.date, reference);
+  for (const set of sets) await assertEditable(set.date, reference);
+  if (session && line) await assertEditable(session.date, reference);
 
   for (const set of sets) await gymSetsRepository.remove(set.id);
   // The session's own snapshot forgets it too, so a planned exercise the
@@ -674,7 +740,9 @@ export async function removeExerciseFromSession(
       updatedAt: nowIso(),
     });
   }
-  return { sets, line };
+  // Only a removal that took sets can empty a session; one that removed a
+  // line without sets leaves the session as it was.
+  return { sets, line, session: sets.length > 0 ? await removeIfEmptied(sessionId) : null };
 }
 
 /**
@@ -691,7 +759,7 @@ export async function openSessionForDay(
   const existing = await gymSessionsRepository.listByDate(date);
   const last = existing[existing.length - 1];
   if (last) return last;
-  assertEditable(date, reference);
+  await assertSessionWritable(date, reference, 'gym');
   const snapshot = await ensureCurrentSnapshot();
   // Started in the app, so it is running until "Fertig" says otherwise (P7).
   return gymSessionsRepository.create({ date, configSnapshotId: snapshot.id, finishedAt: null });
@@ -707,7 +775,7 @@ export async function finishSession(
   reference: DateKey = today(),
 ): Promise<GymSessionRecord | undefined> {
   const session = await gymSessionsRepository.get(sessionId);
-  if (!session || !isSameWeek(session.date, reference)) return session;
+  if (!session || !(await sessionWritableOn(session.date, reference))) return session;
   // A session recorded before the field is finished already, and its
   // absence is the era (D129): "Fertig" on it is not a time to record.
   if (session.finishedAt === undefined) return session;

@@ -5,6 +5,7 @@ import {
   SCALE_MAX,
   SCALE_MIN,
   SCORING_MODEL,
+  SESSION_WINDOW_DAYS,
 } from './constants';
 import type {
   AppConfigSnapshot,
@@ -109,6 +110,12 @@ export function buildConfigSnapshot(
        * same never-backfill rule, same place.
        */
       runningModel: RUNNING_SCORING_MODEL,
+      /*
+       * P8: the era marker for the one-day window (D132). Absent on every
+       * snapshot before it, and that absence keeps those days and weeks on
+       * the rules they were lived under.
+       */
+      sessionWindowDays: SESSION_WINDOW_DAYS,
     },
   };
 }
