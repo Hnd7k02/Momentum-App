@@ -11,6 +11,7 @@ import {
   archiveQuestion,
   disableDomainType,
   enableDomain,
+  loadConfiguration,
   pauseQuestion,
   updateQuestion,
 } from './configurationService';
@@ -400,6 +401,17 @@ describe('a past day as it was asked (D133, review of Stage 3b)', () => {
     const question = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
     await expect(saveAnswer('2025-03-30', question.id, true)).rejects.toThrow(/mental was not enabled/);
     await saveAnswer(TODAY, question.id, true);
+  });
+
+  it('never calls a yesterday that had only Food empty, and today is (D141)', async () => {
+    freezeAt('2025-03-20');
+    await applyOnboarding({ questions: [] });
+    await enableLegacyFood('2025-03-20');
+    freezeAt(TODAY);
+    await loadConfiguration();
+    const yesterday = await loadDay('2025-03-30');
+    expect([yesterday.mental, yesterday.training.length, yesterday.empty]).toEqual([null, 0, false]);
+    expect((await loadDay(TODAY)).empty).toBe(true);
   });
 
   it('never points to a yesterday that owes only its old Food rating (D141)', async () => {

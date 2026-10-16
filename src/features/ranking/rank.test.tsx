@@ -9,6 +9,7 @@ import type { BossWeighting } from '../../storage/services/configurationService'
 import { BossWeights } from './BossWeights';
 import { RankBadge } from './RankBadge';
 import { RankProgressBar } from './RankScreen';
+import { wholePercents } from './wholePercents';
 
 const render = (node: React.ReactNode, language: 'de' | 'en' = 'de') =>
   renderToStaticMarkup(
@@ -130,6 +131,19 @@ describe('the Boss weighting control', () => {
     for (const parts of [[1, 1, 1], [3, 1], [4, 4, 1], [2, 2, 3], [1, 9]]) {
       const html = render(<BossWeights weighting={weighting(parts)} onChange={() => undefined} />);
       expect(percents(html).reduce((sum, value) => sum + value, 0), JSON.stringify(parts)).toBe(100);
+    }
+  });
+
+  it('prints the shares the one helper works out, which the area list reads too', () => {
+    // Parts 4 : 3 : 2 after Food left (D139): 44.4, 33.3 and 22.2. Rounded
+    // one by one they read 44, 33, 22 — 99 — and the list beside this card
+    // used to say so while the card said 45.
+    expect(wholePercents([4 / 9, 3 / 9, 2 / 9])).toEqual([45, 33, 22]);
+    expect(percents(render(<BossWeights weighting={weighting([4, 3, 2])} onChange={() => undefined} />))).toEqual(
+      wholePercents([4 / 9, 3 / 9, 2 / 9]),
+    );
+    for (const shares of [[1 / 3, 1 / 3, 1 / 3], [0.75, 0.25], [1], [0.05, 0.475, 0.475]]) {
+      expect(wholePercents(shares).reduce((sum, value) => sum + value, 0), JSON.stringify(shares)).toBe(100);
     }
   });
 

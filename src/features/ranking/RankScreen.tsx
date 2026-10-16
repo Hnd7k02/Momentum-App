@@ -10,6 +10,7 @@ import { RankIcon } from '../../components/Icons';
 import { formatDayAndMonth, formatNumber } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
+import { wholePercents } from './wholePercents';
 import { settingsRepository } from '../../storage/repositories';
 import { loadBossProgression } from '../../storage/services/bossService';
 import {
@@ -148,6 +149,11 @@ export function RankScreen({
   const progress = displayedRankProgress(rating, boss.rank);
   const calibrating = legacy.points[legacy.points.length - 1]?.calibrating ?? false;
   const weighting = bossWeightingOf(configuration);
+  // The same whole percentages the Gewichtung card prints, over the same rows.
+  const offered = weighting.filter((entry) => isOfferedDomain(entry.domain));
+  const percentOf = new Map(
+    wholePercents(offered.map((entry) => entry.share)).map((percent, index) => [offered[index]!.domain, percent]),
+  );
   const ladder = rankLadder(boss.peakRank);
   // Shown as soon as a promotion is pending, 0/7 included, so crossing a
   // threshold without an instant promotion is explained where it happens.
@@ -252,7 +258,7 @@ export function RankScreen({
               )
               .map((domain) => {
                 const value = Math.round(domain.momentum);
-                const share = weighting.find((entry) => entry.domain === domain.domain)?.share ?? 0;
+                const percent = percentOf.get(domain.domain) ?? 0;
                 const label = t('areas.standing.value', { value });
                 return (
                   <div key={domain.domain} className="domain-standing">
@@ -260,7 +266,7 @@ export function RankScreen({
                       <span className="domain-standing__name">{t(DOMAIN_NAME_KEYS[domain.domain])}</span>
                       <span className="domain-standing__meta">
                         {domain.started
-                          ? `${label} · ${t('rank.weights.share', { percent: Math.round(share * 100) })}`
+                          ? `${label} · ${t('rank.weights.share', { percent })}`
                           : t('rank.domain.notStarted')}
                       </span>
                     </span>

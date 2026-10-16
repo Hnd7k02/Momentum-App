@@ -154,7 +154,11 @@ export interface DayView {
    * away — it is not a state the app enters.
    */
   paused: boolean;
-  /** True when nothing is set up — the day has nothing to ask. */
+  /**
+   * True when nothing is set up — the day has nothing to ask. A past day
+   * whose own snapshot still had Food on is not empty, although nothing of
+   * Food is shown (D141): something was due on it, and Verlauf says so.
+   */
   empty: boolean;
 }
 
@@ -390,7 +394,7 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
     training,
     legacySportChoicePending: needsLegacySportChoice(settings.legacySportMigration),
     paused: isPausedOn(pauses, date),
-    empty: mental === null && training.length === 0,
+    empty: mental === null && training.length === 0 && !(past && enabledIn(dayConfig, 'food')),
   };
 }
 

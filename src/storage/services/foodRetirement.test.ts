@@ -19,7 +19,8 @@ import {
 } from '../repositories';
 import { importBackup } from './backupService';
 import { loadBossProgression, type BossProgression } from './bossService';
-import { applyOnboarding, bossWeightingOf, loadConfiguration, setBossWeights } from './configurationService';
+import { saveAnswer } from './checkInService';
+import { addQuestion, applyOnboarding, bossWeightingOf, loadConfiguration, setBossWeights } from './configurationService';
 import { enableLegacyFood, rateLegacyFood } from './fixtures/legacyFood';
 import {
   FOOD_OFF_CLOCKS,
@@ -51,7 +52,7 @@ function freezeAt(day: string, hour = 9): void {
 }
 
 const foodOn = (config: AppConfigSnapshot) =>
-  config.domains.some((domain) => domain.type === 'food' && domain.enabled);
+  config.domains.some((domain) => domain?.type === 'food' && domain.enabled);
 
 /* ── The step itself ────────────────────────────────────────────────────── */
 
@@ -221,6 +222,55 @@ describe('the switch-off step', () => {
     expect(foodOn((await snapshotOn(TODAY)).config)).toBe(true);
   });
 
+  it('keeps it there through the next write, and a change made that day reaches both sides', async () => {
+    // The state a journey west leaves on a device already in P8: the update
+    // load wrote the switch-off for tomorrow at an instant already past, and
+    // the live record is off — while today, lived with Food, can be written.
+    await legacyDevice(PARTS);
+    const question = (await questionsRepository.list())[0]!;
+    await saveAnswer(TODAY, question.id, 7);
+    const snapshots = await configSnapshotsRepository.list();
+    const first = snapshots[snapshots.length - 1]!;
+    const tomorrow = addDays(TODAY, 1);
+    await configSnapshotsRepository.replaceAll([
+      ...snapshots,
+      {
+        ...first,
+        id: 'cfg_off',
+        effectiveFrom: tomorrow,
+        createdAt: `${TODAY}T05:00:00.000Z`,
+        config: {
+          ...first.config,
+          domains: first.config.domains.map((domain) => (domain.type === 'food' ? { ...domain, enabled: false } : domain)),
+          boss: { weights: weightsForSnapshot(PARTS, REMAINING) },
+        },
+      },
+    ]);
+    await domainsRepository.setEnabled((await domainsRepository.findByType('food'))!.id, false);
+    expect(await ensureFoodRetired()).toBe('unchanged');
+    const before = await loadBossProgression(TODAY);
+
+    // The same answer again: nothing about the day may move.
+    await saveAnswer(TODAY, question.id, 7);
+    expect((await configSnapshotsRepository.list()).map((snapshot) => snapshot.effectiveFrom)).toEqual([SINCE, tomorrow]);
+    const after = await loadBossProgression(TODAY);
+    expect(after.history.days).toEqual(before.history.days);
+    expect(after.points).toEqual(before.points);
+    expect(after.domains).toEqual(before.domains);
+
+    // A question added that day: on it with Food, from the switch-off without.
+    await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+    const onDay = (await snapshotOn(TODAY)).config;
+    const fromOff = (await snapshotOn(tomorrow)).config;
+    expect(onDay.questions.some((entry) => entry.text === 'Neu')).toBe(true);
+    expect(fromOff.questions.some((entry) => entry.text === 'Neu')).toBe(true);
+    expect(foodOn(onDay)).toBe(true);
+    expect(onDay.boss?.weights.food).toBeCloseTo(0.1, 12);
+    expect(foodOn(fromOff)).toBe(false);
+    expect(fromOff.boss?.weights).toEqual(weightsForSnapshot(PARTS, REMAINING));
+    expect((await configSnapshotsRepository.list()).map((snapshot) => snapshot.effectiveFrom)).toEqual([SINCE, TODAY, tomorrow]);
+  });
+
   it('brings a switch-off written on a clock that was ahead back to today', async () => {
     await legacyDevice();
     // The first load after the update ran with the clock three days ahead…
@@ -269,7 +319,8 @@ describe('the switch-off step', () => {
   });
 
   it('never throws on a configuration it does not recognise', async () => {
-    // A throw here would stop the app from opening, on every retry.
+    // A throw here would stop the app from opening, on every retry — and the
+    // way out, importing a good backup, sits behind that load.
     await legacyDevice();
     const snapshots = await configSnapshotsRepository.list();
     await configSnapshotsRepository.replaceAll(
@@ -277,6 +328,19 @@ describe('the switch-off step', () => {
     );
     await expect(ensureFoodRetired()).resolves.toBe('retired');
     expect((await domainsRepository.findByType('food'))?.enabled).toBe(false);
+  });
+
+  it('opens on a restored file whose snapshot holds an entry that is not one', async () => {
+    // Import validation checks that `domains` is an array, not what is in it.
+    const backup = JSON.parse(currentProfile()) as { data: { configSnapshots: { config: { domains: unknown[] } }[] } };
+    backup.data.configSnapshots[0]!.config.domains.push(null);
+    freezeAt('2026-08-30');
+    expect((await importBackup(JSON.stringify(backup))).ok).toBe(true);
+    await expect(loadConfiguration()).resolves.toBeDefined();
+    const last = (await configSnapshotsRepository.resolveForDate('2026-08-30'))!;
+    expect(last.effectiveFrom).toBe('2026-08-30');
+    expect(foodOn(last.config)).toBe(false);
+    expect(last.config.domains).toContain(null);
   });
 
   it('runs on every load, before anything is read, and Rang shows the weights the Boss uses', async () => {

@@ -225,42 +225,6 @@
   text-align: center;
 }
 
-/* Sports --------------------------------------------------------------- */
-
-/* The choice sits in the middle of the screen rather than pinned under the
-   heading, so the step reads as one decision instead of a form field. */
-.sports-step__stage {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-7);
-  padding-bottom: var(--space-10);
-  text-align: center;
-}
-
-.sports-step__value {
-  font-size: 76px;
-  font-weight: var(--weight-bold);
-  letter-spacing: -3px;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  /* The lighter mint: at 76px this is display type, where 3:1 is the bar, and
-     the darker text-safe green reads as heavy on a light ground. */
-  color: var(--domain-sports-mid);
-}
-
-.sports-step__unit {
-  font-size: var(--type-subhead);
-  color: var(--text-secondary);
-  margin-top: var(--space-3);
-}
-
-.sports-step__picker {
-  width: 100%;
-}
-
 /* Summary -------------------------------------------------------------- */
 
 .summary__list {

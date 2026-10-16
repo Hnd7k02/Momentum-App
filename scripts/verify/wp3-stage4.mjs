@@ -254,6 +254,8 @@ for (const [width, height] of SIZES) {
   check(`A ${W}: the Boss weights are Mind, Gym and Laufen, adding to 100`,
     same(weights, ['Mind', 'Gym', 'Laufen']) && shares.reduce((sum, value) => sum + value, 0) === 100,
     short({ weights, shares }));
+  const listed = (await texts(page.locator('.domain-standing__meta'))).map((meta) => Number((meta.match(/(\d+) %/) ?? [])[1]));
+  check(`A ${W}: the list of areas states the same shares as the Gewichtung card`, same(listed, shares), short({ listed, shares }));
   await noFood(page, `A ${W} Rang`);
   await layoutChecks(page, `A ${W} Rang`);
   await shot(page, width, 'rang-gewichtung');

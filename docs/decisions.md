@@ -3136,9 +3136,15 @@ had it, and every day before replays exactly as it did.
   era, and a snapshot without `boss` (RC2) gets none. A snapshot dated later
   takes the same at its own date.
 - **A switch-off already written stays where it is, unless the clock was
-  ahead when it was written** — D132's boundary rule, for the same reason. A
-  profile with no snapshot in force today is left alone for today. Nothing
-  throws: a throw would stop the app from opening, on every retry.
+  ahead when it was written** — D132's boundary rule, for the same reason.
+  Unlike D132's, the day the date lands on can be written (it is a P8 day),
+  so `ensureCurrentSnapshot` carries Food as it was on any day before a kept
+  switch-off: an answer there moves nothing, and a configuration change
+  made there reaches both sides (review of Stage 4). A profile with no
+  snapshot in force today is left alone for today. Nothing throws — not on
+  a snapshot entry that is not an entry either: a throw would stop the app
+  from opening, on every retry, with the import that could repair it behind
+  that load.
 
 **Days before the switch-off replay byte-identically**, because a day reads
 its own snapshot. From that day the Boss moves by the remaining domains
@@ -3178,9 +3184,11 @@ step writes. Those golden files are unchanged.
 - The stores, repositories, types and backup collections stay, as the
   dormant stores do (D115, D122). The backup format is unchanged
   (`BACKUP_FORMAT_VERSION` 3, `SCHEMA_VERSION` 5): a file with Food data
-  imports and keeps it, and an export carries it. The repositories keep
-  their writers for the restore path and for tests that seed Food-era
-  history; a source scan pins that nothing shipped calls one.
+  imports and keeps it, and an export carries it. A restore writes every
+  store directly, through `replaceAllStores`, and calls no repository; the
+  Food repositories keep their writers only for the tests that seed
+  Food-era history (`fixtures/legacyFood.ts`). A source scan pins that
+  nothing shipped calls one.
 - Logged entries and the focus sentence are kept and shown nowhere.
 
 `foodRetirement.test.ts` (the source scan), `backup.test.ts` (the round
@@ -3204,7 +3212,9 @@ since the day reads its own snapshot either way. Food's ledger counts it as
 a silent day — after a rated day that is inside D113's two grace days and
 costs nothing. Only a device already in P8 — the preview — can be in this
 position: a device updating from the released build has no writable day
-before the update (D132).
+before the update (D132). A yesterday that had only Food on is not called
+empty: Gestern does not say "An diesem Tag war nichts fällig." of a day that
+had something due (review of Stage 4).
 
 Not taken: a Food rating on Gestern for the update day only (a screen for
 one day), and switching Food off from yesterday or reading its missing
@@ -3234,11 +3244,13 @@ refused with nothing written, and the same on a closed day) pin it.
 
 **Decision (P3).** "Mind" wherever the wellbeing domain is named, in German
 and English: Heute's section, the Bereiche switch and card, Verlauf's row,
-Rang's list and the Boss weights ("Mehr Mind"), the onboarding picker. One
-key, `domain.mental`, through one map (`i18n/domainNames.ts`). The three
-earlier names — "Mental" on the switch, "Mental Wellbeing" over the
-questions, "Wellbeing" everywhere else — and their keys are gone, and a
-catalogue scan keeps a second name from coming back.
+Rang's list and the Boss weights ("Mehr Mind"), the onboarding picker. Every
+label reads one key, `domain.mental`, through one map
+(`i18n/domainNames.ts`); two sentences spell the name out — the off title
+"Mind ist aus" and the onboarding line "Mind und Gym, Laufen inbegriffen".
+The three earlier names — "Mental" on the switch, "Mental Wellbeing" over
+the questions, "Wellbeing" everywhere else — and their keys are gone, and a
+catalogue scan keeps them from coming back.
 
 - Internal ids stay `mental` (D66), the route included (`#/areas/mental`).
   The question category "Mental" (D17) is a different thing and keeps its

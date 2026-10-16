@@ -259,10 +259,10 @@ Never conflate them.
   timeout and no guess may answer it: a user who never answers must keep a
   fully working app and be asked again next time.
 - Colour is never the only carrier of meaning.
-- **Mind is the wellbeing domain's one name** (D143), in both languages, from
-  one key through `i18n/domainNames.ts`. Its stored id stays `mental` (D66),
-  and the question category "Mental" is a different thing. The terminal is
-  Mind | Gym.
+- **Mind is the wellbeing domain's one name** (D143), in both languages:
+  every label reads one key through `i18n/domainNames.ts`. Its stored id
+  stays `mental` (D66), and the question category "Mental" is a different
+  thing. The terminal is Mind | Gym.
 
 ## Interface rules
 

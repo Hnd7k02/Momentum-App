@@ -8,6 +8,7 @@ import { InfoIcon, MinusIcon, PlusIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
 import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import type { BossWeighting } from '../../storage/services/configurationService';
+import { wholePercents } from './wholePercents';
 import './bossWeights.css';
 
 /**
@@ -67,26 +68,9 @@ export function BossWeights({
     onChange(next);
   };
 
-  /*
-   * Whole percentages that add to exactly 100.
-   *
-   * Three equal shares are 33.33 each, and three 33s are 99. The missing
-   * points go to the rows with the largest fractional part — the standard
-   * largest-remainder apportionment — rather than to whichever row happens to
-   * be last, so the one row that reads 34 is the one that was closest to it.
-   * A column that totals 99 would undermine the whole control.
-   */
-  const exact = weighting.map((entry) => entry.share * 100);
-  const percents = exact.map((value) => Math.floor(value));
-  let drift = 100 - percents.reduce((sum, value) => sum + value, 0);
-  const order = exact
-    .map((value, index) => ({ index, remainder: value - Math.floor(value) }))
-    .sort((a, b) => b.remainder - a.remainder);
-  for (const { index } of order) {
-    if (drift <= 0) break;
-    percents[index] = (percents[index] ?? 0) + 1;
-    drift -= 1;
-  }
+  // Whole percentages that add to exactly 100: a column that totals 99
+  // would undermine the whole control.
+  const percents = wholePercents(weighting.map((entry) => entry.share));
 
   return (
     <Card>

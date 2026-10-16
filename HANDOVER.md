@@ -393,8 +393,8 @@ records (answers, sessions, sets, snapshots)
   cost: a rating still to be given for it is lost, and the day closes with
   Food missed in `score`; `recordedScore` and the Boss are exactly what they
   would be had the rating simply not been given.
-- **Mind** (D143): one name in German and English, from one key; the
-  terminal is Mind | Gym; onboarding offers two worlds, with "Gym" taking
+- **Mind** (D143): one name in German and English, every label from one
+  key; the terminal is Mind | Gym; onboarding offers two worlds, with "Gym" taking
   Laufen in; `#/areas/food` lands on Bereiche.
 - **The STOP 3b carry-overs:** Gestern speaks of yesterday in the standard
   questions whose text is unchanged (D144); the check-in delete refuses a Gym
@@ -409,6 +409,15 @@ records (answers, sessions, sets, snapshots)
   `OnboardingFlow.test.tsx`, `DomainSwitch.test.tsx`; in the browser,
   `wp3-stage4.mjs`. `phase6` and `phase6-a11y` were retired with the Food
   screens, and every suite onboards through Mind and Gym.
+- **Review of Stage 4** (four reviewers, every finding put to a skeptic): a
+  write on a day before a kept switch-off no longer moves it
+  (`ensureCurrentSnapshot`, D139); a restored snapshot holding an entry that
+  is not one no longer blocks the load; a yesterday that had only Food is
+  not called empty (D141); Rang's list and its Gewichtung card print one
+  rounding (`wholePercents`); the switch's dead two-row rule and the unused
+  onboarding sports-step styles are gone. Refuted and left: the retired
+  Sport log reachable through a mislabelled update or delete (the argument
+  is never read there), and the sleep wording (a recorded decision, D144).
 - Verification at STOP 4: see the STOP 4 report.
 
 **Infrastructure only — built, tested, not reachable from any screen**
@@ -585,14 +594,15 @@ edit window leaves the day **open**; unrated once closed is a **miss for
 history** and **no data for the rating**. Before Food was enabled there is no
 food entry at all.
 
-The rating is then the shared daily fold, not the 40/60 training model. There
-is no attendance, no performance curve, no Endurance Phase and no decay.
-Calories and macros are logged, totalled and shown, and never scored — see
-D106 for why that is a rule and not a phase-6 shortcut.
+The rating is then the shared daily fold, not the 40/60 training model: no
+attendance, no performance curve, no Endurance Phase and no abstinence
+episode — the general cooling-off (D113) charges its days as it charges
+Mind's. Calories and macros were logged, totalled and shown, and never scored
+(D106).
 
-Setup is one optional sentence (`FoodDomainSettings.focus`), carried in the
-config snapshot, saying what the user is aiming at. Food scores identically
-with it empty.
+Setup was one optional sentence (`FoodDomainSettings.focus`), carried in the
+config snapshot; a Food-era day scores identically with it empty. The entries
+and the sentence are kept and shown nowhere (D140).
 
 ### Running performance (`core/running/performance.ts`)
 
@@ -760,8 +770,11 @@ own history; no population norms, ever.
 
 ## Verification status
 
-All of the following were run against the exact commit this file is committed
-in, except where noted.
+Taken at the muscle-map release (`735efca`) and carried since; each WP3 stage
+records its own verification in its block above, and its STOP report. Since
+WP3 Stage 4 the Phase 6 suites are retired with the Food screens (D139), the
+release smoke test runs through Mind, Gym and Laufen, and the Food unit tests
+are replay tests seeded through the repositories.
 
 | | |
 |---|---|
@@ -784,8 +797,8 @@ in, except where noted.
 | Accessibility (Phase 8) | **23/23** (`phase8-a11y.mjs`) |
 | Browser (Phase 7, regression) | 57/57 at 320/360/393/430px |
 | Accessibility (Phase 7) | 18/18 |
-| Browser (Phase 6, regression) | 47/47 at 320/360/393/430px |
-| Accessibility (Phase 6) | 20/20 |
+| Browser (Phase 6, regression) | 47/47 at 320/360/393/430px — retired in WP3 Stage 4 (D139) |
+| Accessibility (Phase 6) | 20/20 — retired in WP3 Stage 4 (D139) |
 | Browser (Phase 5, regression) | 46/46 at 320/360/393/430px |
 | Accessibility (Phase 5) | 15/15 |
 | Browser (Phase 4.1, regression) | 52/52 at 320/360/393/430px |

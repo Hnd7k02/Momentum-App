@@ -11,8 +11,10 @@
   margin-top: var(--space-4);
 }
 
-/* Four German labels on one line at 393px and above: footnote weight, no
-   inner padding beyond a hair, and nothing truncated. */
+/* Two labels, Mind | Gym (D143), on one line at every width down to 320px:
+   footnote weight, no inner padding beyond a hair, and nothing truncated.
+   (With four areas, below 360px the switch wrapped to two rows of two; two
+   labels always fit, so that rule went with Food.) */
 .domain-switch__option {
   min-width: 0;
   padding: 0 var(--space-1);
@@ -21,26 +23,13 @@
   white-space: nowrap;
 }
 
-/* Below 360px four labels do not fit one line without cutting them, and a
-   cut label is not a label. Two rows of two keep every word whole and every
-   target 40px tall; readability over shape, as everywhere at this width. */
-@media (max-width: 359px) {
-  .domain-switch {
-    flex-wrap: wrap;
-  }
-
-  .domain-switch__option {
-    flex: 1 1 45%;
-  }
-}
-
 /* The header's bottom padding is generous for a title alone; with the switch
    beneath it the switch carries the spacing. */
 .screen__header--terminal {
   padding-bottom: var(--space-4);
 }
 
-/* The rest of Bereiche — Laufen, pauses, the retired domain, backup, the
+/* The rest of Bereiche — pauses, the retired domain, backup, the
    language — sits below whichever area is open, under its own label, and
    does not change when the area does. */
 .areas__general {

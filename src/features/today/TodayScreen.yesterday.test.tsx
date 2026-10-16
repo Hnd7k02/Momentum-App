@@ -11,7 +11,7 @@ import { closeDatabase, deleteDatabase } from '../../storage/db';
 import { ensureSessionWindowEra } from '../../storage/configService';
 import { answersRepository, configSnapshotsRepository, questionsRepository, runsRepository } from '../../storage/repositories';
 import { saveAnswer } from '../../storage/services/checkInService';
-import { addQuestion, applyOnboarding } from '../../storage/services/configurationService';
+import { addQuestion, applyOnboarding, loadConfiguration } from '../../storage/services/configurationService';
 import { enableLegacyFood } from '../../storage/services/fixtures/legacyFood';
 import { createPause } from '../../storage/services/pauseService';
 import { ensureExerciseCatalogue } from '../../storage/services/gymService';
@@ -285,6 +285,34 @@ describe('Heute | Gestern', () => {
     await show('Gestern', '13. Oktober');
     expect(document.querySelector('[class*="food"]')).toBeNull();
     expect(document.querySelector('.today__progress')?.textContent).toBe('Gestern erledigt');
+  });
+
+  it('does not say nothing was due on a yesterday that had only Food (D141)', async () => {
+    // A profile that had Food alone, on the update day: today nothing is set
+    // up, but yesterday's own snapshot still had Food due — Verlauf counts it.
+    await deleteDatabase();
+    at('2026-10-10');
+    await applyOnboarding({ questions: [] });
+    await enableLegacyFood('2026-10-10');
+    at(TODAY);
+    refreshToday();
+    await loadConfiguration();
+    mounted = await mount(
+      <I18nProvider language="de" setLanguage={() => undefined}>
+        <WeightUnitProvider unit="kg">
+          <ToastProvider>
+            <TodayScreen onGoToAreas={() => undefined} />
+          </ToastProvider>
+        </WeightUnitProvider>
+      </I18nProvider>,
+    );
+    await until(() => (document.body.textContent ?? '').includes('Noch nichts eingerichtet'));
+    expect(document.body.textContent).toContain('Noch nichts eingerichtet');
+
+    await show('Gestern', '13. Oktober');
+    expect(document.querySelector('.today__nothingDue')).toBeNull();
+    expect(document.querySelector('[class*="food"]')).toBeNull();
+    expect(document.body.textContent).not.toContain('Noch nichts eingerichtet');
   });
 
   it('says nothing was due on a yesterday that asked nothing', async () => {

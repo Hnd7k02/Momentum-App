@@ -4,7 +4,7 @@ import { EDIT_WINDOW_DAYS, SESSION_WINDOW_DAYS } from '../core/config/constants'
 import { buildConfigSnapshot, configSnapshotsEqual } from '../core/config/snapshot';
 import type { DateKey } from '../core/dates';
 import { enabledDomainsIn } from '../core/domains';
-import type { AppConfigSnapshot, ConfigSnapshotRecord } from '../core/model';
+import type { AppConfigSnapshot, ConfigSnapshotRecord, DomainConfigSnapshot, DomainRecord, QuestionRecord } from '../core/model';
 import {
   configSnapshotsRepository,
   domainsRepository,
@@ -21,6 +21,15 @@ import {
  */
 
 export async function currentConfigSnapshot(): Promise<AppConfigSnapshot> {
+  const { domains, questions, bossWeights } = await liveConfiguration();
+  return buildConfigSnapshot(domains, questions, bossWeights);
+}
+
+async function liveConfiguration(): Promise<{
+  domains: DomainRecord[];
+  questions: QuestionRecord[];
+  bossWeights: Parameters<typeof buildConfigSnapshot>[2];
+}> {
   const [domains, questions, settings] = await Promise.all([
     domainsRepository.list(),
     questionsRepository.list(),
@@ -29,7 +38,30 @@ export async function currentConfigSnapshot(): Promise<AppConfigSnapshot> {
   // Boss weights are scoring-relevant configuration, so they travel with the
   // rest of it. Changing them appends a snapshot and therefore applies from
   // that day forward — the forward-only rule, with nothing to enforce.
-  return buildConfigSnapshot(domains, questions, settings?.bossWeights);
+  return { domains, questions, bossWeights: settings?.bossWeights };
+}
+
+/** A snapshot's domain entries that are entries at all — a restored file is not trusted to hold only those. */
+const entriesOf = (config: AppConfigSnapshot): DomainConfigSnapshot[] =>
+  Array.isArray(config.domains)
+    ? config.domains.filter((entry): entry is DomainConfigSnapshot => typeof entry === 'object' && entry !== null)
+    : [];
+
+const foodOn = (snapshot: { config: AppConfigSnapshot }): boolean =>
+  entriesOf(snapshot.config).some((domain) => domain.type === 'food' && domain.enabled);
+
+/**
+ * A Food switch-off dated after `date` that stays where it is (D139): the
+ * first later snapshot with Food off, while the day in force still has Food
+ * on — the local date has moved back across it. A switch-off written on a
+ * clock that was ahead is not kept: it moves to the day it reached.
+ */
+function keptFoodSwitchOff(all: readonly ConfigSnapshotRecord[], date: DateKey): ConfigSnapshotRecord | undefined {
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= date);
+  if (inForce === undefined || !foodOn(inForce)) return undefined;
+  const boundary = all.find((snapshot) => snapshot.effectiveFrom > date && !foodOn(snapshot));
+  if (boundary === undefined) return undefined;
+  return now().getTime() < Date.parse(boundary.createdAt) ? undefined : boundary;
 }
 
 /**
@@ -42,17 +74,40 @@ export async function currentConfigSnapshot(): Promise<AppConfigSnapshot> {
  * Such a later snapshot is not history yet — no day has been lived under it —
  * so it takes the current configuration too, or a change made today would be
  * undone on its date.
+ *
+ * **Except Food, before a switch-off that is kept** (D139). Once the local
+ * date has moved back across the switch-off, the live Food record is off but
+ * the day was lived with Food. What is compared and written for a day before
+ * the switch-off carries Food as it was on, with the Boss weights over the
+ * domains that were on; from the switch-off on, the live configuration. An
+ * answer on that day therefore moves nothing, and a change made on it reaches
+ * both sides.
  */
 export async function ensureCurrentSnapshot(
   effectiveFrom: DateKey = today(),
 ): Promise<ConfigSnapshotRecord> {
-  const [config, all] = await Promise.all([currentConfigSnapshot(), configSnapshotsRepository.list()]);
+  const [{ domains, questions, bossWeights }, all] = await Promise.all([
+    liveConfiguration(),
+    configSnapshotsRepository.list(),
+  ]);
+  const config = buildConfigSnapshot(domains, questions, bossWeights);
+  const kept = keptFoodSwitchOff(all, effectiveFrom);
+  const lived = kept
+    ? buildConfigSnapshot(
+        domains.map((domain) => (domain.type === 'food' ? ({ ...domain, enabled: true } as DomainRecord) : domain)),
+        questions,
+        bossWeights,
+      )
+    : config;
+  const configOn = (date: DateKey) => (kept !== undefined && date < kept.effectiveFrom ? lived : config);
   for (const later of all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom)) {
-    if (!configSnapshotsEqual(later.config, config)) await configSnapshotsRepository.append(config, later.effectiveFrom);
+    const target = configOn(later.effectiveFrom);
+    if (!configSnapshotsEqual(later.config, target)) await configSnapshotsRepository.append(target, later.effectiveFrom);
   }
+  const target = configOn(effectiveFrom);
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom);
-  if (inForce && configSnapshotsEqual(inForce.config, config)) return inForce;
-  return configSnapshotsRepository.append(config, effectiveFrom);
+  if (inForce && configSnapshotsEqual(inForce.config, target)) return inForce;
+  return configSnapshotsRepository.append(target, effectiveFrom);
 }
 
 /** The configuration a past day must be scored against. */
@@ -148,7 +203,9 @@ export async function ensureSessionWindowEra(
  * - **A switch-off already written stays where it is, unless the clock was
  *   ahead when it was written** — the boundary rule of the P8 step, for the
  *   same reason: a local date can move back across it (a journey west), and
- *   the day it lands on was lived with Food and must replay as it was.
+ *   the day it lands on was lived with Food and must replay as it was. A
+ *   write on that day keeps it there too: `ensureCurrentSnapshot` carries
+ *   Food as it was on any day before a kept switch-off.
  * - A profile with no snapshot in force today is left alone for today.
  *
  * Every day before the switch-off replays byte-identically, because a day
@@ -173,16 +230,19 @@ export async function ensureFoodRetired(
     }
   }
 
-  const entriesOf = (config: AppConfigSnapshot) => (Array.isArray(config.domains) ? config.domains : []);
-  const foodOn = (snapshot: { config: AppConfigSnapshot }) =>
-    entriesOf(snapshot.config).some((domain) => domain.type === 'food' && domain.enabled);
   const withoutFood = (config: AppConfigSnapshot): AppConfigSnapshot => {
+    // Entries that are not entries are carried untouched; nothing here reads them.
+    const domains: unknown[] = Array.isArray(config.domains) ? config.domains : [];
     const next: AppConfigSnapshot = {
       ...config,
-      domains: entriesOf(config).map((domain) => (domain.type === 'food' ? { ...domain, enabled: false } : domain)),
+      domains: domains.map((domain) =>
+        typeof domain === 'object' && domain !== null && (domain as DomainConfigSnapshot).type === 'food'
+          ? { ...(domain as DomainConfigSnapshot), enabled: false }
+          : domain,
+      ) as DomainConfigSnapshot[],
     };
     if (config.boss) {
-      const remaining = enabledDomainsIn(next);
+      const remaining = enabledDomainsIn({ ...next, domains: entriesOf(next) });
       next.boss = {
         ...config.boss,
         weights: settings?.bossWeights ? weightsForSnapshot(settings.bossWeights, remaining) : equalWeights(remaining),
@@ -193,13 +253,9 @@ export async function ensureFoodRetired(
 
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
   const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
-  if (inForce !== null && foodOn(inForce)) {
-    const boundary = later.find((snapshot) => !foodOn(snapshot));
-    const clockWasAhead = boundary !== undefined && now().getTime() < Date.parse(boundary.createdAt);
-    if (boundary === undefined || clockWasAhead) {
-      await configSnapshotsRepository.append(withoutFood(inForce.config), effectiveFrom);
-      retired = true;
-    }
+  if (inForce !== null && foodOn(inForce) && keptFoodSwitchOff(all, effectiveFrom) === undefined) {
+    await configSnapshotsRepository.append(withoutFood(inForce.config), effectiveFrom);
+    retired = true;
   }
   for (const snapshot of later) {
     if (foodOn(snapshot)) {
