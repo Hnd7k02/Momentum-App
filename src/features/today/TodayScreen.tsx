@@ -391,7 +391,9 @@ export function TodayScreen({
           </div>
         ) : null}
 
-        {day.empty ? (
+        {/* Nothing set up is said on today's side only: a yesterday with
+            nothing due predates the setup, and its closed note says enough. */}
+        {day.empty && shown === 'today' ? (
           <Card rows>
             <EmptyState
               icon={<SparkIcon size={26} />}

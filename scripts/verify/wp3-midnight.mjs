@@ -38,11 +38,15 @@ import { URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
  *   8  a workout from the    the same for a free session opened on the Gym
  *      hub across midnight   hub, whose host reads the live day
  *   9  a run sheet across    the sheet keeps what was typed through Sunday
- *      Sunday midnight       midnight; saving into the now closed week is
- *                            refused, and the screen says so
- *  10  a plan draft across   a draft that has written nothing moves to
- *      Sunday midnight       Monday, and its first set is stored there —
- *                            never refused by Sunday's closed week
+ *      Sunday midnight       midnight, and the save lands: on Monday Sunday
+ *                            is yesterday and can still be written (P8,
+ *                            D133). Reopened from the Gestern side, the sheet
+ *                            turns read-only at the next midnight, when
+ *                            Sunday has closed
+ *  10  a plan draft across   a draft keeps its day through Sunday midnight
+ *      Sunday midnight       and its first set is stored on Sunday; at the
+ *                            next midnight the workout says its day is
+ *                            closed
  *
  * Onboarding runs through lib.mjs `onboard()` unchanged: under
  * `clock.install` the page clock flows with real time, so its transitions
@@ -520,7 +524,8 @@ await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-1
   const runs = async () => (await idbAll(page, 'runs')).map((r) => ({ date: r.date, distance: r.distanceMetres ?? null }));
   const before = await runs();
   check(`${W}: one run on 18.10 before midnight`, before.length === 1 && before[0].date === '2026-10-18', short(before));
-  await page.locator('section.section').filter({ has: page.locator('h2.section__label', { hasText: /^Laufen$/ }) }).locator('.row').last().click();
+  const runRow = () => page.locator('section.section').filter({ has: page.locator('h2.section__label', { hasText: /^Laufen$/ }) }).locator('.row').last();
+  await runRow().click();
   await page.locator('.sheet').waitFor({ timeout: 3000 });
   await page.locator('#session-distance').fill('5.2');
 
@@ -529,14 +534,48 @@ await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-1
   await page.waitForTimeout(800);
   check(`${W}: (precondition) the clock is past Sunday midnight`, (await pageNow(page)).startsWith('2026-10-19 00:0'), await pageNow(page));
   check(`${W}: the run sheet is still open with 5.2`, (await page.locator('#session-distance').count()) === 1 && (await page.locator('#session-distance').inputValue()) === '5.2');
+  check(`${W}: on Monday it still offers saving Sunday's run`, (await page.locator('.sheet__footer button.button--primary').count()) === 1);
   await page.locator('.sheet__footer button.button--primary').click();
-  await page.locator('.toast').waitFor({ timeout: 3000 }).catch(() => undefined);
-  const message = await page.locator('.toast__message').textContent().catch(() => null);
-  check(`${W}: the refused save is said out loud`, message === 'Nicht gespeichert – das Training bleibt, wie es war.', String(message));
+  await page.waitForTimeout(1200);
+  const message = await page.locator('.toast__message').textContent({ timeout: 500 }).catch(() => null);
+  check(`${W}: nothing is refused`, message !== 'Nicht gespeichert – das Training bleibt, wie es war.', String(message));
   const after = await runs();
-  check(`${W}: the closed week's run is unchanged`, after.length === 1 && after[0].distance === null, short(after));
+  check(`${W}: Sunday's run now has its 5.2 km, still on 18.10`, after.length === 1 && after[0].date === '2026-10-18' && after[0].distance === 5200, short(after));
   const moved = await waitForLabel(page, 'Montag, 19. Oktober');
   check(`${W}: Heute shows Montag, 19. Oktober`, moved.ok, short(moved.seen));
+
+  // The Gestern side shows Sunday, in last week, with its run.
+  await page.locator('.today__switch button', { hasText: 'Gestern' }).click();
+  const gestern = await waitForLabel(page, 'Sonntag, 18. Oktober');
+  check(`${W}: the Gestern side shows Sonntag, 18. Oktober`, gestern.ok, short(gestern.seen));
+  await page.waitForTimeout(600);
+  const weekLabel = await page.locator('.week__label').first().textContent();
+  check(`${W}: its week is last week`, weekLabel === 'Letzte Woche', String(weekLabel));
+  await runRow().click();
+  await page.locator('.sheet').waitFor({ timeout: 3000 });
+  const days = await page.locator('.session-days__day').allTextContents();
+  check(`${W}: the run can move between Sunday and Monday, nothing else`, same(days, ['So', 'Mo']), short(days));
+  await page.locator('#session-distance').fill('6');
+
+  // Monday midnight: Sunday has closed, and the open sheet follows.
+  const msToTuesday = await page.evaluate(() => {
+    const next = new Date();
+    next.setHours(24, 0, 30, 0);
+    return next.getTime() - Date.now();
+  });
+  await ctx.clock.fastForward(msToTuesday);
+  await ctx.clock.runFor('00:30');
+  await page.waitForTimeout(1500);
+  check(`${W}: (precondition) the clock is past Monday midnight`, (await pageNow(page)).startsWith('2026-10-20 00:0'), await pageNow(page));
+  const closed = await page.locator('.session-sheet__closed').textContent({ timeout: 3000 }).catch(() => null);
+  check(`${W}: the sheet says the day is closed`, closed === 'Dieser Tag ist abgeschlossen.', String(closed));
+  check(`${W}: and offers no save`, (await page.locator('.sheet__footer button.button--primary').count()) === 0);
+  check(`${W}: what was typed stays visible`, (await page.locator('#session-distance').inputValue()) === '6');
+  const finalRuns = await runs();
+  check(`${W}: the run keeps its 5.2 km`, finalRuns.length === 1 && finalRuns[0].distance === 5200, short(finalRuns));
+  await page.keyboard.press('Escape');
+  const followed = await waitForLabel(page, 'Montag, 19. Oktober');
+  check(`${W}: the Gestern side followed midnight to Montag, 19. Oktober`, followed.ok, short(followed.seen));
 });
 
 await scenario('10 plan draft across Sunday midnight', { tz: BERLIN, time: '2026-10-18T23:55:00+02:00' }, async ({ ctx, page, W }) => {
@@ -559,13 +598,28 @@ await scenario('10 plan draft across Sunday midnight', { tz: BERLIN, time: '2026
   await page.locator('.gym-session__date').tap();
   await page.waitForTimeout(1200);
   check(`${W}: (precondition) the clock is past Sunday midnight`, (await pageNow(page)).startsWith('2026-10-19 00:0'), await pageNow(page));
-  check(`${W}: the draft has moved to Montag`, (await header()) === 'Session vom 19. Oktober · Push', await header());
+  check(`${W}: the draft keeps its day`, (await header()) === 'Session vom 18. Oktober · Push', await header());
   await fillSet(page.locator('.gym-set--pending').first(), 8, 60);
   await page.waitForTimeout(1500);
   const facts = await workoutFacts(page);
-  check(`${W}: its first set is stored, in one session on 19.10`, facts.sessions.length === 1 && facts.sessions[0].date === '2026-10-19' && facts.sets.length === 1 && facts.sets[0].reps === 8 && facts.sets[0].kg === 60, short(facts));
+  check(`${W}: its first set is stored, in one session on 18.10`, facts.sessions.length === 1 && facts.sessions[0].date === '2026-10-18' && facts.sets.length === 1 && facts.sets[0].reps === 8 && facts.sets[0].kg === 60, short(facts));
   check(`${W}: the set is on screen`, facts.logged === 1, String(facts.logged));
-  check(`${W}: no closed-week notice`, (await page.locator('.gym-session__closed').count()) === 0);
+  check(`${W}: no closed notice`, (await page.locator('.gym-session__closed').count()) === 0);
+
+  // Monday midnight: Sunday has closed, and the open workout says so.
+  const msToTuesday = await page.evaluate(() => {
+    const next = new Date();
+    next.setHours(24, 0, 30, 0);
+    return next.getTime() - Date.now();
+  });
+  await ctx.clock.fastForward(msToTuesday);
+  await ctx.clock.runFor('00:30');
+  await page.waitForTimeout(1500);
+  check(`${W}: (precondition) the clock is past Monday midnight`, (await pageNow(page)).startsWith('2026-10-20 00:0'), await pageNow(page));
+  const closed = await page.locator('.gym-session__closed').first().textContent({ timeout: 3000 }).catch(() => null);
+  check(`${W}: the workout says its day is closed`, closed === 'Dieser Tag ist abgeschlossen.', String(closed));
+  const live = await page.locator('.gym-session input:not([disabled])').count();
+  check(`${W}: and takes no input — every field is disabled`, live === 0, String(live));
 });
 
 await browser.close();

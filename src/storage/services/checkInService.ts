@@ -354,20 +354,21 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
    * and the questions asked in its own snapshot, exactly as the replay
    * scores it. A question added this morning was not asked yesterday and one
    * archived this morning still was, so offering today's list for yesterday
-   * would take an answer nothing scores and withhold one that is. Today
-   * reads the live configuration, which today's snapshot follows.
+   * would take an answer nothing scores and withhold one that is. A day
+   * before the app was set up had nothing due at all. Today reads the live
+   * configuration, which today's snapshot follows.
    */
-  const pastConfig = compareDateKeys(date, reference) < 0 ? dayConfig : null;
-  const enabledOnDay = (type: StoredDomainType): boolean => pastConfig === null || enabledIn(pastConfig, type);
+  const past = compareDateKeys(date, reference) < 0;
+  const enabledOnDay = (type: StoredDomainType): boolean => !past || enabledIn(dayConfig, type);
 
   const mentalDomain = domains.find((domain) => domain.type === 'mental') ?? null;
 
   let mental: MentalDayView | null = null;
   if (mentalDomain?.enabled && enabledOnDay('mental')) {
     const active =
-      pastConfig === null
-        ? (await questionsRepository.listActive()).filter((question) => question.domainId === mentalDomain.id)
-        : questionsAskedIn(pastConfig, mentalDomain.id, await questionsRepository.list());
+      past && dayConfig
+        ? questionsAskedIn(dayConfig, mentalDomain.id, await questionsRepository.list())
+        : (await questionsRepository.listActive()).filter((question) => question.domainId === mentalDomain.id);
     const byQuestion = new Map(answers.map((answer) => [answer.questionId, answer]));
     const items: CheckInItem[] = active.map((question) => ({
       question,

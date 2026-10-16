@@ -324,9 +324,14 @@ describe('the day view under one day back (D133, D138)', () => {
     expect((await loadDay(TODAY)).mental?.answeredCount).toBe(0);
   });
 
-  it('owes nothing for a yesterday before the app was set up', async () => {
+  it('owes nothing for a yesterday before the app was set up, and shows nothing for it', async () => {
     await setup();
     expect(await yesterdayOutstanding(TODAY)).toBe(false);
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.mental).toBeNull();
+    expect(yesterday.training).toEqual([]);
+    expect(yesterday.editable).toBe(false);
+    expect(yesterday.empty).toBe(true);
   });
 });
 
