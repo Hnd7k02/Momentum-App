@@ -7,8 +7,10 @@ import { URL_APP, check, summary, onboard, seed, seedTraining, seedMuscles, open
  * Taps a 12px grid over the whole canvas at 393, 430 and 320, front and
  * back, and counts which regions respond. A miss leaves the selection alone,
  * so only a CHANGE of selection is a hit. The approved decision for 320px is
- * 9 of 10 — the triceps below the probe — and this re-measures it rather
- * than restating it.
+ * 9 of 10, and this re-measures it rather than restating it. It was taken
+ * with the triceps below the probe; measured on a body that stands still
+ * (WP3 Stage 4), the triceps are reached and the forearms are the region
+ * the 12px pitch misses at 320. The count is the decision, and it holds.
  *
  * A tap that selects a region on the far side turns the body round
  * (`BodyViewer.tsx`: the turn-into-view rule fires for taps too until
@@ -21,6 +23,8 @@ import { URL_APP, check, summary, onboard, seed, seedTraining, seedMuscles, open
  * canvas is not body a finger can reach, and is skipped. And a hit on the
  * far side turns the body to it: as `body.mjs` does since STOP 3b, the body
  * is put back to the pass's view, and the next tap waits until it is there.
+ * The pill is pressed as a finger presses it, without Playwright scrolling
+ * it into view first: that scroll moved the canvas from under the grid.
  */
 /** `STEP=8 WIDTHS=430` for a finer probe of one width. */
 const STEP = Number(process.env.STEP ?? 12);
@@ -47,22 +51,25 @@ for (const [width, height] of [[393, 852], [430, 932], [320, 693]].filter(([w]) 
   await openMuscles(page);
   await page.locator('.areas__scroll').evaluate((el) => { const m = document.querySelector('.muscle-module'); el.scrollTop += m.getBoundingClientRect().top - el.getBoundingClientRect().top - 8; });
   await page.waitForTimeout(1200);
-  const box = await page.locator('.body-viewer canvas').boundingBox();
+  let box = await page.locator('.body-viewer canvas').boundingBox();
   const tally = new Map();
+  /** A view pill pressed in place — `locator.click()` would scroll the module first. */
+  const press = (view) => page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).evaluate((el) => el.click());
   const current = () => page.evaluate(() => document.querySelector('.muscle-row__button[aria-pressed="true"] .muscle-row__name')?.textContent ?? null);
   const azimuth = async () => Number(await page.locator('.body-viewer').getAttribute('data-azimuth'));
   /** Back to the pass's view, and not one tap before the body is there. */
   const reface = async (view, facing) => {
     for (let tries = 0; tries < 3; tries += 1) {
-      await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).click();
+      await press(view);
       for (let waited = 0; waited < 6000 && (await azimuth()) !== facing; waited += 100) await page.waitForTimeout(100);
       await page.waitForTimeout(150);
       if ((await azimuth()) === facing) return;
     }
   };
   for (const [view, facing] of [['Vorne', 0], ['Hinten', 180]]) {
-    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).click();
+    await press(view);
     await page.waitForTimeout(3500);
+    box = await page.locator('.body-viewer canvas').boundingBox();
     let prev = await current();
     for (let y = 6; y < box.height; y += STEP) {
       for (let x = 6; x < box.width; x += STEP) {
