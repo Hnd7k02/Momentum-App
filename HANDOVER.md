@@ -419,7 +419,22 @@ records (answers, sessions, sets, snapshots)
   onboarding sports-step styles are gone. Refuted and left: the retired
   Sport log reachable through a mislabelled update or delete (the argument
   is never read there), and the sleep wording (a recorded decision, D144).
-- Verification at STOP 4: see the STOP 4 report.
+- Verification at STOP 4, on the final build: `tsc -b` clean, `npm run
+  test` exit 0 (105 files, 1584 tests), build clean (main 143.29 kB gzipped,
+  4.50 kB less than Stage 3b). Every browser suite green — `wp3-stage4`
+  170/170 (new), `release` 83/83, `terminal` 43/43, `geometry` 111/111,
+  `wp3-stage3` 153/153, `wp3-midnight` 139/139, `wp3-sheets` 330/330, the
+  phase suites and their accessibility suites; run alone, `gym-muscles`
+  71/71, `body` 39/39, `body-reach` 3/3 twice with identical tallies.
+  Golden files and fingerprints byte-identical; nothing re-pinned.
+- Suite repaired at STOP 4, no check loosened and no app code changed:
+  `body-reach` measured a moving body — the view pills sit over the canvas
+  and the grid tapped them, a far-side hit turned the body, and pressing a
+  pill through Playwright scrolled the module — so four runs of one build
+  gave four results. It now skips cells under a control, turns the body
+  back after a far-side hit and presses the pills in place. At 320 the
+  region below the 12px pitch is now the forearms, not the triceps; the
+  accepted count, 9 of 10, holds.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
