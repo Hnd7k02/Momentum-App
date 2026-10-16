@@ -232,13 +232,30 @@ async function shot(page, name) {
   await shot(page, 'body-393-selected');
 
   // Every region can be hit by a raycast, front and back.
+  //
+  // A selected group facing more than 70° away is turned into view
+  // (BodyViewer.tsx), and a tap selects as a list press does: the trapezius
+  // seen from the front is `back`, and tapping it turns the body round. So
+  // after a hit on the far side the body is put back to the pass's view
+  // before the next tap — otherwise the rest of the "front" pass taps a body
+  // facing away, and the chest is reached or not depending on timing.
+  const FACES_BACK = new Set(['back', 'hamstringsGlutes', 'triceps', 'calves']); // REGION_FACING 180
   const hits = new Set();
   const grid = [];
   for (const fy of [0.13, 0.2, 0.27, 0.34, 0.42, 0.5, 0.58, 0.66, 0.74, 0.82, 0.9]) for (const fx of [0.3, 0.34, 0.37, 0.4, 0.44, 0.5, 0.56, 0.6, 0.63, 0.66, 0.7]) grid.push([fx, fy]);
-  for (const view of ['Vorne', 'Hinten']) {
+  for (const [view, facing] of [['Vorne', 0], ['Hinten', 180]]) {
     await pills.getByRole('button', { name: view }).click();
     await settle(page);
-    for (const [fx, fy] of grid) { const h = await tapAt(page, fx, fy); if (h) hits.add(h); }
+    for (const [fx, fy] of grid) {
+      const h = await tapAt(page, fx, fy);
+      if (!h) continue;
+      hits.add(h);
+      for (let tries = 0; FACES_BACK.has(h) !== (facing === 180) && tries < 3; tries += 1) {
+        await pills.getByRole('button', { name: view }).click();
+        await settle(page);
+        if ((await azimuthAttr(page)) === facing) break;
+      }
+    }
   }
   check('all ten regions are reachable by a tap, front and back', hits.size === 10, [...hits].sort().join(','));
   check('a tap that hits nothing leaves the selection alone', (await tapAt(page, 0.05, 0.05)) === null && (await (async () => { await page.locator('[data-muscle="calves"]').click(); const b = await canvasBox(page); await page.mouse.click(b.x + 4, b.y + 4); await page.waitForTimeout(120); return readout(page, '[data-selected-readout]'); })()) === 'calves');
