@@ -14,7 +14,7 @@ const shot = (name) => page.screenshot({ path: `${OUT}/${name}.png` });
 
 await page.goto(URL_APP, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
-await onboard(page, { gym: 3, running: 2, food: true });
+await onboard(page, { gym: 3, running: 2 });
 await seed(page, { days: 42 });
 await seedTraining(page, { days: 42 });
 await seedMuscles(page, { days: 42 });
@@ -35,11 +35,6 @@ const ten = scale(/Wie war deine Stimmung/, 10);
 await ten.click();
 await page.waitForTimeout(500);
 await shot('393-B-today-scale-10');
-const three = page.getByRole('radio', { name: /^3 von 10/ }).last();
-await three.scrollIntoViewIfNeeded();
-await three.click();
-await page.waitForTimeout(500);
-await shot('393-C-today-food-3');
 
 // Verlauf: grid and legend.
 await page.locator('.tab-bar button', { hasText: 'Verlauf' }).click();
@@ -48,7 +43,7 @@ await shot('393-D-verlauf');
 await page.locator('.heatmap__legend').scrollIntoViewIfNeeded();
 await page.waitForTimeout(300);
 await shot('393-E-verlauf-legend');
-await page.getByRole('button', { name: /Wellbeing/ }).first().click();
+await page.getByRole('button', { name: /Mind/ }).first().click();
 await page.waitForTimeout(300);
 await page.getByRole('button', { name: /Wie gut hast du gesch/ }).first().click();
 await page.waitForTimeout(600);

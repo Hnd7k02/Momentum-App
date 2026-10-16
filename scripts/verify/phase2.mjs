@@ -17,8 +17,11 @@ async function fresh(opts = {}) {
   check('onboarding opens on the Momentum concept', await page.getByText('Fortschritt sieht man selten').isVisible());
 
   await page.getByRole('button', { name: /Los geht/ }).click();
-  check('second screen names the three worlds',
-    await page.getByRole('heading', { name: 'Drei Welten' }).isVisible());
+  check('second screen names the two worlds, Laufen inside Gym (WP3 Stage 4)',
+    await page.getByRole('heading', { name: 'Zwei Welten' }).isVisible() &&
+    await page.getByText('Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.').isVisible());
+  check('and says nothing of Food',
+    !/Ernährung|Essen/.test((await page.locator('.onboarding').textContent()) ?? ''));
   await page.getByRole('button', { name: 'Weiter' }).click();
   check('third screen is rank and milestones',
     await page.getByRole('heading', { name: /Rang und Meilensteine/ }).isVisible());
@@ -26,19 +29,23 @@ async function fresh(opts = {}) {
 
   const picker = await page.getByRole('heading', { name: 'Womit startest du?' }).isVisible();
   check('fourth screen is the domain picker', picker);
-  check('Sport is offered as one world', await page.getByText('Gym und Laufen').isVisible());
+  const choices = (await page.locator('.question-pick .question-pick__text').allTextContents()).map((s) => s.trim());
+  check('it offers Mind and Gym, and nothing else', JSON.stringify(choices) === JSON.stringify(['Mind', 'Gym']), choices.join(' | '));
+  check('Gym is one world, Laufen included',
+    await page.getByText('Gym-Sessions und Läufe, je mit eigenem Wochenziel.').isVisible());
   check('no generic Sport domain is offered as a thing to track',
     (await page.getByRole('button', { name: /^Sport$/ }).count()) === 0);
+  check('and Food is not offered (D139)', (await page.getByRole('button', { name: /Ernährung/ }).count()) === 0);
 
   // Deselect everything and check the flow refuses to continue.
-  await page.getByRole('button', { name: /^Wellbeing/ }).click();
+  await page.getByRole('button', { name: /^Mind/ }).click();
   const disabled = await page.getByRole('button', { name: 'Weiter' }).isDisabled();
   check('cannot continue with nothing switched on', disabled);
   check('says so rather than only disabling the button',
     await page.getByText('Wähle mindestens einen Bereich').isVisible());
-  await page.getByRole('button', { name: /^Wellbeing/ }).click();
+  await page.getByRole('button', { name: /^Mind/ }).click();
 
-  await page.getByRole('button', { name: /^Sport/ }).click();
+  await page.getByRole('button', { name: /^Gym/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   check('questions are grouped by category',
@@ -72,7 +79,7 @@ async function fresh(opts = {}) {
   check('gym and running were created with their own targets',
     domains.find((d) => d.type === 'gym')?.settings.targetPerWeek === 4 &&
     domains.find((d) => d.type === 'running')?.settings.targetPerWeek === 2);
-  check('food was not created, because it was not chosen',
+  check('Food cannot be chosen, and no Food domain exists',
     !domains.some((d) => d.type === 'food'));
 
   const questions = await storedQuestions(page);
@@ -140,9 +147,9 @@ async function fresh(opts = {}) {
   await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();
   await page.waitForTimeout(400);
   const areaSwitch = await page.getByRole('radiogroup', { name: 'Bereich wählen' }).getByRole('radio').allTextContents();
-  check('Areas offers the three terminal areas in order, and shows one at a time',
-    JSON.stringify(areaSwitch.map((s) => s.trim())) === JSON.stringify(['Mental', 'Gym', 'Ernährung']) &&
-      JSON.stringify(await page.locator('.areas__domainName').allTextContents()) === JSON.stringify(['Wellbeing']),
+  check('Areas offers the two terminal areas in order, and shows one at a time',
+    JSON.stringify(areaSwitch.map((s) => s.trim())) === JSON.stringify(['Mind', 'Gym']) &&
+      JSON.stringify(await page.locator('.areas__domainName').allTextContents()) === JSON.stringify(['Mind']),
     JSON.stringify(areaSwitch));
   check('questions are grouped by category in Areas',
     await page.getByText('Gesundheit').first().isVisible());
@@ -159,7 +166,7 @@ async function fresh(opts = {}) {
 
   await page.locator('.tab-bar button', { hasText: 'Verlauf' }).click();
   await page.waitForTimeout(600);
-  await page.getByRole('button', { name: /Wellbeing/ }).first().click();
+  await page.getByRole('button', { name: /Mind/ }).first().click();
   await page.waitForTimeout(300);
 
   const questionRow = page.getByRole('button', { name: /Wie gut hast du gesch/ }).first();

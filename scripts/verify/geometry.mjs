@@ -203,7 +203,7 @@ async function scrollTo(page, selector) {
  *
  * The point of Stage A is that the *existing* copy renders without clipping,
  * so a card measured while it is still saying "noch keine Daten" proves
- * nothing. Six weeks of answers, gym sets, runs and food ratings puts the
+ * nothing. Six weeks of answers, gym sets and runs puts the
  * rating, the Endurance figure, the year-to-date change and attendance all
  * on screen at once, which is the state the device screenshots were taken in.
  */
@@ -211,18 +211,11 @@ async function profile(ctx, { days = 42 } = {}) {
   const page = await ctx.newPage();
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days });
   await seedTraining(page, { days });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1600);
-
-  // Today's own Food rating, so the scale question shows its selected state.
-  const eight = page.locator('.food__scale').getByRole('radio', { name: /^8\b/ }).first();
-  if (await eight.isVisible().catch(() => false)) {
-    await eight.click();
-    await page.waitForTimeout(600);
-  }
   return page;
 }
 
@@ -238,10 +231,8 @@ for (const [width, height] of [
   });
   const page = await profile(ctx);
 
-  /* ── Today, including the Ernährung scale question ─────────────────────── */
+  /* ── Today ─────────────────────────────────────────────────────────────── */
   await audit(page, 'today', width);
-  await scrollTo(page, '.food__scale');
-  await audit(page, 'today-ernaehrung', width);
 
   /* ── Verlauf: the overall overview ─────────────────────────────────────── */
   await page.getByRole('button', { name: 'Verlauf' }).click();
@@ -295,9 +286,6 @@ for (const [width, height] of [
   await audit(page, 'bereiche-laufen-sheet', width);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(400);
-  await page.getByRole('radio', { name: 'Ernährung' }).click();
-  await page.waitForTimeout(900);
-  await audit(page, 'bereiche-food', width);
 
   await ctx.close();
 

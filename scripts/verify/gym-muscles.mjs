@@ -52,7 +52,7 @@ async function open(width, { reducedMotion = 'no-preference', init = null, heigh
   page.on('request', (r) => { const u = r.url(); if (/BodyViewer|\.glb/.test(u)) chunks.push(u.split('/').pop()); });
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days: 42 });
   await seedTraining(page, { days: 42 });
   await seedMuscles(page, { days: 42 });
@@ -110,10 +110,7 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   check('nothing 3D is fetched while the app is anywhere but Gym', chunks.length === 0, chunks.join(','));
   await page.getByRole('button', { name: 'Bereiche' }).click();
   await page.waitForTimeout(900);
-  check('and not on Bereiche → Mental', chunks.length === 0, chunks.join(','));
-  await page.getByRole('radio', { name: 'Ernährung' }).click();
-  await page.waitForTimeout(1200);
-  check('and not on Bereiche → Ernährung', chunks.length === 0, chunks.join(','));
+  check('and not on Bereiche → Mind', chunks.length === 0, chunks.join(','));
   await page.getByRole('radio', { name: 'Gym' }).click();
   await page.waitForTimeout(2000);
   check('and not on the Gym hub itself (WP2-2)', chunks.length === 0, chunks.join(','));
@@ -314,7 +311,7 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   const page = await ctx.newPage();
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days: 42 });
   await seedMuscles(page, { days: 42 });
   // The chunk is unreachable from here on: the lazy import rejects. The
@@ -427,7 +424,7 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   // The area switch is on the hub, one step back from the module.
   await page.getByRole('button', { name: 'Zurück' }).click();
   await page.waitForTimeout(900);
-  await page.getByRole('radio', { name: 'Ernährung' }).click();
+  await page.getByRole('radio', { name: 'Mind' }).click();
   await page.waitForTimeout(1200);
   p = await probe(page);
   check('leaving Gym takes the body down and releases its context and handlers', (await page.locator('canvas').count()) === 0 && p.contexts - p.lost === 0 && p.listeners === 0, JSON.stringify(p));

@@ -14,15 +14,21 @@ export const summary = () => {
 };
 export const phone = { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, acceptDownloads: true };
 
-/** Walks the iteration-2 onboarding: three concepts, the picker, then setup. */
+/**
+ * Walks the onboarding: three concepts, the picker, then setup.
+ *
+ * Two worlds since WP3 Stage 4: Mind, and Gym with Laufen inside it. Food is
+ * not offered (D139), so asking for it fails at once rather than after a
+ * click times out; a device that had Food is `seedLegacyFood`'s job.
+ */
 export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie war deine Stimmung/], gym = 3, running = 2, food = false, wellbeing = true } = {}) {
+  if (food) throw new Error('onboard: Food is not offered (D139) — use seedLegacyFood for a device that had it');
   await page.getByRole('button', { name: /Los geht/ }).click();
-  await page.getByRole('button', { name: 'Weiter' }).click();   // three worlds
+  await page.getByRole('button', { name: 'Weiter' }).click();   // two worlds
   await page.getByRole('button', { name: 'Weiter' }).click();   // rank + milestones
-  // Domain picker: Wellbeing starts selected.
-  if (!wellbeing) await page.getByRole('button', { name: /^Wellbeing/ }).click();
-  if (gym || running) await page.getByRole('button', { name: /^Sport/ }).click();
-  if (food) await page.getByRole('button', { name: /^Ernährung/ }).click();
+  // Domain picker: Mind starts selected; Gym carries the Laufen target too.
+  if (!wellbeing) await page.getByRole('button', { name: /^Mind/ }).click();
+  if (gym || running) await page.getByRole('button', { name: /^Gym/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   if (wellbeing) {
     for (const q of questions) await page.getByRole('button', { name: q }).first().click();
@@ -181,11 +187,11 @@ export async function seed(page, { days = 30 } = {}) {
 }
 
 /**
- * Gym sets, runs and food ratings across the same window `seed()` fills.
+ * Gym sets and runs across the same window `seed()` fills.
  *
  * `seed()` writes answers and bare gym *sessions*; a session with no sets
- * carries attendance but no performance, and Running and Food it does not
- * touch at all. The geometry suite needs every card on Verlauf to have
+ * carries attendance but no performance, and Running it does not touch at
+ * all. The geometry suite needs every card on Verlauf to have
  * something to say — a rating, an Endurance figure, a year-to-date change,
  * an attendance line — because the whole point of measuring a card is
  * measuring it with its real content in it.
@@ -207,7 +213,7 @@ export async function seedTraining(page, { days = 40, gymPerWeek = 3, runsPerWee
     const stamp = new Date().toISOString();
     const weeks = Math.floor(days / 7);
 
-    const sessions = [], sets = [], runs = [], foodDays = [];
+    const sessions = [], sets = [], runs = [];
     let n = 0;
     for (let week = 0; week < weeks; week += 1) {
       for (let slot = 0; slot < gymPerWeek; slot += 1) {
@@ -236,18 +242,70 @@ export async function seedTraining(page, { days = 40, gymPerWeek = 3, runsPerWee
           note: null, legacyCarryOver: false, configSnapshotId: snaps[0].id, createdAt: stamp, updatedAt: stamp });
       }
     }
-    for (let i = days; i >= 1; i -= 1) {
-      const date = key(shift(-i));
-      foodDays.push({ id: date, date, adherence: 6 + (i % 4), note: null, sensitivity: 'private',
-        configSnapshotId: snaps[0].id, createdAt: stamp, updatedAt: stamp });
-    }
 
     await putAll(db, 'gymSessions', sessions);
     await putAll(db, 'gymSets', sets);
     await putAll(db, 'runs', runs);
-    await putAll(db, 'foodDays', foodDays);
-    return { sessions: sessions.length, sets: sets.length, runs: runs.length, foodDays: foodDays.length };
+    return { sessions: sessions.length, sets: sets.length, runs: runs.length };
   }, { days, gymPerWeek, runsPerWeek });
+}
+
+/**
+ * A device that had Food switched on before WP3 Stage 4 (D139), written the
+ * way the old build left it on disk: the Food record — on, with the user's
+ * focus sentence — every snapshot carrying it, the Boss shared equally over
+ * what was on (domains sorted by id, weights in domain order, exactly as
+ * `buildConfigSnapshot` wrote them), a rating for each day from `days` days
+ * ago to `from` days ago — `from: 2` leaves yesterday unrated, the update
+ * day's one-time cost (D141) — and an entry every third day. Call it after
+ * `seed()`, which dates the first snapshot back, and reload: that load
+ * switches Food off from today.
+ */
+export async function seedLegacyFood(page, { days = 14, from = 1, focus = 'Zmittag selber kochen' } = {}) {
+  return page.evaluate(async ({ days, from, focus }) => {
+    const open = () => new Promise((res, rej) => { const r = indexedDB.open('momentum'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const all = (db, s) => new Promise((res, rej) => { const r = db.transaction([s], 'readonly').objectStore(s).getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const putAll = (db, s, recs) => new Promise((res, rej) => { const tx = db.transaction([s], 'readwrite'); for (const r of recs) tx.objectStore(s).put(r); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+    const pad = (n, l = 2) => String(n).padStart(l, '0');
+    const key = (d) => `${pad(d.getFullYear(), 4)}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const shift = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return d; };
+
+    const db = await open();
+    const stamp = new Date().toISOString();
+    const food = { id: 'dom_legacy_food', type: 'food', enabled: true, order: 3, settings: { focus }, createdAt: stamp, updatedAt: stamp };
+    await putAll(db, 'domains', [food]);
+
+    const TYPES = ['mental', 'gym', 'running', 'food'];
+    const snaps = await all(db, 'configSnapshots');
+    await putAll(db, 'configSnapshots', snaps.map((snapshot) => {
+      const domains = [
+        ...snapshot.config.domains.filter((domain) => domain.type !== 'food'),
+        { id: food.id, type: 'food', enabled: true, settings: food.settings },
+      ].sort((a, b) => a.id.localeCompare(b.id));
+      const config = { ...snapshot.config, domains };
+      if (snapshot.config.boss) {
+        const enabled = TYPES.filter((type) => domains.some((domain) => domain.type === type && domain.enabled));
+        config.boss = { weights: Object.fromEntries(enabled.map((type) => [type, 1 / enabled.length])) };
+      }
+      return { ...snapshot, config };
+    }));
+
+    const foodDays = [], foodEntries = [];
+    for (let i = days; i >= from; i -= 1) {
+      const date = key(shift(-i));
+      foodDays.push({ id: date, date, adherence: 5 + (i % 5), note: null, sensitivity: 'private',
+        configSnapshotId: snaps[0].id, createdAt: stamp, updatedAt: stamp });
+      if (i % 3 === 0) {
+        foodEntries.push({ id: `legacy-food-${date}`, date, foodId: null, label: 'Znüni', grams: null, kcal: 300,
+          proteinG: null, carbsG: null, fatG: null, detail: null, sensitivity: 'private',
+          configSnapshotId: snaps[0].id, createdAt: stamp, updatedAt: stamp });
+      }
+    }
+    await putAll(db, 'foodDays', foodDays);
+    await putAll(db, 'foodEntries', foodEntries);
+    db.close();
+    return { foodDays: foodDays.length, foodEntries: foodEntries.length };
+  }, { days, from, focus });
 }
 
 /**

@@ -829,6 +829,8 @@ rewriting every answer, every question and every config snapshot on every
 device, in exchange for a label — and the label belongs in the string layer,
 where it can differ per language anyway. Display name changes; type does not.
 
+*Since D143 the domain is called Mind; the stored name is still `mental`.*
+
 ## D67 — Boss weights live in the config snapshot
 
 The brief's D3 asks that a weight change apply forward only and never rewrite
@@ -1849,6 +1851,8 @@ means from a Wellbeing question has learned what it means here; the bands, the
 colours and the words are the same, and a second scale with its own arithmetic
 would be a second thing to learn and a second thing to get wrong.
 
+*Since D139 Food has left the product. D106–D109 describe how its days replay; nothing writes a Food day any more (D140).*
+
 ## D107 — Food is scored by the rules that already existed, and gets no rules of its own
 
 Food is a daily domain with one due item, so it is scored by the day-score
@@ -1891,6 +1895,8 @@ Food day earns XP in Food's own ledger but does not move the single lifetime
 XP figure the Boss shows. What a rated day should be worth against a gym
 session is a product decision, and Phase 6 did not make it.
 
+*Historical since D139: this is how a Food-era day replays.*
+
 ## D108 — Food's setup is a sentence, because that is all adherence needs
 
 "How closely did today match what you set out to do?" needs the user to have
@@ -1905,6 +1911,8 @@ This is the smallest thing that makes the daily question answerable, and it is
 the only thing that could be built without pre-empting Gate 2. A profile form
 (age, sex, height, activity, goal weight) would have been building the *input*
 to the undecided model, which is the same commitment in a different order.
+
+*Historical since D139: the sentence is kept on the record (D140) and shown nowhere.*
 
 ## D109 — Version 5 adds a store and invents nothing
 
@@ -1925,6 +1933,8 @@ collection in the envelope. The ratings are the one piece of Food data that
 cannot be recomputed from anything else, so a backup without them would lose
 history outright. Older files still import — every collection a later version
 introduced reads as empty when absent.
+
+*The store stays after D139, with its collection in the backup (D140).*
 
 ## D110 — Boss contribution is normalized domain performance, never event count
 
@@ -2016,6 +2026,8 @@ each domain's day closing on its own obligations — which would be a change to
 
 This is a future architecture and UX consideration. It is not permission to
 change the mechanism now, and it must not be redesigned as cleanup.
+
+*Since D139 only Mind is a daily domain from the update day on. A Food-era day still replays under this rule — which is the cost D141 records for the update day.*
 
 ## D112 — The legacy-Sport question is offered in Areas, never imposed
 
@@ -2379,6 +2391,8 @@ statement about what the interface says, not about what the app counts. The
 underlying property D111 describes stands, and so does its note that
 domain-independent closure deserves revisiting as daily domains multiply.
 
+*Since D141 the daily obligations are Mind's questions alone.*
+
 ## D120 — Nutrition targets stay out of V1, deliberately
 
 Gate 2 is closed for V1 by deciding **not** to build it.
@@ -2394,6 +2408,8 @@ reserved, to close a gap the feature does not have. The reserved decision
 stays reserved, and if targets ever arrive they arrive as something new the
 user can be measured against — the entered 1–10 stays what it always was, and
 no stored value needs rewriting.
+
+*Since D139 Food has left the product, so there is no Food feature for a target to belong to.*
 
 ## D121 — Tombstones are post-V1, not a release blocker
 
@@ -3046,6 +3062,8 @@ too, as built — "my answer 4 didn't follow from answer 3".
 sheet — removes a session without its sets. No screen reaches it: a Gym row
 opens the workout, never the sheet.
 
+*The known limitation is resolved by D142: the check-in delete refuses a Gym session.*
+
 ## D138 — Heute | Gestern
 
 **Decision (P8).** Heute shows one of the two days a write can reach, through
@@ -3089,3 +3107,169 @@ gate, so the switch does not jump while the other day loads.
 
 `TodayScreen.yesterday.test.tsx`, `TodayScreen.midnight.test.tsx`,
 `wp3-stage3.mjs` and `wp3-midnight.mjs` 9–10 pin it.
+
+*Since D139 there is no Food card; D141 says what happens to yesterday's Food on the update day. The standard questions' Gestern wording is D144.*
+
+## D139 — Food leaves the product, as an era that begins on the first load
+
+**Decision (WP3 Stage 4, P1).** The product is Mind and Gym, with Laufen
+inside Gym. Food is switched off from the update day on every device that
+had it, and every day before replays exactly as it did.
+
+- `ensureFoodRetired` (`storage/configService.ts`) is the third ensure step
+  of `loadConfiguration`, after D126's and D132's. It is keyed on the data,
+  never on a run-once flag: wherever Food is still on — the live record, the
+  snapshot in force today, a snapshot dated later — it is switched off. A
+  backup from before the update restored later, a second tab still running
+  the old build, an old switch-off interrupted between its two writes: each
+  ends the same way on the next load.
+- The live record goes off first, its settings kept (D140).
+  `ensureCurrentSnapshot` compares the live configuration with the snapshot
+  in force, so a record left on would switch Food back on with the next
+  write, and Rang would keep showing its share.
+- The snapshot in force today is carried over, effective today, with Food's
+  entry disabled and the Boss weights worked out again over the domains that
+  remain by `buildConfigSnapshot`'s rule — the user's parts, or equal shares.
+  Rang then shows the shares the Boss uses, and the next write finds nothing
+  to append: the carried snapshot is byte-equal to what that write would
+  build. Every other field is carried as it was, so this starts no other
+  era, and a snapshot without `boss` (RC2) gets none. A snapshot dated later
+  takes the same at its own date.
+- **A switch-off already written stays where it is, unless the clock was
+  ahead when it was written** — D132's boundary rule, for the same reason. A
+  profile with no snapshot in force today is left alone for today. Nothing
+  throws: a throw would stop the app from opening, on every retry.
+
+**Days before the switch-off replay byte-identically**, because a day reads
+its own snapshot. From that day the Boss moves by the remaining domains
+alone: `bossSeries` renormalises over the active domains and adds their
+movement, so the level does not jump, and Food's own figures stand where its
+last day left them. Parts 4 : 3 : 2 : 1 become 4/9, 3/9 and 2/9. A profile
+that had only Food is left with nothing switched on and a Boss that holds
+still from that day.
+
+The replay keeps what Food-era days need: `DOMAIN_TYPES` keeps `food` (its
+ledger, the Boss eras, the golden files), and so do `DomainType`,
+`DOMAIN_DEFINITIONS.food`, `history.food` and D107, D110, D111, D113 and
+D118 as they apply to those days. What a user chooses from is
+`OFFERED_DOMAIN_TYPES` — `mental`, `gym`, `running`.
+
+**Why an era, and not a deletion.** Configuration is historical: switching
+a domain off stops it counting from that day and never rewrites a day
+already lived. Taking `food` out of the replay would move every Boss value
+since the day Food was switched on.
+
+`foodRetirement.test.ts` pins it: every case of the step; the Boss across
+the switch-off on six profiles at five clocks each — every day before it
+byte-identical, the remaining domains alone from it, no jump, Food frozen;
+and that the golden profile frozen before any Stage 4 code (`db6076a`,
+`.github/fixtures/wp3-golden/food-off-from-day-45-*`) is exactly what the
+step writes. Those golden files are unchanged.
+
+## D140 — Nothing creates Food data, and nothing deletes it
+
+**Decision (P2).** Food's data is kept; nothing creates more of it.
+
+- The service writers are gone: `saveAdherence`, `clearAdherence`,
+  `addFoodEntry`, `removeFoodEntry` and `setFoodFocus`. `enableDomain`
+  refuses Food by its parameter type (`OfferedDomainType`) and at run time,
+  and onboarding has no field for it. The Heute card, the entry sheet, the
+  focus editor and the area went with them.
+- The stores, repositories, types and backup collections stay, as the
+  dormant stores do (D115, D122). The backup format is unchanged
+  (`BACKUP_FORMAT_VERSION` 3, `SCHEMA_VERSION` 5): a file with Food data
+  imports and keeps it, and an export carries it. The repositories keep
+  their writers for the restore path and for tests that seed Food-era
+  history; a source scan pins that nothing shipped calls one.
+- Logged entries and the focus sentence are kept and shown nowhere.
+
+`foodRetirement.test.ts` (the source scan), `backup.test.ts` (the round
+trip, and a file from before the update imported, every row kept and Food
+off from the import day), `wellbeing.test.ts`, `OnboardingFlow.test.tsx`,
+`release.mjs` (no Food row after a day's use) and `wp3-stage4.mjs` pin it.
+
+## D141 — On the update day, yesterday's Food is neither shown, owed nor writable
+
+**Decision (Stage 4).** On the update day, yesterday's own snapshot still
+has Food on. Its Food item is not shown on Gestern, not counted in the
+day's status (D119 counts Mind's questions now), not a reason for "Gestern
+ist noch offen", and not writable.
+
+**The cost, recorded.** A rating that was still to be given for yesterday
+can no longer be given. The day stays open while it can be written (D111:
+the unanswered item holds it open in the replay), then closes with Food
+missed in the history `score`. `recordedScore` and every Boss value are
+exactly what they would have been without Stage 4, since the day reads its
+own snapshot either way; Food's ledger sees one silent day, inside D113's
+two grace days. Only a device already in P8 — the preview — can be in this
+position: a device updating from the released build has no writable day
+before the update (D132).
+
+Not taken: a Food rating on Gestern for the update day only (a screen for
+one day), and switching Food off from yesterday or reading its missing
+rating as no data — both change yesterday as it reads on the update day.
+
+`foodRetirement.test.ts` ("yesterday's Food unrated, in P8": identical
+with and without the switch-off at every clock), `checkIn.test.ts`,
+`TodayScreen.yesterday.test.tsx` and `wp3-stage4.mjs` pin it.
+
+## D142 — A Gym session is removed only in its workout
+
+**Decision (STOP 3b, question 4).** `deleteSession('gym', …)` refuses
+before it reads or writes anything, on any day. A Gym session goes in its
+workout, set by set, every removal undoable and the session back with the
+same id (D131, D137). The check-in delete removed the session alone: its
+sets stayed and kept counting for performance while attendance forgot the
+workout. No screen reached it, and now nothing can. D137's known limitation
+is resolved.
+
+Not built: an atomic delete of the session with its sets from the Heute
+path — there is no undo there.
+
+`checkIn.test.ts` and `workoutFlow.test.ts` (a workout with two sets
+refused with nothing written, and the same on a closed day) pin it.
+
+## D143 — Mind is the one name of the wellbeing domain; the terminal is Mind | Gym
+
+**Decision (P3).** "Mind" wherever the wellbeing domain is named, in German
+and English: Heute's section, the Bereiche switch and card, Verlauf's row,
+Rang's list and the Boss weights ("Mehr Mind"), the onboarding picker. One
+key, `domain.mental`, through one map (`i18n/domainNames.ts`). The three
+earlier names — "Mental" on the switch, "Mental Wellbeing" over the
+questions, "Wellbeing" everywhere else — and their keys are gone, and a
+catalogue scan keeps a second name from coming back.
+
+- Internal ids stay `mental` (D66), the route included (`#/areas/mental`).
+  The question category "Mental" (D17) is a different thing and keeps its
+  name.
+- The terminal is Mind | Gym. An address left by an older build,
+  `#/areas/food`, lands on Bereiche, on Mind, with the address corrected.
+- Onboarding offers two worlds, "Mind und Gym, Laufen inbegriffen". The
+  choice that was "Sport" is "Gym" — "Gym-Sessions und Läufe, je mit
+  eigenem Wochenziel." — and still sets two independent targets. The
+  attendance explanations no longer say that runs do not count for Gym;
+  they say each has its own weekly target.
+
+`catalogue.test.ts`, `DomainSwitch.test.tsx`, `OnboardingFlow.test.tsx`,
+`route.test.ts`, `terminal.mjs`, `phase2.mjs` and `wp3-stage4.mjs` pin it.
+
+## D144 — Gestern speaks of yesterday in the standard questions
+
+**Decision (STOP 3b, question 3).** Display only, and only for a standard
+question whose stored text is unchanged: on the Gestern side it reads in its
+library "gestern" wording, in the stored text's own language — in the
+heading, the folded row and the answer group's accessible name alike.
+
+- Every library entry carries its Gestern sentence, required by the type.
+- The match is exact, because a stored question keeps no library id and no
+  language: a question the user wrote or edited, even by one letter, is
+  shown as written, "heute" and all.
+- Records, snapshots, answers, Verlauf and Bereiche keep the stored text.
+  Nothing is written.
+- The sleep question names no day; on Gestern it reads "Wie gut hast du
+  vorletzte Nacht geschlafen?" — the night it meant when it was asked
+  yesterday.
+
+`questionLibrary.test.ts`, `migration.test.ts` (the real RC2 export:
+exactly its five standard questions), `TodayScreen.yesterday.test.tsx` and
+`wp3-stage4.mjs` pin it.

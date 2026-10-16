@@ -219,7 +219,7 @@ async function fillPause(page, from, to, reason = '') {
   check('and says progress still counts',
     await page.getByText(/Eintragen und Fortschritt zählen ganz normal weiter/).isVisible());
 
-  check('the Wellbeing questions are still answerable',
+  check('the Mind questions are still answerable',
     (await page.locator('.answer-boolean__option:not([disabled])').count()) > 0 ||
       (await page.locator('.answer-scale__value:not([disabled])').count()) > 0);
   check('the Gym log button is still there and enabled',

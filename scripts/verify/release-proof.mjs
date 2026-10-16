@@ -17,7 +17,7 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   page.on('response', (r) => { const u = r.url(); if (/BodyViewer|\.glb|sw\.js/.test(u)) log.push(`${r.status()} ${u.replace(URL_APP, '/')}`); });
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days: 42 });
   await seedTraining(page, { days: 42 });
   await seedMuscles(page, { days: 42 });
@@ -36,15 +36,14 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   await visit('Heute (boot)', async () => {});
   await visit('Verlauf', () => page.getByRole('button', { name: 'Verlauf' }).click());
   await visit('Rang', () => page.getByRole('button', { name: 'Rang' }).click());
-  await visit('Bereiche → Mental', () => page.getByRole('button', { name: 'Bereiche' }).click());
-  await visit('Bereiche → Ernährung', () => page.getByRole('radio', { name: 'Ernährung' }).click());
+  await visit('Bereiche → Mind', () => page.getByRole('button', { name: 'Bereiche' }).click());
   await visit('Bereiche → Gym (hub)', async () => { await page.getByRole('radio', { name: 'Gym' }).click(); await page.waitForTimeout(2000); });
   await visit('Gym → Muskelgruppen', async () => { await openMuscles(page, { wait: 3500 }); });
   console.log('\n[network per route, cold boot, no worker]');
   for (const [route, chunk, glb] of table) console.log(`  ${route.padEnd(22)} | ${chunk.padEnd(52)} | ${glb}`);
-  const before = table.slice(0, 6);
+  const before = table.slice(0, 5);
   check('no route before Muskelgruppen — the Gym hub included — fetches the viewer chunk or the model', before.every(([, c, g]) => c === 'none' && g === 'none'), before.map((r) => r.join(' | ')).join(' ; '));
-  const gym = table[6];
+  const gym = table[5];
   check('Muskelgruppen fetches the viewer chunk, its CSS and the model, each 200', /200 .*BodyViewer-.*\.js/.test(gym[1]) && /200 .*BodyViewer-.*\.css/.test(gym[1]) && /200 .*momentum-body\.glb/.test(gym[2]), `${gym[1]} | ${gym[2]}`);
   await ctx.close();
 }

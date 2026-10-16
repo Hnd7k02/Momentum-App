@@ -48,7 +48,7 @@ async function boot(width, { withData }) {
   page.on('pageerror', (error) => errors.push(String(error)));
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   if (withData) {
     await seed(page, { days: 42 });
     await seedTraining(page, { days: 42 });

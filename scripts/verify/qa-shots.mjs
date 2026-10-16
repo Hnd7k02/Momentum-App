@@ -15,7 +15,7 @@ async function open(width, height, init = null) {
   const page = await ctx.newPage();
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days: 42 });
   await seedTraining(page, { days: 42 });
   await seedMuscles(page, { days: 42 });

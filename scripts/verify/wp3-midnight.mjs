@@ -127,11 +127,11 @@ const answers = async (page) =>
 const answeredOnScreen = (page) => page.locator('.check-in--answered').count();
 const scaleButton = (page, value) => page.getByRole('radio', { name: new RegExp(`^${value} von 10`) }).first();
 
-/** Onboard (Wellbeing only, two scale questions), then a full reload onto Heute. */
+/** Onboard (Mind only, two scale questions), then a full reload onto Heute. */
 async function setUp(page) {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 0, running: 0, food: false, wellbeing: true });
+  await onboard(page, { gym: 0, running: 0, wellbeing: true });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(900);
   await page.locator('.today__date').waitFor({ timeout: 10000 });
@@ -426,7 +426,7 @@ async function workoutFacts(page) {
 await scenario('7 plan workout from Heute across midnight', { tz: BERLIN, time: '2026-10-14T23:54:00+02:00' }, async ({ ctx, page, W }) => {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 0, food: false, wellbeing: true });
+  await onboard(page, { gym: 3, running: 0, wellbeing: true });
   await putRecord(page, 'gymPlans', PLAN);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('.today__date').waitFor({ timeout: 10000 });
@@ -481,7 +481,7 @@ await scenario('7 plan workout from Heute across midnight', { tz: BERLIN, time: 
 await scenario('8 free workout from the hub across midnight', { tz: BERLIN, time: '2026-10-14T23:54:00+02:00' }, async ({ ctx, page, W }) => {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 0, food: false, wellbeing: true });
+  await onboard(page, { gym: 3, running: 0, wellbeing: true });
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('.today__date').waitFor({ timeout: 10000 });
   await page.getByRole('button', { name: 'Bereiche' }).click();
@@ -525,7 +525,7 @@ await scenario('8 free workout from the hub across midnight', { tz: BERLIN, time
 await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-10-18T23:55:00+02:00' }, async ({ ctx, page, W }) => {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 0, running: 2, food: false, wellbeing: true });
+  await onboard(page, { gym: 0, running: 2, wellbeing: true });
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('.today__date').waitFor({ timeout: 10000 });
   await startsOn(page, W, '2026-10-18 23:5', 'Sonntag, 18. Oktober');
@@ -591,7 +591,7 @@ await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-1
 await scenario('10 plan draft across Sunday midnight', { tz: BERLIN, time: '2026-10-18T23:55:00+02:00' }, async ({ ctx, page, W }) => {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  await onboard(page, { gym: 3, running: 0, food: false, wellbeing: true });
+  await onboard(page, { gym: 3, running: 0, wellbeing: true });
   await putRecord(page, 'gymPlans', PLAN);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('.today__date').waitFor({ timeout: 10000 });

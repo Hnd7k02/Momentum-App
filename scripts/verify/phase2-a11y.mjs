@@ -58,7 +58,7 @@ for (const tab of ['Heute', 'Verlauf', 'Rang', 'Bereiche']) {
 /* The Verlauf drill-down, which is new. */
 await page.locator('.tab-bar button', { hasText: 'Verlauf' }).click();
 await page.waitForTimeout(700);
-await page.getByRole('button', { name: /Wellbeing/ }).first().click();
+await page.getByRole('button', { name: /Mind/ }).first().click();
 await page.waitForTimeout(400);
 
 let nodes = await tree();

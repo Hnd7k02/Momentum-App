@@ -74,7 +74,7 @@ async function heroState(page) {
   /* ── Area ratings: a rating and a share each, and no rank ─────────────── */
   const domainRows = await page.locator('.domain-standing__name').allTextContents();
   check('every enabled area is listed with a rating of its own',
-    JSON.stringify(domainRows) === JSON.stringify(['Wellbeing', 'Gym', 'Laufen']),
+    JSON.stringify(domainRows) === JSON.stringify(['Mind', 'Gym', 'Laufen']),
     JSON.stringify(domainRows));
   const domainMeta = await page.locator('.domain-standing__meta').allTextContents();
   check('each area states its rating out of 1000 and its share, or that it has not started',

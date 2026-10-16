@@ -58,7 +58,7 @@ const decorative = await page.evaluate(() =>
   [...document.querySelectorAll('.badge-svg')].every((el) => el.getAttribute('aria-hidden') === 'true'));
 check('every badge, fogged or not, stays decorative', decorative);
 
-const steppers = nodes.filter((n) => n.role === 'button' && /^(Mehr|Weniger) (Wellbeing|Gym|Laufen|Ernährung)$/.test(n.name));
+const steppers = nodes.filter((n) => n.role === 'button' && /^(Mehr|Weniger) (Mind|Gym|Laufen)$/.test(n.name));
 check('each weight stepper says which area it moves', steppers.length === 6,
   JSON.stringify(steppers.map((n) => n.name)));
 

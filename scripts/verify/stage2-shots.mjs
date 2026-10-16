@@ -4,7 +4,7 @@ import { URL_APP, onboard, seed, seedTraining, seedMuscles, phone } from './lib.
 /**
  * Evidence screenshots for Stage 2 of the Overall-rank update (D125): the
  * Rank screen with the area ratings, the Gym rating board without a badge,
- * Laufen's board, and the Wellbeing standing tile — all at 393px.
+ * Laufen's board, and the Mind standing tile — all at 393px.
  */
 const OUT = process.env.OUT ?? 'docs/design/overall-rank';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
@@ -21,7 +21,7 @@ const scrollTo = async (selector, offset = 8) => {
 
 await page.goto(URL_APP, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
-await onboard(page, { gym: 3, running: 2, food: true });
+await onboard(page, { gym: 3, running: 2 });
 await seed(page, { days: 42 });
 await seedTraining(page, { days: 42 });
 await seedMuscles(page, { days: 42 });

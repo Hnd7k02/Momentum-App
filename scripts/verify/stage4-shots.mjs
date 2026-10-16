@@ -10,7 +10,7 @@ import { URL_APP, check, onboard, phone, seedConfirmation, summary } from './lib
  *
  * The seeded profile is set up under P8, so its whole history is of that
  * era: a day counts towards a confirmation once it is settled — two days
- * old for this Wellbeing-only profile, since yesterday can still be
+ * old for this Mind-only profile, since yesterday can still be
  * answered (D136). The pending and promoted presets therefore seed one day
  * more than under the rule before, where yesterday already counted.
  */

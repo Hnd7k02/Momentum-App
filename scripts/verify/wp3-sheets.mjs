@@ -168,7 +168,7 @@ async function boot(width, height) {
   page.on('pageerror', (error) => errors.push(String(error)));
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
   return { ctx, page, errors };
@@ -302,10 +302,10 @@ for (const [w, h] of [[393, 852], [430, 932], [320, 693]]) {
     await page.waitForTimeout(700);
   }
 
-  // 4: a new Wellbeing question.
+  // 4: a new Mind question.
   {
     const L = `${w} question sheet`;
-    await page.getByRole('radio', { name: 'Mental', exact: true }).click();
+    await page.getByRole('radio', { name: 'Mind', exact: true }).click();
     await page.waitForTimeout(900);
     const opener = page.locator('.areas__scroll').getByRole('button', { name: 'Frage hinzufügen' }).first();
     await opener.click();
@@ -328,36 +328,8 @@ for (const [w, h] of [[393, 852], [430, 932], [320, 693]]) {
     await assertEscapeReturns(page, E, row);
   }
 
-  // 5: the food entry sheet.
-  {
-    const L = `${w} food sheet`;
-    await tab(page, 'Heute').click();
-    await page.waitForTimeout(800);
-    const opener = page.locator('button.food__add');
-    await opener.click();
-    await page.waitForTimeout(600);
-    await assertDialogFocused(page, L, { title: 'Essen eintragen' });
-    const sheet = page.locator('.sheet');
-    const name = sheet.getByLabel('Name', { exact: true });
-    const grams = sheet.getByLabel('Menge in Gramm', { exact: true });
-    const kcal = sheet.getByLabel('Kalorien (kcal)', { exact: true });
-    await name.click();
-    await page.waitForTimeout(250);
-    await typeLetters(page, `${L} name`, name, 'Apfel', { shot: shot(5, 'food'), shotAt: 2 });
-    await grams.click();
-    await page.waitForTimeout(250);
-    await typeLetters(page, `${L} grams`, grams, '150');
-    await kcal.click();
-    await page.waitForTimeout(250);
-    await typeLetters(page, `${L} kcal`, kcal, '78');
-    check(`${L}: the name is still there after the numbers`, (await fieldState(name)).value === 'Apfel');
-    const add = sheet.getByRole('button', { name: 'Eintragen', exact: true });
-    check(`${L}: a complete own entry enables Eintragen`, (await add.count()) === 1 && (await add.isEnabled()));
-    await assertEscapeReturns(page, L, opener);
-  }
-
-  // 6: the run sheet.
-  await runSheet(page, w, { shot: shot(6, 'run-sheet') });
+  // 5: the run sheet. (The food entry sheet left with Food, D139.)
+  await runSheet(page, w, { shot: shot(5, 'run-sheet') });
 
   check(`${w}: no page errors`, errors.length === 0, errors.join(' | '));
   await ctx.close();

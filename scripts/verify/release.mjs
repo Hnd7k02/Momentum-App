@@ -60,11 +60,11 @@ const tab = async (page, name) => {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
 
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
   check('onboarding lands on Today, with no dead end',
     await page.getByRole('heading', { name: 'Heute' }).isVisible());
 
-  // Wellbeing.
+  // Mind.
   const yes = page.locator('.answer-boolean__option--yes');
   for (let i = 0; i < (await yes.count()); i += 1) {
     await yes.nth(i).click();
@@ -75,14 +75,6 @@ const tab = async (page, name) => {
     await scale.nth(i).click();
     await page.waitForTimeout(220);
   }
-
-  // Food: a rating and an entry.
-  await page.locator('.food__scale .answer-scale__value', { hasText: /^7$/ }).click();
-  await page.waitForTimeout(500);
-  await page.getByRole('button', { name: 'Essen eintragen' }).click();
-  await page.waitForTimeout(350);
-  await page.locator('.sheet .row', { hasText: 'Banane' }).first().click();
-  await page.waitForTimeout(600);
 
   // Training: one gym session and one run.
   // A workout is stored with its first saved set (D128), so log one.
@@ -131,8 +123,9 @@ const tab = async (page, name) => {
       runs: await count('runs'),
     };
   });
-  check('every domain wrote real data', stored.answers > 0 && stored.foodDays === 1 &&
-    stored.foodEntries === 1 && stored.gym >= 1 && stored.runs >= 1, JSON.stringify(stored));
+  check('every domain wrote real data', stored.answers > 0 && stored.gym >= 1 && stored.runs >= 1, JSON.stringify(stored));
+  check('and nothing wrote Food data, which nothing creates any more (D140)',
+    stored.foodDays === 0 && stored.foodEntries === 0, JSON.stringify(stored));
 
   // The refresh: a PWA that forgets on reload is not persistent.
   await page.reload({ waitUntil: 'networkidle' });
@@ -140,7 +133,7 @@ const tab = async (page, name) => {
   check('a refresh keeps the user out of onboarding',
     (await page.getByRole('button', { name: /Los geht/ }).count()) === 0);
   check('and the day is still there after the refresh',
-    await page.getByText(/von 10 ·/).first().isVisible());
+    (await page.locator('.check-in--answered').count()) > 0);
 
   // Every screen, with real data in it.
   for (const name of ['Verlauf', 'Rang', 'Bereiche', 'Heute']) {
@@ -162,7 +155,7 @@ const tab = async (page, name) => {
   watch(page, errors);
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
-  await onboard(page, { gym: 3, running: 0, food: true });
+  await onboard(page, { gym: 3, running: 0 });
 
   // The default onboarding questions are scale questions, so answering only
   // the yes/no controls would leave the profile empty and make the checks
@@ -177,9 +170,6 @@ const tab = async (page, name) => {
     await scales.nth(i).click();
     await page.waitForTimeout(220);
   }
-  await page.locator('.food__scale .answer-scale__value', { hasText: /^9$/ }).click();
-  await page.waitForTimeout(600);
-
   const wrote = await page.evaluate(async () => {
     const db = await new Promise((res, rej) => {
       const r = indexedDB.open('momentum');
@@ -204,9 +194,8 @@ const tab = async (page, name) => {
   const parsed = JSON.parse(contents);
   check('the export is a readable backup file',
     parsed.format === 'momentum-backup' && typeof parsed.schemaVersion === 'number');
-  check('and carries every collection, including this release’s',
-    Object.keys(parsed.data).includes('foodDays') &&
-      Object.keys(parsed.data).includes('pausePeriods'));
+  check('and carries every collection, Food’s included — the format is unchanged (D140)',
+    ['foodDays', 'foodEntries', 'pausePeriods'].every((key) => Object.keys(parsed.data).includes(key)));
   check('with the user’s real answers in it', parsed.data.answers.length > 0);
 
   // A broken file must be refused, not half-applied.
@@ -251,7 +240,7 @@ for (const width of [320, 360, 393, 430, 1280]) {
   const page = await ctx.newPage();
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
-  await onboard(page, { gym: 3, running: 2, food: true });
+  await onboard(page, { gym: 3, running: 2 });
 
   for (const name of ['Heute', 'Verlauf', 'Rang', 'Bereiche']) {
     await tab(page, name);

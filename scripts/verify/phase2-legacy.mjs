@@ -43,7 +43,7 @@ check('and explains what it is',
   await page.getByText(/stammen aus der früheren Version/).isVisible());
 check('it is not offered as one of the terminal\'s areas',
   (await page.getByRole('radiogroup', { name: 'Bereich wählen' }).getByRole('radio').allTextContents())
-    .map((s) => s.trim()).join() === 'Mental,Gym,Ernährung');
+    .map((s) => s.trim()).join() === 'Mind,Gym');
 
 await page.locator('.tab-bar button', { hasText: 'Heute' }).click();
 await page.waitForTimeout(500);

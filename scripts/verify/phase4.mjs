@@ -119,8 +119,7 @@ async function fillSet(page, index, reps, weight) {
 
 /* ── Progress, body renderer and exercise history ───────────────────────── */
 {
-  // Food is switched on here purely to prove it stays dormant.
-  const { ctx, page } = await ready({}, { food: true });
+  const { ctx, page } = await ready();
   let clip = [];
   await openGym(page);
   await addExercise(page, 'Bench Press');
@@ -212,8 +211,8 @@ async function fillSet(page, index, reps, weight) {
   await page.waitForTimeout(900);
   const gymRow = await page.locator('.domain-standing', { hasText: 'Gym' }).textContent();
   check('Gym has a rating of its own on the Rank screen', /von 1000/.test(gymRow ?? ''), gymRow?.trim());
-  const foodRow = await page.locator('.domain-standing', { hasText: 'Ernährung' }).textContent();
-  check('Food stays dormant, as phase 6 work', /Noch nicht gestartet/.test(foodRow ?? ''), foodRow?.trim());
+  check('Food is not listed: it left the product (D139)',
+    (await page.locator('.domain-standing', { hasText: 'Ernährung' }).count()) === 0);
 
   await ctx.close();
 }

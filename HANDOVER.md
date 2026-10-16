@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D131). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D144). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -19,15 +19,16 @@ either — it says where things stand.
 | `SCORING_MODEL` | `categoryMean` (`src/core/config/constants.ts`) |
 | `GYM_SCORING_MODEL` | `attendancePerformance` — Gym's 40/60 model |
 | `RUNNING_SCORING_MODEL` | `attendancePerformance` — Running's 40/60 model |
-| Food scoring | the shared daily fold over a 1–10 adherence rating (D106, D107) — **no** model constant, because there is no second model |
+| Food | **retired** (D139): Food-era days replay by the shared daily fold over the 1–10 adherence (D106, D107); nothing writes Food, and its data is kept (D140) |
 | `DECAY_MODEL_APPROVED` | **`true`** — Gate 1 closed by D113. RC2's formula ratified unchanged, and `core/decay` is now on the live path |
-| Gate 2 (nutrition targets) | **still open.** Food ranks without one, on purpose (D106) |
+| Gate 2 (nutrition targets) | moot since Food left the product (D139) |
 
 Phases 0–6 of iteration 2 are complete. Phase 4.1 closed the Gym scoring gate,
 Phase 5 closed Running's, and Phase 6 built Food **without** closing Gate 2:
 Food is ranked on the adherence the user enters, so the calorie and macro
 target decision is still entirely open and nothing in the scoring path
-pre-empts it.
+pre-empts it. WP3 Stage 4 then took Food out of the product (D139): its days
+still replay and its data is kept.
 
 > **The branch changed.** This work was carried out on
 > `claude/gym-scoring-integration-9oeblv`, reset from
@@ -77,8 +78,9 @@ records (answers, sessions, sets, snapshots)
 | `src/core/scoring/endurance.ts` | **Shared.** The first-promotion gate |
 | `src/core/scoring/abstinence.ts` | **Shared.** Episodes, the four decay schedules, rank intervals |
 | `src/core/running/performance.ts` | Distance bands, pace ratios, the window aggregate |
-| `src/core/food/adherence.ts` | The 1–10 Food is ranked on, and why no target lives there |
-| `src/core/food/catalogue.ts` | Five demo foods — code, not data, never in a backup |
+| `src/core/food/adherence.ts` | How a Food-era day's 1–10 replays (Food itself retired, D139) |
+| `src/storage/configService.ts` | The snapshot log and its ensure steps: the P8 era (D132) and the Food switch-off (D139) |
+| `src/i18n/domainNames.ts` | The one name map for the offered domains — Mind, Gym, Laufen (D143) |
 | `src/core/gym/catalogue.ts` | 29 built-in exercises, stable ids, explicit muscles, roles and load types |
 | `src/core/decay/index.ts` | **The** general cooling-off formula (D113) — one source of truth for the schedule, the cap and model selection; on the live path |
 | `src/core/migration/legacySport.ts` | RC2 Sport conversion planning (pure) |
@@ -95,21 +97,21 @@ records (answers, sessions, sets, snapshots)
 | `src/features/pause/*` | The Areas section that plans and ends one |
 | `src/components/metrics.tsx` | **Pass 2.** `MetricTile`, `MetricBoard`, `MetricBar`, `MetricDetailSheet` — a tile states, a sheet explains; built on the one `Sheet` primitive |
 | `src/app/route.ts` | **Domain terminal.** The one navigation state, mirrored to the hash (`#/areas/<area>`); Back walks the areas visited |
-| `src/features/areas/DomainSwitch.tsx`, `GymTerminal.tsx`, `RunningTerminal.tsx`, `CreditsSection.tsx` | **Bereiche is the terminal**: Mental · Gym · Ernährung, one area at a time. Gym carries its board, the muscle module, and Laufen as a separate section; Einstellungen carries the CC BY credit for the body model |
+| `src/features/areas/DomainSwitch.tsx`, `GymTerminal.tsx`, `RunningTerminal.tsx`, `CreditsSection.tsx` | **Bereiche is the terminal**: Mind · Gym (D143), one area at a time. Gym carries its board, the muscle module, and Laufen as a separate section; Einstellungen carries the CC BY credit for the body model |
 | `src/features/body/` | **The 3D body.** `BodyViewer` (R3F canvas, camera rig, tap-vs-drag, the approved material treatment with the neutral selection cue), `useGLTF`, `BodyBoundary`, `bodyVisuals.ts` (the adapter from `MusclePerformance` to tint and intensity), `muscleMeshMap.ts` (the id ↔ GLB contract), `tokens.ts` (identity and state colours, the single colour source). `index.ts` is the **lazy boundary**: three.js and the renderer live in their own chunk and are fetched only when the Gym module renders |
 | `src/features/gym/MuscleModule.tsx`, `MuscleRows.tsx`, `Sparkline.tsx`, `muscleAnalytics.ts` | **Muskelgruppen.** The body above, the ten rows below, one selected group held by `GymProgress`. `toMuscleAnalytics()` derives each row read-only from the loaded history: state, delta, last trained day, and the trend — the group's over-span change since the range began, as of each training day, via `gymPerformanceOverSpan()` on the history prefix, so the last point *is* the row's delta. The chart is the handoff's `spark80`: per-row min/max, flat when equal, a dot for one observation, nothing for none |
 | `public/models/momentum-body.glb`, `tools/validate-body-glb.mjs` | The model (CC BY 4.0, patmateee, modified; 40 000 triangles, one primitive per muscle id plus `none`) and the contract validator that runs first in `npm run build` |
 | `src/components/BodyRenderer/index.tsx` | Muscle diagram; presentation only |
 | `src/features/gym/*` | Session logging, picker, bodyweight, overview, exercise detail, progress |
 | `src/features/running/*` | The Running overview and its distance ranges |
-| `src/features/food/*` | The Today card: the day's rating, then the log |
 | `scripts/verify/` | Browser + accessibility suites (see its README) |
 | `.github/fixtures/` | RC2 export + a 120-day synthetic profile |
 
 ## Implemented state
 
 **Fully implemented and usable**
-- Wellbeing: categories, custom questions, daily check-in, drill-down history
+- Mind (the wellbeing domain, D143): categories, custom questions, daily
+  check-in, drill-down history
 - Gym: exercises, sets, picker, session logging, performance pipeline,
   muscle-group aggregation, body renderer, exercise history, progress hierarchy
 - **Gym scoring: the 40/60 rating, the trend and year-to-date windows, the
@@ -119,7 +121,7 @@ records (answers, sessions, sets, snapshots)
   and year-to-date windows, the Endurance Phase, abstinence decay,
   Maintenance, optional distance/duration entry with derived pace, and the
   Running overview that explains them**
-- Boss Rank + four domain ranks, user-configurable weights, mystery ladder
+- Boss Rank (the only rank, D125), user-configurable weights, mystery ladder
 - Backup export/import, PWA, offline, migrations v1→v2→v3→v4→v5
 - **Pause periods, end to end** (D116). Bounded to 28 days, prospective only,
   suspending inactivity penalties across every domain without fabricating
@@ -371,6 +373,43 @@ records (answers, sessions, sets, snapshots)
   `deleteSession` is fixed in Stage 4, the other known limitations stand;
   (5) the bundle growth is accepted.
 
+**WP3 Stage 4 — Mind and Gym** (branch `claude/momentum-wp3`, not merged)
+- **Food is off as an era** (D139). `ensureFoodRetired`, the third ensure
+  step of `loadConfiguration`, switches Food off from the first load after
+  the update wherever it is still on — the live record (its settings kept),
+  the snapshot in force today, a snapshot dated later — carrying the
+  configuration over with Food's entry disabled and the Boss weights worked
+  out again over what remains, from the user's parts or equally. Keyed on
+  the data, idempotent, with D132's boundary rule. Every day before replays
+  byte-identically; from that day the Boss moves by the remaining domains,
+  with no jump.
+- **Nothing creates Food data, and nothing deletes it** (D140): the service
+  writers, the onboarding field, the Heute card and sheet, the focus editor
+  and the area are gone, and `enableDomain` refuses Food. The stores,
+  repositories, types and backup collections stay; the backup format is
+  unchanged.
+- **The update day** (D141): yesterday's Food — still on in its own
+  snapshot — is not shown, counted, pointed at or writable. The recorded
+  cost: a rating still to be given for it is lost, and the day closes with
+  Food missed in `score`, while `recordedScore` and the Boss are unchanged.
+- **Mind** (D143): one name in German and English, from one key; the
+  terminal is Mind | Gym; onboarding offers two worlds, with "Gym" taking
+  Laufen in; `#/areas/food` lands on Bereiche.
+- **The STOP 3b carry-overs:** Gestern speaks of yesterday in the standard
+  questions whose text is unchanged (D144); the check-in delete refuses a Gym
+  session (D142).
+- **Golden files.** The Food-off profile frozen before any Stage 4 code
+  (`db6076a`) is unchanged, and `foodRetirement.test.ts` proves it is exactly
+  what the step writes. Every other golden file, `.github/fixtures/stage2/`
+  and every fingerprint are byte-identical.
+- **Tests.** Food-era history is seeded through the repositories
+  (`fixtures/legacyFood.ts`), never through a service. New:
+  `foodRetirement.test.ts`, `questionLibrary.test.ts`,
+  `OnboardingFlow.test.tsx`, `DomainSwitch.test.tsx`; in the browser,
+  `wp3-stage4.mjs`. `phase6` and `phase6-a11y` were retired with the Food
+  screens, and every suite onboards through Mind and Gym.
+- Verification at STOP 4: see the STOP 4 report.
+
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
   repositories exist, no logic and no UI. **Weight entries are now reachable**
@@ -378,6 +417,11 @@ records (answers, sessions, sets, snapshots)
 - `RunRecord` carries `source`/`externalId` as the import seam. No importer.
 
 **Intentionally dormant**
+- **Food** (D139, D140). Left the product in WP3 Stage 4. The `foodDays`
+  and `foodEntries` stores, the repositories, the record and the backup
+  collections stay, and Food-era days replay; nothing creates Food data and
+  no screen shows it. A source scan in `foodRetirement.test.ts` pins that
+  nothing shipped writes a Food row.
 - **Rest days.** Deprecated as a product concept (D115): never shipped, never
   approved, made redundant by the seven-day abstinence rule and D37. Store,
   repository, type and backup collection stay for compatibility; nothing
@@ -392,12 +436,12 @@ records (answers, sessions, sets, snapshots)
   not connected to the Boss or to the removed domain ranks.
 
 **Not implemented**
-- Nutrition targets (Gate 2) — deliberately, see below. Tombstone unlocking,
+- Nutrition targets — moot since Food left the product (D139). Tombstone unlocking,
   rest-day/pause handling in the replay, "Warum diese Zahl?", Strava import.
 
 ## Scoring rules, as implemented
 
-### Wellbeing day score — two-level mean (`dayScore.ts`)
+### Mind day score — two-level mean (`dayScore.ts`)
 Per category: mean of its questions. Then the **equal-weighted mean across
 categories**. Six Alltag questions cannot outweigh one Mental question.
 
@@ -529,7 +573,10 @@ rating           ← rating + (target − rating) × movementFactor(rating, targ
   replays as it was scored; the new fold continues from the number the old one
   left.
 
-### Food (`core/food/adherence.ts`, `core/scoring/dayScore.ts`)
+### Food — retired, replayed only (`core/food/adherence.ts`, `core/scoring/dayScore.ts`)
+
+Food left the product in WP3 Stage 4 (D139). This is how a day lived with
+it replays; from the switch-off day it is due nowhere.
 
 One item due per day: the 1–10 the user chooses. `adherence × 10` is the day
 score — the same mapping a Wellbeing scale answer uses. Unrated inside the
@@ -633,11 +680,8 @@ own history; no population norms, ever.
 2b. ~~**Pause-period suspension, and whether XP accrues.**~~ **Resolved by
    D116.** A pause suspends inactivity penalties only; XP is untouched and
    stays monotone.
-3. **Nutrition targets.** Gate 2, **still open after Phase 6.** Food is built
-   and ranked, on the 1–10 adherence the user enters (D106) — deliberately a
-   question that needs no target to answer. Nothing in the scoring path reads
-   a calorie or macro figure, so this decision is as open as it was, and
-   making it later rewrites nothing already stored.
+3. ~~**Nutrition targets.**~~ **Moot since D139**: Food has left the
+   product. Nothing in the scoring path ever read a calorie or macro figure.
 4. ~~**How Food contributes to the Boss, and what a rated day is worth.**~~
    **Resolved by D110.** Boss contribution is normalized domain performance —
    the shared 0–8 ladder position — never raw event count, and lifetime XP was
@@ -763,20 +807,14 @@ Re-run browser suites with `scripts/verify/*.mjs` (see that README; needs
 
 ## Next work
 
-**Gate 2 — nutrition targets — is still open, and Food works without it.**
-Food is ranked on the 1–10 adherence the user enters (D106). Calories and
-macros are logged, totalled and shown, and **nothing about them reaches the
-score**. If and when targets are decided, they arrive as a new thing the user
-can be measured against — the entered 1–10 stays exactly what it always was,
-and no stored value needs rewriting.
-
-Do not read Food's existence as the gate having been closed. There is no
-calorie target, no macro split, no BMR or TDEE estimate and no weight-goal
-model anywhere in the build.
+**Food has left the product (WP3 Stage 4, D139).** Gate 2 is moot. Food-era
+days replay as they were, and the data stays (D140); nothing in the build
+creates Food data, shows it, or reads a calorie or macro figure.
 
 **The domain terminal and the muscle map are merged and released
-(`muscle-map-v1`).** Bereiche is the terminal: one switch — Mental · Gym ·
-Ernährung — and beneath it one area's workspace, with the area in the route
+(`muscle-map-v1`).** Bereiche is the terminal: one switch — Mind · Gym
+since WP3 Stage 4 (D143), Mental · Gym · Ernährung before — and beneath it
+one area's workspace, with the area in the route
 (`src/app/route.ts`, `#/areas/<area>`; Back walks the areas visited). Heute,
 Verlauf and Rang are unchanged in role: Verlauf stays the overall, historical
 overview and keeps every domain's daily row. Gym carries its board, then
@@ -857,9 +895,9 @@ Genuine post-V1 work, none of it blocking:
 | "Warum diese Zahl?" panel | none — it explains numbers that already exist. The largest remaining user-facing gap |
 | Gym plans, profile | stores and repositories exist; what they are *for* is partly a product question |
 | Tombstone unlocking | the benchmark values are an open decision (D121) |
-| Nutrition targets | deliberately out of V1 (D120); D106's reservation stands |
+| Nutrition targets | moot since Food left the product (D139) |
 | Removing the dormant `restDays` collection | a deliberate `BACKUP_FORMAT_VERSION` cleanup, safe but not urgent (D115, D122) |
-| Domain-independent day closure | D111's note, worth revisiting as daily domains multiply |
+| Domain-independent day closure | D111's note; Mind is the only daily domain since D139 |
 
 **If a third training domain ever arrives**, add only its evidence — what one
 comparable observation is, and what makes two of them comparable. Everything

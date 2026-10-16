@@ -126,7 +126,8 @@ Never conflate them.
   calibration against other people — not as a modifier and not as a starting
   estimate. Absolute benchmarks are Tombstones, which are a separate system
   and stay separate in both directions.
-- Wellbeing questions are asked **daily**. There is no rhythm engine, no
+- **The product is Mind and Gym, with Laufen inside Gym** (D139, D143).
+- Mind's questions are asked **daily**. There is no rhythm engine, no
   per-question schedule, and there never will be.
 - Gym and Running are independent weekly quotas, never a combined one.
 - **The week a training domain starts in carries no target** (D127). The
@@ -144,16 +145,19 @@ Never conflate them.
   picked exercise is a pending row, never a stored 0×0 set. Sessions stored
   before this stay history. A session the user empties is deleted, and an
   undo or the next set brings it back with the same id; only a new set
-  reopens a finished workout (D137).
-- **One day back, as an era** (D132, D133). An answer, Food, a session, a
-  set, a run or a weight entry reaches today and yesterday on a day of the
+  reopens a finished workout (D137). A Gym session is removed only in its
+  workout, never by the check-in delete (D142).
+- **One day back, as an era** (D132, D133). An answer, a session, a set, a
+  run or a weight entry reaches today and yesterday on a day of the
   P8 era (`scoring.sessionWindowDays` present) and nothing older. A day's
   window is read from its own snapshot — an absent `editWindowDays` is the
   legacy 3 — and a week takes its era from its Monday. The rule lives in
   `core/config/closure.ts`; never re-implement it in a screen. A Gym session
   keeps its day, and no backfill reaches a day its domain was off. Heute
   shows Heute | Gestern, relative, and every write goes to the day on show
-  (D138).
+  (D138). On Gestern a standard question whose stored text is unchanged
+  reads in its library "gestern" wording — display only, never written
+  (D144).
 - **Nothing is charged while it can still be written** (D134, D135). A P8
   week is judged when it is over — Tuesday 00:00: until then a week with a
   session counts attendance as met and an empty one is no data, while
@@ -172,16 +176,18 @@ Never conflate them.
   workout action decides from what is stored when its turn in the write
   queue comes, never from the render it was tapped on: the tap's own blur
   may just have saved something.
-- **Food is ranked on the 1–10 adherence the user entered, never on calories
-  or macros.** Entries are logged and totalled because a log is useful; none
-  of it reaches the score. What a person's targets should be is a product
-  decision that has not been made, and no number anywhere in the scoring path
-  may stand in for it.
-- Food is **not a training domain**. It has no attendance, no 40/60 target, no
-  performance curve, no Endurance Phase and no abstinence decay — it is scored
-  by the shared daily fold, exactly as Wellbeing is. Do not infer a Food decay
-  rule from Gym or Running: they decay after seven days without a *session*,
-  and Food has no sessions.
+- **Food existed until WP2; its data is kept and nothing creates it**
+  (D139, D140). It was ranked on the 1–10 adherence the user entered, never
+  on calories or macros, by the shared daily fold — no attendance, no 40/60,
+  no Endurance Phase, no abstinence decay. WP3 Stage 4 switched it off from
+  the update day as an era (`ensureFoodRetired`, on every load): each day
+  before replays byte-identically by the rules it was lived under (D107,
+  D110, D111, D113, D118), and from that day the Boss moves by the remaining
+  domains. The stores, the record, the ratings, the entries and the backup
+  collections stay; no screen, service or onboarding field writes them, and
+  `food` stays in `DOMAIN_TYPES` for the replay but never in
+  `OFFERED_DOMAIN_TYPES`. Do not bring a Food screen back, and do not delete
+  its data.
 - A training domain's rating is **40 % attendance and 60 % personal
   development** — Gym and Running both. Extra sessions beyond the weekly
   target buy no more attendance; a rate of change reaches the level through
@@ -200,14 +206,14 @@ Never conflate them.
   looking at neighbouring records reinterprets history the moment one arrives.
 - **The Boss averages normalized domain performance, never event count**
   (D110). It moves by the weighted movement of each domain's position on the
-  one shared 0–8 ladder. Attendance is capped at its target and Food has one
-  due item a day, so logging something more often can never make it dominate.
+  one shared 0–8 ladder. Attendance is capped at its target and a day is
+  answered once, so logging something more often can never make it dominate.
   Lifetime XP answers a different question and never enters the rank. Do not
   introduce a per-event Boss constant or a cross-domain exchange rate.
 - **The general cooling-off formula is RC2's, approved** (D113): two grace
   days, then 1.5 a day to day 7, then 3, capped at 60 per episode. It governs
   every domain-and-era segment that has no approved model of its own —
-  Wellbeing, Food, and the pre-performance-model Gym and Running eras — and
+  Mind, Food's days, and the pre-performance-model Gym and Running eras — and
   it is reached only through `activeDecayModel()`. Gym and Running under the
   performance model use their own abstinence rule and never both (D96).
   A declared **pause** suspends it (D116); rest days never will (D115).
@@ -228,20 +234,21 @@ Never conflate them.
   target is not. And on a paused day the training target may **raise** the
   rating but never lower it (D118) — attendance is a measure of the absence a
   pause excuses, so charging it punished people for turning up. The floor is
-  one-sided, and Wellbeing and Food get none: there a low day is a reported
+  one-sided, and Mind and Food's days get none: there a low day is a reported
   result, not a measure of absence.
 - **Rest days are deprecated** (D115). Never shipped, never approved, and made
   redundant by the seven-day abstinence rule and D37. The store stays for
   backup compatibility; nothing creates one, and no UI ever should.
-- **Today's status counts every daily obligation** — Wellbeing's questions and
-  Food's one rating (D119). A weekly quota is not due today and is not
-  counted. The app must never say "done for today" while something daily is
-  outstanding.
+- **Today's status counts every daily obligation** — Mind's questions (D119,
+  D141). A weekly quota is not due today and is not counted. The app must
+  never say "done for today" while something daily is outstanding.
 - **One unanswered daily domain currently holds the whole day open** (D111).
   That is the existing mechanism, it only postpones closure inside the edit
   window, and it is deliberately unchanged — but it deserves revisiting as
   daily domains multiply, since a later design may want each domain's day to
   close on its own obligations. Not a licence to redesign it as cleanup.
+  Mind is the only daily domain since D139; a Food-era day still replays
+  under this rule, which is the update day's cost recorded in D141.
 - A rating **moves towards** its target rather than becoming it. Climbing gets
   slower as the rating rises; falling never does — a high rank is harder to
   reach, not protected.
@@ -252,6 +259,10 @@ Never conflate them.
   timeout and no guess may answer it: a user who never answers must keep a
   fully working app and be asked again next time.
 - Colour is never the only carrier of meaning.
+- **Mind is the wellbeing domain's one name** (D143), in both languages, from
+  one key through `i18n/domainNames.ts`. Its stored id stays `mental` (D66),
+  and the question category "Mental" is a different thing. The terminal is
+  Mind | Gym.
 
 ## Interface rules
 
@@ -301,11 +312,10 @@ in version order and applies the chain in one pass.
 
 ## What this app does not do
 
-No exercise database, no calorie or macro targets, no food API, no barcode
-scanner, no meal planning, no
-shopping list, no Strava OAuth, no backend, no login, no social feed, no
-avatar editor, no muscle-group ranks, no automatic plan changes without the
-user's approval.
+No food tracking (D139), no exercise database, no calorie or macro targets, no
+food API, no barcode scanner, no meal planning, no shopping list, no Strava
+OAuth, no backend, no login, no social feed, no avatar editor, no muscle-group
+ranks, no automatic plan changes without the user's approval.
 
 Do not introduce a backend because it would simplify something.
 
@@ -315,7 +325,6 @@ Do not introduce a backend because it would simplify something.
 |---|---|
 | domain rating | how am I progressing, against my own history |
 | Tombstone | have I hit this absolute benchmark |
-| a food entry | what did I eat — shown, totalled, and never scored |
 
 Conflating them would ruin both, so the boundary is an API boundary as much as
 a conceptual one: nothing in `core/gym/rating.ts` reads a benchmark table, and
