@@ -7,15 +7,21 @@ import { URL_APP, check, onboard, phone, seedConfirmation, summary } from './lib
  * the threshold was reached today, 4/7 while a confirmation is pending, and
  * nothing while the rating sits below the next threshold with no days
  * collected. Screenshots at 393px go to docs/design/overall-rank.
+ *
+ * The seeded profile is set up under P8, so its whole history is of that
+ * era: a day counts towards a confirmation once it is settled — two days
+ * old for this Wellbeing-only profile, since yesterday can still be
+ * answered (D136). The pending and promoted presets therefore seed one day
+ * more than under the rule before, where yesterday already counted.
  */
 const OUT = process.env.OUT ?? 'docs/design/overall-rank';
 const PRESETS = [
   { name: 'threshold', seed: { days: 28, value: 10, today: true }, expect: 'Rang bestätigen: 0/7 Tage', caption: 'Schwelle erreicht' },
-  { name: 'pending', seed: { days: 32, value: 10 }, expect: 'Rang bestätigen: 4/7 Tage', caption: 'Schwelle erreicht' },
+  { name: 'pending', seed: { days: 33, value: 10 }, expect: 'Rang bestätigen: 4/7 Tage', caption: 'Schwelle erreicht' },
   { name: 'below', seed: { days: 28, value: 10 }, expect: null, caption: /^Noch \d+ bis Veteran$/ },
   // The day after a confirmation completed: the rank moved, the bar and the
   // caption retargeted, nothing pending towards the rank after that yet.
-  { name: 'promoted', seed: { days: 25, value: 10 }, expect: null, caption: /^Noch \d+ bis Veteran$/, rank: 'Elite' },
+  { name: 'promoted', seed: { days: 26, value: 10 }, expect: null, caption: /^Noch \d+ bis Veteran$/, rank: 'Elite' },
   // The top of the ladder is not reachable from this seed in a sane number
   // of days (the seeded rating settles below Legend's threshold); its
   // unchanged treatment is covered by the unit tests instead.
@@ -71,4 +77,4 @@ for (const preset of PRESETS) {
 }
 
 await browser.close();
-summary();
+process.exit(summary() ? 0 : 1);

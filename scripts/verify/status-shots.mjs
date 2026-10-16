@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, onboard, seed, seedTraining, seedMuscles, phone } from './lib.mjs';
+import { URL_APP, onboard, openMuscles, seed, seedTraining, seedMuscles, phone } from './lib.mjs';
 
 /**
  * Evidence screenshots for the status palette (D123): the 1–10 picker on
@@ -22,12 +22,16 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
 
 // Today: pick a 6 (mixed) on the first scale question, a 10 on the next.
-const six = page.getByRole('radio', { name: /^6 von 10/ }).first();
+// An answered question folds away 620 ms later but stays in the page, so
+// each pick names its question rather than taking the first match.
+const scale = (question, value) =>
+  page.getByRole('radiogroup', { name: question }).getByRole('radio', { name: new RegExp(`^${value} von 10`) });
+const six = scale(/Wie gut hast du gesch/, 6);
 await six.scrollIntoViewIfNeeded();
 await six.click();
 await page.waitForTimeout(500);
 await shot('393-A-today-scale-6');
-const ten = page.getByRole('radio', { name: /^10 von 10/ }).first();
+const ten = scale(/Wie war deine Stimmung/, 10);
 await ten.click();
 await page.waitForTimeout(500);
 await shot('393-B-today-scale-10');
@@ -52,11 +56,13 @@ await shot('393-F-question-detail');
 await page.getByRole('button', { name: 'Zurück' }).click();
 await page.waitForTimeout(400);
 
-// Bereiche → Gym: the muscle map and its rows.
+// Bereiche → Gym → Muskelgruppen: the muscle map and its rows, on its own
+// destination since WP2-2.
 await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();
 await page.waitForTimeout(700);
 await page.getByRole('radio', { name: 'Gym' }).click();
-await page.waitForTimeout(4500);
+await page.waitForTimeout(900);
+await openMuscles(page);
 await page.locator('.areas__scroll').evaluate((el) => { const m = document.querySelector('.muscle-module'); if (m) el.scrollTop += m.getBoundingClientRect().top - el.getBoundingClientRect().top - 8; });
 await page.waitForTimeout(900);
 await shot('393-G-muscle-map');

@@ -74,6 +74,9 @@ for (const [width, height] of [[393, 852], [430, 932]]) {
   await waitForAzimuth(page, 0);
   await scrollTo(page, '.muscle-rows', 24);
   await shot(page, `${width}-H-sparklines`);
+  // Laufen lives on the Gym hub, not on the muscle destination (WP2-2).
+  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.waitForTimeout(900);
   await scrollTo(page, '.areas__running');
   await shot(page, `${width}-J-laufen`);
   await ctx.close();
