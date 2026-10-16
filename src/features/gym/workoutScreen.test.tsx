@@ -261,6 +261,73 @@ describe('removing a set', () => {
   });
 });
 
+describe('a workout the user empties (STOP 2, decision 1)', () => {
+  it('goes with its last set, and the undo brings it back under the same id', async () => {
+    const session = await startSessionFromDraft(await planDraft(['ex_bench_press']), WEDNESDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: 60000 });
+    await open({ sessionId: session.id });
+
+    await act(async () => button('Satz 1 von Bankdrücken entfernen').click());
+    await until(() => undoButton() !== null);
+    await quiet();
+    expect(await gymSessionsRepository.getAll()).toEqual([]);
+    // The workout stays on screen, its exercise waiting for a set.
+    expect(hasCard('Bankdrücken')).toBe(true);
+    expect(pendingInputs('Bankdrücken')).toHaveLength(2);
+
+    await act(async () => undoButton()!.click());
+    await until(() => card('Bankdrücken').querySelectorAll('.gym-set:not(.gym-set--pending)').length === 1);
+    await quiet();
+    const back = await gymSessionsRepository.getAll();
+    expect(back.map((entry) => entry.id)).toEqual([session.id]);
+    expect(back[0]!.exercises!.map((line) => line.exerciseId)).toEqual(['ex_bench_press']);
+    expect((await setsOf('ex_bench_press')).map((set) => [set.reps, set.weightGrams])).toEqual([[8, 60000]]);
+  });
+
+  it('comes back under the same id with the next saved set', async () => {
+    const session = await startSessionFromDraft(await planDraft(['ex_bench_press']), WEDNESDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: 60000 });
+    await open({ sessionId: session.id });
+
+    await act(async () => button('Satz 1 von Bankdrücken entfernen').click());
+    await until(() => undoButton() !== null);
+    await quiet();
+    expect(await gymSessionsRepository.getAll()).toEqual([]);
+
+    const [reps, weight] = pendingInputs('Bankdrücken');
+    await act(async () => type(reps!, '5'));
+    await act(async () => leave(reps!, weight!));
+    await act(async () => type(weight!, '70'));
+    await act(async () => leave(weight!));
+    await until(() => card('Bankdrücken').querySelectorAll('.gym-set:not(.gym-set--pending)').length === 1);
+    await quiet();
+    const back = await gymSessionsRepository.getAll();
+    expect(back.map((entry) => entry.id)).toEqual([session.id]);
+    expect((await setsOf('ex_bench_press')).map((set) => [set.reps, set.weightGrams])).toEqual([[5, 70000]]);
+  });
+});
+
+describe('an assisted exercise (STOP 2, decision 3)', () => {
+  it('waits for its assistance to be typed, and takes an explicit 0', async () => {
+    const name = 'Klimmzüge assistiert';
+    await open({ draft: await planDraft(['ex_assisted_pull_up']) });
+
+    const [reps] = pendingInputs(name);
+    await act(async () => type(reps!, '8'));
+    await act(async () => leave(reps!));
+    await quiet();
+    // Reps alone are not a set: how much the machine took off is part of it.
+    expect(await gymSessionsRepository.getAll()).toHaveLength(0);
+    expect(pendingInputs(name)).toHaveLength(2);
+
+    await act(async () => type(pendingInputs(name)[1]!, '0'));
+    await act(async () => leave(pendingInputs(name)[1]!));
+    await until(() => card(name).querySelectorAll('.gym-set:not(.gym-set--pending)').length === 1);
+    await quiet();
+    expect((await setsOf('ex_assisted_pull_up')).map((set) => [set.reps, set.weightGrams])).toEqual([[8, 0]]);
+  });
+});
+
 describe('adding a set', () => {
   it('copies the set before it as stored, including the edit the same tap saved', async () => {
     const session = await startSessionFromDraft(await planDraft(['ex_bench_press']), WEDNESDAY);
