@@ -81,14 +81,21 @@ const canvasBox = (page) => page.locator('.body-viewer canvas').boundingBox();
  * Waits until the reported angle has stopped changing. Under software
  * rendering a preset animation can take a couple of seconds, so a fixed wait
  * would read a mid-animation angle.
+ *
+ * The angle alone is not enough: it is a whole number, and the end of an
+ * inertia coast (×0.93 a frame) can take longer than the quiet window to
+ * cross the next half degree when frames are slow, so a coasting camera
+ * read as settled. The loop only renders while something moves, so the
+ * camera is at rest when no frame has fired for the window either.
  */
 async function settle(page, quietMs = 1500, timeout = 20000) {
   const start = Date.now();
-  let last = await page.locator('[data-angle]').textContent();
+  const state = async () => `${await page.locator('[data-angle]').textContent()}|${(await probe(page)).raf}`;
+  let last = await state();
   let quietSince = Date.now();
   while (Date.now() - start < timeout) {
     await page.waitForTimeout(100);
-    const now = await page.locator('[data-angle]').textContent();
+    const now = await state();
     if (now !== last) { last = now; quietSince = Date.now(); }
     else if (Date.now() - quietSince >= quietMs) return;
   }
