@@ -10,7 +10,15 @@ import { loadBossProgression, type BossProgression } from './bossService';
 import { loadGymHistory, type GymHistory } from './gymService';
 import { percentChange } from '../../core/gym/performance';
 import { muscleStateOf } from '../../features/gym/GymProgress';
-import { LAST, at, currentProfile } from './fixtures/profiles';
+import {
+  CONFIRMATION_CLOCKS,
+  LAST,
+  P8_CROSSING_CLOCKS,
+  at,
+  confirmationProfile,
+  currentProfile,
+  p8CrossingProfile,
+} from './fixtures/profiles';
 
 /**
  * The regression boundary for presentation work.
@@ -218,5 +226,59 @@ describe('domain outputs are the same before and after presentation work', () =>
       expect(values).toBe(profile.gym.values);
       expect(md5).toBe(profile.gym.md5);
     });
+  }
+});
+
+/*
+ * WP3 Stage 3 (P8): two profiles frozen before any Stage 3b code (STOP 3a,
+ * question 7). One crosses into the P8 era in the middle of the training
+ * break profile; the other has promotion confirmation active (D126) and
+ * crosses into P8 too. Each is replayed at the clocks where a P8 rule
+ * decides something — the files are the pre-P8 replay, and the Stage 3b
+ * report names every value that moves against them, and why.
+ *
+ * Beyond the usual outputs these serialise the whole Gym and Running rating
+ * states (every day's attendance, abstinence and decay) and the
+ * confirmation state, because those are what P8 changes.
+ */
+function roundAll(value: unknown): unknown {
+  return JSON.parse(
+    JSON.stringify(value, (_key, v: unknown) =>
+      typeof v === 'number' ? (Number.isFinite(v) ? Math.round(v * 1e9) / 1e9 : `<${String(v)}>`) : v,
+    ),
+  ) as unknown;
+}
+
+const P8_PROFILES: { name: string; load(): string; clocks: readonly string[] }[] = [
+  { name: 'p8 crossing the training break', load: p8CrossingProfile, clocks: P8_CROSSING_CLOCKS },
+  { name: 'p8 with promotion confirmation', load: confirmationProfile, clocks: CONFIRMATION_CLOCKS },
+];
+
+describe('the P8 golden profiles (frozen before Stage 3b)', () => {
+  afterEach(async () => {
+    setClock(null);
+    await closeDatabase();
+  });
+
+  for (const profile of P8_PROFILES) {
+    for (const clock of profile.clocks) {
+      it(`${profile.name} at ${clock}`, async () => {
+        await deleteDatabase();
+        setClock({ now: () => at(clock) });
+        const result = await importBackup(profile.load());
+        if (!result.ok) throw new Error(result.details.join('; '));
+        const boss = await loadBossProgression();
+        const value = roundAll({
+          outputs: outputsOf(boss),
+          pending: boss.pending,
+          confirmation: boss.confirmation,
+          gym: boss.gym,
+          running: boss.running,
+        });
+        checkGolden(`${profile.name} ${clock}`, 'boss', value);
+        const json = JSON.stringify(value);
+        console.log(`p8 golden: ${profile.name} at ${clock}: ${createHash('md5').update(json).digest('hex')}`);
+      });
+    }
   }
 });

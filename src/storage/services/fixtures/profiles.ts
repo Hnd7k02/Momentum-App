@@ -177,3 +177,62 @@ export const BREAK_LAST = addDays(START, BREAK_DAYS - 1);
 export function trainingBreakProfile(): string {
   return currentProfile({ days: BREAK_DAYS, gymBreak: [60, 87], runBreak: [120, 139] });
 }
+
+/*
+ * WP3 Stage 3 (P8). Two profiles frozen into the golden baseline before any
+ * Stage 3b code, so the Stage 3b report can name every value P8 moves.
+ *
+ * A P8 snapshot is the profile's own configuration again with the one-day
+ * window (`editWindowDays: 1`) and the P8 marker (`sessionWindowDays: 1`),
+ * effective from a fixed day. Before Stage 3b nothing reads either field, so
+ * the frozen files are the pre-P8 replay of exactly the data Stage 3b will
+ * replay under P8 from that day on.
+ */
+function withP8Snapshot(profile: string, from: DateKey, extra?: (data: Record<string, unknown>) => void): string {
+  const backup = JSON.parse(profile) as { data: Record<string, unknown> };
+  const snapshots = backup.data.configSnapshots as { id: string; effectiveFrom: string; createdAt: string; config: { scoring: Record<string, unknown> } }[];
+  const base = snapshots[snapshots.length - 1]!;
+  snapshots.push({
+    ...base,
+    id: `${base.id}_p8`,
+    effectiveFrom: from,
+    createdAt: `${from}T06:00:00.000Z`,
+    config: { ...base.config, scoring: { ...base.config.scoring, editWindowDays: 1, sessionWindowDays: 1 } },
+  });
+  extra?.(backup.data);
+  return JSON.stringify(backup);
+}
+
+/** P8 from Monday 2026-07-27 (day 56), four days before the Gym break begins. */
+export const P8_FROM = addDays(START, 56);
+
+/**
+ * The training-break profile crossing into P8. Its clocks each sit on one
+ * rule: the gym break's seventh silent day as yesterday (day 66), the Monday
+ * after an empty Gym week (day 70), an unanswered day aged two (day 74, for
+ * day 72), the first week back with one session of three (day 89), and the
+ * run break's seventh silent day as yesterday (day 125).
+ */
+export function p8CrossingProfile(): string {
+  return withP8Snapshot(trainingBreakProfile(), P8_FROM);
+}
+export const P8_CROSSING_CLOCKS = [66, 70, 74, 89, 125].map((index) => addDays(START, index));
+
+/** P8 from Monday 2026-06-08 (day 7) in the four-domain profile. */
+export const P8_CONFIRMATION_FROM = addDays(START, 7);
+
+/**
+ * The four-domain profile with promotion confirmation active from its first
+ * day (D126) and crossing into P8 at day 7, after its first promotion
+ * (Challenger, 06-07) and before the next four (Contender 06-14, Elite
+ * 06-21, Veteran 06-28, Master 07-09 under the pre-P8 rule). The clocks sit
+ * on those promotions — the Sunday of the first, the Mondays after the next
+ * two, the Friday after the last — and on the last day.
+ */
+export function confirmationProfile(): string {
+  return withP8Snapshot(currentProfile(), P8_CONFIRMATION_FROM, (data) => {
+    const settings = data.settings as Record<string, unknown>;
+    settings.promotionConfirmation = { from: START, targetRankId: null, eligibleDates: [] };
+  });
+}
+export const CONFIRMATION_CLOCKS = [13, 21, 28, 39, 89].map((index) => addDays(START, index));

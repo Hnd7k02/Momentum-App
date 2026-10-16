@@ -1,0 +1,3035 @@
+{
+ "outputs": {
+  "era": "weighted",
+  "origin": "2026-06-01",
+  "rank": "elite",
+  "peakRank": "elite",
+  "progress": 4.836821117,
+  "lifetimeXp": 1995,
+  "points": [
+   [
+    2.433333333,
+    325,
+    0
+   ],
+   [
+    2.742832526,
+    371.424878839,
+    0.309499192
+   ],
+   [
+    3.033297075,
+    414.994561297,
+    0.29046455
+   ],
+   [
+    3.245112542,
+    446.766881285,
+    0.211815467
+   ],
+   [
+    3.502891374,
+    485.433706111,
+    0.257778832
+   ],
+   [
+    3.706412824,
+    515.961923531,
+    0.203521449
+   ],
+   [
+    3.831145123,
+    534.671768384,
+    0.124732299
+   ],
+   [
+    3.990018717,
+    558.502807587,
+    0.158873595
+   ],
+   [
+    4.112918092,
+    575.808532868,
+    0.122899375
+   ],
+   [
+    4.121319926,
+    576.984789622,
+    0.008401834
+   ],
+   [
+    4.195810067,
+    587.413409332,
+    0.074490141
+   ],
+   [
+    4.318522314,
+    604.593123961,
+    0.122712247
+   ],
+   [
+    4.375171795,
+    612.524051297,
+    0.056649481
+   ],
+   [
+    4.485552388,
+    627.977334351,
+    0.110380593
+   ],
+   [
+    4.575848378,
+    640.618772985,
+    0.09029599
+   ],
+   [
+    4.589344624,
+    642.508247325,
+    0.013496245
+   ],
+   [
+    4.672997006,
+    654.219580898,
+    0.083652383
+   ],
+   [
+    4.761477421,
+    666.606838975,
+    0.088480415
+   ],
+   [
+    4.764973128,
+    667.096237918,
+    0.003495707
+   ],
+   [
+    4.820523043,
+    674.873225998,
+    0.055549915
+   ],
+   [
+    4.867502831,
+    681.450396401,
+    0.046979789
+   ],
+   [
+    4.774011677,
+    668.361634849,
+    -0.093491154
+   ],
+   [
+    4.763784237,
+    666.929793111,
+    -0.010227441
+   ],
+   [
+    4.768186027,
+    667.546043815,
+    0.004401791
+   ],
+   [
+    4.72060789,
+    660.885104617,
+    -0.047578137
+   ],
+   [
+    4.741542531,
+    663.815954404,
+    0.020934641
+   ],
+   [
+    4.749878496,
+    664.982989455,
+    0.008335965
+   ],
+   [
+    4.749878496,
+    664.982989455,
+    0
+   ],
+   [
+    4.836821117,
+    677.154956361,
+    0.086942621
+   ]
+  ],
+  "changes": [
+   [
+    "2026-06-07",
+    "promotion",
+    "challenger"
+   ],
+   [
+    "2026-06-14",
+    "promotion",
+    "contender"
+   ],
+   [
+    "2026-06-21",
+    "promotion",
+    "elite"
+   ]
+  ],
+  "domains": [
+   {
+    "domain": "mental",
+    "momentum": 600.60863342,
+    "peakMomentum": 600.60863342,
+    "progress": 4.290061667,
+    "started": true,
+    "series": [
+     1.928571429,
+     2.110451106,
+     2.296352798,
+     2.329502769,
+     2.53922412,
+     2.699534682,
+     2.708085862,
+     2.837815919,
+     2.978147026,
+     2.978147026,
+     3.136998464,
+     3.305516174,
+     3.305516174,
+     3.443938924,
+     3.536394952,
+     3.480369301,
+     3.604997557,
+     3.740473303,
+     3.740473303,
+     3.838348263,
+     3.948834955,
+     3.853857182,
+     3.941639979,
+     4.045276284,
+     3.993999815,
+     4.13502192,
+     4.227331267,
+     4.227331267,
+     4.290061667
+    ],
+    "active": [
+     false,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   {
+    "domain": "gym",
+    "momentum": 676.521478334,
+    "peakMomentum": 777.710953275,
+    "progress": 4.832296274,
+    "started": true,
+    "series": [
+     2.433333333,
+     2.883333333,
+     3.286776913,
+     3.649876135,
+     3.950131525,
+     4.210062594,
+     4.430196463,
+     4.617087053,
+     4.777884495,
+     4.792592814,
+     4.806241741,
+     4.958024318,
+     5.097636008,
+     5.223597145,
+     5.336066718,
+     5.43670135,
+     5.520579184,
+     5.596799337,
+     5.597140072,
+     5.597465586,
+     5.597776564,
+     5.393316623,
+     5.209302676,
+     5.043690124,
+     4.902164625,
+     4.777600327,
+     4.665492458,
+     4.665492458,
+     4.832296274
+    ],
+    "active": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   {
+    "domain": "running",
+    "momentum": 706.83963896,
+    "peakMomentum": 706.83963896,
+    "progress": 5.052612607,
+    "started": true,
+    "series": [
+     2.433333333,
+     2.883333333,
+     3.288333333,
+     3.652833333,
+     3.975683741,
+     4.255122651,
+     4.488614945,
+     4.685874991,
+     4.707485378,
+     4.72743207,
+     4.745866357,
+     4.762922725,
+     4.78981989,
+     4.814640951,
+     4.837582101,
+     4.858816401,
+     4.878497107,
+     4.896760435,
+     4.913727865,
+     4.929508088,
+     4.944198641,
+     4.957887302,
+     4.975824098,
+     4.992525298,
+     5.008714693,
+     5.024355638,
+     5.03896162,
+     5.03896162,
+     5.052612607
+    ],
+    "active": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   {
+    "domain": "food",
+    "momentum": 571.485731521,
+    "peakMomentum": 571.485731521,
+    "progress": 4.082040939,
+    "started": true,
+    "series": [
+     1.928571429,
+     2.046044643,
+     2.186752632,
+     2.354009748,
+     2.546445678,
+     2.601746901,
+     2.687478976,
+     2.80210283,
+     2.944159052,
+     2.944159052,
+     2.975839348,
+     3.039430516,
+     3.133295925,
+     3.255885324,
+     3.405730099,
+     3.420422657,
+     3.467438548,
+     3.545152598,
+     3.545152598,
+     3.676614919,
+     3.674151998,
+     3.705154052,
+     3.7679167,
+     3.860824647,
+     3.982346857,
+     3.970015854,
+     3.991249753,
+     3.991249753,
+     4.082040939
+    ],
+    "active": [
+     false,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   }
+  ],
+  "gym": {
+   "rating": 676.521478334,
+   "sessionsThisWeek": 3,
+   "weeklyTarget": 3,
+   "endurance": {
+    "progress": 2.5,
+    "unlocked": false
+   },
+   "ytdChange": 29.285714286,
+   "performance": {
+    "score": 983.041164973,
+    "components": [
+     "trend",
+     "ytd"
+    ]
+   },
+   "decayFraction": 0,
+   "maintenance": false,
+   "abstinence": null
+  },
+  "running": {
+   "rating": 706.83963896,
+   "sessionsThisWeek": 2,
+   "weeklyTarget": 2,
+   "endurance": {
+    "progress": 4,
+    "unlocked": true
+   },
+   "ytdChange": 1.698161389,
+   "performance": {
+    "score": 558.583479054,
+    "components": [
+     "trend",
+     "ytd"
+    ]
+   },
+   "decayFraction": 0,
+   "maintenance": false,
+   "abstinence": 2,
+   "attendanceOnlyRuns": 0
+  },
+  "history": {
+   "days": [
+    [
+     "2026-06-01",
+     "scored",
+     50,
+     100,
+     4,
+     0
+    ],
+    [
+     "2026-06-02",
+     "scored",
+     85,
+     85,
+     4,
+     4
+    ],
+    [
+     "2026-06-03",
+     "scored",
+     88.75,
+     88.75,
+     4,
+     4
+    ],
+    [
+     "2026-06-04",
+     "scored",
+     80,
+     80,
+     4,
+     4
+    ],
+    [
+     "2026-06-05",
+     "scored",
+     96.25,
+     96.25,
+     4,
+     4
+    ],
+    [
+     "2026-06-06",
+     "scored",
+     83.125,
+     83.125,
+     4,
+     4
+    ],
+    [
+     "2026-06-07",
+     "scored",
+     74.375,
+     74.375,
+     4,
+     4
+    ],
+    [
+     "2026-06-08",
+     "scored",
+     86.25,
+     86.25,
+     4,
+     4
+    ],
+    [
+     "2026-06-09",
+     "scored",
+     90,
+     90,
+     4,
+     4
+    ],
+    [
+     "2026-06-10",
+     "scored",
+     50,
+     100,
+     4,
+     0
+    ],
+    [
+     "2026-06-11",
+     "scored",
+     85,
+     85,
+     4,
+     4
+    ],
+    [
+     "2026-06-12",
+     "scored",
+     88.75,
+     88.75,
+     4,
+     4
+    ],
+    [
+     "2026-06-13",
+     "scored",
+     75.625,
+     75.625,
+     4,
+     4
+    ],
+    [
+     "2026-06-14",
+     "scored",
+     91.875,
+     91.875,
+     4,
+     4
+    ],
+    [
+     "2026-06-15",
+     "scored",
+     91.25,
+     91.25,
+     4,
+     4
+    ],
+    [
+     "2026-06-16",
+     "scored",
+     70,
+     70,
+     4,
+     4
+    ],
+    [
+     "2026-06-17",
+     "scored",
+     86.25,
+     86.25,
+     4,
+     4
+    ],
+    [
+     "2026-06-18",
+     "scored",
+     90,
+     90,
+     4,
+     4
+    ],
+    [
+     "2026-06-19",
+     "scored",
+     50,
+     100,
+     4,
+     0
+    ],
+    [
+     "2026-06-20",
+     "scored",
+     93.125,
+     93.125,
+     4,
+     4
+    ],
+    [
+     "2026-06-21",
+     "scored",
+     84.375,
+     84.375,
+     4,
+     4
+    ],
+    [
+     "2026-06-22",
+     "scored",
+     54.583333333,
+     54.583333333,
+     4,
+     4
+    ],
+    [
+     "2026-06-23",
+     "scored",
+     70.833333333,
+     70.833333333,
+     4,
+     4
+    ],
+    [
+     "2026-06-24",
+     "scored",
+     74.583333333,
+     74.583333333,
+     4,
+     4
+    ],
+    [
+     "2026-06-25",
+     "scored",
+     65.833333333,
+     65.833333333,
+     4,
+     4
+    ],
+    [
+     "2026-06-26",
+     "scored",
+     69.583333333,
+     69.583333333,
+     4,
+     4
+    ],
+    [
+     "2026-06-27",
+     "scored",
+     68.958333333,
+     68.958333333,
+     4,
+     4
+    ],
+    [
+     "2026-06-28",
+     "open",
+     null,
+     66.666666667,
+     4,
+     0
+    ],
+    [
+     "2026-06-29",
+     "scored",
+     88.75,
+     88.75,
+     4,
+     4
+    ]
+   ],
+   "overall": [
+    50,
+    85,
+    88.75,
+    80,
+    96.25,
+    83.125,
+    74.375,
+    86.25,
+    90,
+    50,
+    85,
+    88.75,
+    75.625,
+    91.875,
+    91.25,
+    70,
+    86.25,
+    90,
+    50,
+    93.125,
+    84.375,
+    54.583333333,
+    70.833333333,
+    74.583333333,
+    65.833333333,
+    69.583333333,
+    68.958333333,
+    null,
+    88.75
+   ],
+   "mental": [
+    0,
+    80,
+    85,
+    40,
+    95,
+    82.5,
+    37.5,
+    75,
+    80,
+    0,
+    90,
+    95,
+    32.5,
+    87.5,
+    75,
+    30,
+    85,
+    90,
+    0,
+    82.5,
+    87.5,
+    25,
+    80,
+    85,
+    40,
+    95,
+    82.5,
+    null,
+    75
+   ],
+   "gym": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    33.333333333,
+    33.333333333,
+    33.333333333,
+    33.333333333,
+    33.333333333,
+    33.333333333,
+    null,
+    100
+   ],
+   "running": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    null,
+    100
+   ],
+   "food": [
+    0,
+    60,
+    70,
+    80,
+    90,
+    50,
+    60,
+    70,
+    80,
+    0,
+    50,
+    60,
+    70,
+    80,
+    90,
+    50,
+    60,
+    70,
+    0,
+    90,
+    50,
+    60,
+    70,
+    80,
+    90,
+    50,
+    60,
+    null,
+    80
+   ],
+   "sports": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "paused": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "activity": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true
+   ],
+   "questions": [
+    [
+     "q_fp_0",
+     "alltag",
+     "active",
+     [
+      0,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      40,
+      50,
+      0,
+      70,
+      80,
+      90,
+      100,
+      40,
+      50,
+      60,
+      70,
+      0,
+      90,
+      100,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      null,
+      40
+     ]
+    ],
+    [
+     "q_fp_1",
+     "alltag",
+     "active",
+     [
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      null,
+      100
+     ]
+    ],
+    [
+     "q_fp_2",
+     "gesundheit",
+     "active",
+     [
+      0,
+      70,
+      80,
+      90,
+      100,
+      40,
+      50,
+      60,
+      70,
+      0,
+      90,
+      100,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      0,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      40,
+      null,
+      60
+     ]
+    ],
+    [
+     "q_fp_3",
+     "gesundheit",
+     "active",
+     [
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      0,
+      100,
+      100,
+      null,
+      100
+     ]
+    ]
+   ],
+   "weeks": [
+    [
+     "2026-W23",
+     null,
+     0,
+     false,
+     [
+      [
+       "gym",
+       3,
+       3,
+       true
+      ],
+      [
+       "running",
+       2,
+       2,
+       true
+      ]
+     ]
+    ],
+    [
+     "2026-W24",
+     null,
+     0,
+     false,
+     [
+      [
+       "gym",
+       3,
+       3,
+       true
+      ],
+      [
+       "running",
+       2,
+       2,
+       true
+      ]
+     ]
+    ],
+    [
+     "2026-W25",
+     null,
+     0,
+     false,
+     [
+      [
+       "gym",
+       3,
+       3,
+       true
+      ],
+      [
+       "running",
+       2,
+       2,
+       true
+      ]
+     ]
+    ],
+    [
+     "2026-W26",
+     null,
+     0,
+     false,
+     [
+      [
+       "gym",
+       3,
+       1,
+       false
+      ],
+      [
+       "running",
+       2,
+       2,
+       true
+      ]
+     ]
+    ],
+    [
+     "2026-W27",
+     null,
+     0,
+     false,
+     [
+      [
+       "gym",
+       3,
+       3,
+       true
+      ],
+      [
+       "running",
+       2,
+       2,
+       true
+      ]
+     ]
+    ]
+   ]
+  },
+  "legacy": [
+   250,
+   278.982908194,
+   308.56292586,
+   332.658827114,
+   363.598554024,
+   386.849802009,
+   404.88606845,
+   427.91176989,
+   451.751553639,
+   451.751553639,
+   470.988883904,
+   491.294082293,
+   504.449845939,
+   524.977896915,
+   544.358509253,
+   552.673004635,
+   568.559880736,
+   585.605679011,
+   585.605679011,
+   602.301975049,
+   614.150777606,
+   611.207822497,
+   616.414800863,
+   623.327759714,
+   625.814955578,
+   630.117913099,
+   634.026015152,
+   634.026015152,
+   647.411740562
+  ]
+ },
+ "pending": {
+  "targetRankId": "veteran",
+  "eligibleDates": [
+   "2026-06-22",
+   "2026-06-23",
+   "2026-06-24",
+   "2026-06-25",
+   "2026-06-26",
+   "2026-06-27"
+  ],
+  "required": 7
+ },
+ "confirmation": {
+  "from": "2026-06-01",
+  "targetRankId": "veteran",
+  "eligibleDates": [
+   "2026-06-22",
+   "2026-06-23",
+   "2026-06-24",
+   "2026-06-25",
+   "2026-06-26",
+   "2026-06-27"
+  ]
+ },
+ "gym": {
+  "points": [
+   {
+    "date": "2026-06-01",
+    "rating": 325,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-02",
+    "rating": 392.5,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-03",
+    "rating": 453.016536965,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-04",
+    "rating": 507.481420233,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-05",
+    "rating": 552.519728777,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-06",
+    "rating": 589.408763136,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-07",
+    "rating": 620.22750481,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-08",
+    "rating": 646.392187406,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-09",
+    "rating": 668.903829284,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-10",
+    "rating": 670.962993893,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-11",
+    "rating": 672.873843805,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-12",
+    "rating": 694.123404487,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-13",
+    "rating": 712.692681067,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-14",
+    "rating": 729.067628892,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-15",
+    "rating": 743.688673318,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-16",
+    "rating": 756.771175561,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-17",
+    "rating": 767.675293907,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-18",
+    "rating": 777.583913782,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-19",
+    "rating": 777.628209409,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-20",
+    "rating": 777.670526195,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-21",
+    "rating": 777.710953275,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 751.131160949,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-23",
+    "rating": 727.209347857,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-24",
+    "rating": 705.679716073,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-25",
+    "rating": 686.303047468,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-26",
+    "rating": 668.864045723,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-27",
+    "rating": 653.168944153,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-28",
+    "rating": 653.168944153,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 0,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": true
+   },
+   {
+    "date": "2026-06-29",
+    "rating": 676.521478334,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   }
+  ],
+  "detail": [
+   {
+    "date": "2026-06-01",
+    "rating": 325,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-02",
+    "rating": 392.5,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-03",
+    "rating": 453.016536965,
+    "target": 997.66536965,
+    "attendance": 1000,
+    "performance": 996.108949416,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-04",
+    "rating": 507.481420233,
+    "target": 997.66536965,
+    "attendance": 1000,
+    "performance": 996.108949416,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-05",
+    "rating": 552.519728777,
+    "target": 964.705882353,
+    "attendance": 1000,
+    "performance": 941.176470588,
+    "movement": 0.098503716,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-06",
+    "rating": 589.408763136,
+    "target": 964.705882353,
+    "attendance": 1000,
+    "performance": 941.176470588,
+    "movement": 0.089496054,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-07",
+    "rating": 620.22750481,
+    "target": 964.705882353,
+    "attendance": 1000,
+    "performance": 941.176470588,
+    "movement": 0.082118247,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-08",
+    "rating": 646.392187406,
+    "target": 964.705882353,
+    "attendance": 1000,
+    "performance": 941.176470588,
+    "movement": 0.075954499,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-09",
+    "rating": 668.903829284,
+    "target": 964.705882353,
+    "attendance": 1000,
+    "performance": 941.176470588,
+    "movement": 0.070721563,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-10",
+    "rating": 670.962993893,
+    "target": 700,
+    "attendance": 1000,
+    "performance": 500,
+    "movement": 0.066219234,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-11",
+    "rating": 672.873843805,
+    "target": 700,
+    "attendance": 1000,
+    "performance": 500,
+    "movement": 0.065807401,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-12",
+    "rating": 694.123404487,
+    "target": 997.66536965,
+    "attendance": 1000,
+    "performance": 996.108949416,
+    "movement": 0.065425231,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-13",
+    "rating": 712.692681067,
+    "target": 997.66536965,
+    "attendance": 1000,
+    "performance": 996.108949416,
+    "movement": 0.061175319,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-14",
+    "rating": 729.067628892,
+    "target": 997.66536965,
+    "attendance": 1000,
+    "performance": 996.108949416,
+    "movement": 0.057461464,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-15",
+    "rating": 743.688673318,
+    "target": 998.895932643,
+    "attendance": 1000,
+    "performance": 998.159887738,
+    "movement": 0.054186474,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-16",
+    "rating": 756.771175561,
+    "target": 998.895932643,
+    "attendance": 1000,
+    "performance": 998.159887738,
+    "movement": 0.051262265,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-17",
+    "rating": 767.675293907,
+    "target": 980.924673221,
+    "attendance": 1000,
+    "performance": 968.207788701,
+    "movement": 0.048645765,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-18",
+    "rating": 777.583913782,
+    "target": 980.924673221,
+    "attendance": 1000,
+    "performance": 968.207788701,
+    "movement": 0.046464941,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-19",
+    "rating": 777.628209409,
+    "target": 778.579696689,
+    "attendance": 1000,
+    "performance": 630.966161148,
+    "movement": 0.044483217,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-20",
+    "rating": 777.670526195,
+    "target": 778.579696689,
+    "attendance": 1000,
+    "performance": 630.966161148,
+    "movement": 0.044474358,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-21",
+    "rating": 777.710953275,
+    "target": 778.579696689,
+    "attendance": 1000,
+    "performance": 630.966161148,
+    "movement": 0.044465895,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 751.131160949,
+    "target": 511.913030022,
+    "attendance": 333.333333333,
+    "performance": 630.966161148,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-23",
+    "rating": 727.209347857,
+    "target": 511.913030022,
+    "attendance": 333.333333333,
+    "performance": 630.966161148,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-24",
+    "rating": 705.679716073,
+    "target": 511.913030022,
+    "attendance": 333.333333333,
+    "performance": 630.966161148,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-25",
+    "rating": 686.303047468,
+    "target": 511.913030022,
+    "attendance": 333.333333333,
+    "performance": 630.966161148,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-26",
+    "rating": 668.864045723,
+    "target": 511.913030022,
+    "attendance": 333.333333333,
+    "performance": 630.966161148,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-27",
+    "rating": 653.168944153,
+    "target": 511.913030022,
+    "attendance": 333.333333333,
+    "performance": 630.966161148,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-28",
+    "rating": 653.168944153,
+    "target": null,
+    "attendance": 0,
+    "performance": null,
+    "movement": 0,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": true
+   },
+   {
+    "date": "2026-06-29",
+    "rating": 676.521478334,
+    "target": 989.824698984,
+    "attendance": 1000,
+    "performance": 983.041164973,
+    "movement": 0.069366211,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   }
+  ],
+  "rating": 676.521478334,
+  "peak": 777.710953275,
+  "model": "attendancePerformance",
+  "origin": "2026-06-01",
+  "ageMonths": 0,
+  "endurance": {
+   "progress": 2.5,
+   "required": 4,
+   "unlocked": false,
+   "unlockedAt": null,
+   "remaining": 1.5,
+   "points": [
+    {
+     "weekKey": "2026-W23",
+     "met": true,
+     "progress": 1,
+     "unlocked": false
+    },
+    {
+     "weekKey": "2026-W24",
+     "met": true,
+     "progress": 2,
+     "unlocked": false
+    },
+    {
+     "weekKey": "2026-W25",
+     "met": true,
+     "progress": 3,
+     "unlocked": false
+    },
+    {
+     "weekKey": "2026-W26",
+     "met": false,
+     "progress": 2.5,
+     "unlocked": false
+    }
+   ]
+  },
+  "promotionUnlocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "performance": {
+   "score": 983.041164973,
+   "trendScore": 983.041164973,
+   "ytdScore": 983.041164973,
+   "components": [
+    "trend",
+    "ytd"
+   ]
+  },
+  "trend": {
+   "ratio": 1.292857143,
+   "muscles": [
+    {
+     "muscle": "chest",
+     "status": "measured",
+     "ratio": 1.285714286,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 450000
+    },
+    {
+     "muscle": "back",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    },
+    {
+     "muscle": "shoulders",
+     "status": "measured",
+     "ratio": 1.285714286,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 450000
+    },
+    {
+     "muscle": "biceps",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    },
+    {
+     "muscle": "triceps",
+     "status": "measured",
+     "ratio": 1.285714286,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 450000
+    },
+    {
+     "muscle": "core",
+     "status": "measured",
+     "ratio": 1.3,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 390000
+    },
+    {
+     "muscle": "quadriceps",
+     "status": "measured",
+     "ratio": 1.3,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 390000
+    },
+    {
+     "muscle": "hamstringsGlutes",
+     "status": "measured",
+     "ratio": 1.3,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 390000
+    },
+    {
+     "muscle": "calves",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    },
+    {
+     "muscle": "forearms",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    }
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "ytd": {
+   "ratio": 1.292857143,
+   "muscles": [
+    {
+     "muscle": "chest",
+     "status": "measured",
+     "ratio": 1.285714286,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 450000
+    },
+    {
+     "muscle": "back",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    },
+    {
+     "muscle": "shoulders",
+     "status": "measured",
+     "ratio": 1.285714286,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 450000
+    },
+    {
+     "muscle": "biceps",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    },
+    {
+     "muscle": "triceps",
+     "status": "measured",
+     "ratio": 1.285714286,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 450000
+    },
+    {
+     "muscle": "core",
+     "status": "measured",
+     "ratio": 1.3,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 390000
+    },
+    {
+     "muscle": "quadriceps",
+     "status": "measured",
+     "ratio": 1.3,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 390000
+    },
+    {
+     "muscle": "hamstringsGlutes",
+     "status": "measured",
+     "ratio": 1.3,
+     "exercises": 1,
+     "compared": 1,
+     "latestScore": 390000
+    },
+    {
+     "muscle": "calves",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    },
+    {
+     "muscle": "forearms",
+     "status": "noData",
+     "ratio": null,
+     "exercises": 0,
+     "compared": 0,
+     "latestScore": null
+    }
+   ],
+   "measured": [
+    "chest",
+    "shoulders",
+    "triceps",
+    "core",
+    "quadriceps",
+    "hamstringsGlutes"
+   ],
+   "awaitingBaseline": [],
+   "untrained": [
+    "back",
+    "biceps",
+    "calves",
+    "forearms"
+   ]
+  },
+  "trendChange": 29.285714286,
+  "ytdChange": 29.285714286,
+  "sessionsThisWeek": 3,
+  "weeklyTarget": 3,
+  "abstinence": null,
+  "decayFraction": 0,
+  "maintenance": false
+ },
+ "running": {
+  "points": [
+   {
+    "date": "2026-06-01",
+    "rating": 325,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-02",
+    "rating": 392.5,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-03",
+    "rating": 453.25,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-04",
+    "rating": 507.925,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-05",
+    "rating": 556.352561125,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-06",
+    "rating": 595.717171129,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-07",
+    "rating": 628.406092273,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-08",
+    "rating": 656.022498725,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-09",
+    "rating": 659.047952925,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-10",
+    "rating": 661.840489782,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-11",
+    "rating": 664.421290039,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-12",
+    "rating": 666.809181557,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-13",
+    "rating": 670.574784562,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-14",
+    "rating": 674.049733158,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-15",
+    "rating": 677.261494104,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-16",
+    "rating": 680.234296079,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-17",
+    "rating": 682.989595021,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-18",
+    "rating": 685.546460918,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-19",
+    "rating": 687.921901157,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-20",
+    "rating": 690.131132307,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-21",
+    "rating": 692.187809704,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 694.104222343,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-23",
+    "rating": 696.615373707,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-24",
+    "rating": 698.953541651,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-25",
+    "rating": 701.132910034,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-26",
+    "rating": 703.166232997,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-27",
+    "rating": 705.065010596,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-28",
+    "rating": 705.065010596,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 0,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": true
+   },
+   {
+    "date": "2026-06-29",
+    "rating": 706.83963896,
+    "streak": 0,
+    "streakBonus": 0,
+    "weight": 1,
+    "decay": 0,
+    "calibrating": false,
+    "skipped": false
+   }
+  ],
+  "detail": [
+   {
+    "date": "2026-06-01",
+    "rating": 325,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-02",
+    "rating": 392.5,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-03",
+    "rating": 453.25,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-04",
+    "rating": 507.925,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.1,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-05",
+    "rating": 556.352561125,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.098415,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-06",
+    "rating": 595.717171129,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.088729488,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-07",
+    "rating": 628.406092273,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.080856566,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-08",
+    "rating": 656.022498725,
+    "target": 1000,
+    "attendance": 1000,
+    "performance": null,
+    "movement": 0.074318782,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-09",
+    "rating": 659.047952925,
+    "target": 700,
+    "attendance": 1000,
+    "performance": 500,
+    "movement": 0.0687955,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-10",
+    "rating": 661.840489782,
+    "target": 700,
+    "attendance": 1000,
+    "performance": 500,
+    "movement": 0.068190409,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-11",
+    "rating": 664.421290039,
+    "target": 700,
+    "attendance": 1000,
+    "performance": 500,
+    "movement": 0.067631902,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-12",
+    "rating": 666.809181557,
+    "target": 700,
+    "attendance": 1000,
+    "performance": 500,
+    "movement": 0.067115742,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-13",
+    "rating": 670.574784562,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.066638164,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-14",
+    "rating": 674.049733158,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.065885043,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-15",
+    "rating": 677.261494104,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.065190053,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-16",
+    "rating": 680.234296079,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.064547701,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-17",
+    "rating": 682.989595021,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.063953141,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-18",
+    "rating": 685.546460918,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.063402081,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-19",
+    "rating": 687.921901157,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.062890708,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-20",
+    "rating": 690.131132307,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.06241562,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-21",
+    "rating": 692.187809704,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.061973774,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-22",
+    "rating": 694.104222343,
+    "target": 723.317386421,
+    "attendance": 1000,
+    "performance": 538.862310702,
+    "movement": 0.061562438,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-23",
+    "rating": 696.615373707,
+    "target": 735.150087432,
+    "attendance": 1000,
+    "performance": 558.583479054,
+    "movement": 0.061179156,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-24",
+    "rating": 698.953541651,
+    "target": 735.150087432,
+    "attendance": 1000,
+    "performance": 558.583479054,
+    "movement": 0.060676925,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-25",
+    "rating": 701.132910034,
+    "target": 735.150087432,
+    "attendance": 1000,
+    "performance": 558.583479054,
+    "movement": 0.060209292,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-26",
+    "rating": 703.166232997,
+    "target": 735.150087432,
+    "attendance": 1000,
+    "performance": 558.583479054,
+    "movement": 0.059773418,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-27",
+    "rating": 705.065010596,
+    "target": 735.150087432,
+    "attendance": 1000,
+    "performance": 558.583479054,
+    "movement": 0.059366753,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   },
+   {
+    "date": "2026-06-28",
+    "rating": 705.065010596,
+    "target": null,
+    "attendance": 0,
+    "performance": null,
+    "movement": 0,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": true
+   },
+   {
+    "date": "2026-06-29",
+    "rating": 706.83963896,
+    "target": 735.150087432,
+    "attendance": 1000,
+    "performance": 558.583479054,
+    "movement": 0.058986998,
+    "decayFraction": 0,
+    "decaying": false,
+    "maintenance": false,
+    "skipped": false
+   }
+  ],
+  "rating": 706.83963896,
+  "peak": 706.83963896,
+  "model": "attendancePerformance",
+  "origin": "2026-06-02",
+  "ageMonths": 0,
+  "endurance": {
+   "progress": 4,
+   "required": 4,
+   "unlocked": true,
+   "unlockedAt": "2026-W26",
+   "remaining": 0,
+   "points": [
+    {
+     "weekKey": "2026-W23",
+     "met": true,
+     "progress": 1,
+     "unlocked": false
+    },
+    {
+     "weekKey": "2026-W24",
+     "met": true,
+     "progress": 2,
+     "unlocked": false
+    },
+    {
+     "weekKey": "2026-W25",
+     "met": true,
+     "progress": 3,
+     "unlocked": false
+    },
+    {
+     "weekKey": "2026-W26",
+     "met": true,
+     "progress": 4,
+     "unlocked": true
+    }
+   ]
+  },
+  "promotionUnlocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true
+  ],
+  "performance": {
+   "score": 558.583479054,
+   "trendScore": 558.583479054,
+   "ytdScore": 558.583479054,
+   "components": [
+    "trend",
+    "ytd"
+   ]
+  },
+  "trend": {
+   "ratio": 1.016981614,
+   "comparisons": [
+    {
+     "band": 17,
+     "status": "measured",
+     "baseline": {
+      "id": "run_2026-06-06",
+      "date": "2026-06-06",
+      "distanceMetres": 5000,
+      "durationSeconds": 1800
+     },
+     "current": {
+      "id": "run_2026-06-27",
+      "date": "2026-06-27",
+      "distanceMetres": 5000,
+      "durationSeconds": 1760
+     },
+     "ratio": 1.022727273,
+     "dates": 6
+    },
+    {
+     "band": 24,
+     "status": "measured",
+     "baseline": {
+      "id": "run_2026-06-02",
+      "date": "2026-06-02",
+      "distanceMetres": 10000,
+      "durationSeconds": 3600
+     },
+     "current": {
+      "id": "run_2026-06-16",
+      "date": "2026-06-16",
+      "distanceMetres": 10000,
+      "durationSeconds": 3560
+     },
+     "ratio": 1.011235955,
+     "dates": 2
+    }
+   ],
+   "measured": [
+    17,
+    24
+   ],
+   "awaitingBaseline": []
+  },
+  "ytd": {
+   "ratio": 1.016981614,
+   "comparisons": [
+    {
+     "band": 17,
+     "status": "measured",
+     "baseline": {
+      "id": "run_2026-06-06",
+      "date": "2026-06-06",
+      "distanceMetres": 5000,
+      "durationSeconds": 1800
+     },
+     "current": {
+      "id": "run_2026-06-27",
+      "date": "2026-06-27",
+      "distanceMetres": 5000,
+      "durationSeconds": 1760
+     },
+     "ratio": 1.022727273,
+     "dates": 6
+    },
+    {
+     "band": 24,
+     "status": "measured",
+     "baseline": {
+      "id": "run_2026-06-02",
+      "date": "2026-06-02",
+      "distanceMetres": 10000,
+      "durationSeconds": 3600
+     },
+     "current": {
+      "id": "run_2026-06-16",
+      "date": "2026-06-16",
+      "distanceMetres": 10000,
+      "durationSeconds": 3560
+     },
+     "ratio": 1.011235955,
+     "dates": 2
+    }
+   ],
+   "measured": [
+    17,
+    24
+   ],
+   "awaitingBaseline": []
+  },
+  "trendChange": 1.698161389,
+  "ytdChange": 1.698161389,
+  "sessionsThisWeek": 2,
+  "weeklyTarget": 2,
+  "abstinence": {
+   "from": "2026-06-28",
+   "through": "2026-06-29",
+   "days": 2
+  },
+  "decayFraction": 0,
+  "maintenance": false,
+  "attendanceOnlyRuns": 0
+ }
+}
