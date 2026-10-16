@@ -9,7 +9,7 @@ import { ToastOutlet, ToastProvider } from '../../components/Toast';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import { closeDatabase, deleteDatabase } from '../../storage/db';
 import { ensureSessionWindowEra } from '../../storage/configService';
-import { answersRepository, configSnapshotsRepository, runsRepository } from '../../storage/repositories';
+import { answersRepository, configSnapshotsRepository, questionsRepository, runsRepository } from '../../storage/repositories';
 import { saveAnswer } from '../../storage/services/checkInService';
 import { addQuestion, applyOnboarding } from '../../storage/services/configurationService';
 import { enableLegacyFood } from '../../storage/services/fixtures/legacyFood';
@@ -398,5 +398,69 @@ describe('Heute | Gestern', () => {
     await click(buttonNamed('Sichern')!);
     await until(() => false, 40);
     expect((await runsRepository.getAll()).map((run) => [run.date, run.distanceMetres])).toEqual([[TODAY, 5200]]);
+  });
+});
+
+describe('the standard questions on the Gestern side (D144)', () => {
+  const MOOD = 'Wie war deine Stimmung heute?';
+  const TIDY = 'Hast du heute aufgeräumt?';
+  const MOOD_EN = 'How was your mood today?';
+  const OWN = 'Hast du heute die Küche aufgeräumt?';
+
+  beforeEach(async () => {
+    await deleteDatabase();
+    at('2026-10-10');
+    await applyOnboarding({
+      questions: [
+        { text: MOOD, type: 'scale', category: 'mental' },
+        { text: TIDY, type: 'boolean', category: 'alltag' },
+        // Picked while the interface was in English.
+        { text: MOOD_EN, type: 'scale', category: 'mental' },
+        // The user's own: never reworded, "heute" and all.
+        { text: OWN, type: 'boolean', category: 'eigene' },
+      ],
+    });
+    at(TODAY);
+    refreshToday();
+  });
+
+  const headings = () => [...document.querySelectorAll('.check-in__question')].map((node) => node.textContent);
+  const groups = () => [...document.querySelectorAll('[role="radiogroup"]')].map((node) => node.getAttribute('aria-label'));
+
+  it('speaks of yesterday where the library sentence is unchanged, and only there', async () => {
+    const questions = await questionsRepository.list();
+    const snapshots = await configSnapshotsRepository.list();
+    await open();
+    expect(headings()).toEqual([MOOD, TIDY, MOOD_EN, OWN]);
+
+    await show('Gestern', '13. Oktober');
+    expect(headings()).toEqual([
+      'Wie war deine Stimmung gestern?',
+      'Hast du gestern aufgeräumt?',
+      'How was your mood yesterday?',
+      OWN,
+    ]);
+    // The answer groups are named as they read.
+    expect(groups()).toEqual([
+      'Antwort auf: Wie war deine Stimmung gestern?',
+      'Antwort auf: Hast du gestern aufgeräumt?',
+      'Antwort auf: How was your mood yesterday?',
+      `Antwort auf: ${OWN}`,
+    ]);
+
+    // Answered there, it folds to the same words and is filed under yesterday.
+    await click(document.querySelector<HTMLButtonElement>('.answer-boolean__option--yes')!);
+    await until(() => document.querySelector('.check-in--answered .check-in__summary') !== null);
+    await until(() => false, 30);
+    expect(document.querySelector('.check-in--answered .check-in__question')?.textContent).toBe('Hast du gestern aufgeräumt?');
+    const tidy = questions.find((question) => question.text === TIDY)!;
+    expect((await answersRepository.get(YESTERDAY, tidy.id))?.value).toBe(true);
+
+    // Display only: no record and no snapshot took the wording.
+    expect(await questionsRepository.list()).toEqual(questions);
+    expect(await configSnapshotsRepository.list()).toEqual(snapshots);
+
+    await show('Heute', '14. Oktober');
+    expect(headings()).toEqual([MOOD, TIDY, MOOD_EN, OWN]);
   });
 });

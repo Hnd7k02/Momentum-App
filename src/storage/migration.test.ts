@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../core/clock';
 import { SCHEMA_VERSION } from '../core/model';
+import { yesterdayWordingOf } from '../domains/mental/questionLibrary';
 import type {
   AnswerRecord,
   ConfigSnapshotRecord,
@@ -159,6 +160,24 @@ describe('upgrading a real RC2 database', () => {
     expect(byText.get('Wie gut hast du geschlafen?')).toBe('gesundheit');
     expect(byText.get('Hast du dir heute bewusst Zeit für dich genommen?')).toBe('mental');
     expect(byText.get('Trainiert?')).toBe('eigene');
+  });
+
+  it('gives exactly the five questions RC2 shipped their Gestern wording (D144)', async () => {
+    await openDatabase();
+    const worded = (await questionsRepository.list())
+      .map((question) => [question.text, yesterdayWordingOf(question.text)] as const)
+      .filter(([, yesterday]) => yesterday !== null);
+    expect(new Map(worded)).toEqual(
+      new Map([
+        ['Hast du dir heute bewusst Zeit für dich genommen?', 'Hast du dir gestern bewusst Zeit für dich genommen?'],
+        ['Wie zufrieden bist du heute mit deinem Tag?', 'Wie zufrieden warst du gestern mit deinem Tag?'],
+        ['Wie gut hast du geschlafen?', 'Wie gut hast du vorletzte Nacht geschlafen?'],
+        ['Hast du heute etwas gemacht, das dir gutgetan hat?', 'Hast du gestern etwas gemacht, das dir gutgetan hat?'],
+        ['Wie hoch war dein Energielevel?', 'Wie hoch war dein Energielevel gestern?'],
+      ]),
+    );
+    // The user's own four read as written, on either side.
+    expect((await questionsRepository.list()).length).toBe(9);
   });
 
   it('marks existing answers private, which is what a later social layer needs', async () => {

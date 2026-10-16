@@ -424,6 +424,7 @@ export function TodayScreen({
                   <CheckInItem
                     key={item.question.id}
                     item={item}
+                    day={shown}
                     editable={day.editable}
                     onAnswer={(next) => answer(item.question.id, next)}
                   />
