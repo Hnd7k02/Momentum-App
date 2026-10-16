@@ -9,12 +9,26 @@ import { URL_APP, check, summary, onboard, seed, seedTraining, seedMuscles, open
  * so only a CHANGE of selection is a hit. The approved decision for 320px is
  * 9 of 10 — the triceps below the probe — and this re-measures it rather
  * than restating it.
+ *
+ * A tap that selects a region on the far side turns the body round
+ * (`BodyViewer.tsx`: the turn-into-view rule fires for taps too until
+ * Stage 7). Left alone, the rest of a "front" pass taps a body swinging
+ * between 48° and 125° — every selection change in a 393 front pass was
+ * measured off 0° — and what it reaches depends on frame timing: four runs
+ * of one build gave 10/10/9, 9/10/8, 10/9/9 and 10/9/8. Two things turned
+ * it. The view pills sit over the top of the canvas, so the grid's first
+ * rows tapped "Seite" and "Hinten"; a cell whose topmost element is not the
+ * canvas is not body a finger can reach, and is skipped. And a hit on the
+ * far side turns the body to it: as `body.mjs` does since STOP 3b, the body
+ * is put back to the pass's view, and the next tap waits until it is there.
  */
 /** `STEP=8 WIDTHS=430` for a finer probe of one width. */
 const STEP = Number(process.env.STEP ?? 12);
 const WIDTHS = (process.env.WIDTHS ?? '393,430,320').split(',').map(Number);
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const results = {};
+/** The regions whose REGION_FACING is 180°, by the names their rows show. */
+const FACES_BACK = new Set(['Rücken', 'Beinbeuger und Gesäss', 'Trizeps', 'Waden']);
 for (const [width, height] of [[393, 852], [430, 932], [320, 693]].filter(([w]) => WIDTHS.includes(w))) {
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, hasTouch: true });
   const page = await ctx.newPage();
@@ -36,15 +50,31 @@ for (const [width, height] of [[393, 852], [430, 932], [320, 693]].filter(([w]) 
   const box = await page.locator('.body-viewer canvas').boundingBox();
   const tally = new Map();
   const current = () => page.evaluate(() => document.querySelector('.muscle-row__button[aria-pressed="true"] .muscle-row__name')?.textContent ?? null);
-  for (const view of ['Vorne', 'Hinten']) {
+  const azimuth = async () => Number(await page.locator('.body-viewer').getAttribute('data-azimuth'));
+  /** Back to the pass's view, and not one tap before the body is there. */
+  const reface = async (view, facing) => {
+    for (let tries = 0; tries < 3; tries += 1) {
+      await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).click();
+      for (let waited = 0; waited < 6000 && (await azimuth()) !== facing; waited += 100) await page.waitForTimeout(100);
+      await page.waitForTimeout(150);
+      if ((await azimuth()) === facing) return;
+    }
+  };
+  for (const [view, facing] of [['Vorne', 0], ['Hinten', 180]]) {
     await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).click();
     await page.waitForTimeout(3500);
     let prev = await current();
     for (let y = 6; y < box.height; y += STEP) {
       for (let x = 6; x < box.width; x += STEP) {
+        const onCanvas = await page.evaluate(([px, py]) => document.elementFromPoint(px, py)?.tagName === 'CANVAS', [box.x + x, box.y + y]);
+        if (!onCanvas) continue;
         await page.mouse.click(box.x + x, box.y + y);
         const cur = await current();
-        if (cur !== prev) { const hit = cur ?? prev; tally.set(hit, (tally.get(hit) ?? 0) + 1); }
+        if (cur !== prev) {
+          const hit = cur ?? prev;
+          tally.set(hit, (tally.get(hit) ?? 0) + 1);
+          if (cur !== null && FACES_BACK.has(cur) !== (facing === 180)) await reface(view, facing);
+        }
         prev = cur;
       }
     }
