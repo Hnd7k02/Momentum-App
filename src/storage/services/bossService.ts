@@ -220,8 +220,8 @@ function domainDayStates(
       recorded: entry.itemsAnswered > 0,
       complete: entry.itemsDue > 0 && entry.itemsAnswered >= entry.itemsDue,
       // Suspends the penalty for absence and nothing else. The two training
-      // domains supply their own series and ignore this; Wellbeing and Food
-      // fold through the general model, which reads it.
+      // domains supply their own series and ignore this; Mind, and Food on
+      // the days it was on, fold through the general model, which reads it.
       paused,
     };
   });

@@ -9,8 +9,8 @@ import { useDomainStanding } from './useDomainStanding';
  * A domain's standing, as the hero of its terminal.
  *
  * The domain's rating on the shared 0–1000 scale, in the tile shape the
- * training terminals already open with — so Wellbeing and Food answer "where
- * do I stand here" the way Gym and Running do. Nothing here is computed: the
+ * training terminals already open with — so Mind answers "where do I stand
+ * here" the way Gym and Running do. Nothing here is computed: the
  * ledger arrives from the Boss replay and is printed. There is no domain
  * rank to show; the Boss is the only rank.
  */

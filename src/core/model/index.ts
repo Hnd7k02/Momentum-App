@@ -18,7 +18,7 @@ export const SCHEMA_VERSION = 5;
 /**
  * The domains a user can have active.
  *
- * `mental` keeps its stored name even though the product calls it Wellbeing:
+ * `mental` keeps its stored name even though the product calls it Mind (D143):
  * renaming a discriminator that every answer row references is a data
  * migration in exchange for a label, and the label belongs in the string
  * layer. Display name changes; the type does not.

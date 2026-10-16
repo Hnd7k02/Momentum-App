@@ -25,7 +25,7 @@ import './muscleModule.css';
  * `toMuscleAnalytics()`, both over what the screen already loaded.
  *
  * The 3D body is behind `React.lazy`, so three.js reaches a device only when
- * this module renders — entering Mental or Ernährung never fetches it. Where
+ * this module renders — entering Mind never fetches it. Where
  * WebGL is missing, the chunk cannot be fetched or the viewer throws, the
  * SVG figure takes its place with the same states and the same selection,
  * and the rows below are untouched either way.

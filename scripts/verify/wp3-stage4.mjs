@@ -215,6 +215,11 @@ for (const [width, height] of SIZES) {
   await noFood(page, `A ${W} Bereiche → Gym`);
   await layoutChecks(page, `E ${W} Bereiche → Gym`);
   await shot(page, width, 'bereiche-gym');
+  // Below the area: pause, backup, credits and Einstellungen.
+  await page.locator('.areas__general').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  await noFood(page, `A ${W} Einstellungen`);
+  await shot(page, width, 'bereiche-einstellungen');
 
   // Verlauf and Rang.
   await tab(page, 'Verlauf');

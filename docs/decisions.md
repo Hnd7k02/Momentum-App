@@ -3199,9 +3199,10 @@ ist noch offen", and not writable.
 can no longer be given. The day stays open while it can be written (D111:
 the unanswered item holds it open in the replay), then closes with Food
 missed in the history `score`. `recordedScore` and every Boss value are
-exactly what they would have been without Stage 4, since the day reads its
-own snapshot either way; Food's ledger sees one silent day, inside D113's
-two grace days. Only a device already in P8 — the preview — can be in this
+exactly what they would have been had the rating simply not been given,
+since the day reads its own snapshot either way. Food's ledger counts it as
+a silent day — after a rated day that is inside D113's two grace days and
+costs nothing. Only a device already in P8 — the preview — can be in this
 position: a device updating from the released build has no writable day
 before the update (D132).
 

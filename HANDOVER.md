@@ -391,7 +391,8 @@ records (answers, sessions, sets, snapshots)
 - **The update day** (D141): yesterday's Food — still on in its own
   snapshot — is not shown, counted, pointed at or writable. The recorded
   cost: a rating still to be given for it is lost, and the day closes with
-  Food missed in `score`, while `recordedScore` and the Boss are unchanged.
+  Food missed in `score`; `recordedScore` and the Boss are exactly what they
+  would be had the rating simply not been given.
 - **Mind** (D143): one name in German and English, from one key; the
   terminal is Mind | Gym; onboarding offers two worlds, with "Gym" taking
   Laufen in; `#/areas/food` lands on Bereiche.
