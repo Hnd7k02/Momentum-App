@@ -86,6 +86,20 @@ async function noFood(page, name) {
   check(`${name}: no Food anywhere`, found.nodes === 0 && found.words.length === 0, short(found));
 }
 
+/**
+ * Brings an element to the top of Bereiche's own scroll port. Not
+ * `scrollIntoView`: that also scrolls the app shell, which is
+ * `overflow: hidden` — a script can move it and a finger cannot, so the
+ * screenshot would show a layout no user ever sees.
+ */
+async function scrollAreasTo(page, locator) {
+  await locator.evaluate((el) => {
+    const port = el.closest('.areas__scroll');
+    port.scrollTop += el.getBoundingClientRect().top - port.getBoundingClientRect().top;
+  });
+  await page.waitForTimeout(400);
+}
+
 const tab = async (page, name) => {
   await page.locator('.tab-bar button', { hasText: name }).click();
   await page.waitForTimeout(900);
@@ -216,9 +230,10 @@ for (const [width, height] of SIZES) {
   await layoutChecks(page, `E ${W} Bereiche → Gym`);
   await shot(page, width, 'bereiche-gym');
   // Below the area: pause, backup, credits and Einstellungen.
-  await page.locator('.areas__general').scrollIntoViewIfNeeded();
-  await page.waitForTimeout(400);
-  await noFood(page, `A ${W} Einstellungen`);
+  await scrollAreasTo(page, page.locator('.areas__general'));
+  await noFood(page, `A ${W} Weitere Bereiche und Einstellungen`);
+  await shot(page, width, 'bereiche-weiteres');
+  await scrollAreasTo(page, page.locator('.section__label', { hasText: /^Einstellungen$/ }));
   await shot(page, width, 'bereiche-einstellungen');
 
   // Verlauf and Rang.
