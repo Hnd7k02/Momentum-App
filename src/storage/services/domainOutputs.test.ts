@@ -12,11 +12,13 @@ import { percentChange } from '../../core/gym/performance';
 import { muscleStateOf } from '../../features/gym/GymProgress';
 import {
   CONFIRMATION_CLOCKS,
+  FOOD_OFF_CLOCKS,
   LAST,
   P8_CROSSING_CLOCKS,
   at,
   confirmationProfile,
   currentProfile,
+  foodOffProfile,
   p8CrossingProfile,
 } from './fixtures/profiles';
 
@@ -254,6 +256,9 @@ function roundAll(value: unknown): unknown {
 const P8_PROFILES: { name: string; load(): string; clocks: readonly string[] }[] = [
   { name: 'p8 crossing the training break', load: p8CrossingProfile, clocks: P8_CROSSING_CLOCKS },
   { name: 'p8 with promotion confirmation', load: confirmationProfile, clocks: CONFIRMATION_CLOCKS },
+  // WP3 Stage 4: Food switched off from day 45 — frozen before any Stage 4
+  // code, compared exactly ever since (FOOD_OFF_FROM in the fixtures).
+  { name: 'food off from day 45', load: foodOffProfile, clocks: FOOD_OFF_CLOCKS },
 ];
 
 describe('the P8 golden profiles (re-frozen at STOP 3b under the P8 rules)', () => {

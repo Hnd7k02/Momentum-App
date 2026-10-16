@@ -6,6 +6,7 @@ import {
 } from '../../../core/config/constants';
 import { SCHEMA_VERSION } from '../../../core/model';
 import { addDays, weekKeyOf, type DateKey } from '../../../core/dates';
+import { weightsForSnapshot } from '../../../core/boss';
 
 /**
  * Synthetic backup profiles for replay tests.
@@ -236,3 +237,55 @@ export function confirmationProfile(): string {
   });
 }
 export const CONFIRMATION_CLOCKS = [13, 21, 28, 39, 89].map((index) => addDays(START, index));
+
+/*
+ * WP3 Stage 4 (P1). The confirmation profile — P8 from day 7, promotions
+ * confirmed from day one — with Food switched off from day 45, frozen into
+ * the golden baseline before any Stage 4 code.
+ *
+ * The switch-off snapshot is the configuration in force with Food's entry
+ * disabled and the Boss weights worked out again over the remaining domains
+ * from the user's parts (here 4 : 3 : 2 : 1, the parts the profile's own
+ * shares come from), which is what Stage 4 writes on the first load after
+ * the update. The replay already reads a disabled entry, so the frozen files
+ * are what Stage 4 has to leave byte-identical: it changes what is written
+ * and shown, never how a day is replayed.
+ */
+export const FOOD_OFF_FROM = addDays(START, 45);
+
+export function foodOffProfile(): string {
+  type Snapshot = {
+    id: string;
+    effectiveFrom: string;
+    createdAt: string;
+    config: { boss?: unknown; domains: { type: string; enabled: boolean }[] } & Record<string, unknown>;
+  };
+  const backup = JSON.parse(confirmationProfile()) as { data: Record<string, unknown> };
+  const data = backup.data;
+  const settings = data.settings as Record<string, unknown>;
+  const parts = { mental: 4, gym: 3, running: 2, food: 1 };
+  settings.bossWeights = parts;
+  for (const domain of data.domains as { type: string; enabled: boolean }[]) {
+    if (domain.type === 'food') domain.enabled = false;
+  }
+  const snapshots = data.configSnapshots as Snapshot[];
+  const base = snapshots[snapshots.length - 1]!;
+  snapshots.push({
+    ...base,
+    id: `${base.id}_foodoff`,
+    effectiveFrom: FOOD_OFF_FROM,
+    createdAt: `${FOOD_OFF_FROM}T06:00:00.000Z`,
+    config: {
+      ...base.config,
+      boss: { weights: weightsForSnapshot(parts, ['mental', 'gym', 'running']) },
+      domains: base.config.domains.map((domain) => (domain.type === 'food' ? { ...domain, enabled: false } : domain)),
+    },
+  });
+  return JSON.stringify(backup);
+}
+
+/**
+ * The day before the switch-off, the switch-off day, the day after, the day
+ * the day before closes (two days on, P8), a week on, and the last day.
+ */
+export const FOOD_OFF_CLOCKS = [44, 45, 46, 47, 52, 89].map((index) => addDays(START, index));
