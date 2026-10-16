@@ -1,7 +1,7 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { OfferedDomainType } from '../../core/domains';
 import type {
   DomainRecord,
-  DomainType,
   Language,
   QuestionCategory,
   QuestionRecord,
@@ -36,12 +36,8 @@ import { TargetPicker } from '../../domains/sports/TargetPicker';
 import { BackupSection } from '../backup/BackupSection';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { LANGUAGES, type TranslationKey } from '../../i18n';
-import {
-  foodFocusOf,
-  weeklyTargetOfDomain,
-  FOOD_FOCUS_MAX_LENGTH,
-  type AppConfiguration,
-} from '../../storage/services/configurationService';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
+import { weeklyTargetOfDomain, type AppConfiguration } from '../../storage/services/configurationService';
 import { PauseSection } from '../pause/PauseSection';
 import { MetricBoard } from '../../components/metrics';
 import { TERMINALS, type DomainTerminal, type GymSection } from '../../app/route';
@@ -51,7 +47,6 @@ import { DomainSwitch } from './DomainSwitch';
 import { GymTerminal } from './GymTerminal';
 import { RunningTerminal } from './RunningTerminal';
 import { CreditsSection } from './CreditsSection';
-import '../food/food.css';
 import '../progress/progress.css';
 import './areas.css';
 import './domainTerminal.css';
@@ -152,66 +147,12 @@ function LegacySportChoiceForm({
   );
 }
 
-/**
- * Food's setup, in full.
- *
- * One sentence, in the user's words, saying what they are trying to eat
- * like. There is deliberately no calorie target, no macro split and no
- * body-composition model here: what those should be is a product decision
- * that has not been made, and inventing one to fill the screen would be
- * indistinguishable afterwards from having decided it.
- *
- * The field is optional. Food scores exactly the same with it empty — the
- * daily rating is the user's own judgement either way — so leaving it blank
- * costs nothing but a reminder.
- */
-function FoodFocusEditor({
-  value,
-  onSave,
-}: {
-  value: string;
-  onSave(focus: string): void;
-}) {
-  const t = useT();
-  const fieldId = useId();
-  const [draft, setDraft] = useState(value);
-
-  // The saved value wins whenever it changes underneath — a restore, or a
-  // save landing — without stranding what the user is currently typing.
-  useEffect(() => setDraft(value), [value]);
-
-  return (
-    <div className="food-focus">
-      <label className="food-focus__label" htmlFor={fieldId}>
-        {t('food.focus.label')}
-      </label>
-      <textarea
-        id={fieldId}
-        className="food-focus__input"
-        rows={2}
-        maxLength={FOOD_FOCUS_MAX_LENGTH}
-        placeholder={t('food.focus.placeholder')}
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-      />
-      <p className="food-focus__hint">{t('food.focus.hint')}</p>
-      <Button
-        variant="secondary"
-        disabled={draft.trim() === value.trim()}
-        onClick={() => onSave(draft)}
-      >
-        {t('food.focus.save')}
-      </Button>
-    </div>
-  );
-}
-
 export interface AreasActions {
   /** Reloads everything after a restore replaced the profile. */
   reload(): void;
-  enableDomain(type: DomainType): void;
-  disableDomain(type: DomainType): void;
-  setWeeklyTarget(type: DomainType, target: number): void;
+  enableDomain(type: OfferedDomainType): void;
+  disableDomain(type: OfferedDomainType): void;
+  setWeeklyTarget(type: OfferedDomainType, target: number): void;
   /** Only ever switches the retired domain off — never on. */
   disableLegacySport(): void;
   /** Answers, once, what RC2's generic Sport sessions actually were. */
@@ -221,28 +162,25 @@ export interface AreasActions {
   pauseQuestion(id: string): void;
   resumeQuestion(id: string): void;
   archiveQuestion(id: string): void;
-  /** Food's whole setup: the user's own sentence, or '' to clear it. */
-  setFoodFocus(focus: string): void;
   setLanguage(language: Language): void;
   setWeightUnit(unit: WeightUnit): void;
 }
 
-const DOMAIN_COPY: Record<DomainType, { name: TranslationKey; description: TranslationKey; off: TranslationKey }> = {
+const DOMAIN_COPY: Record<OfferedDomainType, { name: TranslationKey; description: TranslationKey; off: TranslationKey }> = {
   mental: {
-    name: 'domain.wellbeing',
-    description: 'domain.wellbeing.description',
-    off: 'areas.wellbeing.offTitle',
+    name: DOMAIN_NAME_KEYS.mental,
+    description: 'domain.mental.description',
+    off: 'areas.mental.offTitle',
   },
-  gym: { name: 'domain.gym', description: 'domain.gym.description', off: 'areas.gym.offTitle' },
+  gym: { name: DOMAIN_NAME_KEYS.gym, description: 'domain.gym.description', off: 'areas.gym.offTitle' },
   running: {
-    name: 'domain.running',
+    name: DOMAIN_NAME_KEYS.running,
     description: 'domain.running.description',
     off: 'areas.running.offTitle',
   },
-  food: { name: 'domain.food', description: 'domain.food.description', off: 'areas.food.offTitle' },
 };
 
-const TARGET_VALUE_KEYS: Partial<Record<DomainType, TranslationKey>> = {
+const TARGET_VALUE_KEYS: Partial<Record<OfferedDomainType, TranslationKey>> = {
   gym: 'areas.gym.targetValue',
   running: 'areas.running.targetValue',
 };
@@ -250,10 +188,10 @@ const TARGET_VALUE_KEYS: Partial<Record<DomainType, TranslationKey>> = {
 /**
  * Bereiche: the domain terminal.
  *
- * One switch — Mental · Gym · Ernährung — and beneath it one area's whole
- * workspace: what the area shows about itself, and the card that switches
- * it on and configures it. Exactly one area is rendered at a time; when Gym
- * is open nothing of Mental or Ernährung is on the page. The active area is
+ * One switch — Mind · Gym (WP3 Stage 4, D139, D143) — and beneath it one
+ * area's whole workspace: what the area shows about itself, and the card
+ * that switches it on and configures it. Exactly one area is rendered at a
+ * time; when Gym is open nothing of Mind is on the page. The active area is
  * part of the route (`#/areas/<area>`), so the switch derives from it and
  * writes to it, and Back walks the areas visited.
  *
@@ -263,12 +201,11 @@ const TARGET_VALUE_KEYS: Partial<Record<DomainType, TranslationKey>> = {
  * settings panel: enabling Gym and choosing its target are one gesture in
  * one place.
  *
- * Below the area, unchanged by the switch, sits what is not one of the three:
- * Laufen — a full domain whose place in this terminal is an open product
- * decision, so it keeps its card and its board on Verlauf until that is
- * made — the pause, RC2's retired Sport (shown only where a migrated device
- * still carries it, with a switch that only turns it **off**), the backup
- * and the language.
+ * Laufen lives inside the Gym area, with its own quota, rating and card.
+ * Below the area, unchanged by the switch, sits what is not an area: the
+ * pause, RC2's retired Sport (shown only where a migrated device still
+ * carries it, with a switch that only turns it **off**), the backup and the
+ * language.
  */
 export function AreasScreen({
   configuration,
@@ -342,7 +279,7 @@ export function AreasScreen({
     );
   };
 
-  const domainCard = (type: DomainType, domain: DomainRecord | null) => {
+  const domainCard = (type: OfferedDomainType, domain: DomainRecord | null) => {
     const on = Boolean(domain?.enabled);
     const copy = DOMAIN_COPY[type];
     const target = weeklyTargetOfDomain(domain);
@@ -353,7 +290,7 @@ export function AreasScreen({
         <Card rows>
           <div className="areas__domainHeader">
             <span className={`areas__domainMark areas__domainMark--${type}`} aria-hidden="true">
-              {type === 'mental' || type === 'food' ? (
+              {type === 'mental' ? (
                 <SparkIcon size={22} />
               ) : (
                 <ActivityIcon size={22} />
@@ -427,14 +364,7 @@ export function AreasScreen({
                   onChange={(next) => actions.setWeeklyTarget(type, next)}
                 />
               </div>
-            ) : type === 'food' ? (
-              <FoodFocusEditor
-                value={foodFocusOf(configuration) ?? ''}
-                onSave={actions.setFoodFocus}
-              />
-            ) : (
-              <p className="areas__note">{t('areas.food.on')}</p>
-            )}
+            ) : null}
 
             {type === 'mental' && on && archived.length > 0 ? (
               <>
@@ -498,14 +428,6 @@ export function AreasScreen({
               <RunningTerminal />
               {domainCard('running', domains.running)}
             </div>
-          </>
-        ) : null}
-        {terminal === 'food' ? (
-          <>
-            <MetricBoard>
-              <DomainStandingTile domain="food" id="food-standing" />
-            </MetricBoard>
-            {domainCard('food', domains.food)}
           </>
         ) : null}
 

@@ -95,9 +95,9 @@
   --domain-sports-mid: var(--mint-mid);
   --domain-sports-ink: var(--mint-ink);
   --domain-sports-tint: var(--mint-tint);
-  /* Gym keeps the training identity RC2 established; Running and Food take
-     their own so three cards on one screen are told apart by more than a
-     label. */
+  /* Gym keeps the training identity RC2 established; Running takes its own
+     so two cards on one screen are told apart by more than a label. (Food's
+     peach left with Food, D139; the palette keeps the colour.) */
   --domain-gym: var(--mint-fill);
   --domain-gym-mid: var(--mint-mid);
   --domain-gym-ink: var(--mint-ink);
@@ -106,10 +106,6 @@
   --domain-running-mid: var(--sky-ink);
   --domain-running-ink: var(--sky-ink);
   --domain-running-tint: var(--sky-tint);
-  --domain-food: var(--peach-fill);
-  --domain-food-mid: var(--peach-ink);
-  --domain-food-ink: var(--peach-ink);
-  --domain-food-tint: var(--peach-tint);
 
   /*
    * Status palette — the ONE definition of "how is it going" colour (D123).

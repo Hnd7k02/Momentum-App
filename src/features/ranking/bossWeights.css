@@ -84,9 +84,6 @@
 .boss-weights__share--running {
   color: var(--domain-running-ink);
 }
-.boss-weights__share--food {
-  color: var(--domain-food-ink);
-}
 
 .boss-weights__stepper {
   display: flex;

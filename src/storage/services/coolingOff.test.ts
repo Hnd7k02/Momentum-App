@@ -8,8 +8,9 @@ import { closeDatabase, deleteDatabase } from '../db';
 import { questionsRepository } from '../repositories';
 import { loadBossProgression } from './bossService';
 import { importBackup } from './backupService';
-import { logSession, saveAdherence, saveAnswer } from './checkInService';
+import { logSession, saveAnswer } from './checkInService';
 import { applyOnboarding } from './configurationService';
+import { enableLegacyFood, rateLegacyFood } from './fixtures/legacyFood';
 import { loadProgression } from './ratingService';
 
 /**
@@ -65,14 +66,16 @@ async function activeThenSilent(setup: Setup) {
       : [],
     ...(setup.gym ? { gymTargetPerWeek: 2 } : {}),
     ...(setup.running ? { runningTargetPerWeek: 2 } : {}),
-    ...(setup.food ? { food: true } : {}),
   });
+  // Food's days replay by the general formula (D113); it left the product in
+  // WP3 Stage 4 (D139), so its history is seeded as the old build stored it.
+  if (setup.food) await enableLegacyFood(START);
   const questions = await questionsRepository.listActive();
   for (let index = 0; index < ACTIVE_DAYS; index += 1) {
     const date = addDays(START, index);
     freezeAt(date);
     for (const question of questions) await saveAnswer(date, question.id, true, date);
-    if (setup.food) await saveAdherence(date, 8, null, date);
+    if (setup.food) await rateLegacyFood(date, 8);
     if (setup.gym && (index % 7 === 0 || index % 7 === 3)) {
       await logSession('gym', date, {}, date);
     }

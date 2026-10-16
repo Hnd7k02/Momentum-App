@@ -4,12 +4,12 @@ import type { BossWeights as BossWeightMap } from '../../core/boss';
 import { rankById } from '../../core/ranks';
 import { displayedRankProgress, rankLadder, type RankProgress } from '../../core/ranks/progress';
 import { confirmationIndicator, thresholdReached } from '../../core/ranks/confirmation';
-import type { DomainType } from '../../core/model';
+import { isOfferedDomain, type OfferedDomainType } from '../../core/domains';
 import { Card, EmptyState, LoadFailure, Section, StaleNotice } from '../../components';
 import { RankIcon } from '../../components/Icons';
 import { formatDayAndMonth, formatNumber } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
-import type { TranslationKey } from '../../i18n';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import { settingsRepository } from '../../storage/repositories';
 import { loadBossProgression } from '../../storage/services/bossService';
 import {
@@ -34,13 +34,6 @@ import './rank.css';
  * the whole reason that function exists: fill and copy describing different
  * things is the defect this screen used to have.
  */
-
-const DOMAIN_NAMES: Record<DomainType, TranslationKey> = {
-  mental: 'domain.wellbeing',
-  gym: 'domain.gym',
-  running: 'domain.running',
-  food: 'domain.food',
-};
 
 /**
  * One bar, and the sentence that describes it.
@@ -252,7 +245,11 @@ export function RankScreen({
           <Card>
             <p className="rank-section__explain">{t('rank.domains.explain')}</p>
             {boss.domains
-              .filter((domain) => configuration.domains[domain.domain]?.enabled)
+              // Food's days replay, but Food is never shown (D139).
+              .filter(
+                (domain): domain is typeof domain & { domain: OfferedDomainType } =>
+                  isOfferedDomain(domain.domain) && Boolean(configuration.domains[domain.domain]?.enabled),
+              )
               .map((domain) => {
                 const value = Math.round(domain.momentum);
                 const share = weighting.find((entry) => entry.domain === domain.domain)?.share ?? 0;
@@ -260,7 +257,7 @@ export function RankScreen({
                 return (
                   <div key={domain.domain} className="domain-standing">
                     <span className="domain-standing__body">
-                      <span className="domain-standing__name">{t(DOMAIN_NAMES[domain.domain])}</span>
+                      <span className="domain-standing__name">{t(DOMAIN_NAME_KEYS[domain.domain])}</span>
                       <span className="domain-standing__meta">
                         {domain.started
                           ? `${label} · ${t('rank.weights.share', { percent: Math.round(share * 100) })}`

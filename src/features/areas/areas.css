@@ -149,11 +149,6 @@
   color: var(--domain-running-ink);
 }
 
-.areas__domainMark--food {
-  background: var(--domain-food-tint);
-  color: var(--domain-food-ink);
-}
-
 /* A plain sentence inside a card body, where there is nothing to configure
    yet and an empty state would overstate it. */
 .areas__note {

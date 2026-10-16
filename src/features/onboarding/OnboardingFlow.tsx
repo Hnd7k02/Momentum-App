@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { GYM } from '../../core/config/constants';
-import type { DomainType } from '../../core/model';
 import { Button, Card, SelectionMark } from '../../components';
 import {
   ActivityIcon,
@@ -18,6 +17,7 @@ import {
 import { TargetPicker } from '../../domains/sports/TargetPicker';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import type { TranslationKey } from '../../i18n';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import type { OnboardingSelection, QuestionDraft } from '../../storage/services/configurationService';
 import './onboarding.css';
 
@@ -29,43 +29,37 @@ import './onboarding.css';
  * button is, because a screen that has to be explained is the thing that
  * needs fixing.
  *
- * Sport is presented as **one world** — that is how people think about it —
- * while the configuration underneath stays two independent targets, because
- * three gym sessions and two runs is a week rather than five of something.
- * Gym detail and Food setup are deliberately absent: they happen when the
- * user first opens those areas, not before they have seen the app.
+ * Two worlds, Mind and Gym (WP3 Stage 4, P1–P3). Gym is presented as **one
+ * world, Laufen included** — that is how people think about it — while the
+ * configuration underneath stays two independent targets, because three gym
+ * sessions and two runs is a week rather than five of something. Gym detail
+ * is deliberately absent: it happens when the user first opens the area, not
+ * before they have seen the app. Food is not offered: it left the product
+ * (D139), and nothing here can switch it on.
  */
 
 type Step = 'momentum' | 'worlds' | 'rank' | 'domains' | 'questions' | 'sport' | 'summary';
 
-/** Which of the four are offered, and what each looks like on the picker. */
+/** The two worlds on offer, and what each looks like on the picker. */
 const CHOICES: {
-  key: 'mental' | 'sport' | 'food';
-  domains: DomainType[];
+  key: 'mental' | 'sport';
   title: TranslationKey;
   body: TranslationKey;
   accent: string;
 }[] = [
   {
     key: 'mental',
-    domains: ['mental'],
-    title: 'domain.wellbeing',
-    body: 'domain.wellbeing.description',
+    title: DOMAIN_NAME_KEYS.mental,
+    body: 'domain.mental.description',
     accent: 'var(--domain-mental-mid)',
   },
   {
+    // The key stays 'sport' (nothing stores it); on screen it is Gym, with
+    // Laufen named in its description.
     key: 'sport',
-    domains: ['gym', 'running'],
-    title: 'domain.sportWorld',
-    body: 'domain.sportWorld.description',
+    title: DOMAIN_NAME_KEYS.gym,
+    body: 'onboarding.domains.gym',
     accent: 'var(--domain-gym-mid)',
-  },
-  {
-    key: 'food',
-    domains: ['food'],
-    title: 'domain.food',
-    body: 'domain.food.description',
-    accent: 'var(--domain-food-mid)',
   },
 ];
 
@@ -87,7 +81,7 @@ export function OnboardingFlow({
   const { language } = useI18n();
   const categories = useMemo(() => suggestionsByCategory(language), [language]);
 
-  const [chosen, setChosen] = useState<Set<'mental' | 'sport' | 'food'>>(new Set(['mental']));
+  const [chosen, setChosen] = useState<Set<'mental' | 'sport'>>(new Set(['mental']));
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [customQuestions, setCustomQuestions] = useState<QuestionDraft[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -129,7 +123,7 @@ export function OnboardingFlow({
       current.includes(id) ? current.filter((value) => value !== id) : [...current, id],
     );
 
-  const toggleChoice = (key: 'mental' | 'sport' | 'food') =>
+  const toggleChoice = (key: 'mental' | 'sport') =>
     setChosen((current) => {
       const next = new Set(current);
       if (!next.delete(key)) next.add(key);
@@ -144,7 +138,6 @@ export function OnboardingFlow({
       // from here to create the retired generic Sport domain.
       gymTargetPerWeek: chosen.has('sport') ? gymTarget : null,
       runningTargetPerWeek: chosen.has('sport') ? runningTarget : null,
-      food: chosen.has('food'),
     });
 
   const concept = CONCEPTS.find((entry) => entry.key === step);
@@ -373,7 +366,7 @@ export function OnboardingFlow({
               variant="primary"
               block
               onClick={() => {
-                // Choosing neither is a real answer: the user wants the Sport
+                // Choosing neither is a real answer: the user wants the Gym
                 // world but has not decided a number yet. Gym takes its
                 // default so the area is usable; Running stays off until it
                 // is asked for.
@@ -428,14 +421,6 @@ export function OnboardingFlow({
                     <ActivityIcon size={20} />
                   </span>
                   {t('onboarding.summary.running', { count: runningTarget })}
-                </div>
-              ) : null}
-              {chosen.has('food') ? (
-                <div className="summary__item">
-                  <span className="summary__mark summary__mark--food" aria-hidden="true">
-                    <SparkIcon size={20} />
-                  </span>
-                  {t('onboarding.summary.food')}
                 </div>
               ) : null}
             </div>

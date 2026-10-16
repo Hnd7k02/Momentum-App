@@ -3,11 +3,13 @@ import type { AppConfigSnapshot, DomainRecord } from '../model';
 import {
   DOMAIN_DEFINITIONS,
   DOMAIN_TYPES,
+  OFFERED_DOMAIN_TYPES,
   WEEKLY_DOMAIN_TYPES,
   activationOf,
   activationProblem,
   enabledDomainsIn,
   isLegacyDomain,
+  isOfferedDomain,
   legacySportEnabledIn,
   weeklyTargetsIn,
 } from './index';
@@ -34,12 +36,21 @@ const snapshot = (domains: AppConfigSnapshot['domains']): AppConfigSnapshot => (
 });
 
 describe('the registry', () => {
-  it('offers four domains and does not offer the retired one', () => {
+  it('replays four domains and does not replay the retired one as live', () => {
     // A generic Sport rank no longer exists. Anything that enumerates live
     // domains goes through this list, so it cannot come back by accident.
+    // Food stays in it: its days were lived and still replay (D139).
     expect(DOMAIN_TYPES).toEqual(['mental', 'gym', 'running', 'food']);
     expect(DOMAIN_TYPES).not.toContain('sports');
     expect(isLegacyDomain('sports')).toBe(true);
+  });
+
+  it('offers Mind, Gym and Running, and never Food (D139)', () => {
+    // Anything a user chooses from goes through this list.
+    expect(OFFERED_DOMAIN_TYPES).toEqual(['mental', 'gym', 'running']);
+    expect(isOfferedDomain('food')).toBe(false);
+    expect(isOfferedDomain('sports')).toBe(false);
+    expect(OFFERED_DOMAIN_TYPES.every(isOfferedDomain)).toBe(true);
   });
 
   it('defines every domain it offers', () => {
@@ -55,7 +66,7 @@ describe('the registry', () => {
     expect(running).toBeGreaterThan(0);
     expect(DOMAIN_DEFINITIONS.gym.hasWeeklyTarget).toBe(true);
     expect(DOMAIN_DEFINITIONS.running.hasWeeklyTarget).toBe(true);
-    // Wellbeing and Food are judged daily; a weekly quota would be a
+    // Wellbeing is judged daily, as Food was; a weekly quota would be a
     // different product.
     expect(DOMAIN_DEFINITIONS.mental.hasWeeklyTarget).toBe(false);
     expect(DOMAIN_DEFINITIONS.food.hasWeeklyTarget).toBe(false);
@@ -74,13 +85,14 @@ describe('activation', () => {
       domain('sports', true, { targetPerWeek: 4 }),
     ]);
     expect(activation.enabled).toEqual(['mental']);
-    expect(activation.available).toEqual(['gym', 'running', 'food']);
+    // Food is not offered, even to a profile that never had it (D139).
+    expect(activation.available).toEqual(['gym', 'running']);
     expect(activation.legacySportActive).toBe(true);
   });
 
   it('refuses to leave a user with nothing switched on', () => {
     expect(activationProblem([])).toBe('empty');
-    expect(activationProblem(['food'])).toBeNull();
+    expect(activationProblem(['running'])).toBeNull();
   });
 
   it('does not privilege Wellbeing — any one domain is enough', () => {

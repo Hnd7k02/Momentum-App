@@ -10,7 +10,9 @@ import { I18nProvider } from '../../i18n/I18nProvider';
 import { closeDatabase, deleteDatabase } from '../../storage/db';
 import { ensureSessionWindowEra } from '../../storage/configService';
 import { answersRepository, configSnapshotsRepository, runsRepository } from '../../storage/repositories';
-import { applyOnboarding, enableDomain } from '../../storage/services/configurationService';
+import { saveAnswer } from '../../storage/services/checkInService';
+import { addQuestion, applyOnboarding } from '../../storage/services/configurationService';
+import { enableLegacyFood } from '../../storage/services/fixtures/legacyFood';
 import { createPause } from '../../storage/services/pauseService';
 import { ensureExerciseCatalogue } from '../../storage/services/gymService';
 import { mount, type Mounted } from '../../test/dom';
@@ -252,23 +254,37 @@ describe('Heute | Gestern', () => {
     expect(document.querySelector('.week__label')?.textContent).toBe('Letzte Woche');
   });
 
-  it('speaks of yesterday on the Gestern side: Food and a paused day', async () => {
+  it('speaks of yesterday on the Gestern side: a paused day', async () => {
     at('2026-10-12');
-    await enableDomain('food');
     await createPause({ from: '2026-10-12', to: '2026-10-13' });
     at(TODAY);
     refreshToday();
     await open();
     expect(document.querySelector('.today__paused')).toBeNull();
-    expect(document.querySelector('.food__question')?.textContent).toBe('Wie gut hast du heute deinem Vorsatz entsprochen?');
 
     await show('Gestern', '13. Oktober');
     expect(document.querySelector('.today__pausedTitle')?.textContent).toBe(
       'Gestern war Pause. Anwesenheitsverluste sind ausgesetzt.',
     );
-    expect(document.querySelector('.food__question')?.textContent).toBe('Wie gut hast du gestern deinem Vorsatz entsprochen?');
-    expect(document.querySelector('.food__rating')?.textContent).toBe('Gestern noch nicht bewertet');
-    expect(document.querySelector('.food__logTitle')?.textContent).toBe('Gestern gegessen');
+  });
+
+  it('shows no Food, and owes none, on a device that had it switched on (D141)', async () => {
+    // A device from before the update: yesterday's own snapshot still
+    // carries Food, and only Food is left unanswered there.
+    at('2026-10-12');
+    await enableLegacyFood('2026-10-12');
+    at(TODAY);
+    refreshToday();
+    await saveAnswer(YESTERDAY, await questionId('Bett gemacht?'), true);
+    await saveAnswer(YESTERDAY, await questionId('Wie geschlafen?'), 7);
+    await open();
+    await until(() => false, 30);
+    expect(document.querySelector('[class*="food"]')).toBeNull();
+    expect(yesterdayLine()).toBeNull();
+
+    await show('Gestern', '13. Oktober');
+    expect(document.querySelector('[class*="food"]')).toBeNull();
+    expect(document.querySelector('.today__progress')?.textContent).toBe('Gestern erledigt');
   });
 
   it('says nothing was due on a yesterday that asked nothing', async () => {
@@ -277,17 +293,9 @@ describe('Heute | Gestern', () => {
     await applyOnboarding({ questions: [] });
     at(TODAY);
     refreshToday();
-    await enableDomain('food');
-    mounted = await mount(
-      <I18nProvider language="de" setLanguage={() => undefined}>
-        <WeightUnitProvider unit="kg">
-          <ToastProvider>
-            <TodayScreen onGoToAreas={() => undefined} />
-          </ToastProvider>
-        </WeightUnitProvider>
-      </I18nProvider>,
-    );
-    await until(() => document.querySelector('.food__question') !== null);
+    // The first question arrives today; yesterday asked nothing at all.
+    await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+    await open();
     await show('Gestern', '13. Oktober');
     expect(document.querySelector('.today__nothingDue')?.textContent).toBe('An diesem Tag war nichts fällig.');
     expect(document.querySelector('.today__closed')).toBeNull();

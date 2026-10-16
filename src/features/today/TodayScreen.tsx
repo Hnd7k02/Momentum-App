@@ -15,8 +15,7 @@ import { formatDayAndMonth, formatTime, formatWeekday } from '../../i18n/format'
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { yesterdayOutstanding, type TrainingSession } from '../../storage/services/checkInService';
 import type { TranslationKey } from '../../i18n';
-import { FoodCard } from '../food/FoodCard';
-import { FoodEntrySheet } from '../food/FoodEntrySheet';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import '../pause/pause.css';
 import { useTrainingLauncher } from '../gym/useTrainingLauncher';
 import { BossSummary } from './BossSummary';
@@ -31,13 +30,13 @@ const LOG_SETTLE_MS = 600;
 type ShownDay = 'today' | 'yesterday';
 
 /** Titles and log labels per training domain, including the retired one. */
-const TRAINING_COPY: Record<StoredDomainType, { title: TranslationKey; log: TranslationKey }> = {
-  mental: { title: 'domain.wellbeing', log: 'sports.log' },
-  food: { title: 'domain.food', log: 'sports.log' },
+const TRAINING_COPY: Record<'gym' | 'running' | 'sports', { title: TranslationKey; log: TranslationKey }> = {
   gym: { title: 'today.gym.title', log: 'today.gym.log' },
   running: { title: 'today.running.title', log: 'today.running.log' },
   sports: { title: 'domain.legacySport', log: 'sports.log' },
 };
+/** A training card is only ever one of the weekly domains (`loadDay`). */
+const copyOf = (domain: StoredDomainType) => TRAINING_COPY[domain === 'gym' || domain === 'running' ? domain : 'sports'];
 
 /**
  * The primary interaction point: what is due today, grouped by domain, and
@@ -49,8 +48,8 @@ const TRAINING_COPY: Record<StoredDomainType, { title: TranslationKey; log: Tran
  *
  * **Heute | Gestern** (WP3, P8 — D138). Anything can be written for today
  * and yesterday, and nothing older, so the screen shows one of exactly those
- * two days: the questions, Food, Gym (start or continue yesterday's session)
- * and Laufen all follow the switch, and every write goes to the day on show.
+ * two days: the questions, Gym (start or continue yesterday's session) and
+ * Laufen all follow the switch, and every write goes to the day on show.
  * The switch is relative and follows B3: at midnight "Heute" becomes the new
  * day and "Gestern" the one that was today, and the screen moves before it
  * accepts input either way. A yesterday the write rule no longer opens — the
@@ -77,18 +76,7 @@ export function TodayScreen({
   /** The day on show, and so the day every write here goes to. */
   const date = shown === 'today' ? today : addDays(today, -1);
   const toast = useToast();
-  const {
-    state,
-    answer,
-    logSession,
-    updateSession,
-    deleteSession,
-    rateFood,
-    clearFoodRating,
-    addFoodEntry,
-    removeFoodEntry,
-    reload,
-  } = useDay(date);
+  const { state, answer, logSession, updateSession, deleteSession, reload } = useDay(date);
   /*
    * Today's workout while it is under way (WP3, P7). Read only, from the
    * session itself; it moves when a workout writes, which reaches here
@@ -107,7 +95,6 @@ export function TodayScreen({
   const { state: outstandingState } = useLoadable(loadOutstanding, [today], [version]);
   const yesterdayOpen = outstandingState.status === 'ready' && outstandingState.value;
   const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
-  const [addingFood, setAddingFood] = useState(false);
   /** The run the sheet was last opened for, so focus can find its row again. */
   const lastEdited = useRef<string | null>(null);
   /** Each domain's writable days, as the last loaded day gave them. */
@@ -197,12 +184,11 @@ export function TodayScreen({
   if (gym.open) return <>{gym.overlay}</>;
 
   /*
-   * The same holds for what floats over the day: the plan chooser, the run
-   * sheet and the food entry sheet. They are rendered in both branches under
-   * the same keys, so React keeps them — and whatever has been typed into
-   * them — when the gate closes and opens again around midnight. The run
-   * sheet edits a run by id; a food entry is saved to the day the screen
-   * shows when it is saved, as every write here is (B3).
+   * The same holds for what floats over the day: the plan chooser and the
+   * run sheet. They are rendered in both branches under the same keys, so
+   * React keeps them — and whatever has been typed into them — when the gate
+   * closes and opens again around midnight. The run sheet edits a run by id
+   * (B3).
    */
   // The lists the day on show gave when it loaded — a domain it lacks has
   // none. Kept through a load that failed, which is not a closed day, but
@@ -249,13 +235,6 @@ export function TodayScreen({
           }
           setEditingSession(null);
         }}
-      />
-      <FoodEntrySheet
-        key="food-sheet"
-        open={addingFood}
-        returnFocus={() => document.querySelector<HTMLElement>('button.food__add')}
-        onClose={() => setAddingFood(false)}
-        onAdd={(input) => void addFoodEntry(input)}
       />
     </>
   );
@@ -314,23 +293,13 @@ export function TodayScreen({
   const mental = day.mental;
 
   /*
-   * What is due *today*, across every daily domain — not just Wellbeing.
-   *
-   * This line used to count Wellbeing alone, so a user who answered every
-   * question but had not yet rated Food was told "Für heute erledigt" while
-   * Food sat unrated below it and the day was being held open precisely
-   * because of it (D111). The app contradicted itself and then quietly
-   * postponed the day.
-   *
-   * Counting every daily obligation removes the contradiction without
-   * touching scoring: nothing is fabricated, no day closes earlier, and the
-   * replay is untouched. A weekly quota is deliberately not counted here —
-   * it is not due today, it is due this week, and the training cards say so
-   * themselves.
+   * What is due on the day on show, across every daily domain (D119) — since
+   * Food left the product, Mind's questions alone (D141). A weekly quota is
+   * deliberately not counted: it is not due today, it is due this week, and
+   * the training cards say so themselves.
    */
-  const dailyDue = (mental?.items.length ?? 0) + (day.food ? 1 : 0);
-  const dailyDone =
-    (mental?.answeredCount ?? 0) + (day.food?.adherence !== null && day.food ? 1 : 0);
+  const dailyDue = mental?.items.length ?? 0;
+  const dailyDone = mental?.answeredCount ?? 0;
 
   const openGym = (sessionId?: string) => gym.start(sessionId);
   /*
@@ -438,7 +407,7 @@ export function TodayScreen({
         ) : null}
 
         {mental ? (
-          <Section label={t('domain.mental')}>
+          <Section label={t(DOMAIN_NAME_KEYS.mental)}>
             <Card>
               {mental.items.length === 0 ? (
                 <EmptyState
@@ -465,7 +434,7 @@ export function TodayScreen({
         ) : null}
 
         {day.training.map((training) => {
-          const copy = TRAINING_COPY[training.domain];
+          const copy = copyOf(training.domain);
           /*
            * Whether a session may be written for the day on show (D133). The
            * one day the check-in can take and a session cannot is the Sunday
@@ -611,24 +580,6 @@ export function TodayScreen({
             </Section>
           );
         })}
-
-        {/*
-          Food comes after training, which is its display order — and it is
-          one card rather than a row in the training list, because it is not
-          a weekly quota. Nothing here fabricates a session.
-        */}
-        {day.food ? (
-          <FoodCard
-            food={day.food}
-            editable={day.editable}
-            day={shown}
-            closedNoted={!day.editable}
-            onRate={rateFood}
-            onClearRating={clearFoodRating}
-            onOpenEntry={() => setAddingFood(true)}
-            onRemoveEntry={removeFoodEntry}
-          />
-        ) : null}
       </div>
 
       {floating}

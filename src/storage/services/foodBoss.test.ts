@@ -7,17 +7,24 @@ import type { DomainType } from '../../core/model';
 import { closeDatabase, deleteDatabase } from '../db';
 import { loadBossProgression, type BossProgression } from './bossService';
 import { rankForRating } from '../../core/ranks';
-import { addFoodEntry, logSession, saveAdherence, type SessionInput } from './checkInService';
-import { applyOnboarding, enableDomain, setBossWeights } from './configurationService';
+import { logSession, type SessionInput } from './checkInService';
+import { applyOnboarding, setBossWeights, type OnboardingSelection } from './configurationService';
+import { enableLegacyFood, logLegacyFoodEntry, rateLegacyFood } from './fixtures/legacyFood';
 
 /**
- * Food and the Boss Rank.
+ * Food and the Boss Rank, on the days Food was switched on.
  *
  * The Boss reads a ladder position and knows nothing about how a domain
  * produced it, so the cases below are not about Food's arithmetic — they are
  * about the three properties that adding a fourth domain must not break:
  * an unstarted domain contributes nothing, enabling one creates and destroys
  * no progress, and a weight change applies forward only.
+ *
+ * Food left the product in WP3 Stage 4 (D139), and these cases stay: every
+ * day it was switched on still replays by them. The history is seeded the
+ * way the old build left it on disk (`fixtures/legacyFood.ts`), and nothing
+ * here switches Food off — the switch-off and the Boss across it are pinned
+ * in `foodRetirement.test.ts`.
  */
 
 function freezeAt(day: string, hour = 9): void {
@@ -42,7 +49,13 @@ afterEach(async () => {
 
 async function rate(date: string, adherence: number) {
   freezeAt(date);
-  await saveAdherence(date, adherence, null, date);
+  await rateLegacyFood(date, adherence);
+}
+
+/** Onboarding as chosen, on a device that also had Food switched on from START. */
+async function onboardWithFood(selection: OnboardingSelection) {
+  await applyOnboarding(selection);
+  await enableLegacyFood(START);
 }
 
 async function train(domain: 'gym' | 'running', date: string, input: SessionInput = {}) {
@@ -96,7 +109,7 @@ const contributions = (boss: BossProgression) => {
 
 describe('Food switched on and never rated', () => {
   it('contributes nothing, and its weight leaves the denominator with it', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
 
     const boss = await load();
@@ -111,11 +124,8 @@ describe('Food switched on and never rated', () => {
     const run = async (food: boolean) => {
       await deleteDatabase();
       freezeAt(START);
-      await applyOnboarding({
-        questions: [],
-        gymTargetPerWeek: 2,
-        ...(food ? { food: true } : {}),
-      });
+      await applyOnboarding({ questions: [], gymTargetPerWeek: 2 });
+      if (food) await enableLegacyFood(START);
       await trainEveryWeek(['gym']);
       return load();
     };
@@ -138,7 +148,7 @@ describe('Food switched on and never rated', () => {
     // is open for *every* domain, which is how Wellbeing has always behaved.
     // Postponing a day can only ever delay it counting, never cost anything,
     // and it resolves the moment the day is rated or closes.
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
 
     const boss = await load();
@@ -159,7 +169,7 @@ describe('Food switched on and never rated', () => {
 
 describe('Food as the only domain', () => {
   it('drives the Boss on its own', async () => {
-    await applyOnboarding({ questions: [], food: true });
+    await onboardWithFood({ questions: [] });
     await rateEveryDay(9);
 
     const boss = await load();
@@ -170,7 +180,7 @@ describe('Food as the only domain', () => {
   });
 
   it('falls when the days are bad and rises when they are good', async () => {
-    await applyOnboarding({ questions: [], food: true });
+    await onboardWithFood({ questions: [] });
     for (let index = 0; index < WEEKS * 7; index += 1) {
       await rate(addDays(START, index), index < (WEEKS * 7) / 2 ? 9 : 2);
     }
@@ -185,7 +195,7 @@ describe('Food as the only domain', () => {
 
 describe('Food alongside training', () => {
   it('shares the Boss equally with Gym by default', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
     await rateEveryDay();
 
@@ -195,7 +205,7 @@ describe('Food alongside training', () => {
   });
 
   it('shares the Boss equally with Running by default', async () => {
-    await applyOnboarding({ questions: [], runningTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], runningTargetPerWeek: 2 });
     await trainEveryWeek(['running']);
     await rateEveryDay();
 
@@ -205,12 +215,7 @@ describe('Food alongside training', () => {
   });
 
   it('takes a third each beside Gym and Running', async () => {
-    await applyOnboarding({
-      questions: [],
-      gymTargetPerWeek: 2,
-      runningTargetPerWeek: 2,
-      food: true,
-    });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2, runningTargetPerWeek: 2 });
     await trainEveryWeek(['gym', 'running']);
     await rateEveryDay();
 
@@ -230,12 +235,8 @@ describe('adding Food changes nothing about Gym or Running', () => {
     const scenario = async (food: boolean) => {
       await deleteDatabase();
       freezeAt(START);
-      await applyOnboarding({
-        questions: [],
-        gymTargetPerWeek: 2,
-        runningTargetPerWeek: 2,
-        ...(food ? { food: true } : {}),
-      });
+      await applyOnboarding({ questions: [], gymTargetPerWeek: 2, runningTargetPerWeek: 2 });
+      if (food) await enableLegacyFood(START);
       await trainEveryWeek(['gym', 'running']);
       if (food) await rateEveryDay(3);
       const boss = await load();
@@ -271,7 +272,7 @@ describe('adding Food changes nothing about Gym or Running', () => {
       await trainEveryWeek(['gym']);
       if (food) {
         freezeAt(switchOn);
-        await enableDomain('food');
+        await enableLegacyFood(switchOn);
         await rate(switchOn, 10);
       }
       return load();
@@ -304,7 +305,7 @@ describe('adding Food changes nothing about Gym or Running', () => {
 
 describe('weighting Food', () => {
   it('honours unequal weights', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     freezeAt(START);
     await setBossWeights({ gym: 3, food: 1 });
     await trainEveryWeek(['gym']);
@@ -316,7 +317,7 @@ describe('weighting Food', () => {
   });
 
   it('applies a weight change forward only, never to a day already lived', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
     await rateEveryDay();
 
@@ -345,7 +346,7 @@ describe('weighting Food', () => {
   });
 
   it('never lets a domain be weighted out of existence without switching it off', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     freezeAt(START);
     await setBossWeights({ gym: 1000, food: 0.0001 });
     await trainEveryWeek(['gym']);
@@ -360,7 +361,7 @@ describe('weighting Food', () => {
 
 describe('what the Boss actually averages', () => {
   it('averages ladder positions, never events', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
     await rateEveryDay();
 
@@ -406,26 +407,14 @@ describe('what the Boss actually averages', () => {
     const run = async (entriesPerDay: number) => {
       await deleteDatabase();
       freezeAt(START);
-      await applyOnboarding({ questions: [], food: true });
+      await onboardWithFood({ questions: [] });
       for (let index = 0; index < WEEKS * 7; index += 1) {
         const date = addDays(START, index);
         freezeAt(date);
         for (let n = 0; n < entriesPerDay; n += 1) {
-          await addFoodEntry(
-            date,
-            {
-              foodId: null,
-              label: `Mahlzeit ${n}`,
-              grams: null,
-              kcal: 400,
-              proteinG: null,
-              carbsG: null,
-              fatG: null,
-            },
-            date,
-          );
+          await logLegacyFoodEntry(date, { label: `Mahlzeit ${n}`, kcal: 400 });
         }
-        await saveAdherence(date, 8, null, date);
+        await rateLegacyFood(date, 8);
       }
       return load();
     };
@@ -444,7 +433,7 @@ describe('what the Boss actually averages', () => {
     // Food is answered 56 times over the fixture and Gym is trained 16 times.
     // Both are performing perfectly against their own expectations, so the
     // Boss must weigh them equally rather than by how often they were logged.
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
     await rateEveryDay(10);
 
@@ -454,7 +443,7 @@ describe('what the Boss actually averages', () => {
   });
 
   it('keeps lifetime XP out of the Boss rank entirely', async () => {
-    await applyOnboarding({ questions: [], gymTargetPerWeek: 2, food: true });
+    await onboardWithFood({ questions: [], gymTargetPerWeek: 2 });
     await trainEveryWeek(['gym']);
     await rateEveryDay();
 

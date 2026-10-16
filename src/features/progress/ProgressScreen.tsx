@@ -5,6 +5,7 @@ import { Card, EmptyState, LoadFailure, Section, Segmented, StaleNotice } from '
 import { ProgressIcon } from '../../components/Icons';
 import { formatDayAndMonth } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import { Heatmap, type HeatmapRow } from './Heatmap';
 import { QuestionDetail } from './QuestionDetail';
 import { TrendCurve } from './TrendCurve';
@@ -78,7 +79,7 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
     if (mental.some((value) => value !== null) || history.questions.length > 0) {
       result.push({
         key: 'mental',
-        label: t('domain.wellbeing'),
+        label: t(DOMAIN_NAME_KEYS.mental),
         values: mental,
         children: history.questions.map((question) => ({
           key: question.id,

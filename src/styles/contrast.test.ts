@@ -189,7 +189,6 @@ describe('meter fill on its own track', () => {
     ['--domain-gym-ink', '--domain-gym-tint'],
     ['--domain-running-ink', '--domain-running-tint'],
     ['--domain-sports-ink', '--domain-sports-tint'],
-    ['--domain-food-ink', '--domain-food-tint'],
     ['--domain-mental-ink', '--domain-mental-tint'],
     // The Boss and domain-rank bars, which sit on the accent tint.
     ['--accent', '--accent-tint'],

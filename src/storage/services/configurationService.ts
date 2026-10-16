@@ -4,6 +4,7 @@ import {
   DOMAIN_TYPES,
   activationOf,
   type DomainActivation,
+  type OfferedDomainType,
 } from '../../core/domains';
 import type {
   DomainRecord,
@@ -15,7 +16,7 @@ import type {
   SettingsRecord,
 } from '../../core/model';
 import { normaliseWeights, type BossWeights } from '../../core/boss';
-import { ensureCurrentSnapshot, ensureSessionWindowEra } from '../configService';
+import { ensureCurrentSnapshot, ensureFoodRetired, ensureSessionWindowEra } from '../configService';
 import { ensurePromotionConfirmation } from './promotionConfirmationService';
 import { legacySportPrompt, type LegacySportPrompt } from './legacySportService';
 import {
@@ -40,6 +41,9 @@ import {
  *    parameter for it and no branch that reaches it. It survives as a stored
  *    discriminator so a device carrying RC2 history can still replay it, and
  *    that is the whole of its remaining role.
+ * 4. **Nothing here switches Food on** (D139, D140): `enableDomain` takes the
+ *    offered domains only and refuses Food at run time too, onboarding has no
+ *    field for it, and `loadConfiguration` switches off whatever is left on.
  */
 
 export interface AppConfiguration {
@@ -68,6 +72,9 @@ export async function loadConfiguration(): Promise<AppConfiguration> {
   await ensurePromotionConfirmation();
   // The one-day window begins on this load, effective today (D132).
   await ensureSessionWindowEra();
+  // Food is switched off from today wherever it is still on (D139). Before
+  // the reads below, so this very load already shows Rang without it.
+  await ensureFoodRetired();
   const [settings, domains, questions, legacySportChoice] = await Promise.all([
     settingsRepository.getOrCreate(),
     domainsRepository.list(),
@@ -125,9 +132,11 @@ export function clampWeeklyTarget(type: DomainType, target: number): number {
  * reset the target the user chose.
  */
 export async function enableDomain(
-  type: DomainType,
+  type: OfferedDomainType,
   targetPerWeek?: number,
 ): Promise<DomainRecord> {
+  // Food left the product (D139); the type keeps it out, and so does this.
+  if ((type as DomainType) === 'food') throw new Error('Food cannot be switched on (D139)');
   const definition = DOMAIN_DEFINITIONS[type];
   const existing = await domainsRepository.findByType(type);
 
@@ -168,57 +177,10 @@ export async function disableDomainType(type: DomainType): Promise<void> {
 }
 
 export async function setWeeklyTarget(
-  type: DomainType,
+  type: OfferedDomainType,
   targetPerWeek: number,
 ): Promise<DomainRecord> {
   return enableDomain(type, targetPerWeek);
-}
-
-/** The user's own sentence for what they are eating towards, or `null`. */
-export function foodFocusOf(configuration: AppConfiguration): string | null {
-  const domain = configuration.domains.food;
-  if (!domain || !domain.enabled) return null;
-  const settings = domain.settings as { focus?: unknown };
-  return typeof settings.focus === 'string' && settings.focus.trim() !== ''
-    ? settings.focus
-    : null;
-}
-
-/** How long a focus may be. It is a sentence, not a plan document. */
-export const FOOD_FOCUS_MAX_LENGTH = 140;
-
-/**
- * Sets what the user is aiming at, in their words.
- *
- * This is Food's whole setup, and what it is *not* is the point: there is no
- * calorie target here, no macro split, no basal-rate estimate and no
- * weight-goal model. What those should be has not been decided, and a number
- * invented to fill the gap would be indistinguishable afterwards from one
- * that had been. A sentence the user wrote is theirs, needs no model behind
- * it, and is enough to make "how closely did today match that?" a question
- * with an answer.
- *
- * It appends a snapshot like every other domain setting, so the intention a
- * past day was rated against stays readable as what it was on that day.
- * Clearing it is allowed; Food scores identically with it empty.
- */
-export async function setFoodFocus(focus: string): Promise<DomainRecord> {
-  const trimmed = focus.trim().slice(0, FOOD_FOCUS_MAX_LENGTH);
-  const existing = await domainsRepository.findByType('food');
-  const domain = existing
-    ? ((await domainsRepository.setEnabled(existing.id, true)) ?? existing)
-    : await domainsRepository.ensure(
-        'food',
-        DOMAIN_DEFINITIONS.food.order,
-        DOMAIN_DEFINITIONS.food.defaultSettings as never,
-      );
-  const updated =
-    (await domainsRepository.updateSettings(
-      domain.id,
-      (trimmed === '' ? {} : { focus: trimmed }) as never,
-    )) ?? domain;
-  await ensureCurrentSnapshot();
-  return updated;
 }
 
 /**
@@ -322,15 +284,15 @@ export const archiveQuestion = (id: string) => setQuestionStatus(id, 'archived')
  * forgets a field can only ever fail to enable something, never enable
  * something the user did not ask for.
  *
- * There is deliberately no field for the legacy Sport domain. That is how
- * "no path in the new product creates one" is enforced rather than merely
- * intended: the parameter does not exist to be passed.
+ * There is deliberately no field for the legacy Sport domain, and none for
+ * Food (D139). That is how "no path in the new product creates one" is
+ * enforced rather than merely intended: the parameter does not exist to be
+ * passed.
  */
 export interface OnboardingSelection {
   questions: QuestionDraft[];
   gymTargetPerWeek?: number | null;
   runningTargetPerWeek?: number | null;
-  food?: boolean;
 }
 
 /**
@@ -358,7 +320,6 @@ export async function applyOnboarding(selection: OnboardingSelection): Promise<A
   const running = selection.runningTargetPerWeek ?? null;
   if (gym !== null) await enableDomain('gym', gym);
   if (running !== null) await enableDomain('running', running);
-  if (selection.food === true) await enableDomain('food');
 
   await ensureCurrentSnapshot();
   await settingsRepository.completeOnboarding();

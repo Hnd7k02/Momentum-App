@@ -113,7 +113,7 @@ describe('the ladder', () => {
 describe('the Boss weighting control', () => {
   const weighting = (parts: number[]): BossWeighting[] => {
     const total = parts.reduce((sum, value) => sum + value, 0);
-    const domains = ['mental', 'gym', 'running', 'food'] as const;
+    const domains = ['mental', 'gym', 'running'] as const;
     return parts.map((value, index) => ({
       domain: domains[index]!,
       parts: value,
@@ -127,7 +127,7 @@ describe('the Boss weighting control', () => {
     );
 
   it('always totals a hundred, including where the shares do not divide', () => {
-    for (const parts of [[1, 1, 1], [1, 1, 1, 1], [3, 1], [5, 3, 2, 1], [1, 9]]) {
+    for (const parts of [[1, 1, 1], [3, 1], [4, 4, 1], [2, 2, 3], [1, 9]]) {
       const html = render(<BossWeights weighting={weighting(parts)} onChange={() => undefined} />);
       expect(percents(html).reduce((sum, value) => sum + value, 0), JSON.stringify(parts)).toBe(100);
     }
@@ -168,7 +168,7 @@ describe('the Boss weighting control', () => {
       translate('de', 'rank.weights.more', { domain: translate('de', 'domain.gym') }),
     );
     expect(html).toContain(
-      translate('de', 'rank.weights.less', { domain: translate('de', 'domain.wellbeing') }),
+      translate('de', 'rank.weights.less', { domain: translate('de', 'domain.mental') }),
     );
   });
 

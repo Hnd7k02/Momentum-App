@@ -21,11 +21,11 @@ import {
   deleteSession,
   loadDay,
   logSession,
-  saveAdherence,
   saveAnswer,
   updateSession,
   yesterdayOutstanding,
 } from './checkInService';
+import { enableLegacyFood } from './fixtures/legacyFood';
 
 function freezeAt(day: string, hour = 9): void {
   const [y, m, d] = day.split('-').map(Number) as [number, number, number];
@@ -375,53 +375,43 @@ describe('a past day as it was asked (D133, review of Stage 3b)', () => {
 
   it('shows yesterday the domains switched off this morning, and takes their backfill', async () => {
     await setup('2025-03-20', 2);
-    // Food on since Saturday, so yesterday had it too.
-    freezeAt('2025-03-29');
-    await enableDomain('food');
-    freezeAt(TODAY);
     await disableDomainType('mental');
     await disableDomainType('running');
-    await disableDomainType('food');
 
     const yesterday = await loadDay('2025-03-30');
     expect(yesterday.mental?.items).toHaveLength(2);
-    expect(yesterday.food).not.toBeNull();
     expect(yesterday.training.map((entry) => entry.domain)).toEqual(['gym', 'running']);
     expect(yesterday.training[1]?.progress.target).toBe(2);
     expect(yesterday.training[1]?.writableDays).toEqual(['2025-03-30']);
     expect(await yesterdayOutstanding(TODAY)).toBe(true);
     await logSession('running', '2025-03-30');
     expect(await runsRepository.getAll()).toHaveLength(1);
-    await saveAdherence('2025-03-30', 6);
     // Today has none of them.
     const today = await loadDay(TODAY);
     expect(today.mental).toBeNull();
-    expect(today.food).toBeNull();
     expect(today.training.map((entry) => entry.domain)).toEqual(['gym']);
     await expect(logSession('running', TODAY)).rejects.toThrow();
   });
 
-  it('refuses an answer or a Food rating for a yesterday on which its domain was off (Q10)', async () => {
+  it('refuses an answer for a yesterday on which its domain was off (Q10)', async () => {
     freezeAt('2025-03-20');
     await applyOnboarding({ questions: [], gymTargetPerWeek: 3 });
     freezeAt(TODAY);
     const question = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
-    await enableDomain('food');
     await expect(saveAnswer('2025-03-30', question.id, true)).rejects.toThrow(/mental was not enabled/);
-    await expect(saveAdherence('2025-03-30', 7)).rejects.toThrow(/food was not enabled/);
     await saveAnswer(TODAY, question.id, true);
-    await saveAdherence(TODAY, 7);
   });
 
-  it("points to a yesterday that owes only its Food rating", async () => {
+  it('never points to a yesterday that owes only its old Food rating (D141)', async () => {
     const { boolQuestion, scaleQuestion } = await setup('2025-03-20');
+    // A device that had Food on: yesterday's snapshot still carries it, but
+    // Food has no screen any more, so it can never be what Gestern is owed.
     freezeAt('2025-03-20');
-    await enableDomain('food');
+    await enableLegacyFood('2025-03-20');
     freezeAt(TODAY);
+    expect(await yesterdayOutstanding(TODAY)).toBe(true);
     await saveAnswer('2025-03-30', boolQuestion.id, true);
     await saveAnswer('2025-03-30', scaleQuestion.id, 6);
-    expect(await yesterdayOutstanding(TODAY)).toBe(true);
-    await saveAdherence('2025-03-30', 8);
     expect(await yesterdayOutstanding(TODAY)).toBe(false);
   });
 });
@@ -569,11 +559,22 @@ describe('training sessions', () => {
     expect(updated?.note).toBe('Kurz');
   });
 
-  it('deletes a session while its day can still be written', async () => {
+  it('deletes a run while its day can still be written', async () => {
+    await setup(TODAY, 2);
+    const run = await logSession('running', TODAY);
+    await deleteSession('running', run.id);
+    expect((await loadDay())?.training.find((entry) => entry.domain === 'running')?.progress.completed).toBe(0);
+    expect(await runsRepository.get(run.id)).toBeUndefined();
+  });
+
+  it('refuses to delete a Gym session outside its workout (D142)', async () => {
+    // A Gym session goes with its sets, in the workout, where an undo can put
+    // it back (D131, D137). Deleting it here would leave its sets behind.
     await setup();
     const session = await logSession('gym', TODAY);
-    await deleteSession('gym', session.id);
-    expect((await loadDay())?.training[0]?.progress.completed).toBe(0);
+    await expect(deleteSession('gym', session.id)).rejects.toThrow(InvalidAnswerError);
+    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
+    expect((await loadDay())?.training[0]?.progress.completed).toBe(1);
   });
 
   it('keeps a Gym session on the day it was logged for (STOP 3a, question 9)', async () => {
@@ -614,11 +615,29 @@ describe('training sessions', () => {
     await updateSession('gym', session.id, { note: 'am Sonntag' });
     expect((await gymSessionsRepository.get(session.id))?.note).toBe('am Sonntag');
 
+    // Tuesday: it can no longer be written — and it is never deleted here,
+    // on any day (D142).
+    freezeAt('2025-04-01');
+    await expect(updateSession('gym', session.id, { note: 'zu spät' })).rejects.toThrow(EditWindowError);
+    await expect(deleteSession('gym', session.id)).rejects.toThrow(InvalidAnswerError);
+    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
+  });
+
+  it('deletes a run from yesterday today, and refuses it once its window has passed', async () => {
+    await setup('2025-03-27', 2);
+    freezeAt('2025-03-30');
+    const kept = await logSession('running', '2025-03-30');
+    const removed = await logSession('running', '2025-03-30');
+
+    // Monday: Sunday is yesterday, still writable although its week is over.
+    freezeAt(TODAY);
+    await deleteSession('running', removed.id);
+    expect(await runsRepository.get(removed.id)).toBeUndefined();
+
     // Tuesday: it can no longer be written.
     freezeAt('2025-04-01');
-    await expect(deleteSession('gym', session.id)).rejects.toThrow(EditWindowError);
-    await expect(updateSession('gym', session.id, { note: 'zu spät' })).rejects.toThrow(EditWindowError);
-    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
+    await expect(deleteSession('running', kept.id)).rejects.toThrow(EditWindowError);
+    expect(await runsRepository.get(kept.id)).toBeDefined();
   });
 
   it('refuses to log a session older than yesterday', async () => {

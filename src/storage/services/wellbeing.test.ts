@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
-import { DOMAIN_TYPES, enabledDomainsIn, legacySportEnabledIn } from '../../core/domains';
+import { OFFERED_DOMAIN_TYPES, enabledDomainsIn, legacySportEnabledIn } from '../../core/domains';
 import { suggestionsByCategory, PICKABLE_CATEGORIES } from '../../domains/mental/questionLibrary';
 import { closeDatabase, deleteDatabase } from '../db';
 import { currentConfigSnapshot } from '../configService';
@@ -41,8 +41,8 @@ afterEach(async () => {
 });
 
 describe('a newly created profile', () => {
-  it('has Wellbeing, Gym, Running and Food to choose from, and nothing else', () => {
-    expect(DOMAIN_TYPES).toEqual(['mental', 'gym', 'running', 'food']);
+  it('has Mind, Gym and Running to choose from, and nothing else (D139)', () => {
+    expect(OFFERED_DOMAIN_TYPES).toEqual(['mental', 'gym', 'running']);
   });
 
   it('creates no generic Sport domain, whatever is chosen', async () => {
@@ -50,7 +50,6 @@ describe('a newly created profile', () => {
       questions: [{ text: 'A', type: 'boolean', category: 'alltag' }],
       gymTargetPerWeek: 3,
       runningTargetPerWeek: 2,
-      food: true,
     });
     expect(await domainsRepository.findByType('sports')).toBeUndefined();
     expect((await loadConfiguration()).legacySport).toBeNull();

@@ -7,7 +7,7 @@ import { closeDatabase, deleteDatabase } from '../db';
 import { ensureSessionWindowEra } from '../configService';
 import { configSnapshotsRepository, questionsRepository } from '../repositories';
 import { loadBossProgression, type BossProgression } from './bossService';
-import { logSession, saveAdherence, saveAnswer } from './checkInService';
+import { logSession, saveAnswer } from './checkInService';
 import {
   applyOnboarding,
   disableDomainType,
@@ -29,8 +29,8 @@ import {
  * Three things are checked for every probe:
  *
  * 1. The backfill is accepted at `t1` and refused at `t2`.
- * 2. **Finality.** A day that is closed at `t1` keeps its Wellbeing and Food
- *    values, and a day that is settled at `t1` (closed, and its week judged)
+ * 2. **Finality.** A day that is closed at `t1` keeps its Wellbeing values,
+ *    and a day that is settled at `t1` (closed, and its week judged)
  *    keeps every output — its history row, each domain's series, the Boss,
  *    the Gym and Running folds — in every later replay, backfill or not. A
  *    legal write can only reach days nothing has charged yet.
@@ -40,6 +40,9 @@ import {
  * Each probe adds the check for its own mechanism: what must not move at
  * midnight, and that the charge does land once the window has passed — the
  * rules postpone a charge, they never drop one.
+ *
+ * Food was a second daily domain in these probes until it left the product
+ * (D139). Nothing can write it any more, so nothing can reverse it.
  */
 
 const D0 = '2026-01-05' as DateKey; // a Monday
@@ -76,10 +79,9 @@ async function gym(day: DateKey): Promise<void> {
   await logSession('gym', day, {}, day);
 }
 
-async function answerDay(day: DateKey, value: number, food = true, reference: DateKey = day): Promise<void> {
+async function answerDay(day: DateKey, value: number, reference: DateKey = day): Promise<void> {
   freezeAt(reference, 20);
   for (const question of await questionsRepository.list()) await saveAnswer(day, question.id, value, reference);
-  if (food) await saveAdherence(day, 7, null, reference);
 }
 
 interface Replay {
@@ -120,10 +122,10 @@ async function finalDays(clock: DateKey, dates: readonly DateKey[]) {
   return { closed, settled };
 }
 
-/** What a closed day must keep: its Wellbeing and Food values. */
+/** What a closed day must keep: its Wellbeing values. */
 function dailyOutputs(boss: BossProgression, date: DateKey) {
   const index = boss.history.days.findIndex((day) => day.date === date);
-  return ['mental', 'food'].map((name) => round(boss.domains.find((entry) => entry.domain === name)?.series[index]));
+  return ['mental'].map((name) => round(boss.domains.find((entry) => entry.domain === name)?.series[index]));
 }
 
 /** What a settled day must keep: everything. */
@@ -155,16 +157,12 @@ interface Probe {
 }
 
 const gymOnly: OnboardingSelection = { questions: [], gymTargetPerWeek: 3 };
-const mixed: OnboardingSelection = {
-  questions: [
-    { text: 'A', type: 'scale', category: 'mental' },
-    { text: 'B', type: 'scale', category: 'gesundheit' },
-  ],
-  gymTargetPerWeek: 3,
-  food: true,
-};
-const mindOnly: OnboardingSelection = { questions: mixed.questions };
-const mindAndGym: OnboardingSelection = { questions: mixed.questions, gymTargetPerWeek: 3 };
+const QUESTIONS: OnboardingSelection['questions'] = [
+  { text: 'A', type: 'scale', category: 'mental' },
+  { text: 'B', type: 'scale', category: 'gesundheit' },
+];
+const mindOnly: OnboardingSelection = { questions: QUESTIONS };
+const mindAndGym: OnboardingSelection = { questions: QUESTIONS, gymTargetPerWeek: 3 };
 const mwf = (week: number) => [D(week * 7), D(week * 7 + 2), D(week * 7 + 4)];
 const indexOf = (run: Replay, date: DateKey) => run.boss.history.days.findIndex((day) => day.date === date);
 
@@ -227,9 +225,9 @@ const PROBES: Probe[] = [
     },
   },
   {
-    name: "a Sunday's session logged on Monday, with Wellbeing and Food scored every day",
+    name: "a Sunday's session logged on Monday, with Wellbeing scored every day",
     async setup() {
-      await fresh(mixed);
+      await fresh(mindAndGym);
       for (let index = 0; index <= 15; index += 1) await answerDay(D(index), 7);
       for (const day of mwf(0)) await gym(day);
     },
@@ -275,7 +273,7 @@ const PROBES: Probe[] = [
   {
     name: 'the third unanswered day, answered the next day',
     async setup() {
-      await fresh(mixed);
+      await fresh(mindAndGym);
       for (let index = 0; index <= 14; index += 1) await answerDay(D(index), 7);
       await gym(D(14));
     },
@@ -283,17 +281,15 @@ const PROBES: Probe[] = [
     t0: D(17),
     t1: D(18),
     t2: D(19),
-    backfill: (reference) => answerDay(D(17), 7, true, reference),
+    backfill: (reference) => answerDay(D(17), 7, reference),
     check({ t1, t1b, t2 }) {
       const status = (run: Replay, date: DateKey) => run.boss.history.days[indexOf(run, date)]?.status;
       // The day before yesterday has closed and is charged; yesterday is not.
       expect(status(t1, D(16))).toBe('scored');
       expect(status(t1, D(17))).toBe('open');
-      // Not folded: Wellbeing and Food skip it rather than charge it.
-      for (const name of ['mental', 'food']) {
-        const ledger = t1.boss.domains.find((entry) => entry.domain === name)!;
-        expect(ledger.points[indexOf(t1, D(17))]?.skipped, name).toBe(true);
-      }
+      // Not folded: Wellbeing skips it rather than charge it.
+      const mindOn = (run: Replay) => run.boss.domains.find((entry) => entry.domain === 'mental')!;
+      expect(mindOn(t1).points[indexOf(t1, D(17))]?.skipped).toBe(true);
       expect(status(t1b, D(17))).toBe('scored');
       // Without the answers, it is charged the day after — the third silent
       // day is the first cooling-off takes from — folded, with nothing
@@ -302,16 +298,13 @@ const PROBES: Probe[] = [
       expect(mental(t2)).toBeLessThan(mental(t1));
       expect(status(t2, D(17))).toBe('scored');
       expect(t2.boss.history.days[indexOf(t2, D(17))]?.answeredItems).toBe(0);
-      for (const name of ['mental', 'food']) {
-        const ledger = t2.boss.domains.find((entry) => entry.domain === name)!;
-        expect(ledger.points[indexOf(t2, D(17))]?.skipped, name).toBe(false);
-      }
+      expect(mindOn(t2).points[indexOf(t2, D(17))]?.skipped).toBe(false);
     },
   },
   {
     name: 'the first unanswered day, answered the next day',
     async setup() {
-      await fresh(mixed);
+      await fresh(mindAndGym);
       for (let index = 0; index <= 14; index += 1) await answerDay(D(index), 7);
       await gym(D(14));
     },
@@ -319,14 +312,12 @@ const PROBES: Probe[] = [
     t0: D(15),
     t1: D(16),
     t2: D(17),
-    backfill: (reference) => answerDay(D(15), 7, true, reference),
+    backfill: (reference) => answerDay(D(15), 7, reference),
     check({ t0, t1, t2, t2b }) {
       // Neither the streak nor cooling-off moves at midnight.
       expect(t1.boss.legacy.checkInStreak.current).toBe(t0.boss.legacy.checkInStreak.current);
       const mental = (run: Replay) => round(run.boss.domains.find((entry) => entry.domain === 'mental')?.momentum);
-      const food = (run: Replay) => round(run.boss.domains.find((entry) => entry.domain === 'food')?.momentum);
       expect(mental(t1)).toBe(mental(t0));
-      expect(food(t1)).toBe(food(t0));
       // The day after, the unanswered day breaks the streak; the answered one does not.
       expect(t2b.boss.legacy.checkInStreak.current).toBeGreaterThan(t2.boss.legacy.checkInStreak.current);
     },
@@ -335,14 +326,14 @@ const PROBES: Probe[] = [
     name: 'D126: a low day corrected the next day',
     async setup() {
       await fresh(mindOnly);
-      for (let index = 0; index <= 17; index += 1) await answerDay(D(index), 5, false);
-      await answerDay(D(18), 1, false);
+      for (let index = 0; index <= 17; index += 1) await answerDay(D(index), 5);
+      await answerDay(D(18), 1);
     },
     day: D(18),
     t0: D(18),
     t1: D(19),
     t2: D(20),
-    backfill: (reference) => answerDay(D(18), 5, false, reference),
+    backfill: (reference) => answerDay(D(18), 5, reference),
     check({ t0, t1, t1b, t2 }) {
       // D17 is the first day at the threshold, and it is counted once it has
       // settled. The low day is not counted either way while it can still be
@@ -358,13 +349,13 @@ const PROBES: Probe[] = [
     name: 'D126: the seventh eligible day is yesterday, so the promotion waits a day',
     async setup() {
       await fresh(mindOnly);
-      for (let index = 0; index <= 23; index += 1) await answerDay(D(index), 5, false);
+      for (let index = 0; index <= 23; index += 1) await answerDay(D(index), 5);
     },
     day: D(23),
     t0: D(23),
     t1: D(24),
     t2: D(25),
-    backfill: (reference) => answerDay(D(23), 1, false, reference),
+    backfill: (reference) => answerDay(D(23), 1, reference),
     check({ t0, t1, t1b, t2 }) {
       // Six days counted and yesterday the seventh: it does not count while
       // it can still be written, so no promotion yet — and a correction of
@@ -401,7 +392,7 @@ const PROBES: Probe[] = [
   {
     name: 'a partly filled week, with a day closing at midnight',
     async setup() {
-      await fresh(mixed);
+      await fresh(mindAndGym);
       for (let index = 0; index <= 10; index += 1) if (index !== 9) await answerDay(D(index), 7);
       for (const day of mwf(0)) await gym(day);
       await gym(D(7));
@@ -422,8 +413,8 @@ const PROBES: Probe[] = [
     name: "a demotion beside a training week, with Sunday's session logged on Monday",
     async setup() {
       await fresh(mindAndGym);
-      for (let index = 0; index <= 40; index += 1) await answerDay(D(index), 10, false);
-      for (let index = 41; index <= 50; index += 1) await answerDay(D(index), 1, false);
+      for (let index = 0; index <= 40; index += 1) await answerDay(D(index), 10);
+      for (let index = 41; index <= 50; index += 1) await answerDay(D(index), 1);
       // A session every Monday, except in the week of D(42).
       for (let week = 0; week <= 5; week += 1) await gym(D(week * 7));
     },
@@ -445,7 +436,7 @@ const PROBES: Probe[] = [
     name: 'a week whose training domain was switched off mid-week',
     async setup() {
       await fresh(mindAndGym);
-      for (let index = 0; index <= 47; index += 1) await answerDay(D(index), 8, false);
+      for (let index = 0; index <= 47; index += 1) await answerDay(D(index), 8);
       for (const day of [0, 1, 2, 3, 4, 5].flatMap((week) => mwf(week))) await gym(day);
       await gym(D(42));
       // Gym off on Tuesday D(43): the days after it carry no target of their
@@ -457,7 +448,7 @@ const PROBES: Probe[] = [
     t0: D(48),
     t1: D(49),
     t2: D(50),
-    backfill: (reference) => answerDay(D(48), 8, false, reference),
+    backfill: (reference) => answerDay(D(48), 8, reference),
     check({ t1 }) {
       // No rank change is dated in the unjudged week on Monday.
       expect(changesOf(t1.boss).filter((change) => change >= D(42))).toEqual([]);
@@ -572,8 +563,8 @@ describe('no drop at midnight that a backfill reverses (P8)', () => {
     // clock that shows the demotion is `c`; yesterday is corrected at `c`.
     const setup = async () => {
       await fresh(mindOnly);
-      for (let index = 0; index <= 40; index += 1) await answerDay(D(index), 10, false);
-      for (let index = 41; index <= 90; index += 1) await answerDay(D(index), 1, false);
+      for (let index = 0; index <= 40; index += 1) await answerDay(D(index), 10);
+      for (let index = 41; index <= 90; index += 1) await answerDay(D(index), 1);
     };
     await setup();
     let c: DateKey | null = null;
@@ -590,7 +581,7 @@ describe('no drop at midnight that a backfill reverses (P8)', () => {
     expect(demotedOn <= addDays(at, -2)).toBe(true);
 
     await setup();
-    expect(await attempt(at, (reference) => answerDay(addDays(at, -1), 10, false, reference))).toBe('accepted');
+    expect(await attempt(at, (reference) => answerDay(addDays(at, -1), 10, reference))).toBe('accepted');
     const corrected = await replay(at);
     expect(changesOf(corrected.boss)).toContain(demotion);
   });
@@ -600,8 +591,8 @@ describe('no drop at midnight that a backfill reverses (P8)', () => {
     // which a demotion shows, then the two writes that clock still allows.
     const setup = async () => {
       await fresh(mindAndGym);
-      for (let index = 0; index <= 36; index += 1) await answerDay(D(index), 10, false);
-      for (let index = 37; index <= 70; index += 1) await answerDay(D(index), 1, false);
+      for (let index = 0; index <= 36; index += 1) await answerDay(D(index), 10);
+      for (let index = 37; index <= 70; index += 1) await answerDay(D(index), 1);
       for (let week = 0; week <= 5; week += 1) await gym(D(week * 7));
     };
     await setup();

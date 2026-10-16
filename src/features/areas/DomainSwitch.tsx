@@ -2,10 +2,11 @@ import type { DomainTerminal } from '../../app/route';
 import { useRadioKeys } from '../../domains/mental/AnswerControls';
 import { useT } from '../../i18n/I18nProvider';
 import type { TranslationKey } from '../../i18n';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import './domainTerminal.css';
 
 /**
- * The area selector at the top of the domain terminal: Mental · Gym · Food.
+ * The area selector at the top of the domain terminal: Mind · Gym.
  *
  * A segmented control in the iOS shape the app already uses, exposed as a
  * radio group: the assistive-technology reading is "which of these areas is
@@ -14,13 +15,12 @@ import './domainTerminal.css';
  * rather than merely styled.
  *
  * It is an area selector, not a navigation bar — compact, one line, always
- * the same three, because the terminal is also where an area is switched on.
+ * the same two, because the terminal is also where an area is switched on.
  */
 
 const LABELS: Record<DomainTerminal, TranslationKey> = {
-  mental: 'areas.terminal.mental',
-  gym: 'domain.gym',
-  food: 'domain.food',
+  mental: DOMAIN_NAME_KEYS.mental,
+  gym: DOMAIN_NAME_KEYS.gym,
 };
 
 export function DomainSwitch({

@@ -16,19 +16,31 @@ import type {
  * Everything downstream — activation, the ledger, the Boss weighting — reads
  * this table instead of hard-coding a list.
  *
- * Two properties are load-bearing:
+ * Three properties are load-bearing:
  *
- * 1. **`mental` is the stored name of Wellbeing.** Renaming a discriminator
- *    every answer row references would be a data migration in exchange for a
- *    label, and the label belongs in the string layer.
+ * 1. **`mental` is the stored name of Mind** (D66, D143). Renaming a
+ *    discriminator every answer row references would be a data migration in
+ *    exchange for a label, and the label belongs in the string layer.
  * 2. **`sports` is not in `DOMAIN_TYPES`.** RC2's generic Sport domain is
  *    history that still has to type-check and still has to be replayable; it
  *    is not a domain anyone can hold. Anything iterating live domains must
  *    iterate this list and will therefore never resurrect it.
+ * 3. **`food` is in `DOMAIN_TYPES` and not in `OFFERED_DOMAIN_TYPES`** (D139).
+ *    Food left the product in WP3 Stage 4, but the days it was on still
+ *    replay with it — its ledger, its share of the Boss on those days — so
+ *    the replay keeps iterating it. Nothing that offers a choice may.
  */
 
-/** Every domain a user can have active, in display order. */
+/** Every domain the replay knows, in display order — Food included (D139). */
 export const DOMAIN_TYPES: DomainType[] = ['mental', 'gym', 'running', 'food'];
+
+/** The domains a user can switch on: Mind and Gym, Laufen included (D139). */
+export type OfferedDomainType = Exclude<DomainType, 'food'>;
+export const OFFERED_DOMAIN_TYPES: OfferedDomainType[] = ['mental', 'gym', 'running'];
+
+export function isOfferedDomain(type: StoredDomainType): type is OfferedDomainType {
+  return (OFFERED_DOMAIN_TYPES as StoredDomainType[]).includes(type);
+}
 
 /**
  * How a domain earns its daily score.
@@ -99,7 +111,8 @@ export function isLiveDomain(type: StoredDomainType): type is DomainType {
  * The legacy domain belongs here and nowhere else: it is not a domain anyone
  * can hold any more, but the weeks it was scored in still have to replay by
  * the rule they were scored by. Anything that reconstructs the past iterates
- * this list; anything that offers the user a choice iterates `DOMAIN_TYPES`.
+ * this list; anything that offers the user a choice iterates
+ * `OFFERED_DOMAIN_TYPES`.
  */
 export const WEEKLY_DOMAIN_TYPES: StoredDomainType[] = ['sports', 'gym', 'running'];
 
@@ -153,8 +166,8 @@ export function weeklyTargetIn(
  */
 export interface DomainActivation {
   enabled: DomainType[];
-  /** Live domains the user has not switched on. */
-  available: DomainType[];
+  /** Domains the user could still switch on — never Food (D139). */
+  available: OfferedDomainType[];
   /** True while RC2's generic Sport domain is still present and enabled. */
   legacySportActive: boolean;
 }
@@ -165,7 +178,7 @@ export function activationOf(domains: readonly DomainRecord[]): DomainActivation
   );
   return {
     enabled,
-    available: DOMAIN_TYPES.filter((type) => !enabled.includes(type)),
+    available: OFFERED_DOMAIN_TYPES.filter((type) => !enabled.includes(type)),
     legacySportActive: domains.some((domain) => domain.type === 'sports' && domain.enabled),
   };
 }

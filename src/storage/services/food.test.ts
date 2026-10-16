@@ -3,23 +3,21 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
 import { addDays } from '../../core/dates';
 import { closeDatabase, deleteDatabase } from '../db';
-import { foodDaysRepository, foodEntriesRepository } from '../repositories';
-import {
-  EditWindowError,
-  InvalidAnswerError,
-  addFoodEntry,
-  clearAdherence,
-  loadDay,
-  removeFoodEntry,
-  saveAdherence,
-} from './checkInService';
-import { applyOnboarding, enableDomain, setFoodFocus } from './configurationService';
+import { foodDaysRepository } from '../repositories';
+import { applyOnboarding, disableDomainType, enableDomain, loadConfiguration } from './configurationService';
+import { enableLegacyFood, logLegacyFoodEntry, rateLegacyFood } from './fixtures/legacyFood';
 import { loadHistory } from './historyService';
 
 /**
- * Food end to end: what is written, what is replayed from it, and the two
- * promises that matter most — a rating reads back as the number the user
- * entered, and a day before Food existed is never scored as a missed one.
+ * Food-era days, replayed (D106–D111, D139).
+ *
+ * Food left the product in WP3 Stage 4: nothing rates a day and nothing logs
+ * a meal any more. What stays true is how the days it was switched on
+ * replay — a rating reads back as the number the user entered, a day before
+ * Food existed is never a missed one, and nothing logged ever reached the
+ * score. The history is seeded the way the old build left it on disk
+ * (`fixtures/legacyFood.ts`); the switch-off itself is pinned in
+ * `foodRetirement.test.ts`.
  */
 
 function freezeAt(day: string, hour = 9): void {
@@ -40,15 +38,12 @@ afterEach(async () => {
   await closeDatabase();
 });
 
-async function rate(date: string, adherence: number) {
-  freezeAt(date);
-  await saveAdherence(date, adherence, null, date);
+/** A device that had Food switched on from `from`. */
+async function legacyFoodFrom(from = START) {
+  await applyOnboarding({ questions: [] });
+  freezeAt(from);
+  await enableLegacyFood(from);
 }
-
-const dayOf = async (date: string, reference = date) => {
-  freezeAt(reference);
-  return loadDay(date, reference);
-};
 
 const foodScoreOn = (history: Awaited<ReturnType<typeof loadHistory>>, date: string) => {
   const index = history.days.findIndex((day) => day.date === date);
@@ -57,91 +52,21 @@ const foodScoreOn = (history: Awaited<ReturnType<typeof loadHistory>>, date: str
     : history.days[index]!.domains.find((entry) => entry.domain === 'food');
 };
 
-/* ── What is stored ─────────────────────────────────────────────────────── */
-
-describe('what a rating stores', () => {
-  beforeEach(async () => {
-    await applyOnboarding({ questions: [], food: true });
-  });
-
-  it('stores the number the user chose, and nothing derived from it', async () => {
-    await rate(START, 7);
-    const record = await foodDaysRepository.get(START);
-    expect(record?.adherence).toBe(7);
-
-    /*
-     * Not a percentage, not a distance from a target, not a band — asserted
-     * over the fields rather than over the serialised record.
-     *
-     * Searching the JSON for the string "70" is what this check did first,
-     * and it failed about one run in three: an ISO timestamp contains "70"
-     * whenever the clock lands on the wrong millisecond. The assertion was
-     * wrong, not the code.
-     */
-    expect(Object.keys(record ?? {}).sort()).toEqual([
-      'adherence',
-      'configSnapshotId',
-      'createdAt',
-      'date',
-      'id',
-      'note',
-      'sensitivity',
-      'updatedAt',
-    ]);
-    expect(Object.values(record ?? {}).some((value) => value === 70)).toBe(false);
-  });
-
-  it('rates a day once — a second rating is a correction, not a second row', async () => {
-    await rate(START, 4);
-    await rate(START, 9);
-    const all = await foodDaysRepository.getAll();
-    expect(all).toHaveLength(1);
-    expect(all[0]!.adherence).toBe(9);
-  });
-
-  it('refuses anything that is not a whole number from 1 to 10', async () => {
-    for (const value of [0, 11, 7.5, -3]) {
-      await expect(saveAdherence(START, value, null, START)).rejects.toBeInstanceOf(
-        InvalidAnswerError,
-      );
-    }
-    expect(await foodDaysRepository.getAll()).toHaveLength(0);
-  });
-
-  it('refuses a day outside the edit window, in both directions', async () => {
-    const reference = addDays(START, 10);
-    freezeAt(reference);
-    await expect(saveAdherence(START, 8, null, reference)).rejects.toBeInstanceOf(EditWindowError);
-    await expect(
-      saveAdherence(addDays(reference, 1), 8, null, reference),
-    ).rejects.toBeInstanceOf(EditWindowError);
-  });
-
-  it('clears a rating back to unrated, never to a bad day', async () => {
-    await rate(START, 3);
-    freezeAt(START);
-    await clearAdherence(START, START);
-    expect(await foodDaysRepository.get(START)).toBeUndefined();
-    const view = await dayOf(START);
-    expect(view.food?.adherence).toBeNull();
-  });
-});
-
 /* ── Historical continuity ──────────────────────────────────────────────── */
 
 describe('a rating stays readable as what the user entered', () => {
-  it('reads back unchanged after a year of other configuration changes', async () => {
-    await applyOnboarding({ questions: [], food: true });
+  it('reads back unchanged after the switch-off and a year of other changes', async () => {
+    await legacyFoodFrom();
     const values = [2, 5, 9, 10, 1];
     for (const [index, value] of values.entries()) {
-      await rate(addDays(START, index), value);
+      await rateLegacyFood(addDays(START, index), value);
     }
 
-    // Everything a user could plausibly change afterwards.
+    // The update switches Food off; then everything else a user could
+    // plausibly change afterwards.
     freezeAt(addDays(START, 200));
-    await setFoodFocus('Mehr Gemüse');
+    await loadConfiguration();
     await enableDomain('gym', 3);
-    await setFoodFocus('');
 
     freezeAt(addDays(START, 365));
     for (const [index, value] of values.entries()) {
@@ -168,8 +93,8 @@ describe('the day Food was switched on', () => {
     const reference = addDays(START, 60);
 
     freezeAt(switchOn);
-    await enableDomain('food');
-    await rate(switchOn, 8);
+    await enableLegacyFood(switchOn);
+    await rateLegacyFood(switchOn, 8);
 
     freezeAt(reference);
     const history = await loadHistory(START, reference, reference);
@@ -189,12 +114,11 @@ describe('the day Food was switched on', () => {
   });
 
   it('does not score days after Food was switched off again', async () => {
-    await applyOnboarding({ questions: [], food: true });
-    await rate(START, 6);
+    await legacyFoodFrom();
+    await rateLegacyFood(START, 6);
 
     const off = addDays(START, 10);
     freezeAt(off);
-    const { disableDomainType } = await import('./configurationService');
     await disableDomainType('food');
 
     const reference = addDays(START, 20);
@@ -205,108 +129,35 @@ describe('the day Food was switched on', () => {
   });
 });
 
-/* ── The log, which is shown and never scored ───────────────────────────── */
+/* ── The log, which was shown and never scored ──────────────────────────── */
 
-describe('logging what was eaten', () => {
-  beforeEach(async () => {
-    await applyOnboarding({ questions: [], food: true });
-  });
-
-  it('adds up the day without any of it reaching the score', async () => {
-    freezeAt(START);
-    await addFoodEntry(
-      START,
-      { foodId: 'food_oats', label: 'Haferflocken', grams: 60, kcal: 223, proteinG: 8, carbsG: 35, fatG: 4 },
-      START,
-    );
-    await addFoodEntry(
-      START,
-      { foodId: null, label: 'Kaffee', grams: null, kcal: 5, proteinG: null, carbsG: null, fatG: null },
-      START,
-    );
-    await rate(START, 6);
-
-    const view = await dayOf(START);
-    expect(view.food?.totals).toEqual({ kcal: 228, proteinG: 8, carbsG: 35, fatG: 4 });
+describe('what was logged', () => {
+  it('never reached the score of a rated day', async () => {
+    await legacyFoodFrom();
+    await logLegacyFoodEntry(START, {
+      foodId: 'food_oats',
+      label: 'Haferflocken',
+      grams: 60,
+      kcal: 223,
+      proteinG: 8,
+      carbsG: 35,
+      fatG: 4,
+    });
+    await logLegacyFoodEntry(START, { label: 'Kaffee', kcal: 5 });
+    await rateLegacyFood(START, 6);
 
     const history = await loadHistory(START, START, START);
     // Six, not something derived from 228 kcal.
     expect(foodScoreOn(history, START)?.score).toBe(60);
   });
 
-  it('scores a day with entries but no rating as unrated', async () => {
-    freezeAt(START);
-    await addFoodEntry(
-      START,
-      { foodId: null, label: 'Znüni', grams: null, kcal: 300, proteinG: null, carbsG: null, fatG: null },
-      START,
-    );
+  it('never rated a day by itself', async () => {
+    await legacyFoodFrom();
+    await logLegacyFoodEntry(START, { label: 'Znüni', kcal: 300 });
     const reference = addDays(START, 10);
     freezeAt(reference);
     const history = await loadHistory(START, reference, reference);
-    // Logging food is not rating the day, and the app does not guess.
+    // Logging food was not rating the day, and the app does not guess.
     expect(foodScoreOn(history, START)?.itemsAnswered).toBe(0);
-  });
-
-  it('refuses a nameless or negative entry', async () => {
-    freezeAt(START);
-    await expect(
-      addFoodEntry(START, { foodId: null, label: '  ', grams: null, kcal: 10, proteinG: null, carbsG: null, fatG: null }, START),
-    ).rejects.toBeInstanceOf(InvalidAnswerError);
-    await expect(
-      addFoodEntry(START, { foodId: null, label: 'X', grams: null, kcal: -1, proteinG: null, carbsG: null, fatG: null }, START),
-    ).rejects.toBeInstanceOf(InvalidAnswerError);
-  });
-
-  it('removes an entry only from the day it is actually on', async () => {
-    freezeAt(START);
-    const entry = await addFoodEntry(
-      START,
-      { foodId: null, label: 'Znüni', grams: null, kcal: 300, proteinG: null, carbsG: null, fatG: null },
-      START,
-    );
-    const other = addDays(START, 1);
-    freezeAt(other);
-    await removeFoodEntry(other, entry.id, other);
-    expect(await foodEntriesRepository.get(entry.id)).toBeDefined();
-
-    freezeAt(START);
-    await removeFoodEntry(START, entry.id, START);
-    expect(await foodEntriesRepository.get(entry.id)).toBeUndefined();
-  });
-});
-
-/* ── Setup: the user's own words, and nothing invented ──────────────────── */
-
-describe('what setting Food up actually sets', () => {
-  it('stores a sentence, and Food scores the same with it empty', async () => {
-    await applyOnboarding({ questions: [], food: true });
-    await rate(START, 8);
-    const before = await loadHistory(START, START, START);
-
-    freezeAt(START);
-    await setFoodFocus('  Zmittag selber kochen  ');
-    const view = await dayOf(START);
-    expect(view.food?.focus).toBe('Zmittag selber kochen');
-
-    const after = await loadHistory(START, START, START);
-    expect(foodScoreOn(after, START)?.score).toBe(foodScoreOn(before, START)?.score);
-  });
-
-  it('clears back to nothing, and never invents a target', async () => {
-    await applyOnboarding({ questions: [], food: true });
-    freezeAt(START);
-    await setFoodFocus('Weniger Süsses');
-    await setFoodFocus('');
-    const view = await dayOf(START);
-    expect(view.food?.focus).toBeNull();
-    // Nothing anywhere in the day view is a calorie or macro target.
-    expect(Object.keys(view.food ?? {})).toEqual([
-      'adherence',
-      'note',
-      'focus',
-      'entries',
-      'totals',
-    ]);
   });
 });

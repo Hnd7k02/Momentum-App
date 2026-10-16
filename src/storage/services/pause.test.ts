@@ -6,8 +6,9 @@ import { addDays } from '../../core/dates';
 import { closeDatabase, deleteDatabase } from '../db';
 import { pausePeriodsRepository, questionsRepository, restDaysRepository } from '../repositories';
 import { loadBossProgression } from './bossService';
-import { loadDay, logSession, saveAdherence, saveAnswer } from './checkInService';
+import { loadDay, logSession, saveAnswer } from './checkInService';
 import { applyOnboarding } from './configurationService';
+import { enableLegacyFood, rateLegacyFood } from './fixtures/legacyFood';
 import { loadHistory } from './historyService';
 import {
   createPause,
@@ -60,14 +61,16 @@ async function buildActive(setup: Setup) {
     questions: setup.wellbeing ? [{ text: 'A', type: 'boolean', category: 'eigene' }] : [],
     ...(setup.gym ? { gymTargetPerWeek: 2 } : {}),
     ...(setup.running ? { runningTargetPerWeek: 2 } : {}),
-    ...(setup.food ? { food: true } : {}),
   });
+  // Food's days replay by the same pause rule (D116); it left the product in
+  // WP3 Stage 4 (D139), so its history is seeded as the old build stored it.
+  if (setup.food) await enableLegacyFood(START);
   const questions = await questionsRepository.listActive();
   for (let index = 0; index < ACTIVE; index += 1) {
     const date = addDays(START, index);
     freezeAt(date);
     for (const question of questions) await saveAnswer(date, question.id, true, date);
-    if (setup.food) await saveAdherence(date, 8, null, date);
+    if (setup.food) await rateLegacyFood(date, 8);
     if (setup.gym && (index % 7 === 0 || index % 7 === 3)) await logSession('gym', date, {}, date);
     if (setup.running && (index % 7 === 1 || index % 7 === 4)) {
       await logSession('running', date, { distanceMetres: 5000, durationMinutes: 27 }, date);
@@ -250,7 +253,7 @@ describe('a pause and the general model', () => {
     freezeAt(inside);
     const questions = await questionsRepository.listActive();
     for (const question of questions) await saveAnswer(inside, question.id, true, inside);
-    await saveAdherence(inside, 9, null, inside);
+    await rateLegacyFood(inside, 9);
 
     const reference = addDays(silenceStarts, 20);
     const history = await loadHistory(START, reference, reference);

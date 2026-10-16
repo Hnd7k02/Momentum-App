@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { TabId } from './TabBar';
 
-/** The three areas the domain terminal switches between. */
-export type DomainTerminal = 'mental' | 'gym' | 'food';
+/**
+ * The two areas the domain terminal switches between: Mind and Gym (WP3
+ * Stage 4, D139). An address left by an older build — `#/areas/food` — names
+ * no area any more and lands on Bereiche with the hash corrected.
+ */
+export type DomainTerminal = 'mental' | 'gym';
 
 /**
  * Where the user is: one tab, and — on the domain terminal — one area.
@@ -36,7 +40,7 @@ export interface Route {
 }
 
 const TABS: readonly TabId[] = ['today', 'progress', 'rank', 'areas'];
-export const TERMINALS: readonly DomainTerminal[] = ['mental', 'gym', 'food'];
+export const TERMINALS: readonly DomainTerminal[] = ['mental', 'gym'];
 const GYM_SECTIONS: readonly GymSection[] = ['muscles'];
 
 const isTab = (value: string): value is TabId => (TABS as readonly string[]).includes(value);
@@ -119,8 +123,9 @@ export function useRoute(initial: Route): {
     const onPop = () => {
       // A hash that names no place — typed, or left by an older build —
       // does not move the user; the screen stays and the hash is corrected
-      // to it, so state and address never disagree. A fresh load of such a
-      // hash falls back to Today through `fromLocation` above.
+      // to it, so state and address never disagree. A fresh load of an
+      // unknown tab falls back to Today through `fromLocation` above; a
+      // known tab with an unknown area (`#/areas/food`) keeps the tab.
       setRoute((previous) => {
         const next = fromLocation(previous);
         const hash = formatRoute(next);

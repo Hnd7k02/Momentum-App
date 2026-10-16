@@ -52,13 +52,6 @@ function dayFor(date: string): DayView {
         writableDays: [yesterdayOf(date), date],
       },
     ],
-    food: {
-      adherence: null,
-      note: null,
-      focus: null,
-      entries: [],
-      totals: { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 },
-    },
     legacySportChoicePending: false,
     paused: false,
     empty: false,
@@ -152,30 +145,6 @@ describe('Heute across midnight', () => {
     expect(loads).toEqual(['2026-10-14', '2026-10-15']);
     expect(distance()?.value).toBe('5.2');
     expect(document.querySelector('.today__date')?.textContent).toContain('15.');
-  });
-
-  it('keeps the food entry sheet open, with what was typed into it', async () => {
-    mounted = await mount(tree());
-    await settle();
-    // Opened from the keyboard: the opener has focus when the sheet opens.
-    await act(async () => {
-      const opener = document.querySelector<HTMLButtonElement>('button.food__add')!;
-      opener.focus();
-      opener.click();
-    });
-    const name = () => document.querySelector<HTMLInputElement>('.sheet input');
-    await type(name()!, 'Pasta');
-
-    await pastMidnight();
-    expect(document.querySelector('.today__date')?.textContent).toContain('15.');
-    expect(name()?.value).toBe('Pasta');
-
-    // The opener was replaced while the new day loaded; focus finds the new one.
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    });
-    expect(document.querySelector('.sheet')).toBeNull();
-    expect(document.activeElement?.className).toContain('food__add');
   });
 
   it('returns focus to the run row when the run sheet closes after midnight', async () => {

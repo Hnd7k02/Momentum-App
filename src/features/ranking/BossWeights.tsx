@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { BOSS } from '../../core/config/constants';
 import type { BossWeights as BossWeightMap } from '../../core/boss';
+import { isOfferedDomain, type OfferedDomainType } from '../../core/domains';
 import type { DomainType } from '../../core/model';
 import { Card, EmptyState, Sheet } from '../../components';
 import { InfoIcon, MinusIcon, PlusIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
-import type { TranslationKey } from '../../i18n';
+import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import type { BossWeighting } from '../../storage/services/configurationService';
 import './bossWeights.css';
 
@@ -16,7 +17,7 @@ import './bossWeights.css';
  * exactly 100 are a spreadsheet: every adjustment forces a compensating one
  * somewhere else, and on a phone that is four sliders fighting each other.
  * Parts are what the user actually means — "gym matters twice as much as
- * food" — and the share is arithmetic.
+ * Laufen" — and the share is arithmetic.
  *
  * The arithmetic is not hidden, which is the other half of the rule. Each row
  * shows its parts *and* the percentage they work out to, the total is stated
@@ -28,18 +29,11 @@ import './bossWeights.css';
  * and cannot reach a day already lived. The screen says so.
  */
 
-const DOMAIN_NAMES: Record<DomainType, TranslationKey> = {
-  mental: 'domain.wellbeing',
-  gym: 'domain.gym',
-  running: 'domain.running',
-  food: 'domain.food',
-};
-
 const MIN_PARTS = 1;
 const MAX_PARTS = 10;
 
 export function BossWeights({
-  weighting,
+  weighting: all,
   onChange,
   infoOpen: initialInfoOpen = false,
 }: {
@@ -51,6 +45,11 @@ export function BossWeights({
 }) {
   const t = useT();
   const [infoOpen, setInfoOpen] = useState(initialInfoOpen);
+  // The areas a user can have; Food's days replay, but it is never offered
+  // or shown (D139).
+  const weighting = all.filter((entry): entry is BossWeighting & { domain: OfferedDomainType } =>
+    isOfferedDomain(entry.domain),
+  );
 
   if (weighting.length === 0) {
     return (
@@ -111,7 +110,7 @@ export function BossWeights({
       </div>
 
       {weighting.map((entry, index) => {
-        const name = t(DOMAIN_NAMES[entry.domain]);
+        const name = t(DOMAIN_NAME_KEYS[entry.domain]);
         return (
           <div key={entry.domain} className="boss-weights__row">
             <span className="boss-weights__body">

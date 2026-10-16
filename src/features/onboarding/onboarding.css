@@ -338,8 +338,3 @@
   background: var(--domain-running-tint);
   color: var(--domain-running-ink);
 }
-
-.summary__mark--food {
-  background: var(--domain-food-tint);
-  color: var(--domain-food-ink);
-}

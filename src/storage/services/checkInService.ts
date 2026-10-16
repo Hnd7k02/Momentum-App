@@ -1,4 +1,4 @@
-import { nowIso, today } from '../../core/clock';
+import { today } from '../../core/clock';
 import { checkInWritable, sessionWritable, snapshotOn, weekWindows } from '../../core/config/closure';
 import {
   addDays,
@@ -11,8 +11,6 @@ import {
 import { WEEKLY_DOMAIN_TYPES, weeklyTargetIn, weeklyTargetOf } from '../../core/domains';
 import { needsLegacySportChoice } from '../../core/migration/legacySport';
 import { isPausedOn } from '../../core/pause';
-import { isValidAdherence } from '../../core/food';
-import { createId } from '../../core/ids';
 import { isValidScaleValue } from '../../core/scoring/scale';
 import type {
   AnswerRecord,
@@ -20,7 +18,6 @@ import type {
   AppConfigSnapshot,
   ConfigSnapshotRecord,
   DomainRecord,
-  FoodEntryRecord,
   QuestionRecord,
   StoredDomainType,
 } from '../../core/model';
@@ -30,8 +27,6 @@ import {
   answersRepository,
   configSnapshotsRepository,
   domainsRepository,
-  foodDaysRepository,
-  foodEntriesRepository,
   gymSessionsRepository,
   pausePeriodsRepository,
   questionsRepository,
@@ -45,10 +40,13 @@ import {
  *
  * Everything the Today screen reads and writes goes through here, including
  * the one write rule that must not be re-implemented in a component (D133):
- * an answer, a Food rating, a session or a run may be written for today and
- * yesterday, on a day of the P8 era — for a session also in a week whose
- * Sunday can still be written. Older days are closed and read-only. The rule
- * itself lives in `core/config/closure.ts`, beside the closure it guarantees.
+ * an answer, a session or a run may be written for today and yesterday, on a
+ * day of the P8 era — for a session also in a week whose Sunday can still be
+ * written. Older days are closed and read-only. The rule itself lives in
+ * `core/config/closure.ts`, beside the closure it guarantees.
+ *
+ * Nothing here writes Food (D140): Food left the product in WP3 Stage 4, its
+ * data is kept and replayed, and no path creates or deletes any of it.
  *
  * Training is plural now. Gym and Running are separate quotas with separate
  * logs, and RC2's generic Sport is a third that the product no longer creates
@@ -129,32 +127,6 @@ export interface TrainingDayView {
   writableDays: DateKey[];
 }
 
-/** What a day's food entries add up to. Shown, never scored. */
-export interface FoodTotals {
-  kcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatG: number;
-}
-
-export interface FoodDayView {
-  /** The 1–10 the user chose, or `null` if they have not rated the day. */
-  adherence: number | null;
-  note: string | null;
-  /** What the user is aiming at, in their words. Empty is allowed. */
-  focus: string | null;
-  /** Everything logged on this day, oldest first. */
-  entries: FoodEntryRecord[];
-  /**
-   * The day's totals.
-   *
-   * Informational, and that is a rule rather than a phase-6 shortcut: what a
-   * person's calorie and macro targets should be has not been decided, so
-   * nothing here reaches the score. Food is ranked on `adherence`.
-   */
-  totals: FoodTotals;
-}
-
 export interface DayView {
   date: DateKey;
   editState: DayEditState;
@@ -163,8 +135,6 @@ export interface DayView {
   mental: MentalDayView | null;
   /** One entry per enabled weekly-quota domain, in display order. */
   training: TrainingDayView[];
-  /** `null` when Food is disabled or was never enabled. */
-  food: FoodDayView | null;
   /**
    * Whether the migrated user still owes an answer about their RC2 Sport
    * sessions.
@@ -189,8 +159,8 @@ export interface DayView {
 }
 
 /**
- * The one write rule, for a check-in answer or a Food rating (D133): today
- * or yesterday, on a day of the P8 era. A day lived before the update keeps
+ * The one write rule, for a check-in answer (D133): today or yesterday, on a
+ * day of the P8 era. A day lived before the update keeps
  * its own window for scoring but is never reopened by a write — so nothing
  * can be written for a day once it may have been charged.
  */
@@ -403,22 +373,9 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
     if (view) training.push(view);
   }
 
-  const foodDomain = domains.find((entry) => entry.type === 'food');
-  let food: FoodDayView | null = null;
-  if (shownOnDay(foodDomain)) {
-    const [rating, entries] = await Promise.all([
-      foodDaysRepository.get(date),
-      foodEntriesRepository.listByDate(date),
-    ]);
-    const ordered = [...entries].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-    food = {
-      adherence: rating?.adherence ?? null,
-      note: rating?.note ?? null,
-      focus: focusOf(foodDomain) ?? null,
-      entries: ordered,
-      totals: foodTotals(ordered),
-    };
-  }
+  // Food is not shown on any day, not even on a yesterday that still had it
+  // due (D141): it left the product, nothing can rate it, and a card or a
+  // count for it would ask for an answer nobody can give.
 
   // What the day view offers is the write rule, not the scoring window: a
   // day lived before the update may still be open for scoring and already
@@ -431,24 +388,21 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
     editable: writable,
     mental,
     training,
-    food,
     legacySportChoicePending: needsLegacySportChoice(settings.legacySportMigration),
     paused: isPausedOn(pauses, date),
-    empty: mental === null && training.length === 0 && food === null,
+    empty: mental === null && training.length === 0,
   };
 }
 
 /**
  * Whether yesterday still owes a daily answer that can be given (D138): a
- * question or the Food rating unanswered on a day the write rule still
- * opens. Heute says so in one quiet line; nothing is scored from it.
+ * question unanswered on a day the write rule still opens. Heute says so in
+ * one quiet line; nothing is scored from it.
  */
 export async function yesterdayOutstanding(reference: DateKey = today()): Promise<boolean> {
   const day = await loadDay(addDays(reference, -1), reference);
   if (!day.editable) return false;
-  const questions = day.mental !== null && day.mental.answeredCount < day.mental.items.length;
-  const food = day.food !== null && day.food.adherence === null;
-  return questions || food;
+  return day.mental !== null && day.mental.answeredCount < day.mental.items.length;
 }
 
 /**
@@ -471,25 +425,6 @@ function questionsAskedIn(
     const onDay = asked.get(question.id);
     return onDay ? [{ ...question, type: onDay.type }] : [];
   });
-}
-
-/** The user's own sentence for what they are eating towards, if they wrote one. */
-function focusOf(domain: { settings: unknown }): string | null {
-  const settings = domain.settings as { focus?: unknown };
-  return typeof settings.focus === 'string' && settings.focus.trim() !== ''
-    ? settings.focus
-    : null;
-}
-
-function foodTotals(entries: readonly FoodEntryRecord[]): FoodTotals {
-  const sum = (pick: (entry: FoodEntryRecord) => number | null): number =>
-    Math.round(entries.reduce((total, entry) => total + (pick(entry) ?? 0), 0));
-  return {
-    kcal: sum((entry) => entry.kcal),
-    proteinG: sum((entry) => entry.proteinG),
-    carbsG: sum((entry) => entry.carbsG),
-    fatG: sum((entry) => entry.fatG),
-  };
 }
 
 function validate(question: QuestionRecord, value: AnswerValue): AnswerValue {
@@ -585,8 +520,11 @@ export async function logSession(
   input: SessionInput = {},
   reference: DateKey = today(),
 ): Promise<TrainingSession> {
-  // The retired Sport log takes nothing new, ever (CLAUDE.md, D112).
+  // The retired Sport log takes nothing new, ever (CLAUDE.md, D112) — and a
+  // daily domain has no sessions: Mind or Food here would land in that same
+  // retired log (D140).
   if (domain === 'sports') throw new InvalidAnswerError('The retired Sport log takes no new session');
+  if (domain !== 'gym' && domain !== 'running') throw new InvalidAnswerError(`${domain} takes no sessions`);
   // The day's snapshot decides whether the domain was on (D133): a run for
   // yesterday stays writable after the domain was switched off this morning.
   await assertSessionWritable(date, reference, domain);
@@ -714,13 +652,10 @@ export async function deleteSession(
   id: string,
   reference: DateKey = today(),
 ): Promise<void> {
-  if (domain === 'gym') {
-    const session = await gymSessionsRepository.get(id);
-    if (!session) return;
-    await assertSessionWritable(session.date, reference);
-    await gymSessionsRepository.remove(id);
-    return;
-  }
+  // A Gym session goes only in its workout, set by set, each removal undoable
+  // and the session back with the same id (D131, D137) — never from here,
+  // which would delete the session and leave its sets counting (D142).
+  if (domain === 'gym') throw new InvalidAnswerError('A Gym session is removed in its workout');
   if (domain === 'running') {
     const run = await runsRepository.get(id);
     if (!run) return;
@@ -732,109 +667,4 @@ export async function deleteSession(
   if (!session) return;
   await assertSessionWritable(session.date, reference);
   await sportsSessionsRepository.remove(id);
-}
-
-/* ── Food ──────────────────────────────────────────────────────────────── */
-
-/**
- * Writes the day's adherence rating.
- *
- * Under exactly the same edit-window rule as a Wellbeing answer, because it
- * is the same kind of act: a judgement about a calendar day, correctable
- * while the day is still open and fixed once it closes. It is not a diary
- * entry, so it does not get the session rule.
- *
- * The number written is the number the user chose. Nothing here converts it
- * to a percentage, compares it to a target or looks at what was eaten.
- */
-export async function saveAdherence(
-  date: DateKey,
-  adherence: number,
-  note: string | null = null,
-  reference: DateKey = today(),
-): Promise<void> {
-  await assertEditable(date, reference, 'food');
-  if (!isValidAdherence(adherence)) {
-    throw new InvalidAnswerError('Adherence is a whole number from 1 to 10');
-  }
-  const snapshot = await ensureCurrentSnapshot();
-  await foodDaysRepository.save({
-    date,
-    adherence,
-    note,
-    configSnapshotId: snapshot.id,
-  });
-}
-
-/** Clearing a rating returns the day to "not rated", never to a bad day. */
-export async function clearAdherence(
-  date: DateKey,
-  reference: DateKey = today(),
-): Promise<void> {
-  await assertEditable(date, reference, 'food');
-  await foodDaysRepository.clear(date);
-}
-
-export interface FoodEntryInput {
-  /** The demo food this came from, or `null` for something typed by hand. */
-  foodId: string | null;
-  label: string;
-  grams: number | null;
-  kcal: number;
-  proteinG: number | null;
-  carbsG: number | null;
-  fatG: number | null;
-}
-
-/**
- * Logs one thing eaten.
- *
- * The figures are copied onto the entry rather than referenced, so an entry
- * keeps saying what it said even if the catalogue behind it changes — the
- * same reason a gym set records the muscle groups it was logged under.
- */
-export async function addFoodEntry(
-  date: DateKey,
-  input: FoodEntryInput,
-  reference: DateKey = today(),
-): Promise<FoodEntryRecord> {
-  await assertEditable(date, reference, 'food');
-  const label = input.label.trim();
-  if (label === '') throw new InvalidAnswerError('A food entry needs a name');
-  if (!Number.isFinite(input.kcal) || input.kcal < 0) {
-    throw new InvalidAnswerError('A food entry needs a non-negative energy value');
-  }
-  const snapshot = await ensureCurrentSnapshot();
-  const stamp = nowIso();
-  const record: FoodEntryRecord = {
-    id: createId('food'),
-    date,
-    foodId: input.foodId,
-    label,
-    grams: input.grams,
-    kcal: Math.round(input.kcal),
-    proteinG: input.proteinG,
-    carbsG: input.carbsG,
-    fatG: input.fatG,
-    detail: null,
-    // Food defaults to private, like Wellbeing (D47). Nothing reads it yet.
-    sensitivity: 'private',
-    configSnapshotId: snapshot.id,
-    createdAt: stamp,
-    updatedAt: stamp,
-  };
-  await foodEntriesRepository.put(record);
-  return record;
-}
-
-export async function removeFoodEntry(
-  date: DateKey,
-  id: string,
-  reference: DateKey = today(),
-): Promise<void> {
-  await assertEditable(date, reference, 'food');
-  const existing = await foodEntriesRepository.get(id);
-  // A stale screen could ask to delete something from a day it is not on.
-  if (!existing || existing.date !== date) return;
-  await foodEntriesRepository.remove(id);
 }

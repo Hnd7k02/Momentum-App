@@ -5,7 +5,15 @@ import { BACKUP_FORMAT_VERSION } from '../../core/backup/format';
 import { addDays } from '../../core/dates';
 import { SCHEMA_VERSION } from '../../core/model';
 import { closeDatabase, deleteDatabase } from '../db';
-import { answersRepository, questionsRepository, settingsRepository } from '../repositories';
+import {
+  answersRepository,
+  configSnapshotsRepository,
+  domainsRepository,
+  foodDaysRepository,
+  foodEntriesRepository,
+  questionsRepository,
+  settingsRepository,
+} from '../repositories';
 import {
   addQuestion,
   applyOnboarding,
@@ -14,7 +22,8 @@ import {
   setWeeklyTarget,
   weeklyTargetOfDomain,
 } from './configurationService';
-import { addFoodEntry, logSession, saveAdherence, saveAnswer } from './checkInService';
+import { logSession, saveAnswer } from './checkInService';
+import { enableLegacyFood, logLegacyFoodEntry, rateLegacyFood } from './fixtures/legacyFood';
 import { loadHistory } from './historyService';
 import { loadProgression } from './ratingService';
 import { exportBackup, exportBackupFile, importBackup, inspectBackup } from './backupService';
@@ -190,28 +199,33 @@ describe('round trips', () => {
       .toBe(5);
   });
 
-  it('restores a profile with Food ratings and entries', async () => {
-    await applyOnboarding({ questions: [], food: true });
+  /**
+   * Twelve days of Food on a device from before WP3 Stage 4: ratings every
+   * day, an entry every fourth, stored the way the old build stored them.
+   */
+  async function legacyFoodProfile() {
+    await applyOnboarding({ questions: [{ text: 'A', type: 'boolean', category: 'eigene' }] });
+    await enableLegacyFood(ORIGIN);
     for (let index = 0; index < 12; index += 1) {
       const date = addDays(ORIGIN, index);
       freezeAt(date);
-      await saveAdherence(date, ((index % 10) + 1), null, date);
+      await rateLegacyFood(date, (index % 10) + 1);
       if (index % 4 === 0) {
-        await addFoodEntry(
-          date,
-          {
-            foodId: 'food_oats',
-            label: 'Haferflocken',
-            grams: 60,
-            kcal: 223,
-            proteinG: 8,
-            carbsG: 35,
-            fatG: 4,
-          },
-          date,
-        );
+        await logLegacyFoodEntry(date, {
+          foodId: 'food_oats',
+          label: 'Haferflocken',
+          grams: 60,
+          kcal: 223,
+          proteinG: 8,
+          carbsG: 35,
+          fatG: 4,
+        });
       }
     }
+  }
+
+  it('restores a profile with Food ratings and entries (D140)', async () => {
+    await legacyFoodProfile();
 
     const before = await loadHistory(ORIGIN, addDays(ORIGIN, 11), addDays(ORIGIN, 20));
     const { before: file, after } = await roundTrip();
@@ -222,6 +236,48 @@ describe('round trips', () => {
     const restored = await loadHistory(ORIGIN, addDays(ORIGIN, 11), addDays(ORIGIN, 20));
     expect(restored.food).toEqual(before.food);
     expect(restored.food.filter((value) => value !== null)).toHaveLength(12);
+  });
+
+  it('imports a file with Food switched on, keeps every row, and the next load switches it off (D139, D140)', async () => {
+    await legacyFoodProfile();
+    const file = await text();
+    const stored = JSON.parse(file).data;
+    expect(stored.foodDays).toHaveLength(12);
+    expect(stored.foodEntries).toHaveLength(3);
+
+    // Restored on a new device a few days later, and opened.
+    const importDay = addDays(ORIGIN, 14);
+    freezeAt(importDay);
+    await wipe();
+    expect((await importBackup(file)).ok).toBe(true);
+    const before = await loadHistory(ORIGIN, addDays(ORIGIN, 13), importDay);
+    await loadConfiguration();
+
+    // Every Food row is still there, byte for byte, and so is the record.
+    expect(await foodDaysRepository.getAll()).toEqual(stored.foodDays);
+    expect(await foodEntriesRepository.getAll()).toHaveLength(3);
+    const food = await domainsRepository.findByType('food');
+    expect(food?.enabled).toBe(false);
+    expect(food?.settings).toEqual(stored.domains.find((domain: { type: string }) => domain.type === 'food').settings);
+
+    // Food is off from the import day, and only from it.
+    const snapshots = await configSnapshotsRepository.list();
+    expect(snapshots[snapshots.length - 1]?.effectiveFrom).toBe(importDay);
+    const foodOn = (date: string) =>
+      [...snapshots].reverse().find((snapshot) => snapshot.effectiveFrom <= date)!
+        .config.domains.some((domain) => domain.type === 'food' && domain.enabled);
+    expect(foodOn(addDays(importDay, -1))).toBe(true);
+    expect(foodOn(importDay)).toBe(false);
+
+    // The days before replay exactly as they did.
+    const after = await loadHistory(ORIGIN, addDays(ORIGIN, 13), importDay);
+    expect(after.food).toEqual(before.food);
+    expect(after.days).toEqual(before.days);
+
+    // And a second export still carries all of it.
+    const again = JSON.parse(await text()).data;
+    expect(again.foodDays).toEqual(stored.foodDays);
+    expect(again.foodEntries).toEqual(stored.foodEntries);
   });
 
   it('exporting twice around an import gives the same file', async () => {

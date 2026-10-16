@@ -1,7 +1,9 @@
+import { equalWeights, weightsForSnapshot } from '../core/boss';
 import { now, today } from '../core/clock';
 import { EDIT_WINDOW_DAYS, SESSION_WINDOW_DAYS } from '../core/config/constants';
 import { buildConfigSnapshot, configSnapshotsEqual } from '../core/config/snapshot';
 import type { DateKey } from '../core/dates';
+import { enabledDomainsIn } from '../core/domains';
 import type { AppConfigSnapshot, ConfigSnapshotRecord } from '../core/model';
 import {
   configSnapshotsRepository,
@@ -117,4 +119,93 @@ export async function ensureSessionWindowEra(
     }
   }
   return appended ? 'appended' : 'unchanged';
+}
+
+/**
+ * Food leaves the product (WP3 Stage 4, P1 — D139), as an era that begins on
+ * the first load after the update, built the way the P8 step above is.
+ *
+ * Keyed on the data, never on a run-once flag: wherever Food is still
+ * switched on — the live record, the snapshot in force today, a snapshot
+ * dated later — it is switched off. A backup from before the update
+ * restored later, a second tab still running the old build that switches
+ * Food back on, an old-build switch-off interrupted between its two writes:
+ * each ends the same way on the next load.
+ *
+ * - The live record goes off first, its settings kept (P2). The live
+ *   configuration is what `ensureCurrentSnapshot` compares against the
+ *   snapshot in force, so a record left on would switch Food back on with
+ *   the next answer, and Rang would keep showing its share.
+ * - The snapshot in force today is carried over, effective today, with
+ *   Food's entry disabled and the Boss weights worked out again over the
+ *   domains that remain — by `buildConfigSnapshot`'s rule (the user's parts,
+ *   or equal shares), so Rang shows the shares the Boss uses and the next
+ *   write finds nothing to append. Every other field is carried as it was:
+ *   this starts its own era and no other, and a snapshot without `boss`
+ *   (RC2) gets none.
+ * - A snapshot dated after today takes the same at its own date, so Food
+ *   cannot come back on that day.
+ * - **A switch-off already written stays where it is, unless the clock was
+ *   ahead when it was written** — the boundary rule of the P8 step, for the
+ *   same reason: a local date can move back across it (a journey west), and
+ *   the day it lands on was lived with Food and must replay as it was.
+ * - A profile with no snapshot in force today is left alone for today.
+ *
+ * Every day before the switch-off replays byte-identically, because a day
+ * reads its own snapshot; from that day the Boss moves by the remaining
+ * domains alone, with no jump (`bossSeries` adds movement). Nothing here
+ * throws on a configuration it does not recognise: a throw would stop the
+ * app from opening, on every retry. Idempotent.
+ */
+export async function ensureFoodRetired(
+  effectiveFrom: DateKey = today(),
+): Promise<'unchanged' | 'retired'> {
+  const [all, domains, settings] = await Promise.all([
+    configSnapshotsRepository.list(),
+    domainsRepository.list(),
+    settingsRepository.get(),
+  ]);
+  let retired = false;
+  for (const domain of domains) {
+    if (domain.type === 'food' && domain.enabled) {
+      await domainsRepository.setEnabled(domain.id, false);
+      retired = true;
+    }
+  }
+
+  const entriesOf = (config: AppConfigSnapshot) => (Array.isArray(config.domains) ? config.domains : []);
+  const foodOn = (snapshot: { config: AppConfigSnapshot }) =>
+    entriesOf(snapshot.config).some((domain) => domain.type === 'food' && domain.enabled);
+  const withoutFood = (config: AppConfigSnapshot): AppConfigSnapshot => {
+    const next: AppConfigSnapshot = {
+      ...config,
+      domains: entriesOf(config).map((domain) => (domain.type === 'food' ? { ...domain, enabled: false } : domain)),
+    };
+    if (config.boss) {
+      const remaining = enabledDomainsIn(next);
+      next.boss = {
+        ...config.boss,
+        weights: settings?.bossWeights ? weightsForSnapshot(settings.bossWeights, remaining) : equalWeights(remaining),
+      };
+    }
+    return next;
+  };
+
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
+  const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
+  if (inForce !== null && foodOn(inForce)) {
+    const boundary = later.find((snapshot) => !foodOn(snapshot));
+    const clockWasAhead = boundary !== undefined && now().getTime() < Date.parse(boundary.createdAt);
+    if (boundary === undefined || clockWasAhead) {
+      await configSnapshotsRepository.append(withoutFood(inForce.config), effectiveFrom);
+      retired = true;
+    }
+  }
+  for (const snapshot of later) {
+    if (foodOn(snapshot)) {
+      await configSnapshotsRepository.append(withoutFood(snapshot.config), snapshot.effectiveFrom);
+      retired = true;
+    }
+  }
+  return retired ? 'retired' : 'unchanged';
 }

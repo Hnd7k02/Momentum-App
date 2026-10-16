@@ -3,7 +3,7 @@ import type { Language } from '../core/model';
 import { StorageError, type StorageFailure } from '../storage/db';
 import { settingsRepository } from '../storage/repositories';
 import type { BossWeights } from '../core/boss';
-import type { DomainType } from '../core/model';
+import type { OfferedDomainType } from '../core/domains';
 import {
   addQuestion,
   applyOnboarding,
@@ -14,7 +14,6 @@ import {
   loadConfiguration,
   pauseQuestion,
   resumeQuestion,
-  setFoodFocus,
   setBossWeights,
   setWeeklyTarget,
   updateQuestion,
@@ -137,9 +136,9 @@ export function useMomentum() {
   );
 
   const areasActions: AreasActions = {
-    enableDomain: (type: DomainType) => run(() => enableDomain(type)),
-    disableDomain: (type: DomainType) => run(() => disableDomainType(type)),
-    setWeeklyTarget: (type: DomainType, target: number) => run(() => setWeeklyTarget(type, target)),
+    enableDomain: (type: OfferedDomainType) => run(() => enableDomain(type)),
+    disableDomain: (type: OfferedDomainType) => run(() => disableDomainType(type)),
+    setWeeklyTarget: (type: OfferedDomainType, target: number) => run(() => setWeeklyTarget(type, target)),
     /*
      * One-way, deliberately. RC2's generic Sport domain can be switched off
      * by a user who has finished with it, and there is nothing anywhere that
@@ -165,7 +164,6 @@ export function useMomentum() {
     pauseQuestion: (id) => run(() => pauseQuestion(id)),
     resumeQuestion: (id) => run(() => resumeQuestion(id)),
     archiveQuestion: (id) => run(() => archiveQuestion(id)),
-    setFoodFocus: (focus: string) => run(() => setFoodFocus(focus)),
     reload: () => void refresh(),
     setLanguage,
     setWeightUnit,
