@@ -400,18 +400,37 @@ describe('abstinence decay through the replay', () => {
     const { state } = await unlockThenStop(6);
     expect(state.abstinence?.days).toBe(6);
     expect(state.decayFraction).toBe(0);
+    expect(state.decayPending).toBeUndefined();
   });
 
   it('decays at seven, once the seventh silent day can no longer be written (D135)', async () => {
     // Day seven is today: it counts as seven, but a session could still be
-    // logged for it, so nothing is charged yet.
+    // logged for it, so nothing is charged yet — and the tile says so.
     const today = await unlockThenStop(7);
     expect(today.state.endurance.unlocked).toBe(true);
     expect(today.state.abstinence?.days).toBe(7);
     expect(today.state.decayFraction).toBe(0);
-    // Two days on, day seven is closed and the decay lands, once.
+    expect(today.state.decayPending).toBe(true);
+    // Day eight: day seven is yesterday, still writable, still pending.
+    const eight = await gymOf(addDays(START, LAST_SESSION + 8));
+    expect(eight.state.decayFraction).toBe(0);
+    expect(eight.state.decayPending).toBe(true);
+    // Two days on, day seven is closed and the decay lands, once. Day eight
+    // and nine sit in the same block, so nothing more waits.
     const { state } = await gymOf(addDays(START, LAST_SESSION + 9));
     expect(state.decayFraction).toBeGreaterThan(0);
+    expect(state.decayPending).toBeUndefined();
+  });
+
+  it('marks the next block pending on day fourteen, on top of what is charged', async () => {
+    const charged = await unlockThenStop(13);
+    expect(charged.state.decayPending).toBeUndefined();
+    const fourteen = await gymOf(addDays(START, LAST_SESSION + 14));
+    expect(fourteen.state.decayFraction).toBe(charged.state.decayFraction);
+    expect(fourteen.state.decayPending).toBe(true);
+    const sixteen = await gymOf(addDays(START, LAST_SESSION + 16));
+    expect(sixteen.state.decayFraction).toBeGreaterThan(charged.state.decayFraction);
+    expect(sixteen.state.decayPending).toBeUndefined();
   });
 
   it('does not decay a user who is still inside the Endurance Phase', async () => {

@@ -2,8 +2,9 @@ import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
 import { closeDatabase, deleteDatabase } from '../db';
-import { answersRepository, gymSessionsRepository, runsRepository } from '../repositories';
-import { addQuestion, applyOnboarding, archiveQuestion, pauseQuestion } from './configurationService';
+import { ensureSessionWindowEra } from '../configService';
+import { answersRepository, configSnapshotsRepository, gymSessionsRepository, runsRepository } from '../repositories';
+import { addQuestion, applyOnboarding, archiveQuestion, enableDomain, pauseQuestion } from './configurationService';
 import {
   EditWindowError,
   InvalidAnswerError,
@@ -13,6 +14,7 @@ import {
   logSession,
   saveAnswer,
   updateSession,
+  yesterdayOutstanding,
 } from './checkInService';
 
 function freezeAt(day: string, hour = 9): void {
@@ -216,6 +218,115 @@ describe('the edit window: today and yesterday (P8, D133)', () => {
     const day = await loadDay('2025-03-30');
     expect(day.editable).toBe(false);
     expect(day.mental?.items[0]?.answer?.value).toBe(true);
+  });
+});
+
+/**
+ * Strips the P8 marker from every stored snapshot, as a profile set up by a
+ * build before P8 has them, and appends the P8 era from `from` — what the
+ * first load after the update does on that day.
+ */
+async function updatedOn(from: string): Promise<void> {
+  const legacy = (await configSnapshotsRepository.list()).map((snapshot) => {
+    const { sessionWindowDays: _marker, ...scoring } = snapshot.config.scoring;
+    return { ...snapshot, config: { ...snapshot.config, scoring: { ...scoring, editWindowDays: 3 } } };
+  });
+  await configSnapshotsRepository.replaceAll(legacy);
+  expect(await ensureSessionWindowEra(from)).toBe('appended');
+}
+
+describe('the day view under one day back (D133, D138)', () => {
+  it('offers today and yesterday for a session, and nothing older', async () => {
+    await setup('2025-03-20', 2);
+    const day = await loadDay(TODAY);
+    for (const training of day.training) {
+      expect(training.writableDays, training.domain).toEqual(['2025-03-30', TODAY]);
+    }
+    // The same answer from yesterday's side: the days do not depend on the day on show.
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.training.map((entry) => entry.writableDays)).toEqual([
+      ['2025-03-30', TODAY],
+      ['2025-03-30', TODAY],
+    ]);
+  });
+
+  it("shows yesterday's week on the Monday, with Sunday's run in it", async () => {
+    await setup('2025-03-20', 2);
+    await logSession('running', '2025-03-30');
+    const yesterday = await loadDay('2025-03-30');
+    const running = yesterday.training.find((entry) => entry.domain === 'running')!;
+    expect(running.weekKey).toBe('2025-W13');
+    expect(running.sessionsToday.map((session) => session.date)).toEqual(['2025-03-30']);
+    // Today's own week does not hold it.
+    const today = (await loadDay(TODAY)).training.find((entry) => entry.domain === 'running')!;
+    expect(today.sessions).toEqual([]);
+  });
+
+  it('leaves yesterday read-only on the update day', async () => {
+    const { boolQuestion } = await setup('2025-03-20', 2);
+    await updatedOn(TODAY);
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.editable).toBe(false);
+    expect(yesterday.editState).toBe('closed');
+    for (const training of yesterday.training) expect(training.writableDays).toEqual([TODAY]);
+    await expect(saveAnswer('2025-03-30', boolQuestion.id, true)).rejects.toThrow(EditWindowError);
+    await expect(logSession('running', '2025-03-30')).rejects.toThrow(EditWindowError);
+    expect(await yesterdayOutstanding(TODAY)).toBe(false);
+  });
+
+  it("keeps a Sunday's check-in open on the Monday after a mid-week update, and its week closed", async () => {
+    // The week of 24 March began before the update (Saturday 29th), so it
+    // closed at Sunday midnight under the rules it was lived by.
+    const { boolQuestion } = await setup('2025-03-20', 2);
+    await updatedOn('2025-03-29');
+    const sunday = await loadDay('2025-03-30');
+    expect(sunday.editable).toBe(true);
+    for (const training of sunday.training) expect(training.writableDays).toEqual([TODAY]);
+    await saveAnswer('2025-03-30', boolQuestion.id, true);
+    await expect(logSession('running', '2025-03-30')).rejects.toThrow(EditWindowError);
+  });
+
+  it("shows yesterday the questions it asked, not today's", async () => {
+    const { boolQuestion, scaleQuestion } = await setup('2025-03-20');
+    await archiveQuestion(scaleQuestion.id);
+    await addQuestion({ text: 'Neu seit heute', type: 'boolean', category: 'eigene' });
+
+    const today = await loadDay(TODAY);
+    expect(today.mental?.items.map((item) => item.question.text)).toEqual([
+      'Hast du dein Bett gemacht?',
+      'Neu seit heute',
+    ]);
+    // Yesterday still asked the archived one and never asked the new one.
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.mental?.items.map((item) => item.question.id)).toEqual([boolQuestion.id, scaleQuestion.id]);
+    await saveAnswer('2025-03-30', scaleQuestion.id, 7);
+    expect((await loadDay('2025-03-30')).mental?.answeredCount).toBe(1);
+  });
+
+  it('leaves a domain out of a day it was not enabled on', async () => {
+    await setup('2025-03-20');
+    await enableDomain('running', 2);
+    const today = await loadDay(TODAY);
+    expect(today.training.map((entry) => entry.domain)).toEqual(['gym', 'running']);
+    expect(today.training[1]?.writableDays).toEqual([TODAY]);
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.training.map((entry) => entry.domain)).toEqual(['gym']);
+  });
+
+  it('says whether yesterday still owes an answer that can be given', async () => {
+    const { boolQuestion, scaleQuestion } = await setup('2025-03-20');
+    expect(await yesterdayOutstanding(TODAY)).toBe(true);
+    await saveAnswer('2025-03-30', boolQuestion.id, true);
+    expect(await yesterdayOutstanding(TODAY)).toBe(true);
+    await saveAnswer('2025-03-30', scaleQuestion.id, 6);
+    expect(await yesterdayOutstanding(TODAY)).toBe(false);
+    // Today's own answers are not yesterday's business.
+    expect((await loadDay(TODAY)).mental?.answeredCount).toBe(0);
+  });
+
+  it('owes nothing for a yesterday before the app was set up', async () => {
+    await setup();
+    expect(await yesterdayOutstanding(TODAY)).toBe(false);
   });
 });
 

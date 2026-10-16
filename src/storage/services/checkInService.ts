@@ -1,6 +1,8 @@
 import { nowIso, today } from '../../core/clock';
 import { checkInWritable, sessionWritable, snapshotOn, weekWindows } from '../../core/config/closure';
 import {
+  addDays,
+  compareDateKeys,
   weekKeyOf,
   type DateKey,
   type DayEditState,
@@ -16,6 +18,7 @@ import type {
   AnswerRecord,
   AnswerValue,
   AppConfigSnapshot,
+  ConfigSnapshotRecord,
   DomainRecord,
   FoodEntryRecord,
   QuestionRecord,
@@ -41,13 +44,11 @@ import {
  * The daily check-in.
  *
  * Everything the Today screen reads and writes goes through here, including
- * the two rules that must not be re-implemented in a component:
- *
- * - Daily answers may be written for today and the three preceding days.
- *   Older days are closed and read-only (§17).
- * - A training session may be edited or deleted within the week it belongs
- *   to; sessions are diary entries, not daily check-ins, so they get their
- *   own rule.
+ * the one write rule that must not be re-implemented in a component (D133):
+ * an answer, a Food rating, a session or a run may be written for today and
+ * yesterday, on a day of the P8 era — for a session also in a week whose
+ * Sunday can still be written. Older days are closed and read-only. The rule
+ * itself lives in `core/config/closure.ts`, beside the closure it guarantees.
  *
  * Training is plural now. Gym and Running are separate quotas with separate
  * logs, and RC2's generic Sport is a third that the product no longer creates
@@ -119,6 +120,13 @@ export interface TrainingDayView {
   sessions: TrainingSession[];
   /** Sessions logged on the day being viewed. */
   sessionsToday: TrainingSession[];
+  /**
+   * The days a session of this domain may still be written for, oldest
+   * first: today and yesterday, where the write rule allows it and the
+   * domain was enabled on the day (D133). The run sheet offers exactly
+   * these, and a session dated on any other day is read-only.
+   */
+  writableDays: DateKey[];
 }
 
 /** What a day's food entries add up to. Shown, never scored. */
@@ -200,8 +208,12 @@ async function assertEditable(date: DateKey, reference: DateKey, domain: StoredD
  * switched it on, and score a day that was never asked for.
  */
 function assertEnabledOn(dayConfig: AppConfigSnapshot | null, domain: StoredDomainType, date: DateKey): void {
-  const enabled = dayConfig?.domains.some((entry) => entry.type === domain && entry.enabled) ?? false;
-  if (!enabled) throw new InvalidAnswerError(`${domain} was not enabled on ${date}`);
+  if (!enabledIn(dayConfig, domain)) throw new InvalidAnswerError(`${domain} was not enabled on ${date}`);
+}
+
+/** Whether a snapshot has the domain switched on. */
+function enabledIn(config: AppConfigSnapshot | null, domain: StoredDomainType): boolean {
+  return config?.domains.some((entry) => entry.type === domain && entry.enabled) ?? false;
 }
 
 /** Whether a session, set, run or weight entry may be written for `date` (D133). */
@@ -279,18 +291,26 @@ async function trainingWeekOf(
   type: StoredDomainType,
   domains: readonly DomainRecord[],
   date: DateKey,
+  reference: DateKey,
+  snapshots: readonly ConfigSnapshotRecord[],
 ): Promise<TrainingDayView | null> {
   const domain = domains.find((entry) => entry.type === type);
   const target = domain ? weeklyTargetOf(domain) : null;
   if (!domain || target === null) return null;
   const weekKey = weekKeyOf(date);
   const sessions = await loadWeek(type, weekKey);
+  const weekWindowOf = weekWindows(snapshots);
+  const writableDays = [addDays(reference, -1), reference].filter((day) => {
+    const dayConfig = snapshotOn(snapshots, day);
+    return sessionWritable(day, reference, dayConfig, weekWindowOf(day)) && enabledIn(dayConfig, type);
+  });
   return {
     domain: type,
     weekKey,
     progress: weekProgress(sessions.length, target, weekKey),
     sessions,
     sessionsToday: sessions.filter((session) => session.date === date),
+    writableDays,
   };
 }
 
@@ -306,8 +326,10 @@ async function trainingWeekOf(
 export async function loadTrainingWeek(
   type: StoredDomainType,
   date: DateKey = today(),
+  reference: DateKey = today(),
 ): Promise<TrainingDayView | null> {
-  return trainingWeekOf(type, await domainsRepository.list(), date);
+  const [domains, snapshots] = await Promise.all([domainsRepository.list(), configSnapshotsRepository.list()]);
+  return trainingWeekOf(type, domains, date, reference, snapshots);
 }
 
 /**
@@ -318,20 +340,34 @@ export async function loadTrainingWeek(
  * distinguish "nothing due" from "nothing tracked".
  */
 export async function loadDay(date: DateKey = today(), reference: DateKey = today()): Promise<DayView> {
-  const [domains, answers, settings, pauses] = await Promise.all([
+  const [domains, answers, settings, pauses, snapshots] = await Promise.all([
     domainsRepository.list(),
     answersRepository.listByDate(date),
     settingsRepository.getOrCreate(),
     pausePeriodsRepository.getAll(),
+    configSnapshotsRepository.list(),
   ]);
+  const dayConfig = snapshotOn(snapshots, date);
+
+  /*
+   * A day before today shows what was due on it (D138): the domains enabled
+   * and the questions asked in its own snapshot, exactly as the replay
+   * scores it. A question added this morning was not asked yesterday and one
+   * archived this morning still was, so offering today's list for yesterday
+   * would take an answer nothing scores and withhold one that is. Today
+   * reads the live configuration, which today's snapshot follows.
+   */
+  const pastConfig = compareDateKeys(date, reference) < 0 ? dayConfig : null;
+  const enabledOnDay = (type: StoredDomainType): boolean => pastConfig === null || enabledIn(pastConfig, type);
 
   const mentalDomain = domains.find((domain) => domain.type === 'mental') ?? null;
 
   let mental: MentalDayView | null = null;
-  if (mentalDomain?.enabled) {
-    const active = (await questionsRepository.listActive()).filter(
-      (question) => question.domainId === mentalDomain.id,
-    );
+  if (mentalDomain?.enabled && enabledOnDay('mental')) {
+    const active =
+      pastConfig === null
+        ? (await questionsRepository.listActive()).filter((question) => question.domainId === mentalDomain.id)
+        : questionsAskedIn(pastConfig, mentalDomain.id, await questionsRepository.list());
     const byQuestion = new Map(answers.map((answer) => [answer.questionId, answer]));
     const items: CheckInItem[] = active.map((question) => ({
       question,
@@ -347,13 +383,14 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
 
   const training: TrainingDayView[] = [];
   for (const type of WEEKLY_DOMAIN_TYPES) {
-    const view = await trainingWeekOf(type, domains, date);
+    if (!enabledOnDay(type)) continue;
+    const view = await trainingWeekOf(type, domains, date, reference, snapshots);
     if (view) training.push(view);
   }
 
   const foodDomain = domains.find((entry) => entry.type === 'food');
   let food: FoodDayView | null = null;
-  if (foodDomain?.enabled) {
+  if (foodDomain?.enabled && enabledOnDay('food')) {
     const [rating, entries] = await Promise.all([
       foodDaysRepository.get(date),
       foodEntriesRepository.listByDate(date),
@@ -371,7 +408,7 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
   // What the day view offers is the write rule, not the scoring window: a
   // day lived before the update may still be open for scoring and already
   // read-only (D133).
-  const writable = checkInWritable(date, reference, snapshotOn(await configSnapshotsRepository.list(), date));
+  const writable = checkInWritable(date, reference, dayConfig);
   const editState: DayEditState = writable ? 'open' : date > reference ? 'future' : 'closed';
   return {
     date,
@@ -384,6 +421,37 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
     paused: isPausedOn(pauses, date),
     empty: mental === null && training.length === 0 && food === null,
   };
+}
+
+/**
+ * Whether yesterday still owes a daily answer that can be given (D138): a
+ * question or the Food rating unanswered on a day the write rule still
+ * opens. Heute says so in one quiet line; nothing is scored from it.
+ */
+export async function yesterdayOutstanding(reference: DateKey = today()): Promise<boolean> {
+  const day = await loadDay(addDays(reference, -1), reference);
+  if (!day.editable) return false;
+  const questions = day.mental !== null && day.mental.answeredCount < day.mental.items.length;
+  const food = day.food !== null && day.food.adherence === null;
+  return questions || food;
+}
+
+/**
+ * The questions a snapshot asked in a domain, as their live records in the
+ * order Areas shows them. A question's wording and scale come from its
+ * record; whether it was asked comes from the day.
+ */
+function questionsAskedIn(
+  config: AppConfigSnapshot,
+  domainId: string,
+  live: readonly QuestionRecord[],
+): QuestionRecord[] {
+  const asked = new Set(
+    config.questions
+      .filter((question) => question.domainId === domainId && question.status === 'active')
+      .map((question) => question.id),
+  );
+  return live.filter((question) => asked.has(question.id));
 }
 
 /** The user's own sentence for what they are eating towards, if they wrote one. */

@@ -296,9 +296,11 @@ describe('abstinence decay for Running', () => {
     expect(today.state.endurance.unlocked).toBe(true);
     expect(today.state.abstinence?.days).toBe(7);
     expect(today.state.decayFraction).toBe(0);
+    expect(today.state.decayPending).toBe(true);
     // Two days on, day seven is closed and the decay lands, once.
     const { state } = await stateAt(addDays(START, 24 + 9));
     expect(state.decayFraction).toBeGreaterThan(0);
+    expect(state.decayPending).toBeUndefined();
   });
 
   it('does not decay a user still inside the Endurance Phase', async () => {

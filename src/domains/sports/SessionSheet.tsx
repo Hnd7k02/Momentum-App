@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useToday } from '../../app/useToday';
-import { daysOfWeek, type DateKey } from '../../core/dates';
+import type { DateKey } from '../../core/dates';
 
 import { Button, Sheet } from '../../components';
 import { formatWeekdayShort } from '../../i18n/format';
@@ -24,6 +23,11 @@ import './sessionSheet.css';
  * nothing but a date still counts in full towards the weekly target. Making
  * them mandatory would tax the honest logging the whole domain depends on.
  * The sheet says what supplying them buys instead of insisting.
+ *
+ * **What can change is the write rule's, not the sheet's** (D133). A run can
+ * be moved to the days a run may still be written for — today and
+ * yesterday — and a run dated on any other day opens read-only, with the
+ * closed copy instead of the buttons.
  */
 /** Kilometres as whole metres. Swiss metric, one decimal is plenty. */
 function metresFrom(text: string): number | null {
@@ -46,6 +50,7 @@ function paceText(metres: number, seconds: number): string {
 export function SessionSheet({
   open,
   session,
+  days,
   onClose,
   onSave,
   onDelete,
@@ -53,6 +58,11 @@ export function SessionSheet({
 }: {
   open: boolean;
   session: TrainingSession | null;
+  /**
+   * The days a run may be written for, oldest first — the day view's
+   * `writableDays`, which move with the app's one "today" (B3).
+   */
+  days: readonly DateKey[];
   onClose(): void;
   onSave(input: SessionInput): void;
   onDelete(): void;
@@ -64,19 +74,25 @@ export function SessionSheet({
   const [note, setNote] = useState('');
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
-  // The week's days are offered against the app's one "today" (B3).
-  const current = useToday();
-  const [date, setDate] = useState<DateKey>(current);
+  const [date, setDate] = useState<DateKey | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setNote(session?.note ?? '');
     setDuration(session?.durationMinutes ? String(session.durationMinutes) : '');
     setDistance(session?.distanceMetres ? kmText(session.distanceMetres) : '');
-    setDate(session?.date ?? current);
+    setDate(session?.date ?? null);
     // Reset when the sheet opens for a session, not when the day turns.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, session]);
+
+  /*
+   * Read-only once the run's own day has left the window: nothing about it
+   * can be written any more, so the sheet shows it and offers nothing. A
+   * sheet left open across midnight follows, as everything else does.
+   */
+  const editable = session !== null && days.includes(session.date);
+  /* The run's own day, and every day it could move to. */
+  const offered = [...new Set([...(session ? [session.date] : []), ...days])].sort();
 
   const parsedDuration = Number.parseInt(duration, 10);
   const parsedDistance = metresFrom(distance);
@@ -94,52 +110,58 @@ export function SessionSheet({
       onClose={onClose}
       returnFocus={returnFocus}
       footer={
-        <>
-          <Button
-            variant="primary"
-            block
-            onClick={() =>
-              onSave({
-                date,
-                note: note.trim() || null,
-                durationMinutes:
-                  Number.isFinite(parsedDuration) && parsedDuration > 0 ? parsedDuration : null,
-                distanceMetres: parsedDistance,
-              })
-            }
-          >
-            {t('common.save')}
-          </Button>
-          <Button variant="quiet" block onClick={onDelete}>
-            {t('sports.delete')}
-          </Button>
-        </>
+        editable ? (
+          <>
+            <Button
+              variant="primary"
+              block
+              onClick={() =>
+                onSave({
+                  ...(date === null ? {} : { date }),
+                  note: note.trim() || null,
+                  durationMinutes:
+                    Number.isFinite(parsedDuration) && parsedDuration > 0 ? parsedDuration : null,
+                  distanceMetres: parsedDistance,
+                })
+              }
+            >
+              {t('common.save')}
+            </Button>
+            <Button variant="quiet" block onClick={onDelete}>
+              {t('sports.delete')}
+            </Button>
+          </>
+        ) : undefined
       }
     >
+      {editable ? null : (
+        <p className="session-sheet__closed" role="status">
+          {t('today.closed')}
+        </p>
+      )}
+
       {/*
-        A session can be moved to the day it actually happened, within its own
-        week. Without this, forgetting to log Monday's run until Wednesday
-        left no way to record it truthfully.
+        A run can be moved to the day it actually happened while that day can
+        still be written: today or yesterday (D133). A run logged this morning
+        for last night's training is recorded truthfully; one older than that
+        stays where it is.
       */}
       <div>
         <span className="field-label">{t('sports.day')}</span>
         <div className="session-days" role="radiogroup" aria-label={t('sports.day')}>
-          {daysOfWeek(session?.date ?? current).map((option) => {
-            const future = option > current;
-            return (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={option === date}
-                className="session-days__day"
-                disabled={future}
-                onClick={() => setDate(option)}
-              >
-                {formatWeekdayShort(language, option)}
-              </button>
-            );
-          })}
+          {offered.map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={option === date}
+              className="session-days__day"
+              disabled={!editable || !days.includes(option)}
+              onClick={() => setDate(option)}
+            >
+              {formatWeekdayShort(language, option)}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -153,6 +175,7 @@ export function SessionSheet({
             className="field"
             value={distance}
             inputMode="decimal"
+            readOnly={!editable}
             placeholder={t('running.distanceUnit')}
             onChange={(event) => setDistance(event.target.value.replace(/[^0-9.,]/g, ''))}
           />
@@ -170,6 +193,7 @@ export function SessionSheet({
             className="field"
             value={duration}
             inputMode="numeric"
+            readOnly={!editable}
             placeholder={t('sports.durationUnit')}
             onChange={(event) => setDuration(event.target.value.replace(/[^0-9]/g, ''))}
           />
@@ -189,6 +213,7 @@ export function SessionSheet({
           id="session-note"
           className="field"
           value={note}
+          readOnly={!editable}
           placeholder={t('sports.notePlaceholder')}
           onChange={(event) => setNote(event.target.value)}
           autoComplete="off"

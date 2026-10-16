@@ -87,6 +87,13 @@ export interface GymRatingState {
   abstinence: AbstinenceEpisode | null;
   /** Share of the baseline rank progress the episode has removed so far. */
   decayFraction: number;
+  /**
+   * Present, as `true`, while a charge waits for its day to close (D135):
+   * the run has reached a block of the schedule on a day that can still take
+   * a session. Absent otherwise — so every state before P8 serialises
+   * exactly as it did.
+   */
+  decayPending?: true;
   /** True when today's rating is being held up by the Maintenance rule. */
   maintenance: boolean;
 }
@@ -380,6 +387,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
     weeklyTarget: todayWeek?.target ?? 0,
     abstinence,
     decayFraction: lastDetail?.decayFraction ?? 0,
+    ...(lastDetail?.decayPending === true ? { decayPending: true as const } : {}),
     maintenance: lastDetail?.maintenance ?? false,
   };
 }

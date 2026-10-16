@@ -1,6 +1,6 @@
 import { TRAINING_RATING, RATING } from '../config/constants';
 import type { DateKey } from '../dates';
-import { applyAbstinenceDecay } from './abstinence';
+import { applyAbstinenceDecay, decayFraction as scheduledFraction } from './abstinence';
 import { decayTierFor, holdDecayTier, type DecayTier } from './decayTier';
 import { attendanceScore, performanceScore, type PerformanceScore } from './performanceCurve';
 
@@ -246,6 +246,12 @@ export interface TrainingRatingPoint {
   decayFraction: number;
   /** True when this day's rating was set by decay rather than by movement. */
   decaying: boolean;
+  /**
+   * Set, and only set, on a carried day (D135) whose closing would charge
+   * more than the episode has charged so far: the "pending" line of the
+   * break tile. Absent everywhere before P8.
+   */
+  decayPending?: true;
   maintenance: boolean;
   skipped: boolean;
 }
@@ -344,6 +350,9 @@ export function computeTrainingRating(
      * day closes — then the replay charges it, once, for good.
      */
     if (decaying && day.open === true) {
+      // Measured as the charge will be: against the episode's age, or this
+      // day's when the episode has not begun yet.
+      const pending = scheduledFraction(day.abstinentDays, episode?.ageMonths ?? day.ageMonths) > carriedFraction;
       points.push({
         date: day.date,
         rating,
@@ -353,6 +362,7 @@ export function computeTrainingRating(
         movement: 0,
         decayFraction: carriedFraction,
         decaying: false,
+        ...(pending ? { decayPending: true as const } : {}),
         maintenance: false,
         skipped: true,
       });

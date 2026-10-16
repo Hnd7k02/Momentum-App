@@ -1,4 +1,5 @@
-import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { addDays, weekKeyOf } from '../../core/dates';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
 import { useToday } from '../../app/useToday';
@@ -7,12 +8,12 @@ import { useLoadable } from '../../app/useLoadable';
 import { loadRunningWorkout } from '../../storage/services/gymService';
 import { RunningWorkoutCard } from '../gym/RunningWorkoutCard';
 import { useToast } from '../../components/Toast';
-import { Button, Card, EmptyState, LoadFailure, Row, Section, StaleNotice, focusTarget } from '../../components';
+import { Button, Card, EmptyState, LoadFailure, Row, Section, Segmented, StaleNotice, focusTarget } from '../../components';
 import { ChevronRightIcon, PlusIcon, SparkIcon } from '../../components/Icons';
 import { SessionSheet } from '../../domains/sports/SessionSheet';
 import { formatDayAndMonth, formatTime, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
-import type { TrainingSession } from '../../storage/services/checkInService';
+import { yesterdayOutstanding, type TrainingSession } from '../../storage/services/checkInService';
 import type { TranslationKey } from '../../i18n';
 import { FoodCard } from '../food/FoodCard';
 import { FoodEntrySheet } from '../food/FoodEntrySheet';
@@ -25,6 +26,9 @@ import './today.css';
 
 /** How long a one-tap log stays busy after its write has landed. */
 const LOG_SETTLE_MS = 600;
+
+/** The two days Heute can show (WP3, P8 — D138). */
+type ShownDay = 'today' | 'yesterday';
 
 /** Titles and log labels per training domain, including the retired one. */
 const TRAINING_COPY: Record<StoredDomainType, { title: TranslationKey; log: TranslationKey }> = {
@@ -42,6 +46,16 @@ const TRAINING_COPY: Record<StoredDomainType, { title: TranslationKey; log: Tran
  *
  * Training is a list rather than one card: Gym and Running are separate
  * quotas, so a week that met one and missed the other has to read that way.
+ *
+ * **Heute | Gestern** (WP3, P8 — D138). Anything can be written for today
+ * and yesterday, and nothing older, so the screen shows one of exactly those
+ * two days: the questions, Food, Gym (start or continue yesterday's session)
+ * and Laufen all follow the switch, and every write goes to the day on show.
+ * The switch is relative and follows B3: at midnight "Heute" becomes the new
+ * day and "Gestern" the one that was today, and the screen moves before it
+ * accepts input either way. A yesterday the write rule no longer opens — the
+ * update day, when yesterday was lived under the old rules — is shown
+ * read-only with the closed copy.
  */
 export function TodayScreen({
   onGoToAreas,
@@ -58,7 +72,10 @@ export function TodayScreen({
   const { language } = useI18n();
   // One "today" for the whole app (WP3, B3): it moves at local midnight, when
   // the app comes back to the foreground, and at the start of any input.
-  const date = useToday();
+  const today = useToday();
+  const [shown, setShown] = useState<ShownDay>('today');
+  /** The day on show, and so the day every write here goes to. */
+  const date = shown === 'today' ? today : addDays(today, -1);
   const toast = useToast();
   const {
     state,
@@ -81,6 +98,14 @@ export function TodayScreen({
   const loadWorkout = useCallback(() => loadRunningWorkout(date), [date]);
   const { state: workoutState } = useLoadable(loadWorkout, [date], [version]);
   const runningWorkout = workoutState.status === 'ready' ? workoutState.value : null;
+  /*
+   * Whether yesterday still owes an answer that can be given (STOP 3a, Q8).
+   * Read from storage, so answering it from the Gestern side clears the
+   * line by the time the switch is back on Heute.
+   */
+  const loadOutstanding = useCallback(() => yesterdayOutstanding(today), [today]);
+  const { state: outstandingState } = useLoadable(loadOutstanding, [today], [version]);
+  const yesterdayOpen = outstandingState.status === 'ready' && outstandingState.value;
   const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
   const [addingFood, setAddingFood] = useState(false);
   /** The run the sheet was last opened for, so focus can find its row again. */
@@ -110,8 +135,9 @@ export function TodayScreen({
           message: t('today.running.logged'),
           action: {
             label: t('toast.undo'),
-            // An undo tapped just after Sunday midnight meets a closed week;
-            // it says so rather than leaving the run in place silently.
+            // An undo tapped once the run's day has left the window — a run
+            // logged for yesterday, undone after midnight — is refused; it
+            // says so rather than leaving the run in place silently.
             run: () =>
               void deleteSession(domain, session.id).then((deleted) => {
                 if (!deleted) toast({ message: t('today.running.undoRefused') });
@@ -148,10 +174,17 @@ export function TodayScreen({
    */
   const scrollPort = useRef<HTMLDivElement>(null);
   const savedScroll = useRef(0);
-  const showsToday = state.status === 'ready' && state.value.date === date;
+  const showsDay = state.status === 'ready' && state.value.date === date;
   useLayoutEffect(() => {
-    if (showsToday && !gym.open && scrollPort.current) scrollPort.current.scrollTop = savedScroll.current;
-  }, [showsToday, gym.open]);
+    if (showsDay && !gym.open && scrollPort.current) scrollPort.current.scrollTop = savedScroll.current;
+  }, [showsDay, gym.open]);
+
+  /** The user's own switch starts the other day at its top; midnight does not. */
+  const show = (next: ShownDay) => {
+    if (next === shown) return;
+    savedScroll.current = 0;
+    setShown(next);
+  };
 
   /*
    * The workout belongs to its own session, not to the day on show, so it is
@@ -168,6 +201,10 @@ export function TodayScreen({
    * sheet edits a run by id; a food entry is saved to the day the screen
    * shows when it is saved, as every write here is (B3).
    */
+  const editingDays =
+    editingSession && state.status === 'ready'
+      ? state.value.training.find((entry) => entry.domain === editingSession.domain)?.writableDays ?? []
+      : [];
   const floating = (
     <>
       <Fragment key="gym-overlay">{gym.overlay}</Fragment>
@@ -175,10 +212,11 @@ export function TodayScreen({
         key="run-sheet"
         open={editingSession !== null}
         session={editingSession}
+        days={editingDays}
         returnFocus={() => (lastEdited.current ? focusTarget(`session-${lastEdited.current}`) : null)}
         onClose={() => setEditingSession(null)}
-        // A write the edit window refuses — the run's week closed while the
-        // sheet was open — is said out loud rather than dropped silently.
+        // A write the window refuses — the run's day closed while the sheet
+        // was open — is said out loud rather than dropped silently.
         onSave={(input) => {
           if (editingSession) {
             void updateSession(editingSession.domain, editingSession.id, input).then((saved) => {
@@ -206,18 +244,46 @@ export function TodayScreen({
     </>
   );
 
+  /*
+   * The title, the switch and the day on show. Drawn from `date` alone, so it
+   * stands in both branches below: the switch stays where it is while the
+   * other day loads, and the date always names the day a write would reach.
+   */
+  const header = (status?: ReactNode) => (
+    <header className="screen__header">
+      <h1 className="screen__title">{t('nav.today')}</h1>
+      <div className="today__switch">
+        <Segmented<ShownDay>
+          value={shown}
+          options={[
+            { value: 'today', label: t('today.show.today') },
+            { value: 'yesterday', label: t('today.show.yesterday') },
+          ]}
+          onChange={show}
+          label={t('today.show.label')}
+        />
+      </div>
+      <p className="today__date">
+        {t('today.date', {
+          weekday: formatWeekday(language, date),
+          date: formatDayAndMonth(language, date),
+        })}
+      </p>
+      {status}
+    </header>
+  );
+
   // Three states, never collapsed into one: still loading, failed outright,
   // or loaded. What is *empty* is decided further down, from the day itself.
   // A view loaded for another day is not "loaded" (WP3, B3): after midnight
-  // yesterday's answers stay in memory until today's arrive, and not one
-  // control is offered on them in the meantime. If today's load fails, that
-  // is a failure with a retry, never an endless wait.
-  if (!showsToday) {
+  // — or a moment after the switch — the other day's answers stay in memory
+  // until this day's arrive, and not one control is offered on them in the
+  // meantime. If the load fails, that is a failure with a retry, never an
+  // endless wait.
+  if (!showsDay) {
     return (
       <div className="screen">
-        <header className="screen__header">
-          <h1 className="screen__title">{t('nav.today')}</h1>
-        </header>
+        {header()}
         <div className="today__scroll" aria-busy={state.status !== 'failed'}>
           {state.status === 'failed' ? (
             <LoadFailure title={t('error.day.title')} onRetry={reload} />
@@ -251,26 +317,43 @@ export function TodayScreen({
     (mental?.answeredCount ?? 0) + (day.food?.adherence !== null && day.food ? 1 : 0);
 
   const openGym = (sessionId?: string) => gym.start(sessionId);
+  /*
+   * A workout under way on the day on show. Yesterday's is offered only
+   * while it can still be written; today's always is (P7).
+   */
+  const gymDays = day.training.find((entry) => entry.domain === 'gym')?.writableDays ?? [];
+  const showsWorkout = runningWorkout !== null && (shown === 'today' || gymDays.includes(date));
+  const thisWeek = weekKeyOf(today);
 
   return (
     <div className="screen">
-      <header className="screen__header">
-        <h1 className="screen__title">{t('nav.today')}</h1>
-        <p className="today__date">
-          {t('today.date', {
-            weekday: formatWeekday(language, date),
-            date: formatDayAndMonth(language, date),
-          })}
-        </p>
-        {dailyDue > 0 ? (
-          <p className={`today__progress ${dailyDone === dailyDue ? 'today__progress--complete' : ''}`.trim()}>
-            <span className="today__progressDot" aria-hidden="true" />
-            {dailyDone === dailyDue
-              ? t('today.allDone')
-              : t('today.progress', { done: dailyDone, total: dailyDue })}
-          </p>
-        ) : null}
-      </header>
+      {header(
+        <>
+          {/* A yesterday that can no longer be written says so once (D133). */}
+          {day.editable ? null : (
+            <p className="today__closed" role="status">
+              {t('today.closed')}
+            </p>
+          )}
+          <div className="today__status">
+            {dailyDue > 0 ? (
+              <p className={`today__progress ${dailyDone === dailyDue ? 'today__progress--complete' : ''}`.trim()}>
+                <span className="today__progressDot" aria-hidden="true" />
+                {dailyDone === dailyDue
+                  ? t(shown === 'today' ? 'today.allDone' : 'today.yesterdayDone')
+                  : t('today.progress', { done: dailyDone, total: dailyDue })}
+              </p>
+            ) : null}
+            {/* Quiet, and only a way across: nothing here is counted. */}
+            {shown === 'today' && yesterdayOpen ? (
+              <button type="button" className="today__yesterday" onClick={() => show('yesterday')}>
+                {t('today.yesterdayOpen')}
+                <ChevronRightIcon size={14} />
+              </button>
+            ) : null}
+          </div>
+        </>,
+      )}
 
       <div
         className="today__scroll"
@@ -282,7 +365,7 @@ export function TodayScreen({
         {state.refreshFailed ? <StaleNotice onRetry={reload} /> : null}
 
         {/* A workout under way comes first: one tap continues it (P7). */}
-        {runningWorkout ? (
+        {showsWorkout && runningWorkout ? (
           <RunningWorkoutCard workout={runningWorkout} onContinue={() => openGym(runningWorkout.sessionId)} />
         ) : null}
 
@@ -352,6 +435,13 @@ export function TodayScreen({
 
         {day.training.map((training) => {
           const copy = TRAINING_COPY[training.domain];
+          /*
+           * Whether a session may be written for the day on show (D133). The
+           * one day the check-in can take and a session cannot is the Sunday
+           * of a week that began before the update, on the Monday after: that
+           * week closed at Sunday midnight under the rules it was lived by.
+           */
+          const loggable = training.writableDays.includes(date);
           return (
             <Section key={training.domain} label={t(copy.title)} labelHidden={training.domain === 'gym' && Boolean(onOpenGym)}>
               {/* Gym's label is the door to its hub (WP2-2): logging stays
@@ -364,7 +454,9 @@ export function TodayScreen({
               ) : null}
               <Card>
                 <div className="week__header">
-                  <span className="week__label">{t('sports.thisWeek')}</span>
+                  <span className="week__label">
+                    {t(training.weekKey === thisWeek ? 'sports.thisWeek' : 'sports.lastWeek')}
+                  </span>
                   <span className="week__value">
                     {t('sports.progress', {
                       done: training.progress.completed,
@@ -447,6 +539,14 @@ export function TodayScreen({
                     <button type="button" className="week__legacyAsk" onClick={() => onGoToAreas()}>
                       {t('legacySport.today.pending')}
                     </button>
+                  ) : null
+                ) : !loggable ? (
+                  // A closed day already says so above; only the closed week
+                  // of a day the check-in still takes needs its own line.
+                  day.editable ? (
+                    <p className="week__closed" role="status">
+                      {t('sports.weekClosed')}
+                    </p>
                   ) : null
                 ) : (
                   <button

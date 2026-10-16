@@ -1,5 +1,5 @@
-/* The seven days of the session's own week. Days still to come are shown but
-   disabled, so the week reads as a whole rather than being truncated. */
+/* The days a run may be moved to — yesterday and today, while each can still
+   be written — beside its own day (D133). Two or three pills, never a week. */
 .session-days {
   display: flex;
   gap: var(--space-1);
@@ -23,6 +23,14 @@
   color: var(--text-on-accent);
 }
 
-.session-days__day:disabled {
+/* A day that cannot be chosen steps back; the run's own day stays readable
+   even when the whole sheet is read-only. */
+.session-days__day:disabled:not([aria-checked='true']) {
   opacity: 0.35;
+}
+
+/* A run whose day has closed: said once, above what can no longer change. */
+.session-sheet__closed {
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
 }

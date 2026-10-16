@@ -22,13 +22,14 @@ import { PlanChooserSheet } from './PlanChooserSheet';
  * reload whatever it shows.
  *
  * The workout's day is fixed when it opens (WP3, B3). The host's `date` is
- * live and turns at midnight; a workout begun at 23:50 is still that day's
+ * the day it shows — Heute's today or yesterday (D138), the hub's today —
+ * and turns at midnight; a workout begun at 23:50 is still that day's
  * workout at 00:10, so its draft, its header and the bodyweight typed into
- * it stay on the day it was opened for — while that day's week is open: a
- * draft has written nothing, and one carried past Sunday midnight moves to
- * today in the screen rather than be refused by the closed week. Once the
- * draft has become a session the launcher holds the session's id, so a host
- * that has to mount the screen again resumes the session, not the draft.
+ * it stay on the day it was opened for. That day stays writable through the
+ * next one (D133); a draft carried past that turns read-only like every
+ * closed day, and is never moved to another day. Once the draft has become
+ * a session the launcher holds the session's id, so a host that has to
+ * mount the screen again resumes the session, not the draft.
  */
 export function useTrainingLauncher({
   date,

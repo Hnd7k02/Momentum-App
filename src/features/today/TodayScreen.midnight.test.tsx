@@ -19,6 +19,12 @@ import { ToastProvider } from '../../components/Toast';
 const failing = new Set<string>();
 const loads: string[] = [];
 
+const yesterdayOf = (date: string): string => {
+  const day = new Date(`${date}T12:00:00`);
+  day.setDate(day.getDate() - 1);
+  return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+};
+
 function dayFor(date: string): DayView {
   return {
     date,
@@ -43,6 +49,7 @@ function dayFor(date: string): DayView {
           },
         ],
         sessionsToday: [],
+        writableDays: [yesterdayOf(date), date],
       },
     ],
     food: {
@@ -65,6 +72,7 @@ vi.mock('../../storage/services/checkInService', async (original) => ({
     if (failing.has(date)) throw new Error('Connection to Indexed Database server lost');
     return dayFor(date);
   },
+  yesterdayOutstanding: async () => false,
 }));
 
 vi.mock('./BossSummary', () => ({ BossSummary: () => null }));

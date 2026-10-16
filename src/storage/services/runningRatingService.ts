@@ -86,6 +86,13 @@ export interface RunningRatingState {
   weeklyTarget: number;
   abstinence: AbstinenceEpisode | null;
   decayFraction: number;
+  /**
+   * Present, as `true`, while a charge waits for its day to close (D135):
+   * the run has reached a block of the schedule on a day that can still take
+   * a session. Absent otherwise — so every state before P8 serialises
+   * exactly as it did.
+   */
+  decayPending?: true;
   maintenance: boolean;
   /** Runs in the window that carry no performance, so a screen can say why. */
   attendanceOnlyRuns: number;
@@ -367,6 +374,7 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
     weeklyTarget: todayWeek?.target ?? 0,
     abstinence: origin ? currentAbstinence(runDates, origin, input.reference) : null,
     decayFraction: lastDetail?.decayFraction ?? 0,
+    ...(lastDetail?.decayPending === true ? { decayPending: true as const } : {}),
     maintenance: lastDetail?.maintenance ?? false,
     attendanceOnlyRuns: ordered.filter(
       (entry) =>

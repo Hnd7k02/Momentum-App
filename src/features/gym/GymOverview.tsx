@@ -107,6 +107,17 @@ export function GymOverview({
     state.abstinence !== null &&
     state.abstinence.days >= TRAINING_RATING.ABSTINENCE_BLOCK_DAYS;
   const ytdText = changeText(state.ytdChange, t);
+  /*
+   * A charge that waits for its day to close (D135) is said, not hidden: the
+   * days counter has passed a block, and the tile would otherwise read as if
+   * nothing were coming.
+   */
+  const lostPercent = Math.round(state.decayFraction * 100);
+  const decayLine = state.decayPending
+    ? lostPercent > 0
+      ? t('gym.decay.lostPending', { percent: lostPercent })
+      : t('gym.decay.pending')
+    : t('gym.decay.lost', { percent: lostPercent });
 
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
@@ -194,7 +205,7 @@ export function GymOverview({
             id="gym-decay"
             title={t('gym.decay.title')}
             value={t('gym.decay.days', { days: state.abstinence.days })}
-            line={t('gym.decay.lost', { percent: Math.round(state.decayFraction * 100) })}
+            line={decayLine}
             onOpen={() => setDetail('decay')}
           />
         ) : null}
@@ -263,9 +274,10 @@ export function GymOverview({
           open={detail === 'decay'}
           title={t('gym.decay.title')}
           value={t('gym.decay.days', { days: state.abstinence.days })}
-          scale={t('gym.decay.lost', { percent: Math.round(state.decayFraction * 100) })}
+          scale={decayLine}
           onClose={close}
         >
+          {state.decayPending === true ? <p>{t('gym.decay.pendingExplain')}</p> : null}
           <p>{t('gym.decay.explain')}</p>
           <p>{t('gym.decay.floor')}</p>
           <p>{t('gym.decay.resume')}</p>

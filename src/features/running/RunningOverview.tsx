@@ -95,6 +95,13 @@ export function RunningOverview({
     state.abstinence.days >= TRAINING_RATING.ABSTINENCE_BLOCK_DAYS;
   const ytdText = changeText(state.ytdChange, t);
   const counted = t('running.performance.counted', { count: state.ytd?.measured.length ?? 0 });
+  // A charge waiting for its day to close is said, as on the Gym tile (D135).
+  const lostPercent = Math.round(state.decayFraction * 100);
+  const decayLine = state.decayPending
+    ? lostPercent > 0
+      ? t('running.decay.lostPending', { percent: lostPercent })
+      : t('running.decay.pending')
+    : t('running.decay.lost', { percent: lostPercent });
 
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
@@ -180,9 +187,7 @@ export function RunningOverview({
             id="running-decay"
             title={t('running.decay.title')}
             value={t('running.decay.days', { days: state.abstinence.days })}
-            line={t('running.decay.lost', {
-              percent: Math.round(state.decayFraction * 100),
-            })}
+            line={decayLine}
             onOpen={() => setDetail('decay')}
           />
         ) : null}
@@ -246,9 +251,10 @@ export function RunningOverview({
           open={detail === 'decay'}
           title={t('running.decay.title')}
           value={t('running.decay.days', { days: state.abstinence.days })}
-          scale={t('running.decay.lost', { percent: Math.round(state.decayFraction * 100) })}
+          scale={decayLine}
           onClose={close}
         >
+          {state.decayPending === true ? <p>{t('running.decay.pendingExplain')}</p> : null}
           <p>{t('running.decay.explain')}</p>
           <p>{t('running.decay.floor')}</p>
           <p>{t('running.decay.resume')}</p>

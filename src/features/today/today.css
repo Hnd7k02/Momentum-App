@@ -27,10 +27,53 @@
     calc(var(--safe-left) + var(--space-5));
 }
 
+/* Heute | Gestern (D138): the full width under the title, so neither label
+   is ever squeezed at 320. */
+.today__switch {
+  margin-top: var(--space-3);
+}
+
 .today__date {
   margin-top: var(--space-2);
   font-size: var(--type-subhead);
   color: var(--text-secondary);
+}
+
+/* The completion pill and the pointer to yesterday share a line, and wrap
+   beneath each other when the width runs out. */
+.today__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.today__status:empty {
+  display: none;
+}
+
+.today__status .today__progress {
+  margin-top: 0;
+}
+
+/* "Gestern ist noch offen": a way across, quieter than any control that
+   writes. 44px effective through the inset hit area. */
+.today__yesterday {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  color: var(--accent);
+}
+
+.today__yesterday::before {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
 }
 
 /* A quiet completion line, not a score. */
@@ -259,6 +302,16 @@
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   font-size: var(--type-footnote);
+}
+
+/* The closed week of a day the check-in still takes, where the log button
+   would be (D133). */
+.week__closed {
+  border-top: 1px solid var(--separator);
+  padding: var(--space-4) 0 var(--space-1);
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* A closed day states the fact once and stops offering controls. */
