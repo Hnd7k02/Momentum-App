@@ -2896,6 +2896,8 @@ its days lived under P8 follow P8 day by day: an abstinence charge carried
 while the day can take a session, attendance met while the week is in
 progress, an empty week no data (Stage 3b review).
 
+*Since the review of Stage 4, a kept boundary also survives a configuration change made on the day the date moved back to: `ensureCurrentSnapshot` writes that day without the P8 fields (reproduced before the fix: a question added that day moved the era one day earlier). D139's switch-off is kept the same way.*
+
 ## D133 — One write rule: today and yesterday
 
 **Decision (P8).** An answer, a Food rating or entry, a session, a set, a run

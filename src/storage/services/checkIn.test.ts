@@ -488,6 +488,43 @@ describe('the P8 era append (D132)', () => {
     ]);
   });
 
+  it('keeps that boundary through a configuration change made on the moved-back day', async () => {
+    // Found in the Stage 4 review: a question added on the 31st wrote the
+    // full current configuration effective that day — P8 marker and all —
+    // so the 31st, lived under the old rules, began to replay under P8.
+    await setup('2025-03-20');
+    const [first] = await configSnapshotsRepository.list();
+    const { sessionWindowDays: _marker, ...scoring } = first!.config.scoring;
+    const legacy = { ...first!.config, scoring: { ...scoring, editWindowDays: 3 } };
+    await configSnapshotsRepository.replaceAll([
+      { ...first!, config: legacy },
+      {
+        ...first!,
+        id: 'cfg_p8',
+        effectiveFrom: '2025-04-01',
+        createdAt: '2025-03-31T05:00:00.000Z',
+        config: { ...legacy, scoring: { ...legacy.scoring, editWindowDays: 1, sessionWindowDays: 1 } },
+      },
+    ]);
+    expect(await ensureSessionWindowEra(TODAY)).toBe('unchanged');
+
+    const added = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+    const byDate = Object.fromEntries((await configSnapshotsRepository.list()).map((snapshot) => [snapshot.effectiveFrom, snapshot.config]));
+    expect(Object.keys(byDate)).toEqual(['2025-03-20', TODAY, '2025-04-01']);
+    // The 31st takes the question under its own rules; the era still begins on the 1st.
+    expect(byDate[TODAY]!.scoring.sessionWindowDays).toBeUndefined();
+    expect(byDate[TODAY]!.scoring.editWindowDays).toBe(3);
+    expect(byDate['2025-04-01']!.scoring.sessionWindowDays).toBe(1);
+    for (const date of [TODAY, '2025-04-01']) {
+      expect(byDate[date]!.questions.some((question) => question.id === added.id), date).toBe(true);
+    }
+    // Asked again, nothing moves.
+    const count = (await configSnapshotsRepository.list()).length;
+    await addQuestion({ text: 'Noch eine', type: 'boolean', category: 'eigene' });
+    expect((await configSnapshotsRepository.list()).map((snapshot) => snapshot.effectiveFrom)).toEqual(['2025-03-20', TODAY, '2025-04-01']);
+    expect((await configSnapshotsRepository.list()).length).toBe(count);
+  });
+
   it('leaves a profile set up with the clock ahead to begin on its first day', async () => {
     // Moving its configuration back would put days before its first day, and
     // its promotion boundary, into its history. Until then nothing is due.

@@ -411,7 +411,8 @@ records (answers, sessions, sets, snapshots)
   screens, and every suite onboards through Mind and Gym.
 - **Review of Stage 4** (four reviewers, every finding put to a skeptic): a
   write on a day before a kept switch-off no longer moves it
-  (`ensureCurrentSnapshot`, D139); a restored snapshot holding an entry that
+  (`ensureCurrentSnapshot`, D139), and the same holds for D132's P8
+  boundary, which a configuration change on that day used to move; a restored snapshot holding an entry that
   is not one no longer blocks the load; a yesterday that had only Food is
   not called empty (D141); Rang's list and its Gewichtung card print one
   rounding (`wholePercents`); the switch's dead two-row rule and the unused

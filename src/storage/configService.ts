@@ -64,6 +64,31 @@ function keptFoodSwitchOff(all: readonly ConfigSnapshotRecord[], date: DateKey):
   return now().getTime() < Date.parse(boundary.createdAt) ? undefined : boundary;
 }
 
+const marked = (snapshot: { config: AppConfigSnapshot }): boolean => snapshot.config.scoring.sessionWindowDays !== undefined;
+
+/**
+ * The P8 boundary dated after `date` that stays where it is (D132): the first
+ * later snapshot carrying the marker, while the day in force does not — the
+ * local date has moved back across it. One written on a clock that was ahead
+ * is not kept: it moves to the day it reached.
+ */
+function keptSessionWindowEra(all: readonly ConfigSnapshotRecord[], date: DateKey): ConfigSnapshotRecord | undefined {
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= date);
+  if (inForce === undefined || marked(inForce)) return undefined;
+  const boundary = all.find((snapshot) => snapshot.effectiveFrom > date && marked(snapshot));
+  if (boundary === undefined) return undefined;
+  return now().getTime() < Date.parse(boundary.createdAt) ? undefined : boundary;
+}
+
+/** `config` with the one-day window's fields as `era` had them: before P8, none. */
+function withWindowOf(config: AppConfigSnapshot, era: AppConfigSnapshot['scoring']): AppConfigSnapshot {
+  const scoring: Partial<AppConfigSnapshot['scoring']> = { ...config.scoring };
+  delete scoring.sessionWindowDays;
+  if (era.editWindowDays === undefined) delete scoring.editWindowDays;
+  else scoring.editWindowDays = era.editWindowDays;
+  return { ...config, scoring: scoring as AppConfigSnapshot['scoring'] };
+}
+
 /**
  * Returns the snapshot record that new entries should reference, appending one
  * first if configuration has drifted from the state in force on the day.
@@ -75,13 +100,14 @@ function keptFoodSwitchOff(all: readonly ConfigSnapshotRecord[], date: DateKey):
  * so it takes the current configuration too, or a change made today would be
  * undone on its date.
  *
- * **Except Food, before a switch-off that is kept** (D139). Once the local
- * date has moved back across the switch-off, the live Food record is off but
- * the day was lived with Food. What is compared and written for a day before
- * the switch-off carries Food as it was on, with the Boss weights over the
- * domains that were on; from the switch-off on, the live configuration. An
- * answer on that day therefore moves nothing, and a change made on it reaches
- * both sides.
+ * **Except the eras a kept boundary has not reached** (D132, D139). Once the
+ * local date has moved back across a boundary written before now, the day it
+ * lands on was lived under the earlier era: without the one-day window, or
+ * with Food. What is compared and written for a day before such a boundary
+ * carries that era as it was — the window fields of the snapshot in force;
+ * Food on, with the Boss weights over the domains that were on — and from
+ * the boundary on, the live configuration. An answer on that day therefore
+ * moves nothing, and a change made on it reaches both sides.
  */
 export async function ensureCurrentSnapshot(
   effectiveFrom: DateKey = today(),
@@ -99,13 +125,19 @@ export async function ensureCurrentSnapshot(
         bossWeights,
       )
     : config;
-  const configOn = (date: DateKey) => (kept !== undefined && date < kept.effectiveFrom ? lived : config);
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom);
+  const keptWindow = keptSessionWindowEra(all, effectiveFrom);
+  const configOn = (date: DateKey) => {
+    const withFood = kept !== undefined && date < kept.effectiveFrom ? lived : config;
+    return keptWindow !== undefined && inForce !== undefined && date < keptWindow.effectiveFrom
+      ? withWindowOf(withFood, inForce.config.scoring)
+      : withFood;
+  };
   for (const later of all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom)) {
     const target = configOn(later.effectiveFrom);
     if (!configSnapshotsEqual(later.config, target)) await configSnapshotsRepository.append(target, later.effectiveFrom);
   }
   const target = configOn(effectiveFrom);
-  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom);
   if (inForce && configSnapshotsEqual(inForce.config, target)) return inForce;
   return configSnapshotsRepository.append(target, effectiveFrom);
 }
@@ -139,7 +171,9 @@ export async function configForDate(date: DateKey): Promise<AppConfigSnapshot | 
  * old rules and must replay as it was. The two are told apart by the instant
  * the boundary was written: a local date can move back, absolute time cannot,
  * so only a boundary written after now was written on a clock that was ahead.
- * Kept, it locks today until the boundary — hours, after a journey west.
+ * Kept, it locks today until the boundary — hours, after a journey west — and
+ * a configuration change made meanwhile keeps it there too: `ensureCurrentSnapshot`
+ * writes that day without the P8 fields (review of Stage 4).
  *
  * A profile with no snapshot in force today — set up while the clock was
  * ahead — is left alone: moving its configuration back would put days before
@@ -155,17 +189,12 @@ export async function ensureSessionWindowEra(
     ...config,
     scoring: { ...config.scoring, editWindowDays: EDIT_WINDOW_DAYS, sessionWindowDays: SESSION_WINDOW_DAYS },
   });
-  const marked = (snapshot: { config: AppConfigSnapshot }) => snapshot.config.scoring.sessionWindowDays !== undefined;
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
   const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
   let appended = false;
-  if (inForce !== null && !marked(inForce)) {
-    const boundary = later.find(marked);
-    const clockWasAhead = boundary !== undefined && now().getTime() < Date.parse(boundary.createdAt);
-    if (boundary === undefined || clockWasAhead) {
-      await configSnapshotsRepository.append(withMarker(inForce.config), effectiveFrom);
-      appended = true;
-    }
+  if (inForce !== null && !marked(inForce) && keptSessionWindowEra(all, effectiveFrom) === undefined) {
+    await configSnapshotsRepository.append(withMarker(inForce.config), effectiveFrom);
+    appended = true;
   }
   for (const snapshot of later) {
     if (!marked(snapshot)) {
