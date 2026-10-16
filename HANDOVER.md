@@ -222,8 +222,9 @@ records (answers, sessions, sets, snapshots)
   workout holds the signal and releases it when it closes, after the write
   in flight has landed.
 - The workout's day is fixed when it opens; an existing session shows its
-  own day; a draft carried past Sunday midnight moves to today. Bodyweight
-  entries obey the same weekly edit window as sets.
+  own day. (Superseded in Stage 3b: a draft no longer moves to Monday, and
+  bodyweight entries follow the one write rule — today and yesterday, D133,
+  D137.)
 - One toast (`components/Toast.tsx`): an outlet above the banners and tab
   bar, `useToastLift` for a screen with its own bar (the workout's sticky bar
   in Stage 2), below the sheet layer — sheets render into `<body>` — and
@@ -252,7 +253,8 @@ records (answers, sessions, sets, snapshots)
   (`.gym-session__bar`, `--workout-bar-height`, safe-area aware). Removing an
   exercise is a worded "Entfernen" control; a set keeps its minus. Both
   removals undo for 5 s by putting the same rows back (`restoreSet`,
-  `restoreExercise`; D131), refused once the week has closed. Every write of
+  `restoreExercise`; D131), refused once the day has closed (the week, until
+  Stage 3b's D133). Every write of
   the screen goes through one queue (`run`), double taps through `tap`; a set
   row writes only the field whose text changed.
 - "Fertig" stores `finishedAt` (D129): `null` while running, a timestamp
@@ -331,8 +333,8 @@ records (answers, sessions, sets, snapshots)
 - **Heute | Gestern** (D138), "Gestern ist noch offen", the run sheet on the
   writable days only, the closed copy "Dieser Tag ist abgeschlossen."
 - **Golden files.** Everything before P8 is byte-identical: the six original
-  golden files, `.github/fixtures/stage2/`, every fingerprint. The ten P8
-  files were re-frozen at STOP 3b as a deliberate commit; every moved value
+  golden files, `.github/fixtures/stage2/`, every fingerprint. The P8 files
+  are re-frozen at STOP 3b as their own deliberate commit; every moved value
   lies on a day of the P8 era and is explained in the STOP 3b report.
 - **Recorded, not changed (STOP 3a, Q11):** the Wellbeing ledger folds
   `entry.score` where the rating tracks `recordedScore`, and a silent day 0
@@ -378,7 +380,9 @@ categories**. Six Alltag questions cannot outweigh one Mental question.
 
 ### Weekly-quota domains (Gym, Running, legacy Sport)
 `min(100, sessionsInWeek / target × 100)`. A week still running with nothing
-logged is `null`, not 0. Target resolved at the week's Monday.
+logged is `null`, not 0. Target resolved at the week's Monday. On a day lived
+under P8 a week in progress with a session reads as met (100) and is judged
+once it can no longer be written — Tuesday 00:00 (D134).
 
 ### Rating (`core/rating`)
 EWMA over day scores, half-life 14 days, start 250, range 0–1000. Streak bonus
@@ -386,8 +390,10 @@ is part of the target rather than added on. Inactivity **decays** (capped per
 episode) rather than feeding zeros. First 14 days may rise, never fall.
 
 ### Ranks
-Eight, thresholds in `RANKS`. Promotion immediate; demotion needs 15 points
-below the floor **and** 3 sustained scored days.
+Eight, thresholds in `RANKS`. Promotion confirmed over seven eligible days
+(D126); demotion needs 15 points below the floor **and** 3 sustained days —
+every point before P8, settled days in the P8 era, which also count for a
+promotion only once settled (D136).
 `rankProgress(value, displayedRank)` is the single source for fill, percentage
 and remaining — never derive one from a different rank than the other.
 `displayedRankProgress` rounds once first so the printed rating and the

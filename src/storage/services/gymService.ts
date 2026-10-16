@@ -710,9 +710,10 @@ export interface RemovedExercise {
 }
 
 /**
- * Removes an exercise and every set of it, within the session's own week,
- * and returns exactly what went, for an undo to put back (D131). Every rule
- * is checked before anything is deleted, so a refusal removes nothing.
+ * Removes an exercise and every set of it, while their day can still be
+ * written (D133), and returns exactly what went, for an undo to put back
+ * (D131). Every rule is checked before anything is deleted, so a refusal
+ * removes nothing.
  */
 export async function removeExerciseFromSession(
   sessionId: string,
@@ -756,10 +757,12 @@ export async function openSessionForDay(
   date: DateKey = today(),
   reference: DateKey = today(),
 ): Promise<GymSessionRecord> {
+  // Checked first: a caller writes into what this returns, so an existing
+  // session of a closed day is refused like a new one (D133).
+  await assertSessionWritable(date, reference, 'gym');
   const existing = await gymSessionsRepository.listByDate(date);
   const last = existing[existing.length - 1];
   if (last) return last;
-  await assertSessionWritable(date, reference, 'gym');
   const snapshot = await ensureCurrentSnapshot();
   // Started in the app, so it is running until "Fertig" says otherwise (P7).
   return gymSessionsRepository.create({ date, configSnapshotId: snapshot.id, finishedAt: null });

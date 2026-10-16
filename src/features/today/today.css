@@ -304,6 +304,13 @@
   font-size: var(--type-footnote);
 }
 
+/* A yesterday with nothing due says so in one quiet line (D138). */
+.today__nothingDue {
+  padding: var(--space-2) var(--card-pad) var(--space-6);
+  font-size: var(--type-subhead);
+  color: var(--text-secondary);
+}
+
 /* The closed week of a day the check-in still takes, where the log button
    would be (D133). */
 .week__closed {

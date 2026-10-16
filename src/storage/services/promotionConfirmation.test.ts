@@ -7,7 +7,7 @@ import { addDays, type DateKey } from '../../core/dates';
 import { confirmationIndicator, confirmedRankHistory, canonicalConfirmation } from '../../core/ranks/confirmation';
 import { canonicalJson } from '../../testing/canonical';
 import { closeDatabase, deleteDatabase } from '../db';
-import { dayClosed, daySettled, snapshotOn, weekWindows } from '../../core/config/closure';
+import { daySettled, snapshotOn, weekTargetThrough, weekWindows } from '../../core/config/closure';
 import { configSnapshotsRepository, questionsRepository, settingsRepository } from '../repositories';
 import { exportBackup, importBackup } from './backupService';
 import { loadBossProgression, type BossProgression } from './bossService';
@@ -45,14 +45,13 @@ async function recomputed(boss: BossProgression, today: DateKey) {
     boss.points.map((point, index) => {
       const date = boss.history.days[index]!.date;
       const dayConfig = snapshotOn(snapshots, date);
-      const closed = dayClosed(date, today, dayConfig, weekWindowOf(date));
-      const settled = daySettled(date, today, dayConfig, weekWindowOf(date));
+      const settled = daySettled(date, today, dayConfig, weekWindowOf(date), weekTargetThrough(snapshots, date));
       return {
         date,
         rating: point.rating,
         scored: boss.history.days[index]!.status === 'scored',
         paused: boss.history.paused[index] === true,
-        ...(closed === null || settled === null ? {} : { closed, settled }),
+        ...(settled === null ? {} : { settled }),
       };
     }),
     { from: boss.confirmation!.from, today },

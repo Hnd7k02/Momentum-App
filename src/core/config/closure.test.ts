@@ -9,6 +9,7 @@ import {
   sessionWritable,
   snapshotOn,
   weekInProgress,
+  weekTargetThrough,
   weekWindows,
 } from './closure';
 
@@ -71,7 +72,7 @@ describe('the write rule closes behind itself (D133)', () => {
       const closed = (date: DateKey, reference: DateKey) =>
         dayClosed(date, reference, at(date), weekWindowOf(date));
       const settled = (date: DateKey, reference: DateKey) =>
-        daySettled(date, reference, at(date), weekWindowOf(date));
+        daySettled(date, reference, at(date), weekWindowOf(date), weekTargetThrough(snapshots, date));
 
       let checked = 0;
       for (const reference of range(update, 57)) {
@@ -132,7 +133,13 @@ describe('the write rule closes behind itself (D133)', () => {
     const wednesday = addDays(ORIGIN, 2);
     const at = (reference: DateKey) => ({
       closed: dayClosed(wednesday, reference, snapshotOn(snapshots, wednesday), weekWindowOf(wednesday)),
-      settled: daySettled(wednesday, reference, snapshotOn(snapshots, wednesday), weekWindowOf(wednesday)),
+      settled: daySettled(
+        wednesday,
+        reference,
+        snapshotOn(snapshots, wednesday),
+        weekWindowOf(wednesday),
+        weekTargetThrough(snapshots, wednesday),
+      ),
     });
     expect(at(addDays(wednesday, 1))).toEqual({ closed: false, settled: false });
     expect(at(addDays(wednesday, 2))).toEqual({ closed: true, settled: false });

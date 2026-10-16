@@ -24,7 +24,10 @@ import { URL_APP, check, clipped, onboard, phone, smallTargets, summary } from '
  *   D  the break tiles                 the seventh day without a session or
  *                                      a run is carried while it can still be
  *                                      written, and the tiles say the charge
- *                                      is pending; two days on it lands
+ *                                      is pending and which day's session
+ *                                      prevents it; two days on it lands; a
+ *                                      session today leaves yesterday's
+ *                                      charge waiting, and the tile says so
  *                                      (D135)
  *
  * Screenshots of every touched screen at 393×852, 430×932 and 320×693 go to
@@ -349,6 +352,10 @@ for (const [width, height] of SIZES) {
 
   await pastMidnight(ctx, page);
   check(`${W}: (precondition) past Sunday midnight`, (await pageNow(page)).startsWith('2026-10-19 00:0'), await pageNow(page));
+  // Mounted afresh, so the figure is Monday's own and not Sunday's left over.
+  await page.locator('.tab-bar button', { hasText: 'Heute' }).click();
+  await page.waitForTimeout(500);
+  await openHub(page);
   const monday = await until(() => tile(page, 'gym-endurance'), (value) => value !== null);
   check(`${W}: Monday midnight judges nothing: still 2.0`, /^Ausdauerphase\s*2\.0 von 4 Wochen/.test(monday ?? ''), String(monday));
   await shot(page, 393, 'hub-monday');
@@ -417,9 +424,9 @@ for (const [width, height] of SIZES) {
   await openHub(page);
   const gymTile = await until(() => tile(page, 'gym-decay'), (value) => value !== null);
   check(`${W}: the Gym tile counts seven days`, (gymTile ?? '').includes('7 Tage ohne Session'), String(gymTile));
-  check(`${W}: and says the charge is pending`, (gymTile ?? '').includes('Abbau ausstehend – zählt, sobald der Tag abgeschlossen ist'), String(gymTile));
+  check(`${W}: and says the charge is pending, and how to prevent it`, (gymTile ?? '').includes('Abbau ausstehend – eine Session heute verhindert ihn'), String(gymTile));
   const runTile = await tile(page, 'running-decay');
-  check(`${W}: the Laufen tile says the same`, (runTile ?? '').includes('7 Tage ohne Lauf') && (runTile ?? '').includes('Abbau ausstehend'), String(runTile));
+  check(`${W}: the Laufen tile says the same`, (runTile ?? '').includes('7 Tage ohne Lauf') && (runTile ?? '').includes('Abbau ausstehend – ein Lauf heute verhindert ihn'), String(runTile));
   await layoutChecks(page, `${W} hub pending`);
   await page.locator('[data-metric="gym-decay"]').scrollIntoViewIfNeeded();
   await shot(page, width, 'gym-break-pending');
@@ -447,6 +454,49 @@ for (const [width, height] of SIZES) {
   check(`${W}: and the decay has landed`, lost > 0 && !(charged ?? '').includes('ausstehend'), String(charged));
   await page.locator('[data-metric="gym-decay"]').scrollIntoViewIfNeeded();
   await shot(page, width, 'gym-break-charged');
+  check(`${W}: no page errors`, errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+
+/* ── D': a session today, and yesterday's charge still waits ────────────── */
+{
+  const W = "D' 393";
+  const { ctx, page, errors } = await newPage(393, 852, '2026-10-15T09:00:00+02:00');
+  await onboard(page, { gym: 3, running: 0 });
+  const mondays = ['2026-08-31', '2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28'];
+  await history(page, {
+    origin: '2026-08-31',
+    answered: range('2026-08-31', '2026-10-14'),
+    gym: [...mwf(...mondays), '2026-10-05', '2026-10-06', '2026-10-07'],
+  });
+  await reloadOn(page, 'Donnerstag, 15. Oktober');
+  // Today's session, logged as one: the run ends, yesterday's seventh day does not.
+  await page.getByRole('button', { name: 'Session eintragen' }).click();
+  await page.waitForTimeout(800);
+  const free = page.locator('[role="dialog"]').getByRole('button', { name: 'Freie Session' });
+  if ((await free.count()) > 0) await free.click();
+  await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
+  await page.locator('.gym-session__bar').getByRole('button', { name: /Übung hinzufügen/ }).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('textbox', { name: 'Suchen' }).fill('Kniebeuge');
+  await page.waitForTimeout(350);
+  await page.locator('.gym-picker__row').filter({ has: page.locator('.gym-picker__name', { hasText: /^Kniebeuge$/ }) }).first().click();
+  await page.waitForTimeout(900);
+  const row = page.locator('.gym-set--pending').first();
+  await row.locator('input').nth(0).fill('5');
+  await row.locator('input').nth(0).blur();
+  await page.waitForTimeout(300);
+  await row.locator('input').nth(1).fill('100');
+  await row.locator('input').nth(1).blur();
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Fertig' }).click();
+  await page.waitForTimeout(1000);
+  await openHub(page);
+  const pending = await until(() => tile(page, 'gym-decay'), (value) => value !== null);
+  check(`${W}: after today's session the tile still counts the seven days`, (pending ?? '').includes('7 Tage ohne Session'), String(pending));
+  check(`${W}: and says only a session for yesterday prevents the charge`, (pending ?? '').includes('Abbau ausstehend – eine Session für gestern verhindert ihn'), String(pending));
+  await page.locator('[data-metric="gym-decay"]').scrollIntoViewIfNeeded();
+  await shot(page, 393, 'gym-break-pending-yesterday');
   check(`${W}: no page errors`, errors.length === 0, errors.join(' | '));
   await ctx.close();
 }

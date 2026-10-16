@@ -252,8 +252,10 @@ function scoreMental(input: MentalDayInput, countUnansweredAsMissed: boolean): M
  *
  * A week still in progress with nothing logged has no data yet rather than a
  * score of zero — the same principle as an open day. Once anything is logged
- * the week reports its running progress, and a finished week reports the
- * truth even when that truth is zero.
+ * the week reports its running progress — before P8 — or, on a day lived
+ * under P8 (`judgedAtClose`), reads as met until the week can no longer be
+ * written (D134). A finished week reports the truth even when that truth is
+ * zero.
  */
 function scoreWeekly(input: WeeklyDayInput): number | null {
   if (input.weekInProgress && input.sessionsInWeek === 0) return null;

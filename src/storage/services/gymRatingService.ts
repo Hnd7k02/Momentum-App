@@ -1,4 +1,4 @@
-import { sessionDayOpen, weekWindows } from '../../core/config/closure';
+import { isP8, sessionWritable, snapshotOn, weekWindows } from '../../core/config/closure';
 import { RATING } from '../../core/config/constants';
 import {
   addDays,
@@ -22,6 +22,7 @@ import {
 } from '../../core/gym/performance';
 import {
   computeTrainingRating,
+  type DecayPending,
   type TrainingRatingDay,
   type TrainingRatingPoint,
 } from '../../core/scoring/trainingRating';
@@ -88,12 +89,14 @@ export interface GymRatingState {
   /** Share of the baseline rank progress the episode has removed so far. */
   decayFraction: number;
   /**
-   * Present, as `true`, while a charge waits for its day to close (D135):
-   * the run has reached a block of the schedule on a day that can still take
-   * a session. Absent otherwise — so every state before P8 serialises
-   * exactly as it did.
+   * Present while a charge waits for its day to close (D135): the earliest
+   * day that can still take a session — yesterday or today — on which the
+   * run reached a block of the schedule, and how long the run was then. It
+   * outlives a session logged today, which ends the run but not yesterday's
+   * charge. Absent otherwise, so every state before P8 serialises exactly as
+   * it did.
    */
-  decayPending?: true;
+  decayPending?: DecayPending;
   /** True when today's rating is being held up by the Maintenance rule. */
   maintenance: boolean;
 }
@@ -292,6 +295,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
     const date = dates[index]!;
     const state = dayStates[index];
     const weekWindow = weekWindowOf(date);
+    const dayConfig = snapshotOn(snapshots, date);
     const week = weekTargets.get(weekKeyOf(date));
     const performance = performanceFor(date);
     modernDays.push({
@@ -310,13 +314,15 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
         !(pausedOn(date) && (week?.sessions ?? 0) === 0),
       /*
        * The weekly target is judged when the week is over (D134): while a
-       * P8 week can still take a session, anything logged in it counts as
-       * met, so a session written for yesterday can never lift a day this
-       * replay already charged. Performance moves daily all the same. The
-       * real count lands once the week's Sunday can no longer be written.
+       * week can still take a session, anything logged in it counts as met
+       * on a day lived under P8, so a session written for yesterday can never
+       * lift a day this replay already charged. Performance moves daily all
+       * the same. The real count lands once the week can no longer be
+       * written. Decided per day: in the week the update lands in, its days
+       * before the update keep the running count they were lived under.
        */
       sessionsInWeek:
-        weekWindow !== null && week?.inProgress === true && (week?.sessions ?? 0) > 0
+        isP8(dayConfig) && week?.inProgress === true && (week?.sessions ?? 0) > 0
           ? Math.max(week.sessions, week.target)
           : week?.sessions ?? 0,
       weeklyTarget: week?.target ?? 1,
@@ -325,8 +331,9 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
       performance: performance.score,
       performanceChange: aggregateChange(performance),
       abstinentDays: abstinentDays[index] ?? 0,
-      // P8 (D135): a day that can still take a session is carried, not charged.
-      ...(sessionDayOpen(date, input.reference, weekWindow) ? { open: true } : {}),
+      // P8 (D135): a day that can still take a session is carried, not
+      // charged — exactly the days the write rule still opens.
+      ...(sessionWritable(date, input.reference, dayConfig, weekWindow) ? { open: true } : {}),
       ageMonths: origin ? trainingAgeMonths(origin, date) : 0,
       // The gate opens from the day *after* the week it was completed in:
       // a week is only known to have been met once it is over.
@@ -367,6 +374,14 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
     ? currentAbstinence(sessionDates, origin, input.reference)
     : null;
   const lastDetail = modern.points[modern.points.length - 1];
+  // Only yesterday and today can still be carried; the earlier of them waits first.
+  const pendingPoint = modern.points.slice(-2).find((point) => point.decayPending === true);
+  const decayPending: DecayPending | null = pendingPoint
+    ? {
+        day: pendingPoint.date === input.reference ? 'today' : 'yesterday',
+        days: abstinentDays[dates.indexOf(pendingPoint.date)] ?? 0,
+      }
+    : null;
 
   return {
     points,
@@ -387,7 +402,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
     weeklyTarget: todayWeek?.target ?? 0,
     abstinence,
     decayFraction: lastDetail?.decayFraction ?? 0,
-    ...(lastDetail?.decayPending === true ? { decayPending: true as const } : {}),
+    ...(decayPending ? { decayPending } : {}),
     maintenance: lastDetail?.maintenance ?? false,
   };
 }

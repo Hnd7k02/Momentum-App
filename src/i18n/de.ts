@@ -146,6 +146,7 @@ export const de = {
   'today.show.today': 'Heute',
   'today.show.yesterday': 'Gestern',
   'today.yesterdayOpen': 'Gestern ist noch offen',
+  'today.yesterdayEmpty': 'An diesem Tag war nichts fällig.',
   'today.emptyTitle': 'Noch nichts eingerichtet',
   'today.emptyBody': 'Lege unter Bereiche fest, was Momentum für dich verfolgen soll.',
   'today.emptyAction': 'Zu den Bereichen',
@@ -499,7 +500,8 @@ export const de = {
   'gym.decay.title': 'Trainingspause',
   'gym.decay.days': '{days} Tage ohne Session',
   'gym.decay.lost': '{percent} % deines Fortschritts abgebaut',
-  'gym.decay.pending': 'Abbau ausstehend – zählt, sobald der Tag abgeschlossen ist',
+  'gym.decay.pendingToday': 'Abbau ausstehend – eine Session heute verhindert ihn',
+  'gym.decay.pendingYesterday': 'Abbau ausstehend – eine Session für gestern verhindert ihn',
   'gym.decay.lostPending': '{percent} % abgebaut · weiterer Abbau ausstehend',
   'gym.decay.pendingExplain':
     'Ein Tag ohne Session zählt erst, wenn er nicht mehr nachgetragen werden kann. Trägst du für diesen Tag noch eine Session nach, entfällt dieser Abbau.',
@@ -597,7 +599,8 @@ export const de = {
   'running.decay.title': 'Laufpause',
   'running.decay.days': '{days} Tage ohne Lauf',
   'running.decay.lost': '{percent} % deines Fortschritts abgebaut',
-  'running.decay.pending': 'Abbau ausstehend – zählt, sobald der Tag abgeschlossen ist',
+  'running.decay.pendingToday': 'Abbau ausstehend – ein Lauf heute verhindert ihn',
+  'running.decay.pendingYesterday': 'Abbau ausstehend – ein Lauf für gestern verhindert ihn',
   'running.decay.lostPending': '{percent} % abgebaut · weiterer Abbau ausstehend',
   'running.decay.pendingExplain':
     'Ein Tag ohne Lauf zählt erst, wenn er nicht mehr nachgetragen werden kann. Trägst du für diesen Tag noch einen Lauf nach, entfällt dieser Abbau.',
@@ -620,7 +623,9 @@ export const de = {
   'food.title': 'Ernährung',
   'food.today.title': 'Ernährung',
   'food.rate.label': 'Wie gut hast du heute deinem Vorsatz entsprochen?',
+  'food.rate.label.yesterday': 'Wie gut hast du gestern deinem Vorsatz entsprochen?',
   'food.rate.none': 'Heute noch nicht bewertet',
+  'food.rate.none.yesterday': 'Gestern noch nicht bewertet',
   'food.rate.value': '{value} von 10 · {band}',
   'food.rate.clear': 'Bewertung entfernen',
   'food.focus.label': 'Dein Vorsatz',
@@ -629,6 +634,7 @@ export const de = {
   'food.focus.hint': 'Ein Satz in deinen Worten. Daran misst du dich täglich — nicht an einer Kalorienzahl.',
   'food.focus.save': 'Vorsatz sichern',
   'food.entries.title': 'Heute gegessen',
+  'food.entries.title.yesterday': 'Gestern gegessen',
   'food.entries.empty': 'Noch nichts eingetragen.',
   'food.entries.add': 'Essen eintragen',
   'food.entries.remove': 'Eintrag entfernen',
@@ -705,6 +711,7 @@ export const de = {
   'pause.error.extendsBeyondOriginal': 'So lässt sich eine Pause nur verkürzen.',
   'pause.error.notFound': 'Diese Pause gibt es nicht mehr.',
   'pause.today': 'Heute ist Pause. Anwesenheitsverluste sind ausgesetzt.',
+  'pause.yesterday': 'Gestern war Pause. Anwesenheitsverluste sind ausgesetzt.',
   'pause.today.detail': 'Eintragen und Fortschritt zählen ganz normal weiter.',
 
   /* ── Trainingspläne (WP2-1) ──────────────────────────────────────────── */

@@ -96,12 +96,17 @@ export function RunningOverview({
   const ytdText = changeText(state.ytdChange, t);
   const counted = t('running.performance.counted', { count: state.ytd?.measured.length ?? 0 });
   // A charge waiting for its day to close is said, as on the Gym tile (D135).
+  const pending = state.decayPending ?? null;
   const lostPercent = Math.round(state.decayFraction * 100);
-  const decayLine = state.decayPending
+  const decayLine = pending
     ? lostPercent > 0
       ? t('running.decay.lostPending', { percent: lostPercent })
-      : t('running.decay.pending')
+      : t(pending.day === 'today' ? 'running.decay.pendingToday' : 'running.decay.pendingYesterday')
     : t('running.decay.lost', { percent: lostPercent });
+  // While a charge waits the tile stays, even once a session today has ended
+  // the run: yesterday's charge still lands unless yesterday is filled in.
+  const showBreak = onBreak || pending !== null;
+  const breakDays = state.abstinence?.days ?? pending?.days ?? 0;
 
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
@@ -182,11 +187,11 @@ export function RunningOverview({
         ) : null}
 
         {/* Surfaced only while it is actually happening. */}
-        {onBreak && state.abstinence ? (
+        {showBreak ? (
           <MetricTile
             id="running-decay"
             title={t('running.decay.title')}
-            value={t('running.decay.days', { days: state.abstinence.days })}
+            value={t('running.decay.days', { days: breakDays })}
             line={decayLine}
             onOpen={() => setDetail('decay')}
           />
@@ -246,15 +251,15 @@ export function RunningOverview({
         <p>{t('running.endurance.stillCounts')}</p>
       </MetricDetailSheet>
 
-      {state.abstinence ? (
+      {showBreak ? (
         <MetricDetailSheet
           open={detail === 'decay'}
           title={t('running.decay.title')}
-          value={t('running.decay.days', { days: state.abstinence.days })}
+          value={t('running.decay.days', { days: breakDays })}
           scale={decayLine}
           onClose={close}
         >
-          {state.decayPending === true ? <p>{t('running.decay.pendingExplain')}</p> : null}
+          {pending ? <p>{t('running.decay.pendingExplain')}</p> : null}
           <p>{t('running.decay.explain')}</p>
           <p>{t('running.decay.floor')}</p>
           <p>{t('running.decay.resume')}</p>

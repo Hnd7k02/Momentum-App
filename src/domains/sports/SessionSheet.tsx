@@ -88,11 +88,21 @@ export function SessionSheet({
   /*
    * Read-only once the run's own day has left the window: nothing about it
    * can be written any more, so the sheet shows it and offers nothing. A
-   * sheet left open across midnight follows, as everything else does.
+   * sheet left open across midnight follows, as everything else does — and
+   * then shows the run as stored, never what was typed but not saved.
    */
   const editable = session !== null && days.includes(session.date);
-  /* The run's own day, and every day it could move to. */
-  const offered = [...new Set([...(session ? [session.date] : []), ...days])].sort();
+  useEffect(() => {
+    if (!open || editable) return;
+    setNote(session?.note ?? '');
+    setDuration(session?.durationMinutes ? String(session.durationMinutes) : '');
+    setDistance(session?.distanceMetres ? kmText(session.distanceMetres) : '');
+    setDate(session?.date ?? null);
+  }, [open, editable, session]);
+  /* The run's own day and every day it could move to; read-only, its own. */
+  const offered = editable ? [...new Set([session.date, ...days])].sort() : session ? [session.date] : [];
+  /* A day picked before midnight that is no longer offered falls back to the run's own. */
+  const chosen = date !== null && editable && !days.includes(date) ? session.date : date;
 
   const parsedDuration = Number.parseInt(duration, 10);
   const parsedDistance = metresFrom(distance);
@@ -117,7 +127,7 @@ export function SessionSheet({
               block
               onClick={() =>
                 onSave({
-                  ...(date === null ? {} : { date }),
+                  ...(chosen === null ? {} : { date: chosen }),
                   note: note.trim() || null,
                   durationMinutes:
                     Number.isFinite(parsedDuration) && parsedDuration > 0 ? parsedDuration : null,
@@ -154,7 +164,7 @@ export function SessionSheet({
               key={option}
               type="button"
               role="radio"
-              aria-checked={option === date}
+              aria-checked={option === chosen}
               className="session-days__day"
               disabled={!editable || !days.includes(option)}
               onClick={() => setDate(option)}

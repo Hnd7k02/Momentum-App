@@ -142,7 +142,9 @@ export type RankId = (typeof RANKS)[number]['id'];
 export const RANK_DEMOTION_HYSTERESIS = 15;
 
 /**
- * And it must stay there this many scored days running.
+ * And it must stay there this many evaluated days running: every point
+ * before P8 (today's and unscored ones included, as the walk always counted
+ * them), and only settled days in the P8 era (D136).
  *
  * Promotion was immediate under the legacy walk, because reaching a rank is
  * an achievement the moment it happens; from the confirmation era on it has
@@ -157,9 +159,11 @@ export const RANK_DEMOTION_SUSTAIN_DAYS = 3;
  *
  * From the confirmation era on, the next rank is awarded only once the Boss
  * rating has been at or above its threshold on this many **eligible**
- * evaluations in a row — past, scored, unpaused days. Open, neutral and
- * paused days are transparent to the count; a scored day below the threshold
- * resets it. Today never counts: it is not final yet. Demotion is untouched.
+ * evaluations in a row — scored, unpaused days that are final: past, before
+ * P8; settled — closed, and their week judged if it carried a weekly target —
+ * in the P8 era (D136). Open, unsettled, neutral and paused days are
+ * transparent to the count; a scored day below the threshold resets it.
+ * Today never counts: it is not final yet. Demotion keeps its own step.
  */
 export const RANK_PROMOTION_CONFIRMATION_DAYS = 7;
 

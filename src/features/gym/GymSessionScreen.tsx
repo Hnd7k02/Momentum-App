@@ -837,7 +837,7 @@ export function GymSessionScreen({
     });
   };
 
-  /** An undo that a closed week refused says so (P5). */
+  /** An undo that a closed day refused says so (P5, D133). */
   const undone = (stored: boolean) => {
     if (!stored) toast({ message: t('gym.undoRefused') });
   };

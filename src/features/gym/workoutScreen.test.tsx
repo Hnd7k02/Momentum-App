@@ -479,6 +479,18 @@ describe('a field left empty', () => {
     expect(setInputs('Bankdrücken', 0)[0]!.value).toBe('8');
   });
 
+  it("is not zero assistance: an assisted set's load stays what it was", async () => {
+    const session = await startSessionFromDraft(await planDraft(['ex_assisted_pull_up']), WEDNESDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_assisted_pull_up', reps: 8, weightGrams: 20000 });
+    await open({ sessionId: session.id });
+    const [, weight] = setInputs('Klimmzüge assistiert', 0);
+    await act(async () => type(weight!, ''));
+    await act(async () => leave(weight!));
+    await quiet();
+    expect((await setsOf('ex_assisted_pull_up')).map((set) => set.weightGrams)).toEqual([20000]);
+    expect(setInputs('Klimmzüge assistiert', 0)[1]!.value).toBe('20');
+  });
+
   it('a pending barbell row with only a decimal point stores nothing', async () => {
     await open({ draft: await planDraft(['ex_bench_press']) });
     const [reps, weight] = pendingInputs('Bankdrücken');

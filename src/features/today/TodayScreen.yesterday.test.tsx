@@ -10,7 +10,8 @@ import { I18nProvider } from '../../i18n/I18nProvider';
 import { closeDatabase, deleteDatabase } from '../../storage/db';
 import { ensureSessionWindowEra } from '../../storage/configService';
 import { answersRepository, configSnapshotsRepository, runsRepository } from '../../storage/repositories';
-import { applyOnboarding } from '../../storage/services/configurationService';
+import { applyOnboarding, enableDomain } from '../../storage/services/configurationService';
+import { createPause } from '../../storage/services/pauseService';
 import { ensureExerciseCatalogue } from '../../storage/services/gymService';
 import { mount, type Mounted } from '../../test/dom';
 import { TodayScreen } from './TodayScreen';
@@ -226,8 +227,9 @@ describe('Heute | Gestern', () => {
     expect(document.querySelector('.session-sheet__closed')?.textContent).toBe('Dieser Tag ist abgeschlossen.');
     expect(buttonNamed('Sichern')).toBeNull();
     expect(buttonNamed('Training löschen')).toBeNull();
+    // Read-only, it shows the run's own day and nothing it could move to.
     const days = [...document.querySelectorAll<HTMLButtonElement>('.session-days__day')];
-    expect(days.map((day) => day.textContent)).toEqual(['Mo', 'Di', 'Mi']);
+    expect(days.map((day) => day.textContent)).toEqual(['Mo']);
     expect(days.every((day) => day.disabled)).toBe(true);
     expect(document.querySelector<HTMLInputElement>('#session-distance')?.readOnly).toBe(true);
   });
@@ -248,5 +250,118 @@ describe('Heute | Gestern', () => {
     expect(document.querySelector('.week__label')?.textContent).toBe('Diese Woche');
     await show('Gestern', '18. Oktober');
     expect(document.querySelector('.week__label')?.textContent).toBe('Letzte Woche');
+  });
+
+  it('speaks of yesterday on the Gestern side: Food and a paused day', async () => {
+    at('2026-10-12');
+    await enableDomain('food');
+    await createPause({ from: '2026-10-12', to: '2026-10-13' });
+    at(TODAY);
+    refreshToday();
+    await open();
+    expect(document.querySelector('.today__paused')).toBeNull();
+    expect(document.querySelector('.food__question')?.textContent).toBe('Wie gut hast du heute deinem Vorsatz entsprochen?');
+
+    await show('Gestern', '13. Oktober');
+    expect(document.querySelector('.today__pausedTitle')?.textContent).toBe(
+      'Gestern war Pause. Anwesenheitsverluste sind ausgesetzt.',
+    );
+    expect(document.querySelector('.food__question')?.textContent).toBe('Wie gut hast du gestern deinem Vorsatz entsprochen?');
+    expect(document.querySelector('.food__rating')?.textContent).toBe('Gestern noch nicht bewertet');
+    expect(document.querySelector('.food__logTitle')?.textContent).toBe('Gestern gegessen');
+  });
+
+  it('says nothing was due on a yesterday that asked nothing', async () => {
+    await deleteDatabase();
+    at('2026-10-10');
+    await applyOnboarding({ questions: [] });
+    at(TODAY);
+    refreshToday();
+    await enableDomain('food');
+    mounted = await mount(
+      <I18nProvider language="de" setLanguage={() => undefined}>
+        <WeightUnitProvider unit="kg">
+          <ToastProvider>
+            <TodayScreen onGoToAreas={() => undefined} />
+          </ToastProvider>
+        </WeightUnitProvider>
+      </I18nProvider>,
+    );
+    await until(() => document.querySelector('.food__question') !== null);
+    await show('Gestern', '13. Oktober');
+    expect(document.querySelector('.today__nothingDue')?.textContent).toBe('An diesem Tag war nichts fällig.');
+    expect(document.querySelector('.today__closed')).toBeNull();
+  });
+
+  it('shows a run logged for yesterday by its weekday, not the time it was logged', async () => {
+    await open();
+    await show('Gestern', '13. Oktober');
+    await click(buttonNamed('Lauf eintragen')!);
+    await until(() => document.querySelector('button.row .session-row__time') !== null);
+    expect(document.querySelector('button.row .session-row__time')?.textContent).toBe('Dienstag');
+  });
+
+  it('moves focus to the Gestern option when the pointer leads there', async () => {
+    await open();
+    await until(() => yesterdayLine() !== null);
+    await act(async () => {
+      yesterdayLine()!.focus();
+      yesterdayLine()!.click();
+    });
+    await until(() => dateLine().includes('13. Oktober') && document.querySelector('.check-in') !== null);
+    expect(document.activeElement).toBe(switchButton('Gestern'));
+  });
+
+  it('saves a run sheet left open across midnight on the run\'s own day, if the day picked is gone', async () => {
+    at(TODAY, 23, 58);
+    refreshToday();
+    const snapshotId = (await configSnapshotsRepository.list())[0]!.id;
+    await runsRepository.create({ date: TODAY, note: null, durationSeconds: null, distanceMetres: null, configSnapshotId: snapshotId });
+    await open();
+    await until(() => document.querySelector('button.row') !== null);
+    await click(document.querySelector<HTMLButtonElement>('button.row')!);
+    await until(() => document.querySelector('.session-days') !== null);
+    await click([...document.querySelectorAll<HTMLButtonElement>('.session-days__day')][0]!);
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    await act(async () => {
+      const distance = document.getElementById('session-distance') as HTMLInputElement;
+      setter.call(distance, '5.2');
+      distance.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    at('2026-10-15', 0, 1);
+    await act(async () => refreshToday());
+    await until(() => dateLine().includes('15. Oktober') && document.querySelector('.check-in') !== null);
+    const days = [...document.querySelectorAll<HTMLButtonElement>('.session-days__day')];
+    expect(days.map((day) => [day.textContent, day.getAttribute('aria-checked')])).toEqual([
+      ['Mi', 'true'],
+      ['Do', 'false'],
+    ]);
+    await click(buttonNamed('Sichern')!);
+    await until(() => false, 30);
+    expect((await runsRepository.getAll()).map((run) => [run.date, run.distanceMetres])).toEqual([[TODAY, 5200]]);
+  });
+
+  it('shows the run as stored when its sheet turns read-only at midnight', async () => {
+    at(TODAY, 23, 58);
+    refreshToday();
+    const snapshotId = (await configSnapshotsRepository.list())[0]!.id;
+    await runsRepository.create({ date: YESTERDAY, note: null, durationSeconds: 1800, distanceMetres: 5000, configSnapshotId: snapshotId });
+    await open();
+    await until(() => document.querySelector('button.row') !== null);
+    await click(document.querySelector<HTMLButtonElement>('button.row')!);
+    await until(() => document.querySelector('.session-days') !== null);
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    await act(async () => {
+      const distance = document.getElementById('session-distance') as HTMLInputElement;
+      setter.call(distance, '7.5');
+      distance.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    at('2026-10-15', 0, 1);
+    await act(async () => refreshToday());
+    await until(() => document.querySelector('.session-sheet__closed') !== null);
+    expect((document.getElementById('session-distance') as HTMLInputElement).value).toBe('5');
+    expect([...document.querySelectorAll('.session-days__day')].map((day) => day.textContent)).toEqual(['Di']);
   });
 });

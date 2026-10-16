@@ -112,12 +112,17 @@ export function GymOverview({
    * days counter has passed a block, and the tile would otherwise read as if
    * nothing were coming.
    */
+  const pending = state.decayPending ?? null;
   const lostPercent = Math.round(state.decayFraction * 100);
-  const decayLine = state.decayPending
+  const decayLine = pending
     ? lostPercent > 0
       ? t('gym.decay.lostPending', { percent: lostPercent })
-      : t('gym.decay.pending')
+      : t(pending.day === 'today' ? 'gym.decay.pendingToday' : 'gym.decay.pendingYesterday')
     : t('gym.decay.lost', { percent: lostPercent });
+  // While a charge waits the tile stays, even once a session today has ended
+  // the run: yesterday's charge still lands unless yesterday is filled in.
+  const showBreak = onBreak || pending !== null;
+  const breakDays = state.abstinence?.days ?? pending?.days ?? 0;
 
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
@@ -200,11 +205,11 @@ export function GymOverview({
         ) : null}
 
         {/* Surfaced only while it is actually happening. */}
-        {onBreak && state.abstinence ? (
+        {showBreak ? (
           <MetricTile
             id="gym-decay"
             title={t('gym.decay.title')}
-            value={t('gym.decay.days', { days: state.abstinence.days })}
+            value={t('gym.decay.days', { days: breakDays })}
             line={decayLine}
             onOpen={() => setDetail('decay')}
           />
@@ -269,15 +274,15 @@ export function GymOverview({
         <p>{t('gym.endurance.stillCounts')}</p>
       </MetricDetailSheet>
 
-      {state.abstinence ? (
+      {showBreak ? (
         <MetricDetailSheet
           open={detail === 'decay'}
           title={t('gym.decay.title')}
-          value={t('gym.decay.days', { days: state.abstinence.days })}
+          value={t('gym.decay.days', { days: breakDays })}
           scale={decayLine}
           onClose={close}
         >
-          {state.decayPending === true ? <p>{t('gym.decay.pendingExplain')}</p> : null}
+          {pending ? <p>{t('gym.decay.pendingExplain')}</p> : null}
           <p>{t('gym.decay.explain')}</p>
           <p>{t('gym.decay.floor')}</p>
           <p>{t('gym.decay.resume')}</p>

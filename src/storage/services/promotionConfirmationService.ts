@@ -18,7 +18,8 @@ import { settingsRepository } from '../repositories';
  * **next** local day, so the activation day — whatever the legacy rule
  * awards on it, including a promotion later that same day — stays entirely
  * legacy, and the new rule begins on a day that is still today and
- * therefore cannot count until it has become yesterday. Every later call
+ * therefore cannot count until it is final — yesterday under the old rules,
+ * settled in the P8 era (D136). Every later call
  * finds the state and does nothing. The boundary is never moved.
  *
  * An old backup carries no state, so restoring one on a device activates a

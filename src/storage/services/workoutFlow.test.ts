@@ -174,10 +174,18 @@ describe('a session the user empties (STOP 2, decision 1)', () => {
     expect(await gymSessionsRepository.get(session.id)).toBeDefined();
   });
 
-  it('leaves a session stored empty before P6 alone', async () => {
-    const session = await openSessionForDay(WEDNESDAY);
-    // Nothing removes a set from it, so nothing deletes it.
-    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
+  it('stays when a line without sets is removed, with its other lines', async () => {
+    // A planned session with lines and no set yet — what a first set that
+    // failed to save leaves, and how a session stored empty before P6 looks.
+    const plan = await createTrainingPlan({
+      name: 'Push',
+      exercises: [{ exerciseId: 'ex_bench_press' }, { exerciseId: 'ex_dip' }],
+    });
+    const session = await startSessionFromDraft(draftFromPlan(plan), WEDNESDAY);
+    const removed = await removeExerciseFromSession(session.id, 'ex_bench_press');
+    expect(removed.session).toBeNull();
+    const kept = await gymSessionsRepository.get(session.id);
+    expect(kept?.exercises?.map((line) => line.exerciseId)).toEqual(['ex_dip']);
   });
 });
 

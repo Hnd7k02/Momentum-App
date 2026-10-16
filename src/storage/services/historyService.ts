@@ -20,7 +20,7 @@ import type {
 import type { WeekKey } from '../../core/dates';
 import { WEEKLY_DOMAIN_TYPES, weeklyTargetsIn } from '../../core/domains';
 import { pausedFlags } from '../../core/pause';
-import { editWindowOf, weekInProgress, weekWindows } from '../../core/config/closure';
+import { editWindowOf, isP8, weekInProgress, weekWindows } from '../../core/config/closure';
 import {
   scoreDay,
   type DayScore,
@@ -292,8 +292,9 @@ export async function loadHistory(
           target,
           sessionsInWeek: sessionsIn(domain, weekKey),
           weekInProgress: inProgress,
-          // P8 (D134): the target is judged when the week is over.
-          ...(weekWindow === null ? {} : { judgedAtClose: true }),
+          // P8 (D134): the target is judged when the week is over — for a
+          // day lived under P8, in the update's week too.
+          ...(isP8(config) ? { judgedAtClose: true } : {}),
         }))
       : [];
 

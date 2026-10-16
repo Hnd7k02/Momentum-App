@@ -1,13 +1,19 @@
 import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
-import { dayClosed, daySettled, snapshotOn, weekWindows } from '../../core/config/closure';
+import { dayClosed, daySettled, snapshotOn, weekTargetThrough, weekWindows } from '../../core/config/closure';
 import { addDays, type DateKey } from '../../core/dates';
 import { closeDatabase, deleteDatabase } from '../db';
+import { ensureSessionWindowEra } from '../configService';
 import { configSnapshotsRepository, questionsRepository } from '../repositories';
 import { loadBossProgression, type BossProgression } from './bossService';
 import { logSession, saveAdherence, saveAnswer } from './checkInService';
-import { applyOnboarding, loadConfiguration, type OnboardingSelection } from './configurationService';
+import {
+  applyOnboarding,
+  disableDomainType,
+  loadConfiguration,
+  type OnboardingSelection,
+} from './configurationService';
 
 /**
  * No drop at midnight that a backfill then reverses (WP3, P8 — D132–D136).
@@ -49,6 +55,20 @@ async function fresh(selection: OnboardingSelection): Promise<void> {
   freezeAt(D0, 8);
   await applyOnboarding(selection);
   await loadConfiguration();
+}
+
+/**
+ * Strips the P8 marker from every snapshot — a profile lived before P8 — and
+ * appends the era from `update`, as the first load after the update does.
+ */
+async function legacyUntil(update: DateKey): Promise<void> {
+  const legacy = (await configSnapshotsRepository.list()).map((snapshot) => {
+    const { sessionWindowDays: _marker, ...scoring } = snapshot.config.scoring;
+    return { ...snapshot, config: { ...snapshot.config, scoring: { ...scoring, editWindowDays: 3 } } };
+  });
+  await configSnapshotsRepository.replaceAll(legacy);
+  freezeAt(update, 8);
+  expect(await ensureSessionWindowEra(update)).toBe('appended');
 }
 
 async function gym(day: DateKey): Promise<void> {
@@ -93,7 +113,9 @@ async function finalDays(clock: DateKey, dates: readonly DateKey[]) {
     (date) => dayClosed(date, clock, snapshotOn(snapshots, date), weekWindowOf(date)) === true,
   );
   const settled = dates.filter(
-    (date) => daySettled(date, clock, snapshotOn(snapshots, date), weekWindowOf(date)) === true,
+    (date) =>
+      daySettled(date, clock, snapshotOn(snapshots, date), weekWindowOf(date), weekTargetThrough(snapshots, date)) ===
+      true,
   );
   return { closed, settled };
 }
@@ -142,16 +164,17 @@ const mixed: OnboardingSelection = {
   food: true,
 };
 const mindOnly: OnboardingSelection = { questions: mixed.questions };
+const mindAndGym: OnboardingSelection = { questions: mixed.questions, gymTargetPerWeek: 3 };
 const mwf = (week: number) => [D(week * 7), D(week * 7 + 2), D(week * 7 + 4)];
 const indexOf = (run: Replay, date: DateKey) => run.boss.history.days.findIndex((day) => day.date === date);
 
 /** Attendance at its target, on the fold's 0–1000 scale. */
 const MET = 1000;
 
-/** The week's attendance, as the training fold took it on each of its days. */
-const attendanceOn = (run: Replay, dates: readonly DateKey[]) =>
+/** The week's attendance, as a training fold took it on each of its days. */
+const attendanceOn = (run: Replay, dates: readonly DateKey[], domain: 'gym' | 'running' = 'gym') =>
   dates.map((date) => {
-    const point = run.boss.gym.detail.find((entry) => entry.date === date);
+    const point = run.boss[domain].detail.find((entry) => entry.date === date);
     return point?.skipped === false ? point.attendance : null;
   });
 
@@ -236,11 +259,11 @@ const PROBES: Probe[] = [
     backfill: (reference) => logSession('gym', D(37), {}, reference).then(() => undefined),
     check({ t0, t1, t1b, t2, t2b }) {
       expect(t0.boss.gym.abstinence?.days).toBe(7);
-      // Carried, not charged — and said to be pending — on both evenings.
-      for (const run of [t0, t1]) {
-        expect(run.boss.gym.decayFraction).toBe(0);
-        expect(run.boss.gym.decayPending).toBe(true);
-      }
+      // Carried, not charged — and said to be pending — on both evenings,
+      // naming the day a session would have to be written for.
+      for (const run of [t0, t1]) expect(run.boss.gym.decayFraction).toBe(0);
+      expect(t0.boss.gym.decayPending).toEqual({ day: 'today', days: 7 });
+      expect(t1.boss.gym.decayPending).toEqual({ day: 'yesterday', days: 7 });
       expect(round(t1.boss.gym.rating)).toBe(round(t0.boss.gym.rating));
       expect(t1b.boss.gym.decayPending).toBeUndefined();
       // The charge lands once day seven has closed, and only without the session.
@@ -272,8 +295,11 @@ const PROBES: Probe[] = [
         expect(ledger.points[indexOf(t1, D(17))]?.skipped, name).toBe(true);
       }
       expect(status(t1b, D(17))).toBe('scored');
-      // Without the answers, it is charged the day after: folded, with
-      // nothing answered.
+      // Without the answers, it is charged the day after — the third silent
+      // day is the first cooling-off takes from — folded, with nothing
+      // answered.
+      const mental = (run: Replay) => run.boss.domains.find((entry) => entry.domain === 'mental')!.momentum;
+      expect(mental(t2)).toBeLessThan(mental(t1));
       expect(status(t2, D(17))).toBe('scored');
       expect(t2.boss.history.days[indexOf(t2, D(17))]?.answeredItems).toBe(0);
       for (const name of ['mental', 'food']) {
@@ -317,18 +343,15 @@ const PROBES: Probe[] = [
     t1: D(19),
     t2: D(20),
     backfill: (reference) => answerDay(D(18), 5, false, reference),
-    check({ t0, t1, t1b }) {
-      // The low day is not yet eligible either way, so nothing is reset at
-      // midnight and the correction changes nothing that was counted.
-      for (const run of [t0, t1, t1b]) {
-        expect(pendingOf(run.boss).every((date) => date < D(18))).toBe(true);
-      }
-      if (t0.boss.pending && t1.boss.pending && t0.boss.pending.targetRankId === t1.boss.pending.targetRankId) {
-        expect(t1.boss.pending.eligibleDates.slice(0, t0.boss.pending.eligibleDates.length)).toEqual(
-          t0.boss.pending.eligibleDates,
-        );
-      }
-      expect(pendingOf(t1b.boss)).toEqual(pendingOf(t1.boss));
+    check({ t0, t1, t1b, t2 }) {
+      // D17 is the first day at the threshold, and it is counted once it has
+      // settled. The low day is not counted either way while it can still be
+      // written, so nothing resets at midnight and the correction changes
+      // nothing that was counted; left low, it resets the count once settled.
+      expect(pendingOf(t0.boss)).toEqual([]);
+      expect(pendingOf(t1.boss)).toEqual([D(17)]);
+      expect(pendingOf(t1b.boss)).toEqual([D(17)]);
+      expect(pendingOf(t2.boss)).toEqual([]);
     },
   },
   {
@@ -389,10 +412,122 @@ const PROBES: Probe[] = [
     t2: D(12),
     backfill: (reference) => logSession('gym', D(10), {}, reference).then(() => undefined),
     check({ t1, t1b }) {
+      // Wednesday, unanswered, closed at midnight and is scored — at the
+      // week's target, not its running count. Today is still open.
       const week = [D(7), D(8), D(9), D(10), D(11)];
-      for (const run of [t1, t1b]) {
-        for (const value of attendanceOn(run, week)) expect([null, MET]).toContain(value);
+      for (const run of [t1, t1b]) expect(attendanceOn(run, week)).toEqual([MET, MET, MET, MET, null]);
+    },
+  },
+  {
+    name: "a demotion beside a training week, with Sunday's session logged on Monday",
+    async setup() {
+      await fresh(mindAndGym);
+      for (let index = 0; index <= 40; index += 1) await answerDay(D(index), 10, false);
+      for (let index = 41; index <= 50; index += 1) await answerDay(D(index), 1, false);
+      // A session every Monday, except in the week of D(42).
+      for (let week = 0; week <= 5; week += 1) await gym(D(week * 7));
+    },
+    day: D(48),
+    t0: D(48),
+    t1: D(49),
+    t2: D(50),
+    backfill: (reference) => logSession('gym', D(48), {}, reference).then(() => undefined),
+    check({ t1, t1b }) {
+      // The week of D(42) is not judged on Monday: none of its days moves
+      // the demotion counter yet, with the session or without it.
+      const inWeek = (run: Replay) =>
+        changesOf(run.boss).filter((change) => change.includes('demotion') && change >= D(42));
+      expect(inWeek(t1)).toEqual([]);
+      expect(inWeek(t1b)).toEqual([]);
+    },
+  },
+  {
+    name: 'a week whose training domain was switched off mid-week',
+    async setup() {
+      await fresh(mindAndGym);
+      for (let index = 0; index <= 47; index += 1) await answerDay(D(index), 8, false);
+      for (const day of [0, 1, 2, 3, 4, 5].flatMap((week) => mwf(week))) await gym(day);
+      await gym(D(42));
+      // Gym off on Tuesday D(43): the days after it carry no target of their
+      // own, but their Boss inherits Monday's, which is judged next Tuesday.
+      freezeAt(D(43), 9);
+      await disableDomainType('gym');
+    },
+    day: D(48),
+    t0: D(48),
+    t1: D(49),
+    t2: D(50),
+    backfill: (reference) => answerDay(D(48), 8, false, reference),
+    check({ t1 }) {
+      // No rank change is dated in the unjudged week on Monday.
+      expect(changesOf(t1.boss).filter((change) => change >= D(42))).toEqual([]);
+    },
+  },
+  {
+    name: 'the seventh silent day in the week the update lands in',
+    async setup() {
+      await fresh(gymOnly);
+      for (let week = 0; week < 4; week += 1) for (const day of mwf(week)) await gym(day);
+      await gym(D(28));
+      await gym(D(30));
+      // Lived before P8 until Tuesday D(36), the update's day: its week began
+      // before P8, and Wednesday D(37) is a day of the P8 era within it.
+      await legacyUntil(D(36));
+    },
+    day: D(37),
+    t0: D(37),
+    t1: D(38),
+    t2: D(39),
+    backfill: (reference) => logSession('gym', D(37), {}, reference).then(() => undefined),
+    check({ t0, t1, t1b, t2, t2b }) {
+      // Carried while the write rule still opens the day, as in any P8 week.
+      for (const run of [t0, t1]) expect(run.boss.gym.decayFraction).toBe(0);
+      expect(t0.boss.gym.decayPending).toEqual({ day: 'today', days: 7 });
+      expect(t1.boss.gym.decayPending).toEqual({ day: 'yesterday', days: 7 });
+      expect(t1b.boss.gym.decayPending).toBeUndefined();
+      expect(t2.boss.gym.decayFraction).toBeGreaterThan(0);
+      expect(t2b.boss.gym.decayFraction).toBe(0);
+    },
+  },
+  {
+    name: 'a week met by Saturday, with an extra session logged for Sunday on Monday',
+    async setup() {
+      await fresh(gymOnly);
+      for (let week = 0; week < 5; week += 1) for (const day of mwf(week)) await gym(day);
+    },
+    day: D(34),
+    t0: D(34),
+    t1: D(35),
+    t2: D(36),
+    backfill: (reference) => logSession('gym', D(34), {}, reference).then(() => undefined),
+    check({ t0, t1, t2, t2b }) {
+      // The week bonus is judged with the week: not at Sunday midnight, on
+      // Tuesday, and the extra session buys nothing more.
+      expect(t1.boss.lifetimeXp).toBe(t0.boss.lifetimeXp);
+      expect(t2.boss.lifetimeXp).toBeGreaterThan(t1.boss.lifetimeXp);
+      expect(t2b.boss.lifetimeXp - t2.boss.lifetimeXp).toBeLessThanOrEqual(t1.boss.lifetimeXp);
+    },
+  },
+  {
+    name: "a partly filled running week: Tuesday's run logged on Wednesday",
+    async setup() {
+      await fresh({ questions: [], runningTargetPerWeek: 2 });
+      for (const day of [D(0), D(3)]) {
+        freezeAt(day, 7);
+        await logSession('running', day, {}, day);
       }
+      freezeAt(D(7), 7);
+      await logSession('running', D(7), {}, D(7));
+    },
+    day: D(8),
+    t0: D(8),
+    t1: D(9),
+    t2: D(10),
+    backfill: (reference) => logSession('running', D(8), {}, reference).then(() => undefined),
+    check({ t0, t1, t1b }) {
+      expect(attendanceOn(t0, [D(7), D(8)], 'running')).toEqual([MET, MET]);
+      expect(attendanceOn(t1, [D(7), D(8), D(9)], 'running')).toEqual([MET, MET, MET]);
+      expect(attendanceOn(t1b, [D(7), D(8), D(9)], 'running')).toEqual([MET, MET, MET]);
     },
   },
 ];
@@ -458,5 +593,33 @@ describe('no drop at midnight that a backfill reverses (P8)', () => {
     expect(await attempt(at, (reference) => answerDay(addDays(at, -1), 10, false, reference))).toBe('accepted');
     const corrected = await replay(at);
     expect(changesOf(corrected.boss)).toContain(demotion);
+  });
+
+  it("a demotion beside a training week survives a session logged today, or one for yesterday", async () => {
+    // Ones from day 37, no session in the week of D(42): the first clock at
+    // which a demotion shows, then the two writes that clock still allows.
+    const setup = async () => {
+      await fresh(mindAndGym);
+      for (let index = 0; index <= 36; index += 1) await answerDay(D(index), 10, false);
+      for (let index = 37; index <= 70; index += 1) await answerDay(D(index), 1, false);
+      for (let week = 0; week <= 5; week += 1) await gym(D(week * 7));
+    };
+    await setup();
+    let c: DateKey | null = null;
+    let demotion: string | null = null;
+    for (let index = 38; index <= 70 && c === null; index += 1) {
+      const run = await replay(D(index));
+      demotion = changesOf(run.boss).find((change) => change.includes('demotion')) ?? null;
+      if (demotion) c = D(index);
+    }
+    expect(c, 'a demotion within a month of ones').not.toBeNull();
+    const at = c!;
+    for (const day of [at, addDays(at, -1)]) {
+      await setup();
+      expect(await attempt(at, (reference) => logSession('gym', day, {}, reference).then(() => undefined))).toBe(
+        'accepted',
+      );
+      expect(changesOf((await replay(at)).boss), `a session for ${day}`).toContain(demotion);
+    }
   });
 });

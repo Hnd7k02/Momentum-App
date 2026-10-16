@@ -328,8 +328,9 @@ export interface AppConfigSnapshot {
     /**
      * P8 (D132): days after a day on which a session may still be written
      * for it. Its presence is the P8 era — one write window for everything,
-     * a week judged once its Sunday can no longer be written, abstinence and
-     * promotions counted on closed days. Absent means the era before:
+     * a week judged once its Sunday can no longer be written, an abstinence
+     * charge carried while its day can still be written, and a rank moved
+     * only by settled days (D134–D136). Absent means the era before:
      * sessions within their ISO week, the week judged at Sunday midnight.
      * Never backfilled.
      */

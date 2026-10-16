@@ -410,11 +410,11 @@ describe('abstinence decay through the replay', () => {
     expect(today.state.endurance.unlocked).toBe(true);
     expect(today.state.abstinence?.days).toBe(7);
     expect(today.state.decayFraction).toBe(0);
-    expect(today.state.decayPending).toBe(true);
+    expect(today.state.decayPending).toEqual({ day: 'today', days: 7 });
     // Day eight: day seven is yesterday, still writable, still pending.
     const eight = await gymOf(addDays(START, LAST_SESSION + 8));
     expect(eight.state.decayFraction).toBe(0);
-    expect(eight.state.decayPending).toBe(true);
+    expect(eight.state.decayPending).toEqual({ day: 'yesterday', days: 7 });
     // Two days on, day seven is closed and the decay lands, once. Day eight
     // and nine sit in the same block, so nothing more waits.
     const { state } = await gymOf(addDays(START, LAST_SESSION + 9));
@@ -427,7 +427,7 @@ describe('abstinence decay through the replay', () => {
     expect(charged.state.decayPending).toBeUndefined();
     const fourteen = await gymOf(addDays(START, LAST_SESSION + 14));
     expect(fourteen.state.decayFraction).toBe(charged.state.decayFraction);
-    expect(fourteen.state.decayPending).toBe(true);
+    expect(fourteen.state.decayPending).toEqual({ day: 'today', days: 14 });
     const sixteen = await gymOf(addDays(START, LAST_SESSION + 16));
     expect(sixteen.state.decayFraction).toBeGreaterThan(charged.state.decayFraction);
     expect(sixteen.state.decayPending).toBeUndefined();

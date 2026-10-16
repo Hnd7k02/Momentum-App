@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { addDays, weekKeyOf } from '../../core/dates';
+import { addDays, toDateKey, weekKeyOf, type DateKey } from '../../core/dates';
 import type { StoredDomainType } from '../../core/model';
 import type { DomainTerminal } from '../../app/route';
 import { useToday } from '../../app/useToday';
@@ -110,6 +110,9 @@ export function TodayScreen({
   const [addingFood, setAddingFood] = useState(false);
   /** The run the sheet was last opened for, so focus can find its row again. */
   const lastEdited = useRef<string | null>(null);
+  /** Each domain's writable days, as the last loaded day gave them. */
+  const writableDays = useRef<Partial<Record<StoredDomainType, DateKey[]>>>({});
+  const switchRef = useRef<HTMLDivElement>(null);
   /*
    * One-tap logging is one write per tap (WP3, B9). A double tap logged two
    * runs and called the week met; the ref turns the second tap away before
@@ -201,10 +204,11 @@ export function TodayScreen({
    * sheet edits a run by id; a food entry is saved to the day the screen
    * shows when it is saved, as every write here is (B3).
    */
-  const editingDays =
-    editingSession && state.status === 'ready'
-      ? state.value.training.find((entry) => entry.domain === editingSession.domain)?.writableDays ?? []
-      : [];
+  if (state.status === 'ready') {
+    for (const entry of state.value.training) writableDays.current[entry.domain] = entry.writableDays;
+  }
+  // The last list a loaded day gave: a load that failed is not a closed day.
+  const editingDays = editingSession ? writableDays.current[editingSession.domain] ?? [] : [];
   const floating = (
     <>
       <Fragment key="gym-overlay">{gym.overlay}</Fragment>
@@ -219,8 +223,14 @@ export function TodayScreen({
         // was open — is said out loud rather than dropped silently.
         onSave={(input) => {
           if (editingSession) {
-            void updateSession(editingSession.domain, editingSession.id, input).then((saved) => {
+            const domain = editingSession.domain;
+            void updateSession(domain, editingSession.id, input).then((saved) => {
               if (!saved) toast({ message: t('today.session.saveRefused') });
+              // A run moved out of the week on show takes its row with it;
+              // focus goes to its card rather than to the page.
+              requestAnimationFrame(() => {
+                if (document.activeElement === document.body) focusTarget(`log-${domain}`)?.focus();
+              });
             });
           }
           setEditingSession(null);
@@ -252,7 +262,7 @@ export function TodayScreen({
   const header = (status?: ReactNode) => (
     <header className="screen__header">
       <h1 className="screen__title">{t('nav.today')}</h1>
-      <div className="today__switch">
+      <div className="today__switch" ref={switchRef}>
         <Segmented<ShownDay>
           value={shown}
           options={[
@@ -346,7 +356,15 @@ export function TodayScreen({
             ) : null}
             {/* Quiet, and only a way across: nothing here is counted. */}
             {shown === 'today' && yesterdayOpen ? (
-              <button type="button" className="today__yesterday" onClick={() => show('yesterday')}>
+              <button
+                type="button"
+                className="today__yesterday"
+                onClick={() => {
+                  show('yesterday');
+                  // The pointer goes with the day it was on; the switch stays.
+                  switchRef.current?.querySelectorAll<HTMLButtonElement>('button')[1]?.focus();
+                }}
+              >
                 {t('today.yesterdayOpen')}
                 <ChevronRightIcon size={14} />
               </button>
@@ -386,13 +404,18 @@ export function TodayScreen({
         */}
         {day.paused ? (
           <div className="today__paused" role="status">
-            <span className="today__pausedTitle">{t('pause.today')}</span>
+            <span className="today__pausedTitle">
+              {t(shown === 'today' ? 'pause.today' : 'pause.yesterday')}
+            </span>
             <span className="today__pausedBody">{t('pause.today.detail')}</span>
           </div>
         ) : null}
 
-        {/* Nothing set up is said on today's side only: a yesterday with
-            nothing due predates the setup, and its closed note says enough. */}
+        {/* Nothing set up is said on today's side only; a yesterday with
+            nothing due says just that. */}
+        {day.empty && shown === 'yesterday' ? (
+          <p className="today__nothingDue">{t('today.yesterdayEmpty')}</p>
+        ) : null}
         {day.empty && shown === 'today' ? (
           <Card rows>
             <EmptyState
@@ -501,9 +524,13 @@ export function TodayScreen({
                     title={t(copy.title)}
                     subtitle={
                       <span className="session-row__time">
-                        {/* Several sessions can share a day, so today's are told
-                            apart by time and earlier ones by weekday. */}
-                        {session.date === date
+                        {/* Several sessions can share a day, so the day's are told
+                            apart by time and earlier ones by weekday. A session
+                            logged on a later day for this one has no time of
+                            its own: the moment it was written is not when it
+                            happened. */}
+                        {session.date === date &&
+                        toDateKey(new Date(session.performedAt)) === session.date
                           ? formatTime(language, session.performedAt)
                           : formatWeekday(language, session.date)}
                         {session.durationMinutes ? ` · ${session.durationMinutes} min` : ''}
@@ -554,6 +581,7 @@ export function TodayScreen({
                   <button
                     type="button"
                     className="week__log"
+                    data-focus-key={`log-${training.domain}`}
                     // aria-disabled rather than disabled: a disabled button
                     // drops keyboard focus to the page, and the ref in
                     // logOnce already turns the second tap away.
@@ -587,6 +615,8 @@ export function TodayScreen({
           <FoodCard
             food={day.food}
             editable={day.editable}
+            day={shown}
+            closedNoted={!day.editable}
             onRate={rateFood}
             onClearRating={clearFoodRating}
             onOpenEntry={() => setAddingFood(true)}

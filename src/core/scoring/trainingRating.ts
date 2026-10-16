@@ -221,17 +221,28 @@ export interface TrainingRatingDay {
    */
   paused?: boolean;
   /**
-   * P8 (D135): a session can still be written for this day. If the
-   * abstinence rule would decay it, the day is carried instead — no decay
-   * and no gap step, never both (D96) — and the charge lands once the day
-   * can no longer be backfilled. Absent on every day of a week before P8,
-   * which keeps the rule it was lived under.
+   * P8 (D135): a session can still be written for this day — exactly the
+   * days the write rule opens (`sessionWritable`). If the abstinence rule
+   * would decay it, the day is carried instead — no decay and no gap step,
+   * never both (D96) — and the charge lands once the day can no longer be
+   * backfilled. Absent on every day lived before P8, which keeps the rule
+   * it was lived under.
    */
   open?: boolean;
   /** Gym training age in whole months on this day. */
   ageMonths: number;
   /** True once the Endurance Phase has been completed, on this day. */
   enduranceUnlocked: boolean;
+}
+
+/**
+ * A charge waiting for its day to close (D135), as the break tiles state it:
+ * which of the two days that can still take a session it waits on, and how
+ * long the run without one was on that day.
+ */
+export interface DecayPending {
+  day: 'today' | 'yesterday';
+  days: number;
 }
 
 export interface TrainingRatingPoint {
@@ -324,7 +335,10 @@ export function computeTrainingRating(
   for (const day of days) {
     // Any saved session ends the episode immediately. What was lost stays
     // lost — the user rebuilds it through attendance and performance.
-    if (day.sessionToday) episode = null;
+    if (day.sessionToday) {
+      episode = null;
+      carriedFraction = 0;
+    }
 
     /*
      * Decay is judged before the day's own status, and deliberately.
@@ -413,8 +427,12 @@ export function computeTrainingRating(
       carriedFraction = result.fraction;
       rating = clamp(result.rating);
     } else {
-      carriedFraction = 0;
-      if (!day.sessionToday && day.abstinentDays === 0) episode = null;
+      // A day inside an episode that does not decay — a paused day of a week
+      // with sessions — leaves the share charged so far as it was.
+      if (!day.sessionToday && day.abstinentDays === 0) {
+        episode = null;
+        carriedFraction = 0;
+      }
       target = targetRating({ attendance, performance });
       if (
         maintenanceHolds({

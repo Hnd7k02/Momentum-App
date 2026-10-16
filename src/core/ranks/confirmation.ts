@@ -28,19 +28,24 @@ import {
  * - **From `from` on** a promotion has to be *confirmed*: the next rank is
  *   awarded only once the rating has been at or above its threshold on
  *   `RANK_PROMOTION_CONFIRMATION_DAYS` eligible days in a row. A day is
- *   eligible when it is strictly before today, was scored, and was not
- *   paused. Everything else — today, an open day, a neutral day, a paused day
- *   — is transparent: it neither counts nor resets. A scored day below the
- *   threshold resets the count to nothing.
+ *   eligible when it was scored, was not paused, and is final: strictly
+ *   before today for a day lived before P8, **settled** for a day of the P8
+ *   era (D136) — closed, and its week judged if that week carried a weekly
+ *   target up to it. Everything else — today, an open day, a day of a week
+ *   not yet judged, a neutral day, a paused day — is transparent: it neither
+ *   counts nor resets. A scored day below the threshold resets the count to
+ *   nothing.
  *
  * One target at a time. The dates collected for one rank can never confirm
  * another, a rating already two thresholds up still advances one rank per
  * confirmation, and each promotion starts the next target from zero.
  *
- * **Demotion is not touched.** The new walk runs the same demotion step the
- * legacy walk runs, on every point, today's and unscored ones included, with
- * the counter carried across the boundary. The confirmation rule replaces
- * the promotion branch and nothing else.
+ * **Demotion keeps its step.** The new walk runs the same demotion step the
+ * legacy walk runs, with the counter carried across the boundary: on every
+ * point lived before P8, today's and unscored ones included, and on a P8 day
+ * only once it is settled (D136) — a demotion counted on a day whose week can
+ * still take a session could be taken back by that session. The confirmation
+ * rule replaces the promotion branch and nothing else.
  *
  * Pure. Same days, same boundary, same today: same result, byte for byte.
  */
@@ -54,13 +59,9 @@ export interface ConfirmationDay {
   paused: boolean;
   /**
    * P8 (D136), absent on a day before P8: nothing about the day can be
-   * written any more. Only such a day moves the demotion counter.
-   */
-  closed?: boolean;
-  /**
-   * P8 (D136), absent on a day before P8: closed, and — for a day with a
-   * weekly target — its week judged, so its rating is final. Only such a day
-   * counts towards a promotion.
+   * written any more and, if its week carried a weekly target up to it, that
+   * week has been judged — so its rating and the Boss on it are final. Only
+   * such a day counts towards a promotion or moves the demotion counter.
    */
   settled?: boolean;
 }
@@ -85,7 +86,10 @@ export interface ConfirmedRankHistory {
 export interface ConfirmationOptions {
   /** First day of the confirmation era. */
   from: DateKey;
-  /** The current local day. A day counts only when strictly before it. */
+  /**
+   * The current local day. A day lived before P8 counts only when strictly
+   * before it; a P8 day by its `settled` flag.
+   */
   today: DateKey;
   required?: number;
   sustainDays?: number;
@@ -168,9 +172,9 @@ export function confirmedRankHistory(
 
     // The demotion step, on every point that did not confirm — exactly the
     // legacy walk's, with its counter carried in from the prefix. From P8 a
-    // day that can still be written is transparent to it (D136): a dip a
-    // backfill of that day could lift never counts towards a demotion.
-    if (!promoted && day.closed !== false) rankWalkDemotionStep(state, day, natural, sustainDays);
+    // day that is not settled is transparent to it (D136): a dip that a
+    // write into its day or its week could still lift never counts.
+    if (!promoted && day.settled !== false) rankWalkDemotionStep(state, day, natural, sustainDays);
     if (state.current !== before && !promoted) retarget();
 
     if (state.current.index > state.peak.index) state.peak = state.current;

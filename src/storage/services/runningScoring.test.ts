@@ -296,7 +296,11 @@ describe('abstinence decay for Running', () => {
     expect(today.state.endurance.unlocked).toBe(true);
     expect(today.state.abstinence?.days).toBe(7);
     expect(today.state.decayFraction).toBe(0);
-    expect(today.state.decayPending).toBe(true);
+    expect(today.state.decayPending).toEqual({ day: 'today', days: 7 });
+    // Day eight: day seven is yesterday, still writable, still waiting.
+    const eight = await stateAt(addDays(START, 24 + 8));
+    expect(eight.state.decayFraction).toBe(0);
+    expect(eight.state.decayPending).toEqual({ day: 'yesterday', days: 7 });
     // Two days on, day seven is closed and the decay lands, once.
     const { state } = await stateAt(addDays(START, 24 + 9));
     expect(state.decayFraction).toBeGreaterThan(0);

@@ -23,8 +23,8 @@ export type DayState = Loadable<DayView>;
 /**
  * The Today screen's connection to storage.
  *
- * Writes go through the check-in service, which owns the edit-window and
- * same-week rules, and each write is followed by a reload so what is on
+ * Writes go through the check-in service, which owns the one write rule —
+ * today and yesterday (D133) — and each write is followed by a reload so what is on
  * screen is what is on disk. The interaction is small enough that this costs
  * nothing and removes a whole class of drift.
  *
@@ -46,8 +46,8 @@ export function useDay(date: string = today()) {
         await reload();
         return result;
       } catch (error: unknown) {
-        // A rejected write means a rule refused it — the edit window, or a
-        // closed week. Reloading puts the screen back on the truth.
+        // A rejected write means a rule refused it — a day that can no
+        // longer be written. Reloading puts the screen back on the truth.
         console.warn('Check-in write refused', error);
         await reload();
         return undefined;
@@ -63,13 +63,13 @@ export function useDay(date: string = today()) {
         value === null ? clearAnswer(date, questionId) : saveAnswer(date, questionId, value),
       ),
     logSession: (domain: StoredDomainType) => run(() => logSession(domain, date)),
-    /** `true` once saved; `undefined` when a rule refused it (a closed week). */
+    /** `true` once saved; `undefined` when a rule refused it (a closed day). */
     updateSession: (domain: StoredDomainType, id: string, input: SessionInput) =>
       run(async () => {
         await updateSession(domain, id, input);
         return true as const;
       }),
-    /** `true` once deleted; `undefined` when a rule refused it (a closed week). */
+    /** `true` once deleted; `undefined` when a rule refused it (a closed day). */
     deleteSession: (domain: StoredDomainType, id: string) =>
       run(async () => {
         await deleteSession(domain, id);

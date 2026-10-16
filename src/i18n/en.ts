@@ -142,6 +142,7 @@ export const en: Translations = {
   'today.show.today': 'Today',
   'today.show.yesterday': 'Yesterday',
   'today.yesterdayOpen': 'Yesterday is still open',
+  'today.yesterdayEmpty': 'Nothing was due on this day.',
   'today.emptyTitle': 'Nothing set up yet',
   'today.emptyBody': 'Choose what Momentum should track for you under Areas.',
   'today.emptyAction': 'Go to Areas',
@@ -491,7 +492,8 @@ export const en: Translations = {
   'gym.decay.title': 'Training break',
   'gym.decay.days': '{days} days without a session',
   'gym.decay.lost': '{percent} % of your progress reduced',
-  'gym.decay.pending': 'Decay pending — it counts once the day is closed',
+  'gym.decay.pendingToday': 'Decay pending — a session today prevents it',
+  'gym.decay.pendingYesterday': 'Decay pending — a session for yesterday prevents it',
   'gym.decay.lostPending': '{percent} % reduced · more decay pending',
   'gym.decay.pendingExplain':
     'A day without a session only counts once it can no longer be filled in. Log a session for that day while you still can, and this decay does not happen.',
@@ -589,7 +591,8 @@ export const en: Translations = {
   'running.decay.title': 'Running break',
   'running.decay.days': '{days} days without a run',
   'running.decay.lost': '{percent} % of your progress reduced',
-  'running.decay.pending': 'Decay pending — it counts once the day is closed',
+  'running.decay.pendingToday': 'Decay pending — a run today prevents it',
+  'running.decay.pendingYesterday': 'Decay pending — a run for yesterday prevents it',
   'running.decay.lostPending': '{percent} % reduced · more decay pending',
   'running.decay.pendingExplain':
     'A day without a run only counts once it can no longer be filled in. Log a run for that day while you still can, and this decay does not happen.',
@@ -613,7 +616,9 @@ export const en: Translations = {
   'food.title': 'Food',
   'food.today.title': 'Food',
   'food.rate.label': 'How closely did today match what you set out to do?',
+  'food.rate.label.yesterday': 'How closely did yesterday match what you set out to do?',
   'food.rate.none': 'Not rated yet today',
+  'food.rate.none.yesterday': 'Not rated yet for yesterday',
   'food.rate.value': '{value} out of 10 · {band}',
   'food.rate.clear': 'Remove rating',
   'food.focus.label': 'What you are aiming at',
@@ -622,6 +627,7 @@ export const en: Translations = {
   'food.focus.hint': 'One sentence in your own words. That is what you rate yourself against each day — not a calorie figure.',
   'food.focus.save': 'Save',
   'food.entries.title': 'Eaten today',
+  'food.entries.title.yesterday': 'Eaten yesterday',
   'food.entries.empty': 'Nothing logged yet.',
   'food.entries.add': 'Log food',
   'food.entries.remove': 'Remove entry',
@@ -698,6 +704,7 @@ export const en: Translations = {
   'pause.error.extendsBeyondOriginal': 'This can only shorten a pause.',
   'pause.error.notFound': 'That pause no longer exists.',
   'pause.today': 'Today is paused. Losses from being away are suspended.',
+  'pause.yesterday': 'Yesterday was paused. Losses from being away are suspended.',
   'pause.today.detail': 'Logging and progress carry on exactly as usual.',
 
   /* ── Training plans (WP2-1) ──────────────────────────────────────────── */

@@ -24,6 +24,8 @@ import './food.css';
 export function FoodCard({
   food,
   editable,
+  day = 'today',
+  closedNoted = false,
   onRate,
   onClearRating,
   onOpenEntry,
@@ -31,6 +33,10 @@ export function FoodCard({
 }: {
   food: FoodDayView;
   editable: boolean;
+  /** Which day the card speaks of: Heute's side, or Gestern's (D138). */
+  day?: 'today' | 'yesterday';
+  /** The screen already says the day is closed, so the card need not again. */
+  closedNoted?: boolean;
   onRate(value: number): void;
   onClearRating(): void;
   /**
@@ -43,6 +49,8 @@ export function FoodCard({
 }) {
   const t = useT();
   const band = food.adherence === null ? null : adherenceBandOf(food.adherence);
+  const yesterday = day === 'yesterday';
+  const question = t(yesterday ? 'food.rate.label.yesterday' : 'food.rate.label');
 
   return (
     <Section label={t('food.today.title')}>
@@ -55,13 +63,13 @@ export function FoodCard({
           )}
         </div>
 
-        <p className="food__question">{t('food.rate.label')}</p>
+        <p className="food__question">{question}</p>
         {/* Wrapped so the card's own scale can be addressed on its own —
             Wellbeing renders the same control, and a page-wide selector
             would find all of them. */}
         <div className="food__scale">
           <ScaleAnswer
-            questionText={t('food.rate.label')}
+            questionText={question}
             value={food.adherence}
             disabled={!editable}
             onChange={(next) => onRate(Number(next))}
@@ -70,7 +78,7 @@ export function FoodCard({
 
         <p className="food__rating" aria-live="polite">
           {food.adherence === null || band === null
-            ? t('food.rate.none')
+            ? t(yesterday ? 'food.rate.none.yesterday' : 'food.rate.none')
             : t('food.rate.value', {
                 value: food.adherence,
                 band: t(STATUS_LABEL_KEYS[band]),
@@ -85,7 +93,9 @@ export function FoodCard({
 
         <div className="food__log">
           <div className="food__logHeader">
-            <span className="food__logTitle">{t('food.entries.title')}</span>
+            <span className="food__logTitle">
+              {t(yesterday ? 'food.entries.title.yesterday' : 'food.entries.title')}
+            </span>
             {food.entries.length > 0 ? (
               <span className="food__total">
                 {t('food.entries.total', {
@@ -133,7 +143,7 @@ export function FoodCard({
               <PlusIcon size={19} />
               {t('food.entries.add')}
             </button>
-          ) : (
+          ) : closedNoted ? null : (
             <p className="food__closed">{t('food.locked')}</p>
           )}
 

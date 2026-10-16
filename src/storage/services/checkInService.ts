@@ -8,7 +8,7 @@ import {
   type DayEditState,
   type WeekKey,
 } from '../../core/dates';
-import { WEEKLY_DOMAIN_TYPES, weeklyTargetOf } from '../../core/domains';
+import { WEEKLY_DOMAIN_TYPES, weeklyTargetIn, weeklyTargetOf } from '../../core/domains';
 import { needsLegacySportChoice } from '../../core/migration/legacySport';
 import { isPausedOn } from '../../core/pause';
 import { isValidAdherence } from '../../core/food';
@@ -295,7 +295,18 @@ async function trainingWeekOf(
   snapshots: readonly ConfigSnapshotRecord[],
 ): Promise<TrainingDayView | null> {
   const domain = domains.find((entry) => entry.type === type);
-  const target = domain ? weeklyTargetOf(domain) : null;
+  // A day before today states its week against the target it was lived
+  // under, from its own snapshot — so a domain switched off this morning
+  // still shows yesterday's card (D133); today reads the live record.
+  const dayConfig = compareDateKeys(date, reference) < 0 ? snapshotOn(snapshots, date) : undefined;
+  const target =
+    dayConfig !== undefined
+      ? dayConfig
+        ? weeklyTargetIn(dayConfig, type)
+        : null
+      : domain
+        ? weeklyTargetOf(domain)
+        : null;
   if (!domain || target === null) return null;
   const weekKey = weekKeyOf(date);
   const sessions = await loadWeek(type, weekKey);
@@ -359,12 +370,15 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
    * configuration, which today's snapshot follows.
    */
   const past = compareDateKeys(date, reference) < 0;
-  const enabledOnDay = (type: StoredDomainType): boolean => !past || enabledIn(dayConfig, type);
+  // A domain switched off this morning was still due yesterday: a past day
+  // follows its own snapshot alone; the live record supplies only its id.
+  const shownOnDay = (domain: DomainRecord | null | undefined): domain is DomainRecord =>
+    Boolean(domain) && (past ? enabledIn(dayConfig, domain!.type) : domain!.enabled);
 
   const mentalDomain = domains.find((domain) => domain.type === 'mental') ?? null;
 
   let mental: MentalDayView | null = null;
-  if (mentalDomain?.enabled && enabledOnDay('mental')) {
+  if (shownOnDay(mentalDomain)) {
     const active =
       past && dayConfig
         ? questionsAskedIn(dayConfig, mentalDomain.id, await questionsRepository.list())
@@ -384,14 +398,14 @@ export async function loadDay(date: DateKey = today(), reference: DateKey = toda
 
   const training: TrainingDayView[] = [];
   for (const type of WEEKLY_DOMAIN_TYPES) {
-    if (!enabledOnDay(type)) continue;
+    if (past && !enabledIn(dayConfig, type)) continue;
     const view = await trainingWeekOf(type, domains, date, reference, snapshots);
     if (view) training.push(view);
   }
 
   const foodDomain = domains.find((entry) => entry.type === 'food');
   let food: FoodDayView | null = null;
-  if (foodDomain?.enabled && enabledOnDay('food')) {
+  if (shownOnDay(foodDomain)) {
     const [rating, entries] = await Promise.all([
       foodDaysRepository.get(date),
       foodEntriesRepository.listByDate(date),
@@ -439,20 +453,24 @@ export async function yesterdayOutstanding(reference: DateKey = today()): Promis
 
 /**
  * The questions a snapshot asked in a domain, as their live records in the
- * order Areas shows them. A question's wording and scale come from its
- * record; whether it was asked comes from the day.
+ * order Areas shows them. The wording is the record's — the latest wording
+ * wins, as in the history — but whether it was asked and how it is answered
+ * (its type) come from the day, which is how the replay scores it.
  */
 function questionsAskedIn(
   config: AppConfigSnapshot,
   domainId: string,
   live: readonly QuestionRecord[],
 ): QuestionRecord[] {
-  const asked = new Set(
+  const asked = new Map(
     config.questions
       .filter((question) => question.domainId === domainId && question.status === 'active')
-      .map((question) => question.id),
+      .map((question) => [question.id, question]),
   );
-  return live.filter((question) => asked.has(question.id));
+  return live.flatMap((question) => {
+    const onDay = asked.get(question.id);
+    return onDay ? [{ ...question, type: onDay.type }] : [];
+  });
 }
 
 /** The user's own sentence for what they are eating towards, if they wrote one. */
@@ -500,13 +518,20 @@ export async function saveAnswer(
   await assertEditable(date, reference, 'mental');
   const question = await questionsRepository.get(questionId);
   if (!question) throw new InvalidAnswerError(`Unknown question ${questionId}`);
+  // The question as the day asked it (D133): the replay scores a day by its
+  // own snapshot, so a type changed today must not decide how yesterday's
+  // answer is read, and a question that day did not ask takes no answer.
+  const asked = snapshotOn(await configSnapshotsRepository.list(), date)?.questions.find(
+    (entry) => entry.id === questionId && entry.status === 'active',
+  );
+  if (!asked) throw new InvalidAnswerError(`Question ${questionId} was not asked on ${date}`);
   const snapshot = await ensureCurrentSnapshot();
   return answersRepository.save({
     date,
     questionId,
     domainId: question.domainId,
-    value: validate(question, value),
-    valueType: question.type,
+    value: validate({ ...question, type: asked.type }, value),
+    valueType: asked.type,
     configSnapshotId: snapshot.id,
   });
 }
@@ -553,11 +578,11 @@ export async function logSession(
   input: SessionInput = {},
   reference: DateKey = today(),
 ): Promise<TrainingSession> {
+  // The day's snapshot decides whether the domain was on (D133): a run for
+  // yesterday stays writable after the domain was switched off this morning.
   await assertSessionWritable(date, reference, domain);
   const record = await domainsRepository.findByType(domain);
-  if (!record || !record.enabled) {
-    throw new InvalidAnswerError(`${domain} is not enabled`);
-  }
+  if (!record) throw new InvalidAnswerError(`${domain} is not enabled`);
   const snapshot = await ensureCurrentSnapshot();
 
   if (domain === 'gym') {

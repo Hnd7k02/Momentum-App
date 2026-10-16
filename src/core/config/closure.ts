@@ -32,6 +32,10 @@ import { LEGACY_EDIT_WINDOW_DAYS } from './constants';
  *   for sessions also in a week whose Sunday is still writable. So every write
  *   lands on a day and in a week that are still open, and a day lived before
  *   the update is never reopened by it.
+ * - **Charges** wait for the same moment, day by day: a P8 day is carried
+ *   while a session can still be written for it, and settled — final for a
+ *   rank — once it is closed and, if its week carried a weekly target up to
+ *   it, that week judged.
  *
  * Pure: snapshots and dates in, answers out.
  */
@@ -168,30 +172,35 @@ export function dayClosed(
 }
 
 /**
- * Whether a P8 day is settled: closed, and — if it carries a weekly target —
- * its week judged too. Until then a training day's attendance still counts as
- * met (D134), so its rating is not final and a promotion may not count it
- * (D136). `null` for a day before P8.
+ * Whether any day of `date`'s week, from its Monday through `date`, carried a
+ * weekly target. The Boss on a day is the day before's plus that day's
+ * movement, so a day inherits whatever its week's earlier days still owe to a
+ * week not yet judged — even when its own snapshot has no target any more.
+ */
+export function weekTargetThrough(snapshots: readonly ConfigSnapshotRecord[], date: DateKey): boolean {
+  for (let day = startOfWeek(date); compareDateKeys(day, date) <= 0; day = addDays(day, 1)) {
+    const config = snapshotOn(snapshots, day);
+    if (config && weeklyTargetsIn(config).length > 0) return true;
+  }
+  return false;
+}
+
+/**
+ * Whether a P8 day is settled — final for a rank: closed, and, if its week
+ * carried a weekly target up to it (`weekTargetThrough`), that week judged
+ * too. Until then a week's attendance still counts as met or as no data
+ * (D134), so the day's ratings, and the Boss built on them, can still move,
+ * and neither a promotion nor the demotion counter may count it (D136).
+ * `null` for a day before P8.
  */
 export function daySettled(
   date: DateKey,
   reference: DateKey,
   dayConfig: AppConfigSnapshot | null | undefined,
   weekWindow: number | null,
+  weekTarget: boolean,
 ): boolean | null {
   const closed = dayClosed(date, reference, dayConfig, weekWindow);
   if (closed !== true) return closed;
-  const hasWeeklyTarget = dayConfig ? weeklyTargetsIn(dayConfig).length > 0 : false;
-  return !hasWeeklyTarget || !weekInProgress(date, reference, weekWindow);
-}
-
-/**
- * Whether a session could still be written for a day of a P8 week. On such a
- * day an abstinence step that would decay is carried instead (D135). `false`
- * for a week before P8, which keeps the rule it was lived under.
- */
-export function sessionDayOpen(date: DateKey, reference: DateKey, weekWindow: number | null): boolean {
-  if (weekWindow === null) return false;
-  const age = diffInDays(date, reference);
-  return age >= 0 && age <= weekWindow;
+  return !weekTarget || !weekInProgress(date, reference, weekWindow);
 }

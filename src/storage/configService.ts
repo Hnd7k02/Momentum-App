@@ -56,33 +56,44 @@ export async function configForDate(date: DateKey): Promise<AppConfigSnapshot | 
  * first configuration write, which may never come, and which a write guard
  * that refuses pre-P8 days would refuse anyway before it could append.
  *
- * Appends, effective today, the latest snapshot again with the one-day window
- * and the P8 marker and nothing else new: it starts this era and no other (a
- * device that skipped releases starts the Boss or model eras on its next real
- * configuration change, exactly as it always did). On a day that already has
- * a snapshot, that one is carried over with the two fields added. A snapshot
- * dated after today — a clock that was ahead — is not in force yet and takes
- * the fields too, so the era cannot flip back on its date. A profile with no
- * snapshot at all is left alone: its first snapshot is written with the
- * fields. Idempotent: once the latest snapshot carries the marker, nothing
- * is written.
+ * Keyed on the snapshot **in force today**, not on the latest one: when it
+ * lacks the marker, the same configuration is appended effective today with
+ * the one-day window and the marker and nothing else new — it starts this era
+ * and no other (a device that skipped releases starts the Boss or model eras
+ * on its next write, which appends the full current configuration effective
+ * that day, exactly as it always did). On a day that already has a snapshot,
+ * that one is carried over with the two fields added. A snapshot dated after
+ * today — a clock that was ahead — is not in force yet: it takes the fields
+ * too, so the era cannot flip back on its date, and a marker it already
+ * carries does not stand in for today's, so a corrected clock never finds
+ * today locked. With nothing in force today but something dated later — set
+ * up while the clock was ahead — today takes that first configuration, so
+ * the app can be written to at all. A profile with no snapshot is left
+ * alone: its first snapshot is written with the fields. Idempotent.
  */
 export async function ensureSessionWindowEra(
   effectiveFrom: DateKey = today(),
 ): Promise<'unchanged' | 'appended'> {
   const all = await configSnapshotsRepository.list();
-  const latest = all[all.length - 1];
-  if (!latest || latest.config.scoring.sessionWindowDays !== undefined) return 'unchanged';
+  if (all.length === 0) return 'unchanged';
   const withMarker = (config: AppConfigSnapshot): AppConfigSnapshot => ({
     ...config,
     scoring: { ...config.scoring, editWindowDays: EDIT_WINDOW_DAYS, sessionWindowDays: SESSION_WINDOW_DAYS },
   });
-  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? latest;
-  await configSnapshotsRepository.append(withMarker(inForce.config), effectiveFrom);
-  for (const later of all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom)) {
-    if (later.config.scoring.sessionWindowDays === undefined) {
-      await configSnapshotsRepository.append(withMarker(later.config), later.effectiveFrom);
+  const marked = (snapshot: { config: AppConfigSnapshot }) => snapshot.config.scoring.sessionWindowDays !== undefined;
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
+  const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
+  let appended = false;
+  if (inForce === null || !marked(inForce)) {
+    const base = inForce ?? later[0]!;
+    await configSnapshotsRepository.append(withMarker(base.config), effectiveFrom);
+    appended = true;
+  }
+  for (const snapshot of later) {
+    if (!marked(snapshot)) {
+      await configSnapshotsRepository.append(withMarker(snapshot.config), snapshot.effectiveFrom);
+      appended = true;
     }
   }
-  return 'appended';
+  return appended ? 'appended' : 'unchanged';
 }

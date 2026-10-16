@@ -115,9 +115,9 @@ Never conflate them.
   after, never moved. The pending dates are persisted but recomputed from history on
   every replay; never patch them from an edit. Demotion needs hysteresis
   *and* sustained days, exactly as before. A single bad day may never cost a
-  tier. In the P8 era a promotion counts a day only once it is settled —
-  closed, and with a weekly target its week judged — and the demotion
-  counter counts only closed days (D136). Gym's and Running's Endurance Phase
+  tier. In the P8 era a day counts for a promotion, and moves the demotion
+  counter, only once it is settled — closed, and if its week carried a
+  weekly target up to it, that week judged (D136). Gym's and Running's Endurance Phase
   no longer gates a promotion (there is no domain promotion to gate, D125);
   it stays as written in D94 — four net weeks, real numbers throughout — and
   abstinence decay begins only once it is complete.

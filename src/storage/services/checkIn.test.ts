@@ -4,7 +4,15 @@ import { setClock } from '../../core/clock';
 import { closeDatabase, deleteDatabase } from '../db';
 import { ensureSessionWindowEra } from '../configService';
 import { answersRepository, configSnapshotsRepository, gymSessionsRepository, runsRepository } from '../repositories';
-import { addQuestion, applyOnboarding, archiveQuestion, enableDomain, pauseQuestion } from './configurationService';
+import {
+  addQuestion,
+  applyOnboarding,
+  archiveQuestion,
+  disableDomainType,
+  enableDomain,
+  pauseQuestion,
+  updateQuestion,
+} from './configurationService';
 import {
   EditWindowError,
   InvalidAnswerError,
@@ -12,6 +20,7 @@ import {
   deleteSession,
   loadDay,
   logSession,
+  saveAdherence,
   saveAnswer,
   updateSession,
   yesterdayOutstanding,
@@ -335,6 +344,125 @@ describe('the day view under one day back (D133, D138)', () => {
   });
 });
 
+describe('a past day as it was asked (D133, review of Stage 3b)', () => {
+  it("answers yesterday's question with yesterday's type, and refuses one it did not ask", async () => {
+    const { boolQuestion, scaleQuestion } = await setup('2025-03-20');
+    // Both types swapped this morning, and a question added.
+    await updateQuestion(boolQuestion.id, { type: 'scale' });
+    await updateQuestion(scaleQuestion.id, { type: 'boolean' });
+    const added = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.mental?.items.map((item) => [item.question.id, item.question.type])).toEqual([
+      [boolQuestion.id, 'boolean'],
+      [scaleQuestion.id, 'scale'],
+    ]);
+    await saveAnswer('2025-03-30', boolQuestion.id, true);
+    await expect(saveAnswer('2025-03-30', scaleQuestion.id, false)).rejects.toThrow(InvalidAnswerError);
+    await saveAnswer('2025-03-30', scaleQuestion.id, 6);
+    expect((await answersRepository.get('2025-03-30', scaleQuestion.id))?.valueType).toBe('scale');
+    await expect(saveAnswer('2025-03-30', added.id, true)).rejects.toThrow(InvalidAnswerError);
+    // Today asks the new types.
+    await saveAnswer(TODAY, boolQuestion.id, 7);
+    expect((await answersRepository.get(TODAY, boolQuestion.id))?.valueType).toBe('scale');
+  });
+
+  it('shows yesterday the domains switched off this morning, and takes their backfill', async () => {
+    await setup('2025-03-20', 2);
+    // Food on since Saturday, so yesterday had it too.
+    freezeAt('2025-03-29');
+    await enableDomain('food');
+    freezeAt(TODAY);
+    await disableDomainType('mental');
+    await disableDomainType('running');
+    await disableDomainType('food');
+
+    const yesterday = await loadDay('2025-03-30');
+    expect(yesterday.mental?.items).toHaveLength(2);
+    expect(yesterday.food).not.toBeNull();
+    expect(yesterday.training.map((entry) => entry.domain)).toEqual(['gym', 'running']);
+    expect(yesterday.training[1]?.progress.target).toBe(2);
+    expect(yesterday.training[1]?.writableDays).toEqual(['2025-03-30']);
+    expect(await yesterdayOutstanding(TODAY)).toBe(true);
+    await logSession('running', '2025-03-30');
+    expect(await runsRepository.getAll()).toHaveLength(1);
+    await saveAdherence('2025-03-30', 6);
+    // Today has none of them.
+    const today = await loadDay(TODAY);
+    expect(today.mental).toBeNull();
+    expect(today.food).toBeNull();
+    expect(today.training.map((entry) => entry.domain)).toEqual(['gym']);
+    await expect(logSession('running', TODAY)).rejects.toThrow();
+  });
+
+  it('refuses an answer or a Food rating for a yesterday on which its domain was off (Q10)', async () => {
+    freezeAt('2025-03-20');
+    await applyOnboarding({ questions: [], gymTargetPerWeek: 3 });
+    freezeAt(TODAY);
+    const question = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+    await enableDomain('food');
+    await expect(saveAnswer('2025-03-30', question.id, true)).rejects.toThrow(/mental was not enabled/);
+    await expect(saveAdherence('2025-03-30', 7)).rejects.toThrow(/food was not enabled/);
+    await saveAnswer(TODAY, question.id, true);
+    await saveAdherence(TODAY, 7);
+  });
+
+  it("points to a yesterday that owes only its Food rating", async () => {
+    const { boolQuestion, scaleQuestion } = await setup('2025-03-20');
+    freezeAt('2025-03-20');
+    await enableDomain('food');
+    freezeAt(TODAY);
+    await saveAnswer('2025-03-30', boolQuestion.id, true);
+    await saveAnswer('2025-03-30', scaleQuestion.id, 6);
+    expect(await yesterdayOutstanding(TODAY)).toBe(true);
+    await saveAdherence('2025-03-30', 8);
+    expect(await yesterdayOutstanding(TODAY)).toBe(false);
+  });
+});
+
+describe('the P8 era append (D132)', () => {
+  it('appends once and then stays put', async () => {
+    await setup('2025-03-20');
+    await updatedOn(TODAY);
+    expect(await ensureSessionWindowEra(TODAY)).toBe('unchanged');
+    expect(await ensureSessionWindowEra('2025-04-01')).toBe('unchanged');
+  });
+
+  it('never leaves today locked after a clock that was ahead', async () => {
+    const { boolQuestion } = await setup('2025-03-20');
+    // The first load after the update ran with the clock four days ahead…
+    await updatedOn('2025-04-04');
+    // …and the clock was put right.
+    expect(await ensureSessionWindowEra(TODAY)).toBe('appended');
+    expect((await loadDay(TODAY)).editable).toBe(true);
+    await saveAnswer(TODAY, boolQuestion.id, true);
+    await logSession('gym', TODAY);
+  });
+
+  it('marks a snapshot dated after today too', async () => {
+    await setup('2025-03-20');
+    const [first] = await configSnapshotsRepository.list();
+    const { sessionWindowDays: _marker, ...scoring } = first!.config.scoring;
+    const legacy = { ...first!.config, scoring: { ...scoring, editWindowDays: 3 } };
+    await configSnapshotsRepository.replaceAll([
+      { ...first!, config: legacy },
+      { ...first!, id: 'cfg_later', effectiveFrom: '2025-04-05', config: legacy },
+    ]);
+    expect(await ensureSessionWindowEra(TODAY)).toBe('appended');
+    const later = (await configSnapshotsRepository.list()).find((snapshot) => snapshot.effectiveFrom === '2025-04-05');
+    expect(later?.config.scoring.sessionWindowDays).toBe(1);
+  });
+
+  it('gives today a configuration when the app was set up with the clock ahead', async () => {
+    freezeAt('2025-04-03');
+    await applyOnboarding({ questions: [{ text: 'A', type: 'boolean', category: 'eigene' }], gymTargetPerWeek: 3 });
+    freezeAt(TODAY);
+    expect(await ensureSessionWindowEra(TODAY)).toBe('appended');
+    expect((await loadDay(TODAY)).editable).toBe(true);
+    await logSession('gym', TODAY);
+  });
+});
+
 describe('training sessions', () => {
   it('counts this week towards the target', async () => {
     await setup();
@@ -373,7 +501,7 @@ describe('training sessions', () => {
     expect(updated?.note).toBe('Kurz');
   });
 
-  it('deletes a session within its own week', async () => {
+  it('deletes a session while its day can still be written', async () => {
     await setup();
     const session = await logSession('gym', TODAY);
     await deleteSession('gym', session.id);

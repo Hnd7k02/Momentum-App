@@ -24,8 +24,12 @@ export function dayEditState(
   return 'closed';
 }
 
-/** Daily check-in data may be written or corrected for today and the three
- *  preceding days. Everything older is read-only. */
+/**
+ * Whether a day is inside a window of `windowDays` days before today. The
+ * default is the P8 window — today and yesterday (D133). A day's own window
+ * comes from its snapshot (`editWindowOf`: 3 before P8, 1 from it), and
+ * scoring a past day must pass that, never rely on this default.
+ */
 export function isEditableDay(
   day: DateKey,
   today: DateKey,
