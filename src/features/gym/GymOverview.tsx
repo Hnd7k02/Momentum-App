@@ -123,6 +123,8 @@ export function GymOverview({
   // the run: yesterday's charge still lands unless yesterday is filled in.
   const showBreak = onBreak || pending !== null;
   const breakDays = state.abstinence?.days ?? pending?.days ?? 0;
+  // A session today ended the run; what waits is yesterday's charge alone.
+  const runEnded = state.abstinence === null && pending !== null;
 
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
@@ -209,7 +211,7 @@ export function GymOverview({
           <MetricTile
             id="gym-decay"
             title={t('gym.decay.title')}
-            value={t('gym.decay.days', { days: breakDays })}
+            value={t(runEnded ? 'gym.decay.daysEnded' : 'gym.decay.days', { days: breakDays })}
             line={decayLine}
             onOpen={() => setDetail('decay')}
           />
@@ -278,14 +280,14 @@ export function GymOverview({
         <MetricDetailSheet
           open={detail === 'decay'}
           title={t('gym.decay.title')}
-          value={t('gym.decay.days', { days: breakDays })}
+          value={t(runEnded ? 'gym.decay.daysEnded' : 'gym.decay.days', { days: breakDays })}
           scale={decayLine}
           onClose={close}
         >
           {pending ? <p>{t('gym.decay.pendingExplain')}</p> : null}
           <p>{t('gym.decay.explain')}</p>
           <p>{t('gym.decay.floor')}</p>
-          <p>{t('gym.decay.resume')}</p>
+          {runEnded ? null : <p>{t('gym.decay.resume')}</p>}
         </MetricDetailSheet>
       ) : null}
     </>

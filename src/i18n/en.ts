@@ -491,6 +491,7 @@ export const en: Translations = {
 
   'gym.decay.title': 'Training break',
   'gym.decay.days': '{days} days without a session',
+  'gym.decay.daysEnded': '{days} days without a session until yesterday',
   'gym.decay.lost': '{percent} % of your progress reduced',
   'gym.decay.pendingToday': 'Decay pending — a session today prevents it',
   'gym.decay.pendingYesterday': 'Decay pending — a session for yesterday prevents it',
@@ -590,6 +591,7 @@ export const en: Translations = {
 
   'running.decay.title': 'Running break',
   'running.decay.days': '{days} days without a run',
+  'running.decay.daysEnded': '{days} days without a run until yesterday',
   'running.decay.lost': '{percent} % of your progress reduced',
   'running.decay.pendingToday': 'Decay pending — a run today prevents it',
   'running.decay.pendingYesterday': 'Decay pending — a run for yesterday prevents it',

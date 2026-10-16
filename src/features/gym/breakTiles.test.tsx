@@ -83,8 +83,12 @@ describe('the break tiles while a charge waits (D135)', () => {
 
     it(`${domain}: a session today, and yesterday's charge still waits`, async () => {
       await board(domain, rating({ abstinence: null, decayFraction: 0, decayPending: { day: 'yesterday', days: 7 } }));
-      expect(tile(domain)).toContain(days.replace('{days}', '7'));
+      // The run is over: it says until when, and not that a session would end it.
+      expect(tile(domain)).toContain(key('daysEnded').replace('{days}', '7'));
       expect(tile(domain)).toContain(key('pendingYesterday'));
+      const sheet = await openSheet(domain);
+      expect(sheet).toContain(key('pendingExplain'));
+      expect(sheet).not.toContain(key('resume'));
     });
 
     it(`${domain}: a block charged and the next one waiting`, async () => {

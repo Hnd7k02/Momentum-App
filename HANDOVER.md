@@ -326,7 +326,7 @@ records (answers, sessions, sets, snapshots)
   on Tuesday 00:00, with a week holding a session counted as met until then
   and an empty one as no data (D134); an abstinence charge waits for its day
   to close, and the break tiles say it is pending (D135); D126 counts settled
-  days for a promotion and closed days for a demotion (D136).
+  days, for a promotion and for the demotion counter (D136).
 - **STOP 2 follow-ups** (D137): an emptied workout is deleted and comes back
   with the same id; only a new set reopens a finished one; an assisted load
   is typed; the Sunday→Monday draft move is gone.

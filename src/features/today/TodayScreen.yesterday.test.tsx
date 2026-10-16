@@ -364,4 +364,31 @@ describe('Heute | Gestern', () => {
     expect((document.getElementById('session-distance') as HTMLInputElement).value).toBe('5');
     expect([...document.querySelectorAll('.session-days__day')].map((day) => day.textContent)).toEqual(['Di']);
   });
+
+  it('saves on the run\'s own day when Save is tapped before the new day has loaded', async () => {
+    at(TODAY, 23, 58);
+    refreshToday();
+    const snapshotId = (await configSnapshotsRepository.list())[0]!.id;
+    await runsRepository.create({ date: TODAY, note: null, durationSeconds: null, distanceMetres: null, configSnapshotId: snapshotId });
+    await open();
+    await until(() => document.querySelector('button.row') !== null);
+    await click(document.querySelector<HTMLButtonElement>('button.row')!);
+    await until(() => document.querySelector('.session-days') !== null);
+    await click([...document.querySelectorAll<HTMLButtonElement>('.session-days__day')][0]!);
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    await act(async () => {
+      const distance = document.getElementById('session-distance') as HTMLInputElement;
+      setter.call(distance, '5.2');
+      distance.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    // The tap itself turns the day, as the input backstop does, and Save runs
+    // in the same turn, before Thursday has loaded.
+    at('2026-10-15', 0, 3);
+    await act(async () => {
+      refreshToday();
+    });
+    await click(buttonNamed('Sichern')!);
+    await until(() => false, 40);
+    expect((await runsRepository.getAll()).map((run) => [run.date, run.distanceMetres])).toEqual([[TODAY, 5200]]);
+  });
 });

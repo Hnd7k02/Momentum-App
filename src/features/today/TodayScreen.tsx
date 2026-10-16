@@ -204,11 +204,17 @@ export function TodayScreen({
    * sheet edits a run by id; a food entry is saved to the day the screen
    * shows when it is saved, as every write here is (B3).
    */
-  if (state.status === 'ready') {
-    for (const entry of state.value.training) writableDays.current[entry.domain] = entry.writableDays;
+  // The lists the day on show gave when it loaded — a domain it lacks has
+  // none. Kept through a load that failed, which is not a closed day, but
+  // never beyond what the write rule can open now: today and yesterday.
+  if (state.status === 'ready' && state.value.date === date) {
+    writableDays.current = Object.fromEntries(state.value.training.map((entry) => [entry.domain, entry.writableDays]));
   }
-  // The last list a loaded day gave: a load that failed is not a closed day.
-  const editingDays = editingSession ? writableDays.current[editingSession.domain] ?? [] : [];
+  const editingDays = editingSession
+    ? (writableDays.current[editingSession.domain] ?? []).filter(
+        (day) => day === today || day === addDays(today, -1),
+      )
+    : [];
   const floating = (
     <>
       <Fragment key="gym-overlay">{gym.overlay}</Fragment>

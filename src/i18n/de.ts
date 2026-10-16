@@ -499,6 +499,7 @@ export const de = {
 
   'gym.decay.title': 'Trainingspause',
   'gym.decay.days': '{days} Tage ohne Session',
+  'gym.decay.daysEnded': '{days} Tage ohne Session bis gestern',
   'gym.decay.lost': '{percent} % deines Fortschritts abgebaut',
   'gym.decay.pendingToday': 'Abbau ausstehend – eine Session heute verhindert ihn',
   'gym.decay.pendingYesterday': 'Abbau ausstehend – eine Session für gestern verhindert ihn',
@@ -598,6 +599,7 @@ export const de = {
 
   'running.decay.title': 'Laufpause',
   'running.decay.days': '{days} Tage ohne Lauf',
+  'running.decay.daysEnded': '{days} Tage ohne Lauf bis gestern',
   'running.decay.lost': '{percent} % deines Fortschritts abgebaut',
   'running.decay.pendingToday': 'Abbau ausstehend – ein Lauf heute verhindert ihn',
   'running.decay.pendingYesterday': 'Abbau ausstehend – ein Lauf für gestern verhindert ihn',

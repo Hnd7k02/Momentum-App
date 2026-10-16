@@ -2842,10 +2842,23 @@ snapshot (`core/config/closure.ts`):
   plus the session window: Monday midnight.
 - The P8 snapshot is appended on the first load after the update, effective
   that day (`ensureSessionWindowEra`, run by `loadConfiguration` after the
-  D126 ensure step): the snapshot in force again with the two fields, and a
-  later-dated snapshot gets the marker too. Idempotent. Appending lazily on
-  the first write cannot work: the write guard refuses the backfill before it
-  could append.
+  D126 ensure step): the snapshot in force today again with the two fields,
+  and a later-dated snapshot gets the marker too. Idempotent. Appending
+  lazily on the first write cannot work: the write guard refuses the backfill
+  before it could append.
+- **A boundary already written stays where it is, unless the clock was ahead
+  when it was written.** Today before the boundary is either a clock that was
+  ahead at the first load and has been put right — the era moves to today —
+  or a local date that has moved back since, by a time zone or a clock set
+  back, onto a day lived under the old rules — the boundary stays, and today
+  waits for it. The instant the boundary was written tells them apart: a
+  local date can move back, absolute time cannot. A profile set up with the
+  clock ahead begins on its first day; moving it back would put days before
+  its first day, and its D126 boundary, into its history (Stage 3b review).
+- `ensureCurrentSnapshot` measures drift against the snapshot in force on the
+  day, not the latest one, and carries the current configuration into a
+  snapshot dated later — which exists only where a clock was once ahead, and
+  under which no day has been lived yet.
 
 **Why an era.** Measured at STOP 3a (`docs/design/wp3/stage3a-window.md`): one
 constant moved values already shown on the update day — a check-in streak
@@ -2891,9 +2904,13 @@ abgeschlossen."
   switched off this morning still shows yesterday, with yesterday's target,
   because the replay still charges yesterday by it. A day before the app was
   set up shows nothing.
-- **An answer is the question as the day asked it**: its type comes from the
-  day's snapshot, which is how the replay reads it, and a question the day
-  did not ask takes no answer. The live record supplies only the wording.
+- **An answer is the question as the day asked it**: for a past day its type
+  comes from the day's snapshot, which is how the replay reads it, and a
+  question that day did not ask takes no answer; the live record supplies
+  only the wording. Today's answer is read as Heute shows it — the live
+  record — after today's snapshot has been brought up to date, so a snapshot
+  that lags behind a change is repaired by the answer, never held against it.
+- **The retired Sport log takes nothing new**, whatever a snapshot says.
 - **The day's snapshot decides, never today's switch**: a run for yesterday
   is accepted after Laufen was switched off this morning, and the guard on a
   session runs before an existing session of the day is handed back to be
@@ -2959,11 +2976,14 @@ Lauf"), or "{n} % abgebaut · weiterer Abbau ausstehend" on top of a charge
 already made. The detail sheet adds "Ein Tag ohne Session zählt erst, wenn er
 nicht mehr nachgetragen werden kann. Trägst du für diesen Tag noch eine
 Session nach, entfällt dieser Abbau." (Laufen: "ohne Lauf", "einen Lauf").
+Once a session today has ended the run, the tile says "{n} Tage ohne Session
+bis gestern" and the sheet no longer says that a session would end the
+break.
 
 **Why.** Charged on the seventh day itself, the decay fell at midnight and
 came back after a legal backfill: 790.30 → 767.73 → 762.63 (STOP 3a, path 2).
 
-## D136 — D126 counts settled days for a promotion and closed days for a demotion (amends D126)
+## D136 — D126 counts settled days, for a promotion and for the demotion counter (amends D126)
 
 **Decision (STOP 3a answers 3 and 4).** For a day of the P8 era:
 
@@ -3057,7 +3077,9 @@ gate, so the switch does not jump while the other day loads.
 - A run sheet left open across midnight follows: a day it had picked that is
   no longer offered falls back to the run's own; one that turns read-only
   shows the run as stored and only its own day. A load that failed keeps the
-  last writable days rather than reading as closed.
+  last writable days rather than reading as closed — and never beyond today
+  and yesterday, so a Save tapped before the new day has loaded cannot send
+  a day that has closed.
 - Focus: the pointer to Gestern leaves the focus on the switch's "Gestern";
   a run moved out of the week on show leaves it on its card's log button
   (Stage 3b review).

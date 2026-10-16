@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
+import { snapshotOn } from '../../core/config/closure';
 import { closeDatabase, deleteDatabase } from '../db';
 import { ensureSessionWindowEra } from '../configService';
 import { answersRepository, configSnapshotsRepository, gymSessionsRepository, runsRepository } from '../repositories';
@@ -230,6 +231,11 @@ describe('the edit window: today and yesterday (P8, D133)', () => {
   });
 });
 
+/** The snapshot in force on `date`, as stored. */
+async function snapshotOnFor(date: string) {
+  return snapshotOn(await configSnapshotsRepository.list(), date);
+}
+
 /**
  * Strips the P8 marker from every stored snapshot, as a profile set up by a
  * build before P8 has them, and appends the P8 era from `from` — what the
@@ -431,8 +437,10 @@ describe('the P8 era append (D132)', () => {
   it('never leaves today locked after a clock that was ahead', async () => {
     const { boolQuestion } = await setup('2025-03-20');
     // The first load after the update ran with the clock four days ahead…
+    freezeAt('2025-04-04');
     await updatedOn('2025-04-04');
     // …and the clock was put right.
+    freezeAt(TODAY);
     expect(await ensureSessionWindowEra(TODAY)).toBe('appended');
     expect((await loadDay(TODAY)).editable).toBe(true);
     await saveAnswer(TODAY, boolQuestion.id, true);
@@ -453,13 +461,73 @@ describe('the P8 era append (D132)', () => {
     expect(later?.config.scoring.sessionWindowDays).toBe(1);
   });
 
-  it('gives today a configuration when the app was set up with the clock ahead', async () => {
+  it('keeps a boundary written before now when the local date has moved back', async () => {
+    // The era was appended on the first of April, at an instant already past —
+    // then the local date moved back to the 31st (a journey west). The 31st
+    // was lived under the old rules and stays so; today waits for the boundary.
+    await setup('2025-03-20');
+    const [first] = await configSnapshotsRepository.list();
+    const { sessionWindowDays: _marker, ...scoring } = first!.config.scoring;
+    const legacy = { ...first!.config, scoring: { ...scoring, editWindowDays: 3 } };
+    await configSnapshotsRepository.replaceAll([
+      { ...first!, config: legacy },
+      {
+        ...first!,
+        id: 'cfg_p8',
+        effectiveFrom: '2025-04-01',
+        createdAt: '2025-03-31T05:00:00.000Z',
+        config: { ...legacy, scoring: { ...legacy.scoring, editWindowDays: 1, sessionWindowDays: 1 } },
+      },
+    ]);
+    expect(await ensureSessionWindowEra(TODAY)).toBe('unchanged');
+    expect((await configSnapshotsRepository.list()).map((snapshot) => snapshot.effectiveFrom)).toEqual([
+      '2025-03-20',
+      '2025-04-01',
+    ]);
+  });
+
+  it('leaves a profile set up with the clock ahead to begin on its first day', async () => {
+    // Moving its configuration back would put days before its first day, and
+    // its promotion boundary, into its history. Until then nothing is due.
     freezeAt('2025-04-03');
     await applyOnboarding({ questions: [{ text: 'A', type: 'boolean', category: 'eigene' }], gymTargetPerWeek: 3 });
     freezeAt(TODAY);
-    expect(await ensureSessionWindowEra(TODAY)).toBe('appended');
-    expect((await loadDay(TODAY)).editable).toBe(true);
-    await logSession('gym', TODAY);
+    expect(await ensureSessionWindowEra(TODAY)).toBe('unchanged');
+    expect((await loadDay(TODAY)).editable).toBe(false);
+  });
+
+  it('measures drift against the snapshot in force today, and carries a change into a later one', async () => {
+    const { boolQuestion } = await setup('2025-03-20');
+    const [first] = await configSnapshotsRepository.list();
+    await configSnapshotsRepository.replaceAll([first!, { ...first!, id: 'cfg_later', effectiveFrom: '2025-04-05' }]);
+    const added = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+    const asked = (date: string) =>
+      snapshotOnFor(date).then((config) => config?.questions.some((question) => question.id === added.id));
+    expect(await asked(TODAY)).toBe(true);
+    expect(await asked('2025-04-05')).toBe(true);
+    await saveAnswer(TODAY, boolQuestion.id, true);
+  });
+
+  it("repairs today's snapshot with the answer, when it lags behind the questions", async () => {
+    await setup('2025-03-20');
+    const added = await addQuestion({ text: 'Neu', type: 'boolean', category: 'eigene' });
+    // Today's snapshot as if the append after adding the question never landed.
+    const snapshots = await configSnapshotsRepository.list();
+    await configSnapshotsRepository.replaceAll(
+      snapshots.map((snapshot) => ({
+        ...snapshot,
+        config: { ...snapshot.config, questions: snapshot.config.questions.filter((question) => question.id !== added.id) },
+      })),
+    );
+    expect((await loadDay(TODAY)).mental?.items.map((item) => item.question.id)).toContain(added.id);
+    await saveAnswer(TODAY, added.id, true);
+    expect((await answersRepository.get(TODAY, added.id))?.value).toBe(true);
+    expect((await snapshotOnFor(TODAY))?.questions.some((question) => question.id === added.id)).toBe(true);
+  });
+
+  it('never takes a new session into the retired Sport log', async () => {
+    await setup('2025-03-20');
+    await expect(logSession('sports', TODAY)).rejects.toThrow(/retired Sport log/);
   });
 });
 

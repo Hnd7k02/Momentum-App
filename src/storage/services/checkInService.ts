@@ -518,14 +518,21 @@ export async function saveAnswer(
   await assertEditable(date, reference, 'mental');
   const question = await questionsRepository.get(questionId);
   if (!question) throw new InvalidAnswerError(`Unknown question ${questionId}`);
-  // The question as the day asked it (D133): the replay scores a day by its
-  // own snapshot, so a type changed today must not decide how yesterday's
-  // answer is read, and a question that day did not ask takes no answer.
-  const asked = snapshotOn(await configSnapshotsRepository.list(), date)?.questions.find(
-    (entry) => entry.id === questionId && entry.status === 'active',
-  );
-  if (!asked) throw new InvalidAnswerError(`Question ${questionId} was not asked on ${date}`);
+  // Today's configuration is brought up to date first, so a snapshot that
+  // lags behind a change is repaired by the answer, never held against it.
   const snapshot = await ensureCurrentSnapshot();
+  // The question as the day asked it (D133): today, as Heute shows it — the
+  // live record, which today's snapshot now follows; a past day, as its own
+  // snapshot asked it, since the replay scores it by that. A type changed
+  // today must not decide how yesterday's answer is read, and a question
+  // yesterday did not ask takes no answer for it.
+  const asked =
+    date === reference
+      ? question
+      : snapshotOn(await configSnapshotsRepository.list(), date)?.questions.find(
+          (entry) => entry.id === questionId && entry.status === 'active',
+        );
+  if (!asked) throw new InvalidAnswerError(`Question ${questionId} was not asked on ${date}`);
   return answersRepository.save({
     date,
     questionId,
@@ -578,6 +585,8 @@ export async function logSession(
   input: SessionInput = {},
   reference: DateKey = today(),
 ): Promise<TrainingSession> {
+  // The retired Sport log takes nothing new, ever (CLAUDE.md, D112).
+  if (domain === 'sports') throw new InvalidAnswerError('The retired Sport log takes no new session');
   // The day's snapshot decides whether the domain was on (D133): a run for
   // yesterday stays writable after the domain was switched off this morning.
   await assertSessionWritable(date, reference, domain);

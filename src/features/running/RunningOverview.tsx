@@ -107,6 +107,8 @@ export function RunningOverview({
   // the run: yesterday's charge still lands unless yesterday is filled in.
   const showBreak = onBreak || pending !== null;
   const breakDays = state.abstinence?.days ?? pending?.days ?? 0;
+  // A session today ended the run; what waits is yesterday's charge alone.
+  const runEnded = state.abstinence === null && pending !== null;
 
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
@@ -191,7 +193,7 @@ export function RunningOverview({
           <MetricTile
             id="running-decay"
             title={t('running.decay.title')}
-            value={t('running.decay.days', { days: breakDays })}
+            value={t(runEnded ? 'running.decay.daysEnded' : 'running.decay.days', { days: breakDays })}
             line={decayLine}
             onOpen={() => setDetail('decay')}
           />
@@ -255,14 +257,14 @@ export function RunningOverview({
         <MetricDetailSheet
           open={detail === 'decay'}
           title={t('running.decay.title')}
-          value={t('running.decay.days', { days: breakDays })}
+          value={t(runEnded ? 'running.decay.daysEnded' : 'running.decay.days', { days: breakDays })}
           scale={decayLine}
           onClose={close}
         >
           {pending ? <p>{t('running.decay.pendingExplain')}</p> : null}
           <p>{t('running.decay.explain')}</p>
           <p>{t('running.decay.floor')}</p>
-          <p>{t('running.decay.resume')}</p>
+          {runEnded ? null : <p>{t('running.decay.resume')}</p>}
         </MetricDetailSheet>
       ) : null}
 
