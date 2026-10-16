@@ -115,7 +115,9 @@ Never conflate them.
   after, never moved. The pending dates are persisted but recomputed from history on
   every replay; never patch them from an edit. Demotion needs hysteresis
   *and* sustained days, exactly as before. A single bad day may never cost a
-  tier. Gym's and Running's Endurance Phase
+  tier. In the P8 era a promotion counts a day only once it is settled —
+  closed, and with a weekly target its week judged — and the demotion
+  counter counts only closed days (D136). Gym's and Running's Endurance Phase
   no longer gates a promotion (there is no domain promotion to gate, D125);
   it stays as written in D94 — four net weeks, real numbers throughout — and
   abstinence decay begins only once it is complete.
@@ -140,7 +142,24 @@ Never conflate them.
   free or planned, writes nothing; the session is created with the first set
   — a free one as a bare session, a planned one with its snapshot — and a
   picked exercise is a pending row, never a stored 0×0 set. Sessions stored
-  before this stay history.
+  before this stay history. A session the user empties is deleted, and an
+  undo or the next set brings it back with the same id; only a new set
+  reopens a finished workout (D137).
+- **One day back, as an era** (D132, D133). An answer, Food, a session, a
+  set, a run or a weight entry reaches today and yesterday on a day of the
+  P8 era (`scoring.sessionWindowDays` present) and nothing older. A day's
+  window is read from its own snapshot — an absent `editWindowDays` is the
+  legacy 3 — and a week takes its era from its Monday. The rule lives in
+  `core/config/closure.ts`; never re-implement it in a screen. A Gym session
+  keeps its day, and no backfill reaches a day its domain was off. Heute
+  shows Heute | Gestern, relative, and every write goes to the day on show
+  (D138).
+- **Nothing is charged while it can still be written** (D134, D135). A P8
+  week is judged when it is over — Tuesday 00:00: until then a week with a
+  session counts attendance as met and an empty one is no data, while
+  performance keeps moving daily. An abstinence charge waits for its day to
+  close, and the break tiles say it is pending. A legal write may never
+  reverse a charge (`p8Reversal.test.ts`).
 - **`finishedAt` is a fact nothing scores** (D129): a timestamp after
   "Fertig", `null` while a workout started in the app is running, absent for
   a session recorded before the field — which is finished. Never backfill it.

@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. Stage 3 is next and not started. **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -310,7 +310,34 @@ records (answers, sessions, sets, snapshots)
   (measured), the midnight drops a P8 backfill would reverse, and the
   proposal — the window as an era (`editWindowDays` read per day, a new
   optional `scoring.sessionWindowDays` marker, the P8 snapshot appended on
-  first load, one write rule). Waiting for the decisions at STOP 3a.
+  first load, one write rule). Decided at STOP 3a and built in Stage 3b.
+
+**WP3 Stage 3b — one day back (P8)** (branch `claude/momentum-wp3`, not merged)
+- **The window is an era** (D132): `scoring.editWindowDays` is read per day
+  (absent → the legacy 3) and the optional `scoring.sessionWindowDays`
+  marks the P8 era; `ensureSessionWindowEra` appends it on the first load
+  after the update. A week takes its era from its Monday.
+- **One write rule** (D133, `core/config/closure.ts`): today and yesterday on
+  a P8 day, for every write; sessions also only in a week still in progress.
+  A Gym session keeps its day; no backfill reaches a day its domain was off.
+- **Nothing is charged while it can still be written**: a P8 week is judged
+  on Tuesday 00:00, with a week holding a session counted as met until then
+  and an empty one as no data (D134); an abstinence charge waits for its day
+  to close, and the break tiles say it is pending (D135); D126 counts settled
+  days for a promotion and closed days for a demotion (D136).
+- **STOP 2 follow-ups** (D137): an emptied workout is deleted and comes back
+  with the same id; only a new set reopens a finished one; an assisted load
+  is typed; the Sunday→Monday draft move is gone.
+- **Heute | Gestern** (D138), "Gestern ist noch offen", the run sheet on the
+  writable days only, the closed copy "Dieser Tag ist abgeschlossen."
+- **Golden files.** Everything before P8 is byte-identical: the six original
+  golden files, `.github/fixtures/stage2/`, every fingerprint. The ten P8
+  files were re-frozen at STOP 3b as a deliberate commit; every moved value
+  lies on a day of the P8 era and is explained in the STOP 3b report.
+- **Recorded, not changed (STOP 3a, Q11):** the Wellbeing ledger folds
+  `entry.score` where the rating tracks `recordedScore`, and a silent day 0
+  pins the Boss opening at 0. Both are a separate scoring gate after WP3, as
+  their own era.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
@@ -523,6 +550,9 @@ own history; no population norms, ever.
   own date. Never a later measurement.
 - An absence is charged for once: ordinary movement **or** abstinence decay,
   never both on the same day.
+- Nothing is charged while it can still be written (D134–D136): a write may
+  only reach a day and a week that are still open, and a legal write never
+  reverses a charge. `p8Reversal.test.ts` and `closure.test.ts` pin it.
 - The Boss is the only rank (D125). Nothing computes or shows a rank for a
   domain; a domain contributes a rating and a ladder position. The decay tier
   (D124) is internal and is never a rank.

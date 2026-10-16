@@ -2808,3 +2808,197 @@ row saves when the focus leaves the row, not a field: a bodyweight set is
 otherwise stored without its added load. A new set's `order` follows the
 highest, not the count; a set an undo put back may share an order with one
 added meanwhile, and such sets sort by `createdAt`.
+
+## D132 — One day back is an era: the window is read per day, and a marker starts it
+
+**Decision (WP3, P8; STOP 3a answer 1).** The edit window decides what counts
+as missed, so it is scoring configuration and is read from each day's own
+snapshot (`core/config/closure.ts`):
+
+- `scoring.editWindowDays` decides when a day's check-in closes. A snapshot
+  without it reads as the legacy 3 — never as today's default (`editWindowOf`).
+- One new optional field, `scoring.sessionWindowDays`. Present is the P8 era;
+  absent is the era before it — sessions within their ISO week, a week judged
+  at Sunday midnight. P8 snapshots carry `editWindowDays: 1` and
+  `sessionWindowDays: 1`. Never backfilled.
+- A week takes its era from the snapshot in force on its **Monday**, where its
+  target already comes from (D127), or — for a profile's first week — from
+  the first snapshot inside it. A P8 week stays in progress until its Sunday
+  plus the session window: Monday midnight.
+- The P8 snapshot is appended on the first load after the update, effective
+  that day (`ensureSessionWindowEra`, run by `loadConfiguration` after the
+  D126 ensure step): the snapshot in force again with the two fields, and a
+  later-dated snapshot gets the marker too. Idempotent. Appending lazily on
+  the first write cannot work: the write guard refuses the backfill before it
+  could append.
+
+**Why an era.** Measured at STOP 3a (`docs/design/wp3/stage3a-window.md`): one
+constant moved values already shown on the update day — a check-in streak
+10 → 2, XP −60 per met week for a day, master → champion for a day in a
+Gym-only case — and re-pinned seven RC2 continuity values. The era moves
+nothing before its boundary, which `p8UpdateDay.test.ts` pins: three profiles
+and two left unanswered before the update, replayed with and without the
+append, every earlier day and rank change identical, the legacy three-day
+window held.
+
+**One-time costs, accepted (answer 5).** On the update day yesterday is
+read-only. A week that straddles the update cannot take its Sunday session on
+the following Monday, though its check-in can be. For up to two days, days
+aged two and three before the update read as open in the history while
+already read-only.
+
+## D133 — One write rule: today and yesterday
+
+**Decision (P8).** An answer, a Food rating or entry, a session, a set, a run
+or a weight entry may be written for **today or yesterday, on a day of the
+P8 era**; a session, set, run or weight entry also only in a week whose
+Sunday can still be written — for a week that began before P8, its own ISO
+week (`checkInWritable`, `sessionWritable`; the guards `assertEditable` and
+`assertSessionWritable`). Every write therefore lands on a day and in a week
+that are still open, and a day lived before the update is never reopened.
+Older entries are read-only with the closed copy, "Dieser Tag ist
+abgeschlossen."
+
+- **A Gym session keeps the day it was logged for** (answer 9): moving one is
+  refused, since its sets carry their own date. A run may move between today
+  and yesterday, across a week boundary too.
+- **A backfill into a day on which its domain was not enabled is refused**
+  (answer 10): it would date the domain's start before the user switched it
+  on and score a day nothing was asked on.
+- **A past day shows what was due on it**: the domains enabled and the
+  questions asked in its own snapshot, so a question added today is not
+  offered for yesterday and one archived today still is. A day before the app
+  was set up shows nothing.
+
+**Overrides** the three-day window for check-ins (§17) and the same-week rule
+for sessions and runs, including the run sheet's move to any day of the week.
+
+`closure.test.ts` pins it over both eras with the update on every weekday:
+every writable day is open, every session write lands in a week in progress,
+only today and yesterday are ever writable, a day before the update never is,
+nothing closed reopens, and the rule is live.
+
+## D134 — A weekly target is judged when the week is over
+
+**Decision (STOP 3a answer 2: "A weekly target is judged when the week is
+over; performance keeps moving daily").** While a P8 week is in progress and
+holds at least one session, the training fold counts its attendance as met
+(`sessionsInWeek = max(sessions, target)`) and the day score's weekly item
+reads 100; an in-progress P8 week with no session is no data for its domain,
+and the Boss gets a neutral day from it. The real count lands once the week's
+Sunday can no longer be written — Tuesday 00:00 — and the week's days are
+replayed with it, once. The ledger's `inProgress`, the training streak, week
+XP and Endurance move at the same moment.
+
+**Why.** Otherwise a week that already had a session entered each new day at
+the running count: 572 → 548 at midnight and 636 after a legal backfill
+(STOP 3a, path 4). No window rule removes that; judging the week once it is
+over does.
+
+**Consequences.** Attendance inside a partly filled week is optimistic until
+Tuesday, and a week that ends short is charged in one step when it is judged,
+across all its days. A week nobody trained in charges nothing until then
+either. The boards' attendance tile still states the week as lived
+("1 von 3") — information, not the scoring input.
+
+`p8Reversal.test.ts` pins it: a Sunday session logged on Monday (one short, in
+an empty week, beside daily domains) and a partly filled week.
+
+## D135 — An abstinence charge waits for its day to close
+
+**Decision.** A day that would decay — the seventh consecutive day without a
+session, the fourteenth, and so on — but can still take a session (today or
+yesterday of a P8 week) is **carried**: skipped by the fold, nothing decayed,
+the share charged so far reported unchanged (`TrainingRatingDay.open`). Once
+the day has closed the replay charges it, once. A session backfilled for that
+day cancels the charge; a session on a later day ends the episode but does not
+undo a day already passed.
+
+`decayPending` marks a carried day whose closing would charge more than the
+episode has charged so far. It is absent before P8 and whenever nothing
+waits, so no state before P8 serialises differently. While it is set, the Gym
+and Laufen break tiles say so (answer 6): "Abbau ausstehend – zählt, sobald
+der Tag abgeschlossen ist", or "{n} % abgebaut · weiterer Abbau ausstehend"
+on top of a charge already made, and the detail sheet adds "Ein Tag ohne
+Session zählt erst, wenn er nicht mehr nachgetragen werden kann. Trägst du
+für diesen Tag noch eine Session nach, entfällt dieser Abbau." (Laufen: "ohne
+Lauf", "einen Lauf").
+
+**Why.** Charged on the seventh day itself, the decay fell at midnight and
+came back after a legal backfill: 790.30 → 767.73 → 762.63 (STOP 3a, path 2).
+
+## D136 — D126 counts settled days for a promotion and closed days for a demotion (amends D126)
+
+**Decision (STOP 3a answers 3 and 4).** For a day of the P8 era:
+
+- a promotion counts the day only once it is **settled**: closed, so that
+  nothing about it can be written any more, and — if it carries a weekly
+  target — its week judged (D134). "A promotion must never count a day before
+  that. A promotion that arrives later is better than one that disappears
+  again."
+- the demotion counter counts the day only once it is **closed**.
+
+Days before P8 keep D126 as written: eligible means strictly before today,
+scored and unpaused, and demotion counts every point (`daySettled`,
+`dayClosed`; `ConfirmationDay.settled` and `closed`).
+
+**Consequences.** A promotion arrives later — for a day with a weekly target
+up to eight days after it was lived — and is dated on the day it was earned.
+"Rang bestätigen: n/7 Tage" advances on settled days. A demotion lands only
+on a day that can no longer be corrected.
+
+`p8Reversal.test.ts` pins it: a low day corrected the next day resets
+nothing; a seventh eligible day that is yesterday waits a day, then lands
+dated on its own day; a demotion visible at a clock survives a correction of
+yesterday.
+
+## D137 — An emptied workout goes; only a new set reopens a finished one; an assisted load is typed
+
+**Decision (STOP 2 answers 1–3, and the Stage 3 reminder).**
+
+- **A session the user empties is deleted** — the last set removed, or the
+  last exercise with its sets (`removeIfEmptied`). The workout stays on
+  screen, and an undo or the next saved set brings the session back **with
+  the same id** and its plan lines (`reinstateSession`; `restoreSet` and
+  `restoreExercise` take the removed session). Bare sessions stored before P6
+  stay history (D128), which this resolves.
+- **Only a new set reopens a finished workout** (`finishedAt` back to
+  `null`); correcting an existing set does not.
+- **An assisted exercise needs its assistance typed**; an explicit 0 is
+  allowed and means no assistance. A bodyweight exercise's empty load still
+  reads as no added weight (D130).
+- **The Sunday→Monday draft move is gone.** A draft keeps the day it was
+  opened for; when that day closes it turns read-only like any closed day.
+
+**Known limitation.** The gym branch of `deleteSession` — the path of the Today
+sheet — removes a session without its sets. No screen reaches it: a Gym row
+opens the workout, never the sheet.
+
+## D138 — Heute | Gestern
+
+**Decision (P8).** Heute shows one of the two days a write can reach, through
+a two-state switch under the title. The questions, Food, Gym — start or
+continue yesterday's session — and Laufen follow it; every write goes to the
+day on show, and the date line always names that day. The switch is relative
+and follows B3: at midnight "Heute" becomes the new day and "Gestern" the one
+that was today, and the screen withholds every control until that day has
+loaded. The title, the switch and the date stand on both sides of the load
+gate, so the switch does not jump while the other day loads.
+
+- **"Gestern ist noch offen"** (answer 8): a quiet pointer beside the progress
+  pill on the Heute side, while yesterday still owes a question or the Food
+  rating that can be given. It leads to Gestern, and it is read from storage,
+  so it is gone once yesterday is answered.
+- On the Gestern side a complete day says "Gestern erledigt". A yesterday the
+  rule does not open says "Dieser Tag ist abgeschlossen." once and offers no
+  control; the Sunday of a week begun before the update says "Diese Woche ist
+  abgeschlossen." in its training card on the Monday after (D132). A training
+  card names the week "Letzte Woche" when yesterday was a Sunday.
+- **The run sheet offers exactly the writable days**; a run dated on any other
+  day opens read-only with the closed copy and no buttons, and a sheet left
+  open across midnight follows.
+- The running-workout card follows the day on show; yesterday's is offered
+  only while yesterday can still be written.
+
+`TodayScreen.yesterday.test.tsx`, `TodayScreen.midnight.test.tsx`,
+`wp3-stage3.mjs` and `wp3-midnight.mjs` 9–10 pin it.
