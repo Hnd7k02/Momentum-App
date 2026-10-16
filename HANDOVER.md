@@ -340,6 +340,27 @@ records (answers, sessions, sets, snapshots)
   `entry.score` where the rating tracks `recordedScore`, and a silent day 0
   pins the Boss opening at 0. Both are a separate scoring gate after WP3, as
   their own era.
+- Verification at STOP 3b: `tsc -b` clean, `npm run test` exit 0 (101
+  files, 1532 tests), build clean (main 147.79 kB gzipped). Every browser
+  suite green — `wp3-stage3` 153/153 (new), `release` 82/82, `wp3-midnight`
+  139/139, `wp3-reload`, `wp3-sheets`, `wp3-stage1`, `wp3-stage2`, the phase
+  suites and their accessibility suites, `geometry`, `terminal`,
+  `release-proof`, `wp2-1-shots`, `wp2-2-shots`, `stage4-shots` 37/37; run
+  alone, `gym-muscles` 72/72, `body` 39/39 (three times), `body-reach` 3/3.
+  Screenshots in `docs/design/wp3/stage3/`.
+- Suites repaired at STOP 3b, no check loosened and no app code changed:
+  `wp3-midnight` reads the date label only once Heute has loaded (the date
+  stands above the load gate, D138); `stage4-shots` seeds its pending and
+  promoted presets one day longer, since a P8 profile's yesterday is not yet
+  settled (D136), and now exits 1 on a failure; `body`'s settle also waits
+  for the render loop to stop (an inertia coast outlasted 1.5 s of an
+  unchanged whole-degree angle), and its tap grid turns the body back after a
+  far-side hit; `status-shots` and `qa-shots`, broken before WP3, name the
+  question they answer and look for Laufen on the hub.
+- **Found, not changed (pre-WP3):** a tap on the trapezius seen from the
+  front selects `back` and turns the body round — the turn-into-view rule in
+  `BodyViewer.tsx` was written for list selections and fires for taps too.
+  Put to the user at STOP 3b.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
