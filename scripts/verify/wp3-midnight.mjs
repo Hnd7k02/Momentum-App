@@ -42,7 +42,7 @@ import { URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
  *                            is yesterday and can still be written (P8,
  *                            D133). Reopened from the Gestern side, the sheet
  *                            turns read-only at the next midnight, when
- *                            Sunday has closed
+ *                            Sunday has closed, and shows the run as stored
  *  10  a plan draft across   a draft keeps its day through Sunday midnight
  *      Sunday midnight       and its first set is stored on Sunday; at the
  *                            next midnight the workout says its day is
@@ -570,7 +570,7 @@ await scenario('9 run sheet across Sunday midnight', { tz: BERLIN, time: '2026-1
   const closed = await page.locator('.session-sheet__closed').textContent({ timeout: 3000 }).catch(() => null);
   check(`${W}: the sheet says the day is closed`, closed === 'Dieser Tag ist abgeschlossen.', String(closed));
   check(`${W}: and offers no save`, (await page.locator('.sheet__footer button.button--primary').count()) === 0);
-  check(`${W}: what was typed stays visible`, (await page.locator('#session-distance').inputValue()) === '6');
+  check(`${W}: and shows the run as stored, not what was typed`, (await page.locator('#session-distance').inputValue()) === '5.2', await page.locator('#session-distance').inputValue());
   const finalRuns = await runs();
   check(`${W}: the run keeps its 5.2 km`, finalRuns.length === 1 && finalRuns[0].distance === 5200, short(finalRuns));
   await page.keyboard.press('Escape');
