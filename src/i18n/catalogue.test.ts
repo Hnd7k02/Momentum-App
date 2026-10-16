@@ -42,3 +42,29 @@ describe('the string catalogues', () => {
     expect(empty).toEqual([]);
   });
 });
+
+/**
+ * One name for the wellbeing domain (WP3 Stage 4, P3 — D143).
+ *
+ * Before Stage 4 it had three, each from its own key: 'Mental' on the area
+ * switch, 'Mental Wellbeing' over the questions and 'Wellbeing' everywhere
+ * else. It is 'Mind' now, from one key, in both languages. The question
+ * category 'Mental' is another thing and keeps its name; the stored id
+ * stays `mental` either way.
+ */
+describe('the name of the wellbeing domain', () => {
+  const both = (key: TranslationKey) => `${de[key]} | ${en[key]}`;
+
+  it('is Mind, in both languages', () => {
+    expect(both('domain.mental')).toBe('Mind | Mind');
+  });
+
+  it('is the only one any string uses', () => {
+    expect(keys.filter((key) => /wellbeing|wohlbefinden/i.test(both(key)))).toEqual([]);
+    expect(keys.filter((key) => /^Mental\b/.test(de[key]) || /^Mental\b/.test(en[key]))).toEqual(['category.mental']);
+  });
+
+  it('leaves no string about Food, which left the product (D139)', () => {
+    expect(keys.filter((key) => key.startsWith('food.') || /ernährung|\bfood\b/i.test(both(key)))).toEqual([]);
+  });
+});

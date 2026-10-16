@@ -6,6 +6,7 @@ import { changeVersion, committedWrites, flushChanges, holdChanges, subscribeToC
 import { importBackup } from './services/backupService';
 import { loadBossProgression } from './services/bossService';
 import { loadDay, loadTrainingWeek } from './services/checkInService';
+import { loadConfiguration } from './services/configurationService';
 import { existingSessionForDay, latestGymSession, loadGymHistory, loadRunningWorkout } from './services/gymService';
 import { loadProgression } from './services/ratingService';
 import { listTrainingPlans } from './services/trainingPlanService';
@@ -130,6 +131,8 @@ describe('loadsDoNotWrite', () => {
    * or a reload would publish a change and start the next one.
    */
   async function everySubscribedLoad(date: DateKey) {
+    // The app's own load: on this profile it switches Food off once (D139).
+    await loadConfiguration();
     await loadBossProgression(date);
     await loadProgression(date);
     await loadGymHistory(addDays(date, -29), date);

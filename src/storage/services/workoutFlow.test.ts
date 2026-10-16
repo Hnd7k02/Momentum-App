@@ -1,8 +1,10 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
+import { committedWrites } from '../changes';
 import { closeDatabase, deleteDatabase } from '../db';
 import { gymSessionsRepository, gymSetsRepository } from '../repositories';
+import { InvalidAnswerError, deleteSession } from './checkInService';
 import { applyOnboarding } from './configurationService';
 import {
   addSessionExercise,
@@ -251,5 +253,36 @@ describe('undo', () => {
     await expect(restoreSet(set)).rejects.toThrow();
     expect(await gymSetsRepository.get(set.id)).toBeUndefined();
     expect(await gymSetsRepository.get(keep.id)).toEqual(keep);
+  });
+});
+
+describe('a Gym session outside its workout (D142)', () => {
+  /*
+   * A Gym session goes with its sets, in the workout, where an undo can put
+   * it back. The check-in service's delete would have removed the session
+   * alone and left its sets counting for performance, so it refuses — before
+   * it reads or writes anything, on any day.
+   */
+  it('is never deleted by the check-in service, sets and all', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const sets = [
+      await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) }),
+      await addSet({ sessionId: session.id, exerciseId: 'ex_squat', reps: 5, weightGrams: kg(100) }),
+    ];
+    const writes = committedWrites();
+    await expect(deleteSession('gym', session.id)).rejects.toThrow(InvalidAnswerError);
+    expect(committedWrites()).toBe(writes);
+    expect(await gymSessionsRepository.get(session.id)).toBeDefined();
+    expect(await gymSetsRepository.listBySession(session.id)).toEqual(expect.arrayContaining(sets));
+    expect(await gymSetsRepository.listBySession(session.id)).toHaveLength(2);
+  });
+
+  it('is refused the same way once its day is closed', async () => {
+    freezeAt(SUNDAY);
+    const session = await openSessionForDay(SUNDAY);
+    await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps: 8, weightGrams: kg(60) });
+    freezeAt(TUESDAY);
+    await expect(deleteSession('gym', session.id)).rejects.toThrow(InvalidAnswerError);
+    expect(await gymSetsRepository.listBySession(session.id)).toHaveLength(1);
   });
 });

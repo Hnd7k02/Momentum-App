@@ -9,6 +9,7 @@ import { domainsRepository, questionsRepository } from '../repositories';
 import {
   addQuestion,
   applyOnboarding,
+  enableDomain,
   loadConfiguration,
   updateQuestion,
 } from './configurationService';
@@ -43,6 +44,26 @@ afterEach(async () => {
 describe('a newly created profile', () => {
   it('has Mind, Gym and Running to choose from, and nothing else (D139)', () => {
     expect(OFFERED_DOMAIN_TYPES).toEqual(['mental', 'gym', 'running']);
+  });
+
+  it('creates no Food domain, whatever onboarding is handed (D139)', async () => {
+    await applyOnboarding({
+      questions: [{ text: 'A', type: 'boolean', category: 'alltag' }],
+      gymTargetPerWeek: 3,
+      runningTargetPerWeek: 2,
+      // @ts-expect-error — there is no field for Food, and that is the rule.
+      food: true,
+    });
+    expect(await domainsRepository.findByType('food')).toBeUndefined();
+    const snapshot = await currentConfigSnapshot();
+    expect(snapshot.domains.some((domain) => domain.type === 'food')).toBe(false);
+    expect((await loadConfiguration()).activation.available).not.toContain('food');
+  });
+
+  it('refuses to switch Food on, by its type and at run time (D139)', async () => {
+    // @ts-expect-error — Food is not an offered domain.
+    await expect(enableDomain('food')).rejects.toThrow(/Food cannot be switched on/);
+    expect(await domainsRepository.findByType('food')).toBeUndefined();
   });
 
   it('creates no generic Sport domain, whatever is chosen', async () => {
