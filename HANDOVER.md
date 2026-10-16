@@ -360,7 +360,16 @@ records (answers, sessions, sets, snapshots)
 - **Found, not changed (pre-WP3):** a tap on the trapezius seen from the
   front selects `back` and turns the body round — the turn-into-view rule in
   `BodyViewer.tsx` was written for list selections and fires for taps too.
-  Put to the user at STOP 3b.
+  **Decided at STOP 3b: a tap never turns the body; only a list selection
+  does — built in Stage 7**, where the muscle interaction changes anyway.
+- Real-device preview: the Stage 3b build (`188ff3d`) is published to
+  Momentum-preview (`246f47a`, https://hnd7k02.github.io/Momentum-preview/).
+- **Decided at STOP 3b:** (1) the break-tile copy stays as shown; (2) the
+  demotion counter counts settled days, as built (D136); (3) on Gestern a
+  standard question whose stored text is unchanged reads in its "gestern"
+  wording, display only — built in Stage 4; (4) the Gym branch of
+  `deleteSession` is fixed in Stage 4, the other known limitations stand;
+  (5) the bundle growth is accepted.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +

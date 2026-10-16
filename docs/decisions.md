@@ -3021,6 +3021,9 @@ yesterday, a session logged today and one for yesterday, beside a training
 week too; a week whose training domain was switched off mid-week dates no
 rank change before it is judged.
 
+**Confirmed at STOP 3b (question 2):** settled days for the demotion counter
+too, as built — "my answer 4 didn't follow from answer 3".
+
 ## D137 — An emptied workout goes; only a new set reopens a finished one; an assisted load is typed
 
 **Decision (STOP 2 answers 1–3, and the Stage 3 reminder).**
