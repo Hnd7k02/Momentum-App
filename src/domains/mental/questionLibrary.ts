@@ -46,7 +46,7 @@ const LIBRARY: Record<Language, SuggestedQuestion[]> = {
 
     // Gesundheit — Energie, Schlaf, körperliches Wohlbefinden.
     { id: 'sleep', category: 'gesundheit', text: 'Wie gut hast du geschlafen?', type: 'scale',
-      yesterday: 'Wie gut hast du vorletzte Nacht geschlafen?' },
+      yesterday: 'Wie gut hast du in der Nacht auf gestern geschlafen?' },
     { id: 'energy', category: 'gesundheit', text: 'Wie hoch war dein Energielevel?', type: 'scale',
       yesterday: 'Wie hoch war dein Energielevel gestern?' },
     { id: 'body', category: 'gesundheit', text: 'Wie hat sich dein Körper heute angefühlt?', type: 'scale',

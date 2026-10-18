@@ -200,7 +200,7 @@ for (const [width, height] of SIZES) {
   await noFood(page, `A ${W} Gestern`);
   const gestern = await texts(page.locator('.check-in__question'));
   check(`D ${W}: Gestern speaks of yesterday`,
-    same(gestern, ['Wie gut hast du vorletzte Nacht geschlafen?', 'Wie war deine Stimmung gestern?']), short(gestern));
+    same(gestern, ['Wie gut hast du in der Nacht auf gestern geschlafen?', 'Wie war deine Stimmung gestern?']), short(gestern));
   const done = await text(page.locator('.today__progress'));
   check(`A ${W}: yesterday is complete without its Food rating`, done === 'Gestern erledigt', String(done));
   await layoutChecks(page, `A ${W} Gestern`);
@@ -209,7 +209,7 @@ for (const [width, height] of SIZES) {
   await page.locator('.check-in__summary').first().click();
   await page.waitForTimeout(500);
   const group = await page.locator('.check-in [role="radiogroup"]').first().getAttribute('aria-label');
-  check(`D ${W}: the answer group is named as it reads`, group === 'Antwort auf: Wie gut hast du vorletzte Nacht geschlafen?', String(group));
+  check(`D ${W}: the answer group is named as it reads`, group === 'Antwort auf: Wie gut hast du in der Nacht auf gestern geschlafen?', String(group));
   await shot(page, width, 'gestern-open');
   await switchTo(page, 'Heute');
 
@@ -231,7 +231,7 @@ for (const [width, height] of SIZES) {
   await shot(page, width, 'bereiche-gym');
   // Below the area: pause, backup, credits and Einstellungen.
   await scrollAreasTo(page, page.locator('.areas__general'));
-  await noFood(page, `A ${W} Weitere Bereiche und Einstellungen`);
+  await noFood(page, `A ${W} Weiteres`);
   await shot(page, width, 'bereiche-weiteres');
   await scrollAreasTo(page, page.locator('.section__label', { hasText: /^Einstellungen$/ }));
   await shot(page, width, 'bereiche-einstellungen');

@@ -14,7 +14,7 @@ export const en: Translations = {
   'nav.rank': 'Rank',
   'nav.areas': 'Areas',
   'areas.terminalSwitch': 'Choose an area',
-  'areas.general': 'Other areas and settings',
+  'areas.general': 'More',
   'areas.credits': 'Credits',
   'areas.credits.body': '3D body model',
   'areas.credits.bodySubtitle': 'By patmateee, CC BY 4.0',

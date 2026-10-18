@@ -99,7 +99,7 @@ check('the Gym hub carries the rating board and the door to the muscle groups',
 check('and the Gym target is configured there', await page.getByText('3 Sessions / Woche').isVisible());
 check('the URL names the area', (await hash()) === '#/areas/gym');
 check('the rest of Bereiche stays below whichever area is open',
-  await page.getByText('Weitere Bereiche und Einstellungen').isVisible() &&
+  await page.locator('.section__label', { hasText: /^Weiteres$/ }).isVisible() &&
   await page.getByText('Backup exportieren').isVisible() &&
   await page.getByText('Sprache').first().isVisible());
 

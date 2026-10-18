@@ -435,6 +435,15 @@ records (answers, sessions, sets, snapshots)
   back after a far-side hit and presses the pills in place. At 320 the
   region below the 12px pitch is now the forearms, not the triceps; the
   accepted count, 9 of 10, holds.
+- **Decided at STOP 4:** (1) on Gestern the sleep question reads "Wie gut
+  hast du in der Nacht auf gestern geschlafen?" (D144); (2) a Gym session is
+  removed only in its workout, as built (D142); (3) the update day's
+  yesterday stays as built (D141); (4) a profile that had only Food is left
+  with nothing set up, and no note says Food has left; (5) the question
+  category keeps its name "Mental"; (6) the Bereiche heading below the open
+  area reads "Weiteres" / "More"; (7) the Stage 4 build goes to the preview.
+  **Order change:** Stage 6 (the visual system, P11) comes next, then Stage 5
+  (the Gym metric, P10); Stage 7 stays after both.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +

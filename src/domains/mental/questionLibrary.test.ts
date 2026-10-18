@@ -24,7 +24,7 @@ describe('the Gestern wording', () => {
     for (const question of all) {
       if (question.language === 'de') {
         expect(question.yesterday, question.id).not.toMatch(/\bheute\b/i);
-        expect(question.yesterday, question.id).toMatch(/\bgestern\b|vorletzte Nacht/);
+        expect(question.yesterday, question.id).toMatch(/\bgestern\b/);
       } else {
         expect(question.yesterday, question.id).not.toMatch(/\btoday\b/i);
         expect(question.yesterday, question.id).toMatch(/\byesterday\b|night before last/);

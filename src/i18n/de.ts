@@ -15,7 +15,7 @@ export const de = {
   'nav.rank': 'Rang',
   'nav.areas': 'Bereiche',
   'areas.terminalSwitch': 'Bereich wählen',
-  'areas.general': 'Weitere Bereiche und Einstellungen',
+  'areas.general': 'Weiteres',
   'areas.credits': 'Danksagungen',
   'areas.credits.body': '3D-Körpermodell',
   'areas.credits.bodySubtitle': 'Von patmateee, CC BY 4.0',

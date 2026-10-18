@@ -3282,8 +3282,9 @@ heading, the folded row and the answer group's accessible name alike.
 - Records, snapshots, answers, Verlauf and Bereiche keep the stored text.
   Nothing is written.
 - The sleep question names no day; on Gestern it reads "Wie gut hast du
-  vorletzte Nacht geschlafen?" — the night it meant when it was asked
-  yesterday.
+  in der Nacht auf gestern geschlafen?" — the night it meant when it was
+  asked yesterday. Built first as "vorletzte Nacht", reworded at STOP 4
+  (question 1); the English "the night before last" already said it.
 
 `questionLibrary.test.ts`, `migration.test.ts` (the real RC2 export:
 exactly its five standard questions), `TodayScreen.yesterday.test.tsx` and

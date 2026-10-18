@@ -171,7 +171,7 @@ describe('upgrading a real RC2 database', () => {
       new Map([
         ['Hast du dir heute bewusst Zeit für dich genommen?', 'Hast du dir gestern bewusst Zeit für dich genommen?'],
         ['Wie zufrieden bist du heute mit deinem Tag?', 'Wie zufrieden warst du gestern mit deinem Tag?'],
-        ['Wie gut hast du geschlafen?', 'Wie gut hast du vorletzte Nacht geschlafen?'],
+        ['Wie gut hast du geschlafen?', 'Wie gut hast du in der Nacht auf gestern geschlafen?'],
         ['Hast du heute etwas gemacht, das dir gutgetan hat?', 'Hast du gestern etwas gemacht, das dir gutgetan hat?'],
         ['Wie hoch war dein Energielevel?', 'Wie hoch war dein Energielevel gestern?'],
       ]),
