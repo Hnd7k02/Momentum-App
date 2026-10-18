@@ -444,6 +444,8 @@ records (answers, sessions, sets, snapshots)
   area reads "Weiteres" / "More"; (7) the Stage 4 build goes to the preview.
   **Order change:** Stage 6 (the visual system, P11) comes next, then Stage 5
   (the Gym metric, P10); Stage 7 stays after both.
+- Real-device preview: the Stage 4 build (`52fe355`) is published to
+  Momentum-preview (`58c287f`, https://hnd7k02.github.io/Momentum-preview/).
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
