@@ -14,9 +14,9 @@
 /*
  * The title block. Not sticky, and deliberately so: it is a flex item above
  * an independent scroll port, so card content is clipped by the port rather
- * than passing behind the title. It still paints the ground explicitly and
- * stacks above the port, so the arrangement cannot be undone by a later
- * change to either one.
+ * than passing behind the title. It stacks above the port and lets the
+ * shell's ground show through (WP3 Stage 6); every scroll port beneath it
+ * clips its own content, which is what keeps the arrangement honest.
  */
 .screen__header {
   position: relative;
@@ -76,7 +76,6 @@
   background: var(--glass-fill);
   border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: var(--shadow-card);
   padding: var(--card-pad);
   /*
    * Glass (WP3 Stage 6, P11): the ground blurred behind a translucent fill,

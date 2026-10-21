@@ -1,8 +1,10 @@
 /**
  * WP3 Stage 6a — the two design variants, as screenshots (P11).
  *
- * One seeded device, five screens, both variants: Heute, Bereiche → Mind,
- * the Gym hub, a workout with two exercises and a set, and Muskelgruppen.
+ * One seeded device, both variants, the brief's five screens — Heute,
+ * Bereiche → Mind, the Gym hub, a workout with two exercises and a set,
+ * Muskelgruppen — and beside them Heute's Gym tile, Verlauf, Rang, a sheet
+ * from the hub, Laufen, the exercise list and one exercise's detail.
  * Variant A is the build as it stands; variant B is switched on with
  * `data-variant="b"` on `<html>` before the app starts, which is the only
  * way it is ever switched on. The owner chooses at STOP 6a.
@@ -49,8 +51,11 @@ async function holdText(page, W, variant, width, screen) {
   const below = held.filter((r) => r.ratio < (r.large ? 3 : 4.5));
   const worst = held.reduce((min, r) => Math.min(min, r.ratio), Infinity);
   const tertiary = rows.filter((r) => r.tertiary).reduce((min, r) => Math.min(min, r.ratio), Infinity);
+  // A screen with nothing measured is a broken measurement, never a pass.
+  // A sheet shows its title, its value and a paragraph; a screen far more.
   check(`${W} ${screen}: text over glass reads (${held.length} runs, lowest ${worst}, captions ${tertiary})`,
-    below.length === 0, below.map((r) => `${r.className} "${r.text}" ${r.ratio}`).join(' | ').slice(0, 240));
+    held.length >= 3 && below.length === 0,
+    below.map((r) => `${r.className} "${r.text}" ${r.ratio} (${r.size}px/${r.weight}${r.large ? ', large' : ''})`).join(' | ').slice(0, 300));
 }
 
 async function pick(page, name) {
@@ -163,9 +168,20 @@ for (const variant of VARIANTS) {
     /* A sheet opened from the hub: a portal into <body>, still Gym. */
     await page.locator('[data-metric="gym-rating"] .metric-tile__open').click();
     await page.waitForTimeout(600);
+    // The sheet is a portal into <body>; it is drawn in Gym because <html>
+    // carries the world. Its fill is the strong glass, so the colour is read
+    // and its luminance held low, not compared to white.
     const sheetBg = await page.locator('.sheet').evaluate((el) => getComputedStyle(el).backgroundColor);
-    check(`${W}: a sheet from a Gym screen is not white`, !/rgba?\(255, 255, 255(, 1)?\)/.test(sheetBg), sheetBg);
+    const sheetLum = (() => {
+      const m = sheetBg.match(/rgba?\((\d+), (\d+), (\d+)/);
+      if (!m) return null;
+      const ch = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+      return 0.2126 * ch(+m[1]) + 0.7152 * ch(+m[2]) + 0.0722 * ch(+m[3]);
+    })();
+    check(`${W}: a sheet from a Gym screen is drawn in the Gym world`,
+      (await world(page)) === 'gym' && sheetLum !== null && sheetLum < 0.1, `${sheetBg} (luminance ${sheetLum?.toFixed(3)})`);
     await shot(page, variant, width, 'gym-sheet');
+    await holdText(page, W, variant, width, 'gym-sheet');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);
 
@@ -206,6 +222,7 @@ for (const variant of VARIANTS) {
       await rows.first().scrollIntoViewIfNeeded();
       await page.waitForTimeout(400);
       await shot(page, variant, width, 'gym-exercises');
+      await holdText(page, W, variant, width, 'gym-exercises');
       await rows.first().click();
       await page.waitForTimeout(1200);
       check(`${W}: the exercise detail is drawn in the Gym world`, (await world(page)) === 'gym');

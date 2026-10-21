@@ -5,12 +5,14 @@
  * body. This drives the body round by pointer drag on Muskelgruppen and
  * records every animation frame's duration under four arrangements:
  *
- *   card-glass     the design as built: the card holding the canvas is
- *                  glass, the view pills over the canvas are solid
- *   no-glass       the same card with its blur switched off (the baseline)
- *   pills-glass    the view pills over the canvas blurred as well
- *   layer-glass    a blurred layer over the lower half of the canvas, the
- *                  shape of a sheet standing over the body (Stage 7)
+ *   as-built       the card holding the canvas is solid (D146) and the view
+ *                  pills over it are solid — the baseline
+ *   card-glass     the same card as glass, forced on for the measurement
+ *   pills-glass    the card as glass and the view pills over the canvas
+ *                  blurred as well
+ *   layer-glass    the card as glass and a blurred layer over the lower
+ *                  half of the canvas, the shape of a sheet standing over
+ *                  the body (Stage 7)
  *
  * Each arrangement runs twice, interleaved, and the table reports the median
  * and 95th-percentile frame time and the share of frames over 16.7 ms and
@@ -47,13 +49,17 @@ await openMuscles(page, { wait: 6000 });
 await page.locator('.body-viewer canvas').waitFor({ timeout: 20000 });
 await page.waitForTimeout(1500);
 
+const CARD_GLASS =
+  '.card:has(> .muscle-module) { background: var(--glass-fill) !important; backdrop-filter: saturate(160%) blur(18px) !important; -webkit-backdrop-filter: saturate(160%) blur(18px) !important; }';
 const ARRANGEMENTS = {
-  'card-glass': '',
-  'no-glass': '.card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }',
+  'as-built': '',
+  'card-glass': CARD_GLASS,
   'pills-glass':
-    '.body-viewer__views { background: rgba(255,255,255,0.08) !important; backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }',
+    CARD_GLASS +
+    ' .body-viewer__views { background: rgba(255,255,255,0.08) !important; backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }',
   'layer-glass':
-    '.body-viewer::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 50%; pointer-events: none; background: rgba(255,255,255,0.07); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }',
+    CARD_GLASS +
+    ' .body-viewer::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 50%; pointer-events: none; background: rgba(255,255,255,0.07); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }',
 };
 
 async function arrange(css) {
@@ -111,6 +117,11 @@ const stats = (deltas) => {
     over33: deltas.filter((d) => d > 33.4).length / deltas.length,
   };
 };
+
+// A warm-up turn first, so shader compilation and the first layout do not
+// land in whichever arrangement happens to run first.
+await arrange('');
+await frames(2000);
 
 const results = {};
 for (let round = 0; round < 2; round += 1) {

@@ -270,7 +270,7 @@ Never conflate them.
   file and will fail a colour that does not clear its promise.
 - **Two worlds, one vocabulary** (D145). `:root` is Mind, light, and the
   shell every shared screen is drawn in; `[data-world="gym"]` is Gym, dark.
-  The Gym block redefines colours only. A screen declares its world with
+  The Gym block redefines colours and shadows, nothing else. A screen declares its world with
   `useWorld` (`app/world.ts`), which puts the attribute on `<html>` so the
   tab bar, the sheets and the status bar follow; a Gym card on a shared
   screen is a `data-tile="gym"` tile, on the card, never on its section.
@@ -278,17 +278,22 @@ Never conflate them.
 - **Glass is one blur per card** (D146): `backdrop-filter` with the
   `-webkit-` prefix, a hairline light border, the solid `--glass-solid`
   where blur is unsupported or less transparency was asked for. Nothing
-  blurs over or under the 3D canvas. The ground is painted once, on the
-  shell; a header never paints it again.
+  blurs over or under the 3D canvas while it can move; the body's card and
+  its pills are solid, and a sheet over the body stands over a still one.
+  The ground is one layer, painted by the shell and by a full-screen
+  overlay; a header never paints it again.
 - **Text on glass is measured, not assumed** (D147). `wp3-stage6a.mjs` reads
   the rendered pixels under every visible run of text; the ground's washes
   are bounded by secondary text clearing 4.5:1 at their centre.
 - **Status colours have one definition** (D123): `--status-{weak,mixed,good,
-  strong,empty}` in `tokens.css`. CSS uses `var()`; TypeScript and WebGL read
-  the same file through `src/styles/statusPalette.ts`. Never write one of
-  those hex values anywhere else — `statusPalette.test.ts` scans for it. The
+  strong}` in `tokens.css`, the same four fills in both worlds. CSS uses
+  `var()`; TypeScript and WebGL read the same file through
+  `src/styles/statusPalette.ts`, which keeps the light set. Never write one
+  of those hex values anywhere else — `statusPalette.test.ts` scans for it.
+  Their companions — ink, tint, the `-on` label, the track — and the empty
+  cell move with the world (D145); the body never paints the empty cell. The
   1–10 answer and the 0–100 scores both resolve to the same four statuses and
-  the same `status.*` labels; text is darkened to read, the bar never is.
+  the same `status.*` labels; text moves to read, the bar never does.
 - Touch targets 44px effective. A control may reach it with a negatively
   inset `::before`.
 - No horizontal clipping at 320/360/393/430px.

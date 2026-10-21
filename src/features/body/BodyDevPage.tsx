@@ -58,7 +58,11 @@ export function BodyDevPage() {
 
   return (
     <I18nProvider language={LANG} setLanguage={() => undefined}>
-      <main style={{ maxWidth: 430, margin: '0 auto', padding: 16, fontFamily: 'system-ui' }}>
+      {/* A white page, not the app's ground (WP3 Stage 6): the host clips the
+          canvas with rounded corners, and `body.mjs` holds the canvas's top
+          and bottom bands at zero non-white pixels — the ground's lilac wash
+          showing through a corner would count as the body touching the frame. */}
+      <main style={{ maxWidth: 430, margin: '0 auto', padding: 16, fontFamily: 'system-ui', background: '#fff', minHeight: '100%' }}>
         <h1 style={{ fontSize: 17 }}>Body viewer — dev harness</h1>
         <p data-readout style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
           <span data-angle>{angle}</span>° · <span data-view-readout>{view}</span> ·{' '}

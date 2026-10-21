@@ -488,18 +488,37 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   solid and the base — with every promise of the light set kept and the
   dark reading of each ("the empty cell darker than every fill", the label
   on a fill `--text-on-accent`); `world.test.tsx` (counted claims, the
-  theme-colour rewrite); in the browser `wp3-stage6a.mjs` (60 checks: the
+  theme-colour rewrite); in the browser `wp3-stage6a.mjs` (64 checks: the
   world attribute follows the screen and comes back, the status-bar colour
   with it, a sheet from a Gym screen is drawn in Gym, no overflow, text over
-  glass on thirteen screens × two variants) and `stage6-blur-cost.mjs`.
+  glass on thirteen screens × two variants) and `stage6-blur-cost.mjs`
+  (the body's card solid as built against the card as glass, the pills
+  as glass, a layer over the body).
+- Found in passing: `--surface-primary` was referenced by the stale-notice
+  button and the rank-change mark and never defined, so the one had no
+  background and the other no ring; both read `--surface-elevated` now.
+- **Review of Stage 6a** (three reviewers, each asked to refute its own
+  findings before reporting): the domain identity aliases resolved on the
+  root and so a Gym tile on Heute drew its meter in the light mint — they
+  are declared again inside the Gym block; the suite's "sheet is not white"
+  check could not fail and now holds the sheet's luminance in the Gym world;
+  the blur-cost script measured the body's card solid against solid once the
+  card was made solid, and now forces the glass on for that arrangement;
+  a text measurement with no rows passed, and now fails; `world.test.tsx`
+  unmounts every screen it mounted; the contrast test models B's cascade in
+  the browser's order and tolerates a last declaration without its
+  semicolon; the docs no longer say "colours only", "nothing blurs over the
+  canvas" without the still-body exception, or "four tokens".
 - Verification at STOP 6a: see the STOP 6a report; the numbers are recorded
   there and carried here at 6b.
 - **Open at STOP 6a:** the variant (or a mix of palette, glass and tile);
   whether Bereiche turns whole or only below the switch; captions at 4.5:1;
   the status bar (`default` with `theme-color` per world, or the preview's
   `black-translucent`), which only the iPhone settles; the Stage 7 sheet
-  over the body pausing the render loop; `body-preview.webp` regenerated at
-  6b with `tools/render-body-preview.mjs` once the palette is chosen.
+  over the body pausing the render loop; the plan chooser and the run sheet
+  opened from Heute staying light; `body-preview.webp`, a palette-independent
+  alpha cut-out that reads on the dark tile, re-rendered at 6b only if the
+  body's lighting changes for the dark ground.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +

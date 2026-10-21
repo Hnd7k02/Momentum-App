@@ -54,7 +54,9 @@ function rules(css: string): Array<{ selector: string; declarations: Declaration
       }
       if (depth === 0) {
         const declarations: Declarations = new Map();
-        for (const match of body.matchAll(/(--[\w-]+):\s*([^;]+);/g)) {
+        // A last declaration may lack its semicolon; it still counts.
+        const text = body.trim().endsWith(';') ? body : `${body};`;
+        for (const match of text.matchAll(/(--[\w-]+):\s*([^;]+);/g)) {
           declarations.set(match[1]!, match[2]!.replace(/\s+/g, ' ').trim());
         }
         out.push({ selector: selector.replace(/\s+/g, ' ').trim(), declarations });
@@ -95,11 +97,16 @@ const GYM = declarationsOf(TOKENS_CSS, '[data-world="gym"], :root:not([data-vari
 const ROOT_B = declarationsOf(VARIANT_B_CSS, ':root[data-variant="b"]');
 const GYM_B = declarationsOf(VARIANT_B_CSS, '[data-variant="b"] [data-world="gym"], [data-variant="b"][data-world="gym"]');
 
+/*
+ * Layered as the browser cascades them on `<html>`: `:root` and the Gym
+ * block are both (0,1,0) with the Gym block later; B's two rules are (0,2,0)
+ * and outrank both, B's Gym rule last of all.
+ */
 const SETS: Array<[string, Declarations]> = [
   ['Mind (A)', set(ROOT)],
   ['Gym (A)', set(ROOT, GYM)],
   ['Mind (B)', set(ROOT, ROOT_B)],
-  ['Gym (B)', set(ROOT, GYM, GYM_B)],
+  ['Gym (B)', set(ROOT, GYM, ROOT_B, GYM_B)],
 ];
 
 function hexIn(tokens: Declarations, name: string): string {

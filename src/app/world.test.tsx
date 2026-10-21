@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it } from 'vitest';
-import { mount } from '../test/dom';
+import { mount, type Mounted } from '../test/dom';
 import { currentWorld, useWorld, type World } from './world';
 
 /**
@@ -31,7 +31,17 @@ function withTokens(): void {
   document.head.appendChild(style);
 }
 
-afterEach(() => {
+/* Every mounted screen is unmounted after its test, whether the test got
+   that far or not: a claim left behind would leak into every later test. */
+const mounted: Mounted[] = [];
+async function screen(world: World): Promise<Mounted> {
+  const view = await mount(<Screen world={world} />);
+  mounted.push(view);
+  return view;
+}
+
+afterEach(async () => {
+  while (mounted.length > 0) await mounted.pop()!.unmount();
   root().removeAttribute('data-world');
   document.querySelectorAll('[data-test-tokens], meta[name="theme-color"]').forEach((el) => el.remove());
 });
@@ -39,7 +49,7 @@ afterEach(() => {
 describe('useWorld', () => {
   it('puts the Gym world on the document while a Gym screen is mounted, and takes it off again', async () => {
     expect(root().hasAttribute('data-world')).toBe(false);
-    const view = await mount(<Screen world="gym" />);
+    const view = await screen('gym');
     expect(root().getAttribute('data-world')).toBe('gym');
     expect(currentWorld()).toBe('gym');
     await view.unmount();
@@ -48,14 +58,14 @@ describe('useWorld', () => {
   });
 
   it('a Mind screen claims nothing', async () => {
-    const view = await mount(<Screen world="mind" />);
+    const view = await screen('mind');
     expect(root().hasAttribute('data-world')).toBe(false);
     await view.unmount();
   });
 
   it('counts the claims: a workout over the hub holds the world until both have gone', async () => {
-    const hub = await mount(<Screen world="gym" />);
-    const workout = await mount(<Screen world="gym" />);
+    const hub = await screen('gym');
+    const workout = await screen('gym');
     expect(root().getAttribute('data-world')).toBe('gym');
     await hub.unmount();
     expect(root().getAttribute('data-world')).toBe('gym');
@@ -64,7 +74,7 @@ describe('useWorld', () => {
   });
 
   it('follows a screen that changes world, as Bereiche does when the area switches', async () => {
-    const view = await mount(<Screen world="mind" />);
+    const view = await screen('mind');
     expect(root().hasAttribute('data-world')).toBe(false);
     await view.rerender(<Screen world="gym" />);
     expect(root().getAttribute('data-world')).toBe('gym');
@@ -76,7 +86,7 @@ describe('useWorld', () => {
   it('rewrites theme-color from the --status-bar token of the world in force', async () => {
     withTokens();
     withThemeMeta('#f4f4f8');
-    const view = await mount(<Screen world="gym" />);
+    const view = await screen('gym');
     expect(themeColour()).toBe('#0b0e17');
     await view.unmount();
     expect(themeColour()).toBe('#f4f4f8');
@@ -84,7 +94,7 @@ describe('useWorld', () => {
 
   it('leaves theme-color alone when the stylesheet names no status-bar colour', async () => {
     withThemeMeta('#abcdef');
-    const view = await mount(<Screen world="gym" />);
+    const view = await screen('gym');
     expect(themeColour()).toBe('#abcdef');
     await view.unmount();
   });

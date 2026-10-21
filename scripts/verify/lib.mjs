@@ -498,6 +498,9 @@ export async function textContrast(page) {
       if (text.length < 2) continue;
       const el = node.parentElement;
       if (!el || seen.has(el) || el.closest('.visually-hidden, script, style, [aria-hidden="true"]')) continue;
+      // A disabled control is exempt from the contrast requirement, and its
+      // reduced opacity is not composited here, so it is left out.
+      if (el.closest(':disabled, [aria-disabled="true"]')) continue;
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) === 0) continue;
       const range = document.createRange();

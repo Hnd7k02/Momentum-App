@@ -7,14 +7,16 @@
  * (Heute, Verlauf, Rang) is drawn in.
  *
  * `[data-world="gym"]` is Gym: dark, with one neon accent. The block below
- * redefines every colour token and nothing else — type, spacing, radii and
- * motion are the one system. A screen enters the Gym world by declaring it
+ * redefines the colours, the shadows and the glass, and sets the colour
+ * scheme — type, spacing, radii and motion are the one system. A screen enters the Gym world by declaring it
  * (`app/world.ts`), which puts the attribute on `<html>`; a tile on a light
  * screen may carry the same set locally with `data-tile="gym"`.
  *
- * The status palette (D123) keeps its one definition in `:root`. The dark
- * block changes only its companions — ink, tint, the `-on` label and the
- * track — because text that reads on white does not read on #171c2b.
+ * The status palette (D123) keeps its one definition in `:root`: the four
+ * fills are the same in both worlds. The dark block changes only their
+ * companions — ink, tint, the `-on` label, the track and the empty cell —
+ * because text that reads on white does not read on #171c2b, and a light
+ * grey cell is not "nothing" on a dark card.
  *
  * `contrast.test.ts` parses both blocks and holds each to its own ground.
  */
@@ -322,8 +324,9 @@
  * stays white and grey; the status palette stays what it is, and its inks
  * are lifted so a figure reads on the dark card the way it reads on white.
  *
- * Every token redefined here is a colour. Spacing, type, radii and motion
- * are not repeated because they do not change.
+ * Every token redefined here is a colour, a shadow, the ground or the
+ * glass. Spacing, type, radii and motion are not repeated because they do
+ * not change.
  */
 [data-world="gym"],
 :root:not([data-variant="b"]) [data-tile="gym"] {
@@ -376,9 +379,34 @@
   --sand-ink: #f7df92;
   --sand-tint: #463d1a;
 
-  /* The status fills are the one definition above (D123). Their companions
-     move to the dark ground: inks lighter, tints darker, the label on a fill
-     dark instead of the (now light) primary text. */
+  /* The domain identities again, as the same aliases. A `var()` is
+     substituted where the token is declared and the substituted value is
+     what inherits, so a tile that overrides `--mint-*` would still inherit
+     the light `--domain-gym-*` from the root unless they are declared again
+     inside the scope. On `<html>` this is redundant; on a tile it is the
+     difference between a neon meter and a light one on a dark card. */
+  --domain-mental: var(--lilac-fill);
+  --domain-mental-mid: var(--lilac-mid);
+  --domain-mental-ink: var(--lilac-ink);
+  --domain-mental-tint: var(--lilac-tint);
+  --domain-sports: var(--mint-fill);
+  --domain-sports-mid: var(--mint-mid);
+  --domain-sports-ink: var(--mint-ink);
+  --domain-sports-tint: var(--mint-tint);
+  --domain-gym: var(--mint-fill);
+  --domain-gym-mid: var(--mint-mid);
+  --domain-gym-ink: var(--mint-ink);
+  --domain-gym-tint: var(--mint-tint);
+  --domain-running: var(--sky-fill);
+  --domain-running-mid: var(--sky-ink);
+  --domain-running-ink: var(--sky-ink);
+  --domain-running-tint: var(--sky-tint);
+
+  /* The four status fills are the one definition above (D123). Their
+     companions move to the dark ground: inks lighter, tints darker, the
+     label on a fill dark instead of the (now light) primary text, the empty
+     cell a dark grey. `statusPalette.ts` keeps the light set, which is what
+     TypeScript and the body read; the body never paints the empty cell. */
   --status-weak-ink: #ff8296;
   --status-weak-on: #1a0a10;
   --status-weak-tint: #4a1f2a;

@@ -2486,6 +2486,14 @@ reinforces it. contrast.test.ts checks every one of these promises.
 token families. The `bandOf()` thresholds and the scoring model they sit on
 are not superseded.
 
+*Note (WP3 Stage 6a, D145):* the one definition is the four fills,
+`--status-{weak,mixed,good,strong}`, the same in both worlds. Their
+companions and the empty cell are redefined in the Gym block of
+`tokens.css` — still the one file — and `statusPalette.ts`, which keeps
+the first declaration, hands TypeScript and the WebGL body the light set;
+the body never paints the empty cell (a region with no data stays the base
+grey at intensity 0).
+
 ## D124 — Abstinence decay is measured in a held tier, not in a domain rank
 
 **Decision.** `computeTrainingRating` no longer holds a `Rank`. The interval
@@ -3296,9 +3304,9 @@ exactly its five standard questions), `TodayScreen.yesterday.test.tsx` and
 app has two token sets in `tokens.css` and nothing else changes between
 them: `:root` is Mind, light, and the shell every shared screen — Heute,
 Verlauf, Rang — is drawn in; `[data-world="gym"]` is Gym, dark, with one
-neon accent. The Gym block redefines colours only; type, spacing, radii and
-motion are one system, and `contrast.test.ts` holds each set against its
-own ground.
+neon accent. The Gym block redefines colours and shadows, and sets
+`color-scheme: dark`; type, spacing, radii and motion are one system, and
+`contrast.test.ts` holds each set against its own ground.
 
 - **A screen declares its world; the document carries it.** `useWorld('gym')`
   (`app/world.ts`) counts a claim while the screen is mounted and puts
@@ -3309,7 +3317,10 @@ own ground.
   the display, not to a screen. Bereiche declares the world of the area it
   shows, so the switch Mind | Gym is the door: the whole screen turns,
   "Weiteres" with it. Muskelgruppen, the workout and the exercise detail
-  declare Gym wherever they were opened from.
+  declare Gym wherever they were opened from. A sheet follows the screen
+  that opened it: the plan chooser and the run sheet opened from Heute are
+  light, and the workout turns dark the moment it opens — whether those two
+  should be Gym is a STOP 6a question.
 - **The status bar follows.** The `theme-color` meta is rewritten from the
   `--status-bar` token of the world in force, never from a literal. What the
   real iPhone does with it is listed at STOP 6a as open.
@@ -3339,10 +3350,12 @@ from a Gym screen is drawn in Gym, Heute is light again after Gym).
 **Decision (WP3 Stage 6a, P11).** A card is a translucent fill over the
 ground, blurred behind (`backdrop-filter`, with the `-webkit-` prefix), a
 hairline light border drawn as an inset shadow so the box does not change,
-and the soft shadow it always had. The sheet is the strong glass. Four
-tokens describe it per world — `--glass-fill`, `--glass-border`,
-`--glass-blur`, `--glass-solid` — and the ground it shows against is one
-painted layer on the shell (`--ground`), never painted again by a header.
+and the soft shadow it always had. The sheet is the strong glass. Five
+tokens describe it per world — `--glass-fill`, `--glass-fill-strong`,
+`--glass-border`, `--glass-blur`, `--glass-solid` — and the ground it shows
+against is one layer (`--ground`), painted by the shell, by `body` for the
+overscroll and by a full-screen overlay that covers the shell; a header
+never paints it again.
 
 - **Few blur layers.** One per card, none inside a card; the sheet over the
   cards is the one stacked case, and the tab bar is the other.
@@ -3351,14 +3364,20 @@ painted layer on the shell (`--ground`), never painted again by a header.
   (`prefers-reduced-transparency`), and a Gym tile on a light screen. The
   solid is `--glass-solid`, which is also the ground every token promise is
   held against.
-- **Nothing blurs over or under the 3D canvas.** Measured before deciding
-  (`stage6-blur-cost.mjs`, SwiftShader, so relative only): the card holding
-  the canvas as glass costs about a quarter more per frame while the body
-  turns; a blurred layer over the canvas as much again at the 95th
-  percentile. The body's card, its view pills and anything that stands over
-  the body while it can move are solid; Stage 7's sheet over the body pauses
-  the render loop while it is open. A layer that is cheap here is not proven
-  cheap on the phone; one that is expensive here is proven worth avoiding.
+- **Nothing blurs over or under the 3D canvas while it can move.** Measured
+  before deciding (`stage6-blur-cost.mjs`, SwiftShader, so relative only,
+  medians over two interleaved rounds of three seconds): the card holding
+  the canvas as glass, 83 ms a frame against 67 ms solid, a quarter more;
+  the view pills blurred as well, no further change; a blurred layer over
+  the lower half of the body, 83 ms at the median and 150 ms against 117 ms
+  at the 95th percentile, which rests on a handful of frames and is the
+  noisiest figure. So the body's card and its view pills are solid, as built.
+  The one blur that may stand over the body today is a sheet's scrim, when a
+  metric tile on Muskelgruppen opens its sheet: the body does not move under
+  a scrim and its demand loop sleeps, so that costs one frame, not every
+  frame. Stage 7's tall sheet over the body pauses the render loop while it
+  is open. A layer that is cheap here is not proven cheap on the phone; one
+  that is expensive here is proven worth avoiding.
 - The glass_kit reference's frosted noise is not kept: it has no CSS
   property, a tiled image would be a second layer over every card, and the
   look holds without it.
@@ -3379,8 +3398,9 @@ worlds and both variants, and holds body text at 4.5:1 and large text at
   date line and the subtitle are `--text-secondary` on the ground, and at
   the centre of the lilac wash they must still clear 4.5:1. The light
   secondary moved from #72727c to #65656f for it (4.34:1 on #f4f4f8 before,
-  5.2:1 now, and 4.6:1 at the wash's centre); the washes sit at 0.14 and
-  below.
+  5.25:1 now, and 4.65:1 at the lilac wash's centre — a computed bound, the
+  centre lies just above the viewport; the lowest measured run of secondary
+  text on the ground is 4.98:1); the washes sit at 0.14 and below.
 - Captions (`--text-tertiary`) are reported, not held: the light theme
   carries them at about 2.5:1 by an earlier choice, and whether they rise to
   4.5:1 — which makes them a lighter secondary — is a question at STOP 6a,
