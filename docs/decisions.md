@@ -3366,12 +3366,14 @@ never paints it again.
   held against.
 - **Nothing blurs over or under the 3D canvas while it can move.** Measured
   before deciding (`stage6-blur-cost.mjs`, SwiftShader, so relative only,
-  medians over two interleaved rounds of three seconds): the card holding
-  the canvas as glass, 83 ms a frame against 67 ms solid, a quarter more;
-  the view pills blurred as well, no further change; a blurred layer over
-  the lower half of the body, 83 ms at the median and 150 ms against 117 ms
-  at the 95th percentile, which rests on a handful of frames and is the
-  noisiest figure. So the body's card and its view pills are solid, as built.
+  two interleaved rounds of three seconds after a warm-up): the body's card
+  solid, as built, 100 ms a frame at the median and 117 ms at the 95th
+  percentile; the same card as glass, 117 ms and 233 ms — a sixth more at
+  the median, double at the tail; the view pills blurred as well, 117 ms
+  and 150 ms; a blurred layer over the lower half of the body, 117 ms and
+  200 ms. The tail rests on a handful of frames and is the noisiest figure;
+  the medians agree that one blur over a turning body costs a frame in six
+  here. So the body's card and its view pills are solid, as built.
   The one blur that may stand over the body today is a sheet's scrim, when a
   metric tile on Muskelgruppen opens its sheet: the body does not move under
   a scrim and its demand loop sleeps, so that costs one frame, not every

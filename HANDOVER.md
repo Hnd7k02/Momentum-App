@@ -463,10 +463,11 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   blurred behind, under a hairline light border; the ground is one painted
   layer on the shell; one blur per card; the solid `--glass-solid` where blur
   is unsupported, where less transparency was asked for, and on a Gym tile
-  standing on a light screen. Nothing blurs over or under the 3D canvas:
-  `stage6-blur-cost.mjs` measured the card holding the canvas as glass at
-  about a quarter more per frame while the body turns (SwiftShader, so
-  relative only), and the body's card is solid.
+  standing on a light screen. Nothing blurs over or under the 3D canvas
+  while it can move: `stage6-blur-cost.mjs` measured the card holding the
+  canvas as glass at a sixth more per frame at the median and double at
+  the 95th percentile while the body turns (SwiftShader, so relative
+  only), and the body's card is solid.
 - **Text on glass is measured** (D147): `textContrast()` reads the rendered
   pixels under every visible run of text; `wp3-stage6a.mjs` holds body text
   at 4.5:1 and large text at 3:1 on every screen it shows, in both worlds
