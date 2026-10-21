@@ -1,0 +1,129 @@
+/*
+ * WP3 Stage 6a — design variant B, "Studio". Temporary.
+ *
+ * The two variants shown at STOP 6a differ in three things the owner can
+ * choose separately: the Gym palette (A: navy and neon mint; B: graphite and
+ * neon violet), the glass (A: frosted, a hairline border; B: the glass_kit
+ * reference — a gradient fill, a 1.5px gradient border, blur 15) and how a
+ * shared screen carries Gym (A: a dark tile; B: a light tile with the neon
+ * accent). This file is B's overrides, switched on by `data-variant="b"` on
+ * `<html>`; the screenshot suite sets it and nothing in the product does.
+ *
+ * One variant is removed at 6b and the other folded into tokens.css; this
+ * file does not survive the stage.
+ */
+
+/* ── Mind, light: the same tokens, a stronger wash and a clearer glass ─── */
+
+:root[data-variant="b"] {
+  --glass-fill: rgba(255, 255, 255, 0.5);
+  --glass-fill-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-blur: 15px;
+  /* A stronger wash than A's, and the secondary text a shade darker to keep
+     4.5:1 at the wash's centre — the trade B makes for its colour. */
+  --text-secondary: #5e5e68;
+  --ground:
+    radial-gradient(110% 55% at 8% -4%, rgba(143, 127, 240, 0.22), transparent 60%),
+    radial-gradient(80% 45% at 100% 10%, rgba(98, 180, 247, 0.18), transparent 60%),
+    radial-gradient(70% 40% at 10% 82%, rgba(62, 207, 162, 0.14), transparent 60%),
+    radial-gradient(60% 35% at 100% 70%, rgba(247, 177, 131, 0.12), transparent 60%),
+    linear-gradient(180deg, #f7f6fc 0%, #f1f1f7 100%);
+}
+
+/* ── Gym, dark: graphite and neon violet ───────────────────────────────── */
+
+[data-variant="b"] [data-world="gym"],
+[data-variant="b"][data-world="gym"] {
+  --surface-base: #0f0f14;
+  --surface-tinted: #141419;
+  --surface-elevated: #1a1a22;
+  --surface-raised: #202029;
+  --surface-secondary: #232330;
+  --surface-input: #282836;
+  --surface-selected: #383848;
+
+  --text-primary: #f5f4fa;
+  --text-secondary: #b0aec0;
+  --text-tertiary: #83818f;
+  --text-on-accent: #0f0f14;
+
+  --accent: #a39dff;
+  --accent-pressed: #9089ff;
+  --accent-tint: #2c2956;
+  --accent-ink: #bcb7ff;
+
+  --lilac-fill: #a39dff;
+  --lilac-mid: #9089ff;
+  --lilac-ink: #c9c5ff;
+  --lilac-tint: #2c2956;
+
+  --mint-fill: #4ff0b4;
+  --mint-mid: #32d79c;
+  --mint-ink: #7cf3cb;
+  --mint-tint: #163a30;
+
+  --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  --glass-fill-strong: rgba(26, 26, 34, 0.86);
+  --glass-solid: #1a1a22;
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: 15px;
+
+  --ground:
+    radial-gradient(90% 55% at 15% 0%, rgba(163, 157, 255, 0.28), transparent 60%),
+    radial-gradient(70% 50% at 95% 35%, rgba(79, 214, 255, 0.12), transparent 60%),
+    radial-gradient(60% 40% at 30% 100%, rgba(79, 240, 180, 0.1), transparent 60%),
+    linear-gradient(180deg, #14141b 0%, #0f0f14 100%);
+
+  --scrim: rgba(0, 0, 0, 0.55);
+  --status-bar: #0f0f14;
+
+  --shadow-button: 0 6px 22px rgba(163, 157, 255, 0.4);
+  --tab-bar-material: rgba(15, 15, 20, 0.78);
+  --toast-action: #4f47c8;
+}
+
+/*
+ * B's glass: the glass_kit reference. A gradient fill (white 12 % to 4 %),
+ * a 1.5px border that is itself a gradient — white 60 %, white 10 % at
+ * 39 %, light blue 5 % at 40 %, light blue 60 % — drawn by a masked
+ * pseudo-element so the card's box does not change, and blur 15.
+ */
+[data-variant="b"] .card {
+  position: relative;
+  box-shadow: var(--shadow-card);
+}
+
+[data-variant="b"] .card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.1) 39%,
+    rgba(173, 216, 255, 0.05) 40%,
+    rgba(173, 216, 255, 0.6) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* B keeps the shell light and lets a Gym tile carry its world by accent
+   alone: the dark set is not applied to a tile under B (see the selector in
+   tokens.css), so the tile is the light glass with the Gym label in neon. */
+[data-variant="b"] .card[data-tile="gym"],
+[data-variant="b"] [data-tile="gym"] .card {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur));
+  backdrop-filter: saturate(160%) blur(var(--glass-blur));
+}
+
+[data-variant="b"] .today__areaLink .today__areaLabel {
+  color: var(--domain-gym-ink);
+}

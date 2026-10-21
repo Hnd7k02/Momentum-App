@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chooses the variant at STOP 6a, and Stage 6b rolls it out. Stage 5 (the Gym metric) follows Stage 6; Stage 7 after both. **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -446,6 +446,60 @@ records (answers, sessions, sets, snapshots)
   (the Gym metric, P10); Stage 7 stays after both.
 - Real-device preview: the Stage 4 build (`52fe355`) is published to
   Momentum-preview (`58c287f`, https://hnd7k02.github.io/Momentum-preview/).
+
+**WP3 Stage 6a — the visual system, two variants** (branch `claude/momentum-wp3`,
+not merged; the choice between the variants is the owner's at STOP 6a)
+- **Two worlds, one vocabulary** (D145). `:root` is Mind, light, and the
+  shell every shared screen is drawn in; `[data-world="gym"]` is Gym, dark,
+  with one neon accent, redefining colours only. A screen declares its
+  world (`app/world.ts`, `useWorld`), the claim is counted and the document
+  carries it on `<html>`, so the tab bar, a toast, a sheet rendered into
+  `<body>` and the status bar (`theme-color` from `--status-bar`) follow.
+  Bereiche declares the world of the area it shows — the switch is the
+  door, the whole screen turns; Muskelgruppen, the workout and the exercise
+  detail declare Gym wherever they were opened from. A training card on
+  Heute is a Gym tile (`data-tile="gym"` on the card, never on its section).
+- **Glass** (D146): cards and sheets are a translucent fill over the ground,
+  blurred behind, under a hairline light border; the ground is one painted
+  layer on the shell; one blur per card; the solid `--glass-solid` where blur
+  is unsupported, where less transparency was asked for, and on a Gym tile
+  standing on a light screen. Nothing blurs over or under the 3D canvas:
+  `stage6-blur-cost.mjs` measured the card holding the canvas as glass at
+  about a quarter more per frame while the body turns (SwiftShader, so
+  relative only), and the body's card is solid.
+- **Text on glass is measured** (D147): `textContrast()` reads the rendered
+  pixels under every visible run of text; `wp3-stage6a.mjs` holds body text
+  at 4.5:1 and large text at 3:1 on every screen it shows, in both worlds
+  and both variants (`docs/design/wp3/stage6a/text-contrast.json`). The
+  light secondary moved to #65656f and the ground's washes are bounded by
+  it. Captions (`--text-tertiary`, about 2.5:1 on light by an earlier
+  choice) are reported, not held — a STOP 6a question.
+- **Two variants, as built.** A, the build: navy ground, neon mint, frosted
+  glass with a hairline border, a Gym card on Heute as a dark tile. B,
+  `src/styles/stage6-variant-b.css` behind `data-variant="b"` on `<html>`
+  (set only by the screenshot suite): graphite ground, neon violet, the
+  glass_kit reference's gradient fill and 1.5px gradient border, a stronger
+  wash on Mind with its secondary a shade darker, the Gym card on Heute
+  light with the label in the Gym accent. One is removed at 6b and the
+  other folded into `tokens.css`; the temporary `:root:not([data-variant="b"])`
+  selector in `tokens.css` and the `@import` in `global.css` go with it.
+- **Tests.** `contrast.test.ts` parses the token blocks and holds four sets
+  (Mind A, Gym A, Mind B, Gym B) each against its own ground — the card
+  solid and the base — with every promise of the light set kept and the
+  dark reading of each ("the empty cell darker than every fill", the label
+  on a fill `--text-on-accent`); `world.test.tsx` (counted claims, the
+  theme-colour rewrite); in the browser `wp3-stage6a.mjs` (60 checks: the
+  world attribute follows the screen and comes back, the status-bar colour
+  with it, a sheet from a Gym screen is drawn in Gym, no overflow, text over
+  glass on thirteen screens × two variants) and `stage6-blur-cost.mjs`.
+- Verification at STOP 6a: see the STOP 6a report; the numbers are recorded
+  there and carried here at 6b.
+- **Open at STOP 6a:** the variant (or a mix of palette, glass and tile);
+  whether Bereiche turns whole or only below the switch; captions at 4.5:1;
+  the status bar (`default` with `theme-color` per world, or the preview's
+  `black-translucent`), which only the iPhone settles; the Stage 7 sheet
+  over the body pausing the render loop; `body-preview.webp` regenerated at
+  6b with `tools/render-body-preview.mjs` once the palette is chosen.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +

@@ -268,6 +268,21 @@ Never conflate them.
 
 - Design tokens only (`src/styles/tokens.css`). `contrast.test.ts` parses that
   file and will fail a colour that does not clear its promise.
+- **Two worlds, one vocabulary** (D145). `:root` is Mind, light, and the
+  shell every shared screen is drawn in; `[data-world="gym"]` is Gym, dark.
+  The Gym block redefines colours only. A screen declares its world with
+  `useWorld` (`app/world.ts`), which puts the attribute on `<html>` so the
+  tab bar, the sheets and the status bar follow; a Gym card on a shared
+  screen is a `data-tile="gym"` tile, on the card, never on its section.
+  `contrast.test.ts` holds each set against its own ground.
+- **Glass is one blur per card** (D146): `backdrop-filter` with the
+  `-webkit-` prefix, a hairline light border, the solid `--glass-solid`
+  where blur is unsupported or less transparency was asked for. Nothing
+  blurs over or under the 3D canvas. The ground is painted once, on the
+  shell; a header never paints it again.
+- **Text on glass is measured, not assumed** (D147). `wp3-stage6a.mjs` reads
+  the rendered pixels under every visible run of text; the ground's washes
+  are bounded by secondary text clearing 4.5:1 at their centre.
 - **Status colours have one definition** (D123): `--status-{weak,mixed,good,
   strong,empty}` in `tokens.css`. CSS uses `var()`; TypeScript and WebGL read
   the same file through `src/styles/statusPalette.ts`. Never write one of

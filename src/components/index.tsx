@@ -18,15 +18,21 @@ import './ui.css';
  * `data-card` marks the tile for the geometry harness, which measures every
  * line of text against the box that clips it.
  */
-export function Card({ children, rows = false, flush = false, className = '' }: {
+export function Card({ children, rows = false, flush = false, className = '', world }: {
   children: ReactNode;
   rows?: boolean;
   flush?: boolean;
   className?: string;
+  /**
+   * The world this card belongs to when it stands on a shared screen (WP3
+   * Stage 6): a Gym card on Heute carries the Gym token set as a tile. The
+   * label above it stays in the screen's own world.
+   */
+  world?: 'gym';
 }) {
   const variant = flush ? 'card--flush' : rows ? 'card--rows' : '';
   return (
-    <div data-card className={`card ${variant} ${className}`.trim()}>{children}</div>
+    <div data-card data-tile={world} className={`card ${variant} ${className}`.trim()}>{children}</div>
   );
 }
 

@@ -51,6 +51,7 @@ import '../progress/progress.css';
 import './areas.css';
 import './domainTerminal.css';
 import { WEIGHT_UNITS, weightUnitOf, type WeightUnit } from '../../core/gym/weight';
+import { useWorld } from '../../app/world';
 
 /**
  * Asking a migrated user, once, what their RC2 Sport sessions were.
@@ -224,6 +225,8 @@ export function AreasScreen({
   onOpenSection(section: GymSection | undefined): void;
 }) {
   const t = useT();
+  // Bereiche is drawn in the world of the area it shows (WP3 Stage 6).
+  useWorld(terminal === 'gym' ? 'gym' : 'mind');
   const { language } = useI18n();
   const [editing, setEditing] = useState<QuestionRecord | null>(null);
   const [creating, setCreating] = useState(false);

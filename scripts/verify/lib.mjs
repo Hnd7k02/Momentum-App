@@ -454,3 +454,94 @@ export async function seedConfirmation(page, { days = 30, value = 10, today = fa
   }, { value, today });
 }
 
+
+/**
+ * Text over glass, measured (WP3 Stage 6).
+ *
+ * A token test can hold an ink against a solid, but a glass card has no one
+ * colour: what is behind the text is the fill over whatever the blur made
+ * of the ground. So this reads the real pixels. It screenshots the page,
+ * draws the image onto a canvas inside the page, and for every visible run
+ * of text takes the most common colour in its glyph box that is not the
+ * text's own — the background the glyphs actually sit on — and works out
+ * the WCAG ratio against the computed text colour (alpha composited).
+ *
+ * Returns one entry per text element: the text, its class, size, weight,
+ * whether WCAG counts it as large, the measured background, the ratio, and
+ * whether its colour is the scope's `--text-tertiary` (a caption weight the
+ * light theme already carries below 4.5:1, reported apart on purpose).
+ */
+export async function textContrast(page) {
+  const png = (await page.screenshot({ type: 'png' })).toString('base64');
+  return page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = 'data:image/png;base64,' + b64;
+    await img.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+    const dpr = img.naturalWidth / window.innerWidth;
+    const channel = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    const lum = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+    const contrast = (a, b) => { const [l, d] = [lum(a), lum(b)].sort((x, y) => y - x); return (l + 0.05) / (d + 0.05); };
+    const parse = (css) => { const m = css.match(/rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)/); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; };
+    const hexToRgb = (hex) => { const h = hex.trim().replace('#', ''); return h.length === 6 ? [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)] : null; };
+    const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    const out = [];
+    const seen = new Set();
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.textContent.trim();
+      if (text.length < 2) continue;
+      const el = node.parentElement;
+      if (!el || seen.has(el) || el.closest('.visually-hidden, script, style, [aria-hidden="true"]')) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) === 0) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const rects = [...range.getClientRects()].filter((r) => r.width > 2 && r.height > 2);
+      if (rects.length === 0) continue;
+      const r = rects[0];
+      if (r.top < 0 || r.bottom > window.innerHeight || r.left < 0 || r.right > window.innerWidth) continue;
+      const top = document.elementFromPoint(r.left + Math.min(6, r.width / 2), r.top + r.height / 2);
+      if (!top || !(el.contains(top) || top.contains(el))) continue;
+      seen.add(el);
+      const fg = parse(cs.color);
+      if (!fg) continue;
+      const x0 = Math.floor(r.left * dpr), y0 = Math.floor(r.top * dpr);
+      const w = Math.max(1, Math.ceil(r.width * dpr)), h = Math.max(1, Math.ceil(r.height * dpr));
+      const data = ctx.getImageData(x0, y0, w, h).data;
+      const buckets = new Map();
+      for (let i = 0; i < data.length; i += 8) {
+        const key = ((data[i] >> 4) << 8) | ((data[i + 1] >> 4) << 4) | (data[i + 2] >> 4);
+        const b = buckets.get(key) ?? { n: 0, r: 0, g: 0, b: 0 };
+        b.n += 1; b.r += data[i]; b.g += data[i + 1]; b.b += data[i + 2];
+        buckets.set(key, b);
+      }
+      const ranked = [...buckets.values()].sort((a, b) => b.n - a.n).map((b) => [b.r / b.n, b.g / b.n, b.b / b.n]);
+      // The glyphs are the text colour; the background is the most common
+      // colour that is not it.
+      const bg = ranked.find((c) => distance(c, fg) > 48) ?? ranked[0];
+      const alpha = fg[3];
+      const ink = alpha < 1 ? fg.slice(0, 3).map((v, i) => v * alpha + bg[i] * (1 - alpha)) : fg.slice(0, 3);
+      const size = parseFloat(cs.fontSize);
+      const weight = parseInt(cs.fontWeight, 10) || 400;
+      const tertiary = hexToRgb(cs.getPropertyValue('--text-tertiary'));
+      out.push({
+        text: text.slice(0, 30),
+        className: String(el.className || el.tagName).slice(0, 48),
+        size,
+        weight,
+        large: size >= 24 || (size >= 18.66 && weight >= 700),
+        fg: ink.map(Math.round),
+        bg: bg.map(Math.round),
+        ratio: Number(contrast(ink, bg).toFixed(2)),
+        tertiary: tertiary !== null && distance(ink, tertiary) < 6,
+      });
+    }
+    return out;
+  }, png);
+}

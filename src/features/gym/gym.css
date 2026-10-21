@@ -65,7 +65,9 @@
 .gym-detail {
   position: absolute;
   inset: 0;
+  /* The overlay paints the Gym ground itself: it covers the shell's. */
   background: var(--surface-base);
+  background-image: var(--ground);
   z-index: 30;
   display: flex;
   flex-direction: column;
@@ -114,8 +116,10 @@
   margin: 0 calc(-1 * (var(--safe-right) + var(--space-5))) 0 calc(-1 * (var(--safe-left) + var(--space-5)));
   padding: var(--space-3) calc(2 * var(--safe-right) + var(--space-5) + var(--space-4))
     calc(var(--space-3) + var(--safe-bottom)) calc(2 * var(--safe-left) + var(--space-5) + var(--space-4));
-  background: var(--surface-base);
-  border-top: 1px solid var(--separator);
+  background: var(--tab-bar-material);
+  -webkit-backdrop-filter: var(--tab-bar-blur);
+  backdrop-filter: var(--tab-bar-blur);
+  border-top: 1px solid var(--glass-border);
 }
 
 /* Inside the workout the bar holds the safe area, so the scroll needs none. */

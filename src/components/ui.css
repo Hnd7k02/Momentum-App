@@ -21,7 +21,10 @@
 .screen__header {
   position: relative;
   z-index: 1;
-  background: var(--surface-base);
+  /* The ground shows through (WP3 Stage 6): the shell paints it once, and a
+     header painting its own flat colour would cut the wash in half. The
+     scroll port below clips its own content, so nothing passes behind. */
+  background: transparent;
   padding-top: calc(var(--safe-top) + var(--space-7));
   padding-bottom: var(--space-6);
 }
@@ -70,11 +73,47 @@
  * the corner, and with the content inset it no longer has any text to reach.
  */
 .card {
-  background: var(--surface-elevated);
+  background: var(--glass-fill);
   border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   padding: var(--card-pad);
+  /*
+   * Glass (WP3 Stage 6, P11): the ground blurred behind a translucent fill,
+   * under a hairline light border. The border is drawn by an inset shadow,
+   * not `border`, so the card's box and every inset inside it stay exactly
+   * what they were. Only one blur layer per card; nothing inside a card
+   * blurs again.
+   */
+  box-shadow: inset 0 0 0 1px var(--glass-border), var(--shadow-card);
+  -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur));
+  backdrop-filter: saturate(160%) blur(var(--glass-blur));
+}
+
+/*
+ * Solid where glass cannot be: a browser without backdrop blur, a person
+ * who asked for less transparency, or a Gym tile standing on a light screen
+ * (dark glass over a light ground is mud; a dark card is a window).
+ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card {
+    background: var(--glass-solid);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .card {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.card[data-tile="gym"],
+[data-tile="gym"] .card {
+  background: var(--glass-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /*
@@ -338,7 +377,7 @@
    control is exposed as a radio group. Same pill either way. */
 .segmented__option[aria-pressed='true'],
 .segmented__option[aria-checked='true'] {
-  background: var(--surface-elevated);
+  background: var(--surface-selected);
   font-weight: var(--weight-semibold);
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 0 0 0.5px rgba(16, 24, 40, 0.04);
 }
@@ -465,7 +504,7 @@
 .sheet-scrim {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 40, 0.28);
+  background: var(--scrim);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   display: flex;
@@ -479,11 +518,29 @@
   max-height: 88vh;
   display: flex;
   flex-direction: column;
-  background: var(--surface-elevated);
+  /* The sheet is the strong glass: what it covers stays visible behind it,
+     but the fields on it need a surface that reads as one. */
+  background: var(--glass-fill-strong);
   border-radius: 26px 26px 0 0;
-  box-shadow: var(--shadow-sheet);
+  box-shadow: inset 0 1px 0 var(--glass-border), var(--shadow-sheet);
+  -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur));
+  backdrop-filter: saturate(160%) blur(var(--glass-blur));
   padding-bottom: calc(var(--safe-bottom) + var(--space-5));
   animation: sheet-rise var(--duration-base) var(--ease-standard);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sheet {
+    background: var(--glass-solid);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .sheet {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /* The dialog takes focus only when it has no field to offer (WP3, B1); the
@@ -617,7 +674,7 @@
   min-height: 34px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--surface-primary);
+  background: var(--surface-elevated);
   color: var(--accent-ink);
   font-size: var(--type-footnote);
   font-weight: var(--weight-semibold);

@@ -453,7 +453,9 @@ export function TodayScreen({
                   <ChevronRightIcon size={16} />
                 </button>
               ) : null}
-              <Card>
+              {/* Every training card is a Gym tile (D145): Laufen lives inside
+                  Gym, and the retired Sport card is training too. */}
+              <Card world="gym">
                 <div className="week__header">
                   <span className="week__label">
                     {t(training.weekKey === thisWeek ? 'sports.thisWeek' : 'sports.lastWeek')}

@@ -8,6 +8,7 @@ import { useGymHistory } from './useGymHistory';
 import '../areas/areas.css';
 import '../progress/progress.css';
 import './gymHub.css';
+import { useWorld } from '../../app/world';
 
 /**
  * Muskelgruppen — the Gym area's second destination (`#/areas/gym/muscles`).
@@ -24,6 +25,8 @@ import './gymHub.css';
  */
 export function GymMusclesScreen({ onBack }: { onBack(): void }) {
   const t = useT();
+  // Muskelgruppen is a Gym screen (WP3 Stage 6).
+  useWorld('gym');
   const [range, setRange] = useState<number>(TREND_RANGES[TREND_RANGES.length - 1]!);
   const gym = useGymHistory(range);
 

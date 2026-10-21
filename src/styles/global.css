@@ -1,4 +1,7 @@
 @import './tokens.css';
+/* Stage 6a only: the second design variant, chosen at STOP 6a. One of the
+   two is removed at 6b and the other folded into tokens.css. */
+@import './stage6-variant-b.css';
 
 *,
 *::before,
@@ -14,8 +17,10 @@ body,
 
 body {
   margin: 0;
+  /* The ground (WP3 Stage 6): the washes the glass blurs. The shell paints
+     the same layer; here it is what an overscroll shows. */
   background: var(--surface-base);
-  /* Kept in sync with the ground so an overscroll never flashes white. */
+  background-image: var(--ground);
   background-attachment: fixed;
   color: var(--text-primary);
   /* System font only. SF Pro font files may not be embedded on the web. */
@@ -27,6 +32,17 @@ body {
   /* The app is a single scrolling surface; rubber-banding the whole page
      makes an installed PWA feel like a web page. */
   overscroll-behavior-y: none;
+}
+
+/*
+ * A world scope restarts the inherited colour (WP3 Stage 6). Custom
+ * properties cascade into the scope, but `color` is inherited as a computed
+ * value from `body`, so a row title inside a Gym tile on Heute would keep
+ * the light world's ink unless the scope sets it again here.
+ */
+[data-world="gym"],
+:root:not([data-variant="b"]) [data-tile="gym"] {
+  color: var(--text-primary);
 }
 
 button {

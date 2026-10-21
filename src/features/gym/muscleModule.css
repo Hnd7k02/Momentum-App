@@ -12,6 +12,15 @@
   gap: var(--space-4);
 }
 
+/* Nothing blurs under or over the 3D canvas (D146): the card that holds the
+   body is the solid, not the glass, and its view pills stay solid. The
+   cost was measured before deciding (`stage6-blur-cost.mjs`). */
+.card:has(> .muscle-module) {
+  background: var(--glass-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 .muscle-module .body-viewer,
 .muscle-module__placeholder {
   width: 100%;

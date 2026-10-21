@@ -39,7 +39,7 @@ export function RunningWorkoutCard({
   return (
     <button
       type="button"
-      className="running-workout"
+      className="running-workout" data-tile="gym"
       aria-label={t('workout.running.label', { detail })}
       onClick={onContinue}
     >

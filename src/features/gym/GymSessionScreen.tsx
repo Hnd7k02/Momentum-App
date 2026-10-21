@@ -46,6 +46,7 @@ import {
 import { ExercisePicker } from './ExercisePicker';
 import { useExerciseNamer } from './exerciseNames';
 import './gym.css';
+import { useWorld } from '../../app/world';
 
 /**
  * Logging a workout.
@@ -510,6 +511,9 @@ export function GymSessionScreen({
   onClose(): void;
 }) {
   const t = useT();
+  // The workout is a Gym screen wherever it was opened from (WP3 Stage 6),
+  // and from the moment it opens — before any set is saved.
+  useWorld('gym');
   const { language } = useI18n();
   const weights = useWeights();
   const namer = useExerciseNamer();

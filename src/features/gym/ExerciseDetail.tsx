@@ -7,6 +7,7 @@ import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useWeights } from '../../app/useWeights';
 import { roundShown, shownTrend } from './muscleState';
 import './gym.css';
+import { useWorld } from '../../app/world';
 
 /**
  * One exercise, over time.
@@ -31,6 +32,8 @@ export function ExerciseDetail({
   onClose(): void;
 }) {
   const t = useT();
+  // The exercise detail is a Gym screen (WP3 Stage 6).
+  useWorld('gym');
   const { language } = useI18n();
   const weights = useWeights();
   /** The day's score, rendered as the set that produced it, in the user's unit. */

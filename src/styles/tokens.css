@@ -1,13 +1,22 @@
 /*
- * Design tokens — light.
+ * Design tokens — two worlds (WP3 Stage 6, P11).
  *
- * Version 1 is a single light theme. Not two half-considered ones: the
- * history colours and the rank badges are both designed against one ground,
- * and carrying a second would halve the care each gets.
+ * `:root` is Mind: light, Apple's language — a tinted off-white ground,
+ * frosted white cards, hairline separators, generous spacing, pastel as
+ * identity rather than decoration. It is also the shell every shared screen
+ * (Heute, Verlauf, Rang) is drawn in.
  *
- * The language is Apple's: a tinted off-white ground, white cards lifted by
- * a soft shadow rather than a border, hairline separators, generous spacing,
- * and pastel used as identity rather than decoration.
+ * `[data-world="gym"]` is Gym: dark, with one neon accent. The block below
+ * redefines every colour token and nothing else — type, spacing, radii and
+ * motion are the one system. A screen enters the Gym world by declaring it
+ * (`app/world.ts`), which puts the attribute on `<html>`; a tile on a light
+ * screen may carry the same set locally with `data-tile="gym"`.
+ *
+ * The status palette (D123) keeps its one definition in `:root`. The dark
+ * block changes only its companions — ink, tint, the `-on` label and the
+ * track — because text that reads on white does not read on #171c2b.
+ *
+ * `contrast.test.ts` parses both blocks and holds each to its own ground.
  */
 
 :root {
@@ -21,6 +30,9 @@
   --surface-raised: #ffffff;
   --surface-secondary: #f1f1f5;
   --surface-input: #f2f2f7;
+  /* The selected option of a segmented control or a view pill: lifted off
+     its recessed track. White here, lighter than the track on dark. */
+  --surface-selected: #ffffff;
 
   /* Hairlines, never solid rules. */
   --separator: rgba(60, 60, 67, 0.09);
@@ -28,14 +40,15 @@
 
   /*
    * Text. Secondary is deliberately darker than Apple's own secondaryLabel so
-   * it clears 4.5:1 on white at footnote size.
+   * it clears 4.5:1 at footnote size — on white, and since the ground shows
+   * under every section label (WP3 Stage 6) on the ground as well.
    *
    * Every colour here is verified by contrast.test.ts rather than by eye:
    * an `-ink` must read both on white and on its own `-tint`, which is the
    * harder of the two and the one that badges depend on.
    */
   --text-primary: #1c1c1e;
-  --text-secondary: #72727c;
+  --text-secondary: #65656f;
   --text-tertiary: #a0a0a8;
   --text-on-accent: #ffffff;
 
@@ -164,6 +177,46 @@
   /* The unfilled track a history bar stands in. */
   --status-track: #f1f1f5;
 
+  /*
+   * Glass (WP3 Stage 6, P11).
+   *
+   * A card is a translucent surface over the ground, blurred behind
+   * (`backdrop-filter`), with a hairline light border on top and the soft
+   * shadow it always had. Four values describe it: the fill, the border,
+   * the blur radius and the solid colour it falls back to where blur is
+   * unsupported or the person has asked for less transparency. A tile on a
+   * dark world inside a light screen takes the solid colour too: dark glass
+   * over a light ground is mud.
+   */
+  --glass-fill: rgba(255, 255, 255, 0.66);
+  --glass-fill-strong: rgba(255, 255, 255, 0.82);
+  --glass-solid: #ffffff;
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-blur: 20px;
+
+  /*
+   * The ground the glass shows against: the tinted off-white with two soft
+   * washes in the Mind lilac and the Running sky, and a third in the Gym
+   * mint lower down so a card has something to blur wherever it scrolls.
+   * One painted layer on the shell; nothing else paints it again.
+   *
+   * The washes are bounded by the text that stands on the ground: a section
+   * label, the date line and the subtitle are `--text-secondary`, and at the
+   * centre of the lilac wash they must still clear 4.5:1 — `wp3-stage6a.mjs`
+   * measures the rendered pixels. 0.14 is where that holds.
+   */
+  --ground:
+    radial-gradient(120% 60% at 12% -6%, rgba(143, 127, 240, 0.14), transparent 62%),
+    radial-gradient(90% 48% at 96% 6%, rgba(98, 180, 247, 0.12), transparent 60%),
+    radial-gradient(70% 40% at 0% 78%, rgba(62, 207, 162, 0.1), transparent 60%),
+    linear-gradient(180deg, #f6f5fb 0%, #f3f3f8 100%);
+
+  /* What a sheet dims the screen behind it with. */
+  --scrim: rgba(16, 24, 40, 0.28);
+
+  /* What `theme-color` is set to while this world is in force. */
+  --status-bar: #f4f4f8;
+
   /* iOS type scale. */
   --type-large-title: 34px;
   --type-title: 22px;
@@ -257,4 +310,120 @@
     --duration-fast: 0ms;
     --duration-base: 0ms;
   }
+}
+
+/*
+ * Gym — dark, one neon.
+ *
+ * The ground is a deep navy, not black: black flattens the 3D body and
+ * swallows the shadows that give a card its edge. The accent is a neon mint
+ * — Gym's own identity colour taken to full brightness — and it is the only
+ * thing that glows: the primary action, a filled meter, a focus ring. Text
+ * stays white and grey; the status palette stays what it is, and its inks
+ * are lifted so a figure reads on the dark card the way it reads on white.
+ *
+ * Every token redefined here is a colour. Spacing, type, radii and motion
+ * are not repeated because they do not change.
+ */
+[data-world="gym"],
+:root:not([data-variant="b"]) [data-tile="gym"] {
+  color-scheme: dark;
+
+  --surface-base: #0b0e17;
+  --surface-tinted: #10141f;
+  --surface-elevated: #171c2b;
+  --surface-raised: #1c2234;
+  --surface-secondary: #1f2538;
+  --surface-input: #232a40;
+  --surface-selected: #323b55;
+
+  --separator: rgba(255, 255, 255, 0.09);
+  --separator-strong: rgba(255, 255, 255, 0.2);
+
+  --text-primary: #f3f4f8;
+  --text-secondary: #aab0c2;
+  --text-tertiary: #7f879d;
+  --text-on-accent: #07140f;
+
+  --accent: #3ef2b0;
+  --accent-pressed: #2bd99b;
+  --accent-tint: #163a33;
+  --accent-ink: #5ff5c2;
+
+  --lilac-fill: #a89cff;
+  --lilac-mid: #9486ff;
+  --lilac-ink: #c6bdff;
+  --lilac-tint: #282550;
+
+  --mint-fill: #3ef2b0;
+  --mint-mid: #29d79b;
+  --mint-ink: #6cf4c6;
+  --mint-tint: #143a30;
+
+  --sky-fill: #62c6ff;
+  --sky-ink: #93d6ff;
+  --sky-tint: #14334c;
+
+  --peach-fill: #ffb27a;
+  --peach-ink: #ffc79a;
+  --peach-tint: #46301f;
+
+  --rose-fill: #ff8ea0;
+  --rose-ink: #ffa8b6;
+  --rose-tint: #4b2431;
+
+  --sand-fill: #f0d276;
+  --sand-ink: #f7df92;
+  --sand-tint: #463d1a;
+
+  /* The status fills are the one definition above (D123). Their companions
+     move to the dark ground: inks lighter, tints darker, the label on a fill
+     dark instead of the (now light) primary text. */
+  --status-weak-ink: #ff8296;
+  --status-weak-on: #1a0a10;
+  --status-weak-tint: #4a1f2a;
+
+  --status-mixed-ink: #ffe36b;
+  --status-mixed-on: #1a1600;
+  --status-mixed-tint: #46400f;
+
+  --status-good-ink: #8fef6f;
+  --status-good-on: #0d1a08;
+  --status-good-tint: #1f4218;
+
+  --status-strong-ink: #4ae69e;
+  --status-strong-on: #06180f;
+  --status-strong-tint: #124430;
+
+  --status-empty: #2b3249;
+  --status-empty-ink: var(--text-secondary);
+  --status-empty-tint: var(--surface-secondary);
+  --status-track: #222941;
+
+  --glass-fill: rgba(255, 255, 255, 0.07);
+  --glass-fill-strong: rgba(23, 28, 43, 0.84);
+  --glass-solid: #171c2b;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: 18px;
+
+  --ground:
+    radial-gradient(90% 50% at 10% 0%, rgba(62, 242, 176, 0.16), transparent 60%),
+    radial-gradient(80% 50% at 100% 30%, rgba(98, 180, 247, 0.14), transparent 60%),
+    radial-gradient(70% 40% at 20% 100%, rgba(143, 127, 240, 0.12), transparent 60%),
+    linear-gradient(180deg, #0e1220 0%, #0b0e17 100%);
+
+  --scrim: rgba(0, 0, 0, 0.52);
+  --status-bar: #0b0e17;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-button: 0 6px 22px rgba(62, 242, 176, 0.32);
+  --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, 0.55);
+
+  --tab-bar-material: rgba(11, 14, 23, 0.78);
+
+  /* The toast inverts with the world: a light pill over dark cards. */
+  --toast-surface: #f3f4f8;
+  --toast-text: #0b0e17;
+  --toast-action: #0f6f4f;
 }

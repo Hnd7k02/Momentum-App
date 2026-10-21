@@ -1,7 +1,11 @@
 .app {
   position: relative;
   height: 100%;
+  /* One painted ground for the whole display (WP3 Stage 6). The screens
+     scroll inside it, so it is fixed without `background-attachment`, which
+     iOS does not honour. */
   background: var(--surface-base);
+  background-image: var(--ground);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -18,7 +22,7 @@
 .tab-bar {
   display: flex;
   align-items: stretch;
-  border-top: 0.5px solid var(--separator);
+  border-top: 0.5px solid var(--glass-border);
   background: var(--tab-bar-material);
   backdrop-filter: var(--tab-bar-blur);
   -webkit-backdrop-filter: var(--tab-bar-blur);
@@ -93,7 +97,8 @@
     calc(var(--safe-left) + var(--space-4));
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border-radius: var(--radius-control);
-  background: var(--surface-elevated);
+  background: var(--glass-fill-strong);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-raised);
   font-size: var(--type-footnote);
   color: var(--text-secondary);
