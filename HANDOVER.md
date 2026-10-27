@@ -515,8 +515,8 @@ not merged; the choice between the variants is the owner's at STOP 6a)
 - **After STOP 6a, while the choice is open** (the owner's "go ahead" with
   the questions unanswered): the two variants ran at 430 and 320 as well —
   A clean at both; B's Gym label on Heute measured 4.45:1 on B's wash at
-  430, so B's mint ink darkened to #0a6e55 and B was re-run. Nothing that
-  depends on the choice was touched. And Stage 5's Gate G was taken, before
+  430, so B's mint ink darkened to #0a6e55 and B was re-run, 64/64 at 430
+  and 320. Nothing that depends on the choice was touched. And Stage 5's Gate G was taken, before
   any production code: `docs/design/wp3/stage5-gateG.md` compares the best
   set, the mean set score and the total volume through the real pipeline
   over a purpose-built history, recommends keeping the best set, and
