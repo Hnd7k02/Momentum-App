@@ -21,8 +21,11 @@
   --glass-border: rgba(255, 255, 255, 0.95);
   --glass-blur: 15px;
   /* A stronger wash than A's, and the secondary text a shade darker to keep
-     4.5:1 at the wash's centre — the trade B makes for its colour. */
+     4.5:1 at the wash's centre — the trade B makes for its colour. The Gym
+     label on Heute is the mint ink on the same ground, so it goes a shade
+     darker too (4.45:1 measured at 430 before). */
   --text-secondary: #5e5e68;
+  --mint-ink: #0a6e55;
   --ground:
     radial-gradient(110% 55% at 8% -4%, rgba(143, 127, 240, 0.22), transparent 60%),
     radial-gradient(80% 45% at 100% 10%, rgba(98, 180, 247, 0.18), transparent 60%),
