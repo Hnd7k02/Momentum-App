@@ -927,7 +927,23 @@ merged; **in progress, runs up to its gate and stops there**)
     only `anny/data/mpfb2/` is unpacked (1489 files, 66 MB), and its
     `LICENSE.md` is the full text of CC0 1.0 Universal.
   - [x] Step 1 — the decision that supplements D156: **D165**.
-  - [ ] Step 2 — the pipeline under `tools/body/`
+  - [x] Step 2 — the pipeline under `tools/body/` (its `README.md` has the
+    commands). One command, `python3 tools/body/build.py <candidate>`;
+    numpy and Node only. The eighteen MakeHuman files the candidates read
+    lie in `tools/body/makehuman/` with their `LICENSE.md` (CC0 1.0
+    Universal, read in full) and a manifest of sha256 — in the repository
+    rather than pinned to the wheel, so the build runs offline and the
+    wheel's code never comes near. Two builds in a row are byte-identical;
+    `digests.json` records every candidate and a build that differs exits 1.
+    The regions are stored per vertex (`regions.json`); the upper trapezius
+    stays with the back, and the build stops if `refine-body.mjs` hands
+    back a piece of 100 triangles or more. `refine-body.mjs` has tests now
+    (vitest project `tools`, 14 tests, part of `npm run test`), and **they
+    found a defect in the script as the reference page has it**: a border
+    crossing snapped onto a vertex left a T-junction, so the body was not
+    closed (30 open edges in the proof, 84 in the first candidate). One
+    branch is corrected; the body is closed. `npm run test` is 112 files
+    and 1800 tests from here on.
   - [ ] Step 3 — measuring: today's body and the proof
   - [ ] Step 4 — the candidates
   - [ ] Step 5 — light, material, tone mapping (on a candidate, in

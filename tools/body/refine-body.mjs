@@ -399,8 +399,19 @@ for (let t = 0; t < M; t++) {
   const A = l[r], B = l[(r + 1) % 3];
   const mij = vertexOnEdge(i, j), mki = vertexOnEdge(k, i);
   emit(A, i, mij, mki);
-  emit(B, mij, j, k);
-  emit(B, mij, k, mki);
+  // The rest is the quad mij–j–k–mki. Where the crossing on i–j was snapped
+  // onto i, three of its corners lie in one line (i, mki, k), and the diagonal
+  // from mij would make a triangle without area. emit() drops such a triangle,
+  // and with it the only use of mki on this side of the edge: the neighbour
+  // across k–i is split there, this triangle is not, and the closed body has
+  // an open edge. The diagonal from j has no such case.
+  if (mij === i) {
+    emit(B, j, k, mki);
+    emit(B, j, mki, i);
+  } else {
+    emit(B, mij, j, k);
+    emit(B, mij, k, mki);
+  }
 }
 
 /* ── write ─────────────────────────────────────────────────────────────── */

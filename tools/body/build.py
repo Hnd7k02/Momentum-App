@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """Build one Momentum body from the MakeHuman data, with one command.
 
-    python3 tools/body/build.py <candidate> [--out DIR] [--data DIR] [--relabel] [--keep]
+    python3 tools/body/build.py <candidate>… [--out DIR] [--data DIR] [--record] [--relabel] [--keep]
+    python3 tools/body/build.py --all
 
 A candidate is an entry of candidates.json: the macro and local targets, the
 pose, the head, the relief and the options of refine-body.mjs. The result is
 `<out>/<candidate>.glb` — the same bytes every time for the same input — and
 its sha256 on the last line.
 
-`--relabel` makes regions.json anew from the rules (regionrules.py), on the
-candidate named; without it the stored regions are read and the rules never
-run. `--keep` leaves the unrefined GLB beside the result.
+The sha256 of every candidate is kept in digests.json. A build that gives
+other bytes than the ones recorded says so and ends with exit code 1;
+`--record` writes the new digest instead, which is how a deliberate change is
+made. `--relabel` makes regions.json anew from the rules (regionrules.py), on
+the candidate named; without it the stored regions are read and the rules
+never run. `--keep` leaves the unrefined GLB beside the result.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -28,6 +33,15 @@ import regionrules
 
 HERE = Path(__file__).resolve().parent
 REGIONS_FILE = HERE / 'regions.json'
+DIGESTS_FILE = HERE / 'digests.json'
+
+#: refine-body.mjs hands a piece of a region back to its neighbours when it is
+#: cut off from the region's main piece and small. That is right for a stray
+#: speck at a border and wrong for anatomy: in the proof it took the front of
+#: the upper trapezius, 688 triangles, away from the back. The regions are
+#: stored so that this cannot happen (regionrules.py, the neck); a build in
+#: which it happens all the same stops here instead of shipping the loss.
+STRAY_LIMIT = 100
 
 
 def load_regions():
@@ -107,10 +121,22 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         sys.stdout.write(result.stdout)
     if not keep:
         raw.unlink()
+    limit = spec.get('stray_limit', STRAY_LIMIT)
+    lost = [(label, int(count)) for label, count in
+            re.findall(r'^\s+(\w+)\s+(\d+) triangles at y', result.stdout, flags=re.M) if int(count) >= limit]
+    if lost:
+        final.unlink()
+        pieces = ', '.join(f'{count} triangles of {label}' for label, count in lost)
+        raise SystemExit(f'{name}: refine-body.mjs handed back {pieces}. A piece that large is anatomy, not a '
+                         f'stray: connect it in regions.json (regionrules.py) before building.')
     digest = hashlib.sha256(final.read_bytes()).hexdigest()
     say(f'{name}: {len(P)} vertices and {len(tris)} triangles before the borders are cut; pose {posed.info}')
     say(f'{final}  {final.stat().st_size} bytes  sha256 {digest}')
     return final, digest
+
+
+def load_digests():
+    return json.loads(DIGESTS_FILE.read_text()) if DIGESTS_FILE.exists() else {}
 
 
 def resolve(candidates, name):
@@ -134,16 +160,41 @@ def resolve(candidates, name):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('candidate')
+    parser.add_argument('candidate', nargs='*')
+    parser.add_argument('--all', action='store_true', help='every candidate of candidates.json')
     parser.add_argument('--out', default=str(HERE / 'out'))
     parser.add_argument('--data', default=str(B.DATA))
     parser.add_argument('--candidates', default=str(HERE / 'candidates.json'))
+    parser.add_argument('--record', action='store_true', help='write the digest to digests.json')
     parser.add_argument('--relabel', action='store_true')
     parser.add_argument('--keep', action='store_true')
     args = parser.parse_args()
     candidates = json.loads(Path(args.candidates).read_text())
-    spec = resolve(candidates, args.candidate)
-    build(args.candidate, spec, Path(args.data), Path(args.out), args.relabel, args.keep)
+    names = [key for key in candidates if not key.startswith('_')] if args.all else args.candidate
+    if not names:
+        parser.error('name a candidate, or pass --all')
+    if args.relabel and len(names) != 1:
+        parser.error('--relabel takes the one candidate the regions are made on')
+    digests = load_digests()
+    differs = []
+    for name in names:
+        spec = resolve(candidates, name)
+        final, digest = build(name, spec, Path(args.data), Path(args.out), args.relabel, args.keep)
+        entry = {'bytes': final.stat().st_size, 'sha256': digest}
+        if args.record:
+            digests[name] = entry
+        elif name not in digests:
+            print(f'{name}: no digest recorded yet (--record writes it)')
+        elif digests[name] == entry:
+            print(f'{name}: the same bytes as recorded')
+        else:
+            differs.append(name)
+            print(f'{name}: DIFFERS from the recorded sha256 {digests[name]["sha256"]}')
+    if args.record:
+        kept = {name: digests[name] for name in candidates if name in digests}
+        DIGESTS_FILE.write_text(json.dumps(kept, indent=2) + '\n')
+    if differs:
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
