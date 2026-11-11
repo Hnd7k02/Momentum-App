@@ -143,6 +143,7 @@ export const de = {
   'error.load.body': 'Versuche es noch einmal. Deine Einträge sind gespeichert.',
   'error.progress.title': 'Der Verlauf konnte nicht geladen werden',
   'error.rank.title': 'Der Rang konnte nicht geladen werden',
+  'error.muscles.title': 'Die Muskelgruppen konnten nicht geladen werden',
   'error.load.retry': 'Erneut versuchen',
   'error.stale': 'Konnte nicht aktualisiert werden.',
   'error.action': 'Das hat nicht geklappt. Versuche es noch einmal.',
@@ -424,6 +425,8 @@ export const de = {
   'gym.progress.exercises': 'Übungen',
   'gym.progress.noData': 'Noch keine Trainingsdaten.',
   'gym.progress.noBaseline': 'Noch kein Vergleich',
+  'gym.progress.noBaselineHint':
+    'Ein Vergleich braucht dieselbe Übung an zwei Trainingstagen in den letzten {days} Tagen.',
   'gym.progress.groupsCounted': '{count} von {total} Gruppen gewertet',
   'gym.progress.explainGroups':
     'Jede Muskelgruppe zählt gleich viel, unabhängig davon, wie viele Übungen sie enthält.',
@@ -727,6 +730,13 @@ export const de = {
   'gymHub.muscles.trained': '{count} von {total} trainiert',
   'gymHub.muscles.none': 'Noch nicht trainiert',
   'gymHub.muscles.noneHint': 'Nach deiner ersten Session siehst du hier, wie sich deine Muskelgruppen entwickeln.',
+  'gymHub.muscles.outside': 'Kein Training in den letzten {days} Tagen',
+  'gymHub.muscles.outsideHint':
+    'Letzte Session: {date}, vor {count} Tagen. Die Muskelgruppen zeigen nur den gewählten Zeitraum.',
+  'gymHub.muscles.outsideShort': 'Letzte Session vor {count} Tagen',
+  'gymHub.muscles.unscored': 'Noch nichts auszuwerten',
+  'gymHub.muscles.unscoredHint':
+    'In den letzten {days} Tagen ist eine Session eingetragen, aber kein Satz mit Wiederholungen und Gewicht.',
   'gymHub.muscles.range': 'Letzte {days} Tage',
   'gymHub.open': 'Gym öffnen',
 

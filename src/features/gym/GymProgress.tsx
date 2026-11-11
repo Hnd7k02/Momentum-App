@@ -1,17 +1,20 @@
 import { useMemo, useState } from 'react';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
-import { Card, EmptyState, Section } from '../../components';
+import { Button, Card, EmptyState, Section } from '../../components';
 import './gymHub.css';
 import { MetricDetailSheet, MetricTile } from '../../components/metrics';
-import { ChevronRightIcon } from '../../components/Icons';
+import { ChevronRightIcon, PlusIcon } from '../../components/Icons';
 import { MUSCLE_LABEL_KEYS, type MuscleView } from '../../components/BodyRenderer';
+import type { DateKey } from '../../core/dates';
 import { percentChange } from '../../core/gym/performance';
-import { useT } from '../../i18n/I18nProvider';
+import { useI18n, useT } from '../../i18n/I18nProvider';
+import { useToday } from '../../app/useToday';
 import { exerciseHistory, type GymHistory } from '../../storage/services/gymService';
 import { ExerciseDetail } from './ExerciseDetail';
 import { useExerciseNamer } from './exerciseNames';
 import { MuscleModule } from './MuscleModule';
 import { toMuscleAnalytics } from './muscleAnalytics';
+import { muscleGap, muscleGapText } from './muscleGap';
 import { muscleStateOf, shownTrend } from './muscleState';
 import './gym.css';
 import { useWeights } from '../../app/useWeights';
@@ -49,8 +52,23 @@ const changeText = (
     : t('gym.change.declined', { percent: rounded });
 };
 
-export function GymProgress({ history }: { history: GymHistory }) {
+export function GymProgress({
+  history,
+  rangeDays,
+  latestSession,
+  onStartTraining,
+}: {
+  history: GymHistory;
+  /** The range the history was loaded for: what "in den letzten N Tagen" means. */
+  rangeDays: number;
+  /** The day of the latest Gym session of all, `null` before the first. */
+  latestSession: DateKey | null;
+  /** Starts a workout from the empty state (contract §11); absent, no button. */
+  onStartTraining?: () => void;
+}) {
   const t = useT();
+  const { language } = useI18n();
+  const today = useToday();
   const weights = useWeights();
   const namer = useExerciseNamer();
   const [selected, setSelected] = useState<MuscleGroup | null>(null);
@@ -99,19 +117,42 @@ export function GymProgress({ history }: { history: GymHistory }) {
   }
 
   /*
-   * Before the first workout the destination still exists (WP2-2): the body
+   * Why there is nothing here, or nothing to compare, in so many words
+   * (contract §11). The range holds only the last 7 or 30 days, so "nothing
+   * in the range" is not "never trained": the second names the last session
+   * and says that only the range is shown (STOP 6b).
+   */
+  const gap = muscleGap(history, latestSession, today, rangeDays);
+  const gapText = gap ? muscleGapText(gap, { t, language, rangeDays }) : null;
+  const explanation = gapText ? (
+    <p className="gym-progress__noData" role="status">
+      <span className="gym-progress__noDataState">{gapText.title}</span>{' '}
+      <span className="gym-progress__noDataHint">{gapText.hint}</span>
+    </p>
+  ) : null;
+
+  /*
+   * With nothing in the range the destination still exists (WP2-2): the body
    * in its untrained state and the ten rows saying so. No overall figure —
    * there is nothing to state — and no exercise list. Nothing is coloured
    * as if progress existed; every group is `noData`, which is the truth.
+   * What is missing is a session, so the one thing to do is offered where
+   * it is said: before the first session and when the last one lies before
+   * the range.
    */
   if (history.days.length === 0) {
     return (
       <Section label={t('gym.progress.muscles')}>
         <Card>
-          <p className="gym-progress__noData" role="status">
-            <span className="gym-progress__noDataState">{t('gymHub.muscles.none')}</span>{' '}
-            <span className="gym-progress__noDataHint">{t('gymHub.muscles.noneHint')}</span>
-          </p>
+          {explanation}
+          {onStartTraining && (gap?.kind === 'never' || gap?.kind === 'outsideRange') ? (
+            <div className="gym-progress__noDataAction">
+              <Button variant="primary" block onClick={onStartTraining}>
+                <PlusIcon size={18} />
+                {t('gymHub.training.log')}
+              </Button>
+            </div>
+          ) : null}
           <MuscleModule
             muscles={history.overall.muscles}
             analytics={analytics}
@@ -170,6 +211,9 @@ export function GymProgress({ history }: { history: GymHistory }) {
 
       <Section label={t('gym.progress.muscles')}>
         <Card>
+          {/* Trained, but no exercise has a second day yet: the rows' "Noch
+              kein Vergleich" is explained once, here. */}
+          {explanation}
           <MuscleModule
             muscles={history.overall.muscles}
             analytics={analytics}

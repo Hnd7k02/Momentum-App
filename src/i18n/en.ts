@@ -139,6 +139,7 @@ export const en: Translations = {
   'error.load.body': 'Try again. Your entries are saved.',
   'error.progress.title': 'Progress could not be loaded',
   'error.rank.title': 'Rank could not be loaded',
+  'error.muscles.title': 'The muscle groups could not be loaded',
   'error.load.retry': 'Try again',
   'error.stale': 'Could not refresh.',
   'error.action': 'That did not work. Try again.',
@@ -416,6 +417,8 @@ export const en: Translations = {
   'gym.progress.exercises': 'Exercises',
   'gym.progress.noData': 'No training data yet.',
   'gym.progress.noBaseline': 'No comparison yet',
+  'gym.progress.noBaselineHint':
+    'A comparison needs the same exercise on two training days in the last {days} days.',
   'gym.progress.groupsCounted': '{count} of {total} groups counted',
   'gym.progress.explainGroups':
     'Every muscle group counts the same, however many exercises it contains.',
@@ -720,6 +723,13 @@ export const en: Translations = {
   'gymHub.muscles.trained': '{count} of {total} trained',
   'gymHub.muscles.none': 'Not trained yet',
   'gymHub.muscles.noneHint': 'After your first session you will see here how your muscle groups develop.',
+  'gymHub.muscles.outside': 'No training in the last {days} days',
+  'gymHub.muscles.outsideHint':
+    'Last session: {date}, {count} days ago. The muscle groups show the selected range only.',
+  'gymHub.muscles.outsideShort': 'Last session {count} days ago',
+  'gymHub.muscles.unscored': 'Nothing to evaluate yet',
+  'gymHub.muscles.unscoredHint':
+    'A session was logged in the last {days} days, but no set with reps and weight.',
   'gymHub.muscles.range': 'Last {days} days',
   'gymHub.open': 'Open Gym',
 

@@ -26,6 +26,10 @@
  *   which Stage 6a only reported (D149);
  * - no text is rendered smaller than 11px.
  *
+ * At the end the same device is looked at 45 days on, with nothing logged
+ * since: the Gym hub and Muskelgruppen with an empty range, which must say
+ * why it is empty and what is missing (STOP 6b).
+ *
  * And three decisions of STOP 6a, once each per width: in Bereiche the whole
  * screen turns with the area; the plan chooser and the run sheet opened from
  * Heute stay light; the status bar's colour follows the world and comes back.
@@ -569,6 +573,55 @@ for (const width of WIDTHS) {
   await page.getByRole('radio', { name: 'Mind' }).click();
   await page.waitForTimeout(700);
   check(`${width}: choosing Mind turns the whole screen back`, (await world(page)) === null && (await themeColour(page)) === lightBar);
+
+  /* ── The same device, 45 days on and nothing logged since (STOP 6b) ───── */
+  if (wants('leer')) {
+    // Muskelgruppen reads 30 days back; the year's figures on the hub read
+    // further. With the last session before the range the screen used to
+    // say "Noch nicht trainiert — nach deiner ersten Session …" to someone
+    // with months of sessions. It says why now, and what is missing.
+    await ctx.clock.setSystemTime(new Date(berlinNoon(CLOCK_DAY).getTime() + 45 * 86_400_000));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(1300);
+    await tab(page, 'Bereiche');
+    await page.getByRole('radio', { name: 'Gym' }).click();
+    await page.waitForTimeout(1800);
+    await look(page, width, 'gym-uebersicht-ohne-training', 'gym');
+    const entry = ((await page.locator('.gym-hub__muscles').innerText()) ?? '').replace(/\s+/g, ' ');
+    check(`${width}: the hub's muscle card names the empty range and the last session, not "never trained"`,
+      /Kein Training in den letzten 30 Tagen/.test(entry) && /Letzte Session vor \d+ Tagen/.test(entry) && !/Noch nicht trainiert|ersten Session/.test(entry), entry);
+    await openMuscles(page, { wait: 4500 });
+    await look(page, width, 'muskelgruppen-leer', 'gym');
+    const empty = await page.evaluate(() => ({
+      said: (document.querySelector('.gym-progress__noData')?.innerText ?? '').replace(/\s+/g, ' '),
+      status: document.querySelector('.gym-progress__noData')?.getAttribute('role'),
+      primaries: [...document.querySelectorAll('.button--primary')].filter((el) => el.getBoundingClientRect().width > 0).map((el) => el.textContent.trim()),
+      rows: [...document.querySelectorAll('.muscle-row')].map((el) => el.innerText.replace(/\s+/g, ' ')),
+      overall: document.querySelectorAll('[data-metric="gym-overall"]').length,
+    }));
+    check(`${width}: an empty range says why, and when the last session was`,
+      /^Kein Training in den letzten 30 Tagen Letzte Session: \S+, \d+\. \S+, vor \d+ Tagen\. Die Muskelgruppen zeigen nur den gewählten Zeitraum\.$/.test(empty.said)
+        && empty.status === 'status' && !/ersten Session/.test(empty.said), empty.said);
+    check(`${width}: it offers the one thing that is missing — exactly one primary action`,
+      empty.primaries.length === 1 && empty.primaries[0] === 'Training erfassen', short(empty.primaries));
+    check(`${width}: nothing is drawn as progress: ten untrained rows, no overall figure`,
+      empty.rows.length === 10 && empty.rows.every((row) => /Noch nicht trainiert/.test(row)) && empty.overall === 0, short(empty.rows.slice(0, 2)));
+    // The range it names is the one on show.
+    await page.getByRole('button', { name: '7 Tage' }).click();
+    await page.waitForTimeout(1500);
+    const seven = ((await page.locator('.gym-progress__noData').innerText()) ?? '').replace(/\s+/g, ' ');
+    check(`${width}: and it names the range on show`, /^Kein Training in den letzten 7 Tagen /.test(seven), seven);
+    // The action is the hub's own flow: with a plan saved, the chooser.
+    await page.getByRole('button', { name: 'Training erfassen' }).click();
+    await page.waitForTimeout(900);
+    check(`${width}: "Training erfassen" opens the same start as on the hub`,
+      (await page.locator('[role="dialog"]').count()) === 1 && (await page.getByText('Training starten').count()) > 0,
+      String(await page.locator('[role="dialog"]').count()));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(600);
+    await page.locator('.gym-session__back').first().click();
+    await page.waitForTimeout(700);
+  }
 
   check(`${width}: no page errors`, errors.length === 0, short(errors));
   await ctx.close();

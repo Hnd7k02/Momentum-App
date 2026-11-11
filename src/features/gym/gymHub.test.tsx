@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import { de } from '../../i18n/de';
 import { MUSCLE_GROUPS } from '../../core/model';
+import { today } from '../../core/clock';
+import { addDays } from '../../core/dates';
 import { exerciseDays, gymPerformance, gymPerformanceOverSpan, latestComparisons } from '../../core/gym/performance';
 import type { GymHistory } from '../../storage/services/gymService';
 import { MuscleEntryCard } from './MuscleEntryCard';
@@ -14,10 +16,10 @@ import { weekSentence } from './TrainingCard';
  * first workout, what it says after, and what it never loads.
  */
 
-const render = (history: GymHistory | null) =>
+const render = (history: GymHistory | null, latestSession: string | null = null) =>
   renderToStaticMarkup(
     <I18nProvider language="de" setLanguage={() => undefined}>
-      <MuscleEntryCard history={history} rangeDays={30} onOpen={() => undefined} />
+      <MuscleEntryCard history={history} rangeDays={30} latestSession={latestSession} onOpen={() => undefined} />
     </I18nProvider>,
   );
 
@@ -52,6 +54,26 @@ describe('the muscle entry card before the first workout', () => {
         expect(html, state).not.toContain(`gym-hub__previewState--${state}`);
       }
     }
+  });
+
+  it('does not say "not trained yet" to someone whose last session lies before the range', () => {
+    // STOP 6b: a device with months of sessions, the last one six weeks ago,
+    // read "Noch nicht trainiert — nach deiner ersten Session …" here while
+    // the card above it named that very session.
+    const sixWeeksAgo = addDays(today(), -42);
+    const html = render(emptyHistory(), sixWeeksAgo);
+    expect(html).toContain('Kein Training in den letzten 30 Tagen');
+    expect(html).toContain('Letzte Session vor 42 Tagen');
+    expect(html).not.toContain(de['gymHub.muscles.none']);
+    expect(html).not.toContain(de['gymHub.muscles.noneHint']);
+    // Still nothing coloured as progress.
+    expect(html.match(/gym-hub__previewState--noData/g)?.length ?? 0).toBe(MUSCLE_GROUPS.length);
+  });
+
+  it('says that nothing can be scored yet when the range holds a session without a countable set', () => {
+    const html = render(emptyHistory(), today());
+    expect(html).toContain(de['gymHub.muscles.unscored']);
+    expect(html).not.toContain(de['gymHub.muscles.noneHint']);
   });
 
   it('states the counted groups and the overall change once there is history', () => {

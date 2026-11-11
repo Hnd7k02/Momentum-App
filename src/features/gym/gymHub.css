@@ -168,11 +168,18 @@
 
 /* ── The muscle destination before the first workout ───────────────────── */
 
+/* The card carries the inset; the paragraph adds none of its own (it stood
+   a second inset in from the body beneath it). */
 .gym-progress__noData {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
   line-height: 1.4;
-  padding: 0 var(--card-pad) var(--space-3);
+  padding: 0 0 var(--space-3);
+}
+
+/* The empty state's one action, between what is missing and the body. */
+.gym-progress__noDataAction {
+  padding-bottom: var(--space-4);
 }
 
 /* The state on its own line, the hint beneath it: one status for assistive

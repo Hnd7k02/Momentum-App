@@ -5,7 +5,7 @@ import { GymOverview } from '../gym/GymOverview';
 import { MuscleEntryCard } from '../gym/MuscleEntryCard';
 import { TrainingCard } from '../gym/TrainingCard';
 import { TrainingPlansSection } from '../gym/TrainingPlansSection';
-import { useGymHistory } from '../gym/useGymHistory';
+import { useGymHistoryState } from '../gym/useGymHistory';
 import { useGymRatingState } from '../gym/useGymRating';
 import { LoadingBlocks } from '../../components';
 import { useTrainingLauncher } from '../gym/useTrainingLauncher';
@@ -83,11 +83,11 @@ function HubCards({
 }) {
   const range = TREND_RANGES[TREND_RANGES.length - 1]!;
   const { view: gymRating, loading: ratingLoading } = useGymRatingState();
-  const gym = useGymHistory(range);
+  const { history: gym, latestSession } = useGymHistoryState(range);
   return (
     <>
       <TrainingCard onStart={onStart} onManagePlans={onManagePlans} />
-      <MuscleEntryCard history={gym} rangeDays={range} onOpen={onOpenMuscles} />
+      <MuscleEntryCard history={gym} rangeDays={range} latestSession={latestSession} onOpen={onOpenMuscles} />
       {gymRating ? (
         <GymOverview state={gymRating.state} started={gymRating.started} enabled={gymRating.enabled} />
       ) : ratingLoading ? (

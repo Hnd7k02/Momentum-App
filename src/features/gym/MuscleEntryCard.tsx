@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
 import { MUSCLE_GROUPS } from '../../core/model';
+import type { DateKey } from '../../core/dates';
+import { useToday } from '../../app/useToday';
 import { percentChange } from '../../core/gym/performance';
 import { Section } from '../../components';
 import { ChevronRightIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
 import type { GymHistory } from '../../storage/services/gymService';
 import type { MuscleState } from '../../components/BodyRenderer';
+import { muscleGap } from './muscleGap';
 import { muscleStateOf } from './muscleState';
 import bodyPreview from './assets/body-preview.webp';
 import './gymHub.css';
@@ -32,14 +35,18 @@ import './gymHub.css';
 export function MuscleEntryCard({
   history,
   rangeDays,
+  latestSession = null,
   onOpen,
 }: {
-  /** `null` while loading; a history with no days before the first workout. */
+  /** `null` while loading; a history with no days when the range holds none. */
   history: GymHistory | null;
   rangeDays: number;
+  /** The day of the latest Gym session of all, `null` before the first. */
+  latestSession?: DateKey | null;
   onOpen(): void;
 }) {
   const t = useT();
+  const today = useToday();
   const states: { muscle: (typeof MUSCLE_GROUPS)[number]; state: MuscleState }[] = useMemo(
     () =>
       (history?.overall.muscles ?? MUSCLE_GROUPS.map((muscle) => ({ muscle, status: 'noData' as const, ratio: null, exercises: 0, compared: 0, latestScore: null }))).map(
@@ -53,8 +60,16 @@ export function MuscleEntryCard({
   const change = percentChange(history?.overall.ratio ?? null);
   const hasData = (history?.days.length ?? 0) > 0;
 
+  // An empty range is "never trained" only before the first session; with
+  // one behind it the card says that the range is empty and how long ago
+  // the last session was (STOP 6b). The reasons are `muscleGap`'s.
+  const gap = history ? muscleGap(history, latestSession, today, rangeDays) : null;
   const summary = !hasData
-    ? t('gymHub.muscles.none')
+    ? gap?.kind === 'outsideRange'
+      ? t('gymHub.muscles.outside', { days: rangeDays })
+      : gap?.kind === 'unscored'
+        ? t('gymHub.muscles.unscored')
+        : t('gymHub.muscles.none')
     : measured > 0
       ? t('gymHub.muscles.summary', { count: measured, total: MUSCLE_GROUPS.length })
       : t('gymHub.muscles.trained', { count: trained, total: MUSCLE_GROUPS.length });
@@ -104,7 +119,13 @@ export function MuscleEntryCard({
             <span className={`gym-hub__musclesOverall ${overallTone}`.trim()}>{overall}</span>
           ) : null}
           <span className="gym-hub__musclesRange">
-            {hasData ? t('gymHub.muscles.range', { days: rangeDays }) : t('gymHub.muscles.noneHint')}
+            {hasData
+              ? t('gymHub.muscles.range', { days: rangeDays })
+              : gap?.kind === 'outsideRange'
+                ? t('gymHub.muscles.outsideShort', { count: gap.daysAgo })
+                : gap?.kind === 'unscored'
+                  ? t('gymHub.muscles.range', { days: rangeDays })
+                  : t('gymHub.muscles.noneHint')}
           </span>
         </span>
         <span className="gym-hub__chevron" aria-hidden="true">
