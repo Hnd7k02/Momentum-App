@@ -315,6 +315,25 @@ Never conflate them.
   cell move with the world (D145); the body never paints the empty cell. The
   1–10 answer and the 0–100 scores both resolve to the same four statuses and
   the same `status.*` labels; text moves to read, the bar never does.
+- **One place makes a number a state** (D153, D164, contract §7):
+  `features/gym/muscleState.ts`. A change is shown as a whole percent,
+  rounded half away from zero both ways; the state follows the shown
+  figure — −2 % to +2 % is held, from ±3 % the direction — so figure and
+  colour can never part; and a group states a trend only with three
+  exercise days in the range and an exercise on two days, otherwise it is
+  "Zu wenig Vergleichsdaten". The body, the flat figure, the rows, the
+  hub's card, the trend above the rows, the exercise list and detail and
+  the golden test all read it; none rounds, compares or counts on its own.
+  "Gewertet" means the row prints a figure. All of it is presentation:
+  the rating reads its own windows and `src/core` knows none of it.
+- **"Gehalten" is neutral, never the warning yellow** (D153, D161): the
+  text colour in a row, the data ink as a mark, white on the body. The
+  body has two neutral tones, `--body-held` (a trained muscle with no
+  change) and `--body-dimmed` (untrained, and the head, hands and feet);
+  a tint is mixed from white and grows evenly from 2.5 % to 12 %. Block 7A
+  may retune the two values under its light, never which state takes
+  which tone. The muscle trend reads 30 or 90 days, Verlauf 7 or 30 — two
+  constants, never one again.
 - **Type and numbers.** The scale is 34, 22, 17, 15, 13, 11 and no text is
   under 11px. A number takes a figure step — `--type-figure-xl` for the one
   main number of a screen, `-l` on a tile and in a sheet's head, `-m` in a
@@ -335,8 +354,8 @@ Never conflate them.
   says so and can be retried (`LoadFailure`).
 - **An empty state says why it is empty and what is missing** (contract
   §11, D163), and offers the one action that supplies it. An empty *range*
-  is not "never": Muskelgruppen reads 7 or 30 days while the hub's figures
-  read the whole history, and `features/gym/muscleGap.ts` keeps the four
+  is not "never": Muskelgruppen reads 30 or 90 days while the hub's figures
+  read the whole history, and `features/gym/muscleGap.ts` keeps the five
   absences apart. Never answer a range without data with a first-time text.
 - **A figure is printed with a real minus sign and a no-break space before
   its percent sign** (D163): "−10 %", never a hyphen, never "100 / %" across

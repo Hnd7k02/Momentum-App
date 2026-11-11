@@ -326,8 +326,8 @@ export async function seedLegacyFood(page, { days = 14, from = 1, focus = 'Zmitt
  *   calves              1 calf-raise day          trained, awaiting a baseline
  *   shoulders           nothing                   no history
  */
-export async function seedMuscles(page, { days = 42 } = {}) {
-  return page.evaluate(async ({ days }) => {
+export async function seedMuscles(page, { days = 42, older = false } = {}) {
+  return page.evaluate(async ({ days, older }) => {
     const open = () => new Promise((res, rej) => { const r = indexedDB.open('momentum'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
     const all = (db, s) => new Promise((res, rej) => { const r = db.transaction([s], 'readonly').objectStore(s).getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
     const putAll = (db, s, recs) => new Promise((res, rej) => { const tx = db.transaction([s], 'readwrite'); for (const r of recs) tx.objectStore(s).put(r); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
@@ -367,10 +367,18 @@ export async function seedMuscles(page, { days = 42 } = {}) {
     }
     // Identical performances, so every point of the series is the same number.
     for (const back of [19, 12, 5]) log(back, 'ex_lat_pulldown', ['back'], ['back'], 55, 8);
-    // Two days: one comparison, which is a value and not yet a direction.
+    // Two days of one exercise: a comparison, on two exercise days — too
+    // little for the biceps to state a trend (contract §7).
     for (const back of [15, 6]) log(back, 'ex_hammer_curl', ['biceps', 'forearms'], ['biceps'], 16, 10);
+    // With a third exercise day the forearms state one: a single comparable
+    // observation, which is a value and not yet a direction.
+    log(10, 'ex_farmers_carry', ['forearms'], ['forearms'], 30, 12);
     // One day: trained, with nothing to compare against.
     log(8, 'ex_calf_raise', ['calves'], ['calves'], 40, 12);
+    // Asked for: three days of shoulder work that lie before the last 30
+    // days and inside the last 90 — what the longer range reaches and the
+    // shorter one no longer does.
+    if (older) [80, 62, 44].forEach((back, i) => log(back, 'ex_overhead_press', ['shoulders'], ['shoulders'], 40 + i * 2, 8));
 
     // The catalogue rows the app writes the first time the picker opens, so
     // the rows can name an exercise rather than fall back to its id.
@@ -381,6 +389,8 @@ export async function seedMuscles(page, { days = 42 } = {}) {
       ['ex_lat_pulldown', 'Lat Pulldown', ['back', 'biceps'], ['back']],
       ['ex_hammer_curl', 'Hammer Curl', ['biceps', 'forearms'], ['biceps']],
       ['ex_calf_raise', 'Calf Raise', ['calves'], ['calves']],
+      ['ex_farmers_carry', "Farmer's Carry", ['forearms', 'core'], ['forearms']],
+      ...(older ? [['ex_overhead_press', 'Overhead Press', ['shoulders', 'triceps'], ['shoulders']]] : []),
     ].filter(([id]) => !known.has(id)).map(([id, name, muscles, primaryMuscles]) => ({
       id, name, muscles, primaryMuscles, builtIn: true, loadType: 'external',
       durationSeconds: null, attributes: {}, createdAt: stamp, updatedAt: stamp,
@@ -390,7 +400,7 @@ export async function seedMuscles(page, { days = 42 } = {}) {
     await putAll(db, 'gymSets', sets);
     if (catalogue.length) await putAll(db, 'exercises', catalogue);
     return { sessions: sessions.length, sets: sets.length, exercises: catalogue.length };
-  }, { days });
+  }, { days, older });
 }
 
 /**

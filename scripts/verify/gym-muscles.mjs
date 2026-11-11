@@ -148,7 +148,36 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   /* Row text: state, delta, recency. */
   const text = async (name) => (await rowOf(page, name).textContent())?.replace(/\s+/g, ' ').trim();
   check('an untrained group says so in words, with no number', (await text('Schultern'))?.includes('Noch nicht trainiert') && !/%/.test(await text('Schultern')), await text('Schultern'));
-  check('one waiting for a baseline says that instead', (await text('Waden'))?.includes('Noch kein Vergleich'), await text('Waden'));
+  check('one with too little to compare says that instead', (await text('Waden'))?.includes('Zu wenig Vergleichsdaten') && !/%/.test(await text('Waden')), await text('Waden'));
+  // The colour rules (contract §7), on all ten rows: the state follows the
+  // printed figure, and a group that prints none shows a chip and no line.
+  const shownRows = await page.locator('.muscle-row').evaluateAll((els) => els.map((row) => {
+    const right = row.querySelector('.muscle-row__right');
+    return {
+      name: row.querySelector('.muscle-row__name')?.textContent.trim(),
+      state: [...(right?.classList ?? [])].find((c) => c.startsWith('muscle-row__right--'))?.slice('muscle-row__right--'.length) ?? null,
+      delta: row.querySelector('.muscle-row__delta')?.textContent ?? null,
+      word: row.querySelector('.muscle-row__state')?.textContent.trim() ?? null,
+      badge: row.querySelector('.muscle-row__badge')?.textContent.trim() ?? null,
+      marks: row.querySelectorAll('.muscle-row__chart polyline, .muscle-row__chart circle').length,
+      sub: row.querySelector('.muscle-row__sub')?.textContent.trim() ?? null,
+    };
+  }));
+  const shownOf = (delta) => { const m = /^([+\u2212]?)(\d+)\u00a0%$/.exec(delta ?? ''); return m ? (m[1] === '\u2212' ? -Number(m[2]) : Number(m[2])) : Number.NaN; };
+  const wordOf = { improved: 'Verbessert', unchanged: 'Gehalten', declined: 'Zurückgegangen', awaitingBaseline: 'Zu wenig Vergleichsdaten', noData: 'Noch nicht trainiert' };
+  const offRule = shownRows.filter((row) => {
+    if (row.delta === null) return !((row.state === 'awaitingBaseline' || row.state === 'noData') && row.badge === wordOf[row.state] && row.marks === 0);
+    const shown = shownOf(row.delta);
+    const want = shown >= 3 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged';
+    return !(Number.isInteger(shown) && row.state === want && row.word === wordOf[want] && row.badge === null);
+  });
+  check('in each of the ten rows the state fits the printed figure: −2 to +2 held, otherwise the direction', shownRows.length === 10 && offRule.length === 0, JSON.stringify(offRule));
+  // seedMuscles: the biceps have two exercise days (hammer curls), the calves one.
+  const fewDays = shownRows.filter((row) => row.name === 'Bizeps' || row.name === 'Waden');
+  check('a group with fewer than three exercise days shows the chip and no line, and says how many it has',
+    fewDays.length === 2 && fewDays.every((row) => row.state === 'awaitingBaseline' && row.badge === 'Zu wenig Vergleichsdaten' && row.delta === null && row.marks === 0)
+      && /· 2\sÜbungstage$/.test(fewDays.find((row) => row.name === 'Bizeps')?.sub ?? '') && /· 1\sÜbungstag$/.test(fewDays.find((row) => row.name === 'Waden')?.sub ?? ''),
+    JSON.stringify(fewDays));
   check('a measured group shows its percentage, signed', /[+\u2212]?\d+\s%/.test(await text('Brust')), await text('Brust'));
   check('rows say when the group was last trained', /(Heute|Gestern|Vor \d+ Tagen)/.test(await text('Brust')), await text('Brust'));
   check('a group with no number says its state in words instead', /Noch nicht trainiert/.test(await text('Schultern')) && !/%/.test(await text('Schultern')), await text('Schultern'));

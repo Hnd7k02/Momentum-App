@@ -47,8 +47,10 @@ describe('an empty range is not "never trained"', () => {
     const said = text(gap!);
     expect(said.title).toBe('Kein Training in den letzten 30 Tagen');
     expect(said.hint).toBe('Letzte Session: Freitag, 2. Oktober, vor 40 Tagen. Die Muskelgruppen zeigen nur den gewählten Zeitraum.');
-    // Never the first-session text for someone who has trained.
+    // Never the first-time text for someone who has trained.
     expect(said.hint).not.toContain('ersten Session');
+    expect(said.hint).not.toBe(de['gymHub.muscles.noneHint']);
+    expect(said.title).not.toBe(de['gymHub.muscles.none']);
   });
 
   it('counts the range as the loader does: today and the days before it', () => {

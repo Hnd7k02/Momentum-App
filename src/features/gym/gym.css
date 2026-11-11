@@ -358,6 +358,23 @@
   color: var(--text-secondary);
 }
 
+/* The header of Muskelgruppen carries a control on either side of its
+   title. On the narrowest phones the three do not fit at the large title's
+   size — "Muskelgruppen" alone is 233px of 288 — so there the title takes
+   the next step down instead of pushing ⓘ off the screen. */
+.gym-muscles__title {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 359px) {
+  .gym-muscles__title {
+    font-size: var(--type-title);
+    line-height: 44px;
+    letter-spacing: -0.3px;
+  }
+}
+
 /* ⓘ in the header of Muskelgruppen: 44px, at the trailing edge. */
 .gym-muscles__legendButton {
   flex: none;

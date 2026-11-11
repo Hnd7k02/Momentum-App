@@ -3894,3 +3894,106 @@ scrolling to the plans.
 `features/gym/muscleGap.ts`, `features/gym/ExerciseDetail.tsx`,
 `i18n/typography.ts`, `components/ui.css` (`.bubble-row`),
 `scripts/verify/design-system.mjs`, `docs/wp3/vertrag.md` §6.
+
+## D164 — The colour rules of the muscle status: what the contract left open, and that no golden file moved
+
+**Built on 2026-11-11** from contract §7 (D153, D160, D161), in the block
+"Farbregeln". The rule itself is the owner's; these are the readings the
+build needed, each kept small. Those marked *open* are put to him at the
+STOP of the block.
+
+**The owner's decisions at the start of the block.** A preview build opens
+a database of its own (`VITE_MOMENTUM_DB`, `storage/db.ts`): the live app
+is at `hnd7k02.github.io/Momentum-App/`, the same origin as the preview,
+and pages of one origin share their databases. It is the one change the
+block made under `src/storage`. The licence names Dario Moffa, 2026 (D157,
+tidy-up block). Block 9 checks which address the installed app comes from
+and plans the move by backup.
+
+**No golden file changed — the prompt expected one to.** The block's
+prompt foresaw that the Gym golden file of the profile with sets would
+change in the column of the shown state, and asked for it to be frozen
+anew in a commit of its own. It did not change: in that profile every
+rated group lies between −14 % and +50 % and has three exercise days in
+the 7-day window, twelve at 30 and thirty-five at 90, so neither the band
+nor the minimum moves a single state. `git diff af89fd9 -- .github/fixtures`
+is empty, every fingerprint is the one it was, and there is nothing to
+freeze. The proof that no calculation moved is therefore the stronger
+one: `domainOutputs.test.ts` and `stage2Baseline.test.ts` pass untouched
+in their expectations, with the golden test calling the same
+`muscleStateOf()` and the same count of exercise days the screen uses.
+What the golden profile cannot show — a state that does change — is held
+by `muscleState.test.ts` at every edge and by `farbregeln.mjs` on the
+production build. The file's windows stay 7, 30 and 90 days.
+
+**An exercise day is an entry, not a calendar day** (*open*). One
+exercise on one day, counted for every group that exercise gave a weight
+above zero on that day — bench press and incline press on Monday and
+bench press on Thursday are three exercise days for the chest, on two
+calendar days. The other reading, three different calendar days, is
+stricter. In the test profile with sets the two readings differ in no
+group and no window (18 group-windows, each on as many calendar days as
+exercise days); the owner's own data has not been counted — his backup
+comes with block 5b.
+
+**"Gewertet" is a statement of the display.** A group is rated when its
+row prints a figure. The counter "n von 10" and the trend above read only
+those groups; the trend is their mean, each with equal weight, as
+`gymPerformance()` forms its own. The domain's `measured` list and
+`ratio` stay what they were and the rating reads its own windows; the two
+can differ by exactly the groups that have a ratio on fewer than three
+exercise days. The year-to-date tile on the hub is the rating's figure
+and keeps the rating's count; only rounding and band apply to it.
+
+**Where a figure stands alone on a line, a held change is the word.** The
+muscle rows and the trend above them print figure and word — "+2 %
+Gehalten". The exercise list, the exercise detail, the year-to-date tile
+and the hub's card have one line: there a change inside the band reads
+"Gehalten", as an exact 0 % always did. A bare "+2 %" in the text colour
+would read as a rise.
+
+**The band holds for every change that is coloured as a state; the
+minimum only for a group** and for the trend above the groups. An
+exercise's own change — the list, the detail, the latest bar — follows
+rounding and band, so that list and group cannot contradict each other in
+kind; one exercise needs no three exercise days. (They can still differ
+in number: a group's row compares the last day of the range with the
+first, the exercise list the last day with the one before. That is the
+comparison, not the colour rule, and stays as it is.)
+
+**Rounding carries an epsilon of 1e-9.** `(41/40 − 1) × 100` is
+2.4999999999999911 in floating point; it is +2.5 %, which is +3 %.
+
+**The sentence for too little to compare stands with the group's
+exercises**, shown when its row is chosen, and the row itself says how
+many exercise days there are ("Vor 9 Tagen · 2 Übungstage"). The muscle
+sheet, where the contract places the sentence (§9), is block 7C's. With
+three exercise days and no exercise on two of them the sentence says that
+instead of "ab dem dritten".
+
+**The body.** Two tokens, `--body-held` `#e9e9ee` and `--body-dimmed`
+`#7d7d8a`, the tones the mock-ups were coloured with; `--body-base` is
+gone. A tint is mixed from white: three quarters of the way to the status
+colour at full strength, three tenths at the weakest (the mock-ups' tool
+had a quarter; raised so that +3 % is plainly green beside a white group
+at 393px under today's light). Too little to compare is the sky fill at
+half strength. With tinting off the body is the dimmed figure. Light,
+roughness and tone mapping are untouched; block 7A may retune the two
+tones and the numbers of the strength, never which state takes which
+tone or that the strength grows evenly from 2.5 % to 12 %.
+
+**The legend sentence says "bester Arbeitssatz" already**, word for word
+from the contract, although the metric is the best set until block 5b.
+One line beneath the five states says what an exercise day is — an
+addition, because the rule for "Zu wenig Vergleichsdaten" uses the word.
+
+**Words left alone.** "Leistungsentwicklung" and "Tempoentwicklung" name
+the 60 % of a rating and stay; the contract's "nie Entwicklung" is about
+the muscle trend. Running keeps "Noch kein Vergleich". The Gym hub's
+"Noch kein Vergleich möglich" became "Zu wenig Vergleichsdaten", so that
+the replaced phrase is gone from the Gym area.
+
+`features/gym/muscleState.ts`, `features/gym/changeWords.ts`,
+`features/gym/muscleGap.ts`, `features/body/tokens.ts`,
+`styles/tokens.css`, `core/config/constants.ts` (`MUSCLE_TREND_RANGES`),
+`storage/db.ts` (`databaseName`), `scripts/verify/farbregeln.mjs`.

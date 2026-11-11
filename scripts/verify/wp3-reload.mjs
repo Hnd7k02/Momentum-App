@@ -11,7 +11,7 @@ import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, seedMuscle
  * check captures the screen's text, reloads, re-navigates, captures again
  * and compares.
  *
- *   1  Muskelgruppen 7 / 30   the toggle shows the numbers the seeded
+ *   1  Muskelgruppen 30 / 90  the toggle shows the numbers the seeded
  *                              history implies, and 30 comes back exactly
  *   2  the hub after Fertig   the week line moves by one session and every
  *                              card equals a reload, without leaving the area
@@ -261,7 +261,7 @@ async function boot(width, height) {
   await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days: 42 });
   await seedTraining(page, { days: 42 });
-  await seedMuscles(page, { days: 42 });
+  await seedMuscles(page, { days: 42, older: true });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
   return { ctx, page, errors };
@@ -273,7 +273,7 @@ for (const [width, height] of SIZES) {
   const W = `${width}`;
   const { ctx, page, errors } = await boot(width, height);
 
-  /* 1 — Muskelgruppen 7 / 30 ─────────────────────────────────────────── */
+  /* 1 — Muskelgruppen 30 / 90 ─────────────────────────────────────────── */
   await page.getByRole('button', { name: 'Gym öffnen' }).click();
   await page.waitForTimeout(1500);
   await openMuscles(page, { wait: 4500 });
@@ -284,54 +284,58 @@ for (const [width, height] of SIZES) {
   await page.screenshot({ path: `${OUT}/wp3-reload-${W}-muscles-30.png` });
   await scrollTop(page);
 
-  await page.getByRole('button', { name: '7 Tage' }).click();
+  await page.getByRole('button', { name: '90 Tage', exact: true }).click();
   await page.waitForTimeout(900);
-  const m7 = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['7 Tage']) });
-  check(`${W}: 7 Tage is the pressed range`, same(m7.range, ['7 Tage']), short(m7.range));
-  check(`${W}: the 7-day rows are not the 30-day rows`, !same(m7.rows, m30.rows), diff(m7.rows, m30.rows, ['7 Tage', '30 Tage']));
+  const m90 = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['90 Tage']) });
+  check(`${W}: 90 Tage is the pressed range`, same(m90.range, ['90 Tage']), short(m90.range));
+  check(`${W}: the 90-day rows are not the 30-day rows`, !same(m90.rows, m30.rows), diff(m90.rows, m30.rows, ['90 Tage', '30 Tage']));
 
-  // seedMuscles: calves trained once, 8 days ago — inside 30 days, outside 7.
-  const calves30 = row(m30, 'Waden');
-  const calves7 = row(m7, 'Waden');
-  check(`${W}: Waden at 30 days — trained 8 days ago, awaiting a baseline`, calves30?.state === 'awaitingBaseline' && calves30?.sub === 'Vor 8 Tagen' && calves30?.right === 'Noch kein Vergleich', short(calves30));
-  check(`${W}: Waden at 7 days — not trained in the range (no data, no recency)`, calves7?.state === 'noData' && calves7?.sub === null && calves7?.right === 'Noch nicht trainiert' && calves7?.delta === false, short(calves7));
-  // Biceps: curls 15 and 6 days ago — a comparison at 30, one day at 7.
+  // seedMuscles({ older }): shoulders pressed 80, 62 and 44 days ago —
+  // before the last 30 days, inside the last 90.
+  const shoulders30 = row(m30, 'Schultern');
+  const shoulders90 = row(m90, 'Schultern');
+  check(`${W}: Schultern at 30 days — not trained in the range (no data, no recency)`, shoulders30?.state === 'noData' && shoulders30?.sub === null && shoulders30?.right === 'Noch nicht trainiert' && shoulders30?.delta === false, short(shoulders30));
+  check(`${W}: Schultern at 90 days — trained 44 days ago, +10 %, improved`, shoulders90?.state === 'improved' && shoulders90?.sub === 'Vor 44 Tagen' && shoulders90?.delta === true && /^\+10\s% Verbessert$/.test(shoulders90?.right ?? ''), short(shoulders90));
+  // Calves: one calf-raise day, 8 days ago — too little in either range.
+  for (const [label, m] of [['30', m30], ['90', m90]]) {
+    const calves = row(m, 'Waden');
+    check(`${W}: Waden at ${label} days — trained 8 days ago, one exercise day, too little to compare`, calves?.state === 'awaitingBaseline' && calves?.sub === 'Vor 8 Tagen · 1 Übungstag' && calves?.right === 'Zu wenig Vergleichsdaten' && calves?.delta === false, short(calves));
+  }
+  // Biceps: hammer curls 15 and 6 days ago — a comparison on two exercise
+  // days, which is not yet a trend (contract §7).
   const biceps30 = row(m30, 'Bizeps');
-  const biceps7 = row(m7, 'Bizeps');
-  check(`${W}: Bizeps has a figure at 30 days and only one day at 7`, biceps30?.delta === true && biceps7?.state === 'awaitingBaseline' && biceps7?.sub === 'Vor 6 Tagen', `${short(biceps30)} | ${short(biceps7)}`);
-  // Back: pulldowns 19, 12 and 5 days ago — measured at 30, one day at 7.
+  check(`${W}: Bizeps has a comparison on two exercise days and prints no figure`, biceps30?.state === 'awaitingBaseline' && biceps30?.delta === false && biceps30?.sub === 'Vor 6 Tagen · 2 Übungstage', short(biceps30));
+  // Back: pulldowns 19, 12 and 5 days ago, identical — held, with its figure.
   const back30 = row(m30, 'Rücken');
-  const back7 = row(m7, 'Rücken');
-  check(`${W}: Rücken has a figure at 30 days and only one day at 7`, back30?.delta === true && back7?.state === 'awaitingBaseline' && back7?.sub === 'Vor 5 Tagen', `${short(back30)} | ${short(back7)}`);
-  // Shoulders: nothing, in either range.
-  check(`${W}: Schultern has no data in either range`, row(m30, 'Schultern')?.state === 'noData' && row(m7, 'Schultern')?.state === 'noData');
+  check(`${W}: Rücken, three identical days, reads "0 % Gehalten"`, back30?.state === 'unchanged' && back30?.delta === true && /^0\s% Gehalten$/.test(back30?.right ?? '') && back30?.sub === 'Vor 5 Tagen', short(back30));
 
   const counted = (m) => Number(/(\d+) von 10 Gruppen gewertet/.exec(m.overall ?? '')?.[1] ?? Number.NaN);
   const withDelta = (m) => m.rows.filter((r) => r.delta).length;
-  check(`${W}: the overall tile counts fewer groups at 7 days than at 30`, counted(m7) < counted(m30), `${m30.overall} → ${m7.overall}`);
-  check(`${W}: in each range the tile counts exactly the rows that carry a figure`, counted(m30) === withDelta(m30) && counted(m7) === withDelta(m7), `30: ${counted(m30)}/${withDelta(m30)} · 7: ${counted(m7)}/${withDelta(m7)}`);
+  check(`${W}: the trend tile counts more groups at 90 days than at 30`, counted(m90) === counted(m30) + 1, `${m30.overall} → ${m90.overall}`);
+  check(`${W}: in each range the tile counts exactly the rows that carry a figure`, counted(m30) === withDelta(m30) && counted(m90) === withDelta(m90), `30: ${counted(m30)}/${withDelta(m30)} · 90: ${counted(m90)}/${withDelta(m90)}`);
+  check(`${W}: the tile is called "Leistungstrend" in both ranges`, /^Leistungstrend/.test(m30.overall ?? '') && /^Leistungstrend/.test(m90.overall ?? ''), `${m30.overall} | ${m90.overall}`);
   const names30 = m30.exercises.map((e) => e.name);
-  const names7 = m7.exercises.map((e) => e.name);
-  check(`${W}: the 7-day exercise list is a strict subset of the 30-day one`, names7.length < names30.length && names7.every((name) => names30.includes(name)), `${names30.join('|')} → ${names7.join('|')}`);
+  const names90 = m90.exercises.map((e) => e.name);
+  check(`${W}: the 30-day exercise list is a strict subset of the 90-day one`, names30.length < names90.length && names30.every((name) => names90.includes(name)), `${names30.join('|')} → ${names90.join('|')}`);
 
   await scrollTo(page, '.muscle-rows');
   await page.waitForTimeout(300);
-  await page.screenshot({ path: `${OUT}/wp3-reload-${W}-muscles-7.png` });
+  await page.screenshot({ path: `${OUT}/wp3-reload-${W}-muscles-90.png` });
   await scrollTop(page);
 
-  await page.getByRole('button', { name: '30 Tage' }).click();
+  await page.getByRole('button', { name: '30 Tage', exact: true }).click();
   await page.waitForTimeout(900);
   const m30again = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['30 Tage']) });
   check(`${W}: back on 30 Tage the 30-day rows return exactly`, same(m30again.rows, m30.rows), diff(m30again.rows, m30.rows, ['30 again', '30 first']));
-  check(`${W}: and the overall tile and the exercise list with them`, m30again.overall === m30.overall && same(m30again.exercises, m30.exercises), diff([m30again.overall, m30again.exercises], [m30.overall, m30.exercises], ['30 again', '30 first']));
+  check(`${W}: and the trend tile and the exercise list with them`, m30again.overall === m30.overall && same(m30again.exercises, m30.exercises), diff([m30again.overall, m30again.exercises], [m30.overall, m30.exercises], ['30 again', '30 first']));
 
   // A fresh load of each range shows the same thing the toggle did.
   const r30 = await afterReload(page, () => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['30 Tage']) }, () => page.waitForTimeout(3500));
   check(`${W}: 30 Tage equals a full reload`, same(r30, m30), diff(m30, r30));
-  await page.getByRole('button', { name: '7 Tage' }).click();
+  await page.getByRole('button', { name: '90 Tage', exact: true }).click();
   await page.waitForTimeout(900);
-  const r7 = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['7 Tage']) });
-  check(`${W}: 7 Tage equals a full reload, toggled to 7`, same(r7, m7), diff(m7, r7));
+  const r90 = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['90 Tage']) });
+  check(`${W}: 90 Tage equals a full reload, toggled to 90`, same(r90, m90), diff(m90, r90));
 
   /* 2 — the hub after Fertig ─────────────────────────────────────────── */
   await page.getByRole('button', { name: 'Zurück' }).click();

@@ -185,9 +185,10 @@ async function seedZeroChanges(page) {
     const db = await open();
     const snaps = await all(db, 'configSnapshots');
     // seedMuscles() gives calves one calf-raise day and forearms two
-    // hammer-curl days; those would sit inside the comparison, so they go.
+    // hammer-curl days and a carry; those would sit inside the comparison,
+    // so they go.
     const stale = (await all(db, 'gymSets'))
-      .filter((s) => s.exerciseId === 'ex_calf_raise' || s.exerciseId === 'ex_hammer_curl')
+      .filter((s) => s.exerciseId === 'ex_calf_raise' || s.exerciseId === 'ex_hammer_curl' || s.exerciseId === 'ex_farmers_carry')
       .map((s) => s.id);
     await removeAll(db, 'gymSets', stale);
 
@@ -211,8 +212,12 @@ async function seedZeroChanges(page) {
       sets.push({ id: `wp3s1-set-${exerciseId}-${session.date}`, sessionId: session.id, exerciseId, date: session.date,
         weightGrams, reps: 10, order: 0, muscles, primaryMuscles: muscles, loadType: 'external', createdAt: stamp });
     };
+    // Three exercise days each: a group states a trend only from the third
+    // (contract §7). The change is first against last: +0.4 % and −0.3 %.
+    log(16, 'ex_calf_raise', ['calves'], 100000);
     log(9, 'ex_calf_raise', ['calves'], 100000);
     log(2, 'ex_calf_raise', ['calves'], 100400);
+    log(16, 'ex_wrist_curl', ['forearms'], 100000);
     log(9, 'ex_wrist_curl', ['forearms'], 100000);
     log(2, 'ex_wrist_curl', ['forearms'], 99700);
     if (sessions.length) await putAll(db, 'gymSessions', sessions);
@@ -693,7 +698,7 @@ for (const [width, height] of SIZES) {
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     await pageDayCheck(page, `${W} C`);
-    check(`${W}: B6 the two zero-change groups are seeded`, seeded.sets === 4, short(seeded));
+    check(`${W}: B6 the two zero-change groups are seeded, three exercise days each`, seeded.sets === 6, short(seeded));
 
     await page.getByRole('button', { name: 'Gym öffnen' }).click();
     await page.waitForTimeout(1800);

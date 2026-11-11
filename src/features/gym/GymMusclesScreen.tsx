@@ -57,7 +57,7 @@ export function GymMusclesScreen({ onBack }: { onBack(): void }) {
         >
           <ChevronLeftIcon />
         </button>
-        <h1 className="screen__title">{t('gymHub.muscles.title')}</h1>
+        <h1 className="screen__title gym-muscles__title">{t('gymHub.muscles.title')}</h1>
         <button
           type="button"
           className="button button--quiet gym-muscles__legendButton"

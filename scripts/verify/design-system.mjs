@@ -641,11 +641,27 @@ for (const width of WIDTHS) {
       empty.primaries.length === 1 && empty.primaries[0] === 'Training erfassen', short(empty.primaries));
     check(`${width}: nothing is drawn as progress: ten untrained rows, no overall figure`,
       empty.rows.length === 10 && empty.rows.every((row) => /Noch nicht trainiert/.test(row)) && empty.overall === 0, short(empty.rows.slice(0, 2)));
-    // The range it names is the one on show.
-    await page.getByRole('button', { name: '7 Tage' }).click();
+    // The other range reaches it: the session of 45 days ago lies inside
+    // the last 90 days, so the rows carry figures again and nothing is
+    // called empty (contract §7: 30 and 90 days).
+    await page.getByRole('button', { name: '90 Tage', exact: true }).click();
+    await page.waitForTimeout(2500);
+    const ninety = await page.evaluate(() => ({
+      empty: document.querySelectorAll('.gym-progress__noData').length,
+      figures: document.querySelectorAll('.muscle-row__delta').length,
+      overall: (document.querySelector('[data-metric="gym-overall"]')?.textContent ?? '').replace(/\s+/g, ' '),
+      primaries: [...document.querySelectorAll('.button--primary')].filter((el) => el.getBoundingClientRect().width > 0).length,
+      range: [...document.querySelectorAll('.progress__ranges .segmented__option')].map((el) => `${el.textContent.trim()}${el.getAttribute('aria-pressed') === 'true' ? '*' : ''}`),
+    }));
+    check(`${width}: at 90 days the session of 45 days ago appears: rows with figures, a trend, nothing called empty`,
+      ninety.empty === 0 && ninety.figures > 0 && /^Leistungstrend/.test(ninety.overall) && ninety.primaries === 0
+        && JSON.stringify(ninety.range) === JSON.stringify(['30 Tage', '90 Tage*']), short(ninety));
+    await look(page, width, 'muskelgruppen-90-tage', 'gym');
+    // Back on 30 days, the default, the range is empty again and says so.
+    await page.getByRole('button', { name: '30 Tage', exact: true }).click();
     await page.waitForTimeout(1500);
-    const seven = ((await page.locator('.gym-progress__noData').innerText()) ?? '').replace(/\s+/g, ' ');
-    check(`${width}: and it names the range on show`, /^Kein Training in den letzten 7 Tagen /.test(seven), seven);
+    const thirty = ((await page.locator('.gym-progress__noData').innerText()) ?? '').replace(/\s+/g, ' ');
+    check(`${width}: and it names the range on show`, /^Kein Training in den letzten 30 Tagen /.test(thirty), thirty);
     // The action is the hub's own flow: with a plan saved, the chooser.
     await page.getByRole('button', { name: 'Training erfassen' }).click();
     await page.waitForTimeout(900);

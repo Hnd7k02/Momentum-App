@@ -103,7 +103,7 @@ const bodyButtons = nodes.filter((n) => n.role === 'button' && /(Brust|Waden|Rum
 check('each muscle group is a named button', bodyButtons.length >= 3,
   JSON.stringify(bodyButtons.slice(0, 3).map((n) => n.name)));
 check('and its name carries the state in words, not only a colour',
-  bodyButtons.every((n) => /(Noch nicht trainiert|Noch kein Vergleich|Verbessert|Gehalten|Zurückgegangen)/.test(n.name)),
+  bodyButtons.every((n) => /(Noch nicht trainiert|Zu wenig Vergleichsdaten|Verbessert|Gehalten|Zurückgegangen)/.test(n.name)),
   bodyButtons[0]?.name);
 
 const figuresHidden = await page.evaluate(() =>
