@@ -944,7 +944,16 @@ merged; **in progress, runs up to its gate and stops there**)
     closed (30 open edges in the proof, 84 in the first candidate). One
     branch is corrected; the body is closed. `npm run test` is 112 files
     and 1800 tests from here on.
-  - [ ] Step 3 — measuring: today's body and the proof
+  - [x] Step 3 — measuring. `node tools/body/measure-body.mjs <glb>…` reads
+    fourteen measures from the surface of any GLB (no skeleton needed) and
+    says where the regions lie; `tools/body/MEASURES.md` has the definitions,
+    the table for today's body (9 of 14 met) and the proof (8 of 14), and
+    what the targets were checked against. **The check is partial:** the
+    sources themselves are blocked by this session's network rules, so some
+    windows are marked open there and must not enter the validator
+    unchecked. One finding for the gate: the guide's window for the
+    shoulder breadth (25–30 % H) is too low for a bideltoid breadth — ANSUR
+    II's mean is 29.0 %.
   - [ ] Step 4 — the candidates
   - [ ] Step 5 — light, material, tone mapping (on a candidate, in
     `#/dev/body` only)

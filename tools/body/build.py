@@ -129,6 +129,13 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         pieces = ', '.join(f'{count} triangles of {label}' for label, count in lost)
         raise SystemExit(f'{name}: refine-body.mjs handed back {pieces}. A piece that large is anatomy, not a '
                          f'stray: connect it in regions.json (regionrules.py) before building.')
+    # The skeleton, beside the file: measure-body.mjs prints it as a second
+    # opinion next to what it reads from the surface.
+    (out_dir / f'{name}.landmarks.json').write_text(json.dumps({
+        'about': 'Joint centres of the posed MakeHuman skeleton, in the metres of the GLB beside this file.',
+        'joints': {key: [round(float(x), 5) for x in value] for key, value in sorted(body.joints.items())},
+        'pose': spec.get('pose', {}),
+    }, indent=1) + '\n')
     digest = hashlib.sha256(final.read_bytes()).hexdigest()
     say(f'{name}: {len(P)} vertices and {len(tris)} triangles before the borders are cut; pose {posed.info}')
     say(f'{final}  {final.stat().st_size} bytes  sha256 {digest}')

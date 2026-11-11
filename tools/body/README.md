@@ -36,6 +36,7 @@ with `--record`.
 | `digests.json` | size and sha256 of every candidate, written by `build.py --record` |
 | `makehuman/` | the MakeHuman files the candidates read, with their licence and a manifest |
 | `vendor.py` | copies those files from the unpacked wheel, and checks the copies |
+| `measure-body.mjs`, `MEASURES.md` | the body measured at landmarks; the targets, today's body and the proof |
 | `preview.html`, `render.mjs` | stills of any GLB through the Vite dev server, for comparing candidates |
 | `out/` | build results; ignored by git |
 

@@ -273,7 +273,7 @@ UP = np.array([0.0, 1.0, 0.0])
 
 
 def pose(base: Base, V, arm=-1.0, armfwd=0.0, elbow=0.0, palm=None, fingers=0.0, clavicle=0.0,
-         leg=-1.0, shin=None, toes=None, wrist=0.0):
+         leg=-1.0, shin=None, toes=None, wrist=0.0, spread=0.0, thumb=0.0):
     """Bring the rest pose to a standing one.
 
     arm       the upper arms' angle from the vertical in the front view, degrees
@@ -282,6 +282,9 @@ def pose(base: Base, V, arm=-1.0, armfwd=0.0, elbow=0.0, palm=None, fingers=0.0,
     palm      None leaves the forearm's twist of the rest pose; a number turns
               the palms to the thighs and then that many degrees further to the front
     fingers   curl of each finger joint
+    spread    how much of the fingers' fan is closed, 0..1: 1 lays index, ring
+              and little finger parallel to the middle finger
+    thumb     how far the thumb is laid towards the index finger, degrees
     clavicle  how far the shoulder girdle is lowered
     leg       the thighs' angle from the vertical in the front view
     shin      the same for the lower legs (default: as `leg`)
@@ -339,6 +342,31 @@ def pose(base: Base, V, arm=-1.0, armfwd=0.0, elbow=0.0, palm=None, fingers=0.0,
             Hp = p.at(f'wrist.{side}', H)
             across = p.at(f'wrist.{side}', p.joint(f'joint-{s}-finger-5-1')) - p.at(f'wrist.{side}', p.joint(f'joint-{s}-finger-2-1'))
             p.apply(_affine(_rotation(across, wrist * sx), Hp), f'wrist.{side}')
+
+        if spread or thumb:
+            # In the rest pose the fingers fan out and the thumb stands off:
+            # a hand that is held open. A hand that hangs is closed.
+            knuckle = {f: p.joint(f'joint-{s}-finger-{f}-1') for f in (1, 2, 3, 4, 5)}
+            tip = {f: p.joint(f'joint-{s}-finger-{f}-4') for f in (1, 2, 3, 4, 5)}
+            normal = _unit(np.cross(knuckle[5] - knuckle[2], knuckle[3] - H))
+            flat = lambda v: _unit(v - np.dot(v, normal) * normal)
+            middle_dir = flat(tip[3] - knuckle[3])
+            for finger in (2, 4, 5):
+                if not spread:
+                    break
+                own = flat(tip[finger] - knuckle[finger])
+                angle = math.degrees(math.atan2(np.dot(np.cross(own, middle_dir), normal), np.dot(own, middle_dir)))
+                bone = f'finger{finger}-1.{side}'
+                Rb = p.T[bone][:3, :3]
+                p.apply(_affine(_rotation(Rb @ normal, spread * angle), p.at(bone, knuckle[finger])), bone)
+            if thumb:
+                bone = f'finger1-1.{side}'
+                own = tip[1] - knuckle[1]
+                towards = p.joint(f'joint-{s}-finger-2-2') - knuckle[1]
+                axis = np.cross(own, towards)
+                full = math.degrees(math.atan2(np.linalg.norm(axis), np.dot(own, towards)))
+                Rb = p.T[bone][:3, :3]
+                p.apply(_affine(_rotation(Rb @ _unit(axis), min(thumb, 0.9 * full)), p.at(bone, knuckle[1])), bone)
 
         if fingers:
             index = p.joint(f'joint-{s}-finger-2-1')

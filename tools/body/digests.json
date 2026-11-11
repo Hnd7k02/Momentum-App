@@ -1,26 +1,26 @@
 {
   "base": {
-    "bytes": 609384,
-    "sha256": "891b83934aeea937245d4978c06872c65731931987bdb75ffd7e30a40c116015"
+    "bytes": 609244,
+    "sha256": "879bfed403122a1ada82c407f8c189275b8639cab11c4447a193fe3069a39025"
   },
   "plain": {
-    "bytes": 609384,
-    "sha256": "a1462b847d020f191b4727bbccf08e414ae599e99a6bca6924c5ba6c83d0fac7"
+    "bytes": 609244,
+    "sha256": "53cced428dec185e8fba19d0e09f96720b8cbfcde1aff2c3c2cf49d99fffde1d"
   },
   "detail2": {
-    "bytes": 608656,
-    "sha256": "fb794d96b9f1861d0e4c5af773239769005b0a39b089ea6ef5f493e113d1b50b"
+    "bytes": 608712,
+    "sha256": "430ee2438b7085f834f0dce3acaf8fe9c4345f605c8a534a02a8d68ceeab2b04"
   },
   "detail4": {
-    "bytes": 611428,
-    "sha256": "11a9d379cfe8511408e60b7bf609300f7b0961a6749574893cbf78a19d889b7a"
+    "bytes": 611764,
+    "sha256": "5a1dc3877ff785bab0a8cf37e27acaaee1f4c4b6456a6d5dfcc2f07f0080d1f9"
   },
   "detail2u": {
-    "bytes": 609300,
-    "sha256": "1fe73088147665af2f6863436fb9df3d893939491d375969617d4f8a299c21d3"
+    "bytes": 608940,
+    "sha256": "eeef48a78a31d4e45f9c7c9e328897ec326c63c3fc5d002e89da46f8fe482231"
   },
   "detail3": {
-    "bytes": 610164,
-    "sha256": "779ae770a635b2d42b956468dbc49d1993c7419eec75d199eceb20d1491a60f2"
+    "bytes": 610276,
+    "sha256": "5504cc90534621f72798fd82c15f657acf2b74ab03cd1db164f4d6d20422c862"
   }
 }
