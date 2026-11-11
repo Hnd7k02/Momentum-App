@@ -3,7 +3,26 @@ import { addDays, type DateKey } from '../../core/dates';
 import { useLoadable } from '../../app/useLoadable';
 import { useDataVersion } from '../../app/useDataVersion';
 import { useToday } from '../../app/useToday';
-import { latestGymSession, loadGymHistory, type GymHistory } from '../../storage/services/gymService';
+import { gymSessionsRepository } from '../../storage/repositories';
+import { loadGymHistory, type GymHistory } from '../../storage/services/gymService';
+
+/**
+ * The day of the latest Gym session, up to and including `today`; `null`
+ * before the first.
+ *
+ * The latest **day**, not the session created last: a session can be
+ * entered for yesterday after today's (D133), and the sentence built from
+ * this names a day. A session dated after today — a device whose clock was
+ * set back — is not "the last session" of anything the screen shows.
+ */
+export function latestSessionDay(sessions: readonly { date: DateKey }[], today: DateKey): DateKey | null {
+  let latest: DateKey | null = null;
+  for (const session of sessions) {
+    if (session.date > today) continue;
+    if (latest === null || session.date > latest) latest = session.date;
+  }
+  return latest;
+}
 
 /**
  * Gym's replay, over the range a screen is showing.
@@ -28,6 +47,7 @@ import { latestGymSession, loadGymHistory, type GymHistory } from '../../storage
  * last session was (`muscleGap`). Both are read in one load, so the screen
  * never shows the one without the other.
  */
+
 export function useGymHistoryState(rangeDays: number): {
   history: GymHistory | null;
   /** The day of the most recent Gym session, `null` before the first. */
@@ -40,11 +60,11 @@ export function useGymHistoryState(rangeDays: number): {
   const version = useDataVersion();
   const load = useCallback(
     async () => {
-      const [history, latest] = await Promise.all([
+      const [history, sessions] = await Promise.all([
         loadGymHistory(addDays(to, -(rangeDays - 1)), to),
-        latestGymSession(),
+        gymSessionsRepository.getAll(),
       ]);
-      return { history, latestSession: latest?.date ?? null };
+      return { history, latestSession: latestSessionDay(sessions, to) };
     },
     [rangeDays, to],
   );

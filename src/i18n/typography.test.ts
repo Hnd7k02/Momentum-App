@@ -72,6 +72,23 @@ describe('a number and its percent sign never part', () => {
     expect(withPercent).toBeGreaterThanOrEqual(10);
   });
 
+  it('the scan below sees the three ways a breaking space gets in', () => {
+    // The same pattern as the scan, on the lines it exists for — one of
+    // them stood in BossWeights.tsx until STOP 6b.
+    const pattern = /\} %|['"`] %|\d %(?=[`'"<{]|$)/;
+    for (const line of [
+      '` · ${Math.round(BOSS.MIN_WEIGHT * 100)} % min`',
+      '`${average} %`',
+      "String(value) + ' %'",
+      '<span>{value} %</span>',
+      "'100 %'",
+      '`(${share} %)`',
+    ]) expect(pattern.test(line), line).toBe(true);
+    for (const line of ['const odd = index % 2 === 1;', 'width: `${percent}%`', 'percentText(value)', '(i * 7) % 10 < level * 10']) {
+      expect(pattern.test(line), line).toBe(false);
+    }
+  });
+
   it('no source file prints a figure, a plain space and a percent sign', () => {
     const files: string[] = [];
     const walk = (dir: string) => {
@@ -90,10 +107,37 @@ describe('a number and its percent sign never part', () => {
         .replace(/\/\*[\s\S]*?\*\//g, blank)
         .replace(/(^|[^:'"`\\])\/\/[^\n]*/g, (match, lead: string) => lead + blank(match.slice(lead.length)));
       code.split('\n').forEach((line, index) => {
-        // "} %" in a template, "0 %" in a string: a number or a placeholder,
-        // a plain space, a percent sign that ends there. The remainder
-        // operator has an operand after it and is not a hit.
-        if (/[}\d] %(?=[`'"<{]|$)/.test(line)) hits.push(`${path.slice(SRC.length)}:${index + 1} ${line.trim().slice(0, 80)}`);
+        // Three ways a figure meets a plain space and a percent sign in
+        // code, whatever follows it ("% min", "%)", the end of the string):
+        //   `${x} %…`  and JSX `{x} %…`   — a placeholder, a space, a percent
+        //   x + ' %…'                     — a literal that opens with them
+        //   '100 %'                       — a digit, then they end a literal
+        // The remainder operator is none of these: it has an expression,
+        // not a brace or a quote, before its space.
+        if (/\} %|['"`] %|\d %(?=[`'"<{]|$)/.test(line)) hits.push(`${path.slice(SRC.length)}:${index + 1} ${line.trim().slice(0, 80)}`);
+      });
+    }
+    expect(hits).toEqual([]);
+  });
+});
+
+describe('no figure is given its sign by hand', () => {
+  it('no source file builds a negative number with a hyphen', () => {
+    // `-${value}` or '-' + value: the two ways a hyphen becomes a sign in
+    // code. A fall goes through `withMinus()` or `translate()`.
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir)) {
+        const path = join(dir, entry);
+        if (statSync(path).isDirectory()) walk(path);
+        else if (/\.(ts|tsx)$/.test(entry) && !/\.test\.tsx?$/.test(entry)) files.push(path);
+      }
+    };
+    walk(SRC);
+    const hits: string[] = [];
+    for (const path of files) {
+      readFileSync(path, 'utf8').split('\n').forEach((line, index) => {
+        if (/`-\$\{|['"]-['"]\s*\+|\+\s*['"]-['"]/.test(line)) hits.push(`${path.slice(SRC.length)}:${index + 1} ${line.trim().slice(0, 80)}`);
       });
     }
     expect(hits).toEqual([]);

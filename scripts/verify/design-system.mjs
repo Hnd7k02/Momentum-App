@@ -85,36 +85,36 @@ const tab = async (page, name) => {
   await page.waitForTimeout(1100);
 };
 /**
- * The weekly-target bubbles (STOP 6b): seven in one row at every width, each
- * a circle, each a target 44px high and as wide as its share of the row —
- * the `::before` counts, as it does for a tap.
+ * The weekly-target bubbles (STOP 6b): seven in one row at every width. The
+ * button is the target — its own box, 44px high at least and its share of
+ * the row wide, touching its neighbours — and the circle drawn inside it is
+ * round and fits.
  */
 async function bubbles(page, W) {
   const rows = await page.evaluate(() => [...document.querySelectorAll('.bubble-row')].map((row) => {
-    const grow = (value) => (value.endsWith('px') && parseFloat(value) < 0 ? -parseFloat(value) : 0);
+    const round1 = (value) => Math.round(value * 10) / 10;
     const items = [...row.querySelectorAll('.bubble')].map((bubble) => {
       const box = bubble.getBoundingClientRect();
-      const before = getComputedStyle(bubble, '::before');
-      return {
-        top: Math.round(box.top),
-        round: Math.abs(box.width - box.height) < 0.6,
-        targetW: box.width + grow(before.left) + grow(before.right),
-        targetH: box.height + grow(before.top) + grow(before.bottom),
-      };
+      const circle = getComputedStyle(bubble, '::before');
+      return { box, circleW: parseFloat(circle.width), circleH: parseFloat(circle.height) };
     });
-    const round1 = (value) => Math.round(value * 10) / 10;
     return {
       count: items.length,
-      lines: new Set(items.map((item) => item.top)).size,
-      round: items.every((item) => item.round),
+      lines: new Set(items.map((item) => Math.round(item.box.top))).size,
       pitch: round1(row.getBoundingClientRect().width / Math.max(1, items.length)),
-      targetW: round1(Math.min(...items.map((item) => item.targetW))),
-      targetH: round1(Math.min(...items.map((item) => item.targetH))),
+      targetW: round1(Math.min(...items.map((item) => item.box.width))),
+      targetH: round1(Math.min(...items.map((item) => item.box.height))),
+      // Between two neighbours' targets: nothing dead, nothing shared.
+      seam: round1(Math.max(...items.slice(1).map((item, index) => Math.abs(item.box.left - items[index].box.right)))),
+      circle: round1(Math.min(...items.map((item) => item.circleW))),
+      round: items.every((item) => Math.abs(item.circleW - item.circleH) < 0.6),
+      fits: items.every((item) => item.circleW <= item.box.width + 0.1 && item.circleH <= item.box.height + 0.1 && item.circleW >= 28),
     };
   }));
   check(`${W}: the seven target bubbles stand in one row`, rows.length > 0 && rows.every((row) => row.count === 7 && row.lines === 1), short(rows));
-  check(`${W}: each bubble is round, and a target 44px high and its share of the row wide`,
-    rows.length > 0 && rows.every((row) => row.round && row.targetH >= 43.5 && row.targetW >= Math.min(44, row.pitch) - 0.5), short(rows));
+  check(`${W}: each bubble is a target 44px high and its share of the row wide, around a round circle`,
+    rows.length > 0 && rows.every((row) => row.round && row.fits && row.targetH >= 43.9 && row.targetW >= Math.min(44, row.pitch) - 0.1), short(rows));
+  check(`${W}: neighbouring targets touch — no dead strip, no overlap`, rows.length > 0 && rows.every((row) => row.seam <= 0.1), short(rows));
 }
 
 /** Brings an element to the top of its own scroll port — never the shell's. */

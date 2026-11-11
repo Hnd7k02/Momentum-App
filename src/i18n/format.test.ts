@@ -16,6 +16,10 @@ describe('numbers', () => {
   it('shows percentages without decimals', () => {
     expect(formatPercent('de', 66.6)).toBe('67\u00A0%');
     expect(formatPercent('en', 100)).toBe('100\u00A0%');
+    // A negative share carries the minus sign in both languages, and −0 none.
+    expect(formatPercent('de', -9.6)).toBe('\u221210\u00A0%');
+    expect(formatPercent('en', -3)).toBe('\u22123\u00A0%');
+    expect(formatPercent('de', -0.4)).toBe('0\u00A0%');
   });
 });
 

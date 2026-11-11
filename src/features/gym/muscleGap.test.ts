@@ -3,6 +3,7 @@ import { exerciseDays, gymPerformanceOverSpan, type ExerciseDayInput } from '../
 import { createTranslator } from '../../i18n';
 import { de } from '../../i18n/de';
 import { muscleGap, muscleGapText } from './muscleGap';
+import { latestSessionDay } from './useGymHistory';
 
 /**
  * Why Muskelgruppen has nothing to show (STOP 6b).
@@ -93,5 +94,19 @@ describe('trained in the range', () => {
     const history = historyOf([day('2026-11-02', 100000), day('2026-11-09', 105000)]);
     expect(history.overall.measured.length).toBeGreaterThan(0);
     expect(muscleGap(history, '2026-11-09', TODAY, 30)).toBeNull();
+  });
+});
+
+describe('the latest session is the latest day', () => {
+  it('takes the newest date, whatever order the sessions were entered in', () => {
+    // Yesterday's session entered after today's: stored last, not latest.
+    expect(latestSessionDay([{ date: '2026-11-11' }, { date: '2026-11-10' }], TODAY)).toBe('2026-11-11');
+    expect(latestSessionDay([{ date: '2026-10-02' }, { date: '2026-09-28' }, { date: '2026-09-30' }], TODAY)).toBe('2026-10-02');
+  });
+
+  it('is null before the first session, and ignores a day after today', () => {
+    expect(latestSessionDay([], TODAY)).toBeNull();
+    expect(latestSessionDay([{ date: '2026-11-12' }], TODAY)).toBeNull();
+    expect(latestSessionDay([{ date: '2026-11-12' }, { date: '2026-10-02' }], TODAY)).toBe('2026-10-02');
   });
 });

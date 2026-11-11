@@ -1,7 +1,7 @@
 import { addDays, middayOf, todayKey, type DateKey } from '../core/dates';
 import type { Language } from '../core/model';
 import { localeOf, translate } from './index';
-import { percentText } from './typography';
+import { MINUS, percentText } from './typography';
 
 /**
  * All user-facing dates and numbers go through here, so the language setting
@@ -70,5 +70,8 @@ export function formatNumber(language: Language, value: number, fractionDigits =
 
 /** Percentages are shown without decimals: the extra precision is noise. */
 export function formatPercent(language: Language, ratio0to100: number): string {
-  return percentText(formatNumber(language, Math.round(ratio0to100)));
+  // The sign is ours, not the locale's: Intl prints a hyphen for de and en.
+  const rounded = Math.round(ratio0to100);
+  const digits = formatNumber(language, Math.abs(rounded));
+  return percentText(rounded < 0 ? `${MINUS}${digits}` : digits);
 }

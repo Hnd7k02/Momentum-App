@@ -16,10 +16,16 @@ import { weekSentence } from './TrainingCard';
  * first workout, what it says after, and what it never loads.
  */
 
-const render = (history: GymHistory | null, latestSession: string | null = null) =>
+const render = (history: GymHistory | null, latestSession: string | null = null, failed = false) =>
   renderToStaticMarkup(
     <I18nProvider language="de" setLanguage={() => undefined}>
-      <MuscleEntryCard history={history} rangeDays={30} latestSession={latestSession} onOpen={() => undefined} />
+      <MuscleEntryCard
+        history={history}
+        rangeDays={30}
+        latestSession={latestSession}
+        failed={failed}
+        onOpen={() => undefined}
+      />
     </I18nProvider>,
   );
 
@@ -37,23 +43,43 @@ const emptyHistory = (): GymHistory => {
 
 describe('the muscle entry card before the first workout', () => {
   it('is one named button that says there is no data, and colours nothing as progress', () => {
-    for (const html of [render(null), render(emptyHistory())]) {
-      expect(html).toMatch(/<button[^>]*aria-label="Muskelgruppen öffnen"/);
-      // The card names itself once: no grey section label repeating it.
-      expect(html).not.toContain('section__label');
-      expect(html.match(/>Muskelgruppen</g)?.length ?? 0).toBe(1);
-      expect(html).toContain(de['gymHub.muscles.none']);
-      expect(html).toContain(de['gymHub.muscles.noneHint']);
-      // The preview is a picture, hidden from assistive technology: a still
-      // of the approved body, never the SVG diagram and never the viewer.
-      expect(html).toMatch(/<span class="gym-hub__preview" aria-hidden="true"><img class="gym-hub__previewBody" src="[^"]*body-preview[^"]*\.webp" alt=""/);
-      expect(html).not.toContain('body-renderer');
-      // Every group's marker is in its no-data state; no other state exists yet.
-      expect(html.match(/gym-hub__previewState--noData/g)?.length ?? 0).toBe(MUSCLE_GROUPS.length);
-      for (const state of ['improved', 'unchanged', 'declined', 'awaitingBaseline']) {
-        expect(html, state).not.toContain(`gym-hub__previewState--${state}`);
-      }
+    const html = render(emptyHistory());
+    expect(html).toMatch(/<button[^>]*aria-label="Muskelgruppen öffnen"/);
+    // The card names itself once: no grey section label repeating it.
+    expect(html).not.toContain('section__label');
+    expect(html.match(/>Muskelgruppen</g)?.length ?? 0).toBe(1);
+    expect(html).toContain(de['gymHub.muscles.none']);
+    expect(html).toContain(de['gymHub.muscles.noneHint']);
+    // The preview is a picture, hidden from assistive technology: a still
+    // of the approved body, never the SVG diagram and never the viewer.
+    expect(html).toMatch(/<span class="gym-hub__preview" aria-hidden="true"><img class="gym-hub__previewBody" src="[^"]*body-preview[^"]*\.webp" alt=""/);
+    expect(html).not.toContain('body-renderer');
+    // Every group's marker is in its no-data state; no other state exists yet.
+    expect(html.match(/gym-hub__previewState--noData/g)?.length ?? 0).toBe(MUSCLE_GROUPS.length);
+    for (const state of ['improved', 'unchanged', 'declined', 'awaitingBaseline']) {
+      expect(html, state).not.toContain(`gym-hub__previewState--${state}`);
     }
+  });
+
+  it('says nothing while it loads: loading is not "not trained yet"', () => {
+    // Until STOP 6b the card answered a history that had not arrived with
+    // the first-session text, for a frame or two — and for good when the
+    // load failed.
+    const html = render(null);
+    expect(html).toMatch(/<button[^>]*aria-label="Muskelgruppen öffnen"/);
+    expect(html.match(/>Muskelgruppen</g)?.length ?? 0).toBe(1);
+    expect(html).not.toContain(de['gymHub.muscles.none']);
+    expect(html).not.toContain(de['gymHub.muscles.noneHint']);
+    // The lines hold their place, and nothing is coloured as progress.
+    expect(html).toContain('<span class="gym-hub__musclesSummary">\u00A0</span>');
+    expect(html.match(/gym-hub__previewState--noData/g)?.length ?? 0).toBe(MUSCLE_GROUPS.length);
+  });
+
+  it('says that the muscle groups could not be loaded when the load failed', () => {
+    const html = render(null, null, true);
+    expect(html).toContain(de['error.muscles.title']);
+    expect(html).not.toContain(de['gymHub.muscles.none']);
+    expect(html).not.toContain(de['gymHub.muscles.noneHint']);
   });
 
   it('does not say "not trained yet" to someone whose last session lies before the range', () => {

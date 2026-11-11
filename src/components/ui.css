@@ -411,66 +411,86 @@
  * The whole choice stands in one row at every width (STOP 6b). The row used
  * to wrap so that no bubble fell under 44px, and from 320 to 393px that left
  * a lone "7" beneath the other six — a choice of seven read as six and one.
- * The row is a grid of equal columns now: the bubbles share the card's width
- * and shrink with it, a circle as wide as its column and 52px at most.
+ * The row is a grid of equal columns now, and never wraps.
  *
- * What gives on a narrow phone is the width, never the height. Seven targets
- * of 44px need 308px and a card on a 320px phone has 256px, so there a
- * bubble is a 33px circle; its target is still 44px high and as wide as the
- * column's whole pitch, because the `::before` reaches the missing height
- * above and below and half the gap to either side. From 375px the target is
- * 44px both ways.
+ * **The cell is the target and the circle is drawn inside it.** The button
+ * fills its column — the cells touch, so nothing between two bubbles is
+ * dead — and is 44px high at least; the circle is its `::before`, as wide
+ * as the cell less a step and 52px at most. So what gives on a narrow
+ * phone is the width, never the height: seven targets of 44px need 308px
+ * and a card on a 320px phone has 256px, so there the target is 37 × 44
+ * around a 33px circle. From 375px it is 44px both ways.
+ *
+ * The target is the button's own box, not an offset from it: a browser
+ * snaps a 1.5px border to whole device pixels, differently per device, and
+ * a target computed from one came out a pixel wrong.
  */
 .bubble-row {
-  --bubble-gap: var(--space-1);
   display: grid;
   /* The count comes from the component: one column per value. */
   grid-template-columns: repeat(var(--bubble-count), minmax(0, 1fr));
-  justify-items: center;
-  gap: var(--bubble-gap);
 }
 
 .bubble {
   position: relative;
-  width: 100%;
-  max-width: 52px;
-  aspect-ratio: 1;
-  border-radius: 50%;
+  /* Its own stacking context, so the circle can lie beneath the number. */
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* As wide as its column, and never wider: without the explicit minimum
+     the 44px of height would come back as 44px of width through the ratio
+     and push the cells over each other on a narrow phone. As high as it is
+     wide, from 44px up to the largest circle and its step. */
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1;
+  min-height: var(--touch-min);
+  max-height: calc(52px + var(--space-1));
   font-size: var(--type-body);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
-  background: var(--surface-secondary);
-  border: 1.5px solid transparent;
-  transition: transform var(--duration-fast) var(--ease-standard),
-    background var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
-/* The target: 44px high wherever the circle is smaller, and the column's
-   pitch wide. Where the circle is 44px or more it adds nothing above or
-   below. */
 .bubble::before {
   content: '';
   position: absolute;
-  top: min(0px, calc((100% - var(--touch-min)) / 2));
-  bottom: min(0px, calc((100% - var(--touch-min)) / 2));
-  left: calc(var(--bubble-gap) / -2);
-  right: calc(var(--bubble-gap) / -2);
+  z-index: var(--layer-below);
+  top: 50%;
+  left: 50%;
+  width: min(100% - var(--space-1), 52px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--surface-secondary);
+  border: 1.5px solid transparent;
+  transition: transform var(--duration-fast) var(--ease-standard),
+    background var(--duration-fast) var(--ease-standard);
 }
 
-.bubble:active {
-  transform: scale(0.94);
+.bubble:active::before {
+  transform: translate(-50%, -50%) scale(0.94);
 }
 
 .bubble[aria-pressed='true'] {
-  background: var(--accent);
-  border-color: transparent;
   color: var(--text-on-accent);
+}
+
+.bubble[aria-pressed='true']::before {
+  background: var(--accent);
   box-shadow: var(--shadow-selected);
+}
+
+/* The focus ring follows the circle, not the cell around it. */
+.bubble:focus-visible {
+  outline: none;
+}
+
+.bubble:focus-visible::before {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Text field. */

@@ -6,6 +6,7 @@ import { percentChange } from '../../core/gym/performance';
 import { Section } from '../../components';
 import { ChevronRightIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
+import { NBSP } from '../../i18n/typography';
 import type { GymHistory } from '../../storage/services/gymService';
 import type { MuscleState } from '../../components/BodyRenderer';
 import { muscleGap } from './muscleGap';
@@ -36,13 +37,19 @@ export function MuscleEntryCard({
   history,
   rangeDays,
   latestSession = null,
+  failed = false,
   onOpen,
 }: {
-  /** `null` while loading; a history with no days when the range holds none. */
+  /**
+   * `null` while loading, and when the load failed (`failed`); a history
+   * with no days when the range holds none.
+   */
   history: GymHistory | null;
   rangeDays: number;
   /** The day of the latest Gym session of all, `null` before the first. */
   latestSession?: DateKey | null;
+  /** The history could not be loaded: the card says so, not "never trained". */
+  failed?: boolean;
   onOpen(): void;
 }) {
   const t = useT();
@@ -63,8 +70,15 @@ export function MuscleEntryCard({
   // An empty range is "never trained" only before the first session; with
   // one behind it the card says that the range is empty and how long ago
   // the last session was (STOP 6b). The reasons are `muscleGap`'s.
+  //
+  // Loading is not "none" either: until the history is there the lines hold
+  // their place and say nothing, and a load that failed says that.
   const gap = history ? muscleGap(history, latestSession, today, rangeDays) : null;
-  const summary = !hasData
+  const summary = history === null
+    ? failed
+      ? t('error.muscles.title')
+      : NBSP
+    : !hasData
     ? gap?.kind === 'outsideRange'
       ? t('gymHub.muscles.outside', { days: rangeDays })
       : gap?.kind === 'unscored'
@@ -119,7 +133,9 @@ export function MuscleEntryCard({
             <span className={`gym-hub__musclesOverall ${overallTone}`.trim()}>{overall}</span>
           ) : null}
           <span className="gym-hub__musclesRange">
-            {hasData
+            {history === null
+              ? NBSP
+              : hasData
               ? t('gymHub.muscles.range', { days: rangeDays })
               : gap?.kind === 'outsideRange'
                 ? t('gymHub.muscles.outsideShort', { count: gap.daysAgo })
