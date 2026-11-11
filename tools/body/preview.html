@@ -1,0 +1,78 @@
+<!doctype html>
+<!--
+  A still of a body GLB, for the people who build it — not part of the app.
+
+  Served by the dev server (npx vite --port 5173) at
+  /Momentum-App/tools/body/preview.html and driven by render.mjs. The lights
+  are the viewer's (BodyViewer.tsx), so that what is judged here is what the
+  app will draw; `look` in the hash overrides them, to try a light or a tone
+  mapping before it becomes a token.
+
+  The hash is JSON: { glb, views: [{ yaw, pitch, dist, tx, ty, fov }], w, h,
+  regions: { <id>: { color, emissive, glow } }, rest: { color }, bg, shade,
+  look: { tone, exposure, hemi, key, fill, rim, env, roughness } }.
+-->
+<meta charset="utf-8">
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const q = JSON.parse(decodeURIComponent(location.hash.slice(1) || '{}'));
+const views = q.views ?? [{ yaw: 0 }];
+const W = q.w ?? 400, H = q.h ?? 780;
+const look = { tone: 'aces', exposure: 1, hemi: 1.35, key: 2.15, fill: 0.75, rim: 1.05, env: 1, roughness: 0.74, ...(q.look ?? {}) };
+const TONES = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, none: THREE.NoToneMapping, linear: THREE.LinearToneMapping, reinhard: THREE.ReinhardToneMapping, cineon: THREE.CineonToneMapping };
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W * views.length, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = TONES[look.tone] ?? THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = look.exposure;
+renderer.setScissorTest(true);
+if (q.bg) renderer.setClearColor(q.bg, 1);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(look.sky ?? 0xffffff, look.ground ?? 0xcdcdda, look.hemi));
+const light = (p, i, c = 0xffffff) => { const l = new THREE.DirectionalLight(c, i); l.position.set(...p); scene.add(l); };
+light(look.keyAt ?? [-1.7, 2.6, 2.4], look.key);
+light(look.fillAt ?? [2.4, 0.9, 1.5], look.fill, look.fillColor ?? 0xdfe4f5);
+light(look.rimAt ?? [0.4, 1.9, -2.8], look.rim);
+
+const gltf = await new GLTFLoader().loadAsync(q.glb);
+let triangles = 0;
+gltf.scene.traverse((o) => {
+  if (!o.isMesh) return;
+  const name = o.material.name;
+  const spec = (q.regions && q.regions[name]) || q.rest || { color: '#e9e9ee' };
+  triangles += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3;
+  o.material = new THREE.MeshStandardMaterial({
+    color: spec.color, roughness: look.roughness, metalness: 0,
+    emissive: spec.emissive ?? '#000000', emissiveIntensity: spec.glow ?? 0,
+    vertexColors: q.shade !== false && o.geometry.hasAttribute('color'),
+    envMapIntensity: look.env,
+    flatShading: q.flat === true,
+  });
+});
+scene.add(gltf.scene);
+
+views.forEach((v, i) => {
+  const yaw = (v.yaw ?? 0) * Math.PI / 180, pitch = (v.pitch ?? 8) * Math.PI / 180;
+  const D = v.dist ?? 4.05, T = new THREE.Vector3(v.tx ?? 0, v.ty ?? 0.92, v.tz ?? 0);
+  const camera = new THREE.PerspectiveCamera(v.fov ?? 27, W / H, 0.05, 40);
+  camera.position.set(T.x + D * Math.cos(pitch) * Math.sin(yaw), T.y + D * Math.sin(pitch), T.z + D * Math.cos(pitch) * Math.cos(yaw));
+  camera.lookAt(T);
+  renderer.setViewport(i * W, 0, W, H);
+  renderer.setScissor(i * W, 0, W, H);
+  // The lights stay with the camera's side of the body, as in the app, where
+  // the body is what turns: rotate the scene's lights by the same yaw.
+  renderer.render(scene, camera);
+});
+window.__info = { triangles };
+window.__done = true;
+</script>
