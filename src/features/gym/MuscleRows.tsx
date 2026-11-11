@@ -5,7 +5,8 @@ import { diffInDays, type DateKey } from '../../core/dates';
 import { useT } from '../../i18n/I18nProvider';
 import type { Translator } from '../../i18n';
 import type { MuscleAnalyticsView } from './muscleAnalytics';
-import { Sparkline } from './Sparkline';
+import { useMediaQuery } from '../../app/useMediaQuery';
+import { SPARK_WIDTH, SPARK_WIDTH_NARROW, Sparkline } from './Sparkline';
 import { shownChangeText } from './muscleState';
 
 /**
@@ -59,6 +60,9 @@ export function MuscleRows({
   onSelect: (muscle: MuscleGroup) => void;
 }) {
   const t = useT();
+  // Where the row wraps (`muscleModule.css`), the chart is the narrow one:
+  // drawn at 64 units, not the 80-unit chart squeezed (contract §6).
+  const narrow = useMediaQuery('(max-width: 360px)');
 
   return (
     <ul className="muscle-rows">
@@ -97,7 +101,13 @@ export function MuscleRows({
                   a baseline have nothing to draw, and drawing a flat line
                   there would state a result they do not have. */}
               <span className="muscle-row__chart" aria-hidden="true">
-                {view.trend.length > 0 ? <Sparkline trend={view.trend} state={view.state} /> : null}
+                {view.trend.length > 0 ? (
+                  <Sparkline
+                    trend={view.trend}
+                    state={view.state}
+                    width={narrow ? SPARK_WIDTH_NARROW : SPARK_WIDTH}
+                  />
+                ) : null}
               </span>
 
               {/*

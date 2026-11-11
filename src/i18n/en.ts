@@ -514,7 +514,7 @@ export const en: Translations = {
   'gym.detail.previous': 'Before',
   'gym.detail.change': 'Change',
   'gym.detail.history': 'Best set per day',
-  'gym.detail.sets': 'Sets that day',
+  'gym.detail.recentDays': 'Recent training days',
   'gym.detail.muscles': 'Muscle groups',
   'gym.detail.tableCaption': 'Best set per training day',
   'gym.detail.day': 'Day',

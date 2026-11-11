@@ -117,28 +117,34 @@
   display: none;
 }
 
+/* 80 × 24, and 64 × 24 where the row wraps (contract §6). The chart never
+   shrinks: the name gives way first — never the other way round. */
 .muscle-row__chart {
   display: flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  /* The chart's floor. Below this it stops showing a shape, so the name
-     gives way first — never the other way round. */
-  min-width: 56px;
   width: 80px;
   height: 24px;
 }
 
 .muscle-row__spark {
-  width: 100%;
-  height: 100%;
+  display: block;
   overflow: visible;
 }
 
-/* The line is neutral; the end point says how the group is doing. */
+/* The zero line, always there and fine: every row shares one scale, so
+   above it is a gain and below it a loss in all ten. */
+.muscle-row__sparkZero {
+  stroke: var(--separator-strong);
+  stroke-width: 1;
+}
+
+/* The line is neutral, 1.5px with round ends; the end point says how the
+   group is doing, and stays neutral when it is held. */
 .muscle-row__sparkLine {
   stroke: var(--data-ink);
-  stroke-width: 1.6;
+  stroke-width: 1.5;
 }
 
 .muscle-row__sparkEnd {

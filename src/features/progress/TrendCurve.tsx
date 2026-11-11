@@ -1,26 +1,34 @@
-import { useId } from 'react';
 import type { Trend } from '../../core/trends';
 import { useT } from '../../i18n/I18nProvider';
 
 /**
  * The hero of the Progress screen.
  *
- * It answers a directional question, so it is drawn without axes, gridlines
- * or tick labels — a shape, not a trading terminal. The numbers that matter
- * are stated above it in words and figures instead.
+ * It answers a directional question, so it is drawn without a grid or tick
+ * labels — a shape, not a trading terminal. The numbers that matter are
+ * stated beside it in words and figures instead.
  *
  * That is also what makes it safe to treat as a single image: the direction,
  * the current value and the one before it are already real text next to the
  * chart, so a reader who never sees the path still has the answer. The label
  * here adds what only the shape knew — where the line started, and how far
  * it travelled in between.
+ *
+ * Drawn by the chart rules of the visual contract (§6):
+ *
+ * - the line is the neutral data ink, 1.5px with round ends, and there is no
+ *   wash beneath it — a filled area gave the line a weight it does not have;
+ * - a fine line marks where the range began, the zero the direction is read
+ *   against: above it the curve has risen, below it fallen;
+ * - the end point carries the status colour of the direction, the data ink
+ *   when it is steady, and the value it stands at is printed beside it.
+ *
+ * The line is stretched to the card's width, so the end point and its label
+ * are positioned over the drawing rather than inside it: a circle inside a
+ * stretched SVG is an ellipse, and text inside one is distorted.
  */
 export function TrendCurve({ trend, rangeDays }: { trend: Trend; rangeDays: number }) {
   const t = useT();
-  // Ids inside an SVG are document-global; a hardcoded one collides the
-  // moment a second chart is on screen, and the fill silently follows the
-  // first one's gradient.
-  const fillId = `trend-fill-${useId().replace(/:/g, '')}`;
 
   const points = trend.points;
   const values = points.map((point) => point.smoothed);
@@ -59,11 +67,6 @@ export function TrendCurve({ trend, rangeDays }: { trend: Trend; rangeDays: numb
   );
   const lastValue = lastIndex >= 0 ? points[lastIndex]!.smoothed : null;
 
-  const areaPath =
-    segments.length === 1
-      ? `${segments[0]} L ${x(lastIndex).toFixed(1)} ${height} L ${x(points.findIndex((p) => p.smoothed !== null)).toFixed(1)} ${height} Z`
-      : null;
-
   const first = known[0]!;
   const direction = t(
     trend.direction === 'rising'
@@ -73,46 +76,74 @@ export function TrendCurve({ trend, rangeDays }: { trend: Trend; rangeDays: numb
         : 'progress.steady',
   );
 
+  // Where the end point stands, as a share of the drawing: it is laid over
+  // the stretched line, so it is placed in percent, not in SVG units.
+  const endLeft = lastValue === null ? 0 : (x(lastIndex) / width) * 100;
+  const endTop = lastValue === null ? 0 : (y(lastValue) / height) * 100;
+  // The label keeps clear of the line that runs into its point: above the
+  // point when the line arrives from below, beneath it when it arrives from
+  // above — and wherever there is room when the point is near an edge.
+  const before = known.length > 1 ? known[known.length - 2]! : null;
+  const arrivesFromAbove = before !== null && lastValue !== null && before > lastValue;
+  const labelBelow = endTop < 22 ? true : endTop > 78 ? false : arrivesFromAbove;
+
   return (
-    <svg
-      className="trend__chart"
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
-      role="img"
-      aria-label={t('progress.chartLabel', {
-        days: rangeDays,
-        direction,
-        from: Math.round(first),
-        to: Math.round(known[known.length - 1]!),
-        min: Math.round(min),
-        max: Math.round(max),
-      })}
-    >
-      <defs>
-        <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      {areaPath ? <path d={areaPath} fill={`url(#${fillId})`} /> : null}
-
-      {segments.map((segment, index) => (
-        <path
-          key={index}
-          d={segment}
-          fill="none"
-          stroke="var(--accent)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+    <div className="trend__plot">
+      <svg
+        className="trend__chart"
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label={t('progress.chartLabel', {
+          days: rangeDays,
+          direction,
+          from: Math.round(first),
+          to: Math.round(known[known.length - 1]!),
+          min: Math.round(min),
+          max: Math.round(max),
+        })}
+      >
+        {/* Where the range began: the zero the direction is read against. */}
+        <line
+          className="trend__zero"
+          x1="0"
+          x2={width}
+          y1={y(first).toFixed(1)}
+          y2={y(first).toFixed(1)}
           vectorEffect="non-scaling-stroke"
         />
-      ))}
+
+        {segments.map((segment, index) => (
+          <path
+            key={index}
+            className="trend__line"
+            d={segment}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
+      </svg>
 
       {lastValue !== null ? (
-        <circle cx={x(lastIndex)} cy={y(lastValue)} r="4" fill="var(--accent)" />
+        <>
+          <span
+            className={`trend__end trend__end--${trend.direction}`}
+            style={{ left: `${endLeft}%`, top: `${endTop}%` }}
+            aria-hidden="true"
+          />
+          {/* The same figure the line below the chart states as "Aktuell";
+              here it only says which point of the drawing that is. */}
+          <span
+            className={`trend__endValue ${labelBelow ? 'trend__endValue--below' : ''}`.trim()}
+            style={{ top: `${endTop}%` }}
+            aria-hidden="true"
+          >
+            {Math.round(lastValue)}
+          </span>
+        </>
       ) : null}
-    </svg>
+    </div>
   );
 }

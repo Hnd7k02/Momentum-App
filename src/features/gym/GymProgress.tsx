@@ -147,6 +147,8 @@ export function GymProgress({ history }: { history: GymHistory }) {
           count: history.overall.measured.length,
           total: MUSCLE_GROUPS.length,
         })}
+        // This screen's one main number (contract §3).
+        primary
         onOpen={() => setOverallOpen(true)}
         className="gym-progress__overall"
       />

@@ -8,7 +8,7 @@ import type {
   GymSessionRecord,
   GymSetRecord,
 } from '../../core/model';
-import { Button, Card, EmptyState, LoadFailure, Section } from '../../components';
+import { Button, Card, EmptyState, LoadFailure, LoadingBlocks, Section } from '../../components';
 import { ChevronLeftIcon, MinusIcon, PlusIcon } from '../../components/Icons';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { useI18n, useT } from '../../i18n/I18nProvider';
@@ -780,6 +780,9 @@ export function GymSessionScreen({
         <div className="gym-session__scroll" aria-busy={state.status === 'loading'}>
           {state.status === 'failed' ? (
             <LoadFailure title={t('error.day.title')} onRetry={reload} />
+          ) : state.status === 'loading' ? (
+            // One exercise card holds its place while the workout loads.
+            <LoadingBlocks heights={[220]} />
           ) : null}
         </div>
       </div>

@@ -26,6 +26,15 @@ export interface GymRatingView {
  * before, so the hub kept a rating from before the workout it had just shown.
  */
 export function useGymRating(): GymRatingView | null {
+  return useGymRatingState().view;
+}
+
+/**
+ * The same, with loading told apart from "nothing arrived": a screen holds
+ * its layout while the replay is on its way (contract §11), and must not
+ * keep holding it for a load that failed.
+ */
+export function useGymRatingState(): { view: GymRatingView | null; loading: boolean } {
   const date = useToday();
   const version = useDataVersion();
   const load = useCallback(async (): Promise<GymRatingView> => {
@@ -35,5 +44,5 @@ export function useGymRating(): GymRatingView | null {
     return { state: boss.gym, started: ledger.started, enabled: week !== null };
   }, [date]);
   const { state } = useLoadable(load, [date], [version]);
-  return state.status === 'ready' ? state.value : null;
+  return { view: state.status === 'ready' ? state.value : null, loading: state.status === 'loading' };
 }

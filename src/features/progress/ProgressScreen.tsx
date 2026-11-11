@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { RATING, TREND_RANGES } from '../../core/config/constants';
 import { buildTrend } from '../../core/trends';
-import { Card, EmptyState, LoadFailure, Section, Segmented, StaleNotice } from '../../components';
+import { Card, EmptyState, Figure, LoadFailure, LoadingBlocks, Section, Segmented, StaleNotice } from '../../components';
 import { ProgressIcon } from '../../components/Icons';
 import { formatDayAndMonth } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
@@ -123,6 +123,9 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
         <div className="progress__scroll" aria-busy={state.status === 'loading'}>
           {state.status === 'failed' ? (
             <LoadFailure title={t('error.progress.title')} onRetry={reload} />
+          ) : state.status === 'loading' ? (
+            // The range control, the trend and the history hold their places.
+            <LoadingBlocks heights={[36, 320, 360]} />
           ) : null}
         </div>
       </div>
@@ -218,9 +221,14 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
                       <div className="trend__figure">
                         <span className="trend__figureLabel">{t('progress.current')}</span>
                         <span className="trend__figureValue">
-                          {trend.current === null
-                            ? '–'
-                            : `${Math.round(trend.current)} / ${RATING.MAX}`}
+                          {trend.current === null ? (
+                            '–'
+                          ) : (
+                            <Figure
+                              text={`${Math.round(trend.current)} / ${RATING.MAX}`}
+                              figure={Math.round(trend.current)}
+                            />
+                          )}
                         </span>
                       </div>
                       <div className="trend__figure trend__figure--muted">

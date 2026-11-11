@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { TREND_RANGES } from '../../core/config/constants';
-import { Segmented } from '../../components';
+import { LoadingBlocks, Segmented } from '../../components';
 import { ChevronLeftIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
 import { GymProgress } from './GymProgress';
-import { useGymHistory } from './useGymHistory';
+import { useGymHistoryState } from './useGymHistory';
 import '../areas/areas.css';
 import '../progress/progress.css';
 import './gymHub.css';
@@ -28,7 +28,7 @@ export function GymMusclesScreen({ onBack }: { onBack(): void }) {
   // Muskelgruppen is a Gym screen (WP3 Stage 6).
   useWorld('gym');
   const [range, setRange] = useState<number>(TREND_RANGES[TREND_RANGES.length - 1]!);
-  const gym = useGymHistory(range);
+  const { history: gym, loading } = useGymHistoryState(range);
 
   return (
     <div className="screen">
@@ -56,7 +56,9 @@ export function GymMusclesScreen({ onBack }: { onBack(): void }) {
             }))}
           />
         </div>
-        {gym ? <GymProgress history={gym} /> : null}
+        {/* The overall figure and the body's card hold their places while
+            the history loads (contract §11). */}
+        {gym ? <GymProgress history={gym} /> : loading ? <LoadingBlocks heights={[130, 520]} /> : null}
       </div>
     </div>
   );

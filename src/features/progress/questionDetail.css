@@ -8,8 +8,10 @@
 .question-detail {
   position: absolute;
   inset: 0;
+  /* The overlay covers the shell, so it paints the ground itself (D146). */
   background: var(--surface-base);
-  z-index: 30;
+  background-image: var(--ground);
+  z-index: var(--layer-overlay);
   display: flex;
   flex-direction: column;
 }
@@ -55,6 +57,15 @@
   gap: var(--space-4);
 }
 
+/* A scrolling column scrolls; it never squeezes what is in it. A card with
+   `overflow: hidden` has an automatic minimum height of 0 as a flex item, so
+   once the column grew past the viewport the card holding the two figures
+   was shrunk to its labels and the figures themselves clipped away — the
+   same fault the workout's scroll port guards against. */
+.question-detail__scroll > * {
+  flex-shrink: 0;
+}
+
 .question-detail__status {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
@@ -74,7 +85,7 @@
 
 .question-detail__figureLabel {
   font-size: var(--type-caption);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }

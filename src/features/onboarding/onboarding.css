@@ -131,7 +131,7 @@
   inset: -14px;
   border-radius: 34px;
   background: var(--brand-mark-halo);
-  z-index: -1;
+  z-index: var(--layer-below);
 }
 
 .welcome__tagline {

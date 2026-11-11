@@ -187,7 +187,16 @@
    * has asked for less transparency.
    */
   --glass-fill: rgba(255, 255, 255, 0.5);
-  --glass-fill-strong: rgba(255, 255, 255, 0.78);
+  /*
+   * The sheet's fill. The variant as built had 0.78 here, and the browser
+   * suite measured what that does once a sheet stands over a dimmed screen:
+   * a text button in the accent's ink read at 4.38:1 on it, and the screen
+   * behind showed through as ghost text. A sheet carries fields and
+   * buttons, so its surface has to read as one whatever lies beneath it —
+   * the darkest thing a light sheet can cover is the Boss's stage, and at
+   * 0.92 every text on the sheet still clears 4.5:1 there.
+   */
+  --glass-fill-strong: rgba(255, 255, 255, 0.92);
   --glass-solid: #ffffff;
   --glass-border: rgba(255, 255, 255, 0.95);
   --glass-blur: 15px;
@@ -378,9 +387,29 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 
+  /*
+   * Motion (contract §10): three durations and one curve. Fast answers a
+   * tap, base moves a thing, sheet carries a sheet up. The reveal is the one
+   * orchestrated moment the app has — a promotion's badge — and is named so
+   * that no duration is written anywhere but here.
+   */
   --duration-fast: 130ms;
   --duration-base: 240ms;
+  --duration-sheet: 320ms;
+  --duration-reveal: 900ms;
   --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /*
+   * Layers. A screen's header stands over its scroll port; a full-screen
+   * overlay — the workout, a detail — covers the shell; the toast floats
+   * above an overlay and below a sheet, whose scrim covers it; a halo sits
+   * behind the mark it belongs to.
+   */
+  --layer-below: -1;
+  --layer-raised: 1;
+  --layer-overlay: 30;
+  --layer-toast: 35;
+  --layer-sheet: 40;
 }
 
 /* Motion answers an action; it never decorates. When the user has asked for
@@ -389,6 +418,8 @@
   :root {
     --duration-fast: 0ms;
     --duration-base: 0ms;
+    --duration-sheet: 0ms;
+    --duration-reveal: 0ms;
   }
 }
 

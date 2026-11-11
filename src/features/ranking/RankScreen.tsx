@@ -5,7 +5,7 @@ import { rankById } from '../../core/ranks';
 import { displayedRankProgress, rankLadder, type RankProgress } from '../../core/ranks/progress';
 import { confirmationIndicator, thresholdReached } from '../../core/ranks/confirmation';
 import { isOfferedDomain, type OfferedDomainType } from '../../core/domains';
-import { Card, EmptyState, Figure, LoadFailure, Section, StaleNotice } from '../../components';
+import { Card, EmptyState, Figure, LoadFailure, LoadingBlocks, Section, StaleNotice } from '../../components';
 import { RankIcon } from '../../components/Icons';
 import { formatDayAndMonth, formatNumber } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
@@ -137,7 +137,10 @@ export function RankScreen({
         <div className="rank__scroll" aria-busy={state.status === 'loading'}>
           {state.status === 'failed' ? (
             <LoadFailure title={t('error.rank.title')} onRetry={reload} />
-          ) : null}
+          ) : (
+            // The hero and the standings hold their places.
+            <LoadingBlocks heights={[450, 280]} />
+          )}
         </div>
       </div>
     );

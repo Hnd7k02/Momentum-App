@@ -69,7 +69,7 @@
   /* The overlay paints the Gym ground itself: it covers the shell's. */
   background: var(--surface-base);
   background-image: var(--ground);
-  z-index: 30;
+  z-index: var(--layer-overlay);
   display: flex;
   flex-direction: column;
 }
@@ -392,8 +392,11 @@
 .gym-progress__change--declined {
   color: var(--status-weak-ink);
 }
+/* "Gehalten" is a word standing where a number would: one step smaller, so
+   it does not outweigh the figures above and below it. */
 .gym-progress__change--unchanged {
   color: var(--status-mixed-ink);
+  font-size: var(--type-subhead);
 }
 .gym-progress__change--noBaseline {
   color: var(--text-secondary);
@@ -424,7 +427,9 @@
 
 .gym-detail__label {
   font-size: var(--type-caption);
-  color: var(--text-tertiary);
+  /* Secondary, not the caption grey: this card stands where the ground's
+     wash is strongest, and the suite measures the label there. */
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -462,30 +467,84 @@
   padding-top: var(--space-2);
 }
 
+/*
+ * The bars of an exercise's days (contract §6): the scale's smallest and
+ * largest value named on the left, the first and the last date beneath, a
+ * fine line under the bars and a dotted one at the largest value. The bars
+ * are the neutral data ink at 55 %; the last one carries the state of the
+ * change.
+ */
 .gym-detail__chart {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.gym-detail__axis {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 110px;
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+/* The axis reads in one ink: its units are not set apart. */
+.gym-detail__axis .figure__unit {
+  font-size: inherit;
+  color: inherit;
+}
+
+.gym-detail__plot {
+  flex: 1;
+  min-width: 0;
+}
+
+.gym-detail__bars {
   display: flex;
   align-items: flex-end;
   gap: 3px;
   height: 110px;
+  border-top: 1px dashed var(--separator-strong);
+  border-bottom: 1px solid var(--separator-strong);
 }
 
-.gym-detail__cell {
+.gym-detail__bar {
   flex: 1;
   min-width: 3px;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
-  background: var(--status-track);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-/* Neutral: the bars show a value, and height carries it (D154). */
-.gym-detail__bar {
-  width: 100%;
-  border-radius: 3px;
+  max-width: 34px;
+  border-radius: 4px 4px 0 0;
   background: var(--data-ink);
   opacity: 0.55;
+}
+
+/* The latest day: the status colour of its change, the plain data ink when
+   it is held, and like its neighbours where there is nothing to compare. */
+.gym-detail__bar--latest.gym-detail__bar--improved {
+  background: var(--status-strong);
+  opacity: 1;
+}
+
+.gym-detail__bar--latest.gym-detail__bar--declined {
+  background: var(--status-weak);
+  opacity: 1;
+}
+
+.gym-detail__bar--latest.gym-detail__bar--unchanged {
+  opacity: 1;
+}
+
+.gym-detail__dates {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
 }
 
 .gym-detail__row {

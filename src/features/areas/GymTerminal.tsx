@@ -6,7 +6,8 @@ import { MuscleEntryCard } from '../gym/MuscleEntryCard';
 import { TrainingCard } from '../gym/TrainingCard';
 import { TrainingPlansSection } from '../gym/TrainingPlansSection';
 import { useGymHistory } from '../gym/useGymHistory';
-import { useGymRating } from '../gym/useGymRating';
+import { useGymRatingState } from '../gym/useGymRating';
+import { LoadingBlocks } from '../../components';
 import { useTrainingLauncher } from '../gym/useTrainingLauncher';
 
 /**
@@ -81,7 +82,7 @@ function HubCards({
   plansRef: RefObject<HTMLDivElement>;
 }) {
   const range = TREND_RANGES[TREND_RANGES.length - 1]!;
-  const gymRating = useGymRating();
+  const { view: gymRating, loading: ratingLoading } = useGymRatingState();
   const gym = useGymHistory(range);
   return (
     <>
@@ -89,6 +90,10 @@ function HubCards({
       <MuscleEntryCard history={gym} rangeDays={range} onOpen={onOpenMuscles} />
       {gymRating ? (
         <GymOverview state={gymRating.state} started={gymRating.started} enabled={gymRating.enabled} />
+      ) : ratingLoading ? (
+        // The rating board holds its place, so the plans below do not jump
+        // when the replay behind it arrives (contract §11).
+        <LoadingBlocks heights={[150, 120]} />
       ) : null}
       <div ref={plansRef}>
         <TrainingPlansSection />

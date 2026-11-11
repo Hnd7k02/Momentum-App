@@ -18,6 +18,15 @@ import { loadGymHistory, type GymHistory } from '../../storage/services/gymServi
  * showed the same numbers and a finished workout did not reach them.
  */
 export function useGymHistory(rangeDays: number): GymHistory | null {
+  return useGymHistoryState(rangeDays).history;
+}
+
+/**
+ * The same, with loading told apart from "nothing arrived": a screen holds
+ * its layout while the replay is on its way (contract §11), and must not
+ * keep holding it for a load that failed.
+ */
+export function useGymHistoryState(rangeDays: number): { history: GymHistory | null; loading: boolean } {
   const to = useToday();
   const version = useDataVersion();
   const load = useCallback(
@@ -25,5 +34,5 @@ export function useGymHistory(rangeDays: number): GymHistory | null {
     [rangeDays, to],
   );
   const { state } = useLoadable(load, [rangeDays, to], [version]);
-  return state.status === 'ready' ? state.value : null;
+  return { history: state.status === 'ready' ? state.value : null, loading: state.status === 'loading' };
 }

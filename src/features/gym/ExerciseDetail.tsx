@@ -52,7 +52,24 @@ export function ExerciseDetail({
   const shown =
     !comparison || comparison.kind === 'noBaseline' ? null : shownTrend(comparison.ratio);
   const oldest = days[days.length - 1] ?? null;
-  const peak = days.reduce((max, day) => Math.max(max, day.best.score), 0);
+  /*
+   * The chart's scale runs from the smallest day to the largest (contract
+   * §6), and both are named beside it as the sets that produced them — the
+   * way this screen prints a day's value everywhere else. Where every day
+   * is the same there is one value, and it is named once.
+   */
+  const largest = days.reduce<ExerciseDay | null>(
+    (top, day) => (top === null || day.best.score > top.best.score ? day : top),
+    null,
+  );
+  const smallest = days.reduce<ExerciseDay | null>(
+    (low, day) => (low === null || day.best.score < low.best.score ? day : low),
+    null,
+  );
+  const spread = largest && smallest ? largest.best.score - smallest.best.score : 0;
+  /** A bar's height in percent: the smallest day stands at 30, the largest at 100. */
+  const barHeight = (day: ExerciseDay): number =>
+    spread > 0 && smallest ? 30 + ((day.best.score - smallest.best.score) / spread) * 70 : 100;
 
   return (
     <div className="screen gym-detail">
@@ -124,16 +141,35 @@ export function ExerciseDetail({
                   does. One picture, one semantic alternative.
                 */}
                 <div className="gym-detail__chart" aria-hidden="true">
-                  {[...days].reverse().map((day) => (
-                    <span key={day.date} className="gym-detail__cell">
-                      <span
-                        className="gym-detail__bar"
-                        style={{
-                          height: `${peak > 0 ? Math.max(8, (day.best.score / peak) * 100) : 8}%`,
-                        }}
-                      />
-                    </span>
-                  ))}
+                  <div className="gym-detail__axis">
+                    <span>{largest ? score(largest) : null}</span>
+                    {spread > 0 && smallest ? <span>{score(smallest)}</span> : null}
+                  </div>
+                  <div className="gym-detail__plot">
+                    <div className="gym-detail__bars">
+                      {[...days].reverse().map((day, index) => {
+                        // The last bar — the latest day — carries the state
+                        // of the change the figures above state; the bars
+                        // before it are neutral.
+                        const isLatest = index === days.length - 1;
+                        return (
+                          <span
+                            key={day.date}
+                            className={`gym-detail__bar ${
+                              isLatest ? `gym-detail__bar--latest gym-detail__bar--${shown ?? 'noBaseline'}` : ''
+                            }`.trim()}
+                            style={{ height: `${barHeight(day)}%` }}
+                          />
+                        );
+                      })}
+                    </div>
+                    {oldest ? (
+                      <div className="gym-detail__dates">
+                        <span>{formatDayAndMonth(language, oldest.date)}</span>
+                        {days.length > 1 ? <span>{formatDayAndMonth(language, latest!.date)}</span> : null}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="visually-hidden">
@@ -155,17 +191,12 @@ export function ExerciseDetail({
                     </tbody>
                   </table>
                 </div>
-
-                {oldest ? (
-                  <p className="gym-detail__note">
-                    {formatDayAndMonth(language, oldest.date)} – {' '}
-                    {formatDayAndMonth(language, latest!.date)}
-                  </p>
-                ) : null}
               </Card>
             </Section>
 
-            <Section label={t('gym.detail.sets')}>
+            {/* The heading says what the list is: the last days, each with
+                its best set — not the sets of one day. */}
+            <Section label={t('gym.detail.recentDays')}>
               <Card>
                 {days.slice(0, 8).map((day) => (
                   <div key={day.date} className="gym-detail__row">

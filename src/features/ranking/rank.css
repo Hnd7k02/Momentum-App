@@ -97,7 +97,7 @@
 
 /* The one orchestrated moment: a promotion reveal, played once. */
 .badge-svg--reveal {
-  animation: badge-reveal 900ms var(--ease-standard) both;
+  animation: badge-reveal var(--duration-reveal) var(--ease-standard) both;
 }
 
 @keyframes badge-reveal {
@@ -119,7 +119,7 @@
   position: absolute;
   inset: 0;
   background: var(--stage-flash);
-  animation: badge-flash 900ms var(--ease-standard) both;
+  animation: badge-flash var(--duration-reveal) var(--ease-standard) both;
   pointer-events: none;
 }
 

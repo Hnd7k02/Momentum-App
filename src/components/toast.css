@@ -9,7 +9,7 @@
 .toast-anchor {
   position: relative;
   height: 0;
-  z-index: 35;
+  z-index: var(--layer-toast);
 }
 
 .toast-region {

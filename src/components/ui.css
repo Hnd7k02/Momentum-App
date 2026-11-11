@@ -21,7 +21,7 @@
  */
 .screen__header {
   position: relative;
-  z-index: 1;
+  z-index: var(--layer-raised);
   /* The ground shows through (WP3 Stage 6): the shell paints it once, and a
      header painting its own flat colour would cut the wash in half. The
      scroll port below clips its own content, so nothing passes behind. */
@@ -338,7 +338,7 @@
 .sheet__close::before {
   content: '';
   position: absolute;
-  z-index: 1;
+  z-index: var(--layer-raised);
 }
 
 .switch::before {
@@ -532,7 +532,7 @@
   -webkit-backdrop-filter: blur(2px);
   display: flex;
   align-items: flex-end;
-  z-index: 40;
+  z-index: var(--layer-sheet);
   animation: sheet-fade var(--duration-base) var(--ease-standard);
 }
 
@@ -549,7 +549,7 @@
   -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur));
   backdrop-filter: saturate(160%) blur(var(--glass-blur));
   padding-bottom: calc(var(--safe-bottom) + var(--space-5));
-  animation: sheet-rise var(--duration-base) var(--ease-standard);
+  animation: sheet-rise var(--duration-sheet) var(--ease-standard);
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -665,6 +665,24 @@
 }
 
 /* Loading and failure ---------------------------------------------------- */
+
+/*
+ * Loading (contract §11): a screen holds its layout. Where its cards will
+ * stand there are calm surfaces of their size — no shimmer, no spinner — so
+ * nothing jumps when the content arrives. They say nothing to a screen
+ * reader; the scroll port they stand in carries `aria-busy`.
+ */
+.loading-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  margin-bottom: var(--space-7);
+}
+
+.loading-block {
+  border-radius: var(--radius-card);
+  background: var(--surface-secondary);
+}
 
 /*
  * A failed load takes focus when it appears, so a keyboard or screen-reader

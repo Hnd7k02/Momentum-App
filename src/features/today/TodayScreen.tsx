@@ -8,7 +8,7 @@ import { useLoadable } from '../../app/useLoadable';
 import { loadRunningWorkout } from '../../storage/services/gymService';
 import { RunningWorkoutCard } from '../gym/RunningWorkoutCard';
 import { useToast } from '../../components/Toast';
-import { Button, Card, EmptyState, Figure, focusTarget, LoadFailure, Row, Section, Segmented, StaleNotice } from '../../components';
+import { Button, Card, EmptyState, Figure, focusTarget, LoadFailure, LoadingBlocks, Row, Section, Segmented, StaleNotice } from '../../components';
 import { ChevronRightIcon, PlusIcon, SparkIcon } from '../../components/Icons';
 import { SessionSheet } from '../../domains/sports/SessionSheet';
 import { formatDayAndMonth, formatTime, formatWeekday } from '../../i18n/format';
@@ -282,7 +282,11 @@ export function TodayScreen({
         <div className="today__scroll" aria-busy={state.status !== 'failed'}>
           {state.status === 'failed' ? (
             <LoadFailure title={t('error.day.title')} onRetry={reload} />
-          ) : null}
+          ) : (
+            // The day is on its way: the Boss card and the first two cards
+            // hold their places, with not one control among them (B3).
+            <LoadingBlocks heights={[84, 300, 160]} />
+          )}
         </div>
         {floating}
       </div>

@@ -522,7 +522,7 @@ export const de = {
   'gym.detail.previous': 'Davor',
   'gym.detail.change': 'Veränderung',
   'gym.detail.history': 'Bester Satz pro Tag',
-  'gym.detail.sets': 'Sätze an diesem Tag',
+  'gym.detail.recentDays': 'Letzte Trainingstage',
   'gym.detail.muscles': 'Muskelgruppen',
   'gym.detail.tableCaption': 'Bester Satz pro Trainingstag',
   'gym.detail.day': 'Tag',

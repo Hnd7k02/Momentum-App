@@ -276,6 +276,25 @@ export function EmptyState({
 }
 
 /**
+ * What a screen shows while its content loads (contract §11).
+ *
+ * Calm surfaces where the cards will stand, each about the height of the
+ * card it holds the place of, so the layout is there before the content is
+ * and nothing jumps when it arrives. No shimmer: a surface, not an
+ * animation. Hidden from assistive technology — the scroll port around it
+ * carries `aria-busy`, which is what says "loading" there.
+ */
+export function LoadingBlocks({ heights }: { heights: readonly number[] }) {
+  return (
+    <div className="loading-blocks" aria-hidden="true">
+      {heights.map((height, index) => (
+        <div key={index} className="loading-block" style={{ height }} />
+      ))}
+    </div>
+  );
+}
+
+/**
  * A retry that cannot be double-fired and cannot get stuck.
  *
  * The button is out of action while the attempt is in flight, and the flag

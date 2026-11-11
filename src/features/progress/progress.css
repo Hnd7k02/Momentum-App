@@ -67,12 +67,67 @@
   color: var(--text-secondary);
 }
 
-.trend__chart {
-  width: 100%;
+/* The drawing and what is laid over it: the end point and its value. */
+.trend__plot {
+  position: relative;
   height: 96px;
   margin: var(--space-5) 0 var(--space-4);
+}
+
+.trend__chart {
+  width: 100%;
+  height: 100%;
   display: block;
   overflow: visible;
+}
+
+/* The chart rules of the contract (§6): a fine zero line, a neutral line of
+   1.5px, no wash beneath it. */
+.trend__zero {
+  stroke: var(--separator-strong);
+  stroke-width: 1;
+}
+
+.trend__line {
+  stroke: var(--data-ink);
+  stroke-width: 1.5;
+}
+
+/* The end point: 3px in radius, in the status colour of the direction and
+   outlined in its ink — the fill alone does not clear 3:1 on a light card —
+   and the plain data ink when the trend is steady. */
+.trend__end {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--data-ink);
+}
+
+.trend__end--rising {
+  background: var(--status-strong);
+  box-shadow: 0 0 0 1px var(--status-strong-ink);
+}
+
+.trend__end--falling {
+  background: var(--status-weak);
+  box-shadow: 0 0 0 1px var(--status-weak-ink);
+}
+
+/* The value the end point stands at, beside it. */
+.trend__endValue {
+  position: absolute;
+  right: 0;
+  transform: translateY(calc(-100% - 7px));
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--text-secondary);
+}
+
+.trend__endValue--below {
+  transform: translateY(7px);
 }
 
 .trend__figures {
