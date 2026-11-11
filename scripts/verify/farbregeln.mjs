@@ -224,16 +224,32 @@ const tokens = (page) =>
     return out;
   });
 
-/** Every colour drawn on the screen: text, background, border, SVG fill and stroke. */
+/**
+ * Everything on the page that can carry a colour, as the browser computed
+ * it: text, background (a gradient included), all four borders, outline,
+ * shadow, SVG fill and stroke — of every element and of its `::before` and
+ * `::after`, the tab bar and an open sheet included. Returned as the list
+ * of distinct values, so that a check can look for one colour in any of
+ * them, and the number of elements read, so that it cannot pass on nothing.
+ */
 const coloursOnScreen = (page) =>
   page.evaluate(() => {
+    const props = ['color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderRightColor', 'borderBottomColor',
+      'borderLeftColor', 'outlineColor', 'boxShadow', 'fill', 'stroke', 'textDecorationColor', 'caretColor'];
     const seen = new Set();
-    for (const el of document.querySelectorAll('.screen *')) {
-      const s = getComputedStyle(el);
-      for (const value of [s.color, s.backgroundColor, s.borderTopColor, s.fill, s.stroke]) seen.add(value);
+    let elements = 0;
+    for (const el of document.querySelectorAll('body *')) {
+      elements += 1;
+      for (const pseudo of [null, '::before', '::after']) {
+        const s = getComputedStyle(el, pseudo);
+        if (pseudo && (s.content === 'none' || s.content === 'normal')) continue;
+        for (const prop of props) seen.add(s[prop]);
+      }
     }
-    return [...seen];
+    return { values: [...seen], elements };
   });
+/** The values among `drawn` that contain one of `colours`, e.g. inside a gradient. */
+const carrying = (drawn, colours) => drawn.values.filter((value) => colours.some((colour) => value.includes(colour)));
 
 const scrollTo = (page, selector, offset = 8) =>
   page.locator(selector).first().evaluate((el, offset) => {
@@ -254,6 +270,14 @@ const waitBody = async (page) => {
 /** The runs of text below 4.5:1 (3:1 for large text), as `textContrast` measured them. */
 const tooFaint = (runs) =>
   runs.filter((r) => r.ratio < (r.large ? 3 : 4.5)).map((r) => `${r.className} "${r.text}" ${r.ratio}`).slice(0, 4);
+/**
+ * `textContrast` leaves out a run that is not wholly in view or lies under
+ * another element, so "nothing is too faint" proves nothing by itself. A
+ * check names the runs it is about — by the start of their text — and holds
+ * that each was measured, with its ratio.
+ */
+const measured = (runs, starts) => starts.map((start) => runs.find((r) => r.text.startsWith(start)) ?? null);
+const lowest = (runs) => runs.reduce((min, r) => (min === null || r.ratio < min ? r.ratio : min), null);
 const sideways = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 /* ── the rule, the range, the legend, the words: at every width ──────── */
@@ -273,6 +297,16 @@ for (const width of WIDTHS) {
       overallClass: overall ? overall.className : null,
       overallColor: overall ? getComputedStyle(overall).color : null,
       range: n(document.querySelector('.gym-hub__musclesRange')?.textContent),
+      // Where the figure's text ends, against the chevron beside it and the card around it.
+      overallFits: (() => {
+        if (!overall) return null;
+        const range = document.createRange();
+        range.selectNodeContents(overall);
+        const text = range.getBoundingClientRect();
+        const chevron = document.querySelector('.gym-hub__muscles .gym-hub__chevron').getBoundingClientRect();
+        const card = document.querySelector('.gym-hub__muscles').getBoundingClientRect();
+        return { textRight: Math.round(text.right), chevronLeft: Math.round(chevron.left), cardRight: Math.round(card.right), ok: text.right <= chevron.left + 0.5 && text.right <= card.right - 12 };
+      })(),
       markers: [...document.querySelectorAll('.gym-hub__previewState')].map((el) => [...el.classList].find((c) => c.startsWith('gym-hub__previewState--'))?.split('--')[1] ?? null),
       markerColours: [...document.querySelectorAll('.gym-hub__previewState')].map((el) => getComputedStyle(el).backgroundColor),
     };
@@ -281,6 +315,7 @@ for (const width of WIDTHS) {
   check(`${W}: the hub counts the seven groups whose row will print a figure`, hub.summary === '7 von 10 gewertet', hub.summary);
   check(`${W}: the hub says "Leistungstrend", held, in the text colour`,
     hub.overall === 'Leistungstrend Gehalten' && !/--(improved|declined)/.test(hub.overallClass ?? '') && hub.overallColor === T['--text-primary'], short(hub));
+  check(`${W}: the figure ends before the chevron and inside the card`, hub.overallFits?.ok === true, short(hub.overallFits));
   check(`${W}: the hub's card stays on 30 days`, hub.range === 'Letzte 30 Tage', hub.range);
   check(`${W}: the hub's ten markers are the ten states`, JSON.stringify(hub.markers) === JSON.stringify(GROUPS.map((g) => EXPECT_30[g][1])), hub.markers.join(','));
   check(`${W}: no marker is the warning yellow`, !hub.markerColours.includes(T['--status-mixed']), hub.markerColours.join(' | '));
@@ -361,7 +396,14 @@ for (const width of WIDTHS) {
   /* Neutral: no yellow anywhere on this screen. */
   const drawn = await coloursOnScreen(page);
   const yellows = [T['--status-mixed'], T['--status-mixed-ink'], T['--status-mixed-tint']];
-  check(`${W}: nothing on Muskelgruppen is drawn in the warning yellow`, !drawn.some((c) => yellows.includes(c)), drawn.filter((c) => yellows.includes(c)).join(' | '));
+  // The scan must be able to see: the three yellows are real, distinct
+  // colours here, and the colours it is expected to find are found.
+  check(`${W}: the scan for yellow reads the page: ${drawn.elements} elements, and finds the green and the red that are there`,
+    new Set(yellows).size === 3 && yellows.every((c) => /^rgb/.test(c)) && drawn.elements > 150
+      && carrying(drawn, [T['--status-strong-ink']]).length > 0 && carrying(drawn, [T['--status-weak-ink']]).length > 0 && carrying(drawn, [T['--sky-tint']]).length > 0,
+    `${drawn.elements} elements, ${drawn.values.length} values, yellows ${yellows.join(' ')}`);
+  check(`${W}: nothing on Muskelgruppen is drawn in the warning yellow — text, fills, borders, shadows, gradients, pseudo-elements`,
+    carrying(drawn, yellows).length === 0, carrying(drawn, yellows).join(' | '));
 
   /* The row of five states, under the body. */
   const legend = await page.locator('.muscle-legend__item').evaluateAll((els) => els.map((el) => el.textContent.trim()));
@@ -380,8 +422,23 @@ for (const width of WIDTHS) {
   await scrollTo(page, '.muscle-legend', 12);
   await page.waitForTimeout(400);
   await shot(page, width, 'muskelgruppen-30-zeilen');
-  const contrastRows = tooFaint(await textContrast(page));
-  check(`${W}: every text at the rows reads at 4.5:1 (3:1 large)`, contrastRows.length === 0, contrastRows.join(' | '));
+  const upperRuns = await textContrast(page);
+  const upperNamed = measured(upperRuns, ['Verbessert', 'Gehalten', 'Zurückgegangen', 'Zu wenig Vergleichsdaten', 'Noch nicht trainiert', 'Brust', `+9${NBSP}%`, `0${NBSP}%`]);
+  check(`${W}: the legend row and the first rows were measured (${upperRuns.length} runs, lowest ${lowest(upperRuns)})`,
+    upperRuns.length >= 12 && upperNamed.every(Boolean), upperNamed.map((r, i) => (r ? r.ratio : `missing #${i}`)).join(' '));
+  check(`${W}: every text at the rows reads at 4.5:1 (3:1 large)`, tooFaint(upperRuns).length === 0, tooFaint(upperRuns).join(' | '));
+  // The lower rows carry the two chips and the red figures; bring them into
+  // view, clear of the tab bar, and measure those too.
+  await scrollTo(page, '.muscle-row:nth-child(6)', 12);
+  await page.waitForTimeout(400);
+  const lowerRuns = await textContrast(page);
+  const lowerNamed = measured(lowerRuns, ['Zu wenig Vergleichsdaten', 'Noch nicht trainiert', `${MINUS}3${NBSP}%`, `${MINUS}8${NBSP}%`, 'Zurückgegangen', 'Waden']);
+  check(`${W}: the chips and the red figures were measured (${lowerRuns.length} runs, lowest ${lowest(lowerRuns)})`,
+    lowerNamed.every(Boolean), lowerNamed.map((r, i) => (r ? `${r.text} ${r.ratio}` : `missing #${i}`)).join(' · '));
+  check(`${W}: the blue chip is the sky ink on the sky tint, measured on its pixels`,
+    Boolean(lowerNamed[0]) && lowerNamed[0].ratio >= 4.5, short(lowerNamed[0]));
+  check(`${W}: every text at the lower rows reads at 4.5:1 (3:1 large)`, tooFaint(lowerRuns).length === 0, tooFaint(lowerRuns).join(' | '));
+  await shot(page, width, 'muskelgruppen-30-zeilen-unten');
   await scrollTop(page);
 
   /* ⓘ and the legend sheet. */
@@ -416,8 +473,14 @@ for (const width of WIDTHS) {
       ['Noch nicht trainiert', 'Kein Satz im Zeitraum'],
     ]), short(sheet.states, 400));
   check(`${W}: the sheet is not wider than the screen`, sheet.overflow !== null && sheet.overflow <= 0 && (await sideways(page)) <= 0, String(sheet.overflow));
-  const contrastSheet = tooFaint(await textContrast(page));
-  check(`${W}: every text in the legend sheet reads at 4.5:1 (3:1 large)`, contrastSheet.length === 0, contrastSheet.join(' | '));
+  const sheetRuns = await textContrast(page);
+  const sheetNamed = measured(sheetRuns, ['Legende', 'Die Farbe zeigt', 'Verbessert', 'Ab +3', 'Gehalten', `${MINUS}2`, 'Zurückgegangen', `Ab ${MINUS}3`, 'Zu wenig Vergleichsdaten', 'Weniger als drei', 'Noch nicht trainiert', 'Kein Satz im Zeitraum', 'Ein Übungstag ist']);
+  check(`${W}: every line of the legend sheet was measured (${sheetRuns.length} runs, lowest ${lowest(sheetRuns)})`,
+    sheetNamed.every(Boolean), sheetNamed.map((r, i) => (r ? r.ratio : `missing #${i}`)).join(' '));
+  check(`${W}: every text in the legend sheet reads at 4.5:1 (3:1 large)`, tooFaint(sheetRuns).length === 0, tooFaint(sheetRuns).join(' | '));
+  const sheetDrawn = await coloursOnScreen(page);
+  check(`${W}: nothing in the legend sheet is drawn in the warning yellow`,
+    sheetDrawn.elements > drawn.elements && carrying(sheetDrawn, yellows).length === 0, `${sheetDrawn.elements} elements · ${carrying(sheetDrawn, yellows).join(' | ')}`);
   await shot(page, width, 'legende');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(600);
@@ -460,7 +523,8 @@ for (const width of WIDTHS) {
   const detail = await page.locator('.gym-detail__figure').nth(2).locator('.gym-detail__value').evaluate((el) => ({ text: el.textContent.trim(), cls: el.className, color: getComputedStyle(el).color }));
   check(`${W}: the exercise detail reads +2 % as "Gehalten", in the text colour`, detail.text === 'Gehalten' && /--unchanged/.test(detail.cls) && detail.color === T['--text-primary'], short(detail));
   const detailDrawn = await coloursOnScreen(page);
-  check(`${W}: nothing on the exercise detail is drawn in the warning yellow`, !detailDrawn.some((c) => yellows.includes(c)), detailDrawn.filter((c) => yellows.includes(c)).join(' | '));
+  check(`${W}: nothing on the exercise detail is drawn in the warning yellow`,
+    detailDrawn.elements > 40 && carrying(detailDrawn, yellows).length === 0, `${detailDrawn.elements} elements · ${carrying(detailDrawn, yellows).join(' | ')}`);
   await shot(page, width, 'uebungsdetail-gehalten');
   await page.locator('.gym-detail .gym-session__back').click();
   await page.waitForTimeout(700);
@@ -529,19 +593,103 @@ for (const width of WIDTHS) {
   }
 }
 
-/* ── the body: five pictures ─────────────────────────────────────────── */
+/* ── the body: five pictures, and what their pixels say ──────────────── */
 
-if (!process.env.NO_BODY) {
+/**
+ * The picture of the body as numbers (contract §7, §8). Every pixel that is
+ * not the dark card is classified in CIELAB: green or red by its a*, white
+ * by its lightness, dimmed below it. With a second picture taken from the
+ * same angle, the pixels that differ are split into the upper and the lower
+ * half of the frame, and each half reports how far it moved and which way.
+ * Read from the PNG the suite saves, so what is measured is what is shown.
+ */
+const readBody = (page, png, against = null) =>
+  page.evaluate(async ({ png, against }) => {
+    const load = async (b64) => {
+      const img = new Image();
+      img.src = `data:image/png;base64,${b64}`;
+      await img.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      return { data: ctx.getImageData(0, 0, canvas.width, canvas.height).data, w: canvas.width, h: canvas.height };
+    };
+    const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+    const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+    const lab = (r, g, b) => {
+      const R = lin(r), G = lin(g), B = lin(b);
+      const fx = f((0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047);
+      const fy = f(0.2126 * R + 0.7152 * G + 0.0722 * B);
+      const fz = f((0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883);
+      return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+    };
+    const median = (values) => { const s = [...values].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : null; };
+    const round = (v) => (v === null ? null : Math.round(v * 10) / 10);
+
+    const a = await load(png);
+    const count = { body: 0, green: 0, red: 0, white: 0, dimmed: 0 };
+    let lightness = 0;
+    for (let y = 0; y < a.h; y += 2) {
+      for (let x = 0; x < a.w; x += 2) {
+        const i = (y * a.w + x) * 4;
+        const [L, A] = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
+        if (L < 45) continue; // the card behind the body, and the view pills
+        count.body += 1;
+        lightness += L;
+        if (A < -5) count.green += 1;
+        else if (A > 5) count.red += 1;
+        else if (L > 88) count.white += 1;
+        else if (L < 80) count.dimmed += 1;
+      }
+    }
+    const share = (n) => Math.round((n / Math.max(1, count.body)) * 1000) / 1000;
+    const out = {
+      body: count.body, green: share(count.green), red: share(count.red), white: share(count.white), dimmed: share(count.dimmed),
+      lightness: round(lightness / Math.max(1, count.body)),
+    };
+    if (!against) return out;
+
+    const b = await load(against);
+    if (b.w !== a.w || b.h !== a.h) return { ...out, sameFrame: false };
+    const halves = { upper: { dE: [], dA: [] }, lower: { dE: [], dA: [] } };
+    for (let y = 0; y < a.h; y += 2) {
+      for (let x = 0; x < a.w; x += 2) {
+        const i = (y * a.w + x) * 4;
+        const p = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
+        const q = lab(b.data[i], b.data[i + 1], b.data[i + 2]);
+        if (q[0] < 60) continue; // lit body in the picture it is compared with
+        const dE = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+        if (dE <= 3) continue;
+        const half = y < a.h * 0.48 ? halves.upper : halves.lower;
+        half.dE.push(dE);
+        half.dA.push(p[1] - q[1]);
+      }
+    }
+    return {
+      ...out,
+      sameFrame: true,
+      upper: { pixels: halves.upper.dE.length, dE: round(median(halves.upper.dE)), dA: round(median(halves.upper.dA)) },
+      lower: { pixels: halves.lower.dE.length, dE: round(median(halves.lower.dE)), dA: round(median(halves.lower.dA)) },
+    };
+  }, { png: png.toString('base64'), against: against ? against.toString('base64') : null });
+
+if (process.env.NO_BODY) {
+  console.log('NO_BODY: the five pictures of the body and their pixel checks were skipped.');
+} else {
+  const pictures = {};
   const bodyShot = async (page, name) => {
     const box = await page.locator('.body-viewer').first().boundingBox();
-    if (!box) { check(`body ${name}: the 3D body is drawn`, false, 'no .body-viewer'); return; }
-    await page.screenshot({ path: `${OUT}/koerper-${name}.png`, clip: box });
-    check(`body ${name}: the 3D body is drawn`, box.width > 200 && box.height > 200, `${Math.round(box.width)}×${Math.round(box.height)}`);
+    check(`body ${name}: the 3D body is drawn`, Boolean(box) && box.width > 200 && box.height > 200, box ? `${Math.round(box.width)}×${Math.round(box.height)}` : 'no .body-viewer');
+    if (!box) return;
+    pictures[name] = await page.screenshot({ path: `${OUT}/koerper-${name}.png`, clip: box });
   };
   const turn = async (page, label) => {
     await page.getByRole('button', { name: label, exact: true }).click();
     await page.waitForTimeout(3500);
   };
+  let probe = null;
   for (const [name, lifts, back] of [['gemischt', MIXED, true], ['leer', null, false], ['gehalten', HELD, false], ['schwelle', EDGE, true]]) {
     const { ctx, page } = await boot(393, lifts);
     await toHub(page);
@@ -559,7 +707,45 @@ if (!process.env.NO_BODY) {
       await turn(page, 'Hinten');
       await bodyShot(page, `${name}-hinten`);
     }
-    await ctx.close();
+    if (name === 'schwelle') {
+      // The last page stays open: it decodes the pictures for the pixel checks.
+      probe = { ctx, page };
+    } else {
+      await ctx.close();
+    }
+  }
+
+  const have = ['leer-vorne', 'gehalten-vorne', 'schwelle-vorne', 'gemischt-vorne', 'gemischt-hinten'].every((name) => pictures[name]);
+  check('body: all five pictures were taken', have && probe !== null, Object.keys(pictures).join(', '));
+  if (have && probe) {
+    const empty = await readBody(probe.page, pictures['leer-vorne']);
+    const held = await readBody(probe.page, pictures['gehalten-vorne']);
+    const edge = await readBody(probe.page, pictures['schwelle-vorne'], pictures['gehalten-vorne']);
+    const mixed = await readBody(probe.page, pictures['gemischt-vorne']);
+    const mixedBack = await readBody(probe.page, pictures['gemischt-hinten']);
+    console.log('\n[the body, in numbers]', JSON.stringify({ empty, held, edge, mixed, mixedBack }));
+
+    check('body, no data: a quiet grey figure — dimmed, with no white and no colour',
+      empty.body > 3000 && empty.dimmed >= 0.6 && empty.white <= 0.08 && empty.green + empty.red <= 0.01, short(empty));
+    check('body, held only: white — a trained muscle with no change — and no colour at all',
+      held.body > 3000 && held.white >= 0.45 && held.green + held.red <= 0.01, short(held));
+    check('body: an untrained figure is clearly darker than a held one',
+      held.lightness - empty.lightness >= 8 && held.white >= empty.white + 0.4, `held L ${held.lightness}, empty L ${empty.lightness}`);
+    // EDGE against HELD, same angle: the chest and the back are at +3 %, the
+    // quadriceps and the hamstrings at −3 %, everything else is held in both.
+    check('body, +3 % beside held: the chest has moved towards green, by a difference the eye can see (ΔE ≥ 5)',
+      edge.sameFrame === true && edge.upper.pixels >= 300 && edge.upper.dA <= -3 && edge.upper.dE >= 5, short(edge.upper));
+    check('body, −3 % beside held: the quadriceps have moved towards red, by a difference the eye can see (ΔE ≥ 5)',
+      edge.sameFrame === true && edge.lower.pixels >= 300 && edge.lower.dA >= 3 && edge.lower.dE >= 5, short(edge.lower));
+    check('body, +3 % beside held: the rest of the figure is still white',
+      edge.white >= 0.25 && edge.white < held.white, `white ${edge.white} of ${held.white}`);
+    check('body, mixed from the front: green, red, white and dimmed regions are all there',
+      mixed.green >= 0.05 && mixed.red >= 0.1 && mixed.white >= 0.05 && mixed.dimmed >= 0.05, short(mixed));
+    check('body, mixed from the back: the held back is white and the untrained calves dimmed, beside green shoulders',
+      mixedBack.green >= 0.02 && mixedBack.white >= 0.03 && mixedBack.dimmed >= 0.1, short(mixedBack));
+    await probe.ctx.close();
+  } else if (probe) {
+    await probe.ctx.close();
   }
 }
 

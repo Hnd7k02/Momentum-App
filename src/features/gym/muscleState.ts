@@ -99,19 +99,40 @@ export function shownChangeText(change: number | null): string | null {
  * How many exercise days each group has in the loaded range.
  *
  * An **exercise day** is one exercise on one day — one entry of
- * `GymHistory.days` — and it counts for every group that exercise gave a
- * weight above zero on that day, by the roles the sets were logged under.
- * That is the membership `musclePerformance()` computes with. Bench press
- * and incline press on Monday and bench press on Thursday are three
- * exercise days for the chest, on two calendar days.
+ * `GymHistory.days` — and it counts for every group that exercise gives a
+ * weight above zero. Bench press and incline press on Monday and bench
+ * press on Thursday are three exercise days for the chest, on two calendar
+ * days.
+ *
+ * **Which groups an exercise belongs to is the domain's answer, not a
+ * second one.** `musclePerformance()` takes an exercise's groups and roles
+ * from its latest recorded day in the range and lets every comparison of
+ * that exercise speak for those groups; the count follows it, day for day.
+ * Counting each day by its own roles instead would part from the figure it
+ * is the evidence for the moment an exercise's mapping changed inside a
+ * range: a group could then be untrained in the domain with three exercise
+ * days, or print a figure that rests on days it was never counted for.
+ * While the mapping does not change — which is every range but the one
+ * across such an edit — the two readings are the same number.
  */
 export function exerciseDayCounts(days: readonly ExerciseDay[]): Record<MuscleGroup, number> {
   const counts = Object.fromEntries(MUSCLE_GROUPS.map((muscle) => [muscle, 0])) as Record<MuscleGroup, number>;
+
+  /** An exercise's roles as of its latest day, as `musclePerformance()` reads them. */
+  const latest = new Map<string, ExerciseDay>();
   for (const day of days) {
+    const known = latest.get(day.exerciseId);
+    // An exercise has one entry a day, so a later date is the only way to
+    // replace what is known; `>=` keeps the last one listed all the same.
+    if (!known || day.date >= known.date) latest.set(day.exerciseId, day);
+  }
+
+  for (const day of days) {
+    const from = latest.get(day.exerciseId) ?? day;
     const roles =
-      day.primaryMuscles === undefined
-        ? { muscles: day.muscles }
-        : { muscles: day.muscles, primary: day.primaryMuscles };
+      from.primaryMuscles === undefined
+        ? { muscles: from.muscles }
+        : { muscles: from.muscles, primary: from.primaryMuscles };
     for (const { muscle, weight } of muscleWeights(roles)) {
       if (weight > 0) counts[muscle] += 1;
     }

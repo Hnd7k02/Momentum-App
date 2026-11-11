@@ -151,9 +151,11 @@ export const BODY_LIGHT = {
  *
  * The ground is white for every trained group, so the mix is what makes a
  * tint: three quarters of the way to the status colour at full strength,
- * three tenths at the weakest — from the tones the contract's mock-ups were
- * coloured with, the weakest raised a little so that +3 % is plainly green
- * beside a white group at 393px under today's light. Roughness, the lights and the tone mapping are block 7A's.
+ * three eighths at the weakest. The mock-ups' tool had a quarter there; it
+ * is raised because under today's light and tone mapping green arrives much
+ * weaker than red. Measured on the rendered body at 393px, +3 % against a
+ * held group beside it: at a quarter the green was about 4.7 ΔE from white,
+ * at three eighths about 7, the red twice that (`farbregeln.mjs` holds 5). Roughness, the lights and the tone mapping are block 7A's.
  */
 export const REGION_MATERIAL = {
   roughness: 0.74,
@@ -168,12 +170,13 @@ export const REGION_MATERIAL = {
  * The strength of a tint (contract §7): it grows evenly from 2.5 % to 12 %
  * and stays there. 2.5 % is where the band ends — the smallest change that
  * is shown as ±3 % — and it starts at `TINT_STRENGTH.min`, the least at
- * which +3 % reads as green beside a held, white group on a phone.
+ * which +3 % reads as green beside a held, white group on a phone, with a
+ * margin (see `REGION_MATERIAL`).
  */
 export const TINT_STRENGTH = {
   fromPercent: 2.5,
   toPercent: 12,
-  min: 0.4,
+  min: 0.5,
   /** "Zu wenig Vergleichsdaten": lightly blue, whatever its ratio. */
   awaitingBaseline: 0.5,
 } as const;

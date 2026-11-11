@@ -143,8 +143,12 @@
   /* The colour of the state the figure reads as; held is the text colour. */
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
-  /* "Gesamt +26 %" is one figure; the unit never drops to its own line. */
-  white-space: nowrap;
+  /* The word and its figure may part at a narrow width — "Leistungstrend"
+     over "Gehalten" on a 320px phone, where the two together are wider than
+     the column beside the picture. The figure itself never breaks: its
+     percent sign is bound to the number by a no-break space
+     (`i18n/typography.ts`). */
+  overflow-wrap: anywhere;
 }
 
 .gym-hub__musclesOverall--improved {

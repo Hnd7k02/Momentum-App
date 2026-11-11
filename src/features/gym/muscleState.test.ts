@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import {
   exerciseDays,
+  gymPerformance,
   gymPerformanceOverSpan,
   type ExerciseDay,
   type MusclePerformance,
@@ -208,6 +209,63 @@ describe('exercise days', () => {
     expect(counts.back).toBe(1);
     expect(counts.biceps).toBe(2);
     expect(counts.forearms).toBe(0);
+  });
+
+  it('follows the domain when an exercise\'s mapping changes inside the range', () => {
+    // The press was logged for chest and triceps three times, then for the
+    // chest alone. `musclePerformance()` reads an exercise's groups from its
+    // latest day: the triceps are untrained there, and have no exercise days
+    // here either — never "untrained, with three exercise days".
+    const dropped = daysOf([
+      day('2026-06-01', 'press', ['chest', 'triceps'], ['chest'], 60),
+      day('2026-06-03', 'press', ['chest', 'triceps'], ['chest'], 61),
+      day('2026-06-05', 'press', ['chest', 'triceps'], ['chest'], 62),
+      day('2026-06-08', 'press', ['chest'], ['chest'], 63),
+    ]);
+    expect(gymPerformanceOverSpan(dropped).muscles.find((m) => m.muscle === 'triceps')?.status).toBe('noData');
+    expect(exerciseDayCounts(dropped)).toMatchObject({ chest: 4, triceps: 0 });
+
+    // The other way round: the triceps were added on the last day. The
+    // domain lets the whole span of the press speak for them, and the count
+    // is the days that figure rests on — never a figure on days that were
+    // not counted for it.
+    const added = daysOf([
+      day('2026-06-01', 'press', ['chest'], ['chest'], 60),
+      day('2026-06-03', 'press', ['chest'], ['chest'], 61),
+      day('2026-06-05', 'press', ['chest', 'triceps'], ['chest'], 62),
+    ]);
+    expect(gymPerformanceOverSpan(added).muscles.find((m) => m.muscle === 'triceps')?.status).toBe('measured');
+    expect(exerciseDayCounts(added)).toMatchObject({ chest: 3, triceps: 3 });
+    expect(shownPerformance(added, gymPerformanceOverSpan(added)).muscles.find((m) => m.muscle === 'triceps'))
+      .toMatchObject({ state: 'improved', exerciseDays: 3, compared: true });
+  });
+
+  it('never parts from the domain: a group has exercise days exactly when it is trained there', () => {
+    // Every pairing of two mappings over three days of one exercise, with
+    // and without roles — in the day-by-day window and in the span.
+    const mappings: [MuscleGroup[], MuscleGroup[] | undefined][] = [
+      [['chest'], ['chest']],
+      [['chest', 'triceps'], ['chest']],
+      [['chest', 'triceps'], undefined],
+      [['triceps', 'shoulders'], ['triceps']],
+      [['back', 'biceps', 'forearms'], ['back']],
+    ];
+    for (const [early, earlyPrimary] of mappings) {
+      for (const [late, latePrimary] of mappings) {
+        const history = daysOf([
+          day('2026-06-01', 'lift', early, earlyPrimary, 50),
+          day('2026-06-03', 'lift', early, earlyPrimary, 52),
+          day('2026-06-05', 'lift', late, latePrimary, 54),
+          day('2026-06-02', 'other', ['calves'], ['calves'], 40),
+        ]);
+        const counts = exerciseDayCounts(history);
+        for (const performance of [gymPerformanceOverSpan(history), gymPerformance(history)]) {
+          for (const entry of performance.muscles) {
+            expect(counts[entry.muscle] > 0, `${entry.muscle}: ${early} → ${late}`).toBe(entry.status !== 'noData');
+          }
+        }
+      }
+    }
   });
 
   it('a set that cannot be scored is not an exercise day', () => {

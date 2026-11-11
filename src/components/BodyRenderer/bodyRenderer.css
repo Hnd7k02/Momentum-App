@@ -29,8 +29,8 @@
  * the 3D body it stands in for (contract §7): green and red tinted, lightly
  * blue with too little to compare, the neutral data ink for held — a
  * trained group with no change — and the dimmed empty tone for untrained.
- * Each status region is also outlined in its own ink, which is what keeps a
- * region a shape rather than a wash.
+ * A rise and a fall are also outlined in their own ink, which is what keeps
+ * a region a shape rather than a wash.
  */
 .body-renderer__muscle {
   transition: fill var(--duration-base) var(--ease-standard);
@@ -61,8 +61,12 @@
   stroke-width: 1;
 }
 
+/* The chosen group is outlined in the accent, like every selection — and
+   like the neutral cue of the 3D body it stands in for. The text colour
+   used to do it; on a held group, which is the data ink, that outline was
+   the fill's own colour and could not be seen. */
 .body-renderer__muscle--selected {
-  stroke: var(--text-primary);
+  stroke: var(--accent);
   stroke-width: 2;
 }
 
