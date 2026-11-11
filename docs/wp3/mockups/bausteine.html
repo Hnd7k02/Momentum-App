@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup 3 – Bausteinblatt</title>
+<link rel="stylesheet" href="mockup.css">
+<!-- Dieselben Bausteine in beiden Welten: oben Mind (hell), unten Gym (dunkel). -->
+<body>
+<template id="blatt">
+  <h3>Text und Zahlen</h3>
+  <div style="font-size:var(--type-title);font-weight:700">Titel 22</div>
+  <div>Text 17 · <span style="color:var(--text-secondary)">zweite Stufe</span> · <span style="color:var(--text-tertiary);font-size:var(--type-footnote)">dritte Stufe 13</span> · <span style="color:var(--text-tertiary);font-size:var(--type-caption)">kleinste 11</span></div>
+  <div class="num" style="display:flex;gap:16px;align-items:baseline;margin-top:6px">
+    <span style="font-size:var(--type-figure-xl);font-weight:700">830<small style="font-size:.5em;font-weight:400;color:var(--text-secondary)"> von 1000</small></span>
+    <span style="font-size:var(--type-figure-l);font-weight:700" class="t-improved">+9 %</span>
+    <span style="font-size:var(--type-figure-m);font-weight:600">8 / 10</span>
+  </div>
+
+  <h3>Schaltflächen</h3>
+  <div style="display:grid;gap:8px">
+    <div class="btn primary">Training erfassen</div>
+    <div class="btn second">+ Satz hinzufügen</div>
+    <div style="display:flex;justify-content:space-between"><div class="btn text">Pläne verwalten</div><div class="btn quiet">Entfernen</div></div>
+  </div>
+
+  <h3>Zustände</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <span class="chip improved">Verbessert</span><span class="chip held">Gehalten</span><span class="chip declined">Zurückgegangen</span><span class="chip few">Zu wenig Vergleichsdaten</span><span class="chip none">Noch nicht trainiert</span>
+  </div>
+
+  <h3>Kennzahlenleiste, Zeile, Verlaufslinie</h3>
+  <div class="card">
+    <div class="kpis" style="margin:0">
+      <div><div class="label">Leistungstrend</div><div class="value num">+2 %</div><div class="sub">gehalten</div></div>
+      <div><div class="label">Gewertet</div><div class="value num">8 / 10</div><div class="sub">Gruppen</div></div>
+      <div><div class="label">Stärkster</div><div class="value">Brust</div><div class="sub num">+9 %</div></div>
+    </div>
+    <div class="rows" style="margin-top:10px" data-zeilen></div>
+  </div>
+
+  <h3>Balken: neutral, der letzte trägt den Status</h3>
+  <svg width="100%" viewBox="0 0 345 96" role="img" aria-label="Bester Arbeitssatz pro Tag, sechs Tage, zuletzt 94 Kilogramm">
+    <text class="axis" x="0" y="14">94 kg</text><text class="axis" x="0" y="74">80 kg</text>
+    <line class="zero" x1="44" x2="345" y1="70" y2="70"/><line class="zero" x1="44" x2="345" y1="10" y2="10" stroke-dasharray="2 4"/>
+    <g data-balken></g>
+    <text class="axis" x="44" y="92">7. Okt.</text><text class="axis" x="345" y="92" text-anchor="end">21. Okt.</text>
+  </svg>
+
+  <h3>Statusfarben</h3>
+  <div class="swatches">
+    <div class="sw"><b style="background:#00b85b"></b>stark</div><div class="sw"><b style="background:#4cde24"></b>gut</div><div class="sw"><b style="background:#ffd600"></b>wechselhaft</div><div class="sw"><b style="background:#ff3b5c"></b>schwach</div><div class="sw"><b style="background:var(--info-fill)"></b>Hinweis</div>
+  </div>
+  <div data-gedaempft></div>
+
+  <h3>Ohne Mint: vorher und nachher</h3>
+  <div class="pair">
+    <div><small>vorher</small>
+      <div class="week"><b style="background:var(--alt-mint-ink)"></b><b style="background:var(--alt-mint-ink)"></b><b style="background:var(--alt-mint-tint)"></b></div>
+      <div class="meter" style="margin-top:8px;background:var(--alt-mint-tint)"><b style="width:83%;background:var(--alt-mint-ink)"></b></div>
+      <div class="btn" style="margin-top:8px;background:var(--alt-mint-tint);color:var(--alt-mint-ink)">+ Satz</div>
+      <div style="margin-top:8px;color:var(--alt-mint-ink);font-weight:600">Gym ›</div>
+    </div>
+    <div><small>nachher (Vorschlag)</small>
+      <div class="week"><b class="on"></b><b class="on"></b><b></b></div>
+      <div class="meter" style="margin-top:8px"><b style="width:83%"></b></div>
+      <div class="btn second" style="margin-top:8px">+ Satz</div>
+      <div style="margin-top:8px;font-weight:600">Gym <span style="color:var(--accent-ink)">›</span></div>
+    </div>
+  </div>
+  <div style="margin-top:10px"><small class="caption">Variante: Balken im Akzent statt neutral</small>
+    <div class="meter" style="margin-top:4px"><b style="width:83%;background:var(--accent)"></b></div></div>
+</template>
+<section class="sheetpage" id="mind"><h2>Mind · hell</h2></section>
+<section class="sheetpage" id="gym" data-world="gym" style="color:var(--text-primary)"><h2>Gym · dunkel</h2></section>
+<script src="mockup.js"></script>
+<script>
+  for (const id of ['mind', 'gym']) {
+    const s = document.getElementById(id);
+    s.appendChild(document.getElementById('blatt').content.cloneNode(true));
+    const z = s.querySelector('[data-zeilen]');
+    const alle = GRUPPEN.slice();
+    GRUPPEN.length = 0; GRUPPEN.push(alle[0], alle[3], alle[6], alle[9], alle[8]);
+    zeilen(z); GRUPPEN.length = 0; GRUPPEN.push(...alle);
+    const werte = [80.5, 84.6, 88.8, 85.8, 90, 94.4];
+    s.querySelector('[data-balken]').innerHTML = werte.map((v, i) => { const h = (v - 76) / (94.4 - 76) * 56 + 4; return `<rect ${i === 5 ? 'fill="var(--status-strong)"' : 'class="bar"'} x="${52 + i * 50}" y="${70 - h}" width="34" height="${h}" rx="4"/>`; }).join('');
+  }
+  // Nur in der dunklen Welt: die gedämpfte Fassung der Statusfarben zum Vergleich (Frage 2 im Vertrag).
+  document.querySelector('#gym [data-gedaempft]').innerHTML = `<small class="caption" style="display:block;margin:8px 0 4px">Zum Vergleich: gedämpft für dunklen Grund</small><div class="swatches">
+    <div class="sw"><b style="background:#33c27a"></b>stark</div><div class="sw"><b style="background:#77d95a"></b>gut</div><div class="sw"><b style="background:#e8c93a"></b>wechselhaft</div><div class="sw"><b style="background:#f0607a"></b>schwach</div><div class="sw"><b style="background:#6bb8ea"></b>Hinweis</div></div>`;
+</script>
+</body>
+</html>

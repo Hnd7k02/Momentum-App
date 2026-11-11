@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D144). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D159). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -530,6 +530,40 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   opened from Heute staying light; `body-preview.webp`, a palette-independent
   alpha cut-out that reads on the dark tile, re-rendered at 6b only if the
   body's lighting changes for the dark ground.
+
+**WP3 — the November review and the owner's decisions** (branch
+`claude/momentum-wp3`, not merged)
+- A read-only review of the branch at `7e2a5ce` is
+  `docs/wp3/review-2026-11.md`; the owner approved it on 2026-11-11.
+- **STOP 6a is decided** (D148, D149): variant B as built, folded into
+  `tokens.css` at 6b; Bereiche turns whole; captions at 4.5:1; the status
+  bar `default` with a `theme-color` per world, accepted on the iPhone; the
+  render loop paused under the Stage 7 sheet; the plan chooser and the run
+  sheet light from Heute; `body-preview.webp` not re-rendered in 6b.
+- **STOP 5a is decided** (D150–D152): the best working set by a strength
+  score as an era from the first load, warm-up sets marked by hand, the
+  work volume shown and never scored. Gate G's recommendation to keep the
+  best set stands; its set score changes.
+- **Further decisions** (D153–D157): the muscle status with a tolerance
+  band, colour with three jobs and no mint in Gym, the single-colour
+  anatomical body with inert hands, stage 1 of the model plus a BodyParts3D
+  proof gate, the tidy-up of the public repository and the licence.
+- **Block 0 — the visual contract** (no production code):
+  `docs/wp3/vertrag.md`, a draft for STOP 0, with three mock-ups under
+  `docs/wp3/mockups/`. It replaces D89 and marks every rule as decided or
+  proposed.
+- **Order from here** (D159): Stage 6b, the colour rules of the muscle
+  status, Stage 5b, 7A (stage 1 of the body and the proof gate), 7B, 7C, 9;
+  the tidy-up of D157 as a block of its own. Each block starts in a fresh
+  session from its prompt under `docs/wp3/prompts/`.
+- **Reserved, not touched in WP3** (D158): `bossService.ts:217` fills
+  `recordedScore` with `entry.score` — its own scoring gate, as its own era.
+- **Recorded by the review, corrected in the tidy-up block:** the device
+  screenshots named under "Verification status" are iPad screenshots of a
+  design canvas, not the app on an iPhone; `README.md`,
+  `docs/release-candidates.md` and `docs/device-tests.md` describe RC2; the
+  verify scripts name a Chromium path the cloud image no longer has (6b
+  repairs it first).
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +

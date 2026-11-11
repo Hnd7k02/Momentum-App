@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  Standbild des heutigen Körpermodells für die Mockups (Block 0).
+  Kein Produktcode: lädt public/models/momentum-body.glb und three aus node_modules,
+  färbt die elf Teilnetze nach den Angaben in der Adresse und zeigt ein Bild.
+  Licht und Kamera sind die des heutigen Viewers (BodyViewer.tsx, CameraRig.tsx).
+  Aufruf: siehe standbilder.mjs.
+-->
+<meta charset="utf-8">
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">
+{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const q = JSON.parse(decodeURIComponent(location.hash.slice(1) || '{}'));
+const W = q.w ?? 760, H = q.h ?? 1080, yaw = (q.yaw ?? 0) * Math.PI / 180, pitch = (q.pitch ?? 8) * Math.PI / 180;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0xcdcdda, 1.35));
+const add = (p, i, c = 0xffffff) => { const l = new THREE.DirectionalLight(c, i); l.position.set(...p); scene.add(l); };
+add([-1.7, 2.6, 2.4], 2.15); add([2.4, 0.9, 1.5], 0.75, 0xdfe4f5); add([0.4, 1.9, -2.8], 1.05);
+
+const D = q.dist ?? 4.05, T = new THREE.Vector3(0, q.ty ?? 0.92, 0);
+const camera = new THREE.PerspectiveCamera(q.fov ?? 27, W / H, 0.1, 40);
+camera.position.set(T.x + D * Math.cos(pitch) * Math.sin(yaw), T.y + D * Math.sin(pitch), T.z + D * Math.cos(pitch) * Math.cos(yaw));
+camera.lookAt(T);
+
+const gltf = await new GLTFLoader().loadAsync('/public/models/momentum-body.glb');
+gltf.scene.traverse((o) => {
+  if (!o.isMesh) return;
+  const name = o.material.name;
+  const spec = (q.regions && q.regions[name]) || q.rest || { color: '#e4e4ea' };
+  const mat = (s) => new THREE.MeshStandardMaterial({ color: s.color, roughness: 0.74, metalness: 0, emissive: s.emissive ?? '#000000', emissiveIntensity: s.glow ?? 0 });
+  o.material = mat(spec);
+  // Das heutige Modell hat in der neutralen Zone drei Streifen am Rumpf (Kragen, unter der Brust).
+  // Stufe 1 in Block 7A gibt sie den Nachbarn zurück; hier bekommen sie nur eine eigene Farbe.
+  if (name === 'none' && q.strips) {
+    const g = o.geometry.toNonIndexed(); const p = g.attributes.position; const v = new THREE.Vector3();
+    const a = [], b = []; o.updateWorldMatrix(true, false);
+    for (let i = 0; i < p.count; i += 3) {
+      let y = 0; for (let k = 0; k < 3; k++) { v.fromBufferAttribute(p, i + k).applyMatrix4(o.matrixWorld); y += v.y / 3; }
+      (y > 1.1 && y < 1.5 ? b : a).push(i, i + 1, i + 2);
+    }
+    g.setIndex([...a, ...b]); g.clearGroups(); g.addGroup(0, a.length, 0); g.addGroup(a.length, b.length, 1);
+    o.geometry = g; o.material = [mat(spec), mat(q.strips)];
+  }
+});
+scene.add(gltf.scene);
+renderer.render(scene, camera);
+window.__done = true;
+</script>

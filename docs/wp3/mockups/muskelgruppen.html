@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de" data-world="gym">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mockup 1 – Muskelgruppen</title>
+<link rel="stylesheet" href="mockup.css">
+<!-- Zustände: ohne Zusatz = gemischte Datenlage, #leer = erstes Öffnen ohne Daten. -->
+<body>
+<div class="screen">
+  <div class="statusbar"></div>
+  <div class="nav"><button aria-label="Zurück">‹</button><h1>Muskelgruppen</h1><button aria-label="Legende">ⓘ</button></div>
+  <div class="content">
+    <div class="seg"><span aria-current="true">30 Tage</span><span>90 Tage</span></div>
+    <div class="kpis" id="kpis">
+      <div><div class="label">Leistungstrend</div><div class="value num" id="k1">+2 %</div><div class="sub" id="k1s">gehalten</div></div>
+      <div><div class="label">Gewertet</div><div class="value num" id="k2">8 / 10</div><div class="sub">Gruppen</div></div>
+      <div><div class="label">Stärkster</div><div class="value" id="k3">Brust</div><div class="sub num" id="k3s">+9 %</div></div>
+    </div>
+    <div class="stage">
+      <img id="koerper" src="bilder/koerper-gemischt-vorne.png" alt="3D-Körper von vorne: Brust und Schultern grün, Oberschenkel rot, Unterarme blau, Waden grau, der Rest weiss">
+      <div class="views"><span aria-current="true">Vorne</span><span>Seite</span><span>Hinten</span></div>
+      <div class="tool" aria-label="Ansicht zurücksetzen">↺</div>
+      <div class="note">Körper: heutiges Modell und Licht.<br>Block 7A ersetzt beides.</div>
+    </div>
+    <div class="legend" id="legende"></div>
+    <div id="leerhinweis" hidden>
+      <p class="hint" style="margin-top:4px"><b style="color:var(--text-primary)">Noch kein Training erfasst.</b><br><span style="font-size:var(--type-footnote)">Ab dem dritten Übungstag einer Gruppe zeigt der Körper ihren Leistungstrend.</span></p>
+      <div class="btn primary" style="margin:10px 0">Training erfassen</div>
+    </div>
+    <div class="rows" id="zeilen"></div>
+  </div>
+  <div class="tabbar" id="tabs"></div>
+</div>
+<script src="mockup.js"></script>
+<script>
+  const leer = location.hash === '#leer';
+  document.getElementById('tabs').innerHTML = TABS;
+  document.getElementById('legende').innerHTML = LEGENDE;
+  if (leer) {
+    document.getElementById('koerper').src = 'bilder/koerper-leer-vorne.png';
+    document.getElementById('kpis').hidden = true;   // eine Leiste voller Striche sagt nichts
+    document.getElementById('legende').hidden = true;
+    document.getElementById('leerhinweis').hidden = false;
+  }
+  zeilen(document.getElementById('zeilen'), leer);
+</script>
+</body>
+</html>

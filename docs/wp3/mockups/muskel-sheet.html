@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de" data-world="gym">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mockup 2 – Muskel-Sheet</title>
+<link rel="stylesheet" href="mockup.css">
+<!-- Zustände: ohne Zusatz = Brust mit Messwerten, #wenig = Unterarme mit zu wenig Vergleichsdaten. -->
+<body>
+<div class="screen">
+  <div class="statusbar"></div>
+  <div class="nav"><button aria-label="Zurück">‹</button><h1>Muskelgruppen</h1><span></span></div>
+  <!-- Über dem Sheet bleibt der Körper stehen, auf die gewählte Gruppe gerichtet. Er wird nicht neu gezeichnet, solange das Sheet offen ist. -->
+  <div class="zoom"><img id="fenster" src="bilder/koerper-gemischt-vorne.png" alt=""></div>
+  <div class="scrim"></div>
+  <div class="sheet" role="dialog" aria-label="Muskelgruppe">
+    <div class="grab"></div>
+    <header><i class="dot" id="punkt"></i><h2 id="titel">Brust</h2><span class="close" aria-label="Schliessen">✕</span></header>
+    <div id="inhalt"></div>
+  </div>
+</div>
+<script src="mockup.js"></script>
+<script>
+  const wenig = location.hash === '#wenig';
+  const H = window.innerHeight, fenster = document.getElementById('fenster');
+  // Das Standbild so legen, dass die gewählte Gruppe im Fenster über dem Sheet steht.
+  const hoehe = H * 1.25, mitte = wenig ? [0.2, 0.47] : [0.5, 0.29];
+  fenster.style.height = hoehe + 'px';
+  const fensterHoehe = document.querySelector('.zoom').clientHeight;
+  fenster.style.top = (fensterHoehe * 0.5 - mitte[1] * hoehe) + 'px';
+  fenster.style.transform = `translateX(${-mitte[0] * 100}%)`;
+  document.getElementById('punkt').style.background = gedaempft(wenig ? '#6E7B8B' : '#D9654E');
+  document.getElementById('titel').textContent = wenig ? 'Unterarme' : 'Brust';
+  const seg = `<div class="seg" style="margin-top:12px"><span aria-current="true">30 Tage</span><span>90 Tage</span></div>`;
+  const volumen = (werte) => `<div class="section"><span>Arbeitsvolumen pro Woche</span><span class="caption">nicht gewertet</span></div>
+    <svg width="100%" viewBox="0 0 345 84" aria-label="Arbeitsvolumen pro Woche in Kilogramm">${werte.map(([kw, kg], i) => { const h = kg / (Math.max(...werte.map((w) => w[1])) * 1.1) * 40; return `<rect class="bar" x="${24 + i * 86}" y="${64 - h}" width="36" height="${h}" rx="4"/><text class="axis" x="${42 + i * 86}" y="${58 - h}" text-anchor="middle">${kg.toLocaleString('de-CH')} kg</text><text class="axis" x="${42 + i * 86}" y="79" text-anchor="middle">KW ${kw}</text>`; }).join('')}</svg>`;
+  document.getElementById('inhalt').innerHTML = wenig ? `
+    <div class="headline"><span class="chip few">Zu wenig Vergleichsdaten</span></div>
+    <p class="hint">2 Übungstage in den letzten 30 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.</p>
+    <div class="section"><span>Erfasst</span></div>
+    <div class="rows">
+      <div class="row wide"><span></span><div><div class="name">Hammercurls</div><div class="when">Sa., 8. Nov.</div></div><div class="figure num">10 × 14 kg</div></div>
+      <div class="row wide"><span></span><div><div class="name">Hammercurls</div><div class="when">Mo., 3. Nov.</div></div><div class="figure num">10 × 14 kg</div></div>
+    </div>
+    ${volumen([[45, 420], [46, 420]])}` : `
+    <div class="headline"><span class="figure num t-improved">+9 %</span><span class="chip improved">Verbessert</span></div>
+    <div class="caption">Bester Arbeitssatz · letzte 30 Tage</div>
+    ${seg}
+    <svg width="100%" viewBox="0 0 345 132" style="margin-top:10px" role="img" aria-label="Leistungstrend Brust, von 0 auf plus 9 Prozent in 30 Tagen">
+      <text class="axis" x="0" y="14">+12 %</text><text class="axis" x="0" y="104">0 %</text>
+      <line class="zero" x1="40" x2="345" y1="100" y2="100"/><line class="zero" x1="40" x2="345" y1="10" y2="10" stroke-dasharray="2 4"/>
+      <polyline class="line" points="${[0, 2, 3, 5, 7, 9].map((v, i) => `${48 + i * 54},${100 - v / 12 * 90}`).join(' ')}"/>
+      <circle cx="318" cy="${100 - 9 / 12 * 90}" r="4" fill="var(--status-strong)"/>
+      <text class="axis" x="318" y="${100 - 9 / 12 * 90 - 9}" text-anchor="middle" style="fill:var(--status-strong-ink);font-weight:600">+9 %</text>
+      <text class="axis" x="40" y="126">12. Okt.</text><text class="axis" x="345" y="126" text-anchor="end">10. Nov.</text>
+    </svg>
+    <div class="section"><span>Übungen</span></div>
+    <div class="rows">
+      <div class="row wide"><span></span><div><div class="name">Bankdrücken</div><div class="when">Bester Arbeitssatz 8 × 82,5 kg</div></div><div class="figure num t-improved">+7 %</div></div>
+      <div class="row wide"><span></span><div><div class="name">Schrägbank mit Kurzhanteln</div><div class="when">Bester Arbeitssatz 10 × 30 kg</div></div><div class="figure num t-improved">+12 %</div></div>
+    </div>
+    ${volumen([[43, 3980], [44, 4120], [45, 4300], [46, 4450]])}`;
+</script>
+</body>
+</html>

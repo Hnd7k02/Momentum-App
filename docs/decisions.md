@@ -1142,6 +1142,10 @@ The state is a word beside the badge, never the badge alone.
 
 ## D84 — The exercise-day metric is the best set, and only the best set
 
+> **Status note (D150).** From the era D150 opens, an exercise-day is its best
+> *working* set by a strength score, not by `reps × weight`. Every day before
+> that boundary is still exactly what this entry says.
+
 `max(reps × weight)` across the day's completed sets of one exercise. Ten at
 10 kg and six at 20 kg are both 100; eight at 15 kg is 120 and wins.
 
@@ -1229,6 +1233,10 @@ work out why a good month did not move their rank. The mapping is the one
 product decision this phase deliberately leaves open.
 
 ## D89 — The body is a diagram, not an illustration
+
+> **Status note (D155).** Superseded. The body is a 3D figure and its
+> direction is a single-colour anatomical one. What this entry describes is
+> the flat diagram that remains as the stand-in where WebGL is missing.
 
 Rounded blocks laid out on a torso outline, front and back side by side. They
 read at 120 px on a phone, stay legible with ten of them lit, and can be
@@ -2446,6 +2454,11 @@ of it.
 
 ## D123 — One status palette, four bands on every scale
 
+> **Status note (D153, D154).** Two things below change with the visual
+> contract: a held muscle group takes a neutral tone instead of `mixed`, and
+> a group's identity colour remains only as a dot in its row. The four fills
+> and their one definition stand.
+
 **Decision.** The colours that answer "how is it going" are one palette,
 defined once: `weak` #ff3b5c, `mixed` #ffd600, `good` #4cde24, `strong`
 #00b85b, and `empty` for no data — the neutral grey the history grid already
@@ -3300,6 +3313,9 @@ exactly its five standard questions), `TodayScreen.yesterday.test.tsx` and
 
 ## D145 — Two worlds: Mind light, Gym dark, declared by the screen
 
+> **Status note (D148).** The owner chose variant B at STOP 6a. Stage 6b
+> removes variant A and the temporary selector.
+
 **Decision (WP3 Stage 6a, P11; the palette is chosen at STOP 6a).** The
 app has two token sets in `tokens.css` and nothing else changes between
 them: `:root` is Mind, light, and the shell every shared screen — Heute,
@@ -3389,6 +3405,9 @@ never paints it again.
 
 ## D147 — Text on the ground is measured, and the ground is bounded by it
 
+> **Status note (D149).** Captions are held at 4.5:1 from Stage 6b on, no
+> longer only reported.
+
 **Decision (WP3 Stage 6a).** Glass has no one colour behind text, so the
 token test is not the last word: `wp3-stage6a.mjs` reads the rendered
 pixels of every visible run of text on every screen it shows, in both
@@ -3410,3 +3429,173 @@ worlds and both variants, and holds body text at 4.5:1 and large text at
 
 `contrast.test.ts` (secondary on the ground), `wp3-stage6a.mjs`
 (`text-contrast.json` beside the screenshots).
+
+## D148 — Variant B is the look, and Stage 6b makes it the only one
+
+**Decision (owner, STOP 6a, 2026-10-28).** Of the two variants Stage 6a built
+(D145), B stands as built: graphite and neon violet for Gym, the glass_kit
+glass with its 1.5px gradient edge, the stronger wash on Mind, the Gym card
+on Heute light.
+
+- Stage 6b folds B's values into `tokens.css`; variant A, the temporary
+  `:root:not([data-variant="b"])` selector and the `@import` of
+  `stage6-variant-b.css` go.
+- In Bereiche the whole screen turns when the area changes, as built.
+- The plan chooser and the run sheet stay light when opened from Heute.
+- The status bar stays `default` with a `theme-color` per world. The owner
+  accepts it on the iPhone, the only place it can be judged.
+- `body-preview.webp` is not re-rendered in 6b. Whether it is re-rendered
+  with the reworked body is decided at the STOP of block 7A; HANDOVER asks
+  for it whenever the model changes.
+- The Gym label on Heute in B's mint ink does not survive D154.
+
+## D149 — The smallest text clears 4.5:1 in both worlds
+
+**Decision (owner, STOP 6a, 2026-10-28).** `--text-tertiary` rises to 4.5:1
+in both worlds; captions are held, no longer only reported (amends D147).
+
+The values are proposed in `docs/wp3/vertrag.md` §3 — #64646f on light,
+#9896a6 on dark — measured against the card, the ground and the darkest
+ground any text was measured on in the Stage 6a screenshots. On light the
+tertiary lands within a few points of the secondary, so the order of the two
+is carried by size from here on. Built in Stage 6b, with the token in
+`contrast.test.ts` and the captions held by the browser suite.
+
+## D150 — The exercise-day value is the best working set by a strength score
+
+**Decision (owner, STOP 5a, 2026-10-28 and 2026-11-11).** From the first load
+of the update, an exercise-day is worth its best working set, scored as
+`effective load × (1 + reps ÷ 30)`. It supersedes D84 for every day from that
+boundary on. The mean of the working sets, decided on 2026-10-28, is replaced
+by this.
+
+- **The factor is a deliberate, documented exception** to "no population
+  norms" (D90, CLAUDE.md). The owner's reason, in his words: it only converts
+  my own sets into one another and compares me with nobody. One constant,
+  carried in the snapshot; never a table.
+- **An era**, as D132 and D139 are: an ensure step appends the marker on the
+  first load. A snapshot without it is the best set by `reps × load`, and
+  every day before the boundary replays byte-identically.
+- **Across the boundary** each scored day computes its whole window in that
+  day's metric. Days before it see only old values; days after it re-read
+  the older sets in their window under the new score. No two units are mixed
+  and no window is left without a baseline.
+- **The set order becomes deterministic** in the same era. Gate G measured
+  it: one Gym golden file changes its row order and no value.
+- **To be confirmed with numbers at the STOP of Stage 5b:** the window
+  comparison by the median of the last and the first exercise-days.
+
+Why not the mean, with the worked cases: `docs/wp3/review-2026-11.md`,
+section E. Built in Stage 5b.
+
+## D151 — Warm-up sets are marked by hand, set by set
+
+**Decision (owner, STOP 5a, 2026-10-28; kept on 2026-11-11).** A warm-up is a
+fact on the set: off by default, set by the user, editable wherever the set
+is. A set without the field is a working set — never backfilled, never
+detected.
+
+An exercise-day with only warm-up sets is no data, never a zero. A warm-up
+set opens the session and counts for attendance exactly as any set does
+today (D128). Drop sets and back-off sets are working sets. Built in
+Stage 5b.
+
+## D152 — Work volume is shown, never scored
+
+**Decision (owner, 2026-11-11).** The work volume per muscle group and week —
+the sum of `reps × load` over the working sets — appears in the muscle sheet
+as a second figure, marked as not scored. It answers "the app should read
+all my sets" without entering the rating, the Boss or a colour. Built in
+block 7C.
+
+## D153 — The muscle status has a tolerance band and a minimum of evidence
+
+**Decision (owner, 2026-11-11).** A group is *held* inside ±2.5 %, in a
+neutral tone and no longer the `mixed` yellow. It needs at least three
+exercise-days in the range before it shows a direction; below that it reads
+"Zu wenig Vergleichsdaten". The muscle trend is offered over 30 and 90 days.
+
+The contract (§7) states the band on the shown whole number — −2 to +2 % is
+held — so that the figure and the state cannot disagree, which is the B6
+rule.
+
+Presentation only: no rating moves. The Gym golden file carries the display
+state and is re-frozen deliberately when this lands. Built in a block of its
+own, before Stage 5b.
+
+## D154 — Colour has three jobs; the muscle colour is a dot, and mint leaves Gym
+
+**Decision (owner, 2026-11-11).** The accent means *operable*, the status
+palette means *the state of the data*, everything else is neutral. From
+that:
+
+- a muscle group's identity colour remains only as a small dot in its row
+  (amends D123, which kept it on the swatch, the ring and the sparkline);
+- a trend line is neutral and carries the status colour at its end point
+  only;
+- mint is no longer Gym's second colour.
+
+What replaces mint at each of its 41 uses, and the proposal that areas carry
+no colour of their own at all, is `docs/wp3/vertrag.md` §2.5. Built in
+Stage 6b.
+
+## D155 — The body is a single-colour anatomical figure
+
+**Decision (owner, 2026-11-11).** Supersedes D89. The body is one 3D figure
+in white or black with no anatomy colours, a little more anatomical than
+today — recognisable muscle shapes, clean borders between the groups — and
+its colour comes from the training data alone.
+
+- Its movement is dynamic, fluid, organic. A tap never turns it; a selection
+  in the list may (decided at STOP 3b, restated).
+- The hands belong to the inert zone, as HANDOFF.txt always said and the
+  shipped GLB does not. The forearms get a hit tolerance in exchange.
+- While the muscle sheet covers the body, the render loop is paused
+  (STOP 6a).
+
+Built in blocks 7A and 7B. The target is `docs/wp3/vertrag.md` §8 and §9.
+
+## D156 — The body model: stage 1 now, a BodyParts3D proof gate, scripts only
+
+**Decision (owner, 2026-11-11).** The original model (615,940 triangles) can
+no longer be found, so nothing can be re-derived from it. Block 7A therefore
+takes stage 1 — `refine-body.mjs`: borders along the grooves, stray patches
+returned, a baked shade — together with light, material and tone mapping.
+
+Beside it stands one proof gate: BodyParts3D as a white muscle figure, five
+renderings, half a day at most, then the owner decides.
+
+There is no Blender on the owner's machine; 3D work runs only as a script in
+a cloud session. The licence, as the owner checked it on 2026-11-11: the
+official licence page (updated 2025-02-27) names CC BY 4.0. The GitHub mirror
+declares its converted files CC BY-SA 2.1 Japan, so it serves the proof and
+nothing that ships.
+
+## D157 — The public repository is tidied without rewriting history; the app is all rights reserved
+
+**Decision (owner, 2026-11-11).** `momentumpreview 2.zip`,
+`.github/Claude I6 backup request` and the three iPad screenshots under
+`docs/design/muscle-map/qa/device/` leave the tree. History is not
+rewritten. `.github/fixtures/rc2-export.json` stays, deliberately public.
+
+The app gets an explicit licence file: all rights reserved. The 3D model
+keeps its own licence (CC BY 4.0), and the owner's drawings are excluded.
+
+A block of its own. The block that recorded this removed nothing.
+
+## D158 — `recordedScore` in the Boss's daily fold is its own gate, after WP3
+
+**Reserved (owner, 2026-11-11).** `bossService.ts:217` fills `recordedScore`
+with `entry.score` for the domains that fold daily — the divergence STOP 3a
+recorded as Q11. It is not touched inside WP3. It is a scoring gate of its
+own, as its own era.
+
+## D159 — How WP3 is finished: function first, one block per session
+
+**Decision (owner, 2026-11-11).** In the first week the working whole counts
+for more than the best model.
+
+The remaining work runs as blocks — the contract, 6b, the colour rules, 5b,
+7A, 7B, 7C, 9 — each in a fresh cloud session started from its prompt under
+`docs/wp3/prompts/`, each ending at a STOP. One model does all of it
+(Fable 5.2); subagents only for pure search runs, on Sonnet.
