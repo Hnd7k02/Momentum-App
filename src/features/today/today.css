@@ -371,6 +371,7 @@
 
 .today__areaLink .today__areaLabel {
   padding-bottom: 0;
+  color: var(--domain-gym-ink);
 }
 
 .today__areaLink svg {

@@ -14,14 +14,12 @@ import { describe, expect, it } from 'vitest';
  * `[data-world="gym"]` is Gym, dark; a token the Gym block does not redefine
  * is inherited from `:root`. Every promise below is held for each set
  * against *its own* ground — the solid a glass card falls back to — so an
- * ink that reads on white is not assumed to read on #171c2b. While Stage 6a
- * is open the second design variant's overrides are read from
- * `stage6-variant-b.css` and held to the same promises; that file goes at
- * 6b.
+ * ink that reads on white is not assumed to read on graphite. Stage 6a held
+ * four sets, two per design variant; since 6b there is one system (D148)
+ * and two sets, each with every promise it carried before.
  */
 
 const TOKENS_CSS = readFileSync(fileURLToPath(new URL('./tokens.css', import.meta.url)), 'utf8');
-const VARIANT_B_CSS = readFileSync(fileURLToPath(new URL('./stage6-variant-b.css', import.meta.url)), 'utf8');
 
 type Declarations = Map<string, string>;
 
@@ -93,20 +91,15 @@ function set(...layers: Declarations[]): Declarations {
 }
 
 const ROOT = declarationsOf(TOKENS_CSS, ':root');
-const GYM = declarationsOf(TOKENS_CSS, '[data-world="gym"], :root:not([data-variant="b"]) [data-tile="gym"]');
-const ROOT_B = declarationsOf(VARIANT_B_CSS, ':root[data-variant="b"]');
-const GYM_B = declarationsOf(VARIANT_B_CSS, '[data-variant="b"] [data-world="gym"], [data-variant="b"][data-world="gym"]');
+const GYM = declarationsOf(TOKENS_CSS, '[data-world="gym"]');
 
 /*
  * Layered as the browser cascades them on `<html>`: `:root` and the Gym
- * block are both (0,1,0) with the Gym block later; B's two rules are (0,2,0)
- * and outrank both, B's Gym rule last of all.
+ * block are both (0,1,0), the Gym block later.
  */
 const SETS: Array<[string, Declarations]> = [
-  ['Mind (A)', set(ROOT)],
-  ['Gym (A)', set(ROOT, GYM)],
-  ['Mind (B)', set(ROOT, ROOT_B)],
-  ['Gym (B)', set(ROOT, GYM, ROOT_B, GYM_B)],
+  ['Mind', set(ROOT)],
+  ['Gym', set(ROOT, GYM)],
 ];
 
 function hexIn(tokens: Declarations, name: string): string {
@@ -151,9 +144,13 @@ describe('the two worlds share one vocabulary', () => {
     }
   });
 
-  it('variant B overrides only tokens that exist', () => {
-    for (const name of ROOT_B.keys()) expect(ROOT.has(name), name).toBe(true);
-    for (const name of GYM_B.keys()) expect(ROOT.has(name), name).toBe(true);
+  it('is the only place a world is declared: two token blocks, no variant', () => {
+    // Stage 6a's "variant B overrides only tokens that exist" guarded a
+    // second file; with one system the same guard is that no second file and
+    // no variant selector can bring a third set back.
+    const selectors = rules(TOKENS_CSS).map((rule) => rule.selector);
+    expect(selectors).toEqual([':root', '[data-world="gym"]']);
+    expect(TOKENS_CSS).not.toMatch(/data-variant|data-tile/);
   });
 
   it('keeps the status fills the one definition (D123) in every set', () => {

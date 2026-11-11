@@ -1,21 +1,21 @@
 /*
- * Design tokens — two worlds (WP3 Stage 6, P11).
+ * Design tokens — two worlds, one system (WP3 Stage 6b, D148).
  *
- * `:root` is Mind: light, Apple's language — a tinted off-white ground,
- * frosted white cards, hairline separators, generous spacing, pastel as
- * identity rather than decoration. It is also the shell every shared screen
- * (Heute, Verlauf, Rang) is drawn in.
+ * `:root` is Mind: light — a tinted off-white ground under soft washes,
+ * glass cards, hairline separators, generous spacing. It is also the shell
+ * every shared screen (Heute, Verlauf, Rang) is drawn in.
  *
- * `[data-world="gym"]` is Gym: dark, with one neon accent. The block below
- * redefines the colours, the shadows and the glass, and sets the colour
- * scheme — type, spacing, radii and motion are the one system. A screen enters the Gym world by declaring it
- * (`app/world.ts`), which puts the attribute on `<html>`; a tile on a light
- * screen may carry the same set locally with `data-tile="gym"`.
+ * `[data-world="gym"]` is Gym: graphite, with one neon violet accent. The
+ * block below redefines the colours, the shadows and the glass, and sets the
+ * colour scheme — type, spacing, radii and motion are the one system. A
+ * screen enters the Gym world by declaring it (`app/world.ts`), which puts
+ * the attribute on `<html>`. A Gym card on a shared screen stays light, like
+ * the screen it stands on.
  *
  * The status palette (D123) keeps its one definition in `:root`: the four
  * fills are the same in both worlds. The dark block changes only their
  * companions — ink, tint, the `-on` label, the track and the empty cell —
- * because text that reads on white does not read on #171c2b, and a light
+ * because text that reads on white does not read on graphite, and a light
  * grey cell is not "nothing" on a dark card.
  *
  * `contrast.test.ts` parses both blocks and holds each to its own ground.
@@ -50,7 +50,7 @@
    * harder of the two and the one that badges depend on.
    */
   --text-primary: #1c1c1e;
-  --text-secondary: #65656f;
+  --text-secondary: #5e5e68;
   --text-tertiary: #a0a0a8;
   --text-on-accent: #ffffff;
 
@@ -82,7 +82,7 @@
 
   --mint-fill: #3ecfa2;
   --mint-mid: #12a277;
-  --mint-ink: #0a7a5c;
+  --mint-ink: #0a6e55;
   --mint-tint: #e3f7ef;
 
   --sky-fill: #62b4f7;
@@ -183,35 +183,45 @@
    * Glass (WP3 Stage 6, P11).
    *
    * A card is a translucent surface over the ground, blurred behind
-   * (`backdrop-filter`), with a hairline light border on top and the soft
-   * shadow it always had. Four values describe it: the fill, the border,
-   * the blur radius and the solid colour it falls back to where blur is
-   * unsupported or the person has asked for less transparency. A tile on a
-   * dark world inside a light screen takes the solid colour too: dark glass
-   * over a light ground is mud.
+   * (`backdrop-filter`), under a 1.5px gradient edge (`ui.css`) and the soft
+   * shadow it always had. Five values describe it: the fill, the stronger
+   * fill of a sheet, the edge of a sheet and a bar, the blur radius and the
+   * solid colour it falls back to where blur is unsupported or the person
+   * has asked for less transparency.
    */
-  --glass-fill: rgba(255, 255, 255, 0.66);
-  --glass-fill-strong: rgba(255, 255, 255, 0.82);
+  --glass-fill: rgba(255, 255, 255, 0.5);
+  --glass-fill-strong: rgba(255, 255, 255, 0.78);
   --glass-solid: #ffffff;
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --glass-blur: 20px;
+  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-blur: 15px;
+  /* The card's 1.5px edge, the same in both worlds: white 60 %, white 10 %
+     at 39 %, a light blue 5 % at 40 %, the light blue 60 %. */
+  --glass-edge: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.1) 39%,
+    rgba(173, 216, 255, 0.05) 40%,
+    rgba(173, 216, 255, 0.6) 100%
+  );
+  /* An opaque layer for a mask. The colour is never seen. */
+  --mask-opaque: linear-gradient(#000 0 0);
 
   /*
-   * The ground the glass shows against: the tinted off-white with two soft
-   * washes in the Mind lilac and the Running sky, and a third in the Gym
-   * mint lower down so a card has something to blur wherever it scrolls.
-   * One painted layer on the shell; nothing else paints it again.
+   * The ground the glass shows against: the tinted off-white under soft
+   * washes, so a card has something to blur wherever it scrolls. One
+   * painted layer on the shell; nothing else paints it again.
    *
    * The washes are bounded by the text that stands on the ground: a section
    * label, the date line and the subtitle are `--text-secondary`, and at the
-   * centre of the lilac wash they must still clear 4.5:1 — `wp3-stage6a.mjs`
-   * measures the rendered pixels. 0.14 is where that holds.
+   * centre of the strongest wash they must still clear 4.5:1 — the browser
+   * suite measures the rendered pixels.
    */
   --ground:
-    radial-gradient(120% 60% at 12% -6%, rgba(143, 127, 240, 0.14), transparent 62%),
-    radial-gradient(90% 48% at 96% 6%, rgba(98, 180, 247, 0.12), transparent 60%),
-    radial-gradient(70% 40% at 0% 78%, rgba(62, 207, 162, 0.1), transparent 60%),
-    linear-gradient(180deg, #f6f5fb 0%, #f3f3f8 100%);
+    radial-gradient(110% 55% at 8% -4%, rgba(143, 127, 240, 0.22), transparent 60%),
+    radial-gradient(80% 45% at 100% 10%, rgba(98, 180, 247, 0.18), transparent 60%),
+    radial-gradient(70% 40% at 10% 82%, rgba(62, 207, 162, 0.14), transparent 60%),
+    radial-gradient(60% 35% at 100% 70%, rgba(247, 177, 131, 0.12), transparent 60%),
+    linear-gradient(180deg, #f7f6fc 0%, #f1f1f7 100%);
 
   /* What a sheet dims the screen behind it with. */
   --scrim: rgba(16, 24, 40, 0.28);
@@ -315,53 +325,52 @@
 }
 
 /*
- * Gym — dark, one neon.
+ * Gym — graphite, one neon.
  *
- * The ground is a deep navy, not black: black flattens the 3D body and
- * swallows the shadows that give a card its edge. The accent is a neon mint
- * — Gym's own identity colour taken to full brightness — and it is the only
- * thing that glows: the primary action, a filled meter, a focus ring. Text
- * stays white and grey; the status palette stays what it is, and its inks
- * are lifted so a figure reads on the dark card the way it reads on white.
+ * The ground is graphite, not black: black flattens the 3D body and
+ * swallows the shadows that give a card its edge. The accent is a neon
+ * violet, and it is the only thing that glows: the primary action, the
+ * chosen option, a focus ring. Text stays white and grey; the status
+ * palette stays what it is, and its inks are lifted so a figure reads on
+ * the dark card the way it reads on white.
  *
  * Every token redefined here is a colour, a shadow, the ground or the
  * glass. Spacing, type, radii and motion are not repeated because they do
  * not change.
  */
-[data-world="gym"],
-:root:not([data-variant="b"]) [data-tile="gym"] {
+[data-world="gym"] {
   color-scheme: dark;
 
-  --surface-base: #0b0e17;
-  --surface-tinted: #10141f;
-  --surface-elevated: #171c2b;
-  --surface-raised: #1c2234;
-  --surface-secondary: #1f2538;
-  --surface-input: #232a40;
-  --surface-selected: #323b55;
+  --surface-base: #0f0f14;
+  --surface-tinted: #141419;
+  --surface-elevated: #1a1a22;
+  --surface-raised: #202029;
+  --surface-secondary: #232330;
+  --surface-input: #282836;
+  --surface-selected: #383848;
 
   --separator: rgba(255, 255, 255, 0.09);
   --separator-strong: rgba(255, 255, 255, 0.2);
 
-  --text-primary: #f3f4f8;
-  --text-secondary: #aab0c2;
-  --text-tertiary: #7f879d;
-  --text-on-accent: #07140f;
+  --text-primary: #f5f4fa;
+  --text-secondary: #b0aec0;
+  --text-tertiary: #83818f;
+  --text-on-accent: #0f0f14;
 
-  --accent: #3ef2b0;
-  --accent-pressed: #2bd99b;
-  --accent-tint: #163a33;
-  --accent-ink: #5ff5c2;
+  --accent: #a39dff;
+  --accent-pressed: #9089ff;
+  --accent-tint: #2c2956;
+  --accent-ink: #bcb7ff;
 
-  --lilac-fill: #a89cff;
-  --lilac-mid: #9486ff;
-  --lilac-ink: #c6bdff;
-  --lilac-tint: #282550;
+  --lilac-fill: #a39dff;
+  --lilac-mid: #9089ff;
+  --lilac-ink: #c9c5ff;
+  --lilac-tint: #2c2956;
 
-  --mint-fill: #3ef2b0;
-  --mint-mid: #29d79b;
-  --mint-ink: #6cf4c6;
-  --mint-tint: #143a30;
+  --mint-fill: #4ff0b4;
+  --mint-mid: #32d79c;
+  --mint-ink: #7cf3cb;
+  --mint-tint: #163a30;
 
   --sky-fill: #62c6ff;
   --sky-ink: #93d6ff;
@@ -381,10 +390,9 @@
 
   /* The domain identities again, as the same aliases. A `var()` is
      substituted where the token is declared and the substituted value is
-     what inherits, so a tile that overrides `--mint-*` would still inherit
-     the light `--domain-gym-*` from the root unless they are declared again
-     inside the scope. On `<html>` this is redundant; on a tile it is the
-     difference between a neon meter and a light one on a dark card. */
+     what inherits, so a scope below `<html>` that carries this block would
+     still inherit the light `--domain-gym-*` from the root unless they are
+     declared again inside it. On `<html>` this is redundant. */
   --domain-mental: var(--lilac-fill);
   --domain-mental-mid: var(--lilac-mid);
   --domain-mental-ink: var(--lilac-ink);
@@ -428,30 +436,30 @@
   --status-empty-tint: var(--surface-secondary);
   --status-track: #222941;
 
-  --glass-fill: rgba(255, 255, 255, 0.07);
-  --glass-fill-strong: rgba(23, 28, 43, 0.84);
-  --glass-solid: #171c2b;
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-blur: 18px;
+  --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  --glass-fill-strong: rgba(26, 26, 34, 0.86);
+  --glass-solid: #1a1a22;
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: 15px;
 
   --ground:
-    radial-gradient(90% 50% at 10% 0%, rgba(62, 242, 176, 0.16), transparent 60%),
-    radial-gradient(80% 50% at 100% 30%, rgba(98, 180, 247, 0.14), transparent 60%),
-    radial-gradient(70% 40% at 20% 100%, rgba(143, 127, 240, 0.12), transparent 60%),
-    linear-gradient(180deg, #0e1220 0%, #0b0e17 100%);
+    radial-gradient(90% 55% at 15% 0%, rgba(163, 157, 255, 0.28), transparent 60%),
+    radial-gradient(70% 50% at 95% 35%, rgba(79, 214, 255, 0.12), transparent 60%),
+    radial-gradient(60% 40% at 30% 100%, rgba(79, 240, 180, 0.1), transparent 60%),
+    linear-gradient(180deg, #14141b 0%, #0f0f14 100%);
 
-  --scrim: rgba(0, 0, 0, 0.52);
-  --status-bar: #0b0e17;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --status-bar: #0f0f14;
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.4);
   --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.5);
-  --shadow-button: 0 6px 22px rgba(62, 242, 176, 0.32);
+  --shadow-button: 0 6px 22px rgba(163, 157, 255, 0.4);
   --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, 0.55);
 
-  --tab-bar-material: rgba(11, 14, 23, 0.78);
+  --tab-bar-material: rgba(15, 15, 20, 0.78);
 
   /* The toast inverts with the world: a light pill over dark cards. */
   --toast-surface: #f3f4f8;
   --toast-text: #0b0e17;
-  --toast-action: #0f6f4f;
+  --toast-action: #4f47c8;
 }

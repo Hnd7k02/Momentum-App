@@ -73,26 +73,44 @@
  * the corner, and with the content inset it no longer has any text to reach.
  */
 .card {
+  position: relative;
   background: var(--glass-fill);
   border-radius: var(--radius-card);
   overflow: hidden;
   padding: var(--card-pad);
   /*
-   * Glass (WP3 Stage 6, P11): the ground blurred behind a translucent fill,
-   * under a hairline light border. The border is drawn by an inset shadow,
-   * not `border`, so the card's box and every inset inside it stay exactly
-   * what they were. Only one blur layer per card; nothing inside a card
-   * blurs again.
+   * Glass (WP3 Stage 6, D146, D148): the ground blurred behind a
+   * translucent fill, under a gradient edge. Only one blur layer per card;
+   * nothing inside a card blurs again.
    */
-  box-shadow: inset 0 0 0 1px var(--glass-border), var(--shadow-card);
+  box-shadow: var(--shadow-card);
   -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur));
   backdrop-filter: saturate(160%) blur(var(--glass-blur));
 }
 
 /*
- * Solid where glass cannot be: a browser without backdrop blur, a person
- * who asked for less transparency, or a Gym tile standing on a light screen
- * (dark glass over a light ground is mud; a dark card is a window).
+ * The edge: 1.5px, itself a gradient — light at the top left, fading out
+ * towards the middle, a cool light again at the bottom right. Drawn by a
+ * masked pseudo-element, not `border`, so the card's box and every inset
+ * inside it stay exactly what they were.
+ */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--glass-edge);
+  -webkit-mask: var(--mask-opaque) content-box, var(--mask-opaque);
+  mask: var(--mask-opaque) content-box, var(--mask-opaque);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/*
+ * Solid where glass cannot be: a browser without backdrop blur, and a
+ * person who asked for less transparency.
  */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .card {
@@ -106,13 +124,6 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-}
-
-.card[data-tile="gym"],
-[data-tile="gym"] .card {
-  background: var(--glass-solid);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 /*
