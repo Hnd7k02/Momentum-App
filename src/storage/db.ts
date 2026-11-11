@@ -11,7 +11,26 @@ import type { LegacySportMigration, QuestionCategory, Sensitivity } from '../cor
  * installed PWA carrying real history can always be upgraded in place.
  */
 
-export const DB_NAME = 'momentum';
+/**
+ * The database a build opens: `momentum`, unless the build names another.
+ *
+ * Pages served from one origin share their databases in a browser, and the
+ * preview (`…/Momentum-preview/`) is published under the same origin as the
+ * live app. A preview that carried a newer schema or a new era would upgrade
+ * the live app's data in place before the owner had accepted it. A preview
+ * build is therefore given its own name at build time
+ * (`VITE_MOMENTUM_DB=momentum-preview`), and the ordinary build — the live
+ * app, the tests, the verify suites — is `momentum`, as it has always been.
+ *
+ * Only a name of this app's own form is accepted; anything else is ignored
+ * rather than opened. Nothing is copied between the two: a preview starts
+ * empty, and data reaches it through a backup, as onto any new device.
+ */
+export function databaseName(requested: unknown): string {
+  return typeof requested === 'string' && /^momentum(-[a-z0-9]+)+$/.test(requested) ? requested : 'momentum';
+}
+
+export const DB_NAME = databaseName(import.meta.env.VITE_MOMENTUM_DB);
 export const DB_VERSION = SCHEMA_VERSION;
 
 export const STORES = {

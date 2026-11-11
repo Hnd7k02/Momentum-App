@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../core/clock';
 import { weeklyTargetIn } from '../core/domains';
 import { SCHEMA_VERSION } from '../core/model';
-import { ALL_STORES, closeDatabase, deleteDatabase, openDatabase } from './db';
+import { ALL_STORES, DB_NAME, closeDatabase, databaseName, deleteDatabase, openDatabase } from './db';
 import {
   answersRepository,
   configSnapshotsRepository,
@@ -49,6 +49,23 @@ describe('database', () => {
     expect(await questionsRepository.list()).toEqual([]);
     expect(await answersRepository.getAll()).toEqual([]);
     expect(await settingsRepository.get()).toBeUndefined();
+  });
+
+  it('is named "momentum" in the ordinary build', async () => {
+    // The live app's data lives under this name; it must never move.
+    expect(DB_NAME).toBe('momentum');
+    expect((await openDatabase()).name).toBe('momentum');
+    expect(databaseName(undefined)).toBe('momentum');
+    expect(databaseName('')).toBe('momentum');
+  });
+
+  it('lets a preview build name its own database, and nothing else', () => {
+    expect(databaseName('momentum-preview')).toBe('momentum-preview');
+    expect(databaseName('momentum-preview-2')).toBe('momentum-preview-2');
+    // Not this app's form: ignored rather than opened.
+    for (const other of ['preview', 'momentum', 'momentum-', 'Momentum-Preview', 'momentum preview', '../momentum', 7, null]) {
+      expect(databaseName(other)).toBe('momentum');
+    }
   });
 });
 
