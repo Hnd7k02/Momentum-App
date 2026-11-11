@@ -437,15 +437,24 @@ for (const [width, height] of SIZES) {
     check(`${W}: B9 the toast is stacked below the sheet layer`, layers.toast < scrim, short({ ...layers, scrim }));
     // The sheet dismisses the toast in an effect, so the toast goes a frame
     // or two after the sheet appears — under the sheet's layer for that long
-    // (the check above), and gone before anyone could reach for it. This
-    // waits for that instead of sampling the instant after the sheet was
-    // attached: with three suites running, the software renderer's first
-    // frame of a glass sheet is long enough for a sample to land inside it
-    // (WP3 Stage 6b; the suite passed alone and failed at a different width
-    // in each parallel run).
-    const toastGone = await page.locator('.toast').waitFor({ state: 'detached', timeout: 1000 }).then(() => true, () => false);
-    check(`${W}: B9 opening the run sheet dismisses the toast, within a second`,
-      toastGone && (await page.locator('.toast').count()) === 0, `${Date.now() - sheetOpened} ms after the sheet · ${await page.locator('.toast').count()} left`);
+    // (the check above). This waits for that instead of sampling the instant
+    // after the sheet was attached: with three suites running, the software
+    // renderer's first frame of a glass sheet is long enough for a sample to
+    // land inside it (WP3 Stage 6b; the suite passed alone and failed at a
+    // different width in each parallel run).
+    //
+    // The bound is the sheet's own arrival, `--duration-sheet`: the toast is
+    // gone before the sheet has finished coming up, so the two are never on
+    // screen together at rest (STOP 6b; it measured 4–8 ms).
+    const sheetMs = await page.evaluate(() => {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--duration-sheet').trim();
+      return raw.endsWith('ms') ? parseFloat(raw) : parseFloat(raw) * 1000;
+    });
+    const toastGone = await page.locator('.toast').waitFor({ state: 'detached', timeout: Math.max(1, sheetMs) }).then(() => true, () => false);
+    const toastTook = Date.now() - sheetOpened;
+    check(`${W}: B9 opening the run sheet dismisses the toast, before the sheet has arrived (${sheetMs} ms)`,
+      sheetMs === 320 && toastGone && toastTook <= sheetMs && (await page.locator('.toast').count()) === 0,
+      `${toastTook} ms after the sheet · ${await page.locator('.toast').count()} left`);
     const save = await page.locator('.sheet__footer button.button--primary').boundingBox();
     const onSave = save
       ? await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('.sheet') !== null, [save.x + save.width / 2, save.y + save.height - 4])
