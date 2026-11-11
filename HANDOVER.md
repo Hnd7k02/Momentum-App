@@ -601,8 +601,12 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   `prompt-farbregeln-muskelstatus.md`, `prompt-5b-kennzahl.md`,
   `prompt-7a-koerpermodell.md`, `prompt-7b-interaktion.md`,
   `prompt-7c-muskel-sheet.md`, `prompt-9-haertung.md`,
-  `prompt-aufraeumen.md`. Written on 2026-11-11; the first has run, the
-  next is `prompt-5b-kennzahl.md`.
+  `prompt-aufraeumen.md`. Written on 2026-11-11; the first has run.
+  **Changed by the owner in the night of 2026-11-11:** block 7A is pulled
+  before 5b and runs in the session that built the colour rules, up to its
+  gate; the colour rules are not waited on — he accepts them on his iPhone
+  the next day, and what he finds is corrected before 7B. After the gate
+  of 7A the order is his to state again (5b is still to run).
 - **Block 7A takes a different road from D156.** The owner asked for a new
   base model from MakeHuman, built by script after the guide on his
   reference page, with a gate before anything is swapped in the app; if the
@@ -895,6 +899,38 @@ owner's acceptance on his iPhone**)
   (https://hnd7k02.github.io/Momentum-preview/), built with
   `VITE_MOMENTUM_DB=momentum-preview`; the status bar stays `default`
   (D163). It starts empty — the owner imports his backup there.
+
+**WP3 Block 7A — the body model** (branch `claude/momentum-wp3`, not
+merged; **in progress, runs up to its gate and stops there**)
+- **How this block is run.** Started by the owner on 2026-11-11, late, in
+  the session of the colour rules, from
+  `docs/wp3/prompts/prompt-7a-koerpermodell.md`. His points on the first
+  MakeHuman proof: **none — build by the guide.** He decides at the gate
+  the next day. The session may be cut off by its usage limit; two
+  messages are scheduled into it (03:00 and 06:00 Zurich on 2026-11-12)
+  that say: read this file and `git log`, go on where the work stopped, up
+  to the gate; if the gate is reached, do nothing. So every finished step
+  is committed, pushed and ticked here.
+- **Nothing is swapped in the app before the gate**, and the app's logic
+  does not change at all in this block: `src/core`, `src/storage`,
+  `muscleState.ts`, every golden file and fingerprint stay as they are.
+- **Where it stands** (update this list with every step):
+  - [ ] Step 0 — baseline and tooling
+  - [ ] Step 1 — the decision that supplements D156
+  - [ ] Step 2 — the pipeline under `tools/body/`
+  - [ ] Step 3 — measuring: today's body and the proof
+  - [ ] Step 4 — the candidates
+  - [ ] Step 5 — light, material, tone mapping (on a candidate, in
+    `#/dev/body` only)
+  - [ ] Step 6 — the gate: the comparison sheet, the checklist, STOP
+- **Baseline for this block** is the closing run of the colour rules on
+  `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
+  only the record, the pictures and one line of a verify script): `tsc -b`
+  0; `npm run test` exit 0, 111 files, 1786 tests; build `index.css`
+  90.21 kB, `index.js` 507.06 kB; 37 browser suites with an exit code, 36
+  green, 4075 of 4076 checks, the one red being the offline check of
+  `release-proof.mjs`; `gym-muscles` 73/73, `body-reach` 3/3, `body`
+  39/39, `farbregeln` 319/319, each alone.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
