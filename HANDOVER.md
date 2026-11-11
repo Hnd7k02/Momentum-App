@@ -610,9 +610,8 @@ not merged; the choice between the variants is the owner's at STOP 6a)
 - **Block 7A takes a different road from D156.** The owner asked for a new
   base model from MakeHuman, built by script after the guide on his
   reference page, with a gate before anything is swapped in the app; if the
-  gate fails, stage 1 on today's model stands as D156 has it. Block 7A
-  itself records this as a decision that supplements D156 — it is not in
-  `docs/decisions.md` yet.
+  gate fails, stage 1 on today's model stands as D156 has it. Recorded as
+  **D165**, which supplements D156.
 - **Reserved, not touched in WP3** (D158): `bossService.ts:217` fills
   `recordedScore` with `entry.score` — its own scoring gate, as its own era.
 - **Recorded by the review, corrected in the tidy-up block:** the offline
@@ -915,8 +914,19 @@ merged; **in progress, runs up to its gate and stops there**)
   does not change at all in this block: `src/core`, `src/storage`,
   `muscleState.ts`, every golden file and fingerprint stay as they are.
 - **Where it stands** (update this list with every step):
-  - [ ] Step 0 — baseline and tooling
-  - [ ] Step 1 — the decision that supplements D156
+  - [x] Step 0 — baseline and tooling. The baseline is the one below.
+    Tooling: Python 3.13.18 with numpy 2.5.3, Node 22, PyPI reachable.
+    `bpy` 5.3.0 installs from PyPI but does not import in this container
+    (`libtbb.so.12` is missing), so the pipeline uses numpy and Node only —
+    which also keeps the build light and byte-reproducible. The reference
+    page was read with the Artifact tool (the guide, `build_mh.py`,
+    `label_mh.py`, `refine-body.mjs`, the two pictures of today's body and
+    of the proof); its third-party reference pictures were not downloaded
+    and never enter the repository. The data wheel `anny==0.6.2` downloads
+    (47.7 MB, sha256 `bad70bdc2be0dfa9880d60129c3a1339678f08f493184f637dc2825c3e27b8d2`);
+    only `anny/data/mpfb2/` is unpacked (1489 files, 66 MB), and its
+    `LICENSE.md` is the full text of CC0 1.0 Universal.
+  - [x] Step 1 — the decision that supplements D156: **D165**.
   - [ ] Step 2 — the pipeline under `tools/body/`
   - [ ] Step 3 — measuring: today's body and the proof
   - [ ] Step 4 — the candidates

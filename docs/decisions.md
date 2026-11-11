@@ -3575,6 +3575,10 @@ official licence page (updated 2025-02-27) names CC BY 4.0. The GitHub mirror
 declares its converted files CC BY-SA 2.1 Japan, so it serves the proof and
 nothing that ships.
 
+*Status (2026-11-11, D165):* the proof gate with BodyParts3D is replaced by a
+gate on a new base model from MakeHuman. Stage 1 on today's model stays the
+fallback if that gate fails.
+
 ## D157 — The public repository is tidied without rewriting history; the app is all rights reserved
 
 **Decision (owner, 2026-11-11).** `momentumpreview 2.zip`,
@@ -4045,3 +4049,40 @@ the replaced phrase is gone from the Gym area.
 `features/gym/muscleGap.ts`, `features/body/tokens.ts`,
 `styles/tokens.css`, `core/config/constants.ts` (`MUSCLE_TREND_RANGES`),
 `storage/db.ts` (`databaseName`), `scripts/verify/farbregeln.mjs`.
+
+## D165 — The body's new base model comes from MakeHuman, behind a gate
+
+**Decision (owner, 2026-11-11), supplements D156.** The new base model is
+built from MakeHuman — the base mesh, targets and default rig as MPFB2
+ships them, CC0 1.0 — by script: shaped with the macro and local targets,
+posed with the rig, divided into the ten regions and the inert zone, given
+relief, and then passed through `refine-body.mjs` (borders along the
+grooves, a baked shade, quantization). No Blender by hand; everything is a
+script in a cloud session and reproducible: the same input gives a
+byte-identical GLB.
+
+This replaces D156's proof gate with BodyParts3D. BodyParts3D stays only as
+a possible source of relief (the guide's "way B"), only from its official
+source, and with attribution.
+
+**There is a gate, and nothing is swapped in the app before it.** The owner
+is shown candidates — at most three body types and two heads, as chosen
+pairs — against today's body, with the measurements of the guide
+(`koerper-anleitung-7a.md` on his reference page, section 3), and chooses a
+pair, a pair with at most three corrections, or none. The gate is boxed to
+one session and holds no other block up (D159).
+
+**If the gate fails,** stage 1 on today's model stands as D156 has it, and
+the body moves behind WP3.
+
+**The owner's points on the first proof** (2026-11-11, at the start of the
+block): none — build by the guide. The proof is not a target and its
+parameters are not a specification.
+
+**The data.** The MakeHuman data are taken from the PyPI wheel
+`anny==0.6.2` (sha256 `bad70bdc…27b8d2`), and from it only the folder
+`anny/data/mpfb2/`, never the package's code. Its `LICENSE.md` was read in
+full on 2026-11-11: it is the text of Creative Commons CC0 1.0 Universal.
+
+*The outcome of the gate is entered here when the owner has decided.*
+
