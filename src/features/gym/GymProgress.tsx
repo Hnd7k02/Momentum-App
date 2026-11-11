@@ -16,7 +16,7 @@ import { toMuscleAnalytics } from './muscleAnalytics';
 import { MUSCLE_STATE_KEYS } from '../../components/BodyRenderer';
 import { changeWords } from './changeWords';
 import { exerciseDaysText, muscleGap, muscleGapText } from './muscleGap';
-import { shownChangeText, shownPerformance } from './muscleState';
+import { exerciseGroups, shownChangeText, shownPerformance } from './muscleState';
 import { percentChange } from '../../core/gym/performance';
 import './gym.css';
 import { useWeights } from '../../app/useWeights';
@@ -82,11 +82,16 @@ export function GymProgress({
     [shown, t],
   );
 
-  /** The exercises that reached the selected group, newest comparison first. */
+  /**
+   * The exercises of the selected group, by name — by the membership the
+   * state and the exercise days are counted with (`exerciseGroups`), so the
+   * list under a chosen row is the evidence its figure rests on.
+   */
   const exercises = useMemo(() => {
+    const membership = exerciseGroups(history.days);
     const ids = new Set(
       history.days
-        .filter((day) => selected === null || day.muscles.includes(selected))
+        .filter((day) => selected === null || (membership.get(day.exerciseId)?.includes(selected) ?? false))
         .map((day) => day.exerciseId),
     );
     return [...ids]

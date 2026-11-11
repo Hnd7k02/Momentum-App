@@ -96,29 +96,24 @@ export function shownChangeText(change: number | null): string | null {
 }
 
 /**
- * How many exercise days each group has in the loaded range.
+ * Which groups each exercise of the range belongs to: the groups it gives a
+ * weight above zero, by its roles **as of its latest recorded day** there.
  *
- * An **exercise day** is one exercise on one day — one entry of
- * `GymHistory.days` — and it counts for every group that exercise gives a
- * weight above zero. Bench press and incline press on Monday and bench
- * press on Thursday are three exercise days for the chest, on two calendar
- * days.
+ * **This is the domain's answer, not a second one.** `musclePerformance()`
+ * takes an exercise's groups and roles from its latest day in the range and
+ * lets every comparison of that exercise speak for those groups. Everything
+ * on the screen that asks "does this exercise belong to this group" — the
+ * count of exercise days, when a group was last trained, the trend's days,
+ * the exercises listed for a chosen group — reads this one map, so none of
+ * them can part from the state and the figure beside it.
  *
- * **Which groups an exercise belongs to is the domain's answer, not a
- * second one.** `musclePerformance()` takes an exercise's groups and roles
- * from its latest recorded day in the range and lets every comparison of
- * that exercise speak for those groups; the count follows it, day for day.
- * Counting each day by its own roles instead would part from the figure it
- * is the evidence for the moment an exercise's mapping changed inside a
- * range: a group could then be untrained in the domain with three exercise
- * days, or print a figure that rests on days it was never counted for.
- * While the mapping does not change — which is every range but the one
- * across such an edit — the two readings are the same number.
+ * Reading each day by its own roles instead agrees with it in every range
+ * but one: the range across an edit of an exercise's mapping. There it left
+ * a group untrained in the domain with three exercise days and a "Vor 3
+ * Tagen" under its name, or a figure resting on days that were not counted
+ * for it.
  */
-export function exerciseDayCounts(days: readonly ExerciseDay[]): Record<MuscleGroup, number> {
-  const counts = Object.fromEntries(MUSCLE_GROUPS.map((muscle) => [muscle, 0])) as Record<MuscleGroup, number>;
-
-  /** An exercise's roles as of its latest day, as `musclePerformance()` reads them. */
+export function exerciseGroups(days: readonly ExerciseDay[]): Map<string, readonly MuscleGroup[]> {
   const latest = new Map<string, ExerciseDay>();
   for (const day of days) {
     const known = latest.get(day.exerciseId);
@@ -126,16 +121,34 @@ export function exerciseDayCounts(days: readonly ExerciseDay[]): Record<MuscleGr
     // replace what is known; `>=` keeps the last one listed all the same.
     if (!known || day.date >= known.date) latest.set(day.exerciseId, day);
   }
-
-  for (const day of days) {
-    const from = latest.get(day.exerciseId) ?? day;
+  const groups = new Map<string, readonly MuscleGroup[]>();
+  for (const [exerciseId, day] of latest) {
     const roles =
-      from.primaryMuscles === undefined
-        ? { muscles: from.muscles }
-        : { muscles: from.muscles, primary: from.primaryMuscles };
-    for (const { muscle, weight } of muscleWeights(roles)) {
-      if (weight > 0) counts[muscle] += 1;
-    }
+      day.primaryMuscles === undefined
+        ? { muscles: day.muscles }
+        : { muscles: day.muscles, primary: day.primaryMuscles };
+    groups.set(
+      exerciseId,
+      muscleWeights(roles).filter((entry) => entry.weight > 0).map((entry) => entry.muscle),
+    );
+  }
+  return groups;
+}
+
+/**
+ * How many exercise days each group has in the loaded range.
+ *
+ * An **exercise day** is one exercise on one day — one entry of
+ * `GymHistory.days` — and it counts for every group the exercise belongs to
+ * (`exerciseGroups`). Bench press and incline press on Monday and bench
+ * press on Thursday are three exercise days for the chest, on two calendar
+ * days.
+ */
+export function exerciseDayCounts(days: readonly ExerciseDay[]): Record<MuscleGroup, number> {
+  const counts = Object.fromEntries(MUSCLE_GROUPS.map((muscle) => [muscle, 0])) as Record<MuscleGroup, number>;
+  const groups = exerciseGroups(days);
+  for (const day of days) {
+    for (const muscle of groups.get(day.exerciseId) ?? []) counts[muscle] += 1;
   }
   return counts;
 }

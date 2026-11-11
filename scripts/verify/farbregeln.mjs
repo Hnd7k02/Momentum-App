@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, summary, textContrast } from './lib.mjs';
 
@@ -25,8 +25,8 @@ import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, summary, t
  *            replaced words anywhere on the Gym screens
  *
  * `SHOTS=<dir>` (default docs/design/wp3/farbregeln) receives the
- * screenshots of the block at 320, 360, 393 and 430 and the five pictures of
- * the body; `WIDTHS=393` narrows the run. `CLOCK=YYYY-MM-DD`, default
+ * screenshots of the block at 320, 360, 393 and 430 and the pictures of the
+ * body; `WIDTHS=393` narrows the run. `CLOCK=YYYY-MM-DD`, default
  * 2026-11-11.
  */
 const OUT = process.env.SHOTS ?? 'docs/design/wp3/farbregeln';
@@ -248,8 +248,21 @@ const coloursOnScreen = (page) =>
     }
     return { values: [...seen], elements };
   });
-/** The values among `drawn` that contain one of `colours`, e.g. inside a gradient. */
-const carrying = (drawn, colours) => drawn.values.filter((value) => colours.some((colour) => value.includes(colour)));
+/** Every colour written in a computed value, whatever its alpha: `rgb()`, `rgba()` and `color(srgb …)`. */
+const coloursIn = (value) => [
+  ...[...String(value).matchAll(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2]), Number(m[3])]),
+  ...[...String(value).matchAll(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/g)].map((m) => [Number(m[1]) * 255, Number(m[2]) * 255, Number(m[3]) * 255]),
+];
+/**
+ * The values among `drawn` that carry one of `colours` — as a solid colour,
+ * at any transparency, or as a stop of a gradient or a shadow. Compared by
+ * the three channels, so a yellow at 30 % is still the yellow.
+ */
+const carrying = (drawn, colours) => {
+  const wanted = colours.flatMap(coloursIn);
+  return drawn.values.filter((value) =>
+    coloursIn(value).some(([r, g, b]) => wanted.some(([wr, wg, wb]) => Math.abs(r - wr) <= 1 && Math.abs(g - wg) <= 1 && Math.abs(b - wb) <= 1)));
+};
 
 const scrollTo = (page, selector, offset = 8) =>
   page.locator(selector).first().evaluate((el, offset) => {
@@ -257,7 +270,8 @@ const scrollTo = (page, selector, offset = 8) =>
     if (scroller) scroller.scrollTop += el.getBoundingClientRect().top - scroller.getBoundingClientRect().top - offset;
   }, offset);
 const scrollTop = (page) => page.evaluate(() => { for (const s of document.querySelectorAll('.areas__scroll')) s.scrollTop = 0; });
-const shot = (page, width, name) => page.screenshot({ path: `${OUT}/${width}-${name}.png` });
+// The screens as JPEG, like the Stage 6b set; the body's pictures stay PNG, because their pixels are read.
+const shot = (page, width, name) => page.screenshot({ path: `${OUT}/${width}-${name}.jpg`, type: 'jpeg', quality: 82 });
 
 const pressRange = async (page, label) => {
   await page.getByRole('button', { name: label, exact: true }).click();
@@ -273,10 +287,13 @@ const tooFaint = (runs) =>
 /**
  * `textContrast` leaves out a run that is not wholly in view or lies under
  * another element, so "nothing is too faint" proves nothing by itself. A
- * check names the runs it is about — by the start of their text — and holds
- * that each was measured, with its ratio.
+ * check names the runs it is about — by the class of their element (a `dt`
+ * or `dd` by its tag) and the start of their text, so that a row's
+ * "Gehalten" cannot stand in for the legend's — and holds that each was
+ * measured, with its ratio.
  */
-const measured = (runs, starts) => starts.map((start) => runs.find((r) => r.text.startsWith(start)) ?? null);
+const measured = (runs, wanted) =>
+  wanted.map(([className, start]) => runs.find((r) => r.className.startsWith(className) && r.text.startsWith(start)) ?? null);
 const lowest = (runs) => runs.reduce((min, r) => (min === null || r.ratio < min ? r.ratio : min), null);
 const sideways = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
@@ -398,9 +415,13 @@ for (const width of WIDTHS) {
   const yellows = [T['--status-mixed'], T['--status-mixed-ink'], T['--status-mixed-tint']];
   // The scan must be able to see: the three yellows are real, distinct
   // colours here, and the colours it is expected to find are found.
+  // …and it sees a yellow that is not a plain colour: at 30 %, in a gradient, in a shadow.
+  const [yr, yg, yb] = coloursIn(T['--status-mixed'])[0] ?? [];
+  const disguised = { elements: 1, values: [`rgba(${yr}, ${yg}, ${yb}, 0.3)`, `linear-gradient(rgb(0, 0, 0), rgba(${yr}, ${yg}, ${yb}, 0.5))`, `rgb(${yr}, ${yg}, ${yb}) 0px 0px 4px 0px`, `color(srgb ${yr / 255} ${yg / 255} ${yb / 255} / 0.4)`] };
   check(`${W}: the scan for yellow reads the page: ${drawn.elements} elements, and finds the green and the red that are there`,
-    new Set(yellows).size === 3 && yellows.every((c) => /^rgb/.test(c)) && drawn.elements > 150
-      && carrying(drawn, [T['--status-strong-ink']]).length > 0 && carrying(drawn, [T['--status-weak-ink']]).length > 0 && carrying(drawn, [T['--sky-tint']]).length > 0,
+    new Set(yellows).size === 3 && yellows.every((c) => coloursIn(c).length === 1) && drawn.elements > 150
+      && carrying(drawn, [T['--status-strong-ink']]).length > 0 && carrying(drawn, [T['--status-weak-ink']]).length > 0 && carrying(drawn, [T['--sky-tint']]).length > 0
+      && carrying(disguised, yellows).length === 4 && carrying(disguised, [T['--status-strong-ink']]).length === 0,
     `${drawn.elements} elements, ${drawn.values.length} values, yellows ${yellows.join(' ')}`);
   check(`${W}: nothing on Muskelgruppen is drawn in the warning yellow — text, fills, borders, shadows, gradients, pseudo-elements`,
     carrying(drawn, yellows).length === 0, carrying(drawn, yellows).join(' | '));
@@ -423,8 +444,13 @@ for (const width of WIDTHS) {
   await page.waitForTimeout(400);
   await shot(page, width, 'muskelgruppen-30-zeilen');
   const upperRuns = await textContrast(page);
-  const upperNamed = measured(upperRuns, ['Verbessert', 'Gehalten', 'Zurückgegangen', 'Zu wenig Vergleichsdaten', 'Noch nicht trainiert', 'Brust', `+9${NBSP}%`, `0${NBSP}%`]);
-  check(`${W}: the legend row and the first rows were measured (${upperRuns.length} runs, lowest ${lowest(upperRuns)})`,
+  const upperNamed = measured(upperRuns, [
+    ['muscle-legend__item', 'Verbessert'], ['muscle-legend__item', 'Gehalten'], ['muscle-legend__item', 'Zurückgegangen'],
+    ['muscle-legend__item', 'Zu wenig Vergleichsdaten'], ['muscle-legend__item', 'Noch nicht trainiert'],
+    ['muscle-row__name', 'Brust'], ['muscle-row__delta', `+9${NBSP}%`], ['muscle-row__state', 'Verbessert'],
+    ['muscle-row__delta', `0${NBSP}%`], ['muscle-row__state', 'Gehalten'], ['muscle-row__sub', 'Vor 2 Tagen'],
+  ]);
+  check(`${W}: the five items of the legend row and the first rows were measured (${upperRuns.length} runs, lowest ${lowest(upperRuns)})`,
     upperRuns.length >= 12 && upperNamed.every(Boolean), upperNamed.map((r, i) => (r ? r.ratio : `missing #${i}`)).join(' '));
   check(`${W}: every text at the rows reads at 4.5:1 (3:1 large)`, tooFaint(upperRuns).length === 0, tooFaint(upperRuns).join(' | '));
   // The lower rows carry the two chips and the red figures; bring them into
@@ -432,8 +458,12 @@ for (const width of WIDTHS) {
   await scrollTo(page, '.muscle-row:nth-child(6)', 12);
   await page.waitForTimeout(400);
   const lowerRuns = await textContrast(page);
-  const lowerNamed = measured(lowerRuns, ['Zu wenig Vergleichsdaten', 'Noch nicht trainiert', `${MINUS}3${NBSP}%`, `${MINUS}8${NBSP}%`, 'Zurückgegangen', 'Waden']);
-  check(`${W}: the chips and the red figures were measured (${lowerRuns.length} runs, lowest ${lowest(lowerRuns)})`,
+  const lowerNamed = measured(lowerRuns, [
+    ['muscle-row__badge', 'Zu wenig Vergleichsdaten'], ['muscle-row__badge', 'Noch nicht trainiert'],
+    ['muscle-row__delta', `${MINUS}3${NBSP}%`], ['muscle-row__delta', `${MINUS}8${NBSP}%`], ['muscle-row__state', 'Zurückgegangen'],
+    ['muscle-row__name', 'Waden'], ['muscle-row__sub', 'Vor 9 Tagen'],
+  ]);
+  check(`${W}: both kinds of chip, the red figures and the count of exercise days were measured (${lowerRuns.length} runs, lowest ${lowest(lowerRuns)})`,
     lowerNamed.every(Boolean), lowerNamed.map((r, i) => (r ? `${r.text} ${r.ratio}` : `missing #${i}`)).join(' · '));
   check(`${W}: the blue chip is the sky ink on the sky tint, measured on its pixels`,
     Boolean(lowerNamed[0]) && lowerNamed[0].ratio >= 4.5, short(lowerNamed[0]));
@@ -474,9 +504,14 @@ for (const width of WIDTHS) {
     ]), short(sheet.states, 400));
   check(`${W}: the sheet is not wider than the screen`, sheet.overflow !== null && sheet.overflow <= 0 && (await sideways(page)) <= 0, String(sheet.overflow));
   const sheetRuns = await textContrast(page);
-  const sheetNamed = measured(sheetRuns, ['Legende', 'Die Farbe zeigt', 'Verbessert', 'Ab +3', 'Gehalten', `${MINUS}2`, 'Zurückgegangen', `Ab ${MINUS}3`, 'Zu wenig Vergleichsdaten', 'Weniger als drei', 'Noch nicht trainiert', 'Kein Satz im Zeitraum', 'Ein Übungstag ist']);
+  const sheetNamed = measured(sheetRuns, [
+    ['muscle-legend-sheet__lead', 'Die Farbe zeigt'],
+    ['DT', 'Verbessert'], ['DD', 'Ab +3'], ['DT', 'Gehalten'], ['DD', `${MINUS}2`], ['DT', 'Zurückgegangen'], ['DD', `Ab ${MINUS}3`],
+    ['DT', 'Zu wenig Vergleichsdaten'], ['DD', 'Weniger als drei'], ['DT', 'Noch nicht trainiert'], ['DD', 'Kein Satz im Zeitraum'],
+    ['muscle-legend-sheet__note', 'Ein Übungstag ist'],
+  ]);
   check(`${W}: every line of the legend sheet was measured (${sheetRuns.length} runs, lowest ${lowest(sheetRuns)})`,
-    sheetNamed.every(Boolean), sheetNamed.map((r, i) => (r ? r.ratio : `missing #${i}`)).join(' '));
+    sheetNamed.every(Boolean) && sheetRuns.some((r) => r.text === 'Legende'), sheetNamed.map((r, i) => (r ? r.ratio : `missing #${i}`)).join(' '));
   check(`${W}: every text in the legend sheet reads at 4.5:1 (3:1 large)`, tooFaint(sheetRuns).length === 0, tooFaint(sheetRuns).join(' | '));
   const sheetDrawn = await coloursOnScreen(page);
   check(`${W}: nothing in the legend sheet is drawn in the warning yellow`,
@@ -593,18 +628,30 @@ for (const width of WIDTHS) {
   }
 }
 
-/* ── the body: five pictures, and what their pixels say ──────────────── */
+/* ── the body: its pictures, and what their pixels say ───────────────── */
+
+/**
+ * The zones a picture of the body is read in, as shares of the frame: the
+ * middle sixth of its width — the trunk and the legs, without the
+ * shoulders, arms and hands beside them — and three bands of its height.
+ * From the front they are the chest, the quadriceps and the calves; from
+ * the back the upper back, the hamstrings and the calves.
+ */
+const ZONES = { upper: [0.26, 0.36], thigh: [0.5, 0.68], calf: [0.72, 0.84] };
+const ZONE_X = [0.42, 0.58];
 
 /**
  * The picture of the body as numbers (contract §7, §8). Every pixel that is
  * not the dark card is classified in CIELAB: green or red by its a*, white
- * by its lightness, dimmed below it. With a second picture taken from the
- * same angle, the pixels that differ are split into the upper and the lower
- * half of the frame, and each half reports how far it moved and which way.
- * Read from the PNG the suite saves, so what is measured is what is shown.
+ * by its lightness, dimmed below it. With a second picture from the same
+ * angle, each zone reports how the lit pixels of the two differ: the share
+ * that moved by more than 3 ΔE, and the median — over **all** lit pixels
+ * of the zone, moved or not — of the difference and of its three parts:
+ * lightness (dL), green–red (dA) and blue–yellow (dB). Read from the PNG
+ * the suite saves, so what is measured is what is shown.
  */
 const readBody = (page, png, against = null) =>
-  page.evaluate(async ({ png, against }) => {
+  page.evaluate(async ({ png, against, zones, zoneX }) => {
     const load = async (b64) => {
       const img = new Image();
       img.src = `data:image/png;base64,${b64}`;
@@ -635,7 +682,7 @@ const readBody = (page, png, against = null) =>
       for (let x = 0; x < a.w; x += 2) {
         const i = (y * a.w + x) * 4;
         const [L, A] = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
-        if (L < 45) continue; // the card behind the body, and the view pills
+        if (L < 45) continue; // the card behind the body
         count.body += 1;
         lightness += L;
         if (A < -5) count.green += 1;
@@ -644,53 +691,68 @@ const readBody = (page, png, against = null) =>
         else if (L < 80) count.dimmed += 1;
       }
     }
-    const share = (n) => Math.round((n / Math.max(1, count.body)) * 1000) / 1000;
+    const share = (n, of) => Math.round((n / Math.max(1, of)) * 1000) / 1000;
     const out = {
-      body: count.body, green: share(count.green), red: share(count.red), white: share(count.white), dimmed: share(count.dimmed),
+      body: count.body, green: share(count.green, count.body), red: share(count.red, count.body),
+      white: share(count.white, count.body), dimmed: share(count.dimmed, count.body),
       lightness: round(lightness / Math.max(1, count.body)),
     };
     if (!against) return out;
 
     const b = await load(against);
     if (b.w !== a.w || b.h !== a.h) return { ...out, sameFrame: false };
-    const halves = { upper: { dE: [], dA: [] }, lower: { dE: [], dA: [] } };
-    for (let y = 0; y < a.h; y += 2) {
-      for (let x = 0; x < a.w; x += 2) {
-        const i = (y * a.w + x) * 4;
-        const p = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
-        const q = lab(b.data[i], b.data[i + 1], b.data[i + 2]);
-        if (q[0] < 60) continue; // lit body in the picture it is compared with
-        const dE = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
-        if (dE <= 3) continue;
-        const half = y < a.h * 0.48 ? halves.upper : halves.lower;
-        half.dE.push(dE);
-        half.dA.push(p[1] - q[1]);
+    const result = { ...out, sameFrame: true };
+    for (const [name, [from, to]] of Object.entries(zones)) {
+      const dE = [], dL = [], dA = [], dB = [];
+      let moved = 0;
+      for (let y = Math.round(a.h * from); y < Math.round(a.h * to); y += 2) {
+        for (let x = Math.round(a.w * zoneX[0]); x < Math.round(a.w * zoneX[1]); x += 2) {
+          const i = (y * a.w + x) * 4;
+          const p = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
+          const q = lab(b.data[i], b.data[i + 1], b.data[i + 2]);
+          if (p[0] < 45 || q[0] < 45) continue; // lit body in both pictures
+          const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+          dE.push(d); dL.push(p[0] - q[0]); dA.push(p[1] - q[1]); dB.push(p[2] - q[2]);
+          if (d > 3) moved += 1;
+        }
       }
+      result[name] = { pixels: dE.length, moved: share(moved, dE.length), dE: round(median(dE)), dL: round(median(dL)), dA: round(median(dA)), dB: round(median(dB)) };
     }
-    return {
-      ...out,
-      sameFrame: true,
-      upper: { pixels: halves.upper.dE.length, dE: round(median(halves.upper.dE)), dA: round(median(halves.upper.dA)) },
-      lower: { pixels: halves.lower.dE.length, dE: round(median(halves.lower.dE)), dA: round(median(halves.lower.dA)) },
-    };
-  }, { png: png.toString('base64'), against: against ? against.toString('base64') : null });
+    return result;
+  }, { png: png.toString('base64'), against: against ? against.toString('base64') : null, zones: ZONES, zoneX: ZONE_X });
 
 if (process.env.NO_BODY) {
-  console.log('NO_BODY: the five pictures of the body and their pixel checks were skipped.');
+  console.log('NO_BODY: the pictures of the body and their pixel checks were skipped.');
 } else {
   const pictures = {};
+  /**
+   * A picture of the body once it stands still: the tints ease in and a
+   * turn coasts, and the viewer has no "settled" signal, so the frame is
+   * taken until two in a row are the same picture.
+   */
   const bodyShot = async (page, name) => {
     const box = await page.locator('.body-viewer').first().boundingBox();
     check(`body ${name}: the 3D body is drawn`, Boolean(box) && box.width > 200 && box.height > 200, box ? `${Math.round(box.width)}×${Math.round(box.height)}` : 'no .body-viewer');
     if (!box) return;
-    pictures[name] = await page.screenshot({ path: `${OUT}/koerper-${name}.png`, clip: box });
+    let previous = null;
+    let frame = null;
+    let still = false;
+    for (let attempt = 0; attempt < 20 && !still; attempt += 1) {
+      frame = await page.screenshot({ clip: box });
+      still = previous !== null && frame.equals(previous);
+      previous = frame;
+      if (!still) await page.waitForTimeout(350);
+    }
+    check(`body ${name}: the picture was taken of a body that stands still`, still);
+    writeFileSync(`${OUT}/koerper-${name}.png`, frame);
+    pictures[name] = frame;
   };
   const turn = async (page, label) => {
     await page.getByRole('button', { name: label, exact: true }).click();
-    await page.waitForTimeout(3500);
+    await page.waitForTimeout(1200);
   };
   let probe = null;
-  for (const [name, lifts, back] of [['gemischt', MIXED, true], ['leer', null, false], ['gehalten', HELD, false], ['schwelle', EDGE, true]]) {
+  for (const [name, lifts] of [['gemischt', MIXED], ['leer', null], ['gehalten', HELD], ['schwelle', EDGE]]) {
     const { ctx, page } = await boot(393, lifts);
     await toHub(page);
     await openMuscles(page, { wait: 1200 });
@@ -703,7 +765,7 @@ if (process.env.NO_BODY) {
     await scrollTo(page, '.muscle-module', 4);
     await page.waitForTimeout(600);
     await bodyShot(page, `${name}-vorne`);
-    if (back) {
+    if (name !== 'leer') {
       await turn(page, 'Hinten');
       await bodyShot(page, `${name}-hinten`);
     }
@@ -715,15 +777,18 @@ if (process.env.NO_BODY) {
     }
   }
 
-  const have = ['leer-vorne', 'gehalten-vorne', 'schwelle-vorne', 'gemischt-vorne', 'gemischt-hinten'].every((name) => pictures[name]);
-  check('body: all five pictures were taken', have && probe !== null, Object.keys(pictures).join(', '));
+  const NEEDED = ['leer-vorne', 'gehalten-vorne', 'gehalten-hinten', 'schwelle-vorne', 'schwelle-hinten', 'gemischt-vorne', 'gemischt-hinten'];
+  const have = NEEDED.every((name) => pictures[name]);
+  check('body: every picture was taken', have && probe !== null, Object.keys(pictures).join(', '));
   if (have && probe) {
-    const empty = await readBody(probe.page, pictures['leer-vorne']);
-    const held = await readBody(probe.page, pictures['gehalten-vorne']);
-    const edge = await readBody(probe.page, pictures['schwelle-vorne'], pictures['gehalten-vorne']);
-    const mixed = await readBody(probe.page, pictures['gemischt-vorne']);
-    const mixedBack = await readBody(probe.page, pictures['gemischt-hinten']);
-    console.log('\n[the body, in numbers]', JSON.stringify({ empty, held, edge, mixed, mixedBack }));
+    const read = (name, against = null) => readBody(probe.page, pictures[name], against ? pictures[against] : null);
+    const empty = await read('leer-vorne');
+    const held = await read('gehalten-vorne');
+    const edge = await read('schwelle-vorne', 'gehalten-vorne');
+    const edgeBack = await read('schwelle-hinten', 'gehalten-hinten');
+    const mixed = await read('gemischt-vorne', 'gehalten-vorne');
+    const mixedBack = await read('gemischt-hinten', 'gehalten-hinten');
+    console.log('\n[the body, in numbers]', JSON.stringify({ empty, held, edge, edgeBack, mixed, mixedBack }));
 
     check('body, no data: a quiet grey figure — dimmed, with no white and no colour',
       empty.body > 3000 && empty.dimmed >= 0.6 && empty.white <= 0.08 && empty.green + empty.red <= 0.01, short(empty));
@@ -731,18 +796,36 @@ if (process.env.NO_BODY) {
       held.body > 3000 && held.white >= 0.45 && held.green + held.red <= 0.01, short(held));
     check('body: an untrained figure is clearly darker than a held one',
       held.lightness - empty.lightness >= 8 && held.white >= empty.white + 0.4, `held L ${held.lightness}, empty L ${empty.lightness}`);
-    // EDGE against HELD, same angle: the chest and the back are at +3 %, the
-    // quadriceps and the hamstrings at −3 %, everything else is held in both.
-    check('body, +3 % beside held: the chest has moved towards green, by a difference the eye can see (ΔE ≥ 5)',
-      edge.sameFrame === true && edge.upper.pixels >= 300 && edge.upper.dA <= -3 && edge.upper.dE >= 5, short(edge.upper));
-    check('body, −3 % beside held: the quadriceps have moved towards red, by a difference the eye can see (ΔE ≥ 5)',
-      edge.sameFrame === true && edge.lower.pixels >= 300 && edge.lower.dA >= 3 && edge.lower.dE >= 5, short(edge.lower));
-    check('body, +3 % beside held: the rest of the figure is still white',
-      edge.white >= 0.25 && edge.white < held.white, `white ${edge.white} of ${held.white}`);
-    check('body, mixed from the front: green, red, white and dimmed regions are all there',
-      mixed.green >= 0.05 && mixed.red >= 0.1 && mixed.white >= 0.05 && mixed.dimmed >= 0.05, short(mixed));
-    check('body, mixed from the back: the held back is white and the untrained calves dimmed, beside green shoulders',
-      mixedBack.green >= 0.02 && mixedBack.white >= 0.03 && mixedBack.dimmed >= 0.1, short(mixedBack));
+
+    // EDGE against HELD, same angle. The chest and the back are at +3 %,
+    // the quadriceps and the hamstrings at −3 %, everything else is held in
+    // both — the calves stand for "everything else".
+    const same = (a) => a.sameFrame === true;
+    // The zone also holds the strip under the chest that belongs to no group,
+    // so not every pixel of it moves; the median over all of them still must.
+    check('body, +3 % beside held: the chest has turned green — the median of every lit pixel of the zone, by a difference the eye can see (ΔE ≥ 5)',
+      same(edge) && edge.upper.pixels >= 300 && edge.upper.moved >= 0.5 && edge.upper.dA <= -3 && edge.upper.dE >= 5, short(edge.upper));
+    check('body, −3 % beside held: the quadriceps have turned red (ΔE ≥ 5)',
+      same(edge) && edge.thigh.pixels >= 300 && edge.thigh.moved >= 0.6 && edge.thigh.dA >= 3 && edge.thigh.dE >= 5, short(edge.thigh));
+    check('body, ±3 % beside held: the calves, held in both, are the same white',
+      same(edge) && edge.calf.pixels >= 100 && edge.calf.moved <= 0.1 && edge.calf.dE <= 1.5, short(edge.calf));
+    check('body, from the back: the back at +3 % has turned green, the hamstrings at −3 % red, the calves not at all',
+      same(edgeBack) && edgeBack.upper.dA <= -3 && edgeBack.upper.dE >= 5 && edgeBack.thigh.dA >= 3 && edgeBack.thigh.dE >= 5 && edgeBack.calf.moved <= 0.1,
+      short({ upper: edgeBack.upper, thigh: edgeBack.thigh, calf: edgeBack.calf }, 400));
+
+    // MIXED against HELD. From the front: the chest at +9 %, the quadriceps
+    // at −8 %, the calves untrained. From the back: the back held, the
+    // hamstrings with too little to compare, the calves untrained.
+    check('body, mixed: the untrained calves are dimmed — clearly darker than the same calves held, and no colour',
+      same(mixed) && mixed.calf.pixels >= 100 && mixed.calf.moved >= 0.8 && mixed.calf.dL <= -8 && Math.abs(mixed.calf.dA) <= 3, short(mixed.calf));
+    check('body, mixed: +9 % is greener than +3 %, and −8 % redder than −3 % — the strength grows with the change',
+      mixed.upper.dA < edge.upper.dA - 1 && mixed.thigh.dA > edge.thigh.dA + 1, `chest ${mixed.upper.dA} vs ${edge.upper.dA} · thigh ${mixed.thigh.dA} vs ${edge.thigh.dA}`);
+    check('body, mixed from the back: the held back is the same white as in the held figure',
+      same(mixedBack) && mixedBack.upper.pixels >= 300 && mixedBack.upper.moved <= 0.1, short(mixedBack.upper));
+    check('body, mixed from the back: the hamstrings, with too little to compare, are lightly blue — bluer than held, neither green nor red',
+      same(mixedBack) && mixedBack.thigh.moved >= 0.6 && mixedBack.thigh.dB <= -4 && Math.abs(mixedBack.thigh.dA) < Math.abs(mixedBack.thigh.dB) && mixedBack.thigh.dE >= 4, short(mixedBack.thigh));
+    check('body, mixed from the back: the untrained calves are dimmed there too',
+      same(mixedBack) && mixedBack.calf.moved >= 0.8 && mixedBack.calf.dL <= -8, short(mixedBack.calf));
     await probe.ctx.close();
   } else if (probe) {
     await probe.ctx.close();

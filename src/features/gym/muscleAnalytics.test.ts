@@ -119,6 +119,46 @@ describe('toMuscleAnalytics', () => {
     expect(view('chest').dataState).toBe('measured');
   });
 
+  it('a row never contradicts itself when an exercise\'s mapping changes inside the range', () => {
+    // The press counted for chest and triceps three times, then for the
+    // chest alone. The domain reads an exercise by its latest mapping: the
+    // triceps are untrained in this range — and the row says nothing else.
+    const dropped = historyOf([
+      day('2026-06-01', 'ex_press', ['chest', 'triceps'], ['chest'], [set(5, 60)]),
+      day('2026-06-03', 'ex_press', ['chest', 'triceps'], ['chest'], [set(5, 61)]),
+      day('2026-06-05', 'ex_press', ['chest', 'triceps'], ['chest'], [set(5, 62)]),
+      day('2026-06-08', 'ex_press', ['chest'], ['chest'], [set(5, 63)]),
+    ]);
+    const triceps = toMuscleAnalytics(dropped).find((v) => v.id === 'triceps')!;
+    expect(triceps).toMatchObject({
+      state: 'noData', dataState: 'no-history', delta: null, exerciseDays: 0,
+      lastTrainedAt: null, trend: [], latestExerciseLabel: null, latestExerciseIds: [],
+    });
+    expect(toMuscleAnalytics(dropped).find((v) => v.id === 'chest')).toMatchObject({ exerciseDays: 4, lastTrainedAt: '2026-06-08' });
+
+    // The other way round: the triceps were added on the last day. The
+    // domain's figure for them is the press's whole span; the row counts
+    // the same days, and its recency is the press's latest day.
+    const added = historyOf([
+      day('2026-06-01', 'ex_press', ['chest'], ['chest'], [set(5, 60)]),
+      day('2026-06-03', 'ex_press', ['chest'], ['chest'], [set(5, 61)]),
+      day('2026-06-05', 'ex_press', ['chest', 'triceps'], ['chest'], [set(5, 62)]),
+    ]);
+    const gained = toMuscleAnalytics(added).find((v) => v.id === 'triceps')!;
+    expect(gained).toMatchObject({ state: 'improved', exerciseDays: 3, lastTrainedAt: '2026-06-05', latestExerciseIds: ['ex_press'] });
+    expect(gained.delta).toBe(percentChange(310000 / 300000));
+    // Its line ends on its figure, like every row's.
+    expect(gained.trend[gained.trend.length - 1]!.value).toBe(gained.delta);
+    // In every history, with or without such a change: a recency exactly
+    // when the group has exercise days, and "untrained" exactly when not.
+    for (const history of [dropped, added, historyOf(INPUTS, NAMES)]) {
+      for (const view of toMuscleAnalytics(history)) {
+        expect(view.lastTrainedAt !== null, view.id).toBe(view.exerciseDays > 0);
+        expect(view.state === 'noData', view.id).toBe(view.exerciseDays === 0);
+      }
+    }
+  });
+
   it('gaps stay gaps: only training days appear, ascending, nothing between them', () => {
     const dates = view('chest').trend.map((p) => p.date);
     expect(dates).toEqual([...dates].sort());

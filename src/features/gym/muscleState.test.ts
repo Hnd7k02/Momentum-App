@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import {
   exerciseDays,
-  gymPerformance,
   gymPerformanceOverSpan,
   type ExerciseDay,
   type MusclePerformance,
@@ -11,6 +10,7 @@ import {
   HELD_BAND_PERCENT,
   MIN_EXERCISE_DAYS,
   exerciseDayCounts,
+  exerciseGroups,
   muscleStateOf,
   roundShown,
   shownChangeText,
@@ -240,9 +240,11 @@ describe('exercise days', () => {
       .toMatchObject({ state: 'improved', exerciseDays: 3, compared: true });
   });
 
-  it('never parts from the domain: a group has exercise days exactly when it is trained there', () => {
+  it('never parts from the domain: every count is the days of the exercises the domain gives the group', () => {
     // Every pairing of two mappings over three days of one exercise, with
-    // and without roles — in the day-by-day window and in the span.
+    // and without roles, beside a second exercise that reaches the triceps
+    // on its own. The expected count is worked out here, independently:
+    // the days of every exercise whose LATEST mapping names the group.
     const mappings: [MuscleGroup[], MuscleGroup[] | undefined][] = [
       [['chest'], ['chest']],
       [['chest', 'triceps'], ['chest']],
@@ -250,22 +252,31 @@ describe('exercise days', () => {
       [['triceps', 'shoulders'], ['triceps']],
       [['back', 'biceps', 'forearms'], ['back']],
     ];
+    let pairings = 0;
     for (const [early, earlyPrimary] of mappings) {
       for (const [late, latePrimary] of mappings) {
+        pairings += 1;
         const history = daysOf([
           day('2026-06-01', 'lift', early, earlyPrimary, 50),
           day('2026-06-03', 'lift', early, earlyPrimary, 52),
           day('2026-06-05', 'lift', late, latePrimary, 54),
-          day('2026-06-02', 'other', ['calves'], ['calves'], 40),
+          day('2026-06-02', 'pushdown', ['triceps'], ['triceps'], 30),
+          day('2026-06-04', 'pushdown', ['triceps'], ['triceps'], 31),
         ]);
         const counts = exerciseDayCounts(history);
-        for (const performance of [gymPerformanceOverSpan(history), gymPerformance(history)]) {
-          for (const entry of performance.muscles) {
-            expect(counts[entry.muscle] > 0, `${entry.muscle}: ${early} → ${late}`).toBe(entry.status !== 'noData');
-          }
+        const groups = exerciseGroups(history);
+        expect([...groups.get('lift')!].sort(), `${early} → ${late}`).toEqual([...late].sort());
+        const domain = gymPerformanceOverSpan(history);
+        for (const muscle of MUSCLE_GROUPS) {
+          const expected = (late.includes(muscle) ? 3 : 0) + (muscle === 'triceps' ? 2 : 0);
+          expect(counts[muscle], `${muscle}: ${early} → ${late}`).toBe(expected);
+          // And the domain agrees on who is trained at all.
+          const status = domain.muscles.find((entry) => entry.muscle === muscle)!.status;
+          expect(counts[muscle] > 0, `${muscle}: ${early} → ${late}`).toBe(status !== 'noData');
         }
       }
     }
+    expect(pairings).toBe(25);
   });
 
   it('a set that cannot be scored is not an exercise day', () => {

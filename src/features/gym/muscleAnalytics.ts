@@ -7,7 +7,7 @@ import {
 } from '../../core/gym/performance';
 import type { MuscleState } from '../../components/BodyRenderer';
 import type { GymHistory } from '../../storage/services/gymService';
-import { shownPerformance, type ShownPerformance } from './muscleState';
+import { exerciseGroups, shownPerformance, type ShownPerformance } from './muscleState';
 
 /**
  * The muscle rows' view model: per group, its state and delta as the row
@@ -107,11 +107,21 @@ export const SPARKLINE_POINTS = 12;
  */
 export type MuscleSelection = MuscleGroup | null;
 
-const reaches = (day: ExerciseDay, muscle: MuscleGroup): boolean => day.muscles.includes(muscle);
+/**
+ * Whether a recorded day belongs to a group — by the one membership the
+ * state and the count of exercise days use (`exerciseGroups`): the
+ * exercise's groups as of its latest day in the range, which is how the
+ * domain attributes it. A row can therefore never say "Noch nicht
+ * trainiert" over a "Vor 3 Tagen", nor list exercises for a group the
+ * domain does not count them for.
+ */
+type Membership = ReturnType<typeof exerciseGroups>;
+const reaches = (membership: Membership, day: ExerciseDay, muscle: MuscleGroup): boolean =>
+  membership.get(day.exerciseId)?.includes(muscle) ?? false;
 
 /** The days on which the group was trained, ascending, each once. */
-function trainingDays(days: readonly ExerciseDay[], muscle: MuscleGroup): DateKey[] {
-  return [...new Set(days.filter((day) => reaches(day, muscle)).map((day) => day.date))].sort();
+function trainingDays(days: readonly ExerciseDay[], muscle: MuscleGroup, membership: Membership): DateKey[] {
+  return [...new Set(days.filter((day) => reaches(membership, day, muscle)).map((day) => day.date))].sort();
 }
 
 /**
@@ -119,9 +129,13 @@ function trainingDays(days: readonly ExerciseDay[], muscle: MuscleGroup): DateKe
  * point per training day that had a comparable observation. Same rows in,
  * same points out.
  */
-export function muscleTrend(days: readonly ExerciseDay[], muscle: MuscleGroup): MuscleTrendPoint[] {
+export function muscleTrend(
+  days: readonly ExerciseDay[],
+  muscle: MuscleGroup,
+  membership: Membership = exerciseGroups(days),
+): MuscleTrendPoint[] {
   const points: MuscleTrendPoint[] = [];
-  for (const date of trainingDays(days, muscle)) {
+  for (const date of trainingDays(days, muscle, membership)) {
     const asOf = gymPerformanceOverSpan(days.filter((day) => day.date <= date));
     const ratio = asOf.muscles.find((entry) => entry.muscle === muscle)?.ratio ?? null;
     const value = percentChange(ratio);
@@ -136,18 +150,19 @@ export function toMuscleAnalytics(
   shown: ShownPerformance = shownPerformance(history.days, history.overall),
 ): MuscleAnalyticsView[] {
   const shownBy = new Map(shown.muscles.map((entry) => [entry.muscle, entry]));
+  const membership = exerciseGroups(history.days);
   return MUSCLE_GROUPS.map((id) => {
     const entry = shownBy.get(id);
     const state: MuscleState = entry?.state ?? 'noData';
     const delta = entry?.change ?? null;
     // No trend stated, no line drawn.
-    const series = delta === null ? [] : muscleTrend(history.days, id);
-    const trained = trainingDays(history.days, id);
+    const series = delta === null ? [] : muscleTrend(history.days, id, membership);
+    const trained = trainingDays(history.days, id, membership);
     const lastTrainedAt = trained.length > 0 ? trained[trained.length - 1]! : null;
     const latestExerciseIds =
       lastTrainedAt === null
         ? []
-        : [...new Set(history.days.filter((day) => day.date === lastTrainedAt && reaches(day, id)).map((day) => day.exerciseId))].sort();
+        : [...new Set(history.days.filter((day) => day.date === lastTrainedAt && reaches(membership, day, id)).map((day) => day.exerciseId))].sort();
     const only = latestExerciseIds.length === 1 ? latestExerciseIds[0]! : null;
 
     const dataState: MuscleDataState =

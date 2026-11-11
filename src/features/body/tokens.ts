@@ -153,9 +153,10 @@ export const BODY_LIGHT = {
  * tint: three quarters of the way to the status colour at full strength,
  * three eighths at the weakest. The mock-ups' tool had a quarter there; it
  * is raised because under today's light and tone mapping green arrives much
- * weaker than red. Measured on the rendered body at 393px, +3 % against a
- * held group beside it: at a quarter the green was about 4.7 ΔE from white,
- * at three eighths about 7, the red twice that (`farbregeln.mjs` holds 5). Roughness, the lights and the tone mapping are block 7A's.
+ * weaker than red. Measured on the rendered body at 393px, as the median
+ * difference of the chest at +3 % from the same chest held: 4.1 ΔE at a
+ * quarter, 4.8 at three tenths, 6.5 at three eighths; the quadriceps at
+ * −3 % 9.0, 10.8 and 14.7. `farbregeln.mjs` holds both at 5 or more. Roughness, the lights and the tone mapping are block 7A's.
  */
 export const REGION_MATERIAL = {
   roughness: 0.74,
