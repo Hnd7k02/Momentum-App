@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, phone, onboard } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard } from './lib.mjs';
 
 /**
  * A device that carries RC2's Sport domain, after the update.
@@ -7,7 +7,7 @@ import { URL_APP, check, summary, phone, onboard } from './lib.mjs';
  * The product never creates one; it still has to show one, read-only, to
  * whoever already has it.
  */
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 const ctx = await browser.newContext(phone);
 const page = await ctx.newPage();
 await page.goto(URL_APP, { waitUntil: 'networkidle' });

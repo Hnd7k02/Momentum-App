@@ -1,6 +1,6 @@
 import { chromium } from 'playwright-core';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { URL_APP, check, summary, phone, onboard, clipped, smallTargets } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTargets } from './lib.mjs';
 
 /**
  * The V1 release smoke test, against the **production build**.
@@ -12,7 +12,7 @@ import { URL_APP, check, summary, phone, onboard, clipped, smallTargets } from '
  */
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 
 const TMP = process.env.RELEASE_TMP ?? '/tmp';

@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, clipped, onboard, phone, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, phone, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP2-1 — training plans and planned workouts, on the real production
@@ -22,7 +22,7 @@ const WIDTHS = (process.env.WIDTHS ?? '393,360').split(',').map(Number);
  * at 10:00 UTC (11:00 or 12:00 local, the same calendar day either way).
  */
 const CLOCK = process.env.CLOCK ?? '2026-10-14';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 const idb = async (page, store) =>
   page.evaluate(async (s) => {

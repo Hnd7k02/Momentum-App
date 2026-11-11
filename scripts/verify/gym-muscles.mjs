@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
 
 /**
  * The Muskelgruppen module in the real Gym workspace, Stage 4.
@@ -13,7 +13,7 @@ import { URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seed
  */
 
 const OUT = process.env.SHOTS ?? '';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 /** Counts the animation frames that actually ran, not the ones requested. */
 const INSTRUMENT = () => {

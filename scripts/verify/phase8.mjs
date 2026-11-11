@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, phone, onboard, clipped, smallTargets } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTargets } from './lib.mjs';
 
 /**
  * Phase 8: pause periods on the screen, and no rest days anywhere.
@@ -11,7 +11,7 @@ import { URL_APP, check, summary, phone, onboard, clipped, smallTargets } from '
  */
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 
 const p = (n, l = 2) => String(n).padStart(l, '0');

@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, clipped, onboard, phone, seed, seedLegacyFood, seedTraining, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, phone, seed, seedLegacyFood, seedTraining, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP3, Stage 4 — Mind and Gym (P1–P3), on the real production build, under a
@@ -44,7 +44,7 @@ const SIZES = [
 const NOW = '2026-10-21T09:00:00+02:00';
 const TODAY = '2026-10-21';
 const YESTERDAY = '2026-10-20';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 

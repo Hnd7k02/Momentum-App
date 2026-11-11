@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, phone, onboard, seed, seedTraining } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, seed, seedTraining } from './lib.mjs';
 
 /**
  * The domain terminal, Stage A — two areas since WP3 Stage 4: Mind | Gym.
@@ -12,7 +12,7 @@ import { URL_APP, check, summary, phone, onboard, seed, seedTraining } from './l
  */
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 
 const ctx = await browser.newContext(phone);

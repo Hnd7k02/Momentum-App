@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, inSheet, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTargets, inSheet, openMuscles } from './lib.mjs';
 
 /**
  * Phase 4.1: the Gym scoring model on the screen.
@@ -12,7 +12,7 @@ import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, inSheet
  */
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 
 const pad = (n, l = 2) => String(n).padStart(l, '0');

@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, onboard, seed, seedTraining, seedMuscles, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, seed, seedTraining, seedMuscles, openMuscles } from './lib.mjs';
 
 /**
  * How much of the body each region offers a finger, measured, not assumed.
@@ -29,7 +29,7 @@ import { URL_APP, check, summary, onboard, seed, seedTraining, seedMuscles, open
 /** `STEP=8 WIDTHS=430` for a finer probe of one width. */
 const STEP = Number(process.env.STEP ?? 12);
 const WIDTHS = (process.env.WIDTHS ?? '393,430,320').split(',').map(Number);
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 const results = {};
 /** The regions whose REGION_FACING is 180°, by the names their rows show. */
 const FACES_BACK = new Set(['Rücken', 'Beinbeuger und Gesäss', 'Trizeps', 'Waden']);

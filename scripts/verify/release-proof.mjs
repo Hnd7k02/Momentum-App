@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
 
 /**
  * Release evidence for the muscle map, Stage 5: what the network actually
@@ -7,7 +7,7 @@ import { URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seed
  * working offline, what the mini charts actually draw, and what assistive
  * technology is told. Prints the raw observations, then judges them.
  */
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, serviceWorkers });

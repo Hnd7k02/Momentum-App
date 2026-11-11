@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, phone, onboard, inSheet } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, inSheet } from './lib.mjs';
 
 /**
  * Phase 4.1, through the accessibility tree.
@@ -15,7 +15,7 @@ import { URL_APP, check, summary, phone, onboard, inSheet } from './lib.mjs';
  */
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 const ctx = await browser.newContext(phone);
 const page = await ctx.newPage();

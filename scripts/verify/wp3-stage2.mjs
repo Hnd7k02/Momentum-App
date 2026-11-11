@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, clipped, onboard, openMuscles, phone, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP3, Stage 2 — the workout flow, on the real production build.
@@ -35,7 +35,7 @@ const SIZES = [
   [430, 932],
   [320, 693],
 ];
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 function berlinNoon(day) {
   for (const offset of ['+02:00', '+01:00']) {

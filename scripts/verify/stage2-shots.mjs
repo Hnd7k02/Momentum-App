@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, onboard, seed, seedTraining, seedMuscles, phone } from './lib.mjs';
+import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles, phone } from './lib.mjs';
 
 /**
  * Evidence screenshots for Stage 2 of the Overall-rank update (D125): the
@@ -7,7 +7,7 @@ import { URL_APP, onboard, seed, seedTraining, seedMuscles, phone } from './lib.
  * Laufen's board, and the Mind standing tile — all at 393px.
  */
 const OUT = process.env.OUT ?? 'docs/design/overall-rank';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 const ctx = await browser.newContext(phone);
 const page = await ctx.newPage();
 const shot = (name) => page.screenshot({ path: `${OUT}/${name}.png` });

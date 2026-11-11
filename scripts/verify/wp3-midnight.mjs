@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, phone, summary } from './lib.mjs';
 
 /**
  * WP3, B3 — one "today" across local midnight and DST, on the real
@@ -60,7 +60,7 @@ const OUT = process.env.OUT ?? 'docs/design/wp3/stage1';
 mkdirSync(OUT, { recursive: true });
 const BERLIN = 'Europe/Berlin';
 const SAO_PAULO = 'America/Sao_Paulo';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 

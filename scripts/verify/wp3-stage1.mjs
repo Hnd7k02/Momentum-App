@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP3, Stage 1 — B4, B5, B6, B9, B10, B11, B12 on the real production
@@ -32,7 +32,7 @@ const SIZES = [
   [430, 932],
   [320, 693],
 ];
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 /**
  * The German names of every offered catalogue entry, read from the source

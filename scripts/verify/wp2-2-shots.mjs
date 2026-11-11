@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP2-2 — the Gym hub, on the real production build, at 393, 360 and 430.
@@ -16,7 +16,7 @@ const OUT = process.env.OUT ?? 'docs/design/wp2-2';
 mkdirSync(OUT, { recursive: true });
 const SHOT_WIDTHS = [393, 360];
 const CHECK_WIDTHS = [393, 360, 430];
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 const hash = (page) => page.evaluate(() => location.hash);
 

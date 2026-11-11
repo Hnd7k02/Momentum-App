@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, onboard, phone, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, phone, summary } from './lib.mjs';
 
 /**
  * WP3 Stage 1, B1 — typing into every sheet, on the real production build.
@@ -28,7 +28,7 @@ import { URL_APP, check, onboard, phone, summary } from './lib.mjs';
  */
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage1';
 mkdirSync(OUT, { recursive: true });
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 /** Settle time after each character: long enough for a passive effect to run. */
 const PER_KEY_MS = 140;

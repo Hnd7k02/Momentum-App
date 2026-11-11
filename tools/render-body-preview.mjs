@@ -1,4 +1,5 @@
 import { chromium } from 'playwright-core';
+import { CHROMIUM } from '../scripts/verify/lib.mjs';
 import { writeFileSync } from 'node:fs';
 
 /**
@@ -23,7 +24,7 @@ const AZIMUTH = Number(process.argv[3] ?? 25);
 const TARGET_WIDTH = Number(process.argv[4] ?? 240);
 const QUALITY = Number(process.argv[5] ?? 0.8);
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ executablePath: CHROMIUM, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const ctx = await browser.newContext({ viewport: { width: 430, height: 900 }, deviceScaleFactor: 3, reducedMotion: 'reduce' });
 const page = await ctx.newPage();
 page.on('pageerror', (e) => console.error('pageerror', e));

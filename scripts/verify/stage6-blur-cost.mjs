@@ -28,10 +28,10 @@
  *   node scripts/verify/stage6-blur-cost.mjs            (preview on 4173)
  */
 import { chromium } from 'playwright-core';
-import { URL_APP, phone, onboard, seedMuscles, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, phone, onboard, seedMuscles, openMuscles } from './lib.mjs';
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 const ctx = await browser.newContext({ ...phone, viewport: { width: 393, height: 852 } });

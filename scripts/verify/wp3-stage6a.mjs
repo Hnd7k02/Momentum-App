@@ -18,7 +18,7 @@
  */
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { URL_APP, check, summary, phone, onboard, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast } from './lib.mjs';
 
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage6a';
 const WIDTHS = (process.env.WIDTHS ?? '393').split(',').map(Number);
@@ -26,7 +26,7 @@ const VARIANTS = (process.env.VARIANTS ?? 'a,b').split(',');
 mkdirSync(OUT, { recursive: true });
 
 const HEIGHT = { 393: 852, 430: 932, 320: 693 };
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 const shot = (page, variant, width, slug) =>
   page.screenshot({ path: `${OUT}/wp3-stage6a-${variant}-${width}-${slug}.png` });

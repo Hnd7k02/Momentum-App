@@ -22,10 +22,11 @@ canvas. Under other browsers running in parallel they can miss a frame
 budget, which says nothing about the code; a gate is green only when each
 of them passes on its own. Every other suite may run in parallel.
 
-Chromium comes from the image at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`,
-which each script names explicitly — Playwright's own default path is not
-populated here. If that directory moves, change `executablePath` in the
-scripts rather than running `npx playwright install`.
+Chromium comes from the image at `/opt/pw-browsers/chromium`, a link to its
+current build — Playwright's own default path is not populated here. The
+path is named once, as `CHROMIUM` in `lib.mjs`, and every script and
+`tools/render-body-preview.mjs` launch with it; `CHROMIUM_PATH=<binary>`
+points them all at another one. Never run `npx playwright install`.
 
 ## What each one covers
 

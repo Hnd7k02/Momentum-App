@@ -1,5 +1,9 @@
 // URL_APP=http://127.0.0.1:<port>/Momentum-App/ points a suite at another preview.
 export const URL_APP = process.env.URL_APP ?? 'http://127.0.0.1:4173/Momentum-App/';
+// The one place the browser binary is named. `/opt/pw-browsers/chromium` is the
+// image's link to its current build; CHROMIUM_PATH=<binary> points every suite
+// and tool at another one. Never `npx playwright install`.
+export const CHROMIUM = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium';
 export const results = [];
 export const check = (n, p, d = '') => {
   results.push({ n, p, d });

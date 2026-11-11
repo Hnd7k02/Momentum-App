@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, check, onboard, phone, seedConfirmation, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, phone, seedConfirmation, summary } from './lib.mjs';
 
 /**
  * The promotion-confirmation indicator (D126) in its three states, on the
@@ -28,7 +28,7 @@ const PRESETS = [
 ];
 const matches = (text, expected) => (expected instanceof RegExp ? expected.test(text) : text === expected);
 const letters = { threshold: ['H', 'K'], pending: ['I', 'L'], below: ['J', 'M'], promoted: ['N', 'O'] };
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 
 for (const preset of PRESETS) {
   const ctx = await browser.newContext(phone);

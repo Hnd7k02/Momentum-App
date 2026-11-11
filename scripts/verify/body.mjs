@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { check, summary } from './lib.mjs';
+import { CHROMIUM, check, summary } from './lib.mjs';
 
 /**
  * The 3D body viewer, Stage 2, in isolation.
@@ -19,7 +19,7 @@ const URL_DEV = process.env.BODY_URL ?? 'http://127.0.0.1:5173/Momentum-App/#/de
 const OUT = process.env.BODY_SHOTS ?? '';
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 
 /**

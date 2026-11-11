@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { URL_APP, check, summary, onboard, seed, seedTraining, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, seed, seedTraining, openMuscles } from './lib.mjs';
 
 /**
  * Card geometry: does any text sit on, or past, the edge of the box that
@@ -28,7 +28,7 @@ const ART = new URL('../../.artifacts/', import.meta.url);
 mkdirSync(ART, { recursive: true });
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROMIUM,
 });
 
 /**

@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { URL_APP, onboard, openMuscles, seed, seedTraining, seedMuscles, phone } from './lib.mjs';
+import { CHROMIUM, URL_APP, onboard, openMuscles, seed, seedTraining, seedMuscles, phone } from './lib.mjs';
 
 /**
  * Evidence screenshots for the status palette (D123): the 1–10 picker on
@@ -7,7 +7,7 @@ import { URL_APP, onboard, openMuscles, seed, seedTraining, seedMuscles, phone }
  * Gym muscle map, all at 393px. Full viewports, never crops.
  */
 const OUT = process.env.OUT ?? 'docs/design/status-palette';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: CHROMIUM });
 const ctx = await browser.newContext(phone);
 const page = await ctx.newPage();
 const shot = (name) => page.screenshot({ path: `${OUT}/${name}.png` });
