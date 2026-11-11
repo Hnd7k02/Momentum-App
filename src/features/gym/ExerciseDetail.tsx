@@ -1,5 +1,5 @@
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
-import { Card, EmptyState, Section } from '../../components';
+import { Card, EmptyState, Figure, Section } from '../../components';
 import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
 import { percentChange, type ExerciseComparison, type ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
@@ -44,6 +44,9 @@ export function ExerciseDetail({
       unit: weights.unitLabel,
     });
 
+  /** The same text, with its unit set smaller and secondary (contract §3). */
+  const score = (day: ExerciseDay) => <Figure text={scoreText(day)} unit={weights.unitLabel} />;
+
   const latest = days[0] ?? null;
   const change = percentChange(comparison?.ratio ?? null);
   const shown =
@@ -87,12 +90,12 @@ export function ExerciseDetail({
               <div className="gym-detail__figures">
                 <div className="gym-detail__figure">
                   <span className="gym-detail__label">{t('gym.detail.latest')}</span>
-                  <span className="gym-detail__value">{latest ? scoreText(latest) : '–'}</span>
+                  <span className="gym-detail__value">{latest ? score(latest) : '–'}</span>
                 </div>
                 <div className="gym-detail__figure gym-detail__figure--muted">
                   <span className="gym-detail__label">{t('gym.detail.previous')}</span>
                   <span className="gym-detail__value">
-                    {days[1] ? scoreText(days[1]) : t('gym.progress.noBaseline')}
+                    {days[1] ? score(days[1]) : t('gym.progress.noBaseline')}
                   </span>
                 </div>
                 <div className="gym-detail__figure">
@@ -170,7 +173,7 @@ export function ExerciseDetail({
                       {formatWeekday(language, day.date)} ·{' '}
                       {formatDayAndMonth(language, day.date)}
                     </span>
-                    <span className="gym-detail__rowValue">{scoreText(day)}</span>
+                    <span className="gym-detail__rowValue">{score(day)}</span>
                   </div>
                 ))}
               </Card>

@@ -8,7 +8,7 @@ import { useLoadable } from '../../app/useLoadable';
 import { loadRunningWorkout } from '../../storage/services/gymService';
 import { RunningWorkoutCard } from '../gym/RunningWorkoutCard';
 import { useToast } from '../../components/Toast';
-import { Button, Card, EmptyState, LoadFailure, Row, Section, Segmented, StaleNotice, focusTarget } from '../../components';
+import { Button, Card, EmptyState, Figure, focusTarget, LoadFailure, Row, Section, Segmented, StaleNotice } from '../../components';
 import { ChevronRightIcon, PlusIcon, SparkIcon } from '../../components/Icons';
 import { SessionSheet } from '../../domains/sports/SessionSheet';
 import { formatDayAndMonth, formatTime, formatWeekday } from '../../i18n/format';
@@ -462,10 +462,13 @@ export function TodayScreen({
                     {t(training.weekKey === thisWeek ? 'sports.thisWeek' : 'sports.lastWeek')}
                   </span>
                   <span className="week__value">
-                    {t('sports.progress', {
-                      done: training.progress.completed,
-                      target: training.progress.target,
-                    })}
+                    <Figure
+                      text={t('sports.progress', {
+                        done: training.progress.completed,
+                        target: training.progress.target,
+                      })}
+                      figure={`${training.progress.completed} / ${training.progress.target}`}
+                    />
                   </span>
                 </div>
 

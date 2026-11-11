@@ -19,7 +19,7 @@
   bottom: calc(var(--space-3) + var(--toast-lift, 0px));
   display: flex;
   justify-content: center;
-  padding: 0 calc(var(--space-4) + var(--safe-right)) 0 calc(var(--space-4) + var(--safe-left));
+  padding: 0 var(--gutter-right) 0 var(--gutter-left);
   pointer-events: none;
 }
 

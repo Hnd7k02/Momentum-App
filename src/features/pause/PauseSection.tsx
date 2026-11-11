@@ -308,8 +308,10 @@ function PauseForm({
       ) : null}
 
       <div className="pause-form__actions">
+        {/* The second step of the button order: Bereiche already has its one
+            primary action where Gym is open ("Training erfassen"). */}
         <Button
-          variant="primary"
+          variant="secondary"
           disabled={check !== null}
           onClick={() => onSubmit({ from, to, reason: reason.trim() || null })}
         >

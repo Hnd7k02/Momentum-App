@@ -15,11 +15,13 @@
 .gym-hub__week {
   font-size: var(--type-headline);
   font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.2px;
 }
 
 .gym-hub__last {
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -130,6 +132,7 @@
 
 .gym-hub__musclesSummary {
   font-size: var(--type-subhead);
+  font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
 
@@ -153,6 +156,7 @@
 
 .gym-hub__musclesRange {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   line-height: 1.35;
 }

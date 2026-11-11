@@ -25,7 +25,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 48px;
+  min-height: var(--row-height);
   border-bottom: 1px solid var(--separator);
 }
 
@@ -47,11 +47,14 @@
 
 .running-range__meta {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
+/* In a row the number is the body size, semibold (contract §3). */
 .running-range__change {
-  font-size: var(--type-subhead);
+  font-size: var(--type-body);
+  font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   text-align: right;
   overflow-wrap: anywhere;

@@ -95,6 +95,7 @@ export function MetricTile({
   bar,
   line,
   span = 'full',
+  primary = false,
   onOpen,
   className = '',
 }: {
@@ -111,11 +112,17 @@ export function MetricTile({
   /** At most one short supporting line. */
   line?: ReactNode;
   span?: 'full' | 'half';
+  /**
+   * The tile that carries its screen's one main number (D160): its figure
+   * takes the extra-large step, every other tile's the large one.
+   */
+  primary?: boolean;
   /** Opens the detail sheet. Without it the tile is not a control. */
   onOpen?: () => void;
   className?: string;
 }) {
   const classes = ['card', 'metric-tile', `metric-tile--${span}`];
+  if (primary) classes.push('metric-tile--primary');
   if (leading) classes.push('metric-tile--hero');
   if (onOpen) classes.push('metric-tile--openable');
   if (className) classes.push(className);

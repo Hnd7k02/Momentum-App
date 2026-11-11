@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RATING, TRAINING_RATING } from '../../core/config/constants';
-import { Card, Section } from '../../components';
+import { Card, Section, splitFigure } from '../../components';
 import { MetricBoard, MetricDetailSheet, MetricTile } from '../../components/metrics';
 import { useT } from '../../i18n/I18nProvider';
 import type { GymRatingState } from '../../storage/services/gymRatingService';
@@ -84,6 +84,8 @@ export function GymOverview({
       ? Math.min(100, (state.sessionsThisWeek / state.weeklyTarget) * 100)
       : 0;
   const ratingLabel = t('gym.rating.value', { value: ratingValue });
+  // "830" at the figure's size, "von 1000" smaller beside it (contract §3).
+  const [ratingFigure, ratingScale] = splitFigure(ratingLabel, { figure: ratingValue });
   /*
    * A week with no ledger target is no data for the attendance half of the
    * rating — never "0 von 0". The minimum target is 1, so a zero target means
@@ -149,7 +151,9 @@ export function GymOverview({
         <MetricTile
           id="gym-rating"
           title={t('gym.rating.title')}
-          value={ratingLabel}
+          value={ratingFigure}
+          scale={ratingScale?.trim()}
+          primary
           bar={ratingBar}
           line={
             state.maintenance
@@ -225,7 +229,8 @@ export function GymOverview({
       <MetricDetailSheet
         open={detail === 'rating'}
         title={t('gym.rating.title')}
-        value={ratingLabel}
+        value={ratingFigure}
+        scale={ratingScale?.trim()}
         bar={ratingBar}
         onClose={close}
       >

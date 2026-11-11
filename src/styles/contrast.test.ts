@@ -140,7 +140,7 @@ describe('the two worlds share one vocabulary', () => {
 
   it('the Gym block redefines colours only — type, spacing and motion are one system', () => {
     for (const name of GYM.keys()) {
-      expect(name, name).not.toMatch(/^--(type|weight|space|radius|touch|tab-bar-height|workout-bar|safe|duration|ease|card-pad|card-gutter|meter)/);
+      expect(name, name).not.toMatch(/^--(type|weight|space|radius|touch|tab-bar-height|workout-bar|safe|duration|ease|card-pad|page-gutter|row-height|meter|layer)/);
     }
   });
 
@@ -171,12 +171,24 @@ describe.each(SETS)('%s', (_label, tokens) => {
   const dark = luminance(GROUND) < 0.2;
 
   describe('text on a card and on the ground', () => {
-    it.each(['--text-primary', '--text-secondary', '--accent'])('%s is readable on a card', (name) => {
+    it.each(['--text-primary', '--text-secondary', '--text-tertiary', '--accent'])('%s is readable on a card', (name) => {
       expect(contrast(hex(name), CARD)).toBeGreaterThanOrEqual(BODY);
     });
 
-    it.each(['--text-primary', '--text-secondary'])('%s is readable on the ground', (name) => {
+    // The tertiary is the caption weight — a tab label, a row's second line,
+    // an axis label — and the smallest text clears 4.5:1 like any other
+    // (D149). Stage 6a reported it at about 2.5:1 on light and did not hold it.
+    it.each(['--text-primary', '--text-secondary', '--text-tertiary'])('%s is readable on the ground', (name) => {
       expect(contrast(hex(name), GROUND)).toBeGreaterThanOrEqual(BODY);
+    });
+
+    it('--text-tertiary is the value the contract measured', () => {
+      // 5.84:1 on the card and 5.33:1 on the ground on light; 5.97:1 and
+      // 6.60:1 on graphite (contract §3). A nudge that still clears 4.5:1
+      // would pass the two tests above and quietly leave the contract.
+      expect(hex('--text-tertiary')).toBe(dark ? '#9896a6' : '#64646f');
+      expect(contrast(hex('--text-tertiary'), CARD)).toBeCloseTo(dark ? 5.97 : 5.84, 1);
+      expect(contrast(hex('--text-tertiary'), GROUND)).toBeCloseTo(dark ? 6.6 : 5.33, 1);
     });
 
     // The pastel identities left with D160; every ink that remains — the

@@ -5,7 +5,7 @@ import { rankById } from '../../core/ranks';
 import { displayedRankProgress, rankLadder, type RankProgress } from '../../core/ranks/progress';
 import { confirmationIndicator, thresholdReached } from '../../core/ranks/confirmation';
 import { isOfferedDomain, type OfferedDomainType } from '../../core/domains';
-import { Card, EmptyState, LoadFailure, Section, StaleNotice } from '../../components';
+import { Card, EmptyState, Figure, LoadFailure, Section, StaleNotice } from '../../components';
 import { RankIcon } from '../../components/Icons';
 import { formatDayAndMonth, formatNumber } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
@@ -320,7 +320,9 @@ export function RankScreen({
             <div className="streaks">
               <div className="streak">
                 <p className="streak__label">{t('rank.streakCheckIn')}</p>
-                <p className="streak__value">{streakLabel(legacy.checkInStreak.current, 'days')}</p>
+                <p className="streak__value">
+                  <Figure text={streakLabel(legacy.checkInStreak.current, 'days')} figure={legacy.checkInStreak.current} />
+                </p>
                 <p className="streak__best">
                   {t('rank.streakBest', { count: legacy.checkInStreak.best })}
                 </p>
@@ -328,7 +330,7 @@ export function RankScreen({
               <div className="streak">
                 <p className="streak__label">{t('rank.streakTraining')}</p>
                 <p className="streak__value">
-                  {streakLabel(legacy.trainingStreak.current, 'weeks')}
+                  <Figure text={streakLabel(legacy.trainingStreak.current, 'weeks')} figure={legacy.trainingStreak.current} />
                 </p>
                 <p className="streak__best">
                   {t('rank.streakBest', { count: legacy.trainingStreak.best })}

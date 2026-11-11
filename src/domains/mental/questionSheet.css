@@ -20,7 +20,7 @@
   min-height: 48px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-control);
-  color: var(--accent);
+  color: var(--accent-ink);
   font-size: var(--type-body);
   letter-spacing: -0.2px;
 }

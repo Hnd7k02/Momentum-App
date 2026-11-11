@@ -65,7 +65,7 @@
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  min-height: 60px;
+  min-height: var(--row-height);
   padding: var(--space-2) 0;
   text-align: left;
   background: none;
@@ -97,7 +97,8 @@
 }
 
 .muscle-row__name {
-  font-size: var(--type-subhead);
+  font-size: var(--type-body);
+  line-height: 1.2;
   color: var(--text-primary);
 }
 
@@ -107,6 +108,7 @@
 
 .muscle-row__sub {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
 }
 
@@ -155,26 +157,39 @@
   display: flex;
   flex: none;
   min-width: 62px;
-  max-width: 124px;
+  max-width: 172px;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 1px;
   color: var(--text-secondary);
 }
 
+/* In a row the number is the body size, semibold, with tabular digits so
+   ten of them stand in a column (contract §3). */
 .muscle-row__delta {
-  font-size: var(--type-subhead);
+  font-size: var(--type-body);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
   letter-spacing: -0.2px;
   white-space: nowrap;
   color: inherit;
 }
 
+/* The state in words, beneath its number: the caption weight, never the
+   state's colour — the number carries that. */
+.muscle-row__state {
+  font-size: var(--type-caption);
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+/* The chip (contract §5): 11px semibold, surface and text from the state's
+   family, neutral where the state is "nothing yet". */
 .muscle-row__badge {
-  padding: 2px 6px;
+  padding: 3px 9px;
   border-radius: var(--radius-pill);
-  font-size: 10px;
+  font-size: var(--type-caption);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
   color: inherit;
@@ -207,7 +222,7 @@
   background: var(--sky-tint);
 }
 .muscle-row__right--noData {
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 /*
@@ -224,23 +239,31 @@
 @media (max-width: 360px) {
   .muscle-row__button {
     flex-wrap: wrap;
-    row-gap: var(--space-2);
+    row-gap: var(--space-1);
   }
 
   /* The dot stays beside the name; the chart and the state drop below.
-     22px is the dot plus the gap it sits in. */
+     20px is the dot plus the gap it sits in. */
   .muscle-row__text {
-    flex: 1 1 calc(100% - 26px);
+    flex: 1 1 calc(100% - 24px);
   }
 
   .muscle-row__chart {
-    width: 56px;
+    /* The narrow chart of the contract (§6): 64 × 24. */
+    width: 64px;
     /* Lines up under the name rather than under the dot. */
-    margin-left: 22px;
+    margin-left: 20px;
   }
 
+  /* Beneath the name there is room beside the chart, so the state and its
+     number share a line instead of making the row a third line taller. */
   .muscle-row__right {
     flex: 1;
+    max-width: none;
+    flex-direction: row-reverse;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: var(--space-2);
   }
 }
 

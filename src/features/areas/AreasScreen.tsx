@@ -134,8 +134,10 @@ function LegacySportChoiceForm({
       <p className="legacy-choice__note">{t('legacySport.ask.safe')}</p>
       <p className="legacy-choice__note">{t('legacySport.ask.once')}</p>
 
+      {/* The second step of the button order: Bereiche already has its one
+          primary action where Gym is open ("Training erfassen"). */}
       <Button
-        variant="primary"
+        variant="secondary"
         block
         disabled={picked === null}
         onClick={() => {

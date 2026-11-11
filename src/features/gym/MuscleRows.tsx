@@ -101,17 +101,20 @@ export function MuscleRows({
               </span>
 
               {/*
-                The number where there is one, the state in words where there
-                is not. Both are read in the state colour, and neither leaves
-                the colour to carry the meaning on its own: a percentage says
-                which way it went by its sign, and a group with no number says
-                so in words.
+                The number with its state in words beneath it where there is
+                one, the state as a chip where there is not. The number is
+                read in the state colour and never left to carry the meaning
+                alone (contract §12): the sign says which way it went, and
+                the word says it again.
               */}
               <span className={`muscle-row__right muscle-row__right--${view.state}`}>
                 {delta === null ? (
                   <span className="muscle-row__badge">{t(MUSCLE_STATE_KEYS[view.state])}</span>
                 ) : (
-                  <span className="muscle-row__delta">{delta}</span>
+                  <>
+                    <span className="muscle-row__delta">{delta}</span>
+                    <span className="muscle-row__state">{t(MUSCLE_STATE_KEYS[view.state])}</span>
+                  </>
                 )}
               </span>
             </button>

@@ -65,6 +65,7 @@
 
 .boss-summary__caption {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--stage-text-secondary);
 }
 

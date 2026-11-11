@@ -45,8 +45,11 @@
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 calc(var(--safe-right) + var(--space-4)) calc(var(--safe-bottom) + var(--space-6))
-    calc(var(--safe-left) + var(--space-4));
+  /* The one side margin (D160), bled like the tab screens' scroll ports. */
+  overflow-x: clip;
+  margin-left: calc(var(--gutter-left) * -1);
+  margin-right: calc(var(--gutter-right) * -1);
+  padding: 0 var(--gutter-right) calc(var(--safe-bottom) + var(--space-6)) var(--gutter-left);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -55,7 +58,7 @@
 .question-detail__status {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
-  padding: 0 var(--space-2);
+  padding: 0 var(--card-pad);
 }
 
 .question-detail__figures {
@@ -71,13 +74,15 @@
 
 .question-detail__figureLabel {
   font-size: var(--type-caption);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
 
+/* The first figure is this screen's one main number; the one beside it
+   steps back to the strip size. */
 .question-detail__figureValue {
-  font-size: var(--type-large-title);
+  font-size: var(--type-figure-xl);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.8px;
@@ -85,7 +90,7 @@
 }
 
 .question-detail__figure--muted .question-detail__figureValue {
-  font-size: var(--type-title);
+  font-size: var(--type-figure-m);
   color: var(--text-secondary);
 }
 
@@ -109,6 +114,7 @@
 
 .question-detail__meta {
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   margin-top: var(--space-3);
 }
@@ -165,7 +171,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 40px;
+  min-height: var(--row-height-compact);
   border-bottom: 1px solid var(--separator);
 }
 
@@ -175,6 +181,7 @@
 
 .question-detail__rowDay {
   font-size: var(--type-subhead);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 

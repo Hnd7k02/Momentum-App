@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RATING } from '../../core/config/constants';
 import type { DomainType } from '../../core/model';
+import { splitFigure } from '../../components';
 import { MetricDetailSheet, MetricTile } from '../../components/metrics';
 import { useT } from '../../i18n/I18nProvider';
 import { useDomainStanding } from './useDomainStanding';
@@ -22,6 +23,8 @@ export function DomainStandingTile({ domain, id }: { domain: DomainType; id: str
 
   const value = Math.round(standing.momentum);
   const label = t('areas.standing.value', { value });
+  // "830" at the figure's size, "von 1000" smaller beside it (contract §3).
+  const [figure, scale] = splitFigure(label, { figure: value });
   const bar = { percent: Math.round((value / RATING.MAX) * 100), label };
 
   if (!standing.started) {
@@ -39,7 +42,9 @@ export function DomainStandingTile({ domain, id }: { domain: DomainType; id: str
       <MetricTile
         id={id}
         title={t('areas.standing')}
-        value={label}
+        value={figure}
+        scale={scale?.trim()}
+        primary
         bar={bar}
         line={t('areas.standing.summary')}
         onOpen={() => setOpen(true)}
@@ -47,7 +52,8 @@ export function DomainStandingTile({ domain, id }: { domain: DomainType; id: str
       <MetricDetailSheet
         open={open}
         title={t('areas.standing')}
-        value={label}
+        value={figure}
+        scale={scale?.trim()}
         bar={bar}
         onClose={() => setOpen(false)}
       >

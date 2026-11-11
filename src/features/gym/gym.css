@@ -12,7 +12,7 @@
   gap: 2px;
   width: 100%;
   text-align: left;
-  min-height: 56px;
+  min-height: var(--row-height);
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--separator);
 }
@@ -89,6 +89,7 @@
 
 .gym-session__date {
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -96,8 +97,17 @@
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 calc(var(--safe-right) + var(--space-4)) calc(var(--safe-bottom) + var(--space-6))
-    calc(var(--safe-left) + var(--space-4));
+  /*
+   * The one side margin, as on every screen (D160). The port runs to the
+   * screen edge and the gutter is its own padding, so a card's shadow has
+   * the gutter to fall into — the pattern of the tab screens. It used to add
+   * a second inset inside the screen's, and the workout stood at twice the
+   * margin of the screens around it.
+   */
+  overflow-x: clip;
+  margin-left: calc(var(--gutter-left) * -1);
+  margin-right: calc(var(--gutter-right) * -1);
+  padding: 0 var(--gutter-right) calc(var(--safe-bottom) + var(--space-6)) var(--gutter-left);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -114,9 +124,8 @@
   min-height: var(--workout-bar-height);
   /* Edge to edge across the screen's own side padding, with the button
      lined up with the cards in the scroll above. */
-  margin: 0 calc(-1 * (var(--safe-right) + var(--space-5))) 0 calc(-1 * (var(--safe-left) + var(--space-5)));
-  padding: var(--space-3) calc(2 * var(--safe-right) + var(--space-5) + var(--space-4))
-    calc(var(--space-3) + var(--safe-bottom)) calc(2 * var(--safe-left) + var(--space-5) + var(--space-4));
+  margin: 0 calc(var(--gutter-right) * -1) 0 calc(var(--gutter-left) * -1);
+  padding: var(--space-3) var(--gutter-right) calc(var(--space-3) + var(--safe-bottom)) var(--gutter-left);
   background: var(--tab-bar-material);
   -webkit-backdrop-filter: var(--tab-bar-blur);
   backdrop-filter: var(--tab-bar-blur);
@@ -140,7 +149,7 @@
 .gym-session__closed {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
-  padding: 0 var(--space-2);
+  padding: 0 var(--card-pad);
 }
 
 .gym-exercise__header {
@@ -299,6 +308,7 @@
 
 .gym-exercise__best {
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   padding-top: var(--space-2);
 }
@@ -342,7 +352,7 @@
   gap: var(--space-3);
   width: 100%;
   text-align: left;
-  min-height: 56px;
+  min-height: var(--row-height);
   border-bottom: 1px solid var(--separator);
 }
 
@@ -368,8 +378,9 @@
   color: var(--text-secondary);
 }
 
+/* In a row the number is the body size, semibold (contract §3). */
 .gym-progress__change {
-  font-size: var(--type-subhead);
+  font-size: var(--type-body);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   flex: none;
@@ -413,13 +424,13 @@
 
 .gym-detail__label {
   font-size: var(--type-caption);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
 
 .gym-detail__value {
-  font-size: var(--type-title);
+  font-size: var(--type-figure-m);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -482,7 +493,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 40px;
+  min-height: var(--row-height-compact);
   border-bottom: 1px solid var(--separator);
 }
 
@@ -492,6 +503,7 @@
 
 .gym-detail__rowDay {
   font-size: var(--type-subhead);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -541,15 +553,16 @@
 
 /* ── Planned workouts (WP2-1) ───────────────────────────────────────────── */
 
+/* The neutral chip (contract §5). */
 .gym-exercise__source {
   display: inline-block;
   margin-left: var(--space-2);
   padding: 1px 8px;
   border-radius: var(--radius-pill);
-  background: var(--surface-input);
+  background: var(--surface-secondary);
   color: var(--text-secondary);
   font-size: var(--type-caption);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   vertical-align: middle;
 }
 
@@ -623,6 +636,7 @@
 
 .plans__slots {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
   margin: var(--space-2) 0 var(--space-2);
 }
@@ -633,7 +647,7 @@
   font-size: var(--type-footnote);
   color: var(--text-secondary);
   line-height: 1.4;
-  padding: 0 var(--space-2);
+  padding: 0 var(--card-pad);
 }
 
 .plan-editor__list {
@@ -648,7 +662,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 56px;
+  min-height: var(--row-height);
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--separator);
 }
@@ -677,6 +691,7 @@
 
 .plan-editor__detail {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -713,7 +728,7 @@
 .plan-editor__deleteNote {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
-  padding: 0 var(--space-2);
+  padding: 0 var(--card-pad);
 }
 
 .plan-editor__deleteConfirm {

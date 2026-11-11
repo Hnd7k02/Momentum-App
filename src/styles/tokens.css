@@ -45,13 +45,19 @@
    * it clears 4.5:1 at footnote size — on white, and since the ground shows
    * under every section label (WP3 Stage 6) on the ground as well.
    *
+   * Tertiary is the caption weight, and the smallest text clears 4.5:1 too
+   * (D149): on a card, on the ground and at the lightest point any text was
+   * measured on. On light that lands it within a few points of the
+   * secondary, so the order of the two is carried by size from here on, not
+   * by lightness — the consequence of the decision, not an oversight.
+   *
    * Every colour here is verified by contrast.test.ts rather than by eye:
    * an `-ink` must read both on white and on its own `-tint`, which is the
    * harder of the two and the one that badges depend on.
    */
   --text-primary: #1c1c1e;
   --text-secondary: #5e5e68;
-  --text-tertiary: #a0a0a8;
+  --text-tertiary: #64646f;
   --text-on-accent: #ffffff;
 
   /*
@@ -218,7 +224,9 @@
   /* What `theme-color` is set to while this world is in force. */
   --status-bar: #f4f4f8;
 
-  /* iOS type scale. */
+  /* The type scale: 34, 22, 17, 15, 13, 11. No text is smaller than the
+     caption, and no font size is written anywhere but here
+     (`designRules.test.ts`). */
   --type-large-title: 34px;
   --type-title: 22px;
   --type-headline: 17px;
@@ -226,6 +234,14 @@
   --type-subhead: 15px;
   --type-footnote: 13px;
   --type-caption: 11px;
+
+  /* Figure steps (D160): the one main number of a screen, the number in the
+     head of a sheet, a number in a strip of figures. In a row the number is
+     the body size, semibold. Digits are tabular wherever numbers stand
+     beside or beneath each other; a unit is smaller and secondary. */
+  --type-figure-xl: 34px;
+  --type-figure-l: 28px;
+  --type-figure-m: 20px;
 
   --weight-regular: 400;
   --weight-medium: 500;
@@ -252,11 +268,22 @@
    * card, once, and no child inside one sets a horizontal padding of its
    * own.
    */
-  --card-pad: 18px;
+  --card-pad: 16px;
 
-  /* Card to screen edge on the browsing screens. Today is roomier and keeps
-     --space-5; the page canvas itself stays edge to edge on both. */
-  --card-gutter: var(--space-4);
+  /* The one side margin, on every screen (D160): the screen edge to a card,
+     a title or a sheet's content. The page canvas itself stays edge to
+     edge. */
+  --page-gutter: 16px;
+  /* The gutter with the device's own side inset added: what a screen pads
+     its content by, and what a scroll port bleeds back out through. */
+  --gutter-left: calc(var(--safe-left) + var(--page-gutter));
+  --gutter-right: calc(var(--safe-right) + var(--page-gutter));
+
+  /* A row names a thing or can be tapped: at least this tall, taller when
+     its name runs to two lines. The touch target inside it stays 44px. A
+     row of a value table — a day and its figure — is the compact one. */
+  --row-height: 54px;
+  --row-height-compact: 40px;
 
   /* A progress bar is a widget detail, not a rail: inset with the rest of
      the content, thin, fully rounded, on a track tinted from its own fill. */
@@ -395,7 +422,7 @@
 
   --text-primary: #f5f4fa;
   --text-secondary: #b0aec0;
-  --text-tertiary: #83818f;
+  --text-tertiary: #9896a6;
   --text-on-accent: #0f0f14;
 
   --accent: #a39dff;

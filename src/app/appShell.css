@@ -44,12 +44,13 @@
   transition: color var(--duration-fast) var(--ease-standard);
 }
 
+/* The active tab is the chosen option: the accent's ink (contract §5). */
 .tab-bar__tab[aria-current='page'] {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .tab-bar__label {
-  font-size: 10px;
+  font-size: var(--type-caption);
   font-weight: var(--weight-medium);
   letter-spacing: 0.1px;
 }
@@ -93,8 +94,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  margin: 0 calc(var(--safe-right) + var(--space-4)) var(--space-3)
-    calc(var(--safe-left) + var(--space-4));
+  margin: 0 var(--gutter-right) var(--space-3) var(--gutter-left);
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border-radius: var(--radius-control);
   background: var(--glass-fill-strong);

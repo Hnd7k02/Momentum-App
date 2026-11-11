@@ -14,11 +14,11 @@
    * thing that has to pass, rather than a phantom scroll hiding the problem.
    */
   overflow-x: clip;
-  margin-left: calc((var(--safe-left) + var(--space-5)) * -1);
-  margin-right: calc((var(--safe-right) + var(--space-5)) * -1);
-  padding: var(--space-1) calc(var(--safe-right) + var(--card-gutter))
+  margin-left: calc(var(--gutter-left) * -1);
+  margin-right: calc(var(--gutter-right) * -1);
+  padding: var(--space-1) var(--gutter-right)
     calc(var(--tab-bar-height) + var(--safe-bottom) + var(--space-10))
-    calc(var(--safe-left) + var(--card-gutter));
+    var(--gutter-left);
 }
 
 /*
@@ -59,8 +59,9 @@
   position: relative;
 }
 
+/* The rank's name is the hero's headline figure. */
 .rank-hero__name {
-  font-size: 30px;
+  font-size: var(--type-figure-l);
   font-weight: var(--weight-bold);
   letter-spacing: -0.4px;
   line-height: 1.1;
@@ -248,7 +249,7 @@
 }
 
 .streak__value {
-  font-size: var(--type-title);
+  font-size: var(--type-figure-m);
   font-weight: var(--weight-bold);
   letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
@@ -257,6 +258,7 @@
 
 .streak__best {
   font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
   margin-top: 4px;
 }
@@ -292,7 +294,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--type-caption);
   font-weight: var(--weight-bold);
   line-height: 1;
   box-shadow: 0 0 0 2px var(--surface-elevated);
@@ -319,6 +321,7 @@
 
 .rank-change__date {
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -345,6 +348,7 @@
 
 .rank-progress__caption {
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--stage-text-secondary);
   text-align: center;
 }
@@ -382,7 +386,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 56px;
+  min-height: var(--row-height);
   border-bottom: 1px solid var(--separator);
 }
 
@@ -430,7 +434,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 52px;
+  min-height: var(--row-height);
   border-bottom: 1px solid var(--separator);
 }
 

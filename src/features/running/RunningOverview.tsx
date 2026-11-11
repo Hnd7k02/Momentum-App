@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RATING, TRAINING_RATING } from '../../core/config/constants';
 import { bandRange } from '../../core/running/performance';
-import { Card, Section } from '../../components';
+import { Card, Section, splitFigure } from '../../components';
 import { MetricBoard, MetricDetailSheet, MetricTile } from '../../components/metrics';
 import { useT } from '../../i18n/I18nProvider';
 import type { RunningRatingState } from '../../storage/services/runningRatingService';
@@ -71,6 +71,8 @@ export function RunningOverview({
       ? Math.min(100, (state.sessionsThisWeek / state.weeklyTarget) * 100)
       : 0;
   const ratingLabel = t('running.rating.value', { value: ratingValue });
+  // The number at the figure's size, its scale smaller beside it (§3).
+  const [ratingFigure, ratingScale] = splitFigure(ratingLabel, { figure: ratingValue });
   /*
    * A week with no ledger target is no data for the attendance half of the
    * rating — never "0 von 0". The minimum target is 1, so a zero target means
@@ -132,7 +134,8 @@ export function RunningOverview({
         <MetricTile
           id="running-rating"
           title={t('running.rating.title')}
-          value={ratingLabel}
+          value={ratingFigure}
+          scale={ratingScale?.trim()}
           bar={ratingBar}
           line={
             state.maintenance
@@ -202,7 +205,8 @@ export function RunningOverview({
       <MetricDetailSheet
         open={detail === 'rating'}
         title={t('running.rating.title')}
-        value={ratingLabel}
+        value={ratingFigure}
+        scale={ratingScale?.trim()}
         bar={ratingBar}
         onClose={close}
       >

@@ -5,8 +5,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--safe-top) + var(--space-4)) calc(var(--safe-right) + var(--space-5))
-    calc(var(--safe-bottom) + var(--space-5)) calc(var(--safe-left) + var(--space-5));
+  padding: calc(var(--safe-top) + var(--space-4)) var(--gutter-right)
+    calc(var(--safe-bottom) + var(--space-5)) var(--gutter-left);
   overflow: hidden;
   /* The flow stands where the shell will: it paints the one ground itself
      (D146), the same layer every screen is drawn on, and nothing on top. */
@@ -61,7 +61,7 @@
 }
 
 .onboarding__title {
-  font-size: 32px;
+  font-size: var(--type-large-title);
   font-weight: var(--weight-bold);
   letter-spacing: -0.8px;
   line-height: 1.15;
@@ -135,7 +135,7 @@
 }
 
 .welcome__tagline {
-  font-size: 36px;
+  font-size: var(--type-large-title);
   font-weight: var(--weight-bold);
   letter-spacing: -1.1px;
   line-height: 1.12;
@@ -196,7 +196,7 @@
 .question-pick--custom {
   justify-content: flex-start;
   gap: var(--space-3);
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: var(--weight-semibold);
   font-size: var(--type-subhead);
   border-style: dashed;

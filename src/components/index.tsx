@@ -58,6 +58,43 @@ export function Section({
   );
 }
 
+/**
+ * Where a printed figure ends and its unit or scale begins — "830" and
+ * " von 1000", "0 / 3" and " Trainings", "8 × 60 " and "kg".
+ *
+ * The text is the catalogue's, untouched: this only finds the seam, so the
+ * number can be set at the size of its place and what follows it smaller
+ * and secondary (contract §3). Name the seam from the front (`figure`, what
+ * the text begins with) or from the back (`unit`, what it ends with). A
+ * text that does not begin or end that way stays whole.
+ */
+export function splitFigure(
+  text: string,
+  seam: { figure: string | number } | { unit: string },
+): [head: string, rest: string | null] {
+  if ('figure' in seam) {
+    const head = String(seam.figure);
+    return text.startsWith(head) && text.length > head.length ? [head, text.slice(head.length)] : [text, null];
+  }
+  const at = text.length - seam.unit.length;
+  return seam.unit !== '' && at > 0 && text.endsWith(seam.unit) ? [text.slice(0, at), seam.unit] : [text, null];
+}
+
+/**
+ * A figure with its unit: one run of text for a screen reader and a test,
+ * two weights for the eye.
+ */
+export function Figure(props: { text: string } & ({ figure: string | number } | { unit: string })) {
+  const [head, rest] = splitFigure(props.text, props);
+  if (rest === null) return <>{head}</>;
+  return (
+    <>
+      {head}
+      <span className="figure__unit">{rest}</span>
+    </>
+  );
+}
+
 /** The row a sheet was opened from, found again by its `focusKey`. */
 export function focusTarget(key: string): HTMLElement | null {
   return document.querySelector<HTMLElement>(`[data-focus-key="${key}"]`);

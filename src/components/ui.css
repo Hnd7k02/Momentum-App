@@ -7,8 +7,9 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding-left: calc(var(--safe-left) + var(--space-5));
-  padding-right: calc(var(--safe-right) + var(--space-5));
+  /* The one side margin (D160): title, labels and cards all start here. */
+  padding-left: var(--gutter-left);
+  padding-right: var(--gutter-right);
 }
 
 /*
@@ -148,8 +149,10 @@
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  min-height: 56px;
-  padding: var(--space-4) 0;
+  /* At least the row height, more when a title runs to two lines; the
+     padding is what a second line of text grows into (contract §4). */
+  min-height: var(--row-height);
+  padding: var(--space-3) 0;
   text-align: left;
   color: inherit;
   background: transparent;
@@ -235,6 +238,15 @@
 .badge--boolean,
 .badge--paused {
   background: var(--surface-secondary);
+  color: var(--text-secondary);
+}
+
+/* The unit or scale after a figure: smaller, and in the secondary ink
+   (contract §3). The number before it keeps the size of its place. */
+.figure__unit {
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-regular);
+  letter-spacing: 0;
   color: var(--text-secondary);
 }
 
@@ -353,30 +365,34 @@
   transform: translateX(20px);
 }
 
-/* Segmented control — iOS: a recessed track, the selection a white pill. */
+/*
+ * Segmented control (contract §5): a recessed track in --surface-input, the
+ * chosen side lifted in --surface-selected and semibold. 32px tall, with a
+ * 44px target.
+ */
 .segmented {
   display: flex;
   gap: 2px;
   padding: 2px;
   background: var(--surface-input);
-  border-radius: var(--radius-control);
+  border-radius: 10px;
 }
 
 .segmented__option {
   position: relative;
   flex: 1;
-  min-height: 40px;
-  border-radius: 12px;
-  font-size: var(--type-subhead);
-  font-weight: var(--weight-medium);
-  color: var(--text-primary);
+  min-height: 32px;
+  border-radius: 8px;
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-regular);
+  color: var(--text-secondary);
   transition: background var(--duration-fast) var(--ease-standard),
     box-shadow var(--duration-fast) var(--ease-standard);
 }
 
-/* Fills the track's 2px padding, so the target is the 44px the track is. */
+/* The option is 32px; the target reaches 6px past it either way: 44px. */
 .segmented__option::before {
-  inset: -2px 0;
+  inset: -6px 0;
 }
 
 /* Selected: `aria-pressed` for a toggle set, `aria-checked` where the
@@ -384,6 +400,7 @@
 .segmented__option[aria-pressed='true'],
 .segmented__option[aria-checked='true'] {
   background: var(--surface-selected);
+  color: var(--text-primary);
   font-weight: var(--weight-semibold);
   box-shadow: var(--shadow-selected);
 }
@@ -568,7 +585,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-5) var(--space-2);
+  padding: var(--space-3) var(--page-gutter) var(--space-2);
 }
 
 .sheet__title {
@@ -594,7 +611,7 @@
 }
 
 .sheet__body {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4) var(--page-gutter);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -602,7 +619,7 @@
 }
 
 .sheet__footer {
-  padding: var(--space-4) var(--space-5) 0;
+  padding: var(--space-4) var(--page-gutter) 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);

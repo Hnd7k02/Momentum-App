@@ -107,10 +107,16 @@
   overflow-wrap: anywhere;
 }
 
+/* A tile's number is a figure (D160): the large step, and the extra-large
+   one only on the tile that carries its screen's one main number. */
 .metric-tile__number {
-  font-size: var(--type-large-title);
+  font-size: var(--type-figure-l);
   font-weight: var(--weight-semibold);
   color: var(--text-primary);
+}
+
+.metric-tile--primary .metric-tile__number {
+  font-size: var(--type-figure-xl);
 }
 
 .metric-tile__scale {
@@ -130,7 +136,7 @@
 /* A compact tile keeps the same weight of number, a step smaller — the
    scale beneath it is the caption the brief describes. */
 .metric-tile--half .metric-tile__number {
-  font-size: 28px;
+  font-size: var(--type-figure-l);
 }
 
 .metric-tile--half .metric-tile__scale {
@@ -143,6 +149,7 @@
 .metric-tile__line {
   display: block;
   font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -224,13 +231,13 @@
   gap: var(--space-2);
 }
 
+/* The number in the head of a sheet. */
 .metric-sheet__figure .metric-tile__number {
-  font-size: 40px;
-  letter-spacing: -1px;
+  font-size: var(--type-figure-l);
 }
 
 .metric-sheet__figure .metric-tile__scale {
-  font-size: var(--type-body);
+  font-size: var(--type-subhead);
 }
 
 .metric-sheet__body {
