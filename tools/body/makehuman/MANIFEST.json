@@ -1,0 +1,84 @@
+{
+  "about": "MakeHuman base mesh, rig and targets as MPFB2 ships them, copied unchanged. Licence: CC0 1.0 Universal, see LICENSE.md beside this file. Written by tools/body/vendor.py; do not edit.",
+  "source": {
+    "package": "anny",
+    "version": "0.6.2",
+    "file": "anny-0.6.2-py3-none-any.whl",
+    "sha256": "bad70bdc2be0dfa9880d60129c3a1339678f08f493184f637dc2825c3e27b8d2",
+    "folder": "anny/data/mpfb2/"
+  },
+  "files": {
+    "3dobjs/base.obj": {
+      "bytes": 1749303,
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c"
+    },
+    "LICENSE.md": {
+      "bytes": 6962,
+      "sha256": "f6089cba01cb570a24712b41ab8a586ccd3cc5ef53dc266ca50b95c288956d2c"
+    },
+    "mesh_metadata/basemesh_vertex_groups.json": {
+      "bytes": 81984,
+      "sha256": "8cb1417bc55ae5ec8aa99f90734e81ed5fbb556511ff6a2c00e0534b70911444"
+    },
+    "rigs/standard/rig.default.json": {
+      "bytes": 126355,
+      "sha256": "8b949de35c2dd70dbb5094e57a8586c3b9a9f650775a293212581a8f67be6797"
+    },
+    "rigs/standard/weights.default.json": {
+      "bytes": 1633269,
+      "sha256": "c3df45e2f2165663b483b7fa3dfed6f1bd5e2dd48d8825308de1a8453a88b111"
+    },
+    "targets/hands/l-hand-fingers-distance-decr.target.gz": {
+      "bytes": 3671,
+      "sha256": "e11663e967bf3d1478ee5e707c9412b753ea7fa90e05728155780d3ed91425f5"
+    },
+    "targets/hands/r-hand-fingers-distance-decr.target.gz": {
+      "bytes": 3766,
+      "sha256": "1de105e5e75d76a41279cd82f3c9f04633d89429906903da4bbc916ef5a7c608"
+    },
+    "targets/macrodetails/african-male-young.target.gz": {
+      "bytes": 132860,
+      "sha256": "05ed84d6df36e788cdfa8da0be15376850524b960cf2f17f3e592b9cf7d21c85"
+    },
+    "targets/macrodetails/asian-male-young.target.gz": {
+      "bytes": 130005,
+      "sha256": "0928ed8b9f08f60afb9884cf9e9f33a939ed3a85d7f136de9ccc88a76981d6d7"
+    },
+    "targets/macrodetails/caucasian-male-young.target.gz": {
+      "bytes": 127922,
+      "sha256": "ffe69537e53148edff2776204ba48cf3bf1f3cbc72966592c8a562ab80b07333"
+    },
+    "targets/macrodetails/proportions/male-young-averagemuscle-averageweight-idealproportions.target.gz": {
+      "bytes": 39334,
+      "sha256": "b6cccc61b5f5af2e7c668b0a18013e5f3fa8ff082bf8513dcb9578c41275baeb"
+    },
+    "targets/macrodetails/proportions/male-young-averagemuscle-minweight-idealproportions.target.gz": {
+      "bytes": 40700,
+      "sha256": "e6cdfe84dfa8599a9be59466833356b70fe994b494165fd74d92e0abe06c0351"
+    },
+    "targets/macrodetails/proportions/male-young-maxmuscle-averageweight-idealproportions.target.gz": {
+      "bytes": 38091,
+      "sha256": "6a6dee42f9acddd3cf4c29eb498757e4cde1b694ade455298d38ee56dbe7f25a"
+    },
+    "targets/macrodetails/proportions/male-young-maxmuscle-minweight-idealproportions.target.gz": {
+      "bytes": 38087,
+      "sha256": "f12e767c9ebe5d87c312b2c086e64fb53e57e5caf3eed3b7b51b89ed6c5d3a02"
+    },
+    "targets/macrodetails/universal-male-young-averagemuscle-averageweight.target.gz": {
+      "bytes": 76,
+      "sha256": "e814651195c53971503d9823d6841216718a561951ef064f81d132297f4fa494"
+    },
+    "targets/macrodetails/universal-male-young-averagemuscle-minweight.target.gz": {
+      "bytes": 42696,
+      "sha256": "e4a993057e265088e082ee2aeccc860505e759b27251dc63a78314e1f8c78a16"
+    },
+    "targets/macrodetails/universal-male-young-maxmuscle-averageweight.target.gz": {
+      "bytes": 45597,
+      "sha256": "833caafc302bd9306de494f32ee1bc51d3a2e6641183329b031ac06ef0f4277e"
+    },
+    "targets/macrodetails/universal-male-young-maxmuscle-minweight.target.gz": {
+      "bytes": 47278,
+      "sha256": "0323cb5c604d13207d1a10ade8ce165df1cbf14d91de48ad959a082297669905"
+    }
+  }
+}

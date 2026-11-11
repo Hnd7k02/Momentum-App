@@ -113,6 +113,25 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     return final, digest
 
 
+def resolve(candidates, name):
+    """A candidate with everything it takes over from the one it is 'like'."""
+    if name not in candidates or name.startswith('_'):
+        known = ', '.join(key for key in candidates if not key.startswith('_'))
+        raise SystemExit(f'unknown candidate {name}; known: {known}')
+    spec = candidates[name]
+    if 'like' not in spec:
+        return json.loads(json.dumps(spec))
+    merged = resolve(candidates, spec['like'])
+    for key, value in spec.items():
+        if key == 'like':
+            continue
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = {**merged[key], **value}
+        else:
+            merged[key] = value
+    return merged
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('candidate')
@@ -123,22 +142,7 @@ def main():
     parser.add_argument('--keep', action='store_true')
     args = parser.parse_args()
     candidates = json.loads(Path(args.candidates).read_text())
-    if args.candidate not in candidates:
-        raise SystemExit(f'unknown candidate {args.candidate}; known: {", ".join(k for k in candidates if not k.startswith("_"))}')
-    spec = candidates[args.candidate]
-    while 'like' in spec:                      # a candidate may be another one with changes
-        parent = candidates[spec['like']]
-        merged = json.loads(json.dumps(parent))
-        for key, value in spec.items():
-            if key == 'like':
-                continue
-            if isinstance(value, dict) and isinstance(merged.get(key), dict):
-                merged[key] = {**merged[key], **value}
-            else:
-                merged[key] = value
-        if 'like' not in parent:
-            merged.pop('like', None)
-        spec = merged
+    spec = resolve(candidates, args.candidate)
     build(args.candidate, spec, Path(args.data), Path(args.out), args.relabel, args.keep)
 
 

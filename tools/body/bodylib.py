@@ -51,9 +51,11 @@ class Base:
 
     def __init__(self, data: Path = DATA):
         self.data = Path(data)
+        #: every file read, relative to the data folder — vendor.py copies these
+        self.read = set()
         vertices, faces, groups = [], [], []
         group = None
-        with open(self.data / '3dobjs' / 'base.obj') as handle:
+        with open(self._file('3dobjs/base.obj')) as handle:
             for line in handle:
                 if line.startswith('v '):
                     vertices.append([float(x) for x in line.split()[1:4]])
@@ -66,22 +68,32 @@ class Base:
         self.V = np.array(vertices, dtype=np.float64)
         self.faces = faces
         self.groups = groups
-        with open(self.data / 'mesh_metadata' / 'basemesh_vertex_groups.json') as handle:
+        with open(self._file('mesh_metadata/basemesh_vertex_groups.json')) as handle:
             self.vertex_groups = {
                 name: np.concatenate([np.arange(a, b + 1) for a, b in spans])
                 for name, spans in json.load(handle).items() if spans
             }
-        with open(self.data / 'rigs' / 'standard' / 'rig.default.json') as handle:
+        with open(self._file('rigs/standard/rig.default.json')) as handle:
             self.rig = json.load(handle)
-        with open(self.data / 'rigs' / 'standard' / 'weights.default.json') as handle:
+        with open(self._file('rigs/standard/weights.default.json')) as handle:
             self.weights = json.load(handle)['weights']
         #: the quads of the body proper, and the vertices they use
         self.body_quads = np.array([f for f, g in zip(faces, groups) if g == 'body'], dtype=np.int64)
         self.body_vertices = np.unique(self.body_quads)
 
+    def _file(self, relative: str) -> Path:
+        path = self.data / relative
+        if not path.is_file():
+            raise SystemExit(
+                f'{relative} is not in {self.data}. The repository keeps only the MakeHuman files its '
+                f'candidates read; after a change that needs another one, run tools/body/vendor.py '
+                f'(tools/body/README.md).')
+        self.read.add(relative)
+        return path
+
     def target(self, name: str):
         indices, deltas = [], []
-        with gzip.open(self.data / 'targets' / f'{name}.target.gz', 'rt') as handle:
+        with gzip.open(self._file(f'targets/{name}.target.gz'), 'rt') as handle:
             for line in handle:
                 line = line.strip()
                 if not line or line.startswith('#'):
