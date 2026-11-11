@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D162). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D163). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -560,14 +560,17 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   sets, pyramids, drop sets or deloads occur in his history (needed by
   Stage 5b); the iPhone model and iOS version (needed by 7B). He has no
   Mac.
-- **Order from here** (D159): Stage 6b (done, see below; waiting for the
-  owner at STOP 6b), the colour rules of the muscle
+- **Order from here** (D159): Stage 6b (done and accepted, see below), the
+  colour rules of the muscle
   status, Stage 5b, 7A (stage 1 of the body and the proof gate), 7B, 7C, 9;
   the tidy-up of D157 as a block of its own. Each block starts in a fresh
   session from its prompt under `docs/wp3/prompts/`.
 - **Reserved, not touched in WP3** (D158): `bossService.ts:217` fills
   `recordedScore` with `entry.score` — its own scoring gate, as its own era.
-- **Recorded by the review, corrected in the tidy-up block:** the device
+- **Recorded by the review, corrected in the tidy-up block:** the offline
+  check of `release-proof.mjs` — make the test server answer as GitHub
+  Pages does, without `Vary: Origin`, and after go-live the owner checks
+  once in flight mode (D163); the device
   screenshots named under "Verification status" are iPad screenshots of a
   design canvas, not the app on an iPhone; `README.md`,
   `docs/release-candidates.md` and `docs/device-tests.md` describe RC2. (The
@@ -575,15 +578,19 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   one constant in `lib.mjs`, `CHROMIUM_PATH` to override.)
 
 **WP3 Stage 6b — variant B is the design system** (branch
-`claude/momentum-wp3`, not merged; waiting for the owner's acceptance on the
-iPhone at STOP 6b)
+`claude/momentum-wp3`, not merged; **accepted by the owner on his iPhone at
+STOP 6b**, with the changes of D163 — see "After STOP 6b" at the end of
+this block)
 - **What it is.** The look of every existing screen, and nothing about what
   the app does. `src/core/`, `src/storage/`, the data schema, the backup
   format, `muscleState.ts`, the GLB, the body's light and material values
   and `body-preview.webp` are untouched; `git diff 7e2a5ce -- .github/fixtures`
   is empty and `domainOutputs.test.ts` holds the same fingerprints. The one
   string that changed is the heading over the exercise detail's day list
-  ("Letzte Trainingstage" / "Recent training days").
+  ("Letzte Trainingstage" / "Recent training days"). (After STOP 6b the
+  owner lifted the text lock for three rules and the empty range gained
+  its sentences — D163; in `muscleState.ts` only the printed sign and space
+  of a change moved, never the mapping from a number to a state.)
 - **One system** (D148). Variant B's values are folded into `tokens.css`;
   `stage6-variant-b.css`, `data-variant` and the dark Gym tile on a light
   screen (`data-tile`) are gone. Proven before anything else moved: the
@@ -607,8 +614,8 @@ iPhone at STOP 6b)
   zero line, a neutral 1.5px line and the state on the end point; the trend
   on Verlauf lost its wash and gained its zero line and a labelled end; the
   exercise detail's bars are neutral with the latest in the colour of its
-  change, the scale named on the left at the height of the bars it names,
-  the first and the last date beneath.
+  change; they start at zero (D163), with zero and the largest value named
+  on the left and the first and the last date beneath.
 - **Layers, motion, loading** (§10, §11). Every `z-index` and duration is a
   token; a loading screen holds its layout with calm surfaces
   (`LoadingBlocks`) and never for a load that failed.
@@ -661,15 +668,57 @@ iPhone at STOP 6b)
   visited once online the same offline run passes. To be settled on the
   device in flight mode, and in the tidy-up block if it is real.
 - **Seen, left for later blocks.** "Gehalten" stays yellow in a row until
-  the colour-rules block turns it on body, legend and rows at once; a fall
-  is printed with a hyphen-minus; the body is small at 320px and stands
-  still while it loads (7A, 7B); the running workout's companion is still
-  a placeholder (P12); seven target bubbles wrap to a lone "7" under
-  430px; `tokens.css` travels as text inside the script.
-- Real-device preview: the Stage 6b build (`6447ba8`) is published to
-  Momentum-preview (`e8617a7`, https://hnd7k02.github.io/Momentum-preview/),
-  for this acceptance with the status-bar style `default` so that the
-  `theme-color` per world can be judged (D149).
+  the colour-rules block turns it on body, legend and rows at once; the
+  body is small at 320px and stands still while it loads (7A, 7B); the
+  running workout's companion is still a placeholder (P12); `tokens.css`
+  travels as text inside the script. (The hyphen for a fall and the lone
+  "7" of the target bubbles were on this list and are done — D163.)
+- **After STOP 6b** (D163, same session). The owner's answers: the two
+  measured values stay; captions under the Gym wash stay as built; the
+  status bar is `default` for the rest of WP3; **the bars start at zero**;
+  the offline check goes to the tidy-up block. And from the iPhone:
+  - *The finding.* After importing a backup of the live app, Gym showed
+    the year's figure, Muskelgruppen ten untrained rows and a white body.
+    Reproduced with a backup made by the live build through its own
+    interface, imported with the real clock, before and after a reload:
+    Muskelgruppen reads the selected 7 or 30 days, the hub's figures the
+    whole history, and the last session lay 40 days back. The live build
+    shows the same for the same file — not Stage 6b, not the import, not
+    the replay. What was wrong was the sentence ("Noch nicht trainiert —
+    nach deiner ersten Session …"). `features/gym/muscleGap.ts` now tells
+    four absences apart and each says what is missing; with nothing in
+    the range the screen offers "Training erfassen"; a failed load uses
+    the existing "could not load" block; the hub's card says nothing
+    while loading and names a failed load. `src/core` and `src/storage`
+    are untouched. Should the owner's own file show something other than
+    an empty range, the screen now names the reason — and the file is the
+    next thing to look at.
+  - *Three text rules* (`i18n/typography.ts`, `typography.test.ts`): a
+    fall with the minus sign U+2212, a no-break space before a percent
+    sign, "1 Distanzbereich gewertet".
+  - *The seven target bubbles stand in one row at every width*; under
+    375px a bubble's target is 44px high and its share of the row wide —
+    the one place a target is narrower than 44px. The grid cell is the
+    target and the circle is drawn inside it: a target computed from a
+    border came out a pixel wrong, because browsers snap borders.
+  - *The follow-up was reviewed like the stage* (seven findings confirmed,
+    four refuted, six fixed; the one left is in D163).
+  - *The toast check* waits at most `--duration-sheet` (320 ms).
+  - Verification after these (source as of `d63dd8a`): `tsc -b` 0;
+    `npm run test` exit 0, 111 files, 1728 tests; build `index.css`
+    88.25 kB, `index.js` 501.14 kB; browser suites 36 of 37, 3720 of 3721
+    checks — the one red check is still the offline one; `design-system.mjs`
+    1128/1128 over 41 screens at four widths (the Gym hub and Muskelgruppen
+    with an empty range are the two new ones); the 3D suites alone, 71/71,
+    3/3 and 39/39; lowest text contrast unchanged, Mind 4.70:1 and Gym
+    4.79:1. `git diff 7e2a5ce -- .github/fixtures` is empty; `src/core`,
+    `src/storage` and `public/` are unchanged since the stage began. Both
+    live backups were imported into this build once more, with the real
+    clock, before and after a reload.
+- Real-device preview: the build of `6447ba8` was published to
+  Momentum-preview as `e8617a7` for the acceptance
+  (https://hnd7k02.github.io/Momentum-preview/), with the status-bar style
+  `default` so that the `theme-color` per world could be judged (D149).
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
@@ -1138,9 +1187,12 @@ and the Endurance Phase side by side while the first rank is held, and every
 paragraph of methodology moved into the sheet the tile opens. Nothing in
 scoring, ranking, persistence or the questions was touched; the one colour
 that moved is the Gym bar fill (`-mid` → `-ink`, to clear 3:1 on its tint).
-The `Momentum-preview` repository's `index.html` carries
+The `Momentum-preview` repository's `index.html` carried
 `apple-mobile-web-app-status-bar-style: black-translucent`, which this
-repository has never had — worth deciding on deliberately.
+repository has never had. **Decided at STOP 6b (D163):** the style is
+`default` for the rest of WP3, here and in the preview — the status bar is
+painted from `theme-color`, which the app sets per world. An edge-to-edge
+status bar is a backlog item (below).
 
 **V1 is released.** The release pass closed the last four open items —
 Gate 2 by deciding not to build it (D120), tombstones as post-V1 (D121),
@@ -1165,6 +1217,8 @@ Genuine post-V1 work, none of it blocking:
 | Nutrition targets | moot since Food left the product (D139) |
 | Removing the dormant `restDays` collection | a deliberate `BACKUP_FORMAT_VERSION` cleanup, safe but not urgent (D115, D122) |
 | Domain-independent day closure | D111's note; Mind is the only daily domain since D139 |
+| kg or lb per exercise (backlog from STOP 6b, D163) | some machines are marked in pounds only: the unit becomes switchable per exercise, and progress is always converted to and compared in kilograms. Today the unit is one display preference (D130); sets stay grams |
+| Edge-to-edge status bar, like a native app (backlog from STOP 6b, D163) | the content runs under the clock and the battery, only the camera island covers it. The catch: with `black-translucent` the status bar's own text is always white for a Home Screen app, so the light Mind world needs a dark gradient at the top. Not in WP3 — the style stays `default` |
 
 **If a third training domain ever arrives**, add only its evidence — what one
 comparable observation is, and what makes two of them comparable. Everything

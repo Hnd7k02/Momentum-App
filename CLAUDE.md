@@ -327,12 +327,29 @@ Never conflate them.
   of a destructive act — only its confirmation carries `--status-weak-ink`.
 - **A chart** is a neutral 1.5px line or neutral bars with a fine zero
   line and no wash beneath; the end point or the last bar carries the
-  state. The rows of a list share one scale, −12 % to +12 %. No data draws
-  nothing and one value draws a dot.
+  state. The rows of a list share one scale, −12 % to +12 %, and bars start
+  at zero (D163): a small change must look small. No data draws nothing
+  and one value draws a dot.
 - **A screen that loads holds its layout** with calm surfaces
-  (`LoadingBlocks`), no shimmer — and never for a load that failed.
+  (`LoadingBlocks`), no shimmer — and never for a load that failed, which
+  says so and can be retried (`LoadFailure`).
+- **An empty state says why it is empty and what is missing** (contract
+  §11, D163), and offers the one action that supplies it. An empty *range*
+  is not "never": Muskelgruppen reads 7 or 30 days while the hub's figures
+  read the whole history, and `features/gym/muscleGap.ts` keeps the four
+  absences apart. Never answer a range without data with a first-time text.
+- **A figure is printed with a real minus sign and a no-break space before
+  its percent sign** (D163): "−10 %", never a hyphen, never "100 / %" across
+  a line end. `i18n/typography.ts` has the helpers, `translate()` prints a
+  negative parameter that way, and `typography.test.ts` holds both
+  catalogues and the source to it.
 - Touch targets 44px effective. A control may reach it with a negatively
-  inset `::before`.
+  inset `::before` — but never one computed from a border width: a browser
+  snaps a border to whole device pixels, differently per device. Where it
+  can, make the control's own box the target and draw the shape inside it
+  (`.bubble`). The one exception to 44px is the row of seven target
+  bubbles, which never wraps (D163): under 375px a bubble's target is 44px
+  high and its share of the row wide.
 - No horizontal clipping at 320/360/393/430px.
 - Reduced motion and reduced transparency respected.
 - Avoid technical vocabulary in user-facing copy — no "IndexedDB", "JSON",

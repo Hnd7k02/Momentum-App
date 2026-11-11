@@ -3652,8 +3652,8 @@ and §9.
 
 ## D162 — Stage 6b: what the contract left open, and the two values the pixels overruled
 
-**Proposed (Stage 6b, 2026-11-11; the owner accepts or changes them at
-STOP 6b).** Stage 6b applied `docs/wp3/vertrag.md` to every existing screen.
+**Accepted at STOP 6b on 2026-11-11 with one change** — the bars of the
+exercise detail start at zero, D163. Stage 6b applied `docs/wp3/vertrag.md` to every existing screen.
 Where the contract fixes a value, that value is built. This entry records
 the two places where a measured result overruled a value variant B was
 built with, and the small choices made where the contract is silent — each
@@ -3729,7 +3729,9 @@ call, not a cleanup.
   question detail — keeps 40px (`--row-height-compact`). The 54px row is a
   row that names a thing or can be tapped.
 - *Charts.* On Verlauf the fine line marks where the range began: the zero
-  the direction is read against. The exercise detail's scale runs from its
+  the direction is read against. *(The rest of this paragraph, as far as it
+  concerns the bars' scale, was overruled at STOP 6b: they start at zero —
+  D163. The dense mode and the overflow rule stand.)* The exercise detail's scale runs from its
   smallest day to its largest, and names both as the sets that produced
   them, the way the screen prints a day's value everywhere else. Each of
   the two labels stands at the height of the bar it names, on a fine line
@@ -3766,3 +3768,129 @@ belongs to the colour-rules block, which rewrites these words anyway. The
 
 `tokens.css`, `designRules.test.ts`, `contrast.test.ts`,
 `scripts/verify/design-system.mjs`.
+
+## D163 — STOP 6b: accepted on the iPhone; bars from zero, an empty range that says why, three text rules
+
+**Decided by the owner on 2026-11-11**, after going through the published
+preview on his iPhone. Nine of the ten points of the checklist were in
+order; the tenth was a finding (below). His answers to the five questions
+of the STOP 6b report, and the work that followed in the same session:
+
+**1. The two measured values stay.** The light sheet's fill is 0.92 and
+the Gym wash 0.24 (D162).
+
+**2. Captions on glass under the Gym wash stay as built.** Where the
+caption grey does not hold 4.5:1 the label takes the second text level,
+and the browser suite measures every screen. `--text-tertiary` keeps the
+contract's value; the wash is not halved.
+
+**3. The status bar is `default` for the rest of WP3** (D149, now seen on
+the device): painted from `theme-color`, which the app sets per world. An
+edge-to-edge status bar is a backlog item, with its catch recorded there.
+
+**4. The exercise detail's bars start at zero.** D162 had built a scale
+from the smallest day to the largest. That makes a small fall look like a
+collapse — the very thing the shared scale of the muscle rows ended
+(D160) — so a bar is its day's share of the largest day again, as before
+Stage 6b, with the old floor of 8 %. Zero and the largest value are named
+on the left. The contract's §6 says so. Whether a line suits better than
+bars is settled in block 5b, with the new metric.
+
+**5. The offline check is the tidy-up block's.** `release-proof.mjs`'s
+"offline, Gym still shows the 3D body" was red before Stage 6b and is red
+after it. In the tidy-up block the test server is made to answer as
+GitHub Pages does — without `Vary: Origin` — and the owner checks once in
+flight mode after go-live.
+
+**The finding: after importing a backup of the live app, Gym showed the
+year's figure, Muskelgruppen nothing, and the body stayed white.**
+Reproduced with a backup made by the live build (`e30becd`) through its own
+interface and imported with the real clock, before and after a reload:
+
+- with training up to today, everything is there — rows, lines, numbers,
+  the body tinted;
+- with the last session 40 days back, the hub shows "Leistung seit
+  Jahresbeginn +30 %" and Muskelgruppen ten untrained rows and a white body
+  under "Noch nicht trainiert — nach deiner ersten Session …";
+- the live build shows exactly the same for the same file.
+
+So it is neither Stage 6b nor the import nor the replay. The schema and the
+backup format are the same on both branches (5 and 3), the import replaces
+every store in one transaction and raises the change signal, and the
+history loader is unchanged. Muskelgruppen reads the selected 7 or 30 days;
+the rating and the year's figure read the whole history. What was wrong is
+the sentence: the first-session text for someone with months of sessions.
+
+*An empty state says why, and what is missing* (contract §11).
+`features/gym/muscleGap.ts` tells four absences apart: never trained; the
+last session before the range, with its day and how long ago; a session in
+the range without a set that can be scored, the missing bodyweight named
+when that is the reason; trained, but no exercise with a second day. The
+hub's card says the same in short. With nothing in the range the screen
+offers the one action, "Training erfassen", as the contract's mock-up has
+it, and a load that failed uses the existing "could not load" block
+instead of leaving the screen empty. `src/core` and `src/storage` are
+untouched; the day of the latest session is the newest date in the session
+store up to today — the latest *day*, not the session created last, since
+one can be entered for yesterday after today's (D133). The hub's card says
+nothing while the history loads and names a failed load; it used to answer
+both with "Noch nicht trainiert". If the owner's own file shows something else
+than an empty range, the screen now names the reason, and the file is the
+next thing to look at.
+
+**Three text rules** (the text lock was lifted for exactly these):
+
+- A fall is printed with the minus sign, U+2212, never the hyphen.
+- A number and its percent sign never part at a line end: a no-break
+  space stands between them.
+- "1 Distanzbereich gewertet" has a singular.
+
+They live in `i18n/typography.ts`; `translate()` prints a negative
+parameter with the minus sign; `typography.test.ts` holds both catalogues
+and the source to them.
+
+**The seven target bubbles never wrap.** D10 let them wrap so that none
+fell under 44px, which left a lone "7" beneath six from 320 to 393px. The
+row is a grid of equal columns. Seven targets of 44px need 308px and a
+card on a 320px phone has 256px, so there a bubble is a 33px circle; its
+target stays 44px high and as wide as its share of the row. From 375px it
+is 44px both ways. This is the one place a target is narrower than 44px,
+and only its width.
+
+*The cell is the target and the circle is drawn inside it.* The first
+version kept the button round and reached the target with a `::before`
+offset by the gap and the border. A browser snaps a 1.5px border to whole
+device pixels, differently per device, so neighbouring targets overlapped
+by a pixel in one renderer and would have left a dead strip in another —
+found by the review, confirmed by measuring. The button's own box is the
+target now, the cells touch, and nothing is computed from a border.
+
+**The toast check is bound to the sheet.** `wp3-stage1.mjs` waits for the
+toast to go at most `--duration-sheet` (320 ms), read from the page — not
+the second STOP 6b had proposed. It measured 4–8 ms. The time is taken
+straight after the wait, with no other call to the page in between.
+
+**The follow-up was reviewed like the stage:** five read-only reviewers,
+each finding checked by a refuter — seven confirmed, four refuted. Six
+were fixed (the bubbles' target, the hub card while loading and after a
+failed load, the latest day, a negative share printed with the locale's
+hyphen, a source scan that could not see the line it was written for, the
+toast check's timing). One is left: "Pläne verwalten" in the chooser
+opened from the empty Muskelgruppen screen goes back to the hub without
+scrolling to the plans.
+
+**Backlog, recorded here and not built in WP3:**
+
+- *kg or lb per exercise.* Some machines are marked in pounds only. The
+  unit becomes switchable per exercise; progress is always converted to
+  and compared in kilograms. Today the unit is one display preference for
+  the whole app (D130) and sets stay grams, which this keeps.
+- *An edge-to-edge status bar, like a native app:* the content runs under
+  the clock and the battery, and only the camera island covers it. The
+  catch: with `black-translucent` the status bar's own text is always
+  white for an app on the Home Screen, so the light Mind world then needs
+  a dark gradient at the top for the clock to read.
+
+`features/gym/muscleGap.ts`, `features/gym/ExerciseDetail.tsx`,
+`i18n/typography.ts`, `components/ui.css` (`.bubble-row`),
+`scripts/verify/design-system.mjs`, `docs/wp3/vertrag.md` §6.

@@ -655,11 +655,30 @@
       104
      ],
      "bg": [
-      249,
+      250,
       249,
       254
      ],
-     "ratio": 6.1,
+     "ratio": 6.11,
+     "tertiary": false
+    },
+    {
+     "text": "Details richtest du ein, wenn ",
+     "className": "question-pick__count",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      94,
+      94,
+      104
+     ],
+     "bg": [
+      242,
+      242,
+      248
+     ],
+     "ratio": 5.77,
      "tertiary": false
     },
     {
@@ -3056,7 +3075,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -3094,7 +3113,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -3229,7 +3248,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -3267,7 +3286,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -3305,7 +3324,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -3343,7 +3362,7 @@
      "tertiary": false
     },
     {
-     "text": "88 %",
+     "text": "88 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -4071,7 +4090,7 @@
      "tertiary": false
     },
     {
-     "text": "634 von 1000 · 34 %",
+     "text": "634 von 1000 · 34 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -4109,7 +4128,7 @@
      "tertiary": false
     },
     {
-     "text": "840 von 1000 · 33 %",
+     "text": "840 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -4147,7 +4166,7 @@
      "tertiary": false
     },
     {
-     "text": "673 von 1000 · 33 %",
+     "text": "673 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -4242,7 +4261,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -4299,7 +4318,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -4356,7 +4375,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -4548,7 +4567,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -4605,7 +4624,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -4662,7 +4681,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -4681,7 +4700,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -7393,7 +7412,7 @@
      "tertiary": false
     },
     {
-     "text": "Gesamt +29 %",
+     "text": "Gesamt +29 %",
      "className": "gym-hub__musclesOverall gym-hub__musclesOverall-",
      "size": 15,
      "weight": 600,
@@ -7906,7 +7925,7 @@
       41,
       49
      ],
-     "ratio": 13.18,
+     "ratio": 13.27,
      "tertiary": false
     },
     {
@@ -7925,7 +7944,7 @@
       38,
       46
      ],
-     "ratio": 6.9,
+     "ratio": 6.95,
      "tertiary": false
     },
     {
@@ -7942,9 +7961,9 @@
      "bg": [
       39,
       39,
-      47
+      46
      ],
-     "ratio": 6.8,
+     "ratio": 6.86,
      "tertiary": false
     },
     {
@@ -7959,11 +7978,30 @@
       250
      ],
      "bg": [
-      34,
-      34,
-      42
+      33,
+      33,
+      41
      ],
-     "ratio": 14.42,
+     "ratio": 14.53,
+     "tertiary": false
+    },
+    {
+     "text": "Laufen",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      14,
+      14,
+      19
+     ],
+     "ratio": 8.85,
      "tertiary": false
     },
     {
@@ -8499,7 +8537,7 @@
       30,
       39
      ],
-     "ratio": 8.91,
+     "ratio": 8.9,
      "tertiary": false
     },
     {
@@ -8518,7 +8556,7 @@
       14,
       19
      ],
-     "ratio": 8.85,
+     "ratio": 8.86,
      "tertiary": false
     },
     {
@@ -8657,7 +8695,7 @@
      "tertiary": false
     },
     {
-     "text": "Setzt sich zusammen aus 40 % A",
+     "text": "Setzt sich zusammen aus 40 % A",
      "className": "P",
      "size": 15,
      "weight": 400,
@@ -9176,7 +9214,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9252,7 +9290,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9328,7 +9366,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9404,7 +9442,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9480,7 +9518,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9556,7 +9594,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9748,7 +9786,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9824,7 +9862,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9900,7 +9938,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -9976,7 +10014,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -10052,7 +10090,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -10128,7 +10166,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -10282,7 +10320,7 @@
      "tertiary": false
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -10377,7 +10415,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-progress__change gym-progress__change--decli",
      "size": 17,
      "weight": 600,
@@ -10491,7 +10529,7 @@
      "tertiary": false
     },
     {
-     "text": "+2 %",
+     "text": "+2 %",
      "className": "gym-progress__change gym-progress__change--impro",
      "size": 17,
      "weight": 600,
@@ -10873,7 +10911,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-detail__value gym-detail__value--declined",
      "size": 20,
      "weight": 600,
@@ -10965,44 +11003,6 @@
       51
      ],
      "ratio": 6.46,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      40,
-      40,
-      48
-     ],
-     "ratio": 6.71,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      39,
-      39,
-      47
-     ],
-     "ratio": 6.83,
      "tertiary": false
     },
     {
@@ -11271,44 +11271,6 @@
       56
      ],
      "ratio": 6.82,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      52,
-      52,
-      73
-     ],
-     "ratio": 5.6,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      52,
-      51,
-      71
-     ],
-     "ratio": 5.67,
      "tertiary": false
     },
     {
@@ -11822,6 +11784,599 @@
       34
      ],
      "ratio": 7.88,
+     "tertiary": false
+    }
+   ],
+   "40-gym-uebersicht-ohne-training": [
+    {
+     "text": "Bereiche",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      38,
+      38,
+      56
+     ],
+     "ratio": 13.59,
+     "tertiary": false
+    },
+    {
+     "text": "Was Momentum für dich verfolgt",
+     "className": "screen__subtitle",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      38,
+      37,
+      56
+     ],
+     "ratio": 6.87,
+     "tertiary": false
+    },
+    {
+     "text": "Mind",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "Gym",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Training",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      25,
+      25,
+      35
+     ],
+     "ratio": 8.05,
+     "tertiary": false
+    },
+    {
+     "text": "0 von 3 Sessions diese Woche",
+     "className": "gym-hub__week",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      42,
+      42,
+      51
+     ],
+     "ratio": 12.97,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-hub__last",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      41,
+      41,
+      50
+     ],
+     "ratio": 6.61,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "1 Plan",
+     "className": "SPAN",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      38,
+      38,
+      46
+     ],
+     "ratio": 6.92,
+     "tertiary": false
+    },
+    {
+     "text": "Pläne verwalten",
+     "className": "gym-hub__plansLink",
+     "size": 13,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      31,
+      30,
+      39
+     ],
+     "ratio": 8.9,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "gym-hub__musclesTitle",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      36,
+      36,
+      43
+     ],
+     "ratio": 14.08,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-hub__musclesSummary",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      35,
+      35,
+      43
+     ],
+     "ratio": 14.19,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session vor 45 Tagen",
+     "className": "gym-hub__musclesRange",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      33,
+      33,
+      42
+     ],
+     "ratio": 7.35,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
+     "tertiary": false
+    }
+   ],
+   "41-muskelgruppen-leer": [
+    {
+     "text": "Muskelgruppen",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      20,
+      20,
+      27
+     ],
+     "ratio": 16.83,
+     "tertiary": false
+    },
+    {
+     "text": "7 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "30 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      27,
+      26,
+      39
+     ],
+     "ratio": 7.87,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-progress__noDataState",
+     "size": 15,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.81,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-progress__noDataHint",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 7.95,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "Vorne",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Seite",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Hinten",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
      "tertiary": false
     }
    ]
@@ -12516,10 +13071,10 @@
      ],
      "bg": [
       250,
-      249,
+      250,
       254
      ],
-     "ratio": 6.13,
+     "ratio": 6.15,
      "tertiary": false
     },
     {
@@ -12534,11 +13089,11 @@
       104
      ],
      "bg": [
+      244,
       243,
-      242,
-      248
+      249
      ],
-     "ratio": 5.77,
+     "ratio": 5.81,
      "tertiary": false
     },
     {
@@ -15068,7 +15623,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -15106,7 +15661,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -15144,7 +15699,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -15279,7 +15834,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -15317,7 +15872,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -15355,7 +15910,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -15393,7 +15948,7 @@
      "tertiary": false
     },
     {
-     "text": "88 %",
+     "text": "88 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -16292,7 +16847,7 @@
      "tertiary": false
     },
     {
-     "text": "634 von 1000 · 34 %",
+     "text": "634 von 1000 · 34 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -16330,7 +16885,7 @@
      "tertiary": false
     },
     {
-     "text": "840 von 1000 · 33 %",
+     "text": "840 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -16368,7 +16923,7 @@
      "tertiary": false
     },
     {
-     "text": "673 von 1000 · 33 %",
+     "text": "673 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -16463,7 +17018,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -16520,7 +17075,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -16577,7 +17132,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -16596,7 +17151,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -16788,7 +17343,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -16845,7 +17400,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -16902,7 +17457,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -16921,7 +17476,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -19975,7 +20530,7 @@
      "tertiary": false
     },
     {
-     "text": "Gesamt +29 %",
+     "text": "Gesamt +29 %",
      "className": "gym-hub__musclesOverall gym-hub__musclesOverall-",
      "size": 15,
      "weight": 600,
@@ -20545,7 +21100,7 @@
       42,
       50
      ],
-     "ratio": 12.94,
+     "ratio": 13.03,
      "tertiary": false
     },
     {
@@ -20562,9 +21117,9 @@
      "bg": [
       38,
       38,
-      46
+      45
      ],
-     "ratio": 6.87,
+     "ratio": 6.92,
      "tertiary": false
     },
     {
@@ -20583,7 +21138,7 @@
       40,
       48
      ],
-     "ratio": 6.69,
+     "ratio": 6.72,
      "tertiary": false
     },
     {
@@ -20598,11 +21153,11 @@
       250
      ],
      "bg": [
-      34,
-      34,
+      33,
+      33,
       42
      ],
-     "ratio": 14.51,
+     "ratio": 14.58,
      "tertiary": false
     },
     {
@@ -20617,11 +21172,11 @@
       192
      ],
      "bg": [
-      14,
-      14,
-      19
+      15,
+      15,
+      20
      ],
-     "ratio": 8.85,
+     "ratio": 8.82,
      "tertiary": false
     },
     {
@@ -20640,7 +21195,7 @@
       42,
       49
      ],
-     "ratio": 6.59,
+     "ratio": 6.56,
      "tertiary": false
     },
     {
@@ -21391,7 +21946,7 @@
      "tertiary": false
     },
     {
-     "text": "Setzt sich zusammen aus 40 % A",
+     "text": "Setzt sich zusammen aus 40 % A",
      "className": "P",
      "size": 15,
      "weight": 400,
@@ -21967,7 +22522,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22043,7 +22598,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22119,7 +22674,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22195,7 +22750,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22271,7 +22826,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22347,7 +22902,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22423,7 +22978,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22634,7 +23189,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22710,7 +23265,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22786,7 +23341,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22862,7 +23417,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -22938,7 +23493,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -23014,7 +23569,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -23090,7 +23645,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -23339,7 +23894,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -23434,7 +23989,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-progress__change gym-progress__change--decli",
      "size": 17,
      "weight": 600,
@@ -23548,7 +24103,7 @@
      "tertiary": false
     },
     {
-     "text": "+2 %",
+     "text": "+2 %",
      "className": "gym-progress__change gym-progress__change--impro",
      "size": 17,
      "weight": 600,
@@ -23930,7 +24485,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-detail__value gym-detail__value--declined",
      "size": 20,
      "weight": 600,
@@ -24022,44 +24577,6 @@
       52
      ],
      "ratio": 6.43,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      42,
-      42,
-      50
-     ],
-     "ratio": 6.58,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      40,
-      40,
-      48
-     ],
-     "ratio": 6.69,
      "tertiary": false
     },
     {
@@ -24616,44 +25133,6 @@
      "tertiary": false
     },
     {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      44,
-      44,
-      56
-     ],
-     "ratio": 6.34,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      43,
-      43,
-      55
-     ],
-     "ratio": 6.41,
-     "tertiary": false
-    },
-    {
      "text": "18. September",
      "className": "SPAN",
      "size": 11,
@@ -25164,6 +25643,656 @@
       34
      ],
      "ratio": 7.89,
+     "tertiary": false
+    }
+   ],
+   "40-gym-uebersicht-ohne-training": [
+    {
+     "text": "Bereiche",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      45,
+      44,
+      67
+     ],
+     "ratio": 12.37,
+     "tertiary": false
+    },
+    {
+     "text": "Was Momentum für dich verfolgt",
+     "className": "screen__subtitle",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      39,
+      38,
+      57
+     ],
+     "ratio": 6.78,
+     "tertiary": false
+    },
+    {
+     "text": "Mind",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "Gym",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Training",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      28,
+      28,
+      40
+     ],
+     "ratio": 7.77,
+     "tertiary": false
+    },
+    {
+     "text": "0 von 3 Sessions diese Woche",
+     "className": "gym-hub__week",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      43,
+      43,
+      53
+     ],
+     "ratio": 12.86,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-hub__last",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      42,
+      42,
+      51
+     ],
+     "ratio": 6.55,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "1 Plan",
+     "className": "SPAN",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      39,
+      39,
+      47
+     ],
+     "ratio": 6.84,
+     "tertiary": false
+    },
+    {
+     "text": "Pläne verwalten",
+     "className": "gym-hub__plansLink",
+     "size": 13,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      30,
+      30,
+      39
+     ],
+     "ratio": 8.9,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "gym-hub__musclesTitle",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      36,
+      36,
+      44
+     ],
+     "ratio": 14.06,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-hub__musclesSummary",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      35,
+      35,
+      43
+     ],
+     "ratio": 14.24,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session vor 45 Tagen",
+     "className": "gym-hub__musclesRange",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      34,
+      34,
+      42
+     ],
+     "ratio": 7.27,
+     "tertiary": false
+    },
+    {
+     "text": "Gym-Rating",
+     "className": "metric-tile__open",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      42,
+      42,
+      49
+     ],
+     "ratio": 6.57,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
+     "tertiary": false
+    }
+   ],
+   "41-muskelgruppen-leer": [
+    {
+     "text": "Muskelgruppen",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      20,
+      20,
+      27
+     ],
+     "ratio": 16.81,
+     "tertiary": false
+    },
+    {
+     "text": "7 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "30 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      29,
+      29,
+      42
+     ],
+     "ratio": 7.66,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-progress__noDataState",
+     "size": 15,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.81,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-progress__noDataHint",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 7.95,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "Vorne",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Seite",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Hinten",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Brust",
+     "className": "muscle-row__name",
+     "size": 17,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.8,
+     "tertiary": false
+    },
+    {
+     "text": "Noch nicht trainiert",
+     "className": "muscle-row__badge",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      48
+     ],
+     "ratio": 7.11,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
      "tertiary": false
     }
    ]
@@ -25877,10 +27006,10 @@
      ],
      "bg": [
       243,
-      242,
-      248
+      243,
+      249
      ],
-     "ratio": 5.77,
+     "ratio": 5.8,
      "tertiary": false
     },
     {
@@ -28448,7 +29577,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28486,7 +29615,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28524,7 +29653,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28562,7 +29691,7 @@
      "tertiary": false
     },
     {
-     "text": "88 %",
+     "text": "88 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28716,7 +29845,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28754,7 +29883,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28792,7 +29921,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -28830,7 +29959,7 @@
      "tertiary": false
     },
     {
-     "text": "88 %",
+     "text": "88 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -29767,7 +30896,7 @@
      "tertiary": false
     },
     {
-     "text": "634 von 1000 · 34 %",
+     "text": "634 von 1000 · 34 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -29805,7 +30934,7 @@
      "tertiary": false
     },
     {
-     "text": "840 von 1000 · 33 %",
+     "text": "840 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -29843,7 +30972,7 @@
      "tertiary": false
     },
     {
-     "text": "673 von 1000 · 33 %",
+     "text": "673 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -29938,7 +31067,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -29995,7 +31124,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -30052,7 +31181,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -30071,7 +31200,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -30301,7 +31430,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -30358,7 +31487,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -30415,7 +31544,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -30434,7 +31563,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -33792,7 +34921,7 @@
      "tertiary": false
     },
     {
-     "text": "Gesamt +29 %",
+     "text": "Gesamt +29 %",
      "className": "gym-hub__musclesOverall gym-hub__musclesOverall-",
      "size": 15,
      "weight": 600,
@@ -34377,11 +35506,11 @@
       250
      ],
      "bg": [
-      43,
-      43,
-      51
+      42,
+      42,
+      50
      ],
-     "ratio": 12.9,
+     "ratio": 12.98,
      "tertiary": false
     },
     {
@@ -34396,11 +35525,11 @@
       192
      ],
      "bg": [
-      38,
-      38,
-      46
+      37,
+      37,
+      45
      ],
-     "ratio": 6.92,
+     "ratio": 6.97,
      "tertiary": false
     },
     {
@@ -34415,11 +35544,11 @@
       192
      ],
      "bg": [
-      41,
-      41,
-      49
+      40,
+      40,
+      48
      ],
-     "ratio": 6.66,
+     "ratio": 6.71,
      "tertiary": false
     },
     {
@@ -34434,11 +35563,11 @@
       250
      ],
      "bg": [
-      33,
-      33,
-      42
+      31,
+      31,
+      39
      ],
-     "ratio": 14.55,
+     "ratio": 14.99,
      "tertiary": false
     },
     {
@@ -34457,7 +35586,7 @@
       15,
       20
      ],
-     "ratio": 8.82,
+     "ratio": 8.81,
      "tertiary": false
     },
     {
@@ -34476,7 +35605,7 @@
       42,
       49
      ],
-     "ratio": 6.56,
+     "ratio": 6.58,
      "tertiary": false
     },
     {
@@ -34649,7 +35778,7 @@
       28,
       41
      ],
-     "ratio": 7.75,
+     "ratio": 7.77,
      "tertiary": false
     },
     {
@@ -34702,11 +35831,11 @@
       192
      ],
      "bg": [
-      38,
-      38,
+      39,
+      39,
       46
      ],
-     "ratio": 6.88,
+     "ratio": 6.86,
      "tertiary": false
     },
     {
@@ -34723,7 +35852,7 @@
      "bg": [
       38,
       38,
-      46
+      45
      ],
      "ratio": 6.91,
      "tertiary": false
@@ -34778,15 +35907,15 @@
       192
      ],
      "bg": [
-      41,
-      41,
+      42,
+      42,
       49
      ],
-     "ratio": 6.61,
+     "ratio": 6.59,
      "tertiary": false
     },
     {
-     "text": "+5 %",
+     "text": "+5 %",
      "className": "running-range__change",
      "size": 17,
      "weight": 600,
@@ -34801,7 +35930,7 @@
       29,
       36
      ],
-     "ratio": 15.36,
+     "ratio": 15.35,
      "tertiary": false
     },
     {
@@ -35164,7 +36293,7 @@
       37,
       44
      ],
-     "ratio": 14,
+     "ratio": 13.99,
      "tertiary": false
     },
     {
@@ -35341,7 +36470,7 @@
      "tertiary": false
     },
     {
-     "text": "Setzt sich zusammen aus 40 % A",
+     "text": "Setzt sich zusammen aus 40 % A",
      "className": "P",
      "size": 15,
      "weight": 400,
@@ -35782,7 +36911,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -35858,7 +36987,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36031,7 +37160,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36107,7 +37236,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36183,7 +37312,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36259,7 +37388,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36335,7 +37464,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36411,7 +37540,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36487,7 +37616,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36563,7 +37692,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36696,7 +37825,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36907,7 +38036,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -36983,7 +38112,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37059,7 +38188,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37135,7 +38264,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37211,7 +38340,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37287,7 +38416,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37363,7 +38492,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37439,7 +38568,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37572,7 +38701,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37821,7 +38950,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -37954,7 +39083,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -38049,7 +39178,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-progress__change gym-progress__change--decli",
      "size": 17,
      "weight": 600,
@@ -38163,7 +39292,7 @@
      "tertiary": false
     },
     {
-     "text": "+2 %",
+     "text": "+2 %",
      "className": "gym-progress__change gym-progress__change--impro",
      "size": 17,
      "weight": 600,
@@ -38545,7 +39674,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-detail__value gym-detail__value--declined",
      "size": 20,
      "weight": 600,
@@ -38637,44 +39766,6 @@
       56
      ],
      "ratio": 6.23,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      42,
-      42,
-      51
-     ],
-     "ratio": 6.55,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      41,
-      41,
-      50
-     ],
-     "ratio": 6.64,
      "tertiary": false
     },
     {
@@ -39307,7 +40398,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-detail__value gym-detail__value--declined",
      "size": 20,
      "weight": 600,
@@ -39399,44 +40490,6 @@
       62
      ],
      "ratio": 5.93,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      42,
-      42,
-      51
-     ],
-     "ratio": 6.55,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      41,
-      41,
-      50
-     ],
-     "ratio": 6.64,
      "tertiary": false
     },
     {
@@ -39952,6 +41005,694 @@
      "ratio": 7.9,
      "tertiary": false
     }
+   ],
+   "40-gym-uebersicht-ohne-training": [
+    {
+     "text": "Bereiche",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      45,
+      44,
+      67
+     ],
+     "ratio": 12.34,
+     "tertiary": false
+    },
+    {
+     "text": "Was Momentum für dich verfolgt",
+     "className": "screen__subtitle",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      39,
+      38,
+      58
+     ],
+     "ratio": 6.75,
+     "tertiary": false
+    },
+    {
+     "text": "Mind",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.66,
+     "tertiary": false
+    },
+    {
+     "text": "Gym",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.49,
+     "tertiary": false
+    },
+    {
+     "text": "Training",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      30,
+      29,
+      43
+     ],
+     "ratio": 7.61,
+     "tertiary": false
+    },
+    {
+     "text": "0 von 3 Sessions diese Woche",
+     "className": "gym-hub__week",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      42,
+      42,
+      53
+     ],
+     "ratio": 12.94,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-hub__last",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      43,
+      43,
+      53
+     ],
+     "ratio": 6.48,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "1 Plan",
+     "className": "SPAN",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      48
+     ],
+     "ratio": 6.72,
+     "tertiary": false
+    },
+    {
+     "text": "Pläne verwalten",
+     "className": "gym-hub__plansLink",
+     "size": 13,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      31,
+      30,
+      39
+     ],
+     "ratio": 8.89,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "gym-hub__musclesTitle",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      37,
+      37,
+      45
+     ],
+     "ratio": 13.96,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-hub__musclesSummary",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      35,
+      35,
+      43
+     ],
+     "ratio": 14.24,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session vor 45 Tagen",
+     "className": "gym-hub__musclesRange",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      34,
+      34,
+      43
+     ],
+     "ratio": 7.25,
+     "tertiary": false
+    },
+    {
+     "text": "Gym-Rating",
+     "className": "metric-tile__open",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      42,
+      42,
+      49
+     ],
+     "ratio": 6.59,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
+     "tertiary": false
+    }
+   ],
+   "41-muskelgruppen-leer": [
+    {
+     "text": "Muskelgruppen",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      38,
+      37,
+      56
+     ],
+     "ratio": 13.67,
+     "tertiary": false
+    },
+    {
+     "text": "7 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "30 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      34,
+      34,
+      50
+     ],
+     "ratio": 7.21,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-progress__noDataState",
+     "size": 15,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.81,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-progress__noDataHint",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 7.95,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "Vorne",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Seite",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Hinten",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Brust",
+     "className": "muscle-row__name",
+     "size": 17,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.81,
+     "tertiary": false
+    },
+    {
+     "text": "Noch nicht trainiert",
+     "className": "muscle-row__badge",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      48
+     ],
+     "ratio": 7.11,
+     "tertiary": false
+    },
+    {
+     "text": "Rücken",
+     "className": "muscle-row__name",
+     "size": 17,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.8,
+     "tertiary": false
+    },
+    {
+     "text": "Noch nicht trainiert",
+     "className": "muscle-row__badge",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      48
+     ],
+     "ratio": 7.11,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
+     "tertiary": false
+    }
    ]
   },
   "430": {
@@ -40168,7 +41909,7 @@
       235,
       250
      ],
-     "ratio": 5.45,
+     "ratio": 5.46,
      "tertiary": false
     },
     {
@@ -43329,7 +45070,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43367,7 +45108,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43405,7 +45146,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43443,7 +45184,7 @@
      "tertiary": false
     },
     {
-     "text": "88 %",
+     "text": "88 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43711,7 +45452,7 @@
      "tertiary": false
     },
     {
-     "text": "85 %",
+     "text": "85 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43749,7 +45490,7 @@
      "tertiary": false
     },
     {
-     "text": "66 %",
+     "text": "66 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43787,7 +45528,7 @@
      "tertiary": false
     },
     {
-     "text": "100 %",
+     "text": "100 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -43825,7 +45566,7 @@
      "tertiary": false
     },
     {
-     "text": "88 %",
+     "text": "88 %",
      "className": "heatmap__average",
      "size": 13,
      "weight": 400,
@@ -44857,7 +46598,7 @@
      "tertiary": false
     },
     {
-     "text": "634 von 1000 · 34 %",
+     "text": "634 von 1000 · 34 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -44895,7 +46636,7 @@
      "tertiary": false
     },
     {
-     "text": "840 von 1000 · 33 %",
+     "text": "840 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -44933,7 +46674,7 @@
      "tertiary": false
     },
     {
-     "text": "673 von 1000 · 33 %",
+     "text": "673 von 1000 · 33 %",
      "className": "domain-standing__meta",
      "size": 11,
      "weight": 400,
@@ -45028,7 +46769,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -45085,7 +46826,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -45142,7 +46883,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -45161,7 +46902,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -45486,7 +47227,7 @@
      "tertiary": false
     },
     {
-     "text": "34 %",
+     "text": "34 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -45543,7 +47284,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -45600,7 +47341,7 @@
      "tertiary": false
     },
     {
-     "text": "33 %",
+     "text": "33 %",
      "className": "boss-weights__share",
      "size": 17,
      "weight": 600,
@@ -45619,7 +47360,7 @@
      "tertiary": false
     },
     {
-     "text": "Zusammen 100 %",
+     "text": "Zusammen 100 %",
      "className": "boss-weights__total",
      "size": 15,
      "weight": 600,
@@ -49243,7 +50984,7 @@
      "tertiary": false
     },
     {
-     "text": "Gesamt +29 %",
+     "text": "Gesamt +29 %",
      "className": "gym-hub__musclesOverall gym-hub__musclesOverall-",
      "size": 15,
      "weight": 600,
@@ -49866,11 +51607,11 @@
       250
      ],
      "bg": [
-      42,
-      42,
-      50
+      43,
+      43,
+      51
      ],
-     "ratio": 12.93,
+     "ratio": 12.92,
      "tertiary": false
     },
     {
@@ -49944,7 +51685,7 @@
      "bg": [
       15,
       15,
-      21
+      20
      ],
      "ratio": 8.81,
      "tertiary": false
@@ -49984,7 +51725,7 @@
       38,
       45
      ],
-     "ratio": 6.88,
+     "ratio": 6.89,
      "tertiary": false
     },
     {
@@ -50195,7 +51936,7 @@
       42,
       50
      ],
-     "ratio": 6.55,
+     "ratio": 6.56,
      "tertiary": false
     },
     {
@@ -50214,7 +51955,7 @@
       41,
       49
      ],
-     "ratio": 6.6,
+     "ratio": 6.62,
      "tertiary": false
     },
     {
@@ -50229,11 +51970,11 @@
       192
      ],
      "bg": [
-      41,
-      41,
-      49
+      38,
+      38,
+      46
      ],
-     "ratio": 6.63,
+     "ratio": 6.88,
      "tertiary": false
     },
     {
@@ -50290,11 +52031,11 @@
       42,
       49
      ],
-     "ratio": 6.55,
+     "ratio": 6.53,
      "tertiary": false
     },
     {
-     "text": "+5 %",
+     "text": "+5 %",
      "className": "running-range__change",
      "size": 17,
      "weight": 600,
@@ -50309,7 +52050,7 @@
       29,
       36
      ],
-     "ratio": 15.35,
+     "ratio": 15.36,
      "tertiary": false
     },
     {
@@ -50347,7 +52088,7 @@
       37,
       44
      ],
-     "ratio": 7,
+     "ratio": 7.02,
      "tertiary": false
     },
     {
@@ -50729,7 +52470,7 @@
       37,
       45
      ],
-     "ratio": 6.99,
+     "ratio": 6.96,
      "tertiary": false
     },
     {
@@ -50746,9 +52487,9 @@
      "bg": [
       35,
       35,
-      43
+      42
      ],
-     "ratio": 14.26,
+     "ratio": 14.3,
      "tertiary": false
     },
     {
@@ -50925,7 +52666,7 @@
      "tertiary": false
     },
     {
-     "text": "Setzt sich zusammen aus 40 % A",
+     "text": "Setzt sich zusammen aus 40 % A",
      "className": "P",
      "size": 15,
      "weight": 400,
@@ -51366,7 +53107,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51442,7 +53183,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51518,7 +53259,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51691,7 +53432,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51767,7 +53508,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51843,7 +53584,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51919,7 +53660,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -51995,7 +53736,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52071,7 +53812,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52147,7 +53888,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52223,7 +53964,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52356,7 +54097,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52451,7 +54192,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-progress__change gym-progress__change--decli",
      "size": 17,
      "weight": 600,
@@ -52662,7 +54403,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52738,7 +54479,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52814,7 +54555,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52890,7 +54631,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -52966,7 +54707,7 @@
      "tertiary": true
     },
     {
-     "text": "+60 %",
+     "text": "+60 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53042,7 +54783,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53118,7 +54859,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53194,7 +54935,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53327,7 +55068,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53422,7 +55163,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-progress__change gym-progress__change--decli",
      "size": 17,
      "weight": 600,
@@ -53576,7 +55317,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53652,7 +55393,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53728,7 +55469,7 @@
      "tertiary": true
     },
     {
-     "text": "+26 %",
+     "text": "+26 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53861,7 +55602,7 @@
      "tertiary": true
     },
     {
-     "text": "0 %",
+     "text": "0 %",
      "className": "muscle-row__delta",
      "size": 17,
      "weight": 600,
@@ -53956,7 +55697,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-progress__change gym-progress__change--decli",
      "size": 17,
      "weight": 600,
@@ -54070,7 +55811,7 @@
      "tertiary": false
     },
     {
-     "text": "+2 %",
+     "text": "+2 %",
      "className": "gym-progress__change gym-progress__change--impro",
      "size": 17,
      "weight": 600,
@@ -54452,7 +56193,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-detail__value gym-detail__value--declined",
      "size": 20,
      "weight": 600,
@@ -54544,44 +56285,6 @@
       62
      ],
      "ratio": 5.92,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      42,
-      42,
-      51
-     ],
-     "ratio": 6.51,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      41,
-      41,
-      50
-     ],
-     "ratio": 6.61,
      "tertiary": false
     },
     {
@@ -55271,7 +56974,7 @@
      "tertiary": false
     },
     {
-     "text": "-10 %",
+     "text": "−10 %",
      "className": "gym-detail__value gym-detail__value--declined",
      "size": 20,
      "weight": 600,
@@ -55363,44 +57066,6 @@
       62
      ],
      "ratio": 5.92,
-     "tertiary": false
-    },
-    {
-     "text": "5 × 60",
-     "className": "gym-detail__axisMin",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      42,
-      42,
-      51
-     ],
-     "ratio": 6.51,
-     "tertiary": false
-    },
-    {
-     "text": "kg",
-     "className": "figure__unit",
-     "size": 11,
-     "weight": 400,
-     "large": false,
-     "fg": [
-      176,
-      174,
-      192
-     ],
-     "bg": [
-      41,
-      41,
-      50
-     ],
-     "ratio": 6.61,
      "tertiary": false
     },
     {
@@ -55914,6 +57579,751 @@
       34
      ],
      "ratio": 7.9,
+     "tertiary": false
+    }
+   ],
+   "40-gym-uebersicht-ohne-training": [
+    {
+     "text": "Bereiche",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      45,
+      44,
+      68
+     ],
+     "ratio": 12.3,
+     "tertiary": false
+    },
+    {
+     "text": "Was Momentum für dich verfolgt",
+     "className": "screen__subtitle",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      39,
+      38,
+      58
+     ],
+     "ratio": 6.75,
+     "tertiary": false
+    },
+    {
+     "text": "Mind",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "Gym",
+     "className": "segmented__option domain-switch__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Training",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      34,
+      33,
+      49
+     ],
+     "ratio": 7.24,
+     "tertiary": false
+    },
+    {
+     "text": "0 von 3 Sessions diese Woche",
+     "className": "gym-hub__week",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      42,
+      42,
+      53
+     ],
+     "ratio": 12.93,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-hub__last",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      43,
+      43,
+      54
+     ],
+     "ratio": 6.46,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "1 Plan",
+     "className": "SPAN",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      49
+     ],
+     "ratio": 6.71,
+     "tertiary": false
+    },
+    {
+     "text": "Pläne verwalten",
+     "className": "gym-hub__plansLink",
+     "size": 13,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      31,
+      30,
+      40
+     ],
+     "ratio": 8.89,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "gym-hub__musclesTitle",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      38,
+      38,
+      45
+     ],
+     "ratio": 13.76,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-hub__musclesSummary",
+     "size": 15,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      35,
+      35,
+      44
+     ],
+     "ratio": 14.21,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session vor 45 Tagen",
+     "className": "gym-hub__musclesRange",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      43
+     ],
+     "ratio": 7.2,
+     "tertiary": false
+    },
+    {
+     "text": "Gym-Rating",
+     "className": "metric-tile__open",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      43,
+      43,
+      50
+     ],
+     "ratio": 6.51,
+     "tertiary": false
+    },
+    {
+     "text": "Leistung seit Jahresbeginn",
+     "className": "metric-tile__open",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      38,
+      38,
+      45
+     ],
+     "ratio": 6.91,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
+     "tertiary": false
+    }
+   ],
+   "41-muskelgruppen-leer": [
+    {
+     "text": "Muskelgruppen",
+     "className": "screen__title",
+     "size": 34,
+     "weight": 700,
+     "large": true,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      38,
+      37,
+      56
+     ],
+     "ratio": 13.66,
+     "tertiary": false
+    },
+    {
+     "text": "7 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 6.67,
+     "tertiary": false
+    },
+    {
+     "text": "30 Tage",
+     "className": "segmented__option",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Muskelgruppen",
+     "className": "section__label",
+     "size": 13,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      34,
+      51
+     ],
+     "ratio": 7.18,
+     "tertiary": false
+    },
+    {
+     "text": "Kein Training in den letzten 3",
+     "className": "gym-progress__noDataState",
+     "size": 15,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.81,
+     "tertiary": false
+    },
+    {
+     "text": "Letzte Session: Mittwoch, 14. ",
+     "className": "gym-progress__noDataHint",
+     "size": 13,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 7.95,
+     "tertiary": false
+    },
+    {
+     "text": "Training erfassen",
+     "className": "button button--primary button--block",
+     "size": 17,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      15,
+      15,
+      20
+     ],
+     "bg": [
+      163,
+      157,
+      255
+     ],
+     "ratio": 8.03,
+     "tertiary": false
+    },
+    {
+     "text": "Vorne",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      56,
+      56,
+      72
+     ],
+     "ratio": 10.5,
+     "tertiary": false
+    },
+    {
+     "text": "Seite",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.26,
+     "tertiary": false
+    },
+    {
+     "text": "Hinten",
+     "className": "body-viewer__view",
+     "size": 11,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      40,
+      40,
+      54
+     ],
+     "ratio": 13.27,
+     "tertiary": false
+    },
+    {
+     "text": "Brust",
+     "className": "muscle-row__name",
+     "size": 17,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.8,
+     "tertiary": false
+    },
+    {
+     "text": "Noch nicht trainiert",
+     "className": "muscle-row__badge",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      48
+     ],
+     "ratio": 7.11,
+     "tertiary": false
+    },
+    {
+     "text": "Rücken",
+     "className": "muscle-row__name",
+     "size": 17,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.8,
+     "tertiary": false
+    },
+    {
+     "text": "Noch nicht trainiert",
+     "className": "muscle-row__badge",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      48
+     ],
+     "ratio": 7.11,
+     "tertiary": false
+    },
+    {
+     "text": "Schultern",
+     "className": "muscle-row__name",
+     "size": 17,
+     "weight": 400,
+     "large": false,
+     "fg": [
+      245,
+      244,
+      250
+     ],
+     "bg": [
+      26,
+      26,
+      34
+     ],
+     "ratio": 15.81,
+     "tertiary": false
+    },
+    {
+     "text": "Noch nicht trainiert",
+     "className": "muscle-row__badge",
+     "size": 11,
+     "weight": 600,
+     "large": false,
+     "fg": [
+      176,
+      174,
+      192
+     ],
+     "bg": [
+      35,
+      35,
+      48
+     ],
+     "ratio": 7.11,
+     "tertiary": false
+    },
+    {
+     "text": "Heute",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Verlauf",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Rang",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      152,
+      150,
+      166
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 6.59,
+     "tertiary": true
+    },
+    {
+     "text": "Bereiche",
+     "className": "tab-bar__label",
+     "size": 11,
+     "weight": 500,
+     "large": false,
+     "fg": [
+      188,
+      183,
+      255
+     ],
+     "bg": [
+      15,
+      15,
+      21
+     ],
+     "ratio": 10.33,
      "tertiary": false
     }
    ]
