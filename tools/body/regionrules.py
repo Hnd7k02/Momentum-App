@@ -69,6 +69,18 @@ def label_by_rules(P, joints, dominant, bones, height):
         seg[m & above] = 'lowerleg'
         seg[m & ~above] = 'foot'
 
+    # Head and neck are inert, but the neck's bones also carry the slope of
+    # the trapezius between neck and shoulder. The neck is what lies within a
+    # neck's radius of its axis; what the neck bones carry beyond that, below
+    # the jaw, is the trapezius and belongs to the back.
+    neck_low, neck_high = J['joint-neck'], J['joint-head']
+    axis = _unit(neck_high - neck_low)
+    rel = P - neck_low
+    along = rel @ axis
+    radial = np.linalg.norm(rel - np.outer(along, axis), axis=1)
+    slope = (seg == 'head') & (along < 0.75 * np.linalg.norm(neck_high - neck_low)) & (radial > 0.072 * k)
+    seg[slope] = 'torso'
+
     lab = np.full(len(P), -1)
     lab[np.isin(seg, ['head', 'hand', 'foot'])] = R['none']
     lab[seg == 'lowerarm'] = R['forearms']
@@ -160,8 +172,14 @@ def label_by_rules(P, joints, dominant, bones, height):
     chest = m & front & (y >= pec_bottom) & (y < yClav - 0.004 * k) & (x < xS - 0.01 * k)
     lab[chest] = R['chest']
     m = lab < 0
-    # Everything above the clavicle line that is not neck: the trapezius.
-    lab[m & (y >= yClav - 0.004 * k)] = R['back']
+    # Everything above the clavicle line that is not neck: the trapezius —
+    # where it is the slope beside the neck. Right under the neck in front,
+    # between the two clavicles, there is no muscle of the back; that hollow
+    # goes with the neck.
+    above = m & (y >= yClav - 0.004 * k)
+    hollow = above & front & (x < 0.060 * k)
+    lab[hollow] = R['none']
+    lab[above & ~hollow] = R['back']
     m = lab < 0
     below = y < yBelt
     hipside = x > 0.085 * k

@@ -9,10 +9,12 @@
     },
     "pose": { "arm": 20, "armfwd": 2, "elbow": 10, "palm": 0, "fingers": 16, "clavicle": 4, "leg": 3.5, "shin": 1.5, "toes": 8 },
     "relief": {},
+    "inert_share": 0.5,
     "refine": { "cavity": 0.8, "ao": 0.5 }
   },
   "plain": { "like": "base" },
   "detail2": { "like": "base", "relief": { "muscle_detail": 2.0 } },
   "detail4": { "like": "base", "relief": { "muscle_detail": 4.0 } },
-  "detail4u": { "like": "base", "relief": { "muscle_detail": 4.0, "unsharp": 1.0 } }
+  "detail2u": { "like": "base", "relief": { "muscle_detail": 2.0, "unsharp": 0.6 } },
+  "detail3": { "like": "base", "relief": { "muscle_detail": 3.0 } }
 }

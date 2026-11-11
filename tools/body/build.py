@@ -77,6 +77,11 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     for i in range(n_old, len(P)):
         ps = labels[list(parents[i])]
         vertex_region[i] = np.bincount(ps).argmax()
+    if spec.get('inert_share', 1.0) < 1.0:
+        before = int((tri_labels == B.NONE).sum())
+        P, tris, tri_labels, kept = B.decimate(P, tris, tri_labels, B.NONE, spec['inert_share'])
+        vertex_region = vertex_region[kept]
+        say(f'inert zone: {before} → {int((tri_labels == B.NONE).sum())} triangles')
     muscle = np.zeros(len(P), dtype=bool)
     muscle[np.unique(tris[tri_labels != B.NONE])] = True
     inert = np.zeros(len(P), dtype=bool)

@@ -538,6 +538,22 @@ def subdivide(P, quads, labels, refine_mask):
     for f in np.nonzero(needs_centre)[0]:
         parents[face_new[f]] = tuple(int(x) for x in quads[f])
 
+    # Which way the refined quads are cut into triangles. All the diagonals of
+    # a patch should run the same way, so that every vertex has six
+    # neighbours: a fan of diagonals around every other vertex gives the
+    # vertices two kinds of neighbourhood, and whatever smooths over
+    # neighbours (the baked shade, for one) then draws a dotted pattern. The
+    # way is chosen per quad against a fixed direction, mirrored for the
+    # body's two halves, so that neighbouring quads agree and left agrees
+    # with right.
+    centroid_x = P[quads][:, :, 0].mean(axis=1)
+    d02 = P[quads[:, 2]] - P[quads[:, 0]]
+    d13 = P[quads[:, 3]] - P[quads[:, 1]]
+    d02 /= np.linalg.norm(d02, axis=1, keepdims=True) + 1e-12
+    d13 /= np.linalg.norm(d13, axis=1, keepdims=True) + 1e-12
+    reference = np.stack([np.where(centroid_x >= 0, 1.0, -1.0), np.ones(m), np.full(m, 0.35)], axis=1)
+    along02 = np.abs(np.einsum('ij,ij->i', d02, reference)) >= np.abs(np.einsum('ij,ij->i', d13, reference))
+
     tris, tri_labels = [], []
     for f in range(m):
         q = [int(x) for x in quads[f]]
@@ -548,10 +564,15 @@ def subdivide(P, quads, labels, refine_mask):
                 v = q[c]
                 e_next = int(edge_new[face_edges[f, c]])
                 e_prev = int(edge_new[face_edges[f, (c + 3) % 4]])
-                # The child quad v, e_next, centre, e_prev, split on the
-                # diagonal through the centre and the old corner.
-                tris.append((v, e_next, centre)); tri_labels.append(label)
-                tris.append((v, centre, e_prev)); tri_labels.append(label)
+                # The child quad v, e_next, centre, e_prev. Its diagonal runs
+                # with the parent's chosen one: through the corner and the
+                # centre at two opposite corners, across them at the others.
+                if (c % 2 == 0) == bool(along02[f]):
+                    tris.append((v, e_next, centre)); tri_labels.append(label)
+                    tris.append((v, centre, e_prev)); tri_labels.append(label)
+                else:
+                    tris.append((v, e_next, e_prev)); tri_labels.append(label)
+                    tris.append((e_next, centre, e_prev)); tri_labels.append(label)
         elif needs_centre[f]:
             centre = int(face_new[f])
             ring = []
@@ -798,3 +819,154 @@ def groove(P, tris, seeds, depth, width, mask=None, adj=None):
         fall[~mask] = 0
     N = vertex_normals(P, tris)
     return P - (depth * fall)[:, None] * N
+
+
+# ── fewer triangles where nothing is told ─────────────────────────────────────
+
+def decimate(P, tris, tri_labels, label, keep_share, flip_limit=0.2):
+    """Collapse edges inside one region until `keep_share` of its triangles are left.
+
+    Quadric error metrics (Garland and Heckbert): each vertex carries the sum
+    of the squared distances to the planes of the triangles around it, and the
+    edge whose collapse costs least goes first. Only a vertex that lies wholly
+    inside the region may move; one on the seam to another region stays where
+    it is, so the seam and everything beyond it is untouched. A collapse that
+    would fold the surface over, or leave it non-manifold, is not made.
+
+    Deterministic: the queue is ordered by cost and then by the two indices.
+    """
+    import heapq
+
+    n = len(P)
+    P = P.copy()
+    tris = [list(map(int, t)) for t in tris]
+    alive = [True] * len(tris)
+    in_region = [int(l) == label for l in tri_labels]
+    incident = [set() for _ in range(n)]
+    for t, tri in enumerate(tris):
+        for v in tri:
+            incident[v].add(t)
+    interior = [len(incident[v]) > 0 and all(in_region[t] for t in incident[v]) for v in range(n)]
+
+    def plane(tri):
+        a, b, c = P[tri[0]], P[tri[1]], P[tri[2]]
+        normal = np.cross(b - a, c - a)
+        area2 = np.linalg.norm(normal)
+        if area2 < 1e-18:
+            return None, 0.0
+        normal = normal / area2
+        return np.append(normal, -np.dot(normal, a)), 0.5 * area2
+
+    Q = np.zeros((n, 4, 4))
+    for t, tri in enumerate(tris):
+        if not in_region[t]:
+            continue
+        pl, area = plane(tri)
+        if pl is None:
+            continue
+        K = area * np.outer(pl, pl)
+        for v in tri:
+            Q[v] += K
+
+    def neighbours(v):
+        out = set()
+        for t in incident[v]:
+            out.update(tris[t])
+        out.discard(v)
+        return out
+
+    def cost(u, v):
+        """The cheapest place for the vertex that u and v become, and its error."""
+        q = Q[u] + Q[v]
+        if interior[u] and interior[v]:
+            places = [0.5 * (P[u] + P[v]), P[u], P[v]]
+        elif interior[u]:
+            places = [P[v]]
+        else:
+            places = [P[u]]
+        best, best_error = None, None
+        for place in places:
+            h = np.append(place, 1.0)
+            error = float(h @ q @ h)
+            if best_error is None or error < best_error - 1e-18:
+                best, best_error = place, error
+        return best_error, best
+
+    heap = []
+
+    def push(u, v):
+        if not (interior[u] or interior[v]):
+            return
+        a, b = (u, v) if u < v else (v, u)
+        error, _ = cost(a, b)
+        heapq.heappush(heap, (error, a, b))
+
+    seen = set()
+    for t, tri in enumerate(tris):
+        if not in_region[t]:
+            continue
+        for c in range(3):
+            a, b = tri[c], tri[(c + 1) % 3]
+            key = (a, b) if a < b else (b, a)
+            if key not in seen:
+                seen.add(key)
+                push(*key)
+
+    total = sum(in_region)
+    target = int(round(total * keep_share))
+    left = total
+    removed_vertex = [False] * n
+    while heap and left > target:
+        error, u, v = heapq.heappop(heap)
+        if removed_vertex[u] or removed_vertex[v]:
+            continue
+        now, place = cost(u, v)
+        if abs(now - error) > 1e-12 * max(1.0, abs(now)):
+            continue                               # stale entry; a fresh one is in the queue
+        shared = incident[u] & incident[v]
+        if len(shared) != 2:
+            continue
+        # The link condition: u and v may share exactly the two vertices
+        # opposite their edge, or the surface would pinch.
+        if len(neighbours(u) & neighbours(v)) != 2:
+            continue
+        # The one that goes: an interior vertex; if only one is, that one.
+        gone, kept = (u, v) if interior[u] else (v, u)
+        if not interior[gone]:
+            continue
+        if not interior[kept]:
+            place = P[kept]
+        # No triangle may turn over.
+        ok = True
+        for t in (incident[gone] | incident[kept]) - shared:
+            tri = tris[t]
+            before, _ = plane(tri)
+            moved = [place if x in (gone, kept) else P[x] for x in tri]
+            normal = np.cross(moved[1] - moved[0], moved[2] - moved[0])
+            length = np.linalg.norm(normal)
+            if before is None or length < 1e-18 or np.dot(before[:3], normal / length) < flip_limit:
+                ok = False
+                break
+        if not ok:
+            continue
+        for t in shared:
+            alive[t] = False
+            for x in tris[t]:
+                incident[x].discard(t)
+            left -= 1
+        for t in list(incident[gone]):
+            tris[t] = [kept if x == gone else x for x in tris[t]]
+            incident[kept].add(t)
+        incident[gone] = set()
+        removed_vertex[gone] = True
+        P[kept] = place
+        Q[kept] = Q[kept] + Q[gone]
+        for w in sorted(neighbours(kept)):
+            push(kept, w)
+
+    used = sorted({v for t, tri in enumerate(tris) if alive[t] for v in tri})
+    remap = -np.ones(n, dtype=np.int64)
+    remap[used] = np.arange(len(used))
+    out_tris = np.array([[remap[v] for v in tri] for t, tri in enumerate(tris) if alive[t]], dtype=np.int64)
+    out_labels = np.array([int(tri_labels[t]) for t in range(len(tris)) if alive[t]], dtype=np.int64)
+    return P[used], out_tris, out_labels, np.array(used, dtype=np.int64)
