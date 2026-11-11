@@ -556,15 +556,32 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   they are; white is held and the dimmed tone is untrained and the inert
   zone; the body stage takes 55 % of the height; the Gym tile on Heute
   leads to the body; the muscle sheet opens at two thirds.
-- **Still open from the owner:** his usual rep ranges and whether warm-up
-  sets, pyramids, drop sets or deloads occur in his history (needed by
-  Stage 5b); the iPhone model and iOS version (needed by 7B). He has no
-  Mac.
+- **Answered by the owner on 2026-11-11:** his usual reps are about 6–12;
+  he has not logged warm-up sets so far and wants to be able to, without
+  them counting; drop sets yes, deloads no, pyramids "his own decision"
+  (read as: no special rule — section 4 of the 5b prompt). His phone is an
+  iPhone 15 Pro on the newest iOS; the exact version is recorded with the
+  first measurements at STOP 7B. He has no Mac.
+- **Still open from the owner:** his points on the first MakeHuman proof
+  of the body (section 4 of the 7A prompt has the place for them); under
+  which address he opens the live app (the documents say
+  `dario02king.github.io`, the repository is under `Hnd7k02` — asked at the
+  start of block 9, because pages of one origin share the `momentum`
+  database in one browser); the name for the licence file (tidy-up block).
 - **Order from here** (D159): Stage 6b (done and accepted, see below), the
-  colour rules of the muscle
-  status, Stage 5b, 7A (stage 1 of the body and the proof gate), 7B, 7C, 9;
-  the tidy-up of D157 as a block of its own. Each block starts in a fresh
-  session from its prompt under `docs/wp3/prompts/`.
+  colour rules of the muscle status, Stage 5b, 7A, 7B, 7C, 9, and the
+  tidy-up of D157 last — the order the owner gave on 2026-11-11. Each block
+  starts in a fresh session from its prompt under `docs/wp3/prompts/`:
+  `prompt-farbregeln-muskelstatus.md`, `prompt-5b-kennzahl.md`,
+  `prompt-7a-koerpermodell.md`, `prompt-7b-interaktion.md`,
+  `prompt-7c-muskel-sheet.md`, `prompt-9-haertung.md`,
+  `prompt-aufraeumen.md`. Written on 2026-11-11; none of them has run.
+- **Block 7A takes a different road from D156.** The owner asked for a new
+  base model from MakeHuman, built by script after the guide on his
+  reference page, with a gate before anything is swapped in the app; if the
+  gate fails, stage 1 on today's model stands as D156 has it. Block 7A
+  itself records this as a decision that supplements D156 — it is not in
+  `docs/decisions.md` yet.
 - **Reserved, not touched in WP3** (D158): `bossService.ts:217` fills
   `recordedScore` with `entry.score` — its own scoring gate, as its own era.
 - **Recorded by the review, corrected in the tidy-up block:** the offline
