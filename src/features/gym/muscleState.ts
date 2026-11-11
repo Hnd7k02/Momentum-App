@@ -1,5 +1,6 @@
 import type { MuscleState } from '../../components/BodyRenderer';
 import { percentChange, type MusclePerformance } from '../../core/gym/performance';
+import { signedPercentText } from '../../i18n/typography';
 
 /**
  * A change as the screen shows it: the whole percent, with −0 as 0 (WP3, B6).
@@ -31,10 +32,13 @@ export function shownTrend(ratio: number | null): ShownTrend | null {
   return percent > 0 ? 'improved' : percent < 0 ? 'declined' : 'unchanged';
 }
 
-/** "+12 %", "-3 %", "0 %" for a held group — from a `percentChange()` value. */
+/**
+ * "+12 %", "−3 %", "0 %" for a held group — from a `percentChange()` value.
+ * A real minus sign and an unbreakable space, like every figure (`typography.ts`).
+ */
 export function shownChangeText(change: number | null): string | null {
   const percent = roundShown(change);
-  return percent === null ? null : `${percent > 0 ? '+' : ''}${percent} %`;
+  return percent === null ? null : signedPercentText(percent);
 }
 
 /**

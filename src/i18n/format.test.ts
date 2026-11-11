@@ -14,8 +14,8 @@ describe('numbers', () => {
   });
 
   it('shows percentages without decimals', () => {
-    expect(formatPercent('de', 66.6)).toBe('67 %');
-    expect(formatPercent('en', 100)).toBe('100 %');
+    expect(formatPercent('de', 66.6)).toBe('67\u00A0%');
+    expect(formatPercent('en', 100)).toBe('100\u00A0%');
   });
 });
 

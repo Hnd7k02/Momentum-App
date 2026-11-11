@@ -348,9 +348,9 @@ export const de = {
   'rank.ladder.from': 'Ab {points}',
   'rank.weights': 'Gewichtung',
   'rank.weights.explain':
-    'Wie stark jeder Bereich in den Boss-Rang zählt. Die Anteile werden auf 100 % gerechnet.',
-  'rank.weights.total': 'Zusammen {percent} %',
-  'rank.weights.share': '{percent} %',
+    'Wie stark jeder Bereich in den Boss-Rang zählt. Die Anteile werden auf 100\u00A0% gerechnet.',
+  'rank.weights.total': 'Zusammen {percent}\u00A0%',
+  'rank.weights.share': '{percent}\u00A0%',
   'rank.weights.parts': '{count} Teile',
   'rank.weights.partOne': '1 Teil',
   'rank.weights.more': 'Mehr {domain}',
@@ -432,15 +432,15 @@ export const de = {
     'Jede Muskelgruppe zählt gleich viel, unabhängig davon, wie viele Übungen sie enthält.',
   'gym.progress.explainMetric': 'Übungswert = bester Satz des Tages (Wdh. × {unit}).',
   'gym.progress.ratingNote':
-    'Das Gym-Rating misst deine eigene Entwicklung, nicht absolute Stärke: 40 % Anwesenheit, 60 % persönliche Leistungsentwicklung.',
+    'Das Gym-Rating misst deine eigene Entwicklung, nicht absolute Stärke: 40\u00A0% Anwesenheit, 60\u00A0% persönliche Leistungsentwicklung.',
 
   'gym.rating.title': 'Gym-Rating',
-  'gym.rating.summary': '40 % Anwesenheit · 60 % Leistung',
+  'gym.rating.summary': '40\u00A0% Anwesenheit · 60\u00A0% Leistung',
   'gym.attendance.scale': 'von {target} Sessions',
   'gym.endurance.scale': 'von {required} Wochen',
   'gym.rating.value': '{value} von 1000',
   'gym.rating.explain':
-    'Setzt sich zusammen aus 40 % Anwesenheit und 60 % persönlicher Leistungsentwicklung. Verglichen wird immer mit deiner eigenen Historie.',
+    'Setzt sich zusammen aus 40\u00A0% Anwesenheit und 60\u00A0% persönlicher Leistungsentwicklung. Verglichen wird immer mit deiner eigenen Historie.',
   'gym.rating.movesGradually':
     'Das Rating bewegt sich schrittweise auf den Zielwert zu, nicht in einem Sprung.',
   'gym.rating.notStarted': 'Das Gym-Rating startet, sobald ein Tag mit Training abgeschlossen ist.',
@@ -480,10 +480,10 @@ export const de = {
   'gym.decay.title': 'Trainingspause',
   'gym.decay.days': '{days} Tage ohne Session',
   'gym.decay.daysEnded': '{days} Tage ohne Session bis gestern',
-  'gym.decay.lost': '{percent} % deines Fortschritts abgebaut',
+  'gym.decay.lost': '{percent}\u00A0% deines Fortschritts abgebaut',
   'gym.decay.pendingToday': 'Abbau ausstehend – eine Session heute verhindert ihn',
   'gym.decay.pendingYesterday': 'Abbau ausstehend – eine Session für gestern verhindert ihn',
-  'gym.decay.lostPending': '{percent} % abgebaut · weiterer Abbau ausstehend',
+  'gym.decay.lostPending': '{percent}\u00A0% abgebaut · weiterer Abbau ausstehend',
   'gym.decay.pendingExplain':
     'Ein Tag ohne Session zählt erst, wenn er nicht mehr nachgetragen werden kann. Trägst du für diesen Tag noch eine Session nach, entfällt dieser Abbau.',
   'gym.decay.explain':
@@ -513,13 +513,13 @@ export const de = {
 
   'gym.picker.primary': 'Hauptmuskel',
   'gym.picker.primaryHint':
-    'Hauptmuskeln teilen sich 70 % der Übung, die übrigen 30 %.',
+    'Hauptmuskeln teilen sich 70\u00A0% der Übung, die übrigen 30\u00A0%.',
   'gym.picker.builtInProtected': 'Mitgelieferte Übungen behalten ihre Zuordnung.',
 
   'gym.tombstone.boundary':
     'Absolute Bestleistungen gehören zu den Meilensteinen, nicht zum Gym-Rating.',
-  'gym.change.improved': '+{percent} %',
-  'gym.change.declined': '{percent} %',
+  'gym.change.improved': '+{percent}\u00A0%',
+  'gym.change.declined': '{percent}\u00A0%',
   'gym.change.unchanged': 'Gehalten',
   'gym.detail.latest': 'Zuletzt',
   'gym.detail.previous': 'Davor',
@@ -540,12 +540,12 @@ export const de = {
   'running.title': 'Laufen',
 
   'running.rating.title': 'Lauf-Rating',
-  'running.rating.summary': '40 % Anwesenheit · 60 % Tempo',
+  'running.rating.summary': '40\u00A0% Anwesenheit · 60\u00A0% Tempo',
   'running.attendance.scale': 'von {target} Läufen',
   'running.endurance.scale': 'von {required} Wochen',
   'running.rating.value': '{value} von 1000',
   'running.rating.explain':
-    'Setzt sich zusammen aus 40 % Anwesenheit und 60 % Tempoentwicklung auf vergleichbaren Distanzen. Verglichen wird immer mit deiner eigenen Historie.',
+    'Setzt sich zusammen aus 40\u00A0% Anwesenheit und 60\u00A0% Tempoentwicklung auf vergleichbaren Distanzen. Verglichen wird immer mit deiner eigenen Historie.',
   'running.rating.notStarted': 'Das Lauf-Rating startet, sobald ein Tag mit einem Lauf abgeschlossen ist.',
 
   'running.ytd.title': 'Tempo seit Jahresbeginn',
@@ -556,6 +556,7 @@ export const de = {
   'running.performance.needsSecond':
     'Sobald du eine ähnliche Distanz ein zweites Mal mit Distanz und Dauer aufzeichnest, zählt deine Tempoentwicklung.',
   'running.performance.counted': '{count} Distanzbereiche gewertet',
+  'running.performance.countedOne': '1 Distanzbereich gewertet',
   'running.performance.attendanceOnly':
     '{count} Läufe ohne Distanz oder Dauer zählen für die Anwesenheit, aber nicht fürs Tempo.',
   'running.performance.comparable':
@@ -580,10 +581,10 @@ export const de = {
   'running.decay.title': 'Laufpause',
   'running.decay.days': '{days} Tage ohne Lauf',
   'running.decay.daysEnded': '{days} Tage ohne Lauf bis gestern',
-  'running.decay.lost': '{percent} % deines Fortschritts abgebaut',
+  'running.decay.lost': '{percent}\u00A0% deines Fortschritts abgebaut',
   'running.decay.pendingToday': 'Abbau ausstehend – ein Lauf heute verhindert ihn',
   'running.decay.pendingYesterday': 'Abbau ausstehend – ein Lauf für gestern verhindert ihn',
-  'running.decay.lostPending': '{percent} % abgebaut · weiterer Abbau ausstehend',
+  'running.decay.lostPending': '{percent}\u00A0% abgebaut · weiterer Abbau ausstehend',
   'running.decay.pendingExplain':
     'Ein Tag ohne Lauf zählt erst, wenn er nicht mehr nachgetragen werden kann. Trägst du für diesen Tag noch einen Lauf nach, entfällt dieser Abbau.',
   'running.decay.explain':
@@ -711,7 +712,7 @@ export const de = {
   'gymHub.training.today': 'Heute bereits eine Session erfasst.',
   'gymHub.training.log': 'Training erfassen',
   'workout.running.title': 'Training läuft',
-  'workout.running.percent': '{percent} % erledigt',
+  'workout.running.percent': '{percent}\u00A0% erledigt',
   'workout.running.exerciseOne': '1 Übung',
   'workout.running.exercises': '{count} Übungen',
   'workout.running.setOne': '1 Satz',

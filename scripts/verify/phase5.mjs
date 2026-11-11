@@ -234,7 +234,7 @@ async function openProgress(page) {
     (await page.locator('[data-metric="running-rating"] .metric-tile__kicker').count()) === 0);
   check('the 40/60 split is explained',
     await inSheet(page, 'running-rating', (sheet) =>
-      sheet.getByText(/40 % Anwesenheit und 60 % Tempoentwicklung/).isVisible()));
+      sheet.getByText(/40\s% Anwesenheit und 60\s% Tempoentwicklung/).isVisible()));
 
   const ranges = await page.locator('.running-range').count();
   check('the two distance ranges are listed separately', ranges === 2, String(ranges));

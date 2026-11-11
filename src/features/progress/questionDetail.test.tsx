@@ -50,6 +50,9 @@ describe('what the drill-down shows', () => {
     // other and the wrong one for reading back what you said.
     const html = render({ question: row(), days, onClose: noop });
     expect(html).toContain('>10<');
+    // In either spelling of the space: the figure is printed with a no-break
+    // space since STOP 6b, and the plain one must not come back unnoticed.
+    expect(html).not.toContain('100\u00A0%');
     expect(html).not.toContain('100 %');
   });
 

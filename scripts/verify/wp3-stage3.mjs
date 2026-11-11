@@ -450,7 +450,7 @@ for (const [width, height] of SIZES) {
   await openHub(page);
   const charged = await until(() => tile(page, 'gym-decay'), (value) => (value ?? '').includes('9 Tage'));
   check(`${W}: on Friday the tile counts nine days`, (charged ?? '').includes('9 Tage ohne Session'), String(charged));
-  const lost = Number((charged ?? '').match(/(\d+) % deines Fortschritts abgebaut/)?.[1] ?? 0);
+  const lost = Number((charged ?? '').match(/(\d+)\s% deines Fortschritts abgebaut/)?.[1] ?? 0);
   check(`${W}: and the decay has landed`, lost > 0 && !(charged ?? '').includes('ausstehend'), String(charged));
   await page.locator('[data-metric="gym-decay"]').scrollIntoViewIfNeeded();
   await shot(page, width, 'gym-break-charged');

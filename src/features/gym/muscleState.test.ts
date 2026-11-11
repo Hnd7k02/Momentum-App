@@ -16,13 +16,13 @@ const measured = (ratio: number): MusclePerformance =>
 
 describe('the shown change', () => {
   it.each([
-    [1.004, 0, 'unchanged', '0 %'],
-    [0.997, 0, 'unchanged', '0 %'],
-    [1.0049, 0, 'unchanged', '0 %'],
-    [1.0051, 1, 'improved', '+1 %'],
-    [0.9949, -1, 'declined', '-1 %'],
-    [1.26, 26, 'improved', '+26 %'],
-    [1, 0, 'unchanged', '0 %'],
+    [1.004, 0, 'unchanged', '0\u00A0%'],
+    [0.997, 0, 'unchanged', '0\u00A0%'],
+    [1.0049, 0, 'unchanged', '0\u00A0%'],
+    [1.0051, 1, 'improved', '+1\u00A0%'],
+    [0.9949, -1, 'declined', '\u22121\u00A0%'],
+    [1.26, 26, 'improved', '+26\u00A0%'],
+    [1, 0, 'unchanged', '0\u00A0%'],
   ])('ratio %s shows %s, reads %s, prints "%s"', (ratio, percent, trend, text) => {
     expect(shownPercent(ratio)).toBe(percent);
     expect(shownTrend(ratio)).toBe(trend);
@@ -31,7 +31,7 @@ describe('the shown change', () => {
 
   it('never prints a negative zero', () => {
     expect(Object.is(roundShown(-0.3), 0)).toBe(true);
-    expect(shownChangeText(-0.3)).toBe('0 %');
+    expect(shownChangeText(-0.3)).toBe('0\u00A0%');
   });
 
   it('has nothing to show where there is no ratio', () => {

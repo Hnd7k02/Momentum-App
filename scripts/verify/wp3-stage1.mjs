@@ -730,9 +730,9 @@ for (const [width, height] of SIZES) {
     const calves = rows.find((r) => r.name === 'Waden');
     const forearms = rows.find((r) => r.name === 'Unterarme');
     const genuine = rows.find((r) => r.state === 'unchanged' && r.name !== 'Waden' && r.name !== 'Unterarme');
-    check(`${W}: B6 Waden (+0.4 %) reads "0 %" as held`, calves?.delta === '0 %' && calves?.state === 'unchanged', short(calves));
-    check(`${W}: B6 Unterarme (−0.3 %) reads "0 %" as held`, forearms?.delta === '0 %' && forearms?.state === 'unchanged', short(forearms));
-    check(`${W}: B6 a genuinely unchanged group is on screen to compare with`, Boolean(genuine && genuine.delta === '0 %'), short(genuine ?? rows));
+    check(`${W}: B6 Waden (+0.4 %) reads "0 %" as held`, calves?.delta === '0\u00a0%' && calves?.state === 'unchanged', short(calves));
+    check(`${W}: B6 Unterarme (−0.3 %) reads "0 %" as held`, forearms?.delta === '0\u00a0%' && forearms?.state === 'unchanged', short(forearms));
+    check(`${W}: B6 a genuinely unchanged group is on screen to compare with`, Boolean(genuine && genuine.delta === '0\u00a0%'), short(genuine ?? rows));
     if (genuine) {
       check(`${W}: B6 the held colour is the genuinely held one (${genuine.name})`,
         calves?.color === genuine.color && forearms?.color === genuine.color,

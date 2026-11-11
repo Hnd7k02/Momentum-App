@@ -78,8 +78,8 @@ async function heroState(page) {
     JSON.stringify(domainRows));
   const domainMeta = await page.locator('.domain-standing__meta').allTextContents();
   check('each area states its rating out of 1000 and its share, or that it has not started',
-    domainMeta.every((text) => /von 1000 · \d+ %/.test(text) || /Noch nicht gestartet/.test(text)) &&
-      domainMeta.some((text) => /von 1000 · \d+ %/.test(text)),
+    domainMeta.every((text) => /von 1000 · \d+\s%/.test(text) || /Noch nicht gestartet/.test(text)) &&
+      domainMeta.some((text) => /von 1000 · \d+\s%/.test(text)),
     domainMeta.join(' | '));
   check('no area carries a rank badge — the Boss is the only rank',
     (await page.locator('.domain-standing .badge-svg').count()) === 0);

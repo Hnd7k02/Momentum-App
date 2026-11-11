@@ -96,7 +96,9 @@ export function RunningOverview({
     state.abstinence !== null &&
     state.abstinence.days >= TRAINING_RATING.ABSTINENCE_BLOCK_DAYS;
   const ytdText = changeText(state.ytdChange, t);
-  const counted = t('running.performance.counted', { count: state.ytd?.measured.length ?? 0 });
+  const measured = state.ytd?.measured.length ?? 0;
+  const counted =
+    measured === 1 ? t('running.performance.countedOne') : t('running.performance.counted', { count: measured });
   // A charge waiting for its day to close is said, as on the Gym tile (D135).
   const pending = state.decayPending ?? null;
   const lostPercent = Math.round(state.decayFraction * 100);

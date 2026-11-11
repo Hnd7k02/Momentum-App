@@ -149,7 +149,8 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
    * colour it is, and that the muscle's colour is the dot and nothing else.
    */
   const scaleY = (percent) => 12 - (Math.max(-12, Math.min(12, percent)) / 12) * 9;
-  const shown = (c) => { const m = c.rightText.match(/^([+-]?\d+) %$/); return m ? Number(m[1]) : null; };
+  // The figure as printed: a real minus sign and a no-break space (STOP 6b).
+  const shown = (c) => { const m = c.rightText.match(/^([+\u2212]?\d+)\s%$/); return m ? Number(m[1].replace('\u2212', '-')) : null; };
   check('every row shares one scale: a line ends where its number says, ±12 % at the edge',
     drawn.filter((c) => shown(c) !== null).every((c) => {
       // The number is rounded for the eye; the point is drawn from the raw value.

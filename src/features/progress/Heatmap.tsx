@@ -4,6 +4,7 @@ import { STATUS_LABEL_KEYS } from '../../core/scoring/scale';
 import type { DateKey } from '../../core/dates';
 import { ChevronDownIcon, ChevronRightIcon } from '../../components/Icons';
 import { formatDayAndMonth } from '../../i18n/format';
+import { percentText } from '../../i18n/typography';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 
 export interface HeatmapRow {
@@ -94,7 +95,7 @@ function Row({
     <>
       <span className="heatmap__label">{row.label}</span>
       <span className="heatmap__average">
-        {average === null ? t('score.none') : `${average} %`}
+        {average === null ? t('score.none') : percentText(average)}
       </span>
       {/* The shape of the strip, in one sentence, for anyone not seeing it.
           On the expandable rows it is the button's *description*, not part of
@@ -119,7 +120,7 @@ function Row({
         >
           <span className="heatmap__label">{row.label}</span>
           <span className="heatmap__average">
-            {average === null ? t('score.none') : `${average} %`}
+            {average === null ? t('score.none') : percentText(average)}
           </span>
           <ChevronDownIcon size={16} className={expanded ? 'heatmap__chevron--open' : undefined} />
         </button>
@@ -139,7 +140,7 @@ function Row({
         >
           <span className="heatmap__label">{row.label}</span>
           <span className="heatmap__average">
-            {average === null ? t('score.none') : `${average} %`}
+            {average === null ? t('score.none') : percentText(average)}
           </span>
           <ChevronRightIcon size={16} />
         </button>
@@ -218,7 +219,7 @@ function DataTable({ rows, days }: { rows: HeatmapRow[]; days: DateKey[] }) {
                 // Rounded, like every value the screen shows. Unrounded, a
                 // reader hears "70.83333333333333 Prozent".
                 <td key={index}>
-                  {value === null ? t('score.none') : `${Math.round(value)} %`}
+                  {value === null ? t('score.none') : percentText(Math.round(value))}
                 </td>
               ))}
             </tr>

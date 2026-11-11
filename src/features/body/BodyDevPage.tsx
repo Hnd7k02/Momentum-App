@@ -1,5 +1,6 @@
 import { Suspense, useState } from 'react';
 import { I18nProvider } from '../../i18n/I18nProvider';
+import { signedPercentText } from '../../i18n/typography';
 import type { Language } from '../../i18n';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { BodyViewer, type BodyView, type MuscleVisual } from './index';
@@ -118,7 +119,7 @@ export function BodyDevPage() {
                     style={{ width: 12, height: 12, borderRadius: 3, background: mutedIdentity(IDENTITY_COLOR[id], state === 'noData' ? IDENTITY_UNTRAINED_ALPHA : 1) }}
                   />
                   <span style={{ flex: 1 }}>{id}</span>
-                  <span style={{ color: STATE_COLOR[state].ink }}>{delta > 0 ? `+${delta} %` : delta < 0 ? `${delta} %` : STATE_COLOR[state].text}</span>
+                  <span style={{ color: STATE_COLOR[state].ink }}>{delta === 0 ? STATE_COLOR[state].text : signedPercentText(delta)}</span>
                 </button>
               </li>
             );

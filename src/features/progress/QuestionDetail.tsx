@@ -5,6 +5,7 @@ import { Button, Card, EmptyState, Section } from '../../components';
 import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
 import { CATEGORY_LABEL_KEYS } from '../../domains/mental/questionLibrary';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
+import { percentText } from '../../i18n/typography';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import type { HistoryQuestionRow } from '../../storage/services/historyService';
 import './questionDetail.css';
@@ -133,7 +134,7 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
                       ? t('score.none')
                       : isScale
                         ? (Math.round(average) / 10).toFixed(1)
-                        : `${Math.round(average)} %`}
+                        : percentText(Math.round(average))}
                   </span>
                 </div>
               </div>
@@ -185,7 +186,7 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
                         ? t('score.none')
                         : isScale
                           ? (Math.round(average) / 10).toFixed(1)
-                          : `${Math.round(average)} %`,
+                          : percentText(Math.round(average)),
                   })}
                 </p>
 

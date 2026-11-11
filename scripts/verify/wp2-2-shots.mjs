@@ -88,7 +88,7 @@ for (const width of CHECK_WIDTHS) {
     check(`${width}: the body preview does not dominate the hub`, muscles.height <= 200, String(muscles.height));
     const summaryText = ((await page.locator('.gym-hub__musclesSummary').textContent()) ?? '').trim();
     const overallText = ((await page.locator('.gym-hub__musclesOverall').textContent()) ?? '').trim();
-    check(`${width}: the entry states the counted groups and the overall change`, /^\d+ von 10 gewertet$/.test(summaryText) && /^Gesamt [+-]?\d+ %$/.test(overallText), `${summaryText} | ${overallText}`);
+    check(`${width}: the entry states the counted groups and the overall change`, /^\d+ von 10 gewertet$/.test(summaryText) && /^Gesamt [+\u2212]?\d+\s%$/.test(overallText), `${summaryText} | ${overallText}`);
     const summaryLines = await page.locator('.gym-hub__musclesSummary').evaluate((el) => Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)));
     check(`${width}: the count sits on one line`, summaryLines === 1, String(summaryLines));
     const headings = await page.locator('.areas__scroll h2, .areas__scroll .section__label').allTextContents();

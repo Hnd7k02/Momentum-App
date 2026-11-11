@@ -239,7 +239,7 @@ async function openProgress(page) {
     (await page.locator('[data-metric="gym-rating"] .metric-tile__kicker').count()) === 0);
   check('the 40/60 split is explained',
     await inSheet(page, 'gym-rating', (sheet) =>
-      sheet.getByText(/40 % Anwesenheit und 60 % persönlicher Leistungsentwicklung/).isVisible()));
+      sheet.getByText(/40\s% Anwesenheit und 60\s% persönlicher Leistungsentwicklung/).isVisible()));
 
   const ytd = await page.locator('[data-metric="gym-ytd"] .metric-tile__value').textContent();
   check('the year-to-date figure is a real percentage', /%|Gehalten/.test(ytd ?? ''), ytd?.trim());
@@ -326,7 +326,7 @@ async function openProgress(page) {
   check('a custom exercise can name its primary muscle',
     await page.getByText('Hauptmuskel', { exact: true }).isVisible());
   check('and the 70/30 split is explained',
-    await page.getByText(/Hauptmuskeln teilen sich 70 % der Übung/).isVisible());
+    await page.getByText(/Hauptmuskeln teilen sich 70\s% der Übung/).isVisible());
   check('and it can say how it is loaded',
     await page.getByText('Belastungsart').isVisible());
 

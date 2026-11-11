@@ -342,9 +342,9 @@ export const en: Translations = {
   'rank.ladder.from': 'From {points}',
   'rank.weights': 'Weighting',
   'rank.weights.explain':
-    'How much each area counts towards the Boss Rank. The shares are worked out to 100 %.',
-  'rank.weights.total': '{percent} % together',
-  'rank.weights.share': '{percent} %',
+    'How much each area counts towards the Boss Rank. The shares are worked out to 100\u00A0%.',
+  'rank.weights.total': '{percent}\u00A0% together',
+  'rank.weights.share': '{percent}\u00A0%',
   'rank.weights.parts': '{count} parts',
   'rank.weights.partOne': '1 part',
   'rank.weights.more': 'More {domain}',
@@ -424,15 +424,15 @@ export const en: Translations = {
     'Every muscle group counts the same, however many exercises it contains.',
   'gym.progress.explainMetric': 'Exercise value = the best set of the day (reps × {unit}).',
   'gym.progress.ratingNote':
-    'The Gym rating measures your own development rather than absolute strength: 40 % attendance, 60 % personal performance development.',
+    'The Gym rating measures your own development rather than absolute strength: 40\u00A0% attendance, 60\u00A0% personal performance development.',
 
   'gym.rating.title': 'Gym rating',
-  'gym.rating.summary': '40 % attendance · 60 % performance',
+  'gym.rating.summary': '40\u00A0% attendance · 60\u00A0% performance',
   'gym.attendance.scale': 'of {target} sessions',
   'gym.endurance.scale': 'of {required} weeks',
   'gym.rating.value': '{value} of 1000',
   'gym.rating.explain':
-    'Made up of 40 % attendance and 60 % personal performance development. The comparison is always against your own history.',
+    'Made up of 40\u00A0% attendance and 60\u00A0% personal performance development. The comparison is always against your own history.',
   'gym.rating.movesGradually':
     'The rating moves towards its target step by step rather than in one jump.',
   'gym.rating.notStarted': 'The gym rating starts once a day with training is complete.',
@@ -472,10 +472,10 @@ export const en: Translations = {
   'gym.decay.title': 'Training break',
   'gym.decay.days': '{days} days without a session',
   'gym.decay.daysEnded': '{days} days without a session until yesterday',
-  'gym.decay.lost': '{percent} % of your progress reduced',
+  'gym.decay.lost': '{percent}\u00A0% of your progress reduced',
   'gym.decay.pendingToday': 'Decay pending — a session today prevents it',
   'gym.decay.pendingYesterday': 'Decay pending — a session for yesterday prevents it',
-  'gym.decay.lostPending': '{percent} % reduced · more decay pending',
+  'gym.decay.lostPending': '{percent}\u00A0% reduced · more decay pending',
   'gym.decay.pendingExplain':
     'A day without a session only counts once it can no longer be filled in. Log a session for that day while you still can, and this decay does not happen.',
   'gym.decay.explain':
@@ -505,13 +505,13 @@ export const en: Translations = {
 
   'gym.picker.primary': 'Primary muscle',
   'gym.picker.primaryHint':
-    'Primary muscles share 70 % of the exercise, the rest share 30 %.',
+    'Primary muscles share 70\u00A0% of the exercise, the rest share 30\u00A0%.',
   'gym.picker.builtInProtected': 'Built-in exercises keep their mapping.',
 
   'gym.tombstone.boundary':
     'Absolute personal bests belong to the milestones, not to the Gym rating.',
-  'gym.change.improved': '+{percent} %',
-  'gym.change.declined': '{percent} %',
+  'gym.change.improved': '+{percent}\u00A0%',
+  'gym.change.declined': '{percent}\u00A0%',
   'gym.change.unchanged': 'Held',
   'gym.detail.latest': 'Latest',
   'gym.detail.previous': 'Before',
@@ -532,12 +532,12 @@ export const en: Translations = {
   'running.title': 'Running',
 
   'running.rating.title': 'Running rating',
-  'running.rating.summary': '40 % attendance · 60 % pace',
+  'running.rating.summary': '40\u00A0% attendance · 60\u00A0% pace',
   'running.attendance.scale': 'of {target} runs',
   'running.endurance.scale': 'of {required} weeks',
   'running.rating.value': '{value} of 1000',
   'running.rating.explain':
-    'Made up of 40 % attendance and 60 % pace development over comparable distances. The comparison is always against your own history.',
+    'Made up of 40\u00A0% attendance and 60\u00A0% pace development over comparable distances. The comparison is always against your own history.',
   'running.rating.notStarted': 'The running rating starts once a day with a run is complete.',
 
   'running.ytd.title': 'Pace year to date',
@@ -548,6 +548,7 @@ export const en: Translations = {
   'running.performance.needsSecond':
     'As soon as you record a similar distance a second time with both distance and duration, your pace development starts to count.',
   'running.performance.counted': '{count} distance ranges counted',
+  'running.performance.countedOne': '1 distance range counted',
   'running.performance.attendanceOnly':
     '{count} runs without a distance or duration count towards attendance, but not towards pace.',
   'running.performance.comparable':
@@ -572,10 +573,10 @@ export const en: Translations = {
   'running.decay.title': 'Running break',
   'running.decay.days': '{days} days without a run',
   'running.decay.daysEnded': '{days} days without a run until yesterday',
-  'running.decay.lost': '{percent} % of your progress reduced',
+  'running.decay.lost': '{percent}\u00A0% of your progress reduced',
   'running.decay.pendingToday': 'Decay pending — a run today prevents it',
   'running.decay.pendingYesterday': 'Decay pending — a run for yesterday prevents it',
-  'running.decay.lostPending': '{percent} % reduced · more decay pending',
+  'running.decay.lostPending': '{percent}\u00A0% reduced · more decay pending',
   'running.decay.pendingExplain':
     'A day without a run only counts once it can no longer be filled in. Log a run for that day while you still can, and this decay does not happen.',
   'running.decay.explain':
@@ -704,7 +705,7 @@ export const en: Translations = {
   'gymHub.training.today': 'A session is already logged today.',
   'gymHub.training.log': 'Log a workout',
   'workout.running.title': 'Workout in progress',
-  'workout.running.percent': '{percent} % done',
+  'workout.running.percent': '{percent}\u00A0% done',
   'workout.running.exerciseOne': '1 exercise',
   'workout.running.exercises': '{count} exercises',
   'workout.running.setOne': '1 set',

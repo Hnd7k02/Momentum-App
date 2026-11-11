@@ -1,4 +1,5 @@
 import type { Language } from '../core/model';
+import { withMinus } from './typography';
 import { de, type TranslationKey, type Translations } from './de';
 import { en } from './en';
 
@@ -34,7 +35,9 @@ export function translate(
   if (!params) return template;
   return template.replace(/\{(\w+)\}/g, (match, name: string) => {
     const value = params[name];
-    return value === undefined ? match : String(value);
+    if (value === undefined) return match;
+    // A negative number is printed with a real minus sign (`typography.ts`).
+    return typeof value === 'number' ? withMinus(value) : String(value);
   });
 }
 

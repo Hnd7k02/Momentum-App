@@ -1,6 +1,7 @@
 import { addDays, middayOf, todayKey, type DateKey } from '../core/dates';
 import type { Language } from '../core/model';
 import { localeOf, translate } from './index';
+import { percentText } from './typography';
 
 /**
  * All user-facing dates and numbers go through here, so the language setting
@@ -69,5 +70,5 @@ export function formatNumber(language: Language, value: number, fractionDigits =
 
 /** Percentages are shown without decimals: the extra precision is noise. */
 export function formatPercent(language: Language, ratio0to100: number): string {
-  return `${formatNumber(language, Math.round(ratio0to100))} %`;
+  return percentText(formatNumber(language, Math.round(ratio0to100)));
 }

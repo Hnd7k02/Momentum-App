@@ -149,7 +149,7 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   const text = async (name) => (await rowOf(page, name).textContent())?.replace(/\s+/g, ' ').trim();
   check('an untrained group says so in words, with no number', (await text('Schultern'))?.includes('Noch nicht trainiert') && !/%/.test(await text('Schultern')), await text('Schultern'));
   check('one waiting for a baseline says that instead', (await text('Waden'))?.includes('Noch kein Vergleich'), await text('Waden'));
-  check('a measured group shows its percentage, signed', /[+-]?\d+ %/.test(await text('Brust')), await text('Brust'));
+  check('a measured group shows its percentage, signed', /[+\u2212]?\d+\s%/.test(await text('Brust')), await text('Brust'));
   check('rows say when the group was last trained', /(Heute|Gestern|Vor \d+ Tagen)/.test(await text('Brust')), await text('Brust'));
   check('a group with no number says its state in words instead', /Noch nicht trainiert/.test(await text('Schultern')) && !/%/.test(await text('Schultern')), await text('Schultern'));
   check('no row shows a technical id', !(await page.locator('.muscle-rows').textContent())?.includes('ex_'));

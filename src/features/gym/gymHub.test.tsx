@@ -91,7 +91,7 @@ describe('the muscle entry card before the first workout', () => {
     };
     const html = render(history);
     expect(html).toContain('1 von 10 gewertet');
-    expect(html).toContain('Gesamt +10 %');
+    expect(html).toContain('Gesamt +10\u00A0%');
     expect(html).toContain('Letzte 30 Tage');
     expect(html).not.toContain(de['gymHub.muscles.none']);
     // One marker lit for the one measured group, the other nine grey.

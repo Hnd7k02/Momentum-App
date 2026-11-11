@@ -174,7 +174,7 @@ async function fillSet(page, index, reps, weight) {
   // Phase 4.1 replaced this copy: performance now feeds the rating, and what
   // the screen has to keep separate is development from absolute strength.
   check('it says what the Gym rating actually measures',
-    /40 % Anwesenheit, 60 % persönliche Leistungsentwicklung/.test(overallSheet.text ?? ''));
+    /40\s% Anwesenheit, 60\s% persönliche Leistungsentwicklung/.test(overallSheet.text ?? ''));
   check('it keeps the Tombstone boundary visible',
     /Absolute Bestleistungen gehören zu den Meilensteinen/.test(overallSheet.text ?? ''));
 
@@ -184,7 +184,7 @@ async function fillSet(page, index, reps, weight) {
   const legend = await page.locator('.muscle-row').count();
   check('and lists all ten groups', legend === 10, String(legend));
   const chestState = await page.locator('.muscle-row', { hasText: 'Brust' }).textContent();
-  check('an improved group says so with a signed number', /\+\d+ %/.test(chestState ?? ''), chestState?.trim());
+  check('an improved group says so with a signed number', /\+\d+\s%/.test(chestState ?? ''), chestState?.trim());
   const calfState = await page.locator('.muscle-row', { hasText: 'Waden' }).textContent();
   check('an untrained group is told apart from a declining one',
     /Noch nicht trainiert/.test(calfState ?? ''), calfState?.trim());

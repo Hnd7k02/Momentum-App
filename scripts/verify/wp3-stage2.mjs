@@ -332,7 +332,7 @@ for (const [width, height] of SIZES) {
     await page.locator('.today__scroll').evaluate((el) => { el.scrollTop = 0; });
     await page.waitForTimeout(300);
     const label = await page.locator('.running-workout').getAttribute('aria-label').catch(() => null);
-    check(`${W}: P7 a plan reads as the share of planned exercises done, extras excluded`, label === 'Training läuft, 33 % erledigt – fortsetzen', String(label));
+    check(`${W}: P7 a plan reads as the share of planned exercises done, extras excluded`, label === 'Training läuft, 33\u00a0% erledigt – fortsetzen', String(label));
     await page.screenshot({ path: shotPath(width, 'heute-running-plan') });
     await layoutChecks(page, `${W} Heute with a running plan`);
     await page.locator('.running-workout').click();
@@ -341,7 +341,7 @@ for (const [width, height] of SIZES) {
     await back(page);
     await page.waitForTimeout(1200);
     const label2 = await page.locator('.running-workout').getAttribute('aria-label').catch(() => null);
-    check(`${W}: P7 it moves with the next planned exercise`, label2 === 'Training läuft, 67 % erledigt – fortsetzen', String(label2));
+    check(`${W}: P7 it moves with the next planned exercise`, label2 === 'Training läuft, 67\u00a0% erledigt – fortsetzen', String(label2));
     check(`${W} B: no page errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

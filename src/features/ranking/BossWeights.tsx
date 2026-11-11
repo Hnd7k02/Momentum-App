@@ -6,6 +6,7 @@ import type { DomainType } from '../../core/model';
 import { Card, EmptyState, Sheet } from '../../components';
 import { InfoIcon, MinusIcon, PlusIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
+import { percentText } from '../../i18n/typography';
 import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import type { BossWeighting } from '../../storage/services/configurationService';
 import { wholePercents } from './wholePercents';
@@ -142,7 +143,7 @@ export function BossWeights({
       <p className="boss-weights__total">
         {t('rank.weights.total', { percent: 100 })}
         {/* No domain can be squeezed out entirely, however low it is set. */}
-        {weighting.length > 1 ? ` · ${Math.round(BOSS.MIN_WEIGHT * 100)} % min` : ''}
+        {weighting.length > 1 ? ` · ${percentText(Math.round(BOSS.MIN_WEIGHT * 100))} min` : ''}
       </p>
 
       <Sheet open={infoOpen} title={t('rank.weights')} onClose={() => setInfoOpen(false)}>
