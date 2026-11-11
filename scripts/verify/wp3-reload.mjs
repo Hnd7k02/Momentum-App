@@ -136,9 +136,11 @@ const readMuscles = (page) =>
     const rows = [...document.querySelectorAll('.muscle-row')].map((row) => {
       const right = row.querySelector('.muscle-row__right');
       const sub = row.querySelector('.muscle-row__sub');
+      const days = row.querySelector('.muscle-row__days');
       return {
         name: n(row.querySelector('.muscle-row__name')?.textContent),
         sub: sub ? n(sub.textContent) : null,
+        days: days ? n(days.textContent) : null,
         right: n(right?.textContent),
         state: [...(right?.classList ?? [])].find((c) => c.startsWith('muscle-row__right--'))?.slice('muscle-row__right--'.length) ?? null,
         delta: row.querySelector('.muscle-row__delta') !== null,
@@ -299,12 +301,12 @@ for (const [width, height] of SIZES) {
   // Calves: one calf-raise day, 8 days ago — too little in either range.
   for (const [label, m] of [['30', m30], ['90', m90]]) {
     const calves = row(m, 'Waden');
-    check(`${W}: Waden at ${label} days — trained 8 days ago, one exercise day, too little to compare`, calves?.state === 'awaitingBaseline' && calves?.sub === 'Vor 8 Tagen · 1 Übungstag' && calves?.right === 'Zu wenig Vergleichsdaten' && calves?.delta === false, short(calves));
+    check(`${W}: Waden at ${label} days — trained 8 days ago, one exercise day, too little to compare`, calves?.state === 'awaitingBaseline' && calves?.sub === 'Vor 8 Tagen' && calves?.days === '1 Übungstag' && calves?.right === 'Zu wenig Vergleichsdaten' && calves?.delta === false, short(calves));
   }
   // Biceps: hammer curls 15 and 6 days ago — a comparison on two exercise
   // days, which is not yet a trend (contract §7).
   const biceps30 = row(m30, 'Bizeps');
-  check(`${W}: Bizeps has a comparison on two exercise days and prints no figure`, biceps30?.state === 'awaitingBaseline' && biceps30?.delta === false && biceps30?.sub === 'Vor 6 Tagen · 2 Übungstage', short(biceps30));
+  check(`${W}: Bizeps has a comparison on two exercise days and prints no figure`, biceps30?.state === 'awaitingBaseline' && biceps30?.delta === false && biceps30?.sub === 'Vor 6 Tagen' && biceps30?.days === '2 Übungstage', short(biceps30));
   // Back: pulldowns 19, 12 and 5 days ago, identical — held, with its figure.
   const back30 = row(m30, 'Rücken');
   check(`${W}: Rücken, three identical days, reads "0 % Gehalten"`, back30?.state === 'unchanged' && back30?.delta === true && /^0\s%\s?Gehalten$/.test(back30?.right ?? '') && back30?.sub === 'Vor 5 Tagen', short(back30));

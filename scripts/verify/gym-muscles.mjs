@@ -161,6 +161,7 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
       badge: row.querySelector('.muscle-row__badge')?.textContent.trim() ?? null,
       marks: row.querySelectorAll('.muscle-row__chart polyline, .muscle-row__chart circle').length,
       sub: row.querySelector('.muscle-row__sub')?.textContent.trim() ?? null,
+      days: row.querySelector('.muscle-row__days')?.textContent.trim() ?? null,
     };
   }));
   const shownOf = (delta) => { const m = /^([+\u2212]?)(\d+)\u00a0%$/.exec(delta ?? ''); return m ? (m[1] === '\u2212' ? -Number(m[2]) : Number(m[2])) : Number.NaN; };
@@ -176,7 +177,8 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   const fewDays = shownRows.filter((row) => row.name === 'Bizeps' || row.name === 'Waden');
   check('a group with fewer than three exercise days shows the chip and no line, and says how many it has',
     fewDays.length === 2 && fewDays.every((row) => row.state === 'awaitingBaseline' && row.badge === 'Zu wenig Vergleichsdaten' && row.delta === null && row.marks === 0)
-      && /· 2\sÜbungstage$/.test(fewDays.find((row) => row.name === 'Bizeps')?.sub ?? '') && /· 1\sÜbungstag$/.test(fewDays.find((row) => row.name === 'Waden')?.sub ?? ''),
+      && /^2\sÜbungstage$/.test(fewDays.find((row) => row.name === 'Bizeps')?.days ?? '') && /^1\sÜbungstag$/.test(fewDays.find((row) => row.name === 'Waden')?.days ?? '')
+      && shownRows.filter((row) => row.days !== null).length === 2,
     JSON.stringify(fewDays));
   check('a measured group shows its percentage, signed', /[+\u2212]?\d+\s%/.test(await text('Brust')), await text('Brust'));
   check('rows say when the group was last trained', /(Heute|Gestern|Vor \d+ Tagen)/.test(await text('Brust')), await text('Brust'));

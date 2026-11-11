@@ -79,14 +79,16 @@ export function MuscleRows({
          * read against the others: the Übungen list below already answers
          * "what did I do for this muscle", for whichever group is selected.
          */
-        const recency = lastTrainedText(view.lastTrainedAt, today, t);
-        // A group with too little to compare also says how much there is:
-        // "Vor 2 Tagen · 2 Übungstage" (contract §7). The full sentence
+        const sub = lastTrainedText(view.lastTrainedAt, today, t);
+        // A group with too little to compare also says how much there is,
+        // on a line of its own: "2 Übungstage" (contract §7). Set after the
+        // recency with a dot it broke as "Vor 9 Tagen ·" on a 393px phone,
+        // where the chip leaves the words little room. The full sentence
         // stands with the group's exercises once the row is chosen.
-        const sub =
-          view.state === 'awaitingBaseline' && recency
-            ? `${recency} · ${t(view.exerciseDays === 1 ? 'muscle.exerciseDays.shortOne' : 'muscle.exerciseDays.short', { count: view.exerciseDays })}`
-            : recency;
+        const days =
+          view.state === 'awaitingBaseline'
+            ? t(view.exerciseDays === 1 ? 'muscle.exerciseDays.shortOne' : 'muscle.exerciseDays.short', { count: view.exerciseDays })
+            : null;
         // Sign, number and colour from the one rounded figure (B6).
         const delta = shownChangeText(view.delta);
 
@@ -102,6 +104,7 @@ export function MuscleRows({
               <span className="muscle-row__text">
                 <span className="muscle-row__name">{t(MUSCLE_LABEL_KEYS[view.id])}</span>
                 {sub ? <span className="muscle-row__sub">{sub}</span> : null}
+                {days ? <span className="muscle-row__sub muscle-row__days">{days}</span> : null}
               </span>
 
               {/* No trend is no chart: an untrained group and one with too

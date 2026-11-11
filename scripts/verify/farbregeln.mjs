@@ -182,6 +182,7 @@ const readRows = (page) =>
       return {
         name: n(row.querySelector('.muscle-row__name')?.textContent),
         sub: n(row.querySelector('.muscle-row__sub')?.textContent) || null,
+        days: row.querySelector('.muscle-row__days')?.textContent ?? null,
         state: [...(right?.classList ?? [])].find((c) => c.startsWith('muscle-row__right--'))?.slice('muscle-row__right--'.length) ?? null,
         delta: delta ? delta.textContent : null,
         deltaColor: delta ? getComputedStyle(delta).color : null,
@@ -378,8 +379,17 @@ for (const width of WIDTHS) {
     tooFew.length === 2 && tooFew.every((r) => r.badge === 'Zu wenig Vergleichsdaten' && r.line === false && r.badgeBackground === T['--sky-tint'] && r.badgeColor === T['--sky-ink']),
     short(tooFew));
   check(`${W}: and each says how many exercise days there are`,
-    rows.find((r) => r.name === NAME.hamstringsGlutes)?.sub === `Vor 9 Tagen · 2${NBSP}Übungstage` && rows.find((r) => r.name === NAME.forearms)?.sub === `Vor 3 Tagen · 3${NBSP}Übungstage`,
-    short(tooFew.map((r) => r.sub)));
+    rows.find((r) => r.name === NAME.hamstringsGlutes)?.sub === 'Vor 9 Tagen' && rows.find((r) => r.name === NAME.hamstringsGlutes)?.days === `2${NBSP}Übungstage`
+      && rows.find((r) => r.name === NAME.forearms)?.sub === 'Vor 3 Tagen' && rows.find((r) => r.name === NAME.forearms)?.days === `3${NBSP}Übungstage`
+      && rows.filter((r) => r.days !== null).length === 2,
+    short(rows.map((r) => [r.name, r.sub, r.days])));
+  const daysLines = await page.locator('.muscle-row__days').evaluateAll((els) => els.map((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const recency = el.previousElementSibling?.getBoundingClientRect();
+    return { lines: range.getClientRects().length, below: Boolean(recency) && el.getBoundingClientRect().top >= recency.bottom - 0.5 };
+  }));
+  check(`${W}: the count stands on one line of its own, under the recency`, daysLines.length === 2 && daysLines.every((d) => d.lines === 1 && d.below), short(daysLines));
   const untrained = rows.find((r) => r.name === NAME.calves);
   check(`${W}: an untrained group has a neutral chip, a pale dot and no line`,
     untrained?.badge === 'Noch nicht trainiert' && untrained.line === false && untrained.badgeBackground === T['--surface-secondary'] && /rgba\(.*, 0\.4\)/.test(untrained.dotAlpha ?? ''),
@@ -461,7 +471,7 @@ for (const width of WIDTHS) {
   const lowerNamed = measured(lowerRuns, [
     ['muscle-row__badge', 'Zu wenig Vergleichsdaten'], ['muscle-row__badge', 'Noch nicht trainiert'],
     ['muscle-row__delta', `${MINUS}3${NBSP}%`], ['muscle-row__delta', `${MINUS}8${NBSP}%`], ['muscle-row__state', 'Zurückgegangen'],
-    ['muscle-row__name', 'Waden'], ['muscle-row__sub', 'Vor 9 Tagen'],
+    ['muscle-row__name', 'Waden'], ['muscle-row__sub', 'Vor 9 Tagen'], ['muscle-row__sub muscle-row__days', `2${NBSP}Übungstage`],
   ]);
   check(`${W}: both kinds of chip, the red figures and the count of exercise days were measured (${lowerRuns.length} runs, lowest ${lowest(lowerRuns)})`,
     lowerNamed.every(Boolean), lowerNamed.map((r, i) => (r ? `${r.text} ${r.ratio}` : `missing #${i}`)).join(' · '));
@@ -575,6 +585,11 @@ for (const width of WIDTHS) {
   await scrollTop(page);
   await pressRange(page, '90 Tage');
   await waitBody(page);
+  // Choosing a row turned the body to that group; the picture is of the front.
+  if ((await page.locator('.body-viewer canvas').count()) > 0) {
+    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne', exact: true }).click();
+    await page.waitForTimeout(2500);
+  }
   const rows90 = await readRows(page);
   const calves90 = rows90.find((r) => r.name === NAME.calves);
   check(`${W}: at 90 days Waden appears: +10 %, improved, last trained 45 days ago`,
