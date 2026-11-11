@@ -1,5 +1,5 @@
 import { MUSCLE_LABEL_KEYS, MUSCLE_STATE_KEYS } from '../../components/BodyRenderer';
-import { IDENTITY_COLOR, IDENTITY_SELECTION_RING_ALPHA, IDENTITY_UNTRAINED_ALPHA, mutedIdentity } from '../body';
+import { IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, mutedIdentity } from '../body';
 import type { MuscleGroup } from '../../core/model';
 import { diffInDays, type DateKey } from '../../core/dates';
 import { useT } from '../../i18n/I18nProvider';
@@ -15,11 +15,12 @@ import { shownChangeText } from './muscleState';
  * (the identity dot and the name), when it was last worked and by what, which
  * way it is going (the mini chart), and how far (the number and its state).
  *
- * **Two colour systems, never mixed.** The dot and the chart carry the
- * group's identity colour, which says *which muscle this is* and never
- * changes with performance. The number and the badge carry the state colour,
- * which says *how it is going*. Both come from `features/body/tokens.ts`;
- * there is no chart palette.
+ * **Two colour systems, never mixed** (D154). The dot carries the group's
+ * identity colour, which says *which muscle this is* and never changes with
+ * performance — and the dot is the only place it appears. The number, the
+ * badge and the end point of the chart carry the state colour, which says
+ * *how it is going*; the chart's line is the neutral data ink. A chosen row
+ * is marked by the accent, like every selection.
  *
  * The rows own no state: the selected group comes from the Gym screen and
  * goes back to it, so the body above and the exercises below always agree
@@ -86,16 +87,7 @@ export function MuscleRows({
               aria-pressed={on}
               onClick={() => onSelect(view.id)}
             >
-              <span
-                className="muscle-row__dot"
-                aria-hidden="true"
-                style={{
-                  background: identity,
-                  boxShadow: on
-                    ? `0 0 0 3px ${mutedIdentity(IDENTITY_COLOR[view.id], IDENTITY_SELECTION_RING_ALPHA)}`
-                    : 'none',
-                }}
-              />
+              <span className="muscle-row__dot" aria-hidden="true" style={{ background: identity }} />
               <span className="muscle-row__text">
                 <span className="muscle-row__name">{t(MUSCLE_LABEL_KEYS[view.id])}</span>
                 {sub ? <span className="muscle-row__sub">{sub}</span> : null}
@@ -105,9 +97,7 @@ export function MuscleRows({
                   a baseline have nothing to draw, and drawing a flat line
                   there would state a result they do not have. */}
               <span className="muscle-row__chart" aria-hidden="true">
-                {view.trend.length > 0 ? (
-                  <Sparkline trend={view.trend} color={mutedIdentity(IDENTITY_COLOR[view.id])} />
-                ) : null}
+                {view.trend.length > 0 ? <Sparkline trend={view.trend} state={view.state} /> : null}
               </span>
 
               {/*

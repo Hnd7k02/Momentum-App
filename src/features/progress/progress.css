@@ -55,11 +55,12 @@
   letter-spacing: -0.2px;
 }
 
+/* A direction is a state of the data: the status inks, steady neutral. */
 .trend__direction--rising {
-  color: var(--mint-ink);
+  color: var(--status-strong-ink);
 }
 .trend__direction--falling {
-  color: var(--rose-ink);
+  color: var(--status-weak-ink);
 }
 .trend__direction--steady {
   color: var(--text-secondary);

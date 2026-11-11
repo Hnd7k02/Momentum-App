@@ -53,10 +53,11 @@
   border: 1.5px solid transparent;
 }
 
+/* A chosen filter is a selection, so it takes the accent (D154). */
 .gym-picker__muscle[aria-pressed='true'] {
-  background: var(--domain-gym-tint);
-  border-color: var(--domain-gym-ink);
-  color: var(--domain-gym-ink);
+  background: var(--accent-tint);
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
 }
 
 /* ── Logging ────────────────────────────────────────────────────────────── */
@@ -195,18 +196,25 @@
 /*
  * Removing a whole exercise is a different act from removing one set, and
  * it reads differently (WP3, P5): a worded control in the card's header,
- * not the row's minus. Undo follows either way.
+ * not the row's minus. It is the quiet step of the button order (contract
+ * §5): a destructive action is never the loudest thing on the screen, and
+ * the safety is the undo that follows either way.
  */
 .gym-exercise__remove {
   flex: none;
   min-height: var(--touch-min);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--separator-strong);
+  /* The word sits on the card's content edge; the target reaches past it. */
+  margin-right: calc(var(--space-2) * -1);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-control);
   background: transparent;
-  color: var(--rose-ink);
+  color: var(--text-secondary);
   font-size: var(--type-footnote);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-regular);
+}
+
+.gym-exercise__remove:active:not(:disabled) {
+  background: var(--surface-secondary);
 }
 
 .gym-exercise__remove:disabled {
@@ -304,10 +312,12 @@
   min-height: 44px;
   margin-top: var(--space-2);
   border-radius: var(--radius-control);
-  background: var(--domain-gym-tint);
-  color: var(--domain-gym-ink);
+  /* The second step of the button order (contract §5), like "Übung
+     hinzufügen" in the bar below. */
+  background: var(--accent-tint);
+  color: var(--accent-ink);
   font-size: var(--type-subhead);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
 }
 
 .gym-exercise__add:disabled {
@@ -459,10 +469,12 @@
   overflow: hidden;
 }
 
+/* Neutral: the bars show a value, and height carries it (D154). */
 .gym-detail__bar {
   width: 100%;
   border-radius: 3px;
-  background: var(--domain-gym-mid);
+  background: var(--data-ink);
+  opacity: 0.55;
 }
 
 .gym-detail__row {

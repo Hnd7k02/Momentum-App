@@ -15,11 +15,6 @@ const LABELS: Record<TargetDomain, TranslationKey> = {
   running: 'onboarding.sport.running',
 };
 
-const ACCENTS: Record<TargetDomain, string> = {
-  gym: 'var(--domain-gym-mid)',
-  running: 'var(--domain-running-mid)',
-};
-
 /**
  * Sessions per week, as bubbles.
  *
@@ -53,7 +48,6 @@ export function TargetPicker({
       selected={value}
       onSelect={onChange}
       label={t(LABELS[domain])}
-      accent={ACCENTS[domain]}
       describe={(count) => t('onboarding.sports.perWeek', { count })}
     />
   );

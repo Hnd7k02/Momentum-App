@@ -292,7 +292,7 @@ export function AreasScreen({
       <Section key={type}>
         <Card rows>
           <div className="areas__domainHeader">
-            <span className={`areas__domainMark areas__domainMark--${type}`} aria-hidden="true">
+            <span className="areas__domainMark" aria-hidden="true">
               {type === 'mental' ? (
                 <SparkIcon size={22} />
               ) : (
@@ -306,7 +306,6 @@ export function AreasScreen({
             <Switch
               checked={on}
               label={t(copy.name)}
-              accent={`var(--domain-${type}-mid)`}
               onChange={(next) =>
                 next ? actions.enableDomain(type) : actions.disableDomain(type)
               }
@@ -453,7 +452,7 @@ export function AreasScreen({
           <Section>
             <Card rows>
               <div className="areas__domainHeader">
-                <span className="areas__domainMark areas__domainMark--sports" aria-hidden="true">
+                <span className="areas__domainMark" aria-hidden="true">
                   <ActivityIcon size={22} />
                 </span>
                 <span className="row__body">
@@ -466,7 +465,6 @@ export function AreasScreen({
                   <Switch
                     checked
                     label={t('domain.legacySport')}
-                    accent="var(--domain-sports-mid)"
                     onChange={() => actions.disableLegacySport()}
                   />
                 ) : null}

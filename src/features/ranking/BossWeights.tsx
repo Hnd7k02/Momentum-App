@@ -107,7 +107,7 @@ export function BossWeights({
             </span>
 
             <span
-              className={`boss-weights__share boss-weights__share--${entry.domain}`}
+              className="boss-weights__share"
               /* The number is the outcome of the two buttons beside it, so it
                  is announced when it changes rather than read only on focus. */
               aria-live="polite"

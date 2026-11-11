@@ -57,11 +57,6 @@
   overflow-wrap: anywhere;
 }
 
-.pause__badge--active {
-  background: var(--domain-mental-tint);
-  color: var(--domain-mental-ink);
-}
-
 .pause__rowActions {
   display: flex;
   flex-wrap: wrap;
@@ -159,7 +154,7 @@
 
 .pause-form__error {
   /* The same token the backup screen uses to say a thing did not work. */
-  color: var(--rose-ink);
+  color: var(--status-weak-ink);
 }
 
 .pause-form__actions {

@@ -54,8 +54,9 @@
   gap: var(--space-4);
   width: 100%;
   text-align: left;
+  /* An ordinary card (D154): the glass fill of `.card`, no colour of its
+     own. */
   padding: var(--space-4) var(--card-pad);
-  background: var(--domain-gym-tint);
   color: var(--text-primary);
 }
 
@@ -78,7 +79,7 @@
   display: block;
   width: auto;
   height: 100%;
-  filter: drop-shadow(0 6px 10px rgba(16, 24, 40, 0.16));
+  filter: drop-shadow(var(--shadow-figure));
 }
 
 .gym-hub__previewStates {
@@ -135,10 +136,19 @@
 .gym-hub__musclesOverall {
   font-size: var(--type-subhead);
   font-weight: var(--weight-semibold);
-  color: var(--domain-gym-ink);
+  /* The colour of the state the figure reads as; held is the text colour. */
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   /* "Gesamt +26 %" is one figure; the unit never drops to its own line. */
   white-space: nowrap;
+}
+
+.gym-hub__musclesOverall--improved {
+  color: var(--status-strong-ink);
+}
+
+.gym-hub__musclesOverall--declined {
+  color: var(--status-weak-ink);
 }
 
 .gym-hub__musclesRange {
@@ -149,7 +159,7 @@
 
 .gym-hub__chevron {
   flex: none;
-  color: var(--domain-gym-ink);
+  color: var(--text-tertiary);
 }
 
 /* ── The muscle destination before the first workout ───────────────────── */

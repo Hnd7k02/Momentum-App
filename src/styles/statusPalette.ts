@@ -31,7 +31,8 @@ const DECLARATION = /(--[\w-]+):\s*([^;]+);/g;
 
 function readTokens(css: string): Map<string, string> {
   const found = new Map<string, string>();
-  for (const match of css.matchAll(DECLARATION)) {
+  // Comments describe tokens and may quote a declaration; only real ones count.
+  for (const match of css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(DECLARATION)) {
     // First declaration wins: `:root` is defined once, and a later media
     // block (reduced motion) only ever overrides durations.
     if (!found.has(match[1]!)) found.set(match[1]!, match[2]!.trim());

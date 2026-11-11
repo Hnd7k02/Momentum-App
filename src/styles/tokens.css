@@ -54,73 +54,64 @@
   --text-tertiary: #a0a0a8;
   --text-on-accent: #ffffff;
 
-  /* Primary action. Indigo rather than blue: it belongs to the same family
-     as the Mind lilac without competing with it. */
+  /*
+   * Colour has three jobs (D154), and nothing here has a fourth:
+   *
+   * 1. The accent means *operable* — a button, a link, the chosen option,
+   *    the active tab. Mind carries indigo, Gym violet.
+   * 2. The status palette means *the state of the data* — green and red
+   *    judge a change, sky points at missing comparison data.
+   * 3. Everything else is neutral: text, surfaces, lines, bars.
+   *
+   * So an area has no colour of its own (D160): it is named by its word, its
+   * mark is neutral and its bar is the neutral data ink. The pastel families
+   * that used to carry identity — lilac, mint, peach, rose, sand — and the
+   * `--domain-*` aliases are gone. A selection takes the accent; a
+   * destructive or failing thing takes the `weak` companions, a positive
+   * message the `strong` ones.
+   */
   --accent: #5e5ce6;
   --accent-pressed: #4a48cf;
   --accent-tint: #ecebfd;
-  /* Text weight, for a label sitting on --accent-tint. Same split as the
-     pastels: the fill weight does not clear 4.5:1 on its own tint. */
+  /* Text weight, for a label sitting on --accent-tint and for a text
+     button: the fill weight does not clear 4.5:1 on its own tint. */
   --accent-ink: #5654e5;
 
-  /*
-   * Pastels.
-   *
-   * Each identity has two values, and they are not interchangeable:
-   * `-fill` is decorative (marks, dots, switches, selected bubbles) and
-   * `-ink` is the text-safe variant that clears 4.5:1 on white. Colour is
-   * never the only carrier of meaning, but where it does carry any, it has
-   * to be readable.
-   */
-  /* `-mid` is the switch / selected-bubble weight: strong enough to clear
-     3:1 as a graphical element, light enough not to look like a dark theme
-     leaked into a light one. */
-  --lilac-fill: #8f7ff0;
-  --lilac-mid: #7a68e8;
-  --lilac-ink: #6652df;
-  --lilac-tint: #efecfd;
-
-  --mint-fill: #3ecfa2;
-  --mint-mid: #12a277;
-  --mint-ink: #0a6e55;
-  --mint-tint: #e3f7ef;
-
+  /* The information colour: "not enough to compare yet". `-fill` is a mark,
+     `-ink` the text-safe weight, `-tint` the ground of its chip. */
   --sky-fill: #62b4f7;
   --sky-ink: #166db6;
   --sky-tint: #e6f2fd;
 
-  --peach-fill: #f7b183;
-  --peach-ink: #9f5b1f;
-  --peach-tint: #fdf0e6;
+  /*
+   * Data. A bar or a line that shows a value — a rating, a weekly target, a
+   * trend — is neutral: this ink on this track. The one exception the owner
+   * added (D160): a weekly target that has been met is drawn in the `strong`
+   * status. On light that is the status's ink, because the fill reaches only
+   * 2.1:1 on the light track and a bar needs 3:1; on dark it is the fill.
+   */
+  --data-ink: #3a3a44;
+  --data-track: #e7e7ee;
+  --data-met: var(--status-strong-ink);
 
-  --rose-fill: #f2909c;
-  --rose-ink: #bf394e;
-  --rose-tint: #fdecef;
-
-  --sand-fill: #eccf7a;
-  --sand-ink: #856917;
-  --sand-tint: #fbf4de;
-
-  /* Domain identity. */
-  --domain-mental: var(--lilac-fill);
-  --domain-mental-mid: var(--lilac-mid);
-  --domain-mental-ink: var(--lilac-ink);
-  --domain-mental-tint: var(--lilac-tint);
-  --domain-sports: var(--mint-fill);
-  --domain-sports-mid: var(--mint-mid);
-  --domain-sports-ink: var(--mint-ink);
-  --domain-sports-tint: var(--mint-tint);
-  /* Gym keeps the training identity RC2 established; Running takes its own
-     so two cards on one screen are told apart by more than a label. (Food's
-     peach left with Food, D139; the palette keeps the colour.) */
-  --domain-gym: var(--mint-fill);
-  --domain-gym-mid: var(--mint-mid);
-  --domain-gym-ink: var(--mint-ink);
-  --domain-gym-tint: var(--mint-tint);
-  --domain-running: var(--sky-fill);
-  --domain-running-mid: var(--sky-ink);
-  --domain-running-ink: var(--sky-ink);
-  --domain-running-tint: var(--sky-tint);
+  /*
+   * The ten muscle groups' identity colours (D154). They appear in exactly
+   * one place — an 8px dot before the group's name — pulled 35 % towards
+   * their own grey there, so terracotta beside a green figure does not read
+   * as a status. They colour no line, no ring and no surface, and the body
+   * is tinted by the state of the data alone. TypeScript reads them from
+   * here through `statusPalette.ts`, as it reads the status colours.
+   */
+  --muscle-chest: #d9654e;
+  --muscle-back: #2e6fb7;
+  --muscle-shoulders: #e8a33d;
+  --muscle-biceps: #7b5ac9;
+  --muscle-triceps: #c45d9e;
+  --muscle-core: #c9a227;
+  --muscle-quadriceps: #1f9e94;
+  --muscle-hamstrings-glutes: #8c6239;
+  --muscle-calves: #4fb3e8;
+  --muscle-forearms: #6e7b8b;
 
   /*
    * Status palette — the ONE definition of "how is it going" colour (D123).
@@ -207,9 +198,9 @@
   --mask-opaque: linear-gradient(#000 0 0);
 
   /*
-   * The ground the glass shows against: the tinted off-white under soft
-   * washes, so a card has something to blur wherever it scrolls. One
-   * painted layer on the shell; nothing else paints it again.
+   * The ground the glass shows against: the tinted off-white under two soft
+   * washes, a violet and a blue (D160), so a card has something to blur.
+   * One painted layer on the shell; nothing else paints it again.
    *
    * The washes are bounded by the text that stands on the ground: a section
    * label, the date line and the subtitle are `--text-secondary`, and at the
@@ -219,8 +210,6 @@
   --ground:
     radial-gradient(110% 55% at 8% -4%, rgba(143, 127, 240, 0.22), transparent 60%),
     radial-gradient(80% 45% at 100% 10%, rgba(98, 180, 247, 0.18), transparent 60%),
-    radial-gradient(70% 40% at 10% 82%, rgba(62, 207, 162, 0.14), transparent 60%),
-    radial-gradient(60% 35% at 100% 70%, rgba(247, 177, 131, 0.12), transparent 60%),
     linear-gradient(180deg, #f7f6fc 0%, #f1f1f7 100%);
 
   /* What a sheet dims the screen behind it with. */
@@ -287,6 +276,58 @@
   --shadow-raised: 0 2px 6px rgba(16, 24, 40, 0.06), 0 16px 40px rgba(16, 24, 40, 0.08);
   --shadow-button: 0 4px 14px rgba(94, 92, 230, 0.28);
   --shadow-sheet: 0 -8px 40px rgba(16, 24, 40, 0.14);
+  /* The chosen side of a segment, a view pill, a chosen bubble: lifted a
+     hair off its track. */
+  --shadow-selected: 0 1px 3px rgba(16, 24, 40, 0.1), 0 0 0 0.5px rgba(16, 24, 40, 0.04);
+  /* Under the still of the body on the Gym hub (a `drop-shadow`). */
+  --shadow-figure: 0 6px 10px rgba(16, 24, 40, 0.16);
+
+  /* The switch: its resting track, and the knob, which is white in both
+     worlds as it is on the phone. */
+  --switch-track: rgba(120, 120, 128, 0.16);
+  --switch-knob: #ffffff;
+  --shadow-knob: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+
+  /*
+   * The stage (D16): the Boss's dark surface in a light app — the rank hero
+   * and the Boss card on Heute. It is dark wherever it stands, so it is
+   * declared once and the Gym block leaves it alone. `--stage-surface` is
+   * the lightest point of either ground: what the text on it is held
+   * against. The badge on the stage is a fixed graphic (D48) and keeps its
+   * own colours in `RankBadge.tsx`; the bar beneath it is a value, so it is
+   * the neutral data ink like every other bar.
+   */
+  --stage-surface: #23263a;
+  --stage-ground: linear-gradient(150deg, #23233a 0%, #16162a 60%, #101020 100%);
+  --stage-ground-hero:
+    radial-gradient(120% 80% at 50% 0%, #23263a 0%, rgba(35, 38, 58, 0) 62%),
+    linear-gradient(168deg, #14161f 0%, #0b0c11 100%);
+  --stage-sheen: radial-gradient(90% 55% at 50% 8%, rgba(255, 255, 255, 0.07), transparent 70%);
+  --stage-flash: radial-gradient(50% 40% at 50% 40%, rgba(255, 255, 255, 0.5), transparent 70%);
+  --stage-text: #ffffff;
+  --stage-text-secondary: #c2c2cc;
+  --stage-text-tertiary: #a5a5b0;
+  --stage-chip: #3a3b4c;
+  --stage-data-ink: #e6e5ee;
+  --stage-data-track: #3f3f52;
+  --shadow-stage: 0 12px 32px rgba(11, 12, 17, 0.28);
+
+  /* The app icon, as `public/icon.svg` draws it; the welcome screen shows
+     it. A fixed graphic, like the rank badge. */
+  --brand-mark: linear-gradient(150deg, #9d8cf5 0%, #7fb6f2 100%);
+  --brand-mark-ink: #ffffff;
+  --brand-mark-halo: radial-gradient(closest-side, rgba(157, 140, 245, 0.24), transparent);
+  --shadow-brand-mark: 0 10px 30px rgba(125, 118, 235, 0.32), 0 2px 6px rgba(16, 24, 40, 0.06);
+
+  /* The 3D body's material and light — read through `statusPalette.ts`,
+     never by CSS: the untinted grey, the colour of a term that adds no
+     light, the hemisphere's sky and ground and the cool fill. Unchanged in
+     Stage 6b; block 7A owns them. */
+  --body-base: #c9c9d2;
+  --body-unlit: #000000;
+  --body-light-sky: #ffffff;
+  --body-light-ground: #cdcdda;
+  --body-light-fill: #dfe4f5;
 
   /* Touch targets never go below this. */
   --touch-min: 44px;
@@ -362,53 +403,15 @@
   --accent-tint: #2c2956;
   --accent-ink: #bcb7ff;
 
-  --lilac-fill: #a39dff;
-  --lilac-mid: #9089ff;
-  --lilac-ink: #c9c5ff;
-  --lilac-tint: #2c2956;
-
-  --mint-fill: #4ff0b4;
-  --mint-mid: #32d79c;
-  --mint-ink: #7cf3cb;
-  --mint-tint: #163a30;
-
   --sky-fill: #62c6ff;
   --sky-ink: #93d6ff;
   --sky-tint: #14334c;
 
-  --peach-fill: #ffb27a;
-  --peach-ink: #ffc79a;
-  --peach-tint: #46301f;
-
-  --rose-fill: #ff8ea0;
-  --rose-ink: #ffa8b6;
-  --rose-tint: #4b2431;
-
-  --sand-fill: #f0d276;
-  --sand-ink: #f7df92;
-  --sand-tint: #463d1a;
-
-  /* The domain identities again, as the same aliases. A `var()` is
-     substituted where the token is declared and the substituted value is
-     what inherits, so a scope below `<html>` that carries this block would
-     still inherit the light `--domain-gym-*` from the root unless they are
-     declared again inside it. On `<html>` this is redundant. */
-  --domain-mental: var(--lilac-fill);
-  --domain-mental-mid: var(--lilac-mid);
-  --domain-mental-ink: var(--lilac-ink);
-  --domain-mental-tint: var(--lilac-tint);
-  --domain-sports: var(--mint-fill);
-  --domain-sports-mid: var(--mint-mid);
-  --domain-sports-ink: var(--mint-ink);
-  --domain-sports-tint: var(--mint-tint);
-  --domain-gym: var(--mint-fill);
-  --domain-gym-mid: var(--mint-mid);
-  --domain-gym-ink: var(--mint-ink);
-  --domain-gym-tint: var(--mint-tint);
-  --domain-running: var(--sky-fill);
-  --domain-running-mid: var(--sky-ink);
-  --domain-running-ink: var(--sky-ink);
-  --domain-running-tint: var(--sky-tint);
+  /* A value bar on graphite; a met weekly target is the status fill itself
+     here (5.4:1 on the track). */
+  --data-ink: #e6e5ee;
+  --data-track: #2a2a36;
+  --data-met: var(--status-strong);
 
   /* The four status fills are the one definition above (D123). Their
      companions move to the dark ground: inks lighter, tints darker, the
@@ -431,21 +434,23 @@
   --status-strong-on: #06180f;
   --status-strong-tint: #124430;
 
-  --status-empty: #2b3249;
+  /* Graphite, like the surfaces around them (D160). */
+  --status-empty: #2e2e3a;
   --status-empty-ink: var(--text-secondary);
   --status-empty-tint: var(--surface-secondary);
-  --status-track: #222941;
+  --status-track: #2a2a36;
 
+  /* The glass: a gradient fill, white 12 % to 4 %. The blur and the edge are
+     the light set's. */
   --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
   --glass-fill-strong: rgba(26, 26, 34, 0.86);
   --glass-solid: #1a1a22;
   --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-blur: 15px;
 
+  /* One wash, the accent's violet (D160): a second colour on the ground
+     would be a colour without a job. */
   --ground:
     radial-gradient(90% 55% at 15% 0%, rgba(163, 157, 255, 0.28), transparent 60%),
-    radial-gradient(70% 50% at 95% 35%, rgba(79, 214, 255, 0.12), transparent 60%),
-    radial-gradient(60% 40% at 30% 100%, rgba(79, 240, 180, 0.1), transparent 60%),
     linear-gradient(180deg, #14141b 0%, #0f0f14 100%);
 
   --scrim: rgba(0, 0, 0, 0.55);
@@ -455,6 +460,8 @@
   --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.5);
   --shadow-button: 0 6px 22px rgba(163, 157, 255, 0.4);
   --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, 0.55);
+  --shadow-selected: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-figure: 0 6px 10px rgba(0, 0, 0, 0.4);
 
   --tab-bar-material: rgba(15, 15, 20, 0.78);
 

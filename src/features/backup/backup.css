@@ -12,11 +12,11 @@
 }
 
 .backup__status--ok {
-  color: var(--mint-ink);
+  color: var(--status-strong-ink);
 }
 
 .backup__status--error {
-  color: var(--rose-ink);
+  color: var(--status-weak-ink);
 }
 
 .backup__confirmBody {

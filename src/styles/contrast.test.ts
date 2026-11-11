@@ -179,14 +179,10 @@ describe.each(SETS)('%s', (_label, tokens) => {
       expect(contrast(hex(name), GROUND)).toBeGreaterThanOrEqual(BODY);
     });
 
-    it.each([
-      '--lilac-ink',
-      '--mint-ink',
-      '--sky-ink',
-      '--peach-ink',
-      '--rose-ink',
-      '--sand-ink',
-    ])('%s is safe for text, which is what "ink" promises', (name) => {
+    // The pastel identities left with D160; every ink that remains — the
+    // information colour here, the accent and the four statuses below —
+    // keeps the promise the word makes.
+    it.each(['--sky-ink'])('%s is safe for text, which is what "ink" promises', (name) => {
       expect(contrast(hex(name), CARD)).toBeGreaterThanOrEqual(BODY);
     });
 
@@ -197,13 +193,9 @@ describe.each(SETS)('%s', (_label, tokens) => {
 
   describe('ink on its own tint', () => {
     it.each([
-      ['--lilac-ink', '--lilac-tint'],
-      ['--mint-ink', '--mint-tint'],
+      // The "not enough to compare" chip.
       ['--sky-ink', '--sky-tint'],
-      ['--peach-ink', '--peach-tint'],
-      ['--rose-ink', '--rose-tint'],
-      ['--sand-ink', '--sand-tint'],
-      // The tinted secondary button.
+      // The tinted secondary button, and a chosen filter or category.
       ['--accent-ink', '--accent-tint'],
     ])('%s reads on %s', (ink, tint) => {
       // Badges pair an ink with its own tint; both halves have to work.
@@ -218,21 +210,40 @@ describe.each(SETS)('%s', (_label, tokens) => {
   });
 
   describe('the label on a filled control', () => {
-    it.each(['--accent', '--accent-pressed', '--lilac-ink', '--mint-ink'])(
-      '--text-on-accent reads on %s',
+    it.each(['--accent', '--accent-pressed'])('--text-on-accent reads on %s', (name) => {
+      // The primary button, a chosen day and a chosen bubble carry this
+      // label. The chosen "yes" is the `strong` status and is held with the
+      // status palette below (`-on` on the fill).
+      expect(contrast(hex('--text-on-accent'), hex(name))).toBeGreaterThanOrEqual(BODY);
+    });
+
+    it('--accent carries a graphical control against a card', () => {
+      // A switch that is on, a selection mark, the ring round a chosen row:
+      // since D154 every selection is the accent, where the `-mid` weights
+      // of the pastels used to stand.
+      expect(contrast(hex('--accent'), CARD)).toBeGreaterThanOrEqual(LARGE);
+    });
+  });
+
+  /**
+   * The stage (D16): the Boss's dark surface, the same in both worlds. Its
+   * text is held against the lightest point of its ground.
+   */
+  describe('the stage', () => {
+    it.each(['--stage-text', '--stage-text-secondary', '--stage-text-tertiary'])(
+      '%s reads on the stage',
       (name) => {
-        // The primary button, and the "yes" option, carry this label.
-        expect(contrast(hex('--text-on-accent'), hex(name))).toBeGreaterThanOrEqual(BODY);
+        expect(contrast(hex(name), hex('--stage-surface'))).toBeGreaterThanOrEqual(BODY);
       },
     );
 
-    it.each(['--lilac-mid', '--mint-mid'])(
-      '%s carries a graphical control against a card, not body text',
-      (name) => {
-        // The `-mid` weights are switches and display type, never 17px labels.
-        expect(contrast(hex(name), CARD)).toBeGreaterThanOrEqual(LARGE);
-      },
-    );
+    it('--stage-text reads on a chip on the stage', () => {
+      expect(contrast(hex('--stage-text'), hex('--stage-chip'))).toBeGreaterThanOrEqual(BODY);
+    });
+
+    it('is a dark surface in both worlds', () => {
+      expect(luminance(hex('--stage-surface'))).toBeLessThan(0.1);
+    });
   });
 
   /**
@@ -297,21 +308,26 @@ describe.each(SETS)('%s', (_label, tokens) => {
   /**
    * Progress bars.
    *
-   * The track is tinted from the bar's own fill, which is a geometry decision
-   * with an accessibility consequence: the filled part is a graphical object
-   * and has to stay 3:1 against the unfilled part, or the bar stops saying
-   * anything. Each pair is checked rather than assumed.
+   * A bar shows a value, so it is neutral (D154, D160): one ink on one
+   * track, whichever area it belongs to. The filled part is a graphical
+   * object and has to stay 3:1 against the unfilled part, or the bar stops
+   * saying anything. Each pair is checked rather than assumed.
    */
   describe('meter fill on its own track', () => {
     it.each([
-      ['--domain-gym-ink', '--domain-gym-tint'],
-      ['--domain-running-ink', '--domain-running-tint'],
-      ['--domain-sports-ink', '--domain-sports-tint'],
-      ['--domain-mental-ink', '--domain-mental-tint'],
-      // The Boss and domain-rank bars, which sit on the accent tint.
-      ['--accent', '--accent-tint'],
+      // Every rating, weekly-target and progress bar.
+      ['--data-ink', '--data-track'],
+      // The one coloured bar: a weekly target that has been met.
+      ['--data-met', '--data-track'],
+      // The Boss's bar, on the stage.
+      ['--stage-data-ink', '--stage-data-track'],
     ])('%s separates from %s', (fill, track) => {
       expect(contrast(hex(fill), hex(track))).toBeGreaterThanOrEqual(LARGE);
+    });
+
+    it('draws a met weekly target in the `strong` status of its world', () => {
+      // The fill on graphite, its ink on light (D160).
+      expect(hex('--data-met')).toBe(hex(dark ? '--status-strong' : '--status-strong-ink'));
     });
   });
 
@@ -340,9 +356,17 @@ describe.each(SETS)('%s', (_label, tokens) => {
 describe('the light set, as it always was', () => {
   const hex = (name: string) => hexIn(set(ROOT), name);
 
-  it('does not use a -mid weight as a fill on a tint', () => {
-    // `-mid` is verified against the card and nothing else. Reaching for it
-    // here is how the Gym bar shipped at 2.89:1 on a neutral track.
-    expect(contrast(hex('--mint-mid'), hex('--mint-tint'))).toBeLessThan(LARGE);
+  it('does not use the status fill as a bar on the light track', () => {
+    // The fill is verified as a mark inside an outline and nothing else.
+    // Reaching for it as a bar is how the Gym bar once shipped at 2.89:1 on
+    // a neutral track: on light the met bar is the ink, and this is why.
+    expect(contrast(hex('--status-strong'), hex('--data-track'))).toBeLessThan(LARGE);
+  });
+});
+
+describe('the families the contract removed stay removed (D154, D160)', () => {
+  it.each(['mint', 'lilac', 'rose', 'peach', 'sand', 'domain'])('no --%s-* token is declared', (family) => {
+    const declared = [...ROOT.keys(), ...GYM.keys()].filter((name) => name.startsWith(`--${family}-`));
+    expect(declared).toEqual([]);
   });
 });

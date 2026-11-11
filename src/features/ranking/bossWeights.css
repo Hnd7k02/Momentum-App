@@ -65,24 +65,15 @@
   color: var(--text-secondary);
 }
 
-/* The share, in the area's own colour — reinforcing a number that is already
-   there in words, never carrying it alone. */
+/* The share, in the primary ink: an area has no colour of its own (D160),
+   and the name beside the figure says whose share it is. */
 .boss-weights__share {
   font-size: var(--type-headline);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   min-width: 3.4em;
   text-align: right;
-}
-
-.boss-weights__share--mental {
-  color: var(--domain-mental-ink);
-}
-.boss-weights__share--gym {
-  color: var(--domain-gym-ink);
-}
-.boss-weights__share--running {
-  color: var(--domain-running-ink);
+  color: var(--text-primary);
 }
 
 .boss-weights__stepper {

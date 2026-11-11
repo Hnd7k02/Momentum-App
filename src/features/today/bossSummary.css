@@ -1,6 +1,7 @@
 /*
- * One card, tappable as a whole. The dark surface is the same one the rank
- * hero uses, so the Boss reads as the same object in both places.
+ * One card, tappable as a whole. The dark surface is the stage the rank
+ * hero stands on (`--stage-*`), so the Boss reads as the same object in
+ * both places.
  */
 .boss-summary {
   /* It is not inside a Section, so it takes the sections' own rhythm
@@ -13,8 +14,9 @@
   text-align: left;
   padding: var(--card-pad);
   border-radius: var(--radius-card);
-  background: linear-gradient(150deg, #23233a 0%, #16162a 60%, #101020 100%);
-  color: #ffffff;
+  background: var(--stage-surface);
+  background-image: var(--stage-ground);
+  color: var(--stage-text);
   box-shadow: var(--shadow-card);
   min-height: 84px;
 }
@@ -35,7 +37,7 @@
   font-size: var(--type-caption);
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--stage-text-tertiary);
 }
 
 .boss-summary__name {
@@ -48,7 +50,7 @@
   display: block;
   height: 6px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--stage-data-track);
   overflow: hidden;
   margin-top: 4px;
 }
@@ -57,23 +59,23 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, #8f7ff0, #62b4f7);
+  background: var(--stage-data-ink);
   transition: width var(--duration-base) var(--ease-standard);
 }
 
 .boss-summary__caption {
   font-size: var(--type-caption);
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--stage-text-secondary);
 }
 
 .boss-summary__confirm {
   font-size: var(--type-caption);
   font-weight: var(--weight-semibold);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--stage-text);
   font-variant-numeric: tabular-nums;
 }
 
 .boss-summary > svg {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--stage-text-tertiary);
   flex: none;
 }

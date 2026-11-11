@@ -30,7 +30,8 @@
 .question-detail__category {
   font-size: var(--type-footnote);
   font-weight: var(--weight-semibold);
-  color: var(--lilac-ink);
+  /* A category is a fact about the question, not a state: neutral (D160). */
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }

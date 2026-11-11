@@ -91,9 +91,10 @@
   color: var(--text-secondary);
 }
 
+/* Everything answered: a positive message, so the `strong` companions. */
 .today__progress--complete {
-  background: var(--mint-tint);
-  color: var(--mint-ink);
+  background: var(--status-strong-tint);
+  color: var(--status-strong-ink);
   box-shadow: none;
 }
 
@@ -105,7 +106,7 @@
 }
 
 .today__progress--complete .today__progressDot {
-  background: var(--mint-ink);
+  background: var(--status-strong-ink);
 }
 
 /* One question, one block. The prompt sits above its control at full width,
@@ -250,18 +251,22 @@
   padding: 0 0 var(--space-3);
 }
 
+/* A value bar, so neutral (D154): the data ink on the data track. */
 .week__segment {
   flex: 1;
   height: var(--meter-height);
   border-radius: var(--radius-pill);
-  /* The unfilled remainder of the same object, not a separate grey. */
-  background: var(--domain-sports-tint);
+  background: var(--data-track);
 }
 
 .week__segment--filled {
-  /* See the note on .gym-meter__fill: the ink weight is the one that reads
-     against a tinted track. */
-  background: var(--domain-sports-ink);
+  background: var(--data-ink);
+}
+
+/* The one coloured bar (D160): a weekly target that has been met. "Ziel
+   erreicht" stands beneath it as a word. */
+.week__segments--met .week__segment--filled {
+  background: var(--data-met);
 }
 
 .week__status {
@@ -271,7 +276,7 @@
 }
 
 .week__status--met {
-  color: var(--mint-ink);
+  color: var(--status-strong-ink);
   font-weight: var(--weight-semibold);
 }
 
@@ -369,9 +374,11 @@
   position: relative;
 }
 
+/* The area is named by its word, in the primary ink; the arrow carries the
+   accent, because the arrow is what says the label can be tapped (D154). */
 .today__areaLink .today__areaLabel {
   padding-bottom: 0;
-  color: var(--domain-gym-ink);
+  color: var(--text-primary);
 }
 
 .today__areaLink svg {

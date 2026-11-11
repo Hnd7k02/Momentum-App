@@ -40,18 +40,17 @@ import './onboarding.css';
 
 type Step = 'momentum' | 'worlds' | 'rank' | 'domains' | 'questions' | 'sport' | 'summary';
 
-/** The two worlds on offer, and what each looks like on the picker. */
+/** The two worlds on offer. A chosen one takes the accent, like any
+    selection (D154): an area has no colour of its own. */
 const CHOICES: {
   key: 'mental' | 'sport';
   title: TranslationKey;
   body: TranslationKey;
-  accent: string;
 }[] = [
   {
     key: 'mental',
     title: DOMAIN_NAME_KEYS.mental,
     body: 'domain.mental.description',
-    accent: 'var(--domain-mental-mid)',
   },
   {
     // The key stays 'sport' (nothing stores it); on screen it is Gym, with
@@ -59,7 +58,6 @@ const CHOICES: {
     key: 'sport',
     title: DOMAIN_NAME_KEYS.gym,
     body: 'onboarding.domains.gym',
-    accent: 'var(--domain-gym-mid)',
   },
 ];
 
@@ -205,7 +203,6 @@ export function OnboardingFlow({
                     className="question-pick"
                     aria-pressed={selected}
                     onClick={() => toggleChoice(choice.key)}
-                    style={{ ['--selection-accent' as string]: choice.accent }}
                   >
                     <span className="question-pick__body">
                       <span className="question-pick__text">{t(choice.title)}</span>
@@ -256,7 +253,6 @@ export function OnboardingFlow({
                         className="question-pick"
                         aria-pressed={selected}
                         onClick={() => toggleSuggestion(suggestion.id)}
-                        style={{ ['--selection-accent' as string]: 'var(--lilac-mid)' }}
                       >
                         <span className="question-pick__body">
                           <span className="question-pick__text">{suggestion.text}</span>
@@ -288,7 +284,6 @@ export function OnboardingFlow({
                     onClick={() =>
                       setCustomQuestions((current) => current.filter((_, i) => i !== index))
                     }
-                    style={{ ['--selection-accent' as string]: 'var(--lilac-mid)' }}
                   >
                     <span className="question-pick__body">
                       <span className="question-pick__text">{question.text}</span>
@@ -399,7 +394,7 @@ export function OnboardingFlow({
             <div className="summary__list">
               {chosen.has('mental') && chosenQuestions.length > 0 ? (
                 <div className="summary__item">
-                  <span className="summary__mark summary__mark--mental" aria-hidden="true">
+                  <span className="summary__mark" aria-hidden="true">
                     <SparkIcon size={20} />
                   </span>
                   {chosenQuestions.length === 1
@@ -409,7 +404,7 @@ export function OnboardingFlow({
               ) : null}
               {chosen.has('sport') && gymTarget !== null ? (
                 <div className="summary__item">
-                  <span className="summary__mark summary__mark--sports" aria-hidden="true">
+                  <span className="summary__mark" aria-hidden="true">
                     <ActivityIcon size={20} />
                   </span>
                   {t('onboarding.summary.gym', { count: gymTarget })}
@@ -417,7 +412,7 @@ export function OnboardingFlow({
               ) : null}
               {chosen.has('sport') && runningTarget !== null ? (
                 <div className="summary__item">
-                  <span className="summary__mark summary__mark--running" aria-hidden="true">
+                  <span className="summary__mark" aria-hidden="true">
                     <ActivityIcon size={20} />
                   </span>
                   {t('onboarding.summary.running', { count: runningTarget })}

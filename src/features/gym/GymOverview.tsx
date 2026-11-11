@@ -129,13 +129,17 @@ export function GymOverview({
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
     label: ratingLabel,
-    tone: 'gym' as const,
   };
-  const attendanceBar = { percent: attendancePercent, label: attendanceLabel, tone: 'gym' as const };
+  // The weekly target is the one bar that takes a colour, and only once it
+  // is met (D160) — the same two figures the tile prints beside it.
+  const attendanceBar = {
+    percent: attendancePercent,
+    label: attendanceLabel,
+    met: state.weeklyTarget > 0 && state.sessionsThisWeek >= state.weeklyTarget,
+  };
   const enduranceBar = {
     percent: (state.endurance.progress / state.endurance.required) * 100,
     label: enduranceLabel,
-    tone: 'gym' as const,
   };
 
   return (

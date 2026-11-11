@@ -29,12 +29,15 @@
   background: var(--surface-secondary);
 }
 
+/* The first tap towards archiving is quiet; the confirmation it opens is
+   what carries the warning (contract §5). */
 .question-sheet__action--destructive {
-  color: var(--rose-ink);
+  color: var(--text-secondary);
 }
 
+/* A calm box; the button inside it is the one thing in the warning colour. */
 .question-sheet__confirm {
-  background: var(--rose-tint);
+  background: var(--surface-secondary);
   border-radius: var(--radius-inner);
   padding: var(--space-5);
 }
@@ -79,8 +82,9 @@
     color var(--duration-fast) var(--ease-standard);
 }
 
+/* The chosen category is a selection: the accent (D154). */
 .question-sheet__category[aria-checked='true'] {
-  background: var(--lilac-tint);
-  border-color: var(--lilac-ink);
-  color: var(--lilac-ink);
+  background: var(--accent-tint);
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
 }

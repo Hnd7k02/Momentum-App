@@ -69,6 +69,14 @@ export function MuscleEntryCard({
                 : t('gym.change.declined', { percent: Math.round(change) }),
         })
       : null;
+  // The figure's colour follows the figure as printed (B6): green for a
+  // rounded rise, red for a rounded fall, the text colour when it is held.
+  const overallTone =
+    change === null || Math.round(change) === 0
+      ? ''
+      : Math.round(change) > 0
+        ? 'gym-hub__musclesOverall--improved'
+        : 'gym-hub__musclesOverall--declined';
 
   return (
     // No section label: the card names itself, and it is the section's only
@@ -92,7 +100,9 @@ export function MuscleEntryCard({
         <span className="gym-hub__musclesBody">
           <span className="gym-hub__musclesTitle">{t('gymHub.muscles.title')}</span>
           <span className="gym-hub__musclesSummary">{summary}</span>
-          {overall ? <span className="gym-hub__musclesOverall">{overall}</span> : null}
+          {overall ? (
+            <span className={`gym-hub__musclesOverall ${overallTone}`.trim()}>{overall}</span>
+          ) : null}
           <span className="gym-hub__musclesRange">
             {hasData ? t('gymHub.muscles.range', { days: rangeDays }) : t('gymHub.muscles.noneHint')}
           </span>

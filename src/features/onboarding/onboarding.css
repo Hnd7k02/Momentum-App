@@ -8,25 +8,10 @@
   padding: calc(var(--safe-top) + var(--space-4)) calc(var(--safe-right) + var(--space-5))
     calc(var(--safe-bottom) + var(--space-5)) calc(var(--safe-left) + var(--space-5));
   overflow: hidden;
-}
-
-/*
- * A soft tinted wash behind the whole flow. Two very wide, very faint radial
- * gradients — enough to keep the ground from reading as flat grey, far too
- * faint to compete with the content sitting on it.
- */
-.onboarding::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(120% 60% at 12% -6%, rgba(143, 127, 240, 0.22), transparent 62%),
-    radial-gradient(90% 48% at 96% 6%, rgba(98, 180, 247, 0.16), transparent 60%);
-  pointer-events: none;
-}
-
-.onboarding > * {
-  position: relative;
+  /* The flow stands where the shell will: it paints the one ground itself
+     (D146), the same layer every screen is drawn on, and nothing on top. */
+  background: var(--surface-base);
+  background-image: var(--ground);
 }
 
 /* Progress dots. Small, quiet, and the only chrome in the flow. */
@@ -117,6 +102,9 @@
   justify-content: center;
   gap: var(--space-5);
   padding-bottom: var(--space-10);
+  /* Its own stacking context, so the mark's halo sits behind the mark and
+     still in front of the ground the flow paints. */
+  isolation: isolate;
 }
 
 /*
@@ -132,9 +120,9 @@
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-6);
-  color: #fff;
-  background: linear-gradient(150deg, #9d8cf5 0%, #7fb6f2 100%);
-  box-shadow: 0 10px 30px rgba(125, 118, 235, 0.32), 0 2px 6px rgba(16, 24, 40, 0.06);
+  color: var(--brand-mark-ink);
+  background: var(--brand-mark);
+  box-shadow: var(--shadow-brand-mark);
 }
 
 .welcome__mark::after {
@@ -142,7 +130,7 @@
   position: absolute;
   inset: -14px;
   border-radius: 34px;
-  background: radial-gradient(closest-side, rgba(157, 140, 245, 0.24), transparent);
+  background: var(--brand-mark-halo);
   z-index: -1;
 }
 
@@ -185,9 +173,9 @@
   transform: scale(0.99);
 }
 
+/* Chosen: the accent on the edge, and the mark inside says so again. */
 .question-pick[aria-pressed='true'] {
-  border-color: var(--lilac-fill);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 10px 26px rgba(125, 118, 235, 0.18);
+  border-color: var(--accent);
 }
 
 .question-pick__body {
@@ -212,7 +200,7 @@
   font-weight: var(--weight-semibold);
   font-size: var(--type-subhead);
   border-style: dashed;
-  border-color: rgba(94, 92, 230, 0.35);
+  border-color: var(--separator-strong);
   background: transparent;
   box-shadow: none;
   min-height: 56px;
@@ -245,6 +233,7 @@
   letter-spacing: -0.2px;
 }
 
+/* Neutral, like every area mark (D160). */
 .summary__mark {
   width: 38px;
   height: 38px;
@@ -253,16 +242,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.summary__mark--mental {
-  background: var(--domain-mental-tint);
-  color: var(--domain-mental-ink);
-}
-
-.summary__mark--sports {
-  background: var(--domain-sports-tint);
-  color: var(--domain-sports-ink);
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
 }
 
 /*
@@ -296,9 +277,4 @@
 .onboarding__hint {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
-}
-
-.summary__mark--running {
-  background: var(--domain-running-tint);
-  color: var(--domain-running-ink);
 }

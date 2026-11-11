@@ -24,6 +24,7 @@ import { BodyModel } from './BodyModel';
 import { CameraRig, VIEW_AZIMUTH, type BodyView, type CameraRigHandle } from './CameraRig';
 import { REGION_FACING } from './muscleMeshMap';
 import type { MuscleVisual } from './useMuscleHighlight';
+import { BODY_LIGHT } from './tokens';
 import './bodyViewer.css';
 
 export type { BodyView, MuscleVisual };
@@ -223,9 +224,9 @@ export default function BodyViewer({
           pmrem.dispose();
         }}
       >
-        <hemisphereLight args={[0xffffff, 0xcdcdda, 1.35]} />
+        <hemisphereLight args={[BODY_LIGHT.sky, BODY_LIGHT.ground, 1.35]} />
         <directionalLight position={[-1.7, 2.6, 2.4]} intensity={2.15} />
-        <directionalLight position={[2.4, 0.9, 1.5]} intensity={0.75} color={0xdfe4f5} />
+        <directionalLight position={[2.4, 0.9, 1.5]} intensity={0.75} color={BODY_LIGHT.fill} />
         <directionalLight position={[0.4, 1.9, -2.8]} intensity={1.05} />
         <CameraRig ref={rig} onTap={onTap} onAzimuthChange={onAzimuthChange} />
         <Suspense fallback={null}>

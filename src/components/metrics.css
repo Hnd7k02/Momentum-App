@@ -184,6 +184,9 @@
 
 /* ── Bar ────────────────────────────────────────────────────────────────── */
 
+/* A bar shows a value, so it is neutral (D154, D160): the data ink on the
+   data track, the pair contrast.test.ts holds to 3:1 — whichever area the
+   tile belongs to. */
 .metric-bar {
   display: block;
   position: relative;
@@ -191,31 +194,20 @@
   margin-top: var(--space-1);
   border-radius: var(--radius-pill);
   overflow: hidden;
-  background: var(--metric-track);
+  background: var(--data-track);
 }
 
 .metric-bar__fill {
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: var(--metric-fill);
+  background: var(--data-ink);
   transition: width var(--duration-base) var(--ease-standard);
 }
 
-/* The ink weight on its own tint: the pair contrast.test.ts holds to 3:1. */
-.metric-bar--gym {
-  --metric-fill: var(--domain-gym-ink);
-  --metric-track: var(--domain-gym-tint);
-}
-
-.metric-bar--running {
-  --metric-fill: var(--domain-running-ink);
-  --metric-track: var(--domain-running-tint);
-}
-
-.metric-bar--accent {
-  --metric-fill: var(--accent);
-  --metric-track: var(--accent-tint);
+/* The one coloured bar: a weekly target that has been met (D160). */
+.metric-bar--met .metric-bar__fill {
+  background: var(--data-met);
 }
 
 @media (prefers-reduced-motion: reduce) {

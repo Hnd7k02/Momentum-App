@@ -19,25 +19,26 @@ import './metrics.css';
  * a tile is the same value the service produced, printed.
  */
 
-export type MetricTone = 'gym' | 'running' | 'accent';
-
 /**
  * The bar. An image with a name, never the only carrier of its number — the
  * figure it draws is always printed beside it by the tile or the sheet.
- * Inset with the content, thin, fully rounded, on a track tinted from its
- * own fill; `overflow: hidden` on it is the mask that rounds the fill's end.
+ * Inset with the content, thin, fully rounded, neutral on a neutral track
+ * (D154); `overflow: hidden` on it is the mask that rounds the fill's end.
+ *
+ * `met` marks the one bar that carries a colour (D160): a weekly target
+ * that has been reached. The figure beside it says so in numbers.
  */
 export function MetricBar({
   percent,
   label,
-  tone,
+  met = false,
 }: {
   percent: number;
   label: string;
-  tone: MetricTone;
+  met?: boolean;
 }) {
   return (
-    <span className={`metric-bar metric-bar--${tone}`} role="img" aria-label={label}>
+    <span className={`metric-bar ${met ? 'metric-bar--met' : ''}`.trim()} role="img" aria-label={label}>
       <span
         className="metric-bar__fill"
         style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
@@ -66,7 +67,8 @@ export interface MetricBarSpec {
   percent: number;
   /** What the bar says out loud: the full figure it draws. */
   label: string;
-  tone: MetricTone;
+  /** A weekly target that has been reached: the one coloured bar (D160). */
+  met?: boolean;
 }
 
 /**
@@ -122,7 +124,7 @@ export function MetricTile({
     <>
       {kicker ? <span className="metric-tile__kicker">{kicker}</span> : null}
       <MetricValue value={value} scale={scale} />
-      {bar ? <MetricBar percent={bar.percent} label={bar.label} tone={bar.tone} /> : null}
+      {bar ? <MetricBar percent={bar.percent} label={bar.label} met={bar.met} /> : null}
       {line ? <span className="metric-tile__line">{line}</span> : null}
     </>
   );
@@ -189,7 +191,7 @@ export function MetricDetailSheet({
     <Sheet open={open} title={title} onClose={onClose}>
       <div className="metric-sheet__figure">
         <MetricValue value={value} scale={scale} />
-        {bar ? <MetricBar percent={bar.percent} label={bar.label} tone={bar.tone} /> : null}
+        {bar ? <MetricBar percent={bar.percent} label={bar.label} met={bar.met} /> : null}
       </div>
       <div className="metric-sheet__body">{children}</div>
     </Sheet>

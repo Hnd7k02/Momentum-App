@@ -22,7 +22,8 @@
 }
 
 /*
- * The hero — the one dark surface in a light app.
+ * The hero — the one dark surface in a light app (D16), drawn from the
+ * `--stage-*` tokens.
  *
  * The contrast works twice over: the badge stands against its own dark
  * ground, and that ground stands against the calm light interface around it.
@@ -33,11 +34,10 @@
   border-radius: var(--radius-card);
   overflow: hidden;
   padding: var(--space-8) var(--card-pad) var(--space-6);
-  background:
-    radial-gradient(120% 80% at 50% 0%, #23263a 0%, rgba(35, 38, 58, 0) 62%),
-    linear-gradient(168deg, #14161f 0%, #0b0c11 100%);
-  box-shadow: 0 12px 32px rgba(11, 12, 17, 0.28);
-  color: #fff;
+  background: var(--stage-surface);
+  background-image: var(--stage-ground-hero);
+  box-shadow: var(--shadow-stage);
+  color: var(--stage-text);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -51,7 +51,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(90% 55% at 50% 8%, rgba(255, 255, 255, 0.07), transparent 70%);
+  background: var(--stage-sheen);
   pointer-events: none;
 }
 
@@ -68,7 +68,7 @@
 
 .rank-hero__rating {
   font-size: var(--type-footnote);
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--stage-text-tertiary);
   font-variant-numeric: tabular-nums;
   margin-top: 4px;
 }
@@ -83,13 +83,13 @@
 .rank-hero__confirm {
   font-size: var(--type-footnote);
   font-weight: var(--weight-semibold);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--stage-text);
   font-variant-numeric: tabular-nums;
 }
 
 .rank-hero__note {
   font-size: var(--type-caption);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--stage-text-tertiary);
   max-width: 30ch;
   line-height: 1.4;
 }
@@ -117,7 +117,7 @@
 .rank-hero__flash {
   position: absolute;
   inset: 0;
-  background: radial-gradient(50% 40% at 50% 40%, rgba(255, 255, 255, 0.5), transparent 70%);
+  background: var(--stage-flash);
   animation: badge-flash 900ms var(--ease-standard) both;
   pointer-events: none;
 }
@@ -140,7 +140,7 @@
   gap: 6px;
   padding: 5px var(--space-3);
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--stage-chip);
   font-size: var(--type-caption);
   font-weight: var(--weight-semibold);
   letter-spacing: 0.3px;
@@ -298,9 +298,10 @@
   box-shadow: 0 0 0 2px var(--surface-elevated);
 }
 
+/* A promotion is a positive message: the `strong` companions. */
 .rank-change__mark--promotion {
-  background: var(--mint-tint);
-  color: var(--mint-ink);
+  background: var(--status-strong-tint);
+  color: var(--status-strong-ink);
 }
 
 .rank-change__mark--demotion {
@@ -329,21 +330,22 @@
   /* Fully rounded at both ends, on the track as well as the fill: a 4px
      radius on a 7px bar reads as a rectangle with softened corners. */
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--stage-data-track);
   overflow: hidden;
 }
 
+/* A value, so neutral (D154): the stage's data ink on its track. */
 .rank-progress__fill {
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, #8f7ff0, #62b4f7);
+  background: var(--stage-data-ink);
   transition: width var(--duration-base) var(--ease-standard);
 }
 
 .rank-progress__caption {
   font-size: var(--type-footnote);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--stage-text-secondary);
   text-align: center;
 }
 
@@ -365,7 +367,7 @@
   font-size: var(--type-caption);
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--stage-text-tertiary);
 }
 
 .rank-section__explain {
@@ -411,7 +413,7 @@
   flex: 0 0 96px;
   height: 6px;
   border-radius: var(--radius-pill);
-  background: var(--accent-tint);
+  background: var(--data-track);
   overflow: hidden;
 }
 
@@ -419,7 +421,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--accent);
+  background: var(--data-ink);
 }
 
 /* ── The ladder ─────────────────────────────────────────────────────────── */

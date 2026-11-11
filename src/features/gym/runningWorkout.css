@@ -23,8 +23,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1.5px dashed var(--domain-gym-mid);
-  background: var(--domain-gym-tint);
+  border: 1.5px dashed var(--separator-strong);
+  background: var(--surface-secondary);
 }
 
 .running-workout__body {
@@ -50,7 +50,7 @@
   height: 6px;
   margin-top: var(--space-1);
   border-radius: var(--radius-pill);
-  background: var(--domain-gym-tint);
+  background: var(--data-track);
   overflow: hidden;
 }
 
@@ -58,7 +58,7 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: var(--domain-gym-ink);
+  background: var(--data-ink);
 }
 
 .running-workout svg {

@@ -18,8 +18,9 @@
     color var(--duration-fast) var(--ease-standard);
 }
 
+/* The chosen day is a selection: the accent (D154). */
 .session-days__day[aria-checked='true'] {
-  background: var(--domain-sports-mid);
+  background: var(--accent);
   color: var(--text-on-accent);
 }
 

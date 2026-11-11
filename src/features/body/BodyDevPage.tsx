@@ -3,7 +3,7 @@ import { I18nProvider } from '../../i18n/I18nProvider';
 import type { Language } from '../../i18n';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { BodyViewer, type BodyView, type MuscleVisual } from './index';
-import { IDENTITY_COLOR, STATE_COLOR, mutedIdentity, stateIntensity, type MuscleState } from './tokens';
+import { IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, STATE_COLOR, mutedIdentity, stateIntensity, type MuscleState } from './tokens';
 
 /**
  * The isolation harness for the 3D body — development only.
@@ -115,7 +115,7 @@ export function BodyDevPage() {
                 >
                   <span
                     aria-hidden="true"
-                    style={{ width: 12, height: 12, borderRadius: 3, background: mutedIdentity(IDENTITY_COLOR[id], state === 'noData' ? 0.35 : 1) }}
+                    style={{ width: 12, height: 12, borderRadius: 3, background: mutedIdentity(IDENTITY_COLOR[id], state === 'noData' ? IDENTITY_UNTRAINED_ALPHA : 1) }}
                   />
                   <span style={{ flex: 1 }}>{id}</span>
                   <span style={{ color: STATE_COLOR[state].ink }}>{delta > 0 ? `+${delta} %` : delta < 0 ? `${delta} %` : STATE_COLOR[state].text}</span>

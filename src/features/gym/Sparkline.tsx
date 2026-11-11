@@ -1,3 +1,4 @@
+import type { MuscleState } from '../../components/BodyRenderer';
 import type { MuscleTrendPoint } from './muscleAnalytics';
 
 /**
@@ -48,11 +49,16 @@ export function sparkPoints(values: readonly number[]): { x: number; y: number }
 
 export function Sparkline({
   trend,
-  color,
+  state,
 }: {
   trend: readonly MuscleTrendPoint[];
-  /** The muscle's identity colour — which muscle, never how it is doing. */
-  color: string;
+  /**
+   * How the group is doing, from `muscleStateOf`: the end point carries its
+   * status colour, the neutral data ink when it is held. The line itself is
+   * always neutral (D154) — a muscle's identity colour is its dot, never
+   * its chart.
+   */
+  state: MuscleState;
 }) {
   const points = sparkPoints(trend.map((point) => point.value));
   const last = points[points.length - 1];
@@ -70,16 +76,22 @@ export function Sparkline({
     >
       {points.length > 1 ? (
         <polyline
+          className="muscle-row__sparkLine"
           points={points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
           fill="none"
-          stroke={color}
-          strokeWidth="1.6"
           strokeLinecap="round"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
         />
       ) : null}
-      {last ? <circle cx={last.x.toFixed(1)} cy={last.y.toFixed(1)} r="2.1" fill={color} /> : null}
+      {last ? (
+        <circle
+          className={`muscle-row__sparkEnd muscle-row__sparkEnd--${state}`}
+          cx={last.x.toFixed(1)}
+          cy={last.y.toFixed(1)}
+          r="2.1"
+        />
+      ) : null}
     </svg>
   );
 }

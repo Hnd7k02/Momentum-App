@@ -130,17 +130,19 @@ export function Button({
   );
 }
 
-/** iOS-style switch. A real button with `aria-checked`, not a styled div. */
+/**
+ * iOS-style switch. A real button with `aria-checked`, not a styled div.
+ * Switched on it carries the accent of the world it stands in, whatever it
+ * switches (D154): an area has no colour of its own.
+ */
 export function Switch({
   checked,
   onChange,
   label,
-  accent,
 }: {
   checked: boolean;
   onChange(next: boolean): void;
   label: string;
-  accent?: string;
 }) {
   return (
     <button
@@ -149,7 +151,6 @@ export function Switch({
       aria-checked={checked}
       aria-label={label}
       className="switch"
-      style={accent ? ({ '--switch-on': accent } as React.CSSProperties) : undefined}
       onClick={() => onChange(!checked)}
     >
       <span className="switch__knob" />
@@ -190,23 +191,16 @@ export function BubbleRow({
   selected,
   onSelect,
   label,
-  accent,
   describe,
 }: {
   values: number[];
   selected: number | null;
   onSelect(value: number): void;
   label: string;
-  accent?: string;
   describe?(value: number): string;
 }) {
   return (
-    <div
-      className="bubble-row"
-      role="group"
-      aria-label={label}
-      style={accent ? ({ '--bubble-accent': accent } as React.CSSProperties) : undefined}
-    >
+    <div className="bubble-row" role="group" aria-label={label}>
       {values.map((value) => (
         <button
           key={value}

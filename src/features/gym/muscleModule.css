@@ -71,11 +71,19 @@
   background: none;
 }
 
+/* The one place a muscle's identity colour appears (D154): an 8px dot. */
 .muscle-row__dot {
   flex: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* A chosen row is a selection, so its mark is the accent — never a ring in
+   the muscle's own colour. The name turns semibold as well. */
+.muscle-row__button[aria-pressed='true'] .muscle-row__dot {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2.5px;
 }
 
 /* The only column that may shrink: the chart and the number keep their
@@ -123,6 +131,24 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+/* The line is neutral; the end point says how the group is doing. */
+.muscle-row__sparkLine {
+  stroke: var(--data-ink);
+  stroke-width: 1.6;
+}
+
+.muscle-row__sparkEnd {
+  fill: var(--data-ink);
+}
+
+.muscle-row__sparkEnd--improved {
+  fill: var(--status-strong);
+}
+
+.muscle-row__sparkEnd--declined {
+  fill: var(--status-weak);
 }
 
 .muscle-row__right {

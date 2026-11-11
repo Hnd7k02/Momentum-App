@@ -22,7 +22,7 @@ export function DomainStandingTile({ domain, id }: { domain: DomainType; id: str
 
   const value = Math.round(standing.momentum);
   const label = t('areas.standing.value', { value });
-  const bar = { percent: Math.round((value / RATING.MAX) * 100), label, tone: 'accent' as const };
+  const bar = { percent: Math.round((value / RATING.MAX) * 100), label };
 
   if (!standing.started) {
     return (

@@ -22,7 +22,7 @@ import { Color, MeshStandardMaterial } from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { MuscleGroup } from '../../core/model';
 import type { MuscleMeshes } from './muscleMeshMap';
-import { BODY_BASE_COLOR, NEUTRAL_HIGHLIGHT, REGION_MATERIAL } from './tokens';
+import { BODY_BASE_COLOR, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL } from './tokens';
 
 export type MuscleVisual = {
   /** 0–1, already normalised by the Gym domain. Drives tint strength. */
@@ -54,7 +54,7 @@ type Slot = {
   targetRimColor: Color;
 };
 
-const BLACK = '#000000';
+const BLACK = BODY_UNLIT;
 
 /** Below this the eye cannot tell, and continuing to lerp would never settle. */
 const COLOR_EPSILON = 0.002;
@@ -77,7 +77,7 @@ export function regionMaterial(): { material: MeshStandardMaterial; rim: RimUnif
     roughness: REGION_MATERIAL.roughness,
     metalness: REGION_MATERIAL.metalness,
   });
-  const rim: RimUniforms = { uRim: { value: 0 }, uRimColor: { value: new Color(0x000000) } };
+  const rim: RimUniforms = { uRim: { value: 0 }, uRimColor: { value: new Color(BLACK) } };
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uRim = rim.uRim;
     shader.uniforms.uRimColor = rim.uRimColor;
@@ -194,10 +194,10 @@ export function useMuscleHighlight({
         material,
         rim,
         target: new Color(BODY_BASE_COLOR),
-        targetEmissive: new Color(0x000000),
+        targetEmissive: new Color(BLACK),
         targetEmissiveIntensity: 0,
         targetRim: 0,
-        targetRimColor: new Color(0x000000),
+        targetRimColor: new Color(BLACK),
       });
     }
     slots.current = created;

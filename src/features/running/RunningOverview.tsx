@@ -113,17 +113,16 @@ export function RunningOverview({
   const ratingBar = {
     percent: Math.round((ratingValue / RATING.MAX) * 100),
     label: ratingLabel,
-    tone: 'running' as const,
   };
+  // The weekly target is the one bar that takes a colour, once met (D160).
   const attendanceBar = {
     percent: attendancePercent,
     label: attendanceLabel,
-    tone: 'running' as const,
+    met: state.weeklyTarget > 0 && state.sessionsThisWeek >= state.weeklyTarget,
   };
   const enduranceBar = {
     percent: (state.endurance.progress / state.endurance.required) * 100,
     label: enduranceLabel,
-    tone: 'running' as const,
   };
 
   return (

@@ -229,16 +229,10 @@
   color: var(--text-secondary);
 }
 
-.badge--scale {
-  background: var(--sky-tint);
-  color: var(--sky-ink);
-}
-
-.badge--boolean {
-  background: var(--lilac-tint);
-  color: var(--lilac-ink);
-}
-
+/* What kind of question a row is, and that it is paused, are facts, not
+   states of the data: the neutral chip, told apart by their words (D160). */
+.badge--scale,
+.badge--boolean,
 .badge--paused {
   background: var(--surface-secondary);
   color: var(--text-secondary);
@@ -289,9 +283,11 @@
   min-height: var(--touch-min);
 }
 
+/* The confirmation of a destructive act — never the first tap that leads
+   to it, which stays quiet. */
 .button--destructive {
-  color: var(--rose-ink);
-  background: var(--rose-tint);
+  color: var(--status-weak-ink);
+  background: var(--status-weak-tint);
 }
 
 .button--block {
@@ -311,7 +307,7 @@
   height: 31px;
   min-height: 31px;
   border-radius: var(--radius-pill);
-  background: rgba(120, 120, 128, 0.16);
+  background: var(--switch-track);
   flex-shrink: 0;
   transition: background var(--duration-base) var(--ease-standard);
 }
@@ -338,7 +334,7 @@
 }
 
 .switch[aria-checked='true'] {
-  background: var(--switch-on, var(--accent));
+  background: var(--accent);
 }
 
 .switch__knob {
@@ -348,8 +344,8 @@
   width: 27px;
   height: 27px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+  background: var(--switch-knob);
+  box-shadow: var(--shadow-knob);
   transition: transform var(--duration-base) var(--ease-standard);
 }
 
@@ -389,7 +385,7 @@
 .segmented__option[aria-checked='true'] {
   background: var(--surface-selected);
   font-weight: var(--weight-semibold);
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 0 0 0.5px rgba(16, 24, 40, 0.04);
+  box-shadow: var(--shadow-selected);
 }
 
 /*
@@ -431,10 +427,10 @@
 }
 
 .bubble[aria-pressed='true'] {
-  background: var(--bubble-accent, var(--accent));
+  background: var(--accent);
   border-color: transparent;
   color: var(--text-on-accent);
-  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.12);
+  box-shadow: var(--shadow-selected);
 }
 
 /* Text field. */
@@ -647,8 +643,8 @@
 }
 
 .selection-mark--on {
-  background: var(--selection-accent, var(--accent));
-  border-color: var(--selection-accent, var(--accent));
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 /* Loading and failure ---------------------------------------------------- */

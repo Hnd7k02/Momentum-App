@@ -1,5 +1,5 @@
 /**
- * Momentum muscle-map colour tokens — the approved values, verbatim.
+ * Momentum muscle-map colour tokens.
  *
  * Two systems run side by side and must not be mixed:
  *
@@ -9,18 +9,17 @@
  *             `strong`, declined is `weak`, unchanged is `mixed`, noData is
  *             `empty`, and awaitingBaseline keeps the informational blue.
  *
- * Identity is used for: the row swatch/dot, the row sparkline, the dot next to
- * the name in the detail card, and any legend that lists GROUPS.
+ * Identity appears in exactly one place (D154): an 8px dot before the
+ * group's name. It colours no line, no ring and no surface.
  * State is used for: the tinted regions on the 3D model (colour + emissive +
- * rim), the percentage in the row, the status badge, the percentage in the
- * detail card, and any legend that lists STATES.
+ * rim), the percentage in the row, the status badge, the end point of the
+ * row's trend line, and any legend that lists STATES.
  *
- * Identity is rendered ~13 % desaturated (see mutedIdentity) so it never
- * competes with the fully saturated state colours. State colours ship at full
- * saturation and must not be muted.
+ * Nothing here is a literal: every colour is read out of `tokens.css`
+ * through `statusPalette.ts`, the one place a colour is written.
  */
 
-import type { MuscleGroup } from '../../core/model';
+import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { STATUS_PALETTE, cssToken } from '../../styles/statusPalette';
 
 export type MuscleState =
@@ -32,30 +31,36 @@ export type MuscleState =
 
 /* ── A. identity ───────────────────────────────────────────────────────── */
 
-/** Base identity hue per group. Never derived from state. */
-export const IDENTITY_COLOR: Readonly<Record<MuscleGroup, string>> = {
-  chest:            '#D9654E',  // Terracotta
-  back:             '#2E6FB7',  // Stahlblau
-  shoulders:        '#E8A33D',  // Amber
-  biceps:           '#7B5AC9',  // Violett
-  triceps:          '#C45D9E',  // Magenta
-  core:             '#C9A227',  // Ocker
-  quadriceps:       '#1F9E94',  // Teal
-  hamstringsGlutes: '#8C6239',  // Bronze
-  calves:           '#4FB3E8',  // Himmelblau
-  forearms:         '#6E7B8B',  // Schiefer
+/** The token each group's identity hue is declared under in `tokens.css`. */
+const IDENTITY_TOKEN: Readonly<Record<MuscleGroup, string>> = {
+  chest: '--muscle-chest',                        // Terracotta
+  back: '--muscle-back',                          // Stahlblau
+  shoulders: '--muscle-shoulders',                // Amber
+  biceps: '--muscle-biceps',                      // Violett
+  triceps: '--muscle-triceps',                    // Magenta
+  core: '--muscle-core',                          // Ocker
+  quadriceps: '--muscle-quadriceps',              // Teal
+  hamstringsGlutes: '--muscle-hamstrings-glutes', // Bronze
+  calves: '--muscle-calves',                      // Himmelblau
+  forearms: '--muscle-forearms',                  // Schiefer
 };
 
-/** How far identity colours are pulled toward their own luminance. */
-export const IDENTITY_DESATURATION = 0.13;
+/** Base identity hue per group, as `tokens.css` declares it. Never derived from state. */
+export const IDENTITY_COLOR: Readonly<Record<MuscleGroup, string>> = Object.freeze(
+  Object.fromEntries(MUSCLE_GROUPS.map((id) => [id, cssToken(IDENTITY_TOKEN[id])])),
+) as Readonly<Record<MuscleGroup, string>>;
 
-/** Opacity for an untrained group's swatch — present, but clearly inactive. */
-export const IDENTITY_UNTRAINED_ALPHA = 0.35;
+/**
+ * How far the dot is pulled toward its own grey (contract §2.4): 35 %, so
+ * terracotta beside a green figure, or teal beside a red one, does not read
+ * as a status.
+ */
+export const IDENTITY_DESATURATION = 0.35;
 
-/** Alpha of the selection ring drawn around the row swatch. */
-export const IDENTITY_SELECTION_RING_ALPHA = 0.22;
+/** Opacity of an untrained group's dot — present, but clearly inactive. */
+export const IDENTITY_UNTRAINED_ALPHA = 0.4;
 
-/** The exact function the approved design uses. Returns an rgb()/rgba() string. */
+/** The dot's colour: the identity hue, muted. Returns an rgb()/rgba() string. */
 export function mutedIdentity(hex: string, alpha = 1): string {
   const n = parseInt(hex.slice(1), 16);
   const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
@@ -99,10 +104,24 @@ export const STATE_COLOR: Readonly<Record<MuscleState, StateTokens>> = {
 /* ── C. 3D material + selection treatment ─────────────────────────────── */
 
 /** Untinted body grey. Also the colour of the inert `none` region. */
-export const BODY_BASE_COLOR = '#c9c9d2';
+export const BODY_BASE_COLOR = cssToken('--body-base');
 
 /** Highlight used when tinting is off (data-tint="off") and a group is selected. */
-export const NEUTRAL_HIGHLIGHT = '#5e5ce6';
+export const NEUTRAL_HIGHLIGHT = cssToken('--accent');
+
+/** The colour of an emissive or rim term that adds no light. */
+export const BODY_UNLIT = cssToken('--body-unlit');
+
+/**
+ * The colours of the lights the body stands in: the hemisphere's sky and
+ * ground, and the cool fill from the right. The key and the back light are
+ * white by default. Values as approved; block 7A owns the lighting.
+ */
+export const BODY_LIGHT = {
+  sky: cssToken('--body-light-sky'),
+  ground: cssToken('--body-light-ground'),
+  fill: cssToken('--body-light-fill'),
+} as const;
 
 /**
  * Region material mix. `intensity` (0…1) comes from the host and carries the

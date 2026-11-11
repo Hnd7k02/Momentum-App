@@ -470,7 +470,7 @@ export function TodayScreen({
                 </div>
 
                 <div
-                  className="week__segments"
+                  className={`week__segments ${training.progress.met ? 'week__segments--met' : ''}`.trim()}
                   role="img"
                   aria-label={t('sports.progress', {
                     done: training.progress.completed,

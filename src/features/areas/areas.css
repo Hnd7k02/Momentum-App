@@ -13,6 +13,8 @@
   padding: var(--space-4) 0;
 }
 
+/* An area carries no colour of its own (D160): the mark is neutral, the
+   name beside it says which area this is. */
 .areas__domainMark {
   width: 42px;
   height: 42px;
@@ -21,16 +23,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.areas__domainMark--mental {
-  background: var(--domain-mental-tint);
-  color: var(--domain-mental-ink);
-}
-
-.areas__domainMark--sports {
-  background: var(--domain-sports-tint);
-  color: var(--domain-sports-ink);
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
 }
 
 .areas__domainName {
@@ -74,7 +68,7 @@
 .areas__targetValue {
   font-size: var(--type-subhead);
   font-weight: var(--weight-semibold);
-  color: var(--domain-sports-ink);
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -138,17 +132,6 @@
     calc(var(--safe-left) + var(--card-gutter));
 }
 
-/* Domain identity marks for the areas added in iteration 2. */
-.areas__domainMark--gym {
-  background: var(--domain-gym-tint);
-  color: var(--domain-gym-ink);
-}
-
-.areas__domainMark--running {
-  background: var(--domain-running-tint);
-  color: var(--domain-running-ink);
-}
-
 /* A plain sentence inside a card body, where there is nothing to configure
    yet and an empty state would overstate it. */
 .areas__note {
@@ -198,9 +181,10 @@
   color: var(--text-primary);
 }
 
+/* The chosen branch is a selection: the accent (D154). */
 .legacy-choice__option--on {
-  background: var(--domain-sports-tint);
-  box-shadow: inset 0 0 0 2px var(--domain-sports-mid);
+  background: var(--accent-tint);
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 .legacy-choice__body {
