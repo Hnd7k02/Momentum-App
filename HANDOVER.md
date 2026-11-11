@@ -719,6 +719,8 @@ this block)
   Momentum-preview as `e8617a7` for the acceptance
   (https://hnd7k02.github.io/Momentum-preview/), with the status-bar style
   `default` so that the `theme-color` per world could be judged (D149).
+  After STOP 6b the build of `a956ecb` — with everything of D163 — was
+  published as `3d3545d`; the status bar stays `default`, now as decided.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
