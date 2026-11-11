@@ -53,11 +53,21 @@
    * group would sit under a footer it cannot scroll past.
    */
   overflow-y: auto;
+  /* Down only: without this the other axis computes to `auto` as well. */
+  overflow-x: clip;
   -webkit-overflow-scrolling: touch;
   /* Room for the card shadows, which the overflow would otherwise clip. */
   margin: 0 calc(var(--space-2) * -1);
   padding-left: var(--space-2);
   padding-right: var(--space-2);
+}
+
+/* A scrolling column scrolls; it never squeezes what is in it. A card with
+   `overflow: hidden` has an automatic minimum height of 0 as a flex item, so
+   on a short screen the two target cards were shrunk and their second row
+   of bubbles cut away instead of the step scrolling. */
+.onboarding__body > * {
+  flex-shrink: 0;
 }
 
 .onboarding__title {

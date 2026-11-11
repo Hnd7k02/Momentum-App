@@ -256,6 +256,13 @@
   margin-top: 2px;
 }
 
+.streak__value--none {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+
 .streak__best {
   font-size: var(--type-caption);
   font-variant-numeric: tabular-nums;

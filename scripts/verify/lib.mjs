@@ -472,8 +472,10 @@ export async function seedConfirmation(page, { days = 30, value = 10, today = fa
  *
  * Returns one entry per text element: the text, its class, size, weight,
  * whether WCAG counts it as large, the measured background, the ratio, and
- * whether its colour is the scope's `--text-tertiary` (a caption weight the
- * light theme already carries below 4.5:1, reported apart on purpose).
+ * whether its colour is the scope's `--text-tertiary` — the caption weight.
+ * Stage 6a reported captions apart because the light theme carried them at
+ * about 2.5:1; since Stage 6b they are held like any other text (D149), and
+ * the flag only says which runs they are.
  */
 export async function textContrast(page) {
   const png = (await page.screenshot({ type: 'png' })).toString('base64');
@@ -501,7 +503,11 @@ export async function textContrast(page) {
       const text = node.textContent.trim();
       if (text.length < 2) continue;
       const el = node.parentElement;
-      if (!el || seen.has(el) || el.closest('.visually-hidden, script, style, [aria-hidden="true"]')) continue;
+      if (!el || seen.has(el) || el.closest('.visually-hidden, script, style')) continue;
+      // Hidden from assistive technology is not hidden from the eye: a
+      // chart's axis, its dates and its end value are read like any caption
+      // and are held like one. Only a drawing's own lettering is left out.
+      if (el.closest('[aria-hidden="true"]') && el.closest('svg')) continue;
       // A disabled control is exempt from the contrast requirement, and its
       // reduced opacity is not composited here, so it is left out.
       if (el.closest(':disabled, [aria-disabled="true"]')) continue;

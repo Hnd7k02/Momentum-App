@@ -613,6 +613,10 @@
 .sheet__body {
   padding: var(--space-4) var(--page-gutter);
   overflow-y: auto;
+  /* Not decoration: `overflow-y: auto` alone computes the other axis to
+     `auto` as well, and a row a pixel too wide would make the whole sheet
+     slide sideways. */
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);

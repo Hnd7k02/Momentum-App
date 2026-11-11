@@ -72,6 +72,24 @@ describe('the muscle dot', () => {
     expect(new Set(Object.values(IDENTITY_COLOR)).size).toBe(MUSCLE_GROUPS.length);
   });
 
+  it('keeps the ten approved hues: Stage 6b moved where they are written, not what they are', () => {
+    // The table as it stood in this file's subject before the move (contract
+    // §2.4). Reading the token back from the token file would agree with
+    // any value at all; this is the one place the hues are pinned.
+    expect(IDENTITY_COLOR).toEqual({
+      chest: '#d9654e', // terracotta
+      back: '#2e6fb7', // steel blue
+      shoulders: '#e8a33d', // amber
+      biceps: '#7b5ac9', // violet
+      triceps: '#c45d9e', // magenta
+      core: '#c9a227', // ochre
+      quadriceps: '#1f9e94', // teal
+      hamstringsGlutes: '#8c6239', // bronze
+      calves: '#4fb3e8', // sky blue
+      forearms: '#6e7b8b', // slate
+    });
+  });
+
   it('is pulled 35 % towards its own grey, and 40 % opaque for an untrained group', () => {
     expect(IDENTITY_DESATURATION).toBe(0.35);
     expect(IDENTITY_UNTRAINED_ALPHA).toBe(0.4);

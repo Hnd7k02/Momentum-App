@@ -72,15 +72,21 @@
   padding: 0 var(--card-pad);
 }
 
+/* Two figures, labels above and values beneath. A grid rather than two
+   columns of their own, so the values share one baseline although the
+   second is set two steps smaller. */
 .question-detail__figures {
-  display: flex;
-  gap: var(--space-5);
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  column-gap: var(--space-5);
+  row-gap: 2px;
+  align-items: baseline;
 }
 
 .question-detail__figure {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: contents;
 }
 
 .question-detail__figureLabel {

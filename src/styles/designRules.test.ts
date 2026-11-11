@@ -216,10 +216,18 @@ describe('density is one set of numbers (contract §4)', () => {
     expect(value('--touch-min')).toBe('44px');
   });
 
-  it('every screen takes its side margin from the gutter', () => {
-    // A screen, a scroll port or a bar that pads sideways by a spacing step
-    // of its own is how the workout came to stand at twice the margin.
+  it('only the shell and the gutter read the safe-area insets for a side margin', () => {
+    // `--gutter-left/right` already carry the inset. A screen, a scroll port
+    // or a bar that adds `--safe-left` to a padding of its own stands at a
+    // different margin from every other screen — the workout did, at 36px.
+    // What a search cannot hold is a margin written without the inset; that
+    // one is measured on the rendered screens (`geometry.mjs`, 16px on every
+    // screen, and `design-system.mjs` on the workout).
     const own = /(?:padding|margin)(?:-left|-right|-inline)?:[^;]*var\(--safe-(?:left|right)\)/;
-    expect(describeHits(scan(CSS.filter((path) => path !== TOKENS), own))).toEqual(['app/appShell.css:30 padding-left: var(--safe-left)', 'app/appShell.css:31 padding-right: var(--safe-right)']);
+    const hits = scan(CSS.filter((path) => path !== TOKENS), own).map((hit) => `${hit.file} ${hit.text}`);
+    expect(hits).toEqual(['app/appShell.css padding-left: var(--safe-left)', 'app/appShell.css padding-right: var(--safe-right)']);
+    // And the gutter is the inset plus the one margin, on both sides.
+    expect(value('--gutter-left')).toBe('calc(var(--safe-left) + var(--page-gutter))');
+    expect(value('--gutter-right')).toBe('calc(var(--safe-right) + var(--page-gutter))');
   });
 });

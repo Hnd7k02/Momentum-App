@@ -19,6 +19,15 @@ import { useWorld } from '../../app/world';
  * underneath, where they answer "how did I get there".
  */
 
+/** Where the smallest day's bar stands, in percent of the plot's height. */
+const BAR_FOOT = 30;
+/**
+ * From this many training days the bars stand closer together, so that a
+ * season of one exercise still fits a 320px phone with its latest bar — the
+ * one that carries the state — in view.
+ */
+const DENSE_FROM = 24;
+
 export function ExerciseDetail({
   name,
   days,
@@ -67,9 +76,17 @@ export function ExerciseDetail({
     null,
   );
   const spread = largest && smallest ? largest.best.score - smallest.best.score : 0;
-  /** A bar's height in percent: the smallest day stands at 30, the largest at 100. */
+  /**
+   * A bar's height in percent: the smallest day stands at `BAR_FOOT`, the
+   * largest at 100. The two labels stand at exactly those two heights, each
+   * beside the bar it names, with a fine line across the plot — the scale is
+   * what lies between the lines, and the foot beneath the lower one only
+   * keeps the smallest day a bar rather than nothing.
+   */
   const barHeight = (day: ExerciseDay): number =>
-    spread > 0 && smallest ? 30 + ((day.best.score - smallest.best.score) / spread) * 70 : 100;
+    spread > 0 && smallest
+      ? BAR_FOOT + ((day.best.score - smallest.best.score) / spread) * (100 - BAR_FOOT)
+      : 100;
 
   return (
     <div className="screen gym-detail">
@@ -142,11 +159,20 @@ export function ExerciseDetail({
                 */}
                 <div className="gym-detail__chart" aria-hidden="true">
                   <div className="gym-detail__axis">
-                    <span>{largest ? score(largest) : null}</span>
-                    {spread > 0 && smallest ? <span>{score(smallest)}</span> : null}
+                    <span className="gym-detail__axisMax">{largest ? score(largest) : null}</span>
+                    {spread > 0 && smallest ? (
+                      <span className="gym-detail__axisMin" style={{ bottom: `${BAR_FOOT}%` }}>
+                        {score(smallest)}
+                      </span>
+                    ) : null}
                   </div>
                   <div className="gym-detail__plot">
-                    <div className="gym-detail__bars">
+                    <div
+                      className={`gym-detail__bars ${days.length > DENSE_FROM ? 'gym-detail__bars--dense' : ''}`.trim()}
+                    >
+                      {spread > 0 ? (
+                        <span className="gym-detail__level" style={{ bottom: `${BAR_FOOT}%` }} />
+                      ) : null}
                       {[...days].reverse().map((day, index) => {
                         // The last bar — the latest day — carries the state
                         // of the change the figures above state; the bars

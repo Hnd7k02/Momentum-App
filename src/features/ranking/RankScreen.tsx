@@ -167,6 +167,9 @@ export function RankScreen({
     if (unit === 'days') return count === 1 ? t('rank.dayOne') : t('rank.days', { count });
     return count === 1 ? t('rank.weekOne') : t('rank.weeks', { count });
   };
+  // No streak is words, not a figure: it is set like every other "nothing
+  // to show yet" in the app, a step smaller and secondary.
+  const streakClass = (count: number) => (count === 0 ? 'streak__value streak__value--none' : 'streak__value');
 
   return (
     <div className="screen">
@@ -323,7 +326,7 @@ export function RankScreen({
             <div className="streaks">
               <div className="streak">
                 <p className="streak__label">{t('rank.streakCheckIn')}</p>
-                <p className="streak__value">
+                <p className={streakClass(legacy.checkInStreak.current)}>
                   <Figure text={streakLabel(legacy.checkInStreak.current, 'days')} figure={legacy.checkInStreak.current} />
                 </p>
                 <p className="streak__best">
@@ -332,7 +335,7 @@ export function RankScreen({
               </div>
               <div className="streak">
                 <p className="streak__label">{t('rank.streakTraining')}</p>
-                <p className="streak__value">
+                <p className={streakClass(legacy.trainingStreak.current)}>
                   <Figure text={streakLabel(legacy.trainingStreak.current, 'weeks')} figure={legacy.trainingStreak.current} />
                 </p>
                 <p className="streak__best">

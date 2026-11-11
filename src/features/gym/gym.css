@@ -421,6 +421,9 @@
 .gym-detail__figure {
   display: flex;
   flex-direction: column;
+  /* Label at the top, value at the foot: the three values share a line
+     although the middle one is set a step smaller. */
+  justify-content: space-between;
   gap: 2px;
   min-width: 0;
 }
@@ -481,18 +484,40 @@
 
 .gym-detail__axis {
   flex: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  /* Both labels share one cell, so the column is as wide as the wider one
+     and each can stand at the height of the bar it names. */
+  display: grid;
   height: 110px;
   font-size: var(--type-caption);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   white-space: nowrap;
-  color: var(--text-tertiary);
+  /* Secondary, like the figures' labels above: the largest day's label
+     stands in the card's lightest corner, where the caption grey measured
+     4.29:1 on a 440px phone. */
+  color: var(--text-secondary);
 }
 
-/* The axis reads in one ink: its units are not set apart. */
+.gym-detail__axisMax,
+.gym-detail__axisMin {
+  grid-area: 1 / 1;
+}
+
+/* Centred on the line it labels: the largest day on the plot's top edge,
+   the smallest on the level its bar reaches (set inline, from the same
+   constant the bars are drawn with). */
+.gym-detail__axisMax {
+  align-self: start;
+  transform: translateY(-50%);
+}
+
+.gym-detail__axisMin {
+  align-self: end;
+  position: relative;
+  transform: translateY(50%);
+}
+
+/* The axis is set at caption size throughout, its unit included. */
 .gym-detail__axis .figure__unit {
   font-size: inherit;
   color: inherit;
@@ -504,12 +529,29 @@
 }
 
 .gym-detail__bars {
+  position: relative;
   display: flex;
   align-items: flex-end;
+  /* Should there ever be more days than the plot holds, the oldest leave
+     it, never the latest — the one bar that carries the state. */
+  justify-content: flex-end;
+  overflow: hidden;
   gap: 3px;
   height: 110px;
   border-top: 1px dashed var(--separator-strong);
   border-bottom: 1px solid var(--separator-strong);
+}
+
+.gym-detail__bars--dense {
+  gap: 1px;
+}
+
+/* The level of the smallest day, drawn like the largest day's edge. */
+.gym-detail__level {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--separator-strong);
 }
 
 .gym-detail__bar {
@@ -519,6 +561,11 @@
   border-radius: 4px 4px 0 0;
   background: var(--data-ink);
   opacity: 0.55;
+}
+
+.gym-detail__bars--dense .gym-detail__bar {
+  min-width: 1px;
+  border-radius: 1px 1px 0 0;
 }
 
 /* The latest day: the status colour of its change, the plain data ink when
@@ -544,7 +591,7 @@
   padding-top: var(--space-1);
   font-size: var(--type-caption);
   font-variant-numeric: tabular-nums;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .gym-detail__row {
@@ -561,15 +608,20 @@
 }
 
 .gym-detail__rowDay {
+  min-width: 0;
   font-size: var(--type-subhead);
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
+/* The value keeps its line: on a narrow phone the day wraps, never the
+   unit away from its number. */
 .gym-detail__rowValue {
+  flex: none;
   font-size: var(--type-body);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* ── Overview: the tiles live in components/metrics.css; only the
@@ -664,7 +716,10 @@
 
 .plan-chooser__manage {
   align-self: flex-start;
-  min-height: 44px;
+  min-height: var(--touch-min);
+  /* The tap area reaches a step past the label on both sides; the label
+     itself stands on the sheet's margin with the rows above it. */
+  margin-left: calc(var(--space-1) * -1);
   padding: 0 var(--space-1);
   color: var(--accent-ink);
   font-size: var(--type-subhead);

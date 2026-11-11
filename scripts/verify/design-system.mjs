@@ -42,7 +42,7 @@ import { CHROMIUM, URL_APP, check, summary, phone, seed, seedTraining, seedMuscl
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage6b';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
 const ONLY = (process.env.ONLY ?? '').split(',').filter(Boolean);
-const HEIGHT = { 320: 693, 360: 780, 393: 852, 430: 932 };
+const HEIGHT = { 320: 693, 360: 780, 393: 852, 430: 932, 440: 956 };
 const TZ = 'Europe/Berlin';
 const CLOCK_DAY = process.env.CLOCK ?? '2026-10-14';
 mkdirSync(OUT, { recursive: true });
@@ -128,15 +128,14 @@ async function look(page, width, slug, expected, { minRuns = 3 } = {}) {
       if (el.closest('.visually-hidden')) continue;
       const cs = getComputedStyle(el);
       if (cs.position === 'fixed' && cs.visibility === 'hidden') continue;
-      // A box that scrolls sideways on purpose holds more than it shows.
-      let scroller = el.parentElement;
-      let scrolls = false;
-      while (scroller) {
-        const s = getComputedStyle(scroller);
-        if (s.overflowX === 'auto' || s.overflowX === 'scroll') { scrolls = true; break; }
-        scroller = scroller.parentElement;
+      // No box in this app scrolls sideways on purpose, so nothing is exempt:
+      // a scroll port that scrolls down computes `overflow-x: auto` unless it
+      // says `clip`, and would then hide a row wider than its sheet from
+      // every other check here. That is a failure of its own.
+      // (A text field scrolls its own content; that is the field, not the screen.)
+      if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') && !el.matches('textarea, input, select')) {
+        out.push(`${String(el.className || el.tagName).slice(0, 40)} can scroll sideways (${el.scrollWidth} in ${el.clientWidth})`);
       }
-      if (scrolls) continue;
       if (r.right > view + 1.5 || r.left < -1.5) out.push(`${String(el.className || el.tagName).slice(0, 40)} ${Math.round(r.left)}…${Math.round(r.right)} of ${view}`);
     }
     return [...new Set(out)].slice(0, 5);
@@ -201,8 +200,9 @@ for (const width of WIDTHS) {
     deviceScaleFactor: 2,
     viewport: { width, height: HEIGHT[width] ?? 852 },
     timezoneId: TZ,
-    // A Swiss phone: the native date fields of the pause form read as they
-    // will on the device.
+    // A Swiss phone, for everything the app formats itself. The native date
+    // fields of the pause form keep headless Chromium's own format; on the
+    // device they are the system's.
     locale: 'de-CH',
   });
   await ctx.clock.setSystemTime(berlinNoon(CLOCK_DAY));
@@ -213,7 +213,7 @@ for (const width of WIDTHS) {
   await page.waitForTimeout(400);
 
   /* ── Onboarding: seven steps, all light ───────────────────────────────── */
-  const step = async (slug) => { if (wants('onboarding')) await look(page, width, `onboarding-${slug}`, null, { minRuns: 2 }); };
+  const step = async (slug) => { if (wants('onboarding')) await look(page, width, `onboarding-${slug}`, null); };
   await step('1-willkommen');
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.waitForTimeout(400);
@@ -492,6 +492,44 @@ for (const width of WIDTHS) {
     await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Bankdrücken$/ }) }).first().click();
     await page.waitForTimeout(1200);
     await look(page, width, 'uebungsdetail', 'gym');
+    // The bars (contract §6): neutral, the latest in the colour of its
+    // change and never out of view, the scale named on the left with each
+    // label at the height of the bar it names, the first and the last date
+    // beneath.
+    const bars = await page.evaluate(() => {
+      const plot = document.querySelector('.gym-detail__bars').getBoundingClientRect();
+      const all = [...document.querySelectorAll('.gym-detail__bar')];
+      const tops = all.map((bar) => bar.getBoundingClientRect().top);
+      const middle = (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return (r.top + r.bottom) / 2;
+      };
+      const fill = (el) => getComputedStyle(el).backgroundColor;
+      const latest = all[all.length - 1];
+      const level = document.querySelector('.gym-detail__level')?.getBoundingClientRect().top ?? null;
+      return {
+        count: all.length,
+        tallest: Math.round(Math.min(...tops) * 10) / 10,
+        shortest: Math.round(Math.max(...tops) * 10) / 10,
+        max: middle('.gym-detail__axisMax'),
+        min: middle('.gym-detail__axisMin'),
+        level,
+        latestIsLast: latest.classList.contains('gym-detail__bar--latest'),
+        coloured: all.filter((bar) => fill(bar) !== fill(all[0])).length,
+        latestRight: latest.getBoundingClientRect().right,
+        plotRight: plot.right,
+        dates: [...document.querySelectorAll('.gym-detail__dates span')].map((span) => span.textContent),
+      };
+    });
+    check(`${width}: the bars' largest value is named at the top of the tallest bar`,
+      bars.count > 1 && bars.max !== null && Math.abs(bars.max - bars.tallest) <= 2, short(bars));
+    check(`${width}: the bars' smallest value is named at the top of the shortest bar, on its line`,
+      bars.min !== null && Math.abs(bars.min - bars.shortest) <= 2 && bars.level !== null && Math.abs(bars.level - bars.shortest) <= 2, short(bars));
+    check(`${width}: only the latest bar carries a colour, and it is in view`,
+      bars.latestIsLast && bars.coloured === 1 && bars.latestRight <= bars.plotRight + 0.5, short(bars));
+    check(`${width}: the first and the last date stand beneath the bars`, bars.dates.length === 2 && bars.dates[0] !== bars.dates[1], short(bars.dates));
     await page.locator('.gym-detail .gym-session__scroll').evaluate((el) => { el.scrollTop = el.scrollHeight; });
     await page.waitForTimeout(400);
     await look(page, width, 'uebungsdetail-tage', 'gym');
@@ -504,7 +542,12 @@ for (const width of WIDTHS) {
   check(`${width}: Heute is light again after Gym`, (await world(page)) === null, String(await world(page)));
   check(`${width}: the status bar's colour is light again`, (await themeColour(page)) === lightBar, String(await themeColour(page)));
   await tab(page, 'Bereiche');
-  check(`${width}: Bereiche remembers Gym and turns again`, (await world(page)) === 'gym' || (await world(page)) === null);
+  // Whichever area Bereiche comes back on, the screen is drawn in that
+  // area's world and the status bar with it — never one in the other's.
+  const backOnGym = (await page.getByRole('radio', { name: 'Gym' }).getAttribute('aria-checked')) === 'true';
+  check(`${width}: back in Bereiche the screen is drawn in the world of the area on show (${backOnGym ? 'Gym' : 'Mind'})`,
+    (await world(page)) === (backOnGym ? 'gym' : null) && (await themeColour(page)) === (backOnGym ? darkBar : lightBar),
+    `${await world(page)} · ${await themeColour(page)}`);
   await page.getByRole('radio', { name: 'Mind' }).click();
   await page.waitForTimeout(700);
   check(`${width}: choosing Mind turns the whole screen back`, (await world(page)) === null && (await themeColour(page)) === lightBar);
