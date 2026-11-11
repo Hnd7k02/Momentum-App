@@ -387,7 +387,9 @@ for (const width of WIDTHS) {
   /* ⓘ and the legend sheet. */
   const info = page.getByRole('button', { name: 'Legende öffnen' });
   const target = await info.evaluate((el) => { const r = el.getBoundingClientRect(); return { w: r.width, h: r.height, right: Math.round(window.innerWidth - r.right) }; });
-  check(`${W}: ⓘ is in the header, named, a 44px target`, target.w >= 44 && target.h >= 44, short(target));
+  check(`${W}: ⓘ is in the header, named, a 44px target, and wholly on the screen`, target.w >= 44 && target.h >= 44 && target.right >= 0, short(target));
+  const titleFits = await page.locator('.gym-muscles__title').evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+  check(`${W}: and the title beside it is not cut`, titleFits);
   await info.click();
   await page.waitForTimeout(700);
   const sheet = await page.evaluate(() => {

@@ -166,8 +166,11 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   check('a held series is flat on the zero line', charts.find((c) => c.name === 'Rücken')?.lineBBox[3] === 0 && charts.find((c) => c.name === 'Rücken')?.lineBBox[1] === 12);
   check('no line leaves its 80×24 box', measured.every((c) => c.lineBBox[0] >= 0 && c.lineBBox[1] >= 0 && c.lineBBox[0] + c.lineBBox[2] <= 80 && c.lineBBox[1] + c.lineBBox[3] <= 24));
   check('every chart box is 80×24', charts.filter((c) => c.boxPx && c.boxPx[0] > 0).every((c) => c.boxPx[0] === 80 && c.boxPx[1] === 24), charts.map((c) => String(c.boxPx)).join(' '));
-  check('a single observation is a dot and nothing else', charts.filter((c) => ['Bizeps', 'Unterarme'].includes(c.name)).every((c) => c.points === 0 && c.dots === 1));
-  check('groups with nothing to plot draw nothing', charts.filter((c) => ['Schultern', 'Waden'].includes(c.name)).every((c) => c.points === 0 && c.dots === 0));
+  // seedMuscles: the forearms have three exercise days and one comparable
+  // observation; the biceps a comparison on two exercise days, which states
+  // no trend and so draws nothing (contract §7).
+  check('a single observation is a dot and nothing else', charts.filter((c) => c.name === 'Unterarme').length === 1 && charts.filter((c) => c.name === 'Unterarme').every((c) => c.points === 0 && c.dots === 1));
+  check('groups with nothing to plot draw nothing — untrained, or too little to compare', charts.filter((c) => ['Schultern', 'Waden', 'Bizeps'].includes(c.name)).length === 3 && charts.filter((c) => ['Schultern', 'Waden', 'Bizeps'].includes(c.name)).every((c) => c.points === 0 && c.dots === 0));
   check('every line is the one neutral data ink', measured.length >= 4 && measured.every((c) => c.stroke === ink.data), `${[...new Set(measured.map((c) => c.stroke))].join(' ')} vs ${ink.data}`);
   check('the end point carries the state: the status colour, the data ink when held',
     drawn.every((c) => c.end === (c.state === 'improved' ? ink.strong : c.state === 'declined' ? ink.weak : ink.data)),
@@ -196,7 +199,7 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   });
   console.log('\n[rows to assistive technology]', JSON.stringify({ buttons: a11y.buttons, hiddenCharts: a11y.hiddenCharts, textOnly: a11y.textOnly }, null, 0).slice(0, 600));
   check('all ten rows are buttons with a pressed state', a11y.buttons === 10 && a11y.pressed.every((p) => p === 'true' || p === 'false'));
-  check('each row names its muscle and its number or state in text', a11y.textOnly.every((t) => /Brust|Rücken|Schultern|Bizeps|Trizeps|Rumpf|Quadrizeps|Beinbeuger|Waden|Unterarme/.test(t) && /%|Noch/.test(t)));
+  check('each row names its muscle and its number or state in text', a11y.textOnly.every((t) => /Brust|Rücken|Schultern|Bizeps|Trizeps|Rumpf|Quadrizeps|Beinbeuger|Waden|Unterarme/.test(t) && /%|Noch nicht trainiert|Zu wenig Vergleichsdaten/.test(t)));
   check('the charts are hidden from the accessibility tree', a11y.hiddenCharts && a11y.chartWrappersHidden);
   check('every row keeps a 44px target', a11y.heights.every((h) => h >= 44), a11y.heights.join(','));
   const pills = await page.getByRole('group', { name: 'Ansicht' }).getByRole('button').allTextContents();

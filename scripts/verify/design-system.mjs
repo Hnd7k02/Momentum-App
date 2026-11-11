@@ -624,7 +624,7 @@ for (const width of WIDTHS) {
     await look(page, width, 'gym-uebersicht-ohne-training', 'gym');
     const entry = ((await page.locator('.gym-hub__muscles').innerText()) ?? '').replace(/\s+/g, ' ');
     check(`${width}: the hub's muscle card names the empty range and the last session, not "never trained"`,
-      /Kein Training in den letzten 30 Tagen/.test(entry) && /Letzte Session vor \d+ Tagen/.test(entry) && !/Noch nicht trainiert|ersten Session/.test(entry), entry);
+      /Kein Training in den letzten 30 Tagen/.test(entry) && /Letzte Session vor \d+ Tagen/.test(entry) && !/Noch nicht trainiert|ersten Session|Ab dem dritten Übungstag/.test(entry), entry);
     await openMuscles(page, { wait: 4500 });
     await look(page, width, 'muskelgruppen-leer', 'gym');
     const empty = await page.evaluate(() => ({
@@ -636,7 +636,7 @@ for (const width of WIDTHS) {
     }));
     check(`${width}: an empty range says why, and when the last session was`,
       /^Kein Training in den letzten 30 Tagen Letzte Session: \S+, \d+\. \S+, vor \d+ Tagen\. Die Muskelgruppen zeigen nur den gewählten Zeitraum\.$/.test(empty.said)
-        && empty.status === 'status' && !/ersten Session/.test(empty.said), empty.said);
+        && empty.status === 'status' && !/ersten Session|Ab dem dritten Übungstag/.test(empty.said), empty.said);
     check(`${width}: it offers the one thing that is missing — exactly one primary action`,
       empty.primaries.length === 1 && empty.primaries[0] === 'Training erfassen', short(empty.primaries));
     check(`${width}: nothing is drawn as progress: ten untrained rows, no overall figure`,

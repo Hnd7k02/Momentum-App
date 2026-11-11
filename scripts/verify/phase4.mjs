@@ -141,13 +141,21 @@ async function fillSet(page, index, reps, weight) {
     const origin = key(back(30));
     await put('configSnapshots', snaps.map((s, i) => (i === 0 ? { ...s, effectiveFrom: origin } : s)));
     await put('settings', [{ ...settings[0], firstUseDate: origin }]);
-    // An older bench day at 50 kg, and an older squat day so a second group exists.
+    // Two older bench days at 50 and 55 kg — with today's a third exercise
+    // day, from which a group states a trend (contract §7) — and an older
+    // squat day so a second group exists.
     const earlier = key(back(14));
     const at = new Date(back(14).setHours(18, 0, 0, 0)).toISOString();
-    await put('gymSessions', [{ id: 'g_old', date: earlier, weekKey: isoWeek(back(14)), performedAt: at, planId: null, note: null, legacyCarryOver: false, configSnapshotId: snaps[0].id, createdAt: at, updatedAt: at }]);
+    const between = key(back(7));
+    const atBetween = new Date(back(7).setHours(18, 0, 0, 0)).toISOString();
+    await put('gymSessions', [
+      { id: 'g_old', date: earlier, weekKey: isoWeek(back(14)), performedAt: at, planId: null, note: null, legacyCarryOver: false, configSnapshotId: snaps[0].id, createdAt: at, updatedAt: at },
+      { id: 'g_mid', date: between, weekKey: isoWeek(back(7)), performedAt: atBetween, planId: null, note: null, legacyCarryOver: false, configSnapshotId: snaps[0].id, createdAt: atBetween, updatedAt: atBetween },
+    ]);
     await put('gymSets', [
       { id: 's_old1', sessionId: 'g_old', exerciseId: 'ex_bench_press', date: earlier, weightGrams: 50000, reps: 8, order: 0, muscles: ['chest', 'triceps'], createdAt: at },
       { id: 's_old2', sessionId: 'g_old', exerciseId: 'ex_squat', date: earlier, weightGrams: 100000, reps: 5, order: 1, muscles: ['quadriceps', 'hamstringsGlutes'], createdAt: at },
+      { id: 's_mid1', sessionId: 'g_mid', exerciseId: 'ex_bench_press', date: between, weightGrams: 55000, reps: 8, order: 0, muscles: ['chest', 'triceps'], createdAt: atBetween },
     ]);
   });
   await page.reload({ waitUntil: 'networkidle' });

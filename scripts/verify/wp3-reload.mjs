@@ -295,7 +295,7 @@ for (const [width, height] of SIZES) {
   const shoulders30 = row(m30, 'Schultern');
   const shoulders90 = row(m90, 'Schultern');
   check(`${W}: Schultern at 30 days — not trained in the range (no data, no recency)`, shoulders30?.state === 'noData' && shoulders30?.sub === null && shoulders30?.right === 'Noch nicht trainiert' && shoulders30?.delta === false, short(shoulders30));
-  check(`${W}: Schultern at 90 days — trained 44 days ago, +10 %, improved`, shoulders90?.state === 'improved' && shoulders90?.sub === 'Vor 44 Tagen' && shoulders90?.delta === true && /^\+10\s% Verbessert$/.test(shoulders90?.right ?? ''), short(shoulders90));
+  check(`${W}: Schultern at 90 days — trained 44 days ago, +10 %, improved`, shoulders90?.state === 'improved' && shoulders90?.sub === 'Vor 44 Tagen' && shoulders90?.delta === true && /^\+10\s%\s?Verbessert$/.test(shoulders90?.right ?? ''), short(shoulders90));
   // Calves: one calf-raise day, 8 days ago — too little in either range.
   for (const [label, m] of [['30', m30], ['90', m90]]) {
     const calves = row(m, 'Waden');
@@ -307,7 +307,7 @@ for (const [width, height] of SIZES) {
   check(`${W}: Bizeps has a comparison on two exercise days and prints no figure`, biceps30?.state === 'awaitingBaseline' && biceps30?.delta === false && biceps30?.sub === 'Vor 6 Tagen · 2 Übungstage', short(biceps30));
   // Back: pulldowns 19, 12 and 5 days ago, identical — held, with its figure.
   const back30 = row(m30, 'Rücken');
-  check(`${W}: Rücken, three identical days, reads "0 % Gehalten"`, back30?.state === 'unchanged' && back30?.delta === true && /^0\s% Gehalten$/.test(back30?.right ?? '') && back30?.sub === 'Vor 5 Tagen', short(back30));
+  check(`${W}: Rücken, three identical days, reads "0 % Gehalten"`, back30?.state === 'unchanged' && back30?.delta === true && /^0\s%\s?Gehalten$/.test(back30?.right ?? '') && back30?.sub === 'Vor 5 Tagen', short(back30));
 
   const counted = (m) => Number(/(\d+) von 10 Gruppen gewertet/.exec(m.overall ?? '')?.[1] ?? Number.NaN);
   const withDelta = (m) => m.rows.filter((r) => r.delta).length;

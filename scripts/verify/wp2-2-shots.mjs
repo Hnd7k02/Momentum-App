@@ -220,7 +220,7 @@ for (const width of CHECK_WIDTHS) {
     });
     check(`${width}: the state stands on its own line above the hint`, guidance.children === 2 && guidance.stateBlock && guidance.stateBelow, JSON.stringify(guidance));
     const guidanceAria = await page.locator('.gym-progress__noData').ariaSnapshot();
-    check(`${width}: and both are announced as one status`, /^- status: Noch nicht trainiert Nach deiner ersten Session/.test(guidanceAria.trim()), guidanceAria);
+    check(`${width}: and both are announced as one status`, /^- status: Noch nicht trainiert Ab dem dritten Übungstag einer Gruppe zeigt Momentum ihren Leistungstrend\.$/.test(guidanceAria.trim()), guidanceAria);
     check(`${width}: no fake overall figure`, (await page.locator('[data-metric="gym-overall"]').count()) === 0);
     const clip = await clipped(page);
     check(`${width}: the empty destination is not clipped`, clip.length === 0, clip.slice(0, 2).join('; '));
