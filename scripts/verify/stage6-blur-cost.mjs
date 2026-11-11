@@ -50,16 +50,16 @@ await page.locator('.body-viewer canvas').waitFor({ timeout: 20000 });
 await page.waitForTimeout(1500);
 
 const CARD_GLASS =
-  '.card:has(> .muscle-module) { background: var(--glass-fill) !important; backdrop-filter: saturate(160%) blur(18px) !important; -webkit-backdrop-filter: saturate(160%) blur(18px) !important; }';
+  '.card:has(> .muscle-module) { background: var(--glass-fill) !important; backdrop-filter: saturate(160%) blur(var(--glass-blur)) !important; -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur)) !important; }';
 const ARRANGEMENTS = {
   'as-built': '',
   'card-glass': CARD_GLASS,
   'pills-glass':
     CARD_GLASS +
-    ' .body-viewer__views { background: rgba(255,255,255,0.08) !important; backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }',
+    ' .body-viewer__views { background: rgba(255,255,255,0.08) !important; backdrop-filter: saturate(160%) blur(var(--glass-blur)); -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur)); }',
   'layer-glass':
     CARD_GLASS +
-    ' .body-viewer::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 50%; pointer-events: none; background: rgba(255,255,255,0.07); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); }',
+    ' .body-viewer::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 50%; pointer-events: none; background: rgba(255,255,255,0.07); backdrop-filter: saturate(160%) blur(var(--glass-blur)); -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur)); }',
 };
 
 async function arrange(css) {

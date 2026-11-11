@@ -99,33 +99,86 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
     const box = row.querySelector('.muscle-row__chart');
     const svg = box?.querySelector('svg');
     const line = svg?.querySelector('polyline');
+    const zero = svg?.querySelector('line');
     const dot = svg?.querySelector('circle');
     const bbox = line ? line.getBBox() : null;
     const right = row.querySelector('.muscle-row__delta, .muscle-row__badge');
+    const side = row.querySelector('.muscle-row__right');
+    const mark = row.querySelector('.muscle-row__dot');
     return {
       name,
+      state: [...(side?.classList ?? [])].find((c) => c.startsWith('muscle-row__right--'))?.slice('muscle-row__right--'.length) ?? null,
       boxPx: box ? [Math.round(box.getBoundingClientRect().width), Math.round(box.getBoundingClientRect().height)] : null,
-      stroke: line?.getAttribute('stroke') ?? dot?.getAttribute('fill') ?? null,
+      // The colours as drawn: the stylesheet gives them, not an attribute.
+      stroke: line ? getComputedStyle(line).stroke : null,
+      end: dot ? getComputedStyle(dot).fill : null,
+      endY: dot ? Number(dot.getAttribute('cy')) : null,
+      endRadius: dot ? Number(dot.getAttribute('r')) : null,
+      zeroY: zero ? Number(zero.getAttribute('y1')) : null,
       strokeWidthPx: line ? parseFloat(getComputedStyle(line).strokeWidth) : null,
+      lineCap: line ? getComputedStyle(line).strokeLinecap : null,
       lineBBox: bbox ? [Math.round(bbox.x * 10) / 10, Math.round(bbox.y * 10) / 10, Math.round(bbox.width * 10) / 10, Math.round(bbox.height * 10) / 10] : null,
       points: line ? line.getAttribute('points').split(' ').length : 0,
       dots: svg ? svg.querySelectorAll('circle').length : 0,
       rightText: right?.textContent?.trim() ?? '',
       rightColor: right ? getComputedStyle(right).color : null,
+      identity: mark ? getComputedStyle(mark).backgroundColor : null,
+      identitySize: mark ? [Math.round(mark.getBoundingClientRect().width), Math.round(mark.getBoundingClientRect().height)] : null,
     };
   }));
+  // The tokens the charts are drawn in, as the browser resolves them here.
+  const ink = await page.evaluate(() => {
+    const probe = document.createElement('i');
+    document.body.appendChild(probe);
+    const read = (token) => { probe.style.color = `var(${token})`; return getComputedStyle(probe).color; };
+    const out = { data: read('--data-ink'), strong: read('--status-strong'), weak: read('--status-weak') };
+    probe.remove();
+    return out;
+  });
   console.log('\n[mini charts at 393]');
-  for (const c of charts) console.log(`  ${c.name.padEnd(22)} box ${String(c.boxPx).padEnd(8)} pts ${c.points} dots ${c.dots} line bbox ${String(c.lineBBox).padEnd(22)} stroke ${c.stroke} → ${c.rightText} ${c.rightColor}`);
+  for (const c of charts) console.log(`  ${c.name.padEnd(22)} box ${String(c.boxPx).padEnd(8)} pts ${c.points} dots ${c.dots} line bbox ${String(c.lineBBox).padEnd(22)} line ${c.stroke} end ${c.end} @${c.endY} dot ${c.identity} → ${c.rightText} ${c.rightColor}`);
   const measured = charts.filter((c) => c.points > 1);
-  check('measured rows draw a line with a readable height, not a 1–2px mark', measured.every((c) => c.lineBBox[3] >= 4 || c.name === 'Rücken'), measured.map((c) => `${c.name} ${c.lineBBox[3]}px`).join(', '));
-  check('the flat series is the one exception, drawn on purpose down the middle', charts.find((c) => c.name === 'Rücken')?.lineBBox[3] === 0 && charts.find((c) => c.name === 'Rücken')?.lineBBox[1] === 12);
+  const drawn = charts.filter((c) => c.dots > 0);
+  /*
+   * The contract's chart rules (§6, D160). Until Stage 6b each row scaled to
+   * its own minimum and maximum and was drawn in its muscle's colour, and
+   * this section held exactly that: "a readable height, not a 1–2px mark"
+   * for every measured row, and "every drawn chart has its own identity
+   * colour". One shared scale and a neutral line replace both, so the
+   * checks below hold the new rules instead — where the line ends, what
+   * colour it is, and that the muscle's colour is the dot and nothing else.
+   */
+  const scaleY = (percent) => 12 - (Math.max(-12, Math.min(12, percent)) / 12) * 9;
+  const shown = (c) => { const m = c.rightText.match(/^([+-]?\d+) %$/); return m ? Number(m[1]) : null; };
+  check('every row shares one scale: a line ends where its number says, ±12 % at the edge',
+    drawn.filter((c) => shown(c) !== null).every((c) => {
+      // The number is rounded for the eye; the point is drawn from the raw value.
+      const [low, high] = [scaleY(shown(c) + 0.5), scaleY(shown(c) - 0.5)];
+      return c.endY >= Math.min(low, high) - 0.05 && c.endY <= Math.max(low, high) + 0.05;
+    }),
+    drawn.map((c) => `${c.name} ${c.rightText} @${c.endY}`).join(', '));
+  check('a change of 12 % or more stands at the edge, an end point inside the box',
+    measured.filter((c) => Math.abs(shown(c) ?? 0) >= 13).length >= 3 &&
+      measured.filter((c) => Math.abs(shown(c) ?? 0) >= 13).every((c) => c.endY === (shown(c) > 0 ? 3 : 21)),
+    measured.map((c) => `${c.name} ${c.rightText} @${c.endY}`).join(', '));
+  check('the zero line is always there, in the middle', drawn.every((c) => c.zeroY === 12), drawn.map((c) => c.zeroY).join(','));
+  check('a held series is flat on the zero line', charts.find((c) => c.name === 'Rücken')?.lineBBox[3] === 0 && charts.find((c) => c.name === 'Rücken')?.lineBBox[1] === 12);
   check('no line leaves its 80×24 box', measured.every((c) => c.lineBBox[0] >= 0 && c.lineBBox[1] >= 0 && c.lineBBox[0] + c.lineBBox[2] <= 80 && c.lineBBox[1] + c.lineBBox[3] <= 24));
+  check('every chart box is 80×24', charts.filter((c) => c.boxPx && c.boxPx[0] > 0).every((c) => c.boxPx[0] === 80 && c.boxPx[1] === 24), charts.map((c) => String(c.boxPx)).join(' '));
   check('a single observation is a dot and nothing else', charts.filter((c) => ['Bizeps', 'Unterarme'].includes(c.name)).every((c) => c.points === 0 && c.dots === 1));
   check('groups with nothing to plot draw nothing', charts.filter((c) => ['Schultern', 'Waden'].includes(c.name)).every((c) => c.points === 0 && c.dots === 0));
-  const strokes = charts.filter((c) => c.stroke).map((c) => c.stroke);
-  check('every drawn chart has its own identity colour', new Set(strokes).size === strokes.length, strokes.join(' '));
-  check('the number beside a chart is never in the chart\'s colour', charts.filter((c) => c.stroke && c.rightColor).every((c) => c.stroke.replace(/\s/g, '') !== c.rightColor.replace(/\s/g, '')));
-  check('the stroke is thin and crisp, about 1.6px', measured.every((c) => c.strokeWidthPx > 1 && c.strokeWidthPx < 2.5), measured.map((c) => c.strokeWidthPx).join(','));
+  check('every line is the one neutral data ink', measured.length >= 4 && measured.every((c) => c.stroke === ink.data), `${[...new Set(measured.map((c) => c.stroke))].join(' ')} vs ${ink.data}`);
+  check('the end point carries the state: the status colour, the data ink when held',
+    drawn.every((c) => c.end === (c.state === 'improved' ? ink.strong : c.state === 'declined' ? ink.weak : ink.data)),
+    drawn.map((c) => `${c.name} ${c.state} ${c.end}`).join(', '));
+  check('the end point has a radius of 3px', drawn.every((c) => c.endRadius === 3));
+  check('the number beside a chart is never in the chart\'s colour', measured.filter((c) => c.rightColor).every((c) => c.stroke.replace(/\s/g, '') !== c.rightColor.replace(/\s/g, '')));
+  check('the line is 1.5px with round ends', measured.every((c) => c.strokeWidthPx === 1.5 && c.lineCap === 'round'), measured.map((c) => `${c.strokeWidthPx}/${c.lineCap}`).join(','));
+  const identities = charts.map((c) => c.identity);
+  check('a muscle\'s own colour is an 8px dot, one per group, and on no chart',
+    new Set(identities).size === 10 && charts.every((c) => c.identitySize?.[0] === 8 && c.identitySize?.[1] === 8) &&
+      drawn.every((c) => c.stroke !== c.identity && c.end !== c.identity),
+    identities.join(' '));
 
   /* ── 4. What assistive technology is told ───────────────────────────── */
   const a11y = await page.locator('.muscle-rows').evaluate((list) => {

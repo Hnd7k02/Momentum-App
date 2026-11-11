@@ -23,6 +23,8 @@ import { CHROMIUM, URL_APP, check, summary, onboard, seed, seedTraining, openMus
 
 /** Breathing room required between a glyph box and the edge that clips it. */
 const MIN_INSET = 12;
+/** The one side margin, card to screen edge (contract §4). */
+const SIDE_MARGIN = 16;
 
 const ART = new URL('../../.artifacts/', import.meta.url);
 mkdirSync(ART, { recursive: true });
@@ -122,8 +124,12 @@ function findClipped(MIN_INSET) {
   return hits;
 }
 
-/** Every card, measured against the screen edge it should keep clear of. */
-function findBadGutters(MIN_GUTTER) {
+/**
+ * Every card against the one side margin (contract §4, D160): 16px, on every
+ * screen. No card comes closer to the edge than that, and a card that spans
+ * the screen stands exactly on it, on both sides.
+ */
+function findBadGutters(GUTTER) {
   const out = [];
   const width = document.documentElement.clientWidth;
   for (const card of document.querySelectorAll('[data-card], .card')) {
@@ -131,9 +137,11 @@ function findBadGutters(MIN_GUTTER) {
     if (r.width === 0) continue;
     // A card nested inside another is inset by its parent, not by the screen.
     if (card.parentElement?.closest('[data-card], .card')) continue;
-    if (r.left < MIN_GUTTER - 1 || width - r.right < MIN_GUTTER - 1) {
-      out.push(`${card.className || card.tagName} at ${Math.round(r.left)}…${Math.round(r.right)} of ${width}`);
-    }
+    const left = r.left;
+    const right = width - r.right;
+    const where = `${card.className || card.tagName} at ${Math.round(left)}…${Math.round(r.right)} of ${width}`;
+    if (left < GUTTER - 1 || right < GUTTER - 1) out.push(`${where} — inside the margin`);
+    else if (r.width > width * 0.6 && (Math.abs(left - GUTTER) > 1 || Math.abs(right - GUTTER) > 1)) out.push(`${where} — off the margin`);
   }
   return [...new Set(out)].slice(0, 6);
 }
@@ -180,12 +188,14 @@ const describe = (hits) =>
 async function audit(page, name, width) {
   const hits = await page.evaluate(findClipped, MIN_INSET);
   const wide = await page.evaluate(findWideDocument);
-  // Today keeps the roomier 20px treatment; the browsing screens use 16px.
-  const gutter = name.startsWith('today') ? 18 : 14;
-  const gutters = await page.evaluate(findBadGutters, gutter);
+  // One side margin on every screen since Stage 6b. This used to ask for at
+  // least 18px on Heute (its roomier 20px treatment) and at least 14px
+  // elsewhere; it asks for 16px everywhere now, and exactly 16px of a card
+  // that spans the screen.
+  const gutters = await page.evaluate(findBadGutters, SIDE_MARGIN);
   check(`${width} · ${name} · no text on or past a clipping edge`, hits.length === 0, describe(hits));
   check(`${width} · ${name} · nothing overflows the document sideways`, wide.length === 0, wide.join('; '));
-  check(`${width} · ${name} · every card keeps its gutter from the screen`, gutters.length === 0, gutters.join('; '));
+  check(`${width} · ${name} · every card stands on the one ${SIDE_MARGIN}px side margin`, gutters.length === 0, gutters.join('; '));
   await page.screenshot({
     path: new URL(`${name.replace(/\s+/g, '-')}-${width}.png`, ART).pathname,
   });
