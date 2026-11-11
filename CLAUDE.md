@@ -266,25 +266,46 @@ Never conflate them.
 
 ## Interface rules
 
-- Design tokens only (`src/styles/tokens.css`). `contrast.test.ts` parses that
-  file and will fail a colour that does not clear its promise.
-- **Two worlds, one vocabulary** (D145). `:root` is Mind, light, and the
-  shell every shared screen is drawn in; `[data-world="gym"]` is Gym, dark.
-  The Gym block redefines colours and shadows, nothing else. A screen declares its world with
-  `useWorld` (`app/world.ts`), which puts the attribute on `<html>` so the
-  tab bar, the sheets and the status bar follow; a Gym card on a shared
-  screen is a `data-tile="gym"` tile, on the card, never on its section.
-  `contrast.test.ts` holds each set against its own ground.
+- **The visual contract is [`docs/wp3/vertrag.md`](docs/wp3/vertrag.md)**
+  (D160): how every screen looks and speaks. The rules below are the ones
+  that stay true; `src/styles/designRules.test.ts` and
+  `scripts/verify/design-system.mjs` enforce them.
+- Design tokens only (`src/styles/tokens.css`): no colour, font size, layer
+  or duration is written anywhere else, and `designRules.test.ts` walks
+  `src/` for one. The two exceptions are the rank badge, a fixed graphic
+  (`RankBadge.tsx`), and the dev harness `BodyDevPage.tsx`.
+  `contrast.test.ts` parses the token file and will fail a colour that does
+  not clear its promise.
+- **Two worlds, one system** (D145, D148). `:root` is Mind, light, and the
+  shell every shared screen is drawn in; `[data-world="gym"]` is Gym,
+  graphite with one violet accent. The Gym block redefines colours, shadows
+  and the glass, nothing else. A screen declares its world with `useWorld`
+  (`app/world.ts`), which puts the attribute on `<html>` so the tab bar, the
+  sheets and the status bar follow; in Bereiche the whole screen turns with
+  the area. A Gym card on a shared screen is light like the screen it
+  stands on, and a sheet follows the screen that opened it. There is no
+  variant and no dark tile. `contrast.test.ts` holds each set against its
+  own ground.
+- **Colour has three jobs** (D154, D160). The accent means *operable* — a
+  button, a link, the chosen option, the active tab. The status palette
+  means *the state of the data*. Everything else is neutral: an area has no
+  colour of its own, a bar or a line that shows a value is `--data-ink` on
+  `--data-track`, and the one coloured bar is a weekly target that has been
+  met (`--data-met`). A muscle's identity colour is an 8px dot before its
+  name and nothing else. Do not bring back a pastel family, a `--domain-*`
+  alias or mint.
 - **Glass is one blur per card** (D146): `backdrop-filter` with the
-  `-webkit-` prefix, a hairline light border, the solid `--glass-solid`
-  where blur is unsupported or less transparency was asked for. Nothing
-  blurs over or under the 3D canvas while it can move; the body's card and
-  its pills are solid, and a sheet over the body stands over a still one.
-  The ground is one layer, painted by the shell and by a full-screen
-  overlay; a header never paints it again.
-- **Text on glass is measured, not assumed** (D147). `wp3-stage6a.mjs` reads
-  the rendered pixels under every visible run of text; the ground's washes
-  are bounded by secondary text clearing 4.5:1 at their centre.
+  `-webkit-` prefix, a 1.5px gradient edge (`--glass-edge`), the solid
+  `--glass-solid` where blur is unsupported or less transparency was asked
+  for. Nothing blurs over or under the 3D canvas while it can move; the
+  body's card and its pills are solid, and a sheet over the body stands
+  over a still one. The ground is one layer, painted by the shell and by a
+  full-screen overlay; a header never paints it again.
+- **Text on glass is measured, not assumed** (D147, D149).
+  `design-system.mjs` reads the rendered pixels under every visible run of
+  text on every screen at 320, 360, 393 and 430 and holds all of it at
+  4.5:1 — the captions (`--text-tertiary`) included. The ground's washes
+  and a sheet's fill are bounded by that measurement.
 - **Status colours have one definition** (D123): `--status-{weak,mixed,good,
   strong}` in `tokens.css`, the same four fills in both worlds. CSS uses
   `var()`; TypeScript and WebGL read the same file through
@@ -294,10 +315,26 @@ Never conflate them.
   cell move with the world (D145); the body never paints the empty cell. The
   1–10 answer and the 0–100 scores both resolve to the same four statuses and
   the same `status.*` labels; text moves to read, the bar never does.
+- **Type and numbers.** The scale is 34, 22, 17, 15, 13, 11 and no text is
+  under 11px. A number takes a figure step — `--type-figure-xl` for the one
+  main number of a screen, `-l` on a tile and in a sheet's head, `-m` in a
+  strip, 17px semibold in a row — with tabular digits wherever numbers
+  stand in a column and its unit smaller and secondary (`Figure`).
+- **Density.** One side margin of 16px on every screen (`--page-gutter`),
+  a card inset of 16px, a row at least 54px.
+- **One order of buttons** on every screen: at most one primary, the tinted
+  second step, a text button in `--accent-ink`, and quiet for the first tap
+  of a destructive act — only its confirmation carries `--status-weak-ink`.
+- **A chart** is a neutral 1.5px line or neutral bars with a fine zero
+  line and no wash beneath; the end point or the last bar carries the
+  state. The rows of a list share one scale, −12 % to +12 %. No data draws
+  nothing and one value draws a dot.
+- **A screen that loads holds its layout** with calm surfaces
+  (`LoadingBlocks`), no shimmer — and never for a load that failed.
 - Touch targets 44px effective. A control may reach it with a negatively
   inset `::before`.
 - No horizontal clipping at 320/360/393/430px.
-- Reduced motion respected.
+- Reduced motion and reduced transparency respected.
 - Avoid technical vocabulary in user-facing copy — no "IndexedDB", "JSON",
   "service worker", "snapshot".
 - German is the source of truth for strings; English is typed against it and

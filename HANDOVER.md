@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D161). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D162). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chooses the variant at STOP 6a, and Stage 6b rolls it out. Stage 5 (the Gym metric) follows Stage 6; Stage 7 after both. **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). The colour rules of the muscle status, Stage 5b and Stage 7 follow (D159). **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -560,7 +560,8 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   sets, pyramids, drop sets or deloads occur in his history (needed by
   Stage 5b); the iPhone model and iOS version (needed by 7B). He has no
   Mac.
-- **Order from here** (D159): Stage 6b, the colour rules of the muscle
+- **Order from here** (D159): Stage 6b (done, see below; waiting for the
+  owner at STOP 6b), the colour rules of the muscle
   status, Stage 5b, 7A (stage 1 of the body and the proof gate), 7B, 7C, 9;
   the tidy-up of D157 as a block of its own. Each block starts in a fresh
   session from its prompt under `docs/wp3/prompts/`.
@@ -569,9 +570,102 @@ not merged; the choice between the variants is the owner's at STOP 6a)
 - **Recorded by the review, corrected in the tidy-up block:** the device
   screenshots named under "Verification status" are iPad screenshots of a
   design canvas, not the app on an iPhone; `README.md`,
-  `docs/release-candidates.md` and `docs/device-tests.md` describe RC2; the
-  verify scripts name a Chromium path the cloud image no longer has (6b
-  repairs it first).
+  `docs/release-candidates.md` and `docs/device-tests.md` describe RC2. (The
+  verify scripts' Chromium path was the third item; Stage 6b repaired it —
+  one constant in `lib.mjs`, `CHROMIUM_PATH` to override.)
+
+**WP3 Stage 6b — variant B is the design system** (branch
+`claude/momentum-wp3`, not merged; waiting for the owner's acceptance on the
+iPhone at STOP 6b)
+- **What it is.** The look of every existing screen, and nothing about what
+  the app does. `src/core/`, `src/storage/`, the data schema, the backup
+  format, `muscleState.ts`, the GLB, the body's light and material values
+  and `body-preview.webp` are untouched; `git diff 7e2a5ce -- .github/fixtures`
+  is empty and `domainOutputs.test.ts` holds the same fingerprints. The one
+  string that changed is the heading over the exercise detail's day list
+  ("Letzte Trainingstage" / "Recent training days").
+- **One system** (D148). Variant B's values are folded into `tokens.css`;
+  `stage6-variant-b.css`, `data-variant` and the dark Gym tile on a light
+  screen (`data-tile`) are gone. Proven before anything else moved: the
+  thirteen Stage 6a screens rendered pixel for pixel as variant B did.
+- **Colour has three jobs** (contract §2, D154, D160). The pastel families
+  (mint, lilac, rose, peach, sand) and the sixteen `--domain-*` aliases are
+  removed; a bar or a line that shows a value is `--data-ink` on
+  `--data-track`; a met weekly target is the one coloured bar
+  (`--data-met`); a muscle's own colour is an 8px dot, pulled 35 % towards
+  its grey, and never its chart; the Mind ground keeps two washes and Gym
+  one. `--text-tertiary` is `#64646f` and `#9896a6` and is held at 4.5:1.
+- **Type, figures, density** (§3, §4). No text under 11px (the tab bar and
+  one muscle label were 10px); three figure steps and `Figure`, which sets
+  a unit smaller and secondary; one side margin of 16px on every screen
+  (`--page-gutter` — the workout stood at 36px), a card inset of 16px, a
+  row of at least 54px.
+- **Controls** (§5). At most one primary action per screen, the tinted
+  second step, text buttons in `--accent-ink`, a destructive act quiet on
+  its first tap; the segmented control at 32px with a 44px target.
+- **Charts** (§6). The muscle rows share one scale, −12 % to +12 %, with a
+  zero line, a neutral 1.5px line and the state on the end point; the trend
+  on Verlauf lost its wash and gained its zero line and a labelled end; the
+  exercise detail's bars are neutral with the latest in the colour of its
+  change, the scale named on the left at the height of the bars it names,
+  the first and the last date beneath.
+- **Layers, motion, loading** (§10, §11). Every `z-index` and duration is a
+  token; a loading screen holds its layout with calm surfaces
+  (`LoadingBlocks`) and never for a load that failed.
+- **The rules are tests** (§14). `designRules.test.ts` walks `src/` and
+  fails on a colour, a font size, a layer or a duration written outside
+  `tokens.css`, on a removed token family, on a second place that draws a
+  muscle colour, on a type token under 11px; `contrast.test.ts` holds the
+  two worlds, the stage and the data bars; `designSystem.test.tsx` the
+  components; in the browser `design-system.mjs` (successor of
+  `wp3-stage6a.mjs`) walks 39 screens at 320, 360, 393 and 430px and holds
+  world, status-bar colour, width, and every visible run of text at 4.5:1
+  and 11px on its rendered pixels. Each rule was broken once on purpose and
+  seen to fail (19 source mutations, 6 in the browser).
+- **Two values the measurement overruled, and the small choices** are D162:
+  the light sheet's fill is 0.92, not B's 0.78, and the Gym wash 0.24, not
+  0.28 — both where text fell under 4.5:1 on rendered pixels.
+- **Review.** Every screenshot was looked at, at four widths, and the diff
+  was read against the contract by five read-only reviewers with a refuter
+  each (8 findings confirmed, 4 refuted). Fixed from both: the bars' labels
+  stood at the baseline, not at their bars; a chart's visible text was
+  never measured because it is hidden from assistive technology (measuring
+  it found the bars' axis at 4.29:1); a sheet could scroll sideways unseen;
+  a check that could not fail; the onboarding's target cards squeezed at
+  320px; a unit wrapping away from its number; two figure rows off their
+  baseline. The full list is in the STOP 6b report.
+- **Verification** (final build `535e2b3`): `tsc -b` 0; `npm run test`
+  exit 0, 108 files, 1699 tests (1761 before: 108 fewer for
+  the two variant sets `contrast.test.ts` no longer has to hold, the rest
+  new rules); build `index.css` 87.94 kB, `index.js` 497.56 kB (86.74 kB and
+  489.89 kB before — the script grew mostly because `tokens.css` is read
+  as text by `statusPalette.ts` and now carries the body's and the stage's
+  values); browser suites: 37 as before (`design-system.mjs` in
+  place of `wp3-stage6a.mjs`), 3620 of 3621 checks against 2650 of 2651 —
+  the one red check is the same before and after (below). In the full
+  parallel run `wp3-stage1.mjs` also failed one check, at a different width
+  each time: it sampled the toast the instant after a sheet was attached,
+  and the toast goes 4–8 ms later, in the sheet's effect. The check now
+  waits for that, within a second; 312/312 alone and under the same load.
+  The 3D suites ran alone: `gym-muscles` 71/71, `body-reach` 3/3, `body`
+  39/39. Lowest text contrast measured:
+  Mind 4.70:1 (the tinted "Freie Session" on the plan chooser), Gym 4.79:1
+  (the exercise detail's "Zuletzt" label at 430px)
+  (`docs/design/wp3/stage6b/text-contrast.json`).
+- **Known, not from this stage.** `release-proof.mjs` fails one check as it
+  did before the first change of this stage (three runs of the baseline):
+  "offline, Gym still shows the 3D body". Offline in headless Chromium the
+  first dynamic import of the body chunk fails although the worker has it
+  cached and a plain `fetch()` of the same URL answers 200; `vite preview`
+  sends `Vary: Origin`, which GitHub Pages does not, and with Muskelgruppen
+  visited once online the same offline run passes. To be settled on the
+  device in flight mode, and in the tidy-up block if it is real.
+- **Seen, left for later blocks.** "Gehalten" stays yellow in a row until
+  the colour-rules block turns it on body, legend and rows at once; a fall
+  is printed with a hyphen-minus; the body is small at 320px and stands
+  still while it loads (7A, 7B); the running workout's companion is still
+  a placeholder (P12); seven target bubbles wrap to a lone "7" under
+  430px; `tokens.css` travels as text inside the script.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
@@ -986,8 +1080,10 @@ one area's workspace, with the area in the route
 Verlauf and Rang are unchanged in role: Verlauf stays the overall, historical
 overview and keeps every domain's daily row. Gym carries its board, then
 Muskelgruppen — the 3D body above ten analytics rows, each with its identity
-dot, name, last-trained day, an 80 × 24 sparkline in the group's identity
-colour and the percentage or state in the state colour — then Übungen, then
+dot, name, last-trained day, an 80 × 24 sparkline and the percentage or
+state in the state colour (since WP3 Stage 6b the line is neutral on one
+scale shared by the ten rows, with the state on its end point; the group's
+own colour is the dot and nothing else) — then Übungen, then
 Laufen as its own section with its board and target card. The body, the rows
 and the exercise list share one selected group; a body tap selects and never
 clears, a row tap toggles. Three.js arrives in a lazy chunk (235 kB gzip)

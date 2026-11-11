@@ -3649,3 +3649,120 @@ Built in Stage 6b.
 
 Built in blocks 7A, 7B and 7C; the target is `docs/wp3/vertrag.md` §8
 and §9.
+
+## D162 — Stage 6b: what the contract left open, and the two values the pixels overruled
+
+**Proposed (Stage 6b, 2026-11-11; the owner accepts or changes them at
+STOP 6b).** Stage 6b applied `docs/wp3/vertrag.md` to every existing screen.
+Where the contract fixes a value, that value is built. This entry records
+the two places where a measured result overruled a value variant B was
+built with, and the small choices made where the contract is silent — each
+made in the sense of its model (D154), each a line in the STOP 6b report.
+
+**Two deviations, both by measurement.** The contract's table gives the light sheet's fill
+(`--glass-fill-strong`) as variant B built it, `rgba(255, 255, 255, 0.78)`.
+B's light sheets were never shown at STOP 6a — the screenshots held one
+sheet, a Gym one — and the new browser suite measured what 0.78 does over
+a dimmed screen: a text button in the accent's ink read at 4.38:1, and the
+screen behind showed through as ghost text. The contract's own §12 and §14
+hold every text at 4.5:1 on the rendered pixels, so the fill is 0.92: the
+value at which every text on a sheet still clears 4.5:1 over the darkest
+thing a light sheet can cover, the Boss's stage. D147 had settled the same
+conflict the same way: the measurement bounds the surface.
+
+The second is the strength of the Gym ground's violet wash, which the
+contract keeps "as built" without naming a number: `0.28` in variant B. A
+glass card deepens the violet beneath it (its backdrop is saturated), and
+the wash is widest on the widest phone. On the exercise detail the 11px
+labels of the first card under the header — second text level, not the
+caption grey — read at 4.94:1 at 320px, 4.65:1 at 393px and 4.44:1 at
+430px. None of the thirteen Stage 6a screens stood a small label there at
+430px. The wash is `0.24`: the same label reads 4.79:1 at 430px and 4.78:1
+at 440px, the widest iPhone. It is the smallest step that holds with room,
+and it is the wash that moved, not the text: every small label near the
+top of every Gym screen stands on the same violet.
+
+What the same measurement says about the caption grey is recorded rather
+than acted on: `--text-tertiary` clears its promise on a Gym card
+(`contrast.test.ts`), but in a glass card's lightest corner under the wash
+it does not — 4.29:1 at 440px for the bar chart's upper label. The labels
+that stand there (the exercise detail's figure labels, its axis and its
+dates) therefore take the second text level, and the browser suite holds
+every caption on every screen where it is actually drawn. Making the
+caption grey safe everywhere on glass would mean a wash of about half its
+strength or a lighter grey than the contract fixes; that is the owner's
+call, not a cleanup.
+
+**Where the contract is silent.**
+
+- *A bar is a value, on the stage too.* The Boss's progress bar on Heute
+  and Rang was a lilac-to-sky gradient. Lilac is gone and sky is the
+  information colour, so the gradient was a colour without one of the three
+  jobs: the bar is the stage's neutral data ink. The stage itself (D16) and
+  the badge (D48) are untouched; the stage's text greys are opaque values,
+  so `contrast.test.ts` can hold them.
+- *The app mark* on the welcome screen keeps the icon's own gradient, as
+  the token `--brand-mark`: it is the icon, a fixed graphic like the badge.
+  The onboarding paints the app's one ground instead of a stronger wash of
+  its own (D146).
+- *A chosen muscle row* is marked by the accent — a ring round its dot —
+  and a semibold name. The ring in the muscle's own colour went with D154.
+- *"Gehalten" keeps its yellow* in a row's number and chip until the
+  colour-rules block (D153), which turns it neutral on the body, in the
+  legend and in the rows at once; turning the rows alone would make the
+  body and its list disagree. The chart's end point is already neutral for
+  a held group, as §6 says.
+- *Neutral chips.* The question-type badges, the pause's "Läuft" and the
+  ladder's "Erreicht" are neutral chips told apart by their words: none of
+  them is a state of the data.
+- *One primary action per screen* made two buttons step back to the tinted
+  second step: the pause form's "Pause sichern" and the legacy-Sport
+  confirmation, both on Bereiche, where Gym already has "Training
+  erfassen". The archive confirmation's box is calm and only its button
+  carries the warning colour.
+- *Figure steps.* The one tile that carries its screen's main number takes
+  `--type-figure-xl` (the Gym rating on the hub, Mind's rating, the overall
+  trend on Muskelgruppen); every other tile takes `-l`. The rank's name on
+  the hero is `-l` (30px before, 28px now); the onboarding's two display
+  sizes (32 and 36px) are the large title (34px).
+- *A row of a value table* — a day and its figure, in the exercise and the
+  question detail — keeps 40px (`--row-height-compact`). The 54px row is a
+  row that names a thing or can be tapped.
+- *Charts.* On Verlauf the fine line marks where the range began: the zero
+  the direction is read against. The exercise detail's scale runs from its
+  smallest day to its largest, and names both as the sets that produced
+  them, the way the screen prints a day's value everywhere else. Each of
+  the two labels stands at the height of the bar it names, on a fine line
+  across the plot; the smallest day keeps a foot of 30 % beneath its line,
+  so that it is a bar and not nothing. The bars are a ranking of days, not
+  a ratio to zero — with strength figures a tenth apart, bars from zero
+  would be twelve equal columns. From 24 days the bars stand closer, so a
+  season of one exercise fits 320px; beyond what fits, the oldest leave
+  the plot, never the latest. A single observation in a muscle row stands
+  at the height of its value on the shared scale.
+- *The muscle row wraps at 360px and below*, not only at 320px as §6 says:
+  at 360px an 80px chart beside the number leaves "Beinbeuger und Gesäss"
+  about 100px, three lines. The chart is 64px wide wherever the row wraps.
+- *A figure that is words.* "Noch keine Serie" on Rang stood at figure
+  size; it is set like every other "nothing to show yet" — a step smaller,
+  second text level.
+- *A scroll port scrolls one way.* A sheet's body and the onboarding's
+  list clip sideways (`overflow-x: clip`), as the tab screens already did:
+  no box in the app scrolls sideways on purpose, and the suite now fails
+  one that could.
+- *The reveal* of a promotion's badge (900ms) is named
+  `--duration-reveal`, so that no duration is written outside the tokens.
+- *The body's material and light colours* moved into `tokens.css` with
+  their values unchanged, so that the rule "no colour outside the token
+  file" has only the two exceptions the contract names. Block 7A owns the
+  values.
+- *The Stage 6b screenshots* are JPEG at twice the CSS size: about 150
+  lossless phone screenshots of glass and gradients would weigh some 100 MB.
+
+**Left as it is, on purpose.** A fall is still printed with a hyphen-minus
+("-3 %"), not a minus sign: the string is asserted by tests and suites and
+belongs to the colour-rules block, which rewrites these words anyway. The
+3D body, its stage and the muscle sheet are blocks 7A to 7C.
+
+`tokens.css`, `designRules.test.ts`, `contrast.test.ts`,
+`scripts/verify/design-system.mjs`.
