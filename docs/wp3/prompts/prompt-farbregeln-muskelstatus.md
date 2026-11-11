@@ -81,7 +81,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 
 **Suites, die alte Wörter oder Regeln prüfen**
 
-`scripts/verify/gym-muscles.mjs:151` und `wp3-reload.mjs:296` («Noch kein Vergleich»; `wp3-reload` prüft ausserdem den Wechsel zwischen 7 und 30 Tagen), `wp3-stage1.mjs:763–787` («Gehalten» bei einer Veränderung, die auf 0 % rundet), `phase4-a11y.mjs:106` (die Namen der Zustände), `design-system.mjs` (Muskelgruppen mit leerem Zeitraum, 45 Tage nach der letzten Session; in den Zeilen 645–648 tippt sie dort auf «7 Tage» und erwartet «Kein Training in den letzten 7 Tagen»).
+`scripts/verify/gym-muscles.mjs:151` und `wp3-reload.mjs:296` («Noch kein Vergleich»; `wp3-reload` prüft ausserdem den Wechsel zwischen 7 und 30 Tagen), `wp3-stage1.mjs:763–787` («Gehalten» bei einer Veränderung, die auf 0 % rundet), `phase4-a11y.mjs:106` (die Namen der Zustände), `design-system.mjs` (Muskelgruppen mit leerem Zeitraum, 45 Tage nach der letzten Session; in den Zeilen 645–648 tippt sie dort auf «7 Tage» und erwartet «Kein Training in den letzten 7 Tagen»). Das «Gesamt» der Karte und den Zähler «n von 10 gewertet» prüfen `scripts/verify/wp2-2-shots.mjs:91` und der Komponententest `src/features/gym/gymHub.test.tsx:120`.
 
 **Prüfung**
 

@@ -566,8 +566,9 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   of the body (section 4 of the 7A prompt has the place for them); under
   which address he opens the live app (the documents say
   `dario02king.github.io`, the repository is under `Hnd7k02` — asked at the
-  start of block 9, because pages of one origin share the `momentum`
-  database in one browser); the name for the licence file (tidy-up block).
+  start of block 5b and again in block 9, because pages of one origin share
+  the `momentum` database in one browser, and the preview runs under
+  `hnd7k02.github.io`); the name for the licence file (tidy-up block).
 - **Order from here** (D159): Stage 6b (done and accepted, see below), the
   colour rules of the muscle status, Stage 5b, 7A, 7B, 7C, 9, and the
   tidy-up of D157 last — the order the owner gave on 2026-11-11. Each block

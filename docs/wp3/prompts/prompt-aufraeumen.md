@@ -82,7 +82,7 @@ Fehlt das, bau nichts. Sag Dario, was fehlt, und halte an.
 
 - Die Schaltfläche steht in der Planwahl: `src/features/gym/PlanChooserSheet.tsx:57–59` (`plans.chooser.manage`).
 - `src/features/gym/useTrainingLauncher.tsx:126–129` schliesst das Sheet und ruft `onManagePlans` des Wirts.
-- Drei Wirte: `src/features/areas/GymTerminal.tsx:47` und `63` übergeben `scrollToPlans` (Zeile 35; der Anker ist ein Ref in Zeile 31, angehängt in 104). `src/features/today/TodayScreen.tsx:156` geht mit `onGoToAreas('gym')` in die Gym-Übersicht, ohne zu den Plänen zu rollen. `src/features/gym/GymMusclesScreen.tsx:39` übergibt `onBack` und landet ebenfalls oben in der Gym-Übersicht; der Kommentar darüber sagt es.
+- Drei Wirte: `src/features/areas/GymTerminal.tsx:47` und `63` übergeben `scrollToPlans` (Zeile 35; der Anker ist ein Ref in Zeile 31, angehängt in 104). `src/features/today/TodayScreen.tsx:156` geht mit `onGoToAreas('gym')` in die Gym-Übersicht, ohne zu den Plänen zu rollen. `src/features/gym/GymMusclesScreen.tsx:39` übergab am Stand `af89fd9` sein `onBack` und landete ebenfalls oben in der Gym-Übersicht. Block 7B hat Zurück und «Pläne verwalten» dort getrennt; lies in `HANDOVER.md`, wie der Wirt jetzt aussieht.
 - Einen Ort «Pläne» in der Adresse gibt es nicht (`src/app/route.ts`).
 
 **Die Offline-Prüfung**
@@ -127,8 +127,8 @@ Berichtige, was falsch ist; schreib nichts neu, was stimmt.
 
 ### Schritt 4 – «Pläne verwalten» führt zu den Plänen
 
-- Wer in der Planwahl «Pläne verwalten» antippt, steht danach bei den Trainingsplänen in der Gym-Übersicht: aus dem leeren Muskelgruppen-Screen (der Befund aus D163) und von Heute aus. Beides hat dieselbe Ursache; behebe sie einmal.
-- Zurück, als Taste und als Geste des Systems, führt von dort zum vorigen Ort: zu Muskelgruppen oder zu Heute.
+- Wer in der Planwahl «Pläne verwalten» antippt, steht danach bei den Trainingsplänen in der Gym-Übersicht: aus dem leeren Muskelgruppen-Screen (der Befund aus D163) und von Heute aus. Beides hat dieselbe Ursache: Wer in der Gym-Übersicht ankommt, bringt seine Absicht nicht mit. Behebe sie einmal.
+- Zurück, als Taste und als Geste des Systems, führt von dort zum vorigen Ort: zu Muskelgruppen oder zu Heute. Das ist neu und gehört zu diesem Schritt.
 - Der Fokus steht danach bei den Plänen, damit auch Vorlesehilfen dort ankommen.
 - Die Adresse bekommt keinen neuen Ort, ausser du begründest, warum es ohne nicht geht.
 - Ein Komponententest und eine Prüfung in einer Browser-Suite halten beide Wege fest.
@@ -147,7 +147,7 @@ Mach ein Inventar, ohne etwas zu entfernen: die grössten Dateien im aktuellen S
 
 ### Schritt 7 – Schlussprüfung und Vorschau
 
-1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Suites über den Befehl aus Block 9, lokal und auf GitHub. Es gibt keine bekannte rote Prüfung mehr, oder du sagst genau, warum doch.
+1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Suites über den Befehl aus Block 9, lokal und auf GitHub. Es gibt keine bekannte rote Prüfung mehr, oder du sagst genau, warum doch. Hält `HANDOVER.md` fest, dass der Workflow aus Block 9 noch nicht auf GitHub liegt, entfällt der Lauf dort, und dein Bericht sagt es.
 2. `git diff <Commit vor diesem Block> -- .github/fixtures` ist leer. Unter `src/` haben sich Logik und Verhalten nur dort geändert, wo die Schritte 4 und 5 es verlangen; dazu dürfen Kommentare und die Texte der Nennung berichtigt sein.
 3. `git status` ist sauber; die fünf Dateien sind weg; `LICENSE` steht, sobald Dario den Namen genannt hat.
 4. Trag den Stand in `HANDOVER.md` ein und halt in `docs/decisions.md` fest, was du entschieden hast.
@@ -180,7 +180,7 @@ Kein Test wird gelöscht oder abgeschwächt. Gehört eine Suite zu einem Stand, 
 - `README.md` beschreibt die App von heute; die sechs Widersprüche aus dem Review sind aufgelöst oder begründet offen.
 - «Pläne verwalten» führt aus dem leeren Muskelgruppen-Screen und von Heute zu den Plänen; Test und Suite halten es fest.
 - Die Offline-Prüfung ist grün, mit einem Server, der wie GitHub Pages antwortet, oder der Fehler der App ist behoben und getestet.
-- `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, alle Suites bestehen lokal und auf GitHub.
+- `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, alle Suites bestehen lokal und, wo der Workflow liegt, auf GitHub.
 - Der Vorschau-Build ist erreichbar.
 
 ## 9. STOP Aufräumen
@@ -205,7 +205,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 3. Zurück führt beide Male zum vorigen Screen: zu Muskelgruppen oder zu Heute.
 4. Bereiche → Einstellungen: Die Nennung des 3D-Modells stimmt.
 5. Eine Stichprobe, dass sonst nichts anders ist: Heute, Muskelgruppen mit einem Sheet, ein Workout.
-6. Auf GitHub im Browser: Die drei Altdateien sind im aktuellen Stand weg, die Lizenzdatei steht, und die Startseite des Repos beschreibt die App von heute.
+6. Auf GitHub im Browser: Die fünf Altdateien (das Zip, die Backup-Kopie, die drei Bilder) sind im aktuellen Stand weg, die Lizenzdatei steht, und die Startseite des Repos beschreibt die App von heute.
 7. Erst nach dem Go-live: Flugmodus einschalten und die Live-App öffnen. Heute erscheint, und in Muskelgruppen steht der Körper (D163).
 8. Erst nach dem Go-live: das Repo der Vorschau löschen, wenn du es nicht mehr brauchst.
 

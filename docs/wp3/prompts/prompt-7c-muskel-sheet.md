@@ -118,8 +118,11 @@ Die Sheet-Komponente lernt beides, ohne dass ein bestehendes Sheet sein Verhalte
 - Beim Öffnen rückt die Kamera die Gruppe in das Fenster, das über dem Sheet frei bleibt (auf einem iPhone rund 190 px), und bleibt dann stehen (D161).
 - **Nach einem Tipp auf den Körper ändert sich der Drehwinkel nicht:** Die Gruppe ist schon zugewandt, die Kamera rückt sie nur ins Fenster. Aus der Liste geöffnet dreht der Körper zuerst hin, wenn die Gruppe abgewandt ist. So gelten §8 («ein Tipp dreht nie») und §9 zugleich.
 - **Die Reihenfolge beim Öffnen:** Das Sheet fährt hoch, die Kamera fährt zur Gruppe, und sobald sie ruht, greift die Pause aus Block 7B. «Kein Bild» zählt ab diesem Moment.
+- **Kein Weichzeichner, solange die Kamera fährt** (D146, `CLAUDE.md`): Bis sie ruht, liegt weder das Glas des Sheets noch der weichgezeichnete Hintergrund (`.sheet-scrim` in `ui.css`) über dem Körper. Entweder benutzen beide bis dahin die deckende Fläche, oder die Kamera ist am Ziel, bevor das Sheet den Körper erreicht. Miss beide Wege mit der Messanzeige und nimm den, der flüssig bleibt; eine Prüfung hält fest, dass kein Weichzeichner über dem Körper liegt, während ein Bild entsteht.
+- **Zoom.** Hatte der Nutzer gezoomt, ersetzt die Fahrt zur Gruppe seinen Zoom. Beim Schliessen steht die Bühne wieder bei Zoom 1,0; der Drehwinkel bleibt, wo er ist.
 - **Solange das Sheet offen ist, wird der Körper nicht neu gezeichnet** (D155). Ändert sich unter dem offenen Sheet, was er zeigen muss (der Zeitraum), forderst du genau ein Bild an, und er steht wieder.
 - **Beim Schliessen** endet zuerst die Pause, dann fährt die Kamera in die Ansicht der Bühne zurück, und die Schleife läuft wieder nach Bedarf.
+- Die Prüfungen aus Block 7B, die nach einem Tipp auf den Drehwinkel schauen, bleiben. Hält eine die ganze Kamera fest, schreibst du sie auf den Drehwinkel um und nennst es im Bericht.
 - Bei reduzierter Bewegung springt die Kamera.
 
 ### Schritt 4 – Der Inhalt
@@ -150,7 +153,7 @@ Dazu:
 - **Was es ist** (D152): die Summe aus Wiederholungen × Last über die Arbeitssätze, je Muskelgruppe und Woche. Aufwärmsätze zählen nicht. Die Last ist die effektive Last, wie die Kennzahl sie liest. Die Woche beginnt am Montag wie überall in der App.
 - **Wie viel einer Gruppe zusteht:** Eine Übung trifft mehrere Gruppen. Nimm dafür die Anteile, mit denen die Wertung eine Übung auf ihre Gruppen verteilt (`core/gym/muscles.ts`), damit eine Verbundübung nicht für jede Gruppe voll zählt. Nenn die Regel am STOP; hältst du eine andere für besser, begründ sie dort.
 - **Eine reine, getestete Funktion.** Sie darf unter `src/core/gym/` stehen. Nichts unter `src/core/scoring/`, kein Rating-Dienst und `muscleState.ts` lesen sie; ein Test über die Quelltexte hält das fest, wie `foodRetirement.test.ts` es für Food tut.
-- **Die Balken** (Vertrag §6, D163): neutral in `--data-ink` mit 55 % Deckkraft, ab null, die Wochen des gewählten Zeitraums, jede mit Kalenderwoche und Wert in der gewählten Einheit. Kein Balken trägt eine Statusfarbe, auch der letzte nicht: Nach D152 geht das Volumen in keine Farbe ein. Das weicht bewusst vom Satz in §6 über den letzten Balken ab; nenn es am STOP. Bei 90 Tagen und 320 px passen dreizehn Wochen in die Breite; entscheide, welche Beschriftungen dann stehen bleiben.
+- **Die Balken** (Vertrag §6, D163): neutral in `--data-ink` mit 55 % Deckkraft, ab null, die Wochen des gewählten Zeitraums, jede mit Kalenderwoche und Wert in der gewählten Einheit. Kein Balken trägt eine Statusfarbe, auch der letzte nicht: Nach D152 geht das Volumen in keine Farbe ein. Das weicht bewusst vom Satz in §6 über den letzten Balken ab; nenn es am STOP. Bei wenigen Wochen trägt jeder Balken Wert und Kalenderwoche wie im Mockup. Bei 90 Tagen stehen dreizehn Wochen in der Breite, auch bei 320 px; passen die Werte nicht mehr über die Balken, gilt die Achse aus §6: links die Null und der grösste Wert, jede Beschriftung auf ihrer Linie, unten die erste und die letzte Woche.
 - Eine Woche ohne Arbeitssatz der Gruppe ist eine Lücke, kein Balken der Höhe null mit einer Zahl darüber.
 - Die Balken haben eine Entsprechung in Worten für Vorlesehilfen.
 

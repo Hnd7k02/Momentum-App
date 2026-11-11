@@ -101,7 +101,7 @@ Ein Skript startet die Server, lässt jede Suite in der richtigen Art laufen (di
 
 - Ein **eigener** Workflow läuft bei jedem Push auf `claude/momentum-wp3`: `npm ci`, `tsc -b`, `npm run test`, `npm run build`, dann die Suites über den Befehl aus Schritt 1. Er veröffentlicht nichts und hat keine Rechte dazu. `deploy.yml` fasst du nicht an.
 - Auf GitHub darf der Workflow seinen Browser selbst installieren, passend zur Version von `playwright-core` im Repo; `CHROMIUM_PATH` zeigt die Suites dorthin. In deiner Session installierst du weiterhin keinen.
-- Lehnt GitHub deinen Push ab, weil er eine Workflow-Datei enthält, nimm die Datei aus dem Commit, leg sie Dario im Bericht als Text vor und sag ihm, wo er sie einfügt.
+- Lehnt GitHub deinen Push ab, weil er eine Workflow-Datei enthält, nimm die Datei aus dem Commit, leg sie Dario im Bericht als Text vor und sag ihm, wo er sie einfügt. Dann gibt es bis dahin keinen Lauf auf GitHub und damit auch keinen in WebKit: Beides steht am Gate als offen, in der ersten Zeile, und `HANDOVER.md` hält es für den Aufräum-Block fest.
 - Warte auf den ersten Lauf und lies sein Ergebnis. Was dort fehlschlägt und bei dir nicht, klärst du: Zeitabhängigkeit, fehlende Grafik, ein echter Fehler. Die 3D-Suites zählen Bilder; laufen sie dort nicht stabil, bekommen sie einen eigenen Schritt, und du sagst es, statt eine Grenze zu lockern.
 
 ### Schritt 3 – WebKit
@@ -156,7 +156,7 @@ Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block
 
 ### Schritt 10 – Schlussprüfung und Vorschau
 
-1. Der Befehl aus Schritt 1, lokal und auf GitHub, in Chromium und in WebKit. Vergleich mit Schritt 0.
+1. Der Befehl aus Schritt 1: lokal in Chromium, auf GitHub in Chromium und in WebKit. Vergleich mit Schritt 0.
 2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt nur neue Dateien. Unter `src/` sind neue Tests dazugekommen; am übrigen Code haben sich nur Fehlerbehebungen geändert, und jede steht im Bericht.
 3. Veröffentlich den Release-Kandidaten in `Momentum-preview` nach dessen `README.md`, ohne `sw.js`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen.
 
@@ -164,7 +164,7 @@ Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block
 
 **Unverändert bleiben:**
 
-- jedes Verhalten und jedes Aussehen der App, ausser wo ein Fehler behoben wird, den dieser Block gefunden hat;
+- jedes Verhalten und jedes Aussehen der App, ausser wo ein Fehler behoben wird, den dieser Block gefunden hat, und ausser der Messanzeige: Entscheidet Dario am Gate, dass sie nicht im Release bleibt, nimmst du sie in dieser Session heraus;
 - jede bestehende Golden-Datei, jeder Fingerabdruck, jede Grenze in einem Test;
 - `deploy.yml` und der Default-Branch;
 - das Datenschema und das Backup-Format.
@@ -208,10 +208,10 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 **Prüfliste fürs iPhone** (übernimm sie und pass sie an; höchstens zehn Punkte):
 
 1. In der Live-App ein Backup exportieren und sicher ablegen. Das ist der Rückweg.
-2. Die Vorschau öffnen und dieses Backup importieren. Alles ist da: Antworten, Sessions, Läufe, Pläne. Food ist nirgends mehr zu sehen.
-3. Einen ganzen Tag durchspielen: Fragen beantworten, gestern etwas nachtragen, ein Workout mit einem Aufwärmsatz erfassen, «Fertig».
-4. Muskelgruppen: der Körper, drei Sheets, und überall dieselbe Zahl in Zeile, Sheet und Farbe.
-5. In der Vorschau ein Backup exportieren und gleich wieder importieren: Nichts ändert sich.
+2. Den Rückweg zur Hälfte proben, erst wenn Punkt 1 erledigt ist: In der Live-App dieses Backup gleich wieder importieren. Nichts ändert sich. Damit ist belegt, dass der alte Stand sein Backup liest.
+3. Die Vorschau öffnen und das Backup importieren. Alles ist da: Antworten, Sessions, Läufe, Pläne. Food ist nirgends mehr zu sehen. Dort ein Backup exportieren und gleich wieder importieren: Nichts ändert sich.
+4. Einen ganzen Tag durchspielen: Fragen beantworten, gestern etwas nachtragen, ein Workout mit einem Aufwärmsatz erfassen, «Fertig».
+5. Muskelgruppen: der Körper, drei Sheets, und überall dieselbe Zahl in Zeile, Sheet und Farbe.
 6. VoiceOver einschalten. Auf Heute eine Frage beantworten. In Muskelgruppen durch die Zeilen wischen: Jede sagt Gruppe, Zahl und Zustand. Ein Sheet öffnen und schliessen.
 7. In den Bedienungshilfen «Bewegung reduzieren» und «Transparenz reduzieren» je einmal einschalten: Nichts fährt, Glas wird deckend, alles bleibt lesbar.
 8. Die Messanzeige: Werte nach einem frischen Start und beim zweiten Öffnen kopieren und schicken.

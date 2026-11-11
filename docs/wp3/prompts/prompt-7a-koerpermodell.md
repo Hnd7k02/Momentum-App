@@ -155,6 +155,7 @@ Nach Vertrag §8, beurteilt am neuen Körper, nicht am alten:
 - weniger Grundlicht, ein Hauptlicht von schräg oben, ein Kantenlicht von hinten;
 - ein Tone Mapping, das die Statusfarben hält, statt sie zu Pastell zu machen. Die Farbe am Körper muss der Legende entsprechen. Bleib bei `three` 0.160.1; hältst du ein Upgrade für den einzigen Weg, ist das eine Frage fürs Gate, kein stiller Schritt;
 - Weiss für «Gehalten», gedimmt für «Noch nicht trainiert» und die neutrale Zone, deutlich unterscheidbar auf Graphit. Die zwei Tokens dafür hat der Block «Farbregeln» angelegt; du stellst ihre Werte unter dem neuen Licht ein. Welcher Zustand welchen Ton bekommt, bleibt;
+- die Farbstärke hat der Block «Farbregeln» unter dem alten Licht eingestellt. Ist +3 % unter dem neuen Licht nicht mehr als Farbe erkennbar oder ±12 % zu grell, ziehst du die Zahlen der Stärke nach (kleinste und grösste Stärke, Mischung), nicht die Regel: Sie wächst weiter gleichmässig von 2,5 % bis 12 %, und welcher Zustand aus welcher Zahl folgt, bleibt in `muscleState.ts`;
 - jeder Wert ist ein Token in `tokens.css`; `tokens.test.ts` hält die neuen Werte.
 
 Zeig es an genau diesen fünf Bildern des neuen Körpers: gemischte Datenlage von vorne; dieselbe von hinten; ein Körper ohne Daten; einer nur mit gehaltenen Gruppen; die schwächste Stufe (±3 %) neben der stärksten (ab ±12 %), in Grün und in Rot.
@@ -223,7 +224,7 @@ Dazu eine Frage mit Empfehlung: Wird `body-preview.webp` mit dem gewählten Kör
 - die Bedienung des Körpers: Tippen, Drehen, Ansichtstasten, Grösse und Rahmen der Bühne;
 - der flache Ersatzkörper.
 
-Erlaubt sind nur: das Modell und seine Pipeline, der Validator, die Tabelle in `muscleMeshMap.ts`, die Licht- und Materialstellen samt ihren Tokens, die Nennung, das Standbild und die Entwicklerseite `#/dev/body` (etwa ein Parameter, der dort einen Kandidaten lädt).
+Erlaubt sind nur: das Modell und seine Pipeline, der Validator, die Tabelle in `muscleMeshMap.ts`, die Licht- und Materialstellen samt ihren Tokens, die Zahlen der Farbstärke, die Nennung, das Standbild und die Entwicklerseite `#/dev/body` (etwa ein Parameter, der dort einen Kandidaten lädt).
 
 **Nicht tun:** kein Blender von Hand; keine gekauften Modelle und keine von Sketchfab; keine Datei aus dem GitHub-Mirror von BodyParts3D im Repo (er trägt CC BY-SA 2.1 Japan); kein Referenzbild im Repo; kein Merge, kein Deploy der Live-App.
 

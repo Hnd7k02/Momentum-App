@@ -112,8 +112,9 @@ Bau sie vor allem anderen; dann misst du jede weitere Änderung damit.
 
 - **Was sie zeigt.** Ladezeit vom Öffnen von Muskelgruppen bis zum ersten Bild mit Modell, getrennt nach Code, Modell und erstem Bild, und ob aus dem Netz oder aus dem Speicher. Beim Drehen: mittlere Bildrate, Anteil der Bilder unter 25 ms, das längste Bild. Bilder in der letzten Sekunde Leerlauf. Zeichenaufrufe, Dreiecke und Texturen (Anzahl und Grösse) aus dem Renderer. Die benutzte Pixeldichte, die beobachtete Bildrate des Bildschirms, Gerät und iOS-Version aus dem Browser, die Grösse des sichtbaren Bereichs.
 - **Sie verfälscht nichts.** Sie fordert selbst kein Bild an und hält die Schleife nicht wach; sie aktualisiert sich nur mit Bildern, die ohnehin entstehen, und nach dem Ende einer Geste.
-- **Sie ist für Dario bedienbar.** Aus, bis er sie einschaltet. Einschalten geht in der App vom Home-Bildschirm, ohne Adresszeile, und die Einstellung überlebt ein Neuladen, denn die Ladezeit misst man beim Neuladen. Eine Taste kopiert das Ergebnis als Text, damit er es in den Chat einfügen kann. Kein technisches Wort mehr als nötig; Zahlen mit Einheit.
-- **Sie gehört nicht zu den Daten.** Kein Feld im Datenschema, nichts im Backup.
+- **Sie ist für Dario bedienbar.** Aus, bis er sie einschaltet. Einschalten geht in der App vom Home-Bildschirm, ohne Adresszeile, und die Einstellung überlebt ein Neuladen, denn die Ladezeit misst man beim Neuladen. Eine Taste kopiert das Ergebnis als Text, damit er es in den Chat einfügen kann.
+- **Sie ist ein Werkzeug, kein Teil der Oberfläche für Nutzer.** Der Schalter und sein Name in den Einstellungen sind Alltagssprache. Die Anzeige selbst darf Fachwörter tragen (Bilder pro Sekunde, Zeichenaufrufe, Textur), jede Zahl mit Einheit. Das ist eine benannte Ausnahme von der Regel «kein technisches Wort in der Oberfläche»; halt sie im Entscheid dieses Blocks und in `CLAUDE.md` fest. Ihre Texte stehen wie alle in beiden Sprachkatalogen.
+- **Sie gehört nicht zu den Daten.** Kein Feld im Datenschema, nichts im Backup. Der Schalter liegt im lokalen Speicher des Browsers, getrennt von der Datenbank. Das ist die erste und einzige Stelle der App, die ihn benutzt; halt auch das im Entscheid und in `CLAUDE.md` fest. Lässt sich dort nichts speichern, bleibt die Anzeige aus.
 - Ob sie im Release bleibt, fragst du am STOP, mit Empfehlung.
 
 Die Ziele aus dem Review, als Ziel und nicht als Garantie: Körper sichtbar nach höchstens 2,5 Sekunden beim ersten Laden und 1 Sekunde aus dem Speicher; beim Drehen im Mittel mindestens 55 Bilder pro Sekunde und 95 % der Bilder unter 25 ms; im Leerlauf kein Bild; höchstens 12 Zeichenaufrufe, 80'000 Dreiecke und eine Textur von 1024 × 1024.
@@ -128,7 +129,7 @@ Die Ziele aus dem Review, als Ziel und nicht als Garantie: Körper sichtbar nach
 
 ### Schritt 3 – Ein Tipp dreht nie
 
-- Der Viewer erfährt, woher eine Auswahl kommt. Ein Tipp auf den Körper wählt und lässt die Kamera stehen. Eine Auswahl in der Liste dreht den Körper, wenn die Gruppe abgewandt ist, mit der Fahrt aus Schritt 2.
+- Der Viewer erfährt, woher eine Auswahl kommt. Ein Tipp auf den Körper wählt und dreht ihn nicht: Der Drehwinkel bleibt. Prüf genau das, den Drehwinkel; Block 7C lässt die Kamera beim Öffnen des Sheets näher rücken, ohne zu drehen. Eine Auswahl in der Liste dreht den Körper, wenn die Gruppe abgewandt ist, mit der Fahrt aus Schritt 2.
 - Schreib die Prüfungen um, die das alte Verhalten festhalten oder umgehen (`body.mjs:237–238`, die Rückdrehung in `body-reach.mjs`), genauso streng.
 
 ### Schritt 4 – Treffen
@@ -145,7 +146,7 @@ Nach Vertrag §8 und Mockup 1:
 
 - **Grösse und Rahmen.** Der Körper nimmt mindestens 55 % der Bildschirmhöhe ein und steht ohne Kartenrahmen auf dem Grund. Rechne mit der Höhe, die auf dem Gerät wirklich sichtbar ist, als App und in Safari. Kopf und Füsse berühren den Rand in keiner Ansicht.
 - **Darüber** stehen nur drei Dinge: die Kopfzeile in 17 px mit Zurück, «Muskelgruppen» und ⓘ; die Zeitraumwahl; die Kennzahlenleiste.
-- **Die Kennzahlenleiste** (Vertrag §4): drei Zellen, getrennt durch eine feine Linie, die erste breiter (1,35 : 1 : 1), damit «Leistungstrend» bei 320 px passt. Inhalt wie im Mockup: der Leistungstrend mit seinem Zustand; «Gewertet» mit der Zahl der gewerteten Gruppen von zehn; «Stärkster» mit Gruppe und Veränderung. Jede Zelle hat eine Beschriftung in 11 px, einen Wert in `--type-figure-m` und eine Zeile darunter. Die Leiste ersetzt die heutige Kennzahlenkarte; was deren Tipp erklärt hat, bleibt erreichbar.
+- **Die Kennzahlenleiste** (Vertrag §4): drei Zellen, getrennt durch eine feine Linie, die erste breiter (1,35 : 1 : 1), damit «Leistungstrend» bei 320 px passt. Inhalt wie im Mockup: der Leistungstrend mit seinem Zustand; «Gewertet» mit der Zahl der gewerteten Gruppen von zehn; «Stärkster» mit Gruppe und Veränderung. Leistungstrend und Zähler liest du aus der Funktion, die der Block «Farbregeln» dafür gebaut hat; die Leiste zählt nichts selbst. «Stärkster» ist die gewertete Gruppe mit der grössten Veränderung nach oben; gibt es keine mit einer Verbesserung, entscheide, was die Zelle zeigt, und nenn es am STOP. Jede Zelle hat eine Beschriftung in 11 px, einen Wert in `--type-figure-m` und eine Zeile darunter. Die Leiste ersetzt die heutige Kennzahlenkarte; was deren Tipp erklärt hat, bleibt erreichbar.
 - **Unter den Füssen** liegen ein kleiner Kontaktschatten und ein schwacher Schein. Nichts davon ist ein Weichzeichner über oder unter der Zeichenfläche (D146).
 - **Die Tasten** Vorne, Seite, Hinten und Zurücksetzen stehen oben in der Bühne, als feste Flächen, mit 44 px Trefferfläche.
 - **Darunter** die Reihe der fünf Zustände, dann die zehn Zeilen wie bisher.
@@ -164,7 +165,8 @@ Nach Vertrag §8 und Mockup 1:
 ### Schritt 7 – Robust
 
 - **Verlorener Kontext.** Geht der Grafik-Kontext verloren (iOS tut das bei Apps im Hintergrund), steht danach der Körper wieder oder der flache Ersatzkörper, nie eine leere Fläche. Belege es mit einer Prüfung, die den Kontext absichtlich verliert.
-- **Die Pause.** Ein Wirt kann den Viewer anhalten: Von selbst entsteht dann kein Bild, und das letzte bleibt stehen. Die Pause ist ein gesteuerter Zustand mit drei Eigenschaften, die Block 7C braucht: Sie greift erst, wenn eine laufende Kamerafahrt zur Ruhe gekommen ist. Der Wirt kann unter der Pause genau ein Bild anfordern, wenn sich ändert, was der Körper zeigen muss. Und sie endet, bevor eine neue Kamerafahrt beginnt. Bau das hier und benutz es sofort für jedes Sheet, das über Muskelgruppen aufgeht (die Legende, die Erklärung der Kennzahl). Eine Prüfung in `gym-muscles.mjs` hält fest: Unter einem offenen Sheet entsteht kein Bild, solange keines angefordert wurde (Vertrag §14).
+- **Die Pause.** Ein Wirt kann den Viewer anhalten: Von selbst entsteht dann kein Bild, und das letzte bleibt stehen. Die Pause ist ein gesteuerter Zustand mit drei Eigenschaften, die Block 7C braucht: Verlangt der Wirt sie, endet ein Auslaufen sofort; hat der Wirt selbst eine Kamerafahrt verlangt, greift sie, sobald diese ruht. Der Wirt kann unter der Pause genau ein Bild anfordern, wenn sich ändert, was der Körper zeigen muss. Und sie endet, bevor eine neue Kamerafahrt beginnt.
+- **Kein Weichzeichner über einem bewegten Körper** (D146): Solange unter einem Sheet noch ein Bild entsteht, liegt weder das Glas des Sheets noch der weichgezeichnete Hintergrund über dem Körper. Für die Legende und die Erklärung der Kennzahl heisst das: Der Körper steht, bevor sie aufgehen. Bau das hier und benutz es sofort für jedes Sheet, das über Muskelgruppen aufgeht (die Legende, die Erklärung der Kennzahl). Eine Prüfung in `gym-muscles.mjs` hält fest: Unter einem offenen Sheet entsteht kein Bild, solange keines angefordert wurde (Vertrag §14).
 - Was schon gilt, bleibt: kein Bild im Leerlauf, im verdeckten Tab und aus dem Bild gescrollt; nach Verlassen und Wiederbetreten genau ein Viewer.
 
 ### Schritt 8 – Der Weg von Heute

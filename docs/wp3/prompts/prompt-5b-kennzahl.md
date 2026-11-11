@@ -32,6 +32,8 @@ Die wichtigste Eigenschaft dieses Blocks: **Die neue Kennzahl ist eine Era.** Si
 
 Fehlt das, bau nichts. Sag Dario, was fehlt, und halte an.
 
+**Eine Frage stellst du in deiner ersten Antwort, und arbeitest dann weiter,** falls `HANDOVER.md` sie noch als offen führt: Unter welcher Adresse öffnet Dario die Live-App, und öffnet er sie als App vom Home-Bildschirm oder in Safari? Der Grund: Die Datenbank heisst immer `momentum` (`src/storage/db.ts:14`), und Seiten derselben Herkunft teilen sie im selben Browser. Die Vorschau läuft unter `hnd7k02.github.io`. Läuft die Live-App dort auch, schreibt eine Vorschau, die als Tab im selben Browser geöffnet wird, ihre neuen Wertungsabschnitte in die Daten der Live-App. Dieser Block bringt einen weiteren solchen Abschnitt. Trag die Antwort in `HANDOVER.md` ein.
+
 **Die Entscheide gehen diesem Prompt vor:** D150, D151, D152 und jeder jüngere Eintrag in `docs/decisions.md`, dazu der Vertrag `docs/wp3/vertrag.md`. Wo sie diesem Prompt widersprechen, gelten sie; nenn den Widerspruch im STOP-Bericht.
 
 ## 4. Darios Angaben zu seinem Training
@@ -192,7 +194,7 @@ Er steht im STOP-Bericht und, ohne private Daten, in `docs/design/wp3/stage5b-ke
 1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Browser-Suites, die 3D-Suites einzeln. Vergleich mit Schritt 0.
 2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt nur neue Dateien, und die bestehenden Fingerabdrücke in `domainOutputs.test.ts` sind unverändert, beides ausser im Fall aus Schritt 4.
 3. Dokumente: der Stand in `HANDOVER.md` (ein Stage-Block; «Gym performance» unter den Wertungsregeln; der Rückweg aus Review-Risiko 9 unter den Risiken). In `CLAUDE.md` die Sätze, die nicht mehr stimmen: was Gym vergleicht, die neue Era in der Liste unter «Configuration is historical», der Aufwärmsatz als Fakt am Satz und die dokumentierte Ausnahme von «keine fremden Normen» mit Verweis auf D150. In `docs/decisions.md` neue Einträge für das, was du entschieden hast.
-4. Veröffentlich den Build in `Momentum-preview` nach dessen `README.md`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen.
+4. Veröffentlich den Build in `Momentum-preview` nach dessen `README.md`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen. Teilen Live-App und Vorschau die Herkunft, oder ist die Frage aus Abschnitt 3 noch offen, sagt dein Bericht das in der ersten Zeile, und die Prüfliste beginnt damit, die Vorschau nur als eigene App vom Home-Bildschirm zu öffnen und nie als Tab in dem Browser, in dem die Live-App läuft.
 
 ## 8. Was sich nicht ändern darf, und was nicht hierher gehört
 
