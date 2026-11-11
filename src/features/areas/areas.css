@@ -44,9 +44,8 @@
 }
 
 .areas__targetBlock {
-  /* No inset of its own — the card carries it. The seven target bubbles are
-     44px each and wrap to a second row when they do not fit, which they have
-     never quite done at 393px; they never shrink below the touch minimum. */
+  /* No inset of its own — the card carries it. The seven target bubbles
+     share its width in one row and never wrap (STOP 6b; `ui.css`). */
   padding: var(--space-4) 0;
   display: flex;
   flex-direction: column;

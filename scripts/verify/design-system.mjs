@@ -84,6 +84,39 @@ const tab = async (page, name) => {
   await page.locator('.tab-bar button', { hasText: name }).click();
   await page.waitForTimeout(1100);
 };
+/**
+ * The weekly-target bubbles (STOP 6b): seven in one row at every width, each
+ * a circle, each a target 44px high and as wide as its share of the row —
+ * the `::before` counts, as it does for a tap.
+ */
+async function bubbles(page, W) {
+  const rows = await page.evaluate(() => [...document.querySelectorAll('.bubble-row')].map((row) => {
+    const grow = (value) => (value.endsWith('px') && parseFloat(value) < 0 ? -parseFloat(value) : 0);
+    const items = [...row.querySelectorAll('.bubble')].map((bubble) => {
+      const box = bubble.getBoundingClientRect();
+      const before = getComputedStyle(bubble, '::before');
+      return {
+        top: Math.round(box.top),
+        round: Math.abs(box.width - box.height) < 0.6,
+        targetW: box.width + grow(before.left) + grow(before.right),
+        targetH: box.height + grow(before.top) + grow(before.bottom),
+      };
+    });
+    const round1 = (value) => Math.round(value * 10) / 10;
+    return {
+      count: items.length,
+      lines: new Set(items.map((item) => item.top)).size,
+      round: items.every((item) => item.round),
+      pitch: round1(row.getBoundingClientRect().width / Math.max(1, items.length)),
+      targetW: round1(Math.min(...items.map((item) => item.targetW))),
+      targetH: round1(Math.min(...items.map((item) => item.targetH))),
+    };
+  }));
+  check(`${W}: the seven target bubbles stand in one row`, rows.length > 0 && rows.every((row) => row.count === 7 && row.lines === 1), short(rows));
+  check(`${W}: each bubble is round, and a target 44px high and its share of the row wide`,
+    rows.length > 0 && rows.every((row) => row.round && row.targetH >= 43.5 && row.targetW >= Math.min(44, row.pitch) - 0.5), short(rows));
+}
+
 /** Brings an element to the top of its own scroll port — never the shell's. */
 async function scrollTo(page, locator, port, offset = 12) {
   await locator.first().evaluate((el, [selector, gap]) => {
@@ -243,6 +276,7 @@ for (const width of WIDTHS) {
   await page.locator('.card').nth(1).getByRole('button', { name: '2 pro Woche' }).click();
   await page.waitForTimeout(300);
   await step('6-wochenziele');
+  if (wants('onboarding')) await bubbles(page, `${width} onboarding`);
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.waitForTimeout(400);
   await step('7-uebersicht');
@@ -449,6 +483,7 @@ for (const width of WIDTHS) {
     await look(page, width, 'gym-kennzahlen', 'gym');
     await scrollTo(page, page.locator('.plans__slots'), '.areas__scroll', 120);
     await look(page, width, 'gym-trainingsplaene', 'gym');
+    await bubbles(page, `${width} Bereiche Gym`);
     await scrollTo(page, page.locator('.areas__running'), '.areas__scroll');
     await look(page, width, 'gym-laufen', 'gym');
     await scrollTo(page, page.locator('.areas__general'), '.areas__scroll');

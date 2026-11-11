@@ -19,8 +19,9 @@ const LABELS: Record<TargetDomain, TranslationKey> = {
  * Sessions per week, as bubbles.
  *
  * A quota, not a schedule: the number says how often, never on which days.
- * Seven bubbles fit one thumb-width row, and seven is also the point where a
- * weekly quota stops saying anything a daily question would not.
+ * Seven bubbles stand in one row at every width (STOP 6b; `ui.css`), and
+ * seven is also the point where a weekly quota stops saying anything a daily
+ * question would not.
  *
  * Gym and Running each get their own picker, because they are two
  * independent targets rather than one shared one — three gym sessions and two

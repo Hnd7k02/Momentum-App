@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, CloseIcon } from './Icons';
 import { useT } from '../i18n/I18nProvider';
@@ -237,7 +237,13 @@ export function BubbleRow({
   describe?(value: number): string;
 }) {
   return (
-    <div className="bubble-row" role="group" aria-label={label}>
+    // One column per value: the row never wraps (`ui.css`).
+    <div
+      className="bubble-row"
+      role="group"
+      aria-label={label}
+      style={{ '--bubble-count': values.length } as CSSProperties}
+    >
       {values.map((value) => (
         <button
           key={value}

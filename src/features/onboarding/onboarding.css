@@ -64,8 +64,8 @@
 
 /* A scrolling column scrolls; it never squeezes what is in it. A card with
    `overflow: hidden` has an automatic minimum height of 0 as a flex item, so
-   on a short screen the two target cards were shrunk and their second row
-   of bubbles cut away instead of the step scrolling. */
+   on a short screen the two target cards were shrunk and their bubbles cut
+   away instead of the step scrolling. */
 .onboarding__body > * {
   flex-shrink: 0;
 }
