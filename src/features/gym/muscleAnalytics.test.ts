@@ -10,7 +10,7 @@ import {
   type ExerciseDayInput,
 } from '../../core/gym/performance';
 import type { GymHistory } from '../../storage/services/gymService';
-import { muscleStateOf } from './muscleState';
+import { exerciseDayCounts, muscleStateOf } from './muscleState';
 import { SPARKLINE_POINTS, muscleTrend, toMuscleAnalytics } from './muscleAnalytics';
 
 /** A history the way loadGymHistory() builds one, from in-memory days. */
@@ -31,17 +31,22 @@ const day = (
   date: string, exerciseId: string, muscles: MuscleGroup[], primary: MuscleGroup[], sets: ReturnType<typeof set>[],
 ): ExerciseDayInput => ({ date, exerciseId, muscles, primaryMuscles: primary, sets });
 
-/** Bench four times, squat twice, a curl once. Chest is reached by bench only. */
+/**
+ * Bench four times, squat twice, a leg extension and a curl once. Chest is
+ * reached by bench only; the quadriceps have three exercise days, the
+ * hamstrings and the core the squat's two.
+ */
 const INPUTS: ExerciseDayInput[] = [
   day('2026-06-01', 'ex_bench', ['chest', 'triceps', 'shoulders'], ['chest'], [set(5, 60), set(5, 62.5, 1)]),
   day('2026-06-03', 'ex_squat', ['quadriceps', 'hamstringsGlutes', 'core'], ['quadriceps'], [set(5, 80)]),
+  day('2026-06-03', 'ex_legext', ['quadriceps'], ['quadriceps'], [set(10, 40)]),
   day('2026-06-05', 'ex_bench', ['chest', 'triceps', 'shoulders'], ['chest'], [set(6, 62.5)]),
   day('2026-06-08', 'ex_bench', ['chest', 'triceps', 'shoulders'], ['chest'], [set(5, 65)]),
   day('2026-06-10', 'ex_squat', ['quadriceps', 'hamstringsGlutes', 'core'], ['quadriceps'], [set(5, 85)]),
   day('2026-06-12', 'ex_bench', ['chest', 'triceps', 'shoulders'], ['chest'], [set(6, 65)]),
   day('2026-06-12', 'ex_curl', ['biceps', 'forearms'], ['biceps'], [set(10, 15)]),
 ];
-const NAMES = { ex_bench: 'Bench Press', ex_squat: 'Squat', ex_curl: 'Biceps Curl' };
+const NAMES = { ex_bench: 'Bench Press', ex_squat: 'Squat', ex_legext: 'Leg Extension', ex_curl: 'Biceps Curl' };
 
 describe('toMuscleAnalytics', () => {
   const history = historyOf(INPUTS, NAMES);
@@ -53,9 +58,28 @@ describe('toMuscleAnalytics', () => {
   });
 
   it('state and delta are the row\'s own: muscleStateOf() and percentChange() over the range\'s span figure', () => {
+    const counts = exerciseDayCounts(history.days);
     for (const entry of history.overall.muscles) {
-      expect(view(entry.muscle).state).toBe(muscleStateOf(entry));
-      expect(view(entry.muscle).delta).toBe(percentChange(entry.ratio));
+      const row = view(entry.muscle);
+      expect(row.state).toBe(muscleStateOf(entry, counts[entry.muscle]));
+      expect(row.exerciseDays).toBe(counts[entry.muscle]);
+      // A figure only where the group states a trend (contract §7).
+      const rated = row.state === 'improved' || row.state === 'unchanged' || row.state === 'declined';
+      expect(row.delta).toBe(rated ? percentChange(entry.ratio) : null);
+    }
+  });
+
+  it('a group with too little to compare has no figure and no line, whatever its ratio', () => {
+    // The squat was done twice: the domain has a ratio for the hamstrings
+    // and the core, on two exercise days.
+    for (const id of ['hamstringsGlutes', 'core'] as const) {
+      expect(history.overall.muscles.find((entry) => entry.muscle === id)).toMatchObject({ status: 'measured' });
+      expect(view(id)).toMatchObject({
+        state: 'awaitingBaseline', dataState: 'awaiting-baseline', delta: null, trend: [], observations: 0,
+        exerciseDays: 2, compared: true, lastTrainedAt: '2026-06-10',
+      });
+      // The full series is still there for whoever asks for it.
+      expect(muscleTrend(history.days, id)).toHaveLength(1);
     }
   });
 
@@ -86,8 +110,9 @@ describe('toMuscleAnalytics', () => {
   it('classifies all four data states', () => {
     expect(view('calves').dataState).toBe('no-history');
     // Curl once: trained, nothing to compare against — not "no history".
-    expect(view('biceps')).toMatchObject({ state: 'awaitingBaseline', dataState: 'awaiting-baseline', delta: null, trend: [], observations: 0, lastTrainedAt: '2026-06-12' });
-    // Squat twice: one comparable observation, a value but not a line.
+    expect(view('biceps')).toMatchObject({ state: 'awaitingBaseline', dataState: 'awaiting-baseline', delta: null, trend: [], observations: 0, exerciseDays: 1, compared: false, lastTrainedAt: '2026-06-12' });
+    // Squat twice and a leg extension: three exercise days and one
+    // comparable observation, a value but not a line.
     expect(view('quadriceps')).toMatchObject({ dataState: 'single-observation', observations: 1 });
     expect(view('quadriceps').trend).toHaveLength(1);
     expect(view('quadriceps').trend[0]).toEqual({ date: '2026-06-10', value: percentChange(425000 / 400000) });

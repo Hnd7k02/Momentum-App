@@ -22,13 +22,19 @@ import { Color, MeshStandardMaterial } from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { MuscleGroup } from '../../core/model';
 import type { MuscleMeshes } from './muscleMeshMap';
-import { BODY_BASE_COLOR, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL } from './tokens';
+import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL } from './tokens';
 
 export type MuscleVisual = {
   /** 0–1, already normalised by the Gym domain. Drives tint strength. */
   intensity?: number;
   /** Pre-resolved colour token from the Gym state palette. */
   tint?: string;
+  /**
+   * The neutral tone the region stands on: white for a trained group,
+   * dimmed for an untrained one. Absent reads as dimmed — a region nothing
+   * was said about says nothing.
+   */
+  ground?: string;
 };
 
 export type HighlightOptions = {
@@ -73,7 +79,7 @@ function colorDistance(a: Color, b: Color): number {
  */
 export function regionMaterial(): { material: MeshStandardMaterial; rim: RimUniforms } {
   const material = new MeshStandardMaterial({
-    color: BODY_BASE_COLOR,
+    color: BODY_DIMMED_COLOR,
     roughness: REGION_MATERIAL.roughness,
     metalness: REGION_MATERIAL.metalness,
   });
@@ -128,12 +134,16 @@ function lerpHex(from: string, to: string, amount: number): string {
  * and a Fresnel rim, each at the strength `REGION_MATERIAL` names (§13).
  *
  * **A region with nothing to say still shows that it was chosen.** With no
- * tint at all, or an intensity of zero — which is every untrained group,
- * since `stateIntensity()` returns 0 there — the performance channel is
- * silent, and multiplying the selected treatment by it left a successful tap
- * looking like a miss. Such a region keeps its neutral grey and its
- * `noData` meaning, and gains the existing neutral selection rim instead. It
- * is never tinted as though it had improved or declined.
+ * tint at all, or an intensity of zero — which is every untrained and every
+ * held group, since `stateIntensity()` returns 0 there — the performance
+ * channel is silent, and multiplying the selected treatment by it left a
+ * successful tap looking like a miss. Such a region keeps its neutral tone
+ * — dimmed for untrained, white for held — and gains the existing neutral
+ * selection rim instead. It is never tinted as though it had improved or
+ * declined.
+ *
+ * A tint is mixed from white, the tone of a trained muscle: every tinted
+ * state is a trained one.
  */
 export function regionTargets(
   visual: MuscleVisual | undefined,
@@ -142,9 +152,11 @@ export function regionTargets(
 ): RegionTarget {
   const { resting, selected: chosen } = REGION_MATERIAL;
   const amount = visual?.intensity == null ? 1 : Math.max(0, Math.min(1, visual.intensity));
+  // With tinting off the body says nothing at all, so it is the dimmed figure.
+  const ground = tinted ? (visual?.ground ?? BODY_DIMMED_COLOR) : BODY_DIMMED_COLOR;
   if (!tinted || !visual?.tint || amount === 0) {
     return {
-      color: BODY_BASE_COLOR,
+      color: ground,
       emissive: selected ? NEUTRAL_HIGHLIGHT : BLACK,
       emissiveIntensity: selected ? 0.1 : 0,
       rim: selected ? chosen.rim * 0.6 : 0,
@@ -154,7 +166,7 @@ export function regionTargets(
   // intensity carries the magnitude of the change (core/gym decides it).
   // Resting emissive and rim scale with it; the selected rim does not.
   return {
-    color: lerpHex(BODY_BASE_COLOR, visual.tint, (selected ? chosen.mix : resting.mix) * amount),
+    color: lerpHex(BODY_HELD_COLOR, visual.tint, (selected ? chosen.mix : resting.mix) * amount),
     emissive: visual.tint,
     emissiveIntensity: (selected ? chosen.emissiveIntensity : resting.emissiveIntensity) * amount,
     rim: selected ? chosen.rim : resting.rim * amount,
@@ -193,7 +205,7 @@ export function useMuscleHighlight({
       created.set(id, {
         material,
         rim,
-        target: new Color(BODY_BASE_COLOR),
+        target: new Color(BODY_DIMMED_COLOR),
         targetEmissive: new Color(BLACK),
         targetEmissiveIntensity: 0,
         targetRim: 0,

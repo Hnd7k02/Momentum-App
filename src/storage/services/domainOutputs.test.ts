@@ -9,7 +9,7 @@ import { importBackup } from './backupService';
 import { loadBossProgression, type BossProgression } from './bossService';
 import { loadGymHistory, type GymHistory } from './gymService';
 import { percentChange } from '../../core/gym/performance';
-import { muscleStateOf } from '../../features/gym/GymProgress';
+import { exerciseDayCounts, muscleStateOf } from '../../features/gym/muscleState';
 import {
   CONFIRMATION_CLOCKS,
   FOOD_OFF_CLOCKS,
@@ -150,14 +150,20 @@ async function fingerprint(name = ''): Promise<{ md5: string; values: number }> 
  * every muscle group's status, ratio, counts and latest score — plus the two
  * presentation reductions the body map consumes, `muscleStateOf()` and
  * `percentChange()`, so the five-state mapping is inside the hash too.
+ *
+ * The state is the **shown** state (contract §7): the seventh element of a
+ * muscle's tuple, from the same function and the same count of exercise
+ * days the screen uses. It is the one column a change to the colour rules
+ * may move; every other value in the file is a result of the calculation.
  */
 function gymOutputsOf(history: GymHistory) {
   const round = (value: number | null) => (value === null ? null : Math.round(value * 1e9) / 1e9);
+  const exerciseDays = exerciseDayCounts(history.days);
   const performance = (p: GymHistory['overall']) => ({
     ratio: round(p.ratio),
     muscles: p.muscles.map((m) => [
       m.muscle, m.status, round(m.ratio), m.exercises, m.compared, round(m.latestScore),
-      muscleStateOf(m), round(percentChange(m.ratio)),
+      muscleStateOf(m, exerciseDays[m.muscle]), round(percentChange(m.ratio)),
     ]),
     measured: p.measured, awaitingBaseline: p.awaitingBaseline, untrained: p.untrained,
   });
@@ -173,7 +179,12 @@ function gymOutputsOf(history: GymHistory) {
   };
 }
 
-/** The windows the workspace offers, plus the whole synthetic span. */
+/**
+ * The windows of the golden file: a week, a month and a quarter. They are
+ * the file's own and not the screen's choice — Muskelgruppen offers 30 and
+ * 90 days since the colour rules, the 7-day window stays frozen here so the
+ * proof covers what it always covered.
+ */
 const GYM_RANGES = [7, 30, 90] as const;
 
 async function gymFingerprint(clock: DateKey, name = ''): Promise<{ md5: string; values: number }> {

@@ -32,9 +32,9 @@ describe('a fall carries a minus sign, not a hyphen', () => {
     expect(translate('de', 'gym.change.declined', { percent: -10 })).toBe('−10 %');
     expect(translate('en', 'gym.change.declined', { percent: -3 })).toBe('−3 %');
     expect(translate('de', 'gymHub.muscles.overall', { change: translate('de', 'gym.change.declined', { percent: -4 }) }))
-      .toBe('Gesamt −4 %');
+      .toBe('Leistungstrend −4 %');
     // A string parameter is left as it is written.
-    expect(translate('de', 'gymHub.muscles.overall', { change: 'Gehalten' })).toBe('Gesamt Gehalten');
+    expect(translate('de', 'gymHub.muscles.overall', { change: 'Gehalten' })).toBe('Leistungstrend Gehalten');
   });
 
   it.each([['de', de], ['en', en]] as const)('no %s string writes a hyphen as a sign', (_language, catalogue) => {

@@ -372,7 +372,7 @@ export const de = {
   'muscle.calves': 'Waden',
   'muscle.forearms': 'Unterarme',
   'muscle.state.noData': 'Noch nicht trainiert',
-  'muscle.state.awaitingBaseline': 'Noch kein Vergleich',
+  'muscle.state.awaitingBaseline': 'Zu wenig Vergleichsdaten',
   'muscle.state.improved': 'Verbessert',
   'muscle.state.unchanged': 'Gehalten',
   'muscle.state.declined': 'Zurückgegangen',
@@ -380,6 +380,25 @@ export const de = {
   'muscle.lastTrained.today': 'Heute',
   'muscle.lastTrained.yesterday': 'Gestern',
   'muscle.lastTrained.days': 'Vor {count} Tagen',
+  // Too little to compare (contract §7): how much there is, and what is missing.
+  'muscle.exerciseDays.short': '{count}\u00A0Übungstage',
+  'muscle.exerciseDays.shortOne': '1\u00A0Übungstag',
+  'muscle.exerciseDays.count': '{count} Übungstage in den letzten {days} Tagen.',
+  'muscle.exerciseDays.countOne': '1 Übungstag in den letzten {days} Tagen.',
+  'muscle.exerciseDays.fromThird': 'Ab dem dritten zeigt Momentum einen Leistungstrend.',
+  'muscle.exerciseDays.needsSecondDay': 'Ein Leistungstrend braucht dieselbe Übung an zwei Tagen.',
+  // The legend behind ⓘ. The lead is the contract's sentence, word for word (§7).
+  'muscle.legend.open': 'Legende öffnen',
+  'muscle.legend.title': 'Legende',
+  'muscle.legend.lead':
+    'Die Farbe zeigt, wie sich dein bester Arbeitssatz je Muskelgruppe im gewählten Zeitraum verändert hat. Sie misst Trainingsleistung, nicht Muskelmasse.',
+  'muscle.legend.improved': 'Ab +3\u00A0%',
+  'muscle.legend.unchanged': '\u22122\u00A0% bis +2\u00A0%',
+  'muscle.legend.declined': 'Ab \u22123\u00A0%',
+  'muscle.legend.awaitingBaseline':
+    'Weniger als drei Übungstage im Zeitraum, oder keine Übung an zwei Tagen',
+  'muscle.legend.noData': 'Kein Satz im Zeitraum',
+  'muscle.legend.exerciseDay': 'Ein Übungstag ist eine Übung an einem Tag.',
   // The 3D body's view shortcuts.
   'body.view': 'Ansicht',
   'body.view.front': 'Vorne',
@@ -419,14 +438,16 @@ export const de = {
   'gym.picker.empty': 'Keine Übung gefunden.',
 
   'gym.progress.title': 'Gym',
-  'gym.progress.overall': 'Gesamtentwicklung',
+  'gym.progress.overall': 'Leistungstrend',
   'gym.progress.recent': 'Letzte Vergleiche',
   'gym.progress.muscles': 'Muskelgruppen',
   'gym.progress.exercises': 'Übungen',
   'gym.progress.noData': 'Noch keine Trainingsdaten.',
-  'gym.progress.noBaseline': 'Noch kein Vergleich',
+  'gym.progress.noBaseline': 'Zu wenig Vergleichsdaten',
   'gym.progress.noBaselineHint':
-    'Ein Vergleich braucht dieselbe Übung an zwei Trainingstagen in den letzten {days} Tagen.',
+    'Ein Leistungstrend braucht dieselbe Übung an zwei Tagen in den letzten {days} Tagen.',
+  'gym.progress.explainTrend':
+    'Der Leistungstrend ist das Mittel der gewerteten Muskelgruppen. Von \u22122\u00A0% bis +2\u00A0% gilt er als gehalten.',
   'gym.progress.groupsCounted': '{count} von {total} Gruppen gewertet',
   'gym.progress.explainGroups':
     'Jede Muskelgruppe zählt gleich viel, unabhängig davon, wie viele Übungen sie enthält.',
@@ -451,7 +472,7 @@ export const de = {
   'gym.trend.title': 'Aktueller Trend',
   'gym.trend.window': 'Letzte {days} Tage',
   'gym.performance.title': 'Leistungsentwicklung',
-  'gym.performance.none': 'Noch kein Vergleich möglich',
+  'gym.performance.none': 'Zu wenig Vergleichsdaten',
   'gym.performance.needsSecond':
     'Sobald du eine Übung ein zweites Mal aufzeichnest, beginnt die Leistungsentwicklung zu zählen.',
   'gym.performance.onlyTrend': 'Nur der aktuelle Trend hat bisher eine Vergleichsbasis.',
@@ -727,10 +748,10 @@ export const de = {
   'gymHub.muscles.title': 'Muskelgruppen',
   'gymHub.muscles.open': 'Muskelgruppen öffnen',
   'gymHub.muscles.summary': '{count} von {total} gewertet',
-  'gymHub.muscles.overall': 'Gesamt {change}',
+  'gymHub.muscles.overall': 'Leistungstrend {change}',
   'gymHub.muscles.trained': '{count} von {total} trainiert',
   'gymHub.muscles.none': 'Noch nicht trainiert',
-  'gymHub.muscles.noneHint': 'Nach deiner ersten Session siehst du hier, wie sich deine Muskelgruppen entwickeln.',
+  'gymHub.muscles.noneHint': 'Ab dem dritten Übungstag einer Gruppe zeigt Momentum ihren Leistungstrend.',
   'gymHub.muscles.outside': 'Kein Training in den letzten {days} Tagen',
   'gymHub.muscles.outsideHint':
     'Letzte Session: {date}, vor {count} Tagen. Die Muskelgruppen zeigen nur den gewählten Zeitraum.',

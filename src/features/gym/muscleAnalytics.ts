@@ -7,7 +7,7 @@ import {
 } from '../../core/gym/performance';
 import type { MuscleState } from '../../components/BodyRenderer';
 import type { GymHistory } from '../../storage/services/gymService';
-import { muscleStateOf } from './muscleState';
+import { shownPerformance, type ShownPerformance } from './muscleState';
 
 /**
  * The muscle rows' view model: per group, its state and delta as the row
@@ -34,6 +34,11 @@ import { muscleStateOf } from './muscleState';
  * nothing: the helper reports `insufficientBaseline`, and an absence is not a
  * zero. Days between observations are simply not in the array — the renderer
  * decides spacing, and it must never draw a gap as a value.
+ *
+ * A group with too little to compare (contract §7) draws no line and states
+ * no delta, even where the domain has a ratio for it: the row shows the
+ * chip, and a line there would state the trend the chip says is not there
+ * yet. `muscleTrend()` itself stays the full series.
  */
 
 export type MuscleDataState =
@@ -41,7 +46,7 @@ export type MuscleDataState =
   | 'no-history'
   /** Exactly one valid observation — a value, not yet a direction. */
   | 'single-observation'
-  /** Trained in the range, but no exercise has a second day to compare. */
+  /** Trained in the range, with too little to compare (contract §7). */
   | 'awaiting-baseline'
   /** Two or more valid observations. */
   | 'measured';
@@ -57,8 +62,15 @@ export interface MuscleAnalyticsView {
   id: MuscleGroup;
   state: MuscleState;
   dataState: MuscleDataState;
-  /** The row's delta: `percentChange()` of the range's over-span ratio. */
+  /**
+   * The row's delta: `percentChange()` of the range's over-span ratio —
+   * `null` unless the group states a trend.
+   */
   delta: number | null;
+  /** The group's exercise days in the range (`exerciseDayCounts`). */
+  exerciseDays: number;
+  /** Whether one of its exercises was recorded on two days of the range. */
+  compared: boolean;
   /** The latest day an exercise reaching the group was recorded, or `null`. */
   lastTrainedAt: DateKey | null;
   /**
@@ -118,13 +130,18 @@ export function muscleTrend(days: readonly ExerciseDay[], muscle: MuscleGroup): 
   return points;
 }
 
-export function toMuscleAnalytics(history: GymHistory): MuscleAnalyticsView[] {
-  const performance = new Map(history.overall.muscles.map((entry) => [entry.muscle, entry]));
+export function toMuscleAnalytics(
+  history: GymHistory,
+  /** What the screen shows for the range; derived here when not handed in. */
+  shown: ShownPerformance = shownPerformance(history.days, history.overall),
+): MuscleAnalyticsView[] {
+  const shownBy = new Map(shown.muscles.map((entry) => [entry.muscle, entry]));
   return MUSCLE_GROUPS.map((id) => {
-    const entry = performance.get(id);
-    const state: MuscleState = entry ? muscleStateOf(entry) : 'noData';
-    const delta = entry ? percentChange(entry.ratio) : null;
-    const series = muscleTrend(history.days, id);
+    const entry = shownBy.get(id);
+    const state: MuscleState = entry?.state ?? 'noData';
+    const delta = entry?.change ?? null;
+    // No trend stated, no line drawn.
+    const series = delta === null ? [] : muscleTrend(history.days, id);
     const trained = trainingDays(history.days, id);
     const lastTrainedAt = trained.length > 0 ? trained[trained.length - 1]! : null;
     const latestExerciseIds =
@@ -147,6 +164,8 @@ export function toMuscleAnalytics(history: GymHistory): MuscleAnalyticsView[] {
       state,
       dataState,
       delta,
+      exerciseDays: entry?.exerciseDays ?? 0,
+      compared: entry?.compared ?? false,
       lastTrainedAt,
       trend: series.slice(-SPARKLINE_POINTS),
       observations: series.length,

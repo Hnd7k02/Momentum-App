@@ -1,5 +1,5 @@
 import { useRef, type RefObject } from 'react';
-import { TREND_RANGES } from '../../core/config/constants';
+import { MUSCLE_TREND_RANGES } from '../../core/config/constants';
 import { useToday } from '../../app/useToday';
 import { GymOverview } from '../gym/GymOverview';
 import { MuscleEntryCard } from '../gym/MuscleEntryCard';
@@ -81,7 +81,7 @@ function HubCards({
   onOpenMuscles(): void;
   plansRef: RefObject<HTMLDivElement>;
 }) {
-  const range = TREND_RANGES[TREND_RANGES.length - 1]!;
+  const range = MUSCLE_TREND_RANGES[0];
   const { view: gymRating, loading: ratingLoading } = useGymRatingState();
   const { history: gym, latestSession, failed: historyFailed } = useGymHistoryState(range);
   return (

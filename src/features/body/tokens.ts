@@ -4,10 +4,12 @@
  * Two systems run side by side and must not be mixed:
  *
  *   IDENTITY  answers "which muscle is this?"   — fixed per group, state-independent
- *   STATE     answers "how did it go?"          — the five training states,
- *             coloured by the app's one status palette (D123): improved is
- *             `strong`, declined is `weak`, unchanged is `mixed`, noData is
- *             `empty`, and awaitingBaseline keeps the informational blue.
+ *   STATE     answers "how did it go?"          — the five training states
+ *             (contract §7): improved is the status `strong`, declined is
+ *             `weak`, awaitingBaseline the informational blue. Held and
+ *             untrained carry no status colour at all: held is neutral —
+ *             the text colour in a row, white on the body — and untrained
+ *             is dimmed. "Gehalten" was the warning yellow until D153.
  *
  * Identity appears in exactly one place (D154): an 8px dot before the
  * group's name. It colours no line, no ring and no surface.
@@ -26,7 +28,7 @@ export type MuscleState =
   | 'improved'          // Verbessert
   | 'declined'          // Zurückgegangen
   | 'unchanged'         // Gehalten
-  | 'awaitingBaseline'  // Kein Vergleich
+  | 'awaitingBaseline'  // Zu wenig Vergleichsdaten
   | 'noData';           // Noch nicht trainiert
 
 /* ── A. identity ───────────────────────────────────────────────────────── */
@@ -80,8 +82,13 @@ export interface StateTokens {
   ink: string;
   /** Badge background. */
   tint: string;
-  /** What the 3D region is tinted with: colour + emissive + rim. */
+  /**
+   * What the 3D region is tinted with: colour + emissive + rim. For the two
+   * states without a status colour it is the neutral tone they stand in.
+   */
   model: string;
+  /** The neutral tone the region stands on before any tint. */
+  ground: string;
 }
 
 /**
@@ -92,19 +99,30 @@ export interface StateTokens {
  * so the body and the legend swatch next to it are the same colour.
  */
 const SKY_INK = cssToken('--sky-ink');
-
-export const STATE_COLOR: Readonly<Record<MuscleState, StateTokens>> = {
-  improved:         { text: 'Verbessert',           ink: STATUS_PALETTE.strong.ink, tint: STATUS_PALETTE.strong.tint, model: STATUS_PALETTE.strong.fill },
-  declined:         { text: 'Zurückgegangen',       ink: STATUS_PALETTE.weak.ink,   tint: STATUS_PALETTE.weak.tint,   model: STATUS_PALETTE.weak.fill },
-  unchanged:        { text: 'Gehalten',             ink: STATUS_PALETTE.mixed.ink,  tint: STATUS_PALETTE.mixed.tint,  model: STATUS_PALETTE.mixed.fill },
-  awaitingBaseline: { text: 'Kein Vergleich',       ink: SKY_INK,                   tint: cssToken('--sky-tint'),     model: SKY_INK },
-  noData:           { text: 'Noch nicht trainiert', ink: STATUS_PALETTE.empty.ink,  tint: STATUS_PALETTE.empty.tint,  model: STATUS_PALETTE.empty.fill },
-};
+const SKY_FILL = cssToken('--sky-fill');
 
 /* ── C. 3D material + selection treatment ─────────────────────────────── */
 
-/** Untinted body grey. Also the colour of the inert `none` region. */
-export const BODY_BASE_COLOR = cssToken('--body-base');
+/**
+ * White: a trained muscle with no change, "Gehalten" — and the ground every
+ * tint is mixed from, so a small improvement is a white muscle turning green.
+ */
+export const BODY_HELD_COLOR = cssToken('--body-held');
+
+/**
+ * Dimmed: what says nothing. An untrained muscle, and the inert `none`
+ * region (head, hands, feet). A body with no data is a quiet grey figure,
+ * and training makes it light (contract §8, D161).
+ */
+export const BODY_DIMMED_COLOR = cssToken('--body-dimmed');
+
+export const STATE_COLOR: Readonly<Record<MuscleState, StateTokens>> = {
+  improved:         { text: 'Verbessert',               ink: STATUS_PALETTE.strong.ink,  tint: STATUS_PALETTE.strong.tint, model: STATUS_PALETTE.strong.fill, ground: BODY_HELD_COLOR },
+  declined:         { text: 'Zurückgegangen',           ink: STATUS_PALETTE.weak.ink,    tint: STATUS_PALETTE.weak.tint,   model: STATUS_PALETTE.weak.fill,   ground: BODY_HELD_COLOR },
+  unchanged:        { text: 'Gehalten',                 ink: cssToken('--text-primary'), tint: STATUS_PALETTE.empty.tint, model: BODY_HELD_COLOR,   ground: BODY_HELD_COLOR },
+  awaitingBaseline: { text: 'Zu wenig Vergleichsdaten', ink: SKY_INK,                    tint: cssToken('--sky-tint'),    model: SKY_FILL,          ground: BODY_HELD_COLOR },
+  noData:           { text: 'Noch nicht trainiert',     ink: STATUS_PALETTE.empty.ink,   tint: STATUS_PALETTE.empty.tint, model: BODY_DIMMED_COLOR, ground: BODY_DIMMED_COLOR },
+};
 
 /** Highlight used when tinting is off (data-tint="off") and a group is selected. */
 export const NEUTRAL_HIGHLIGHT = cssToken('--accent');
@@ -125,26 +143,47 @@ export const BODY_LIGHT = {
 
 /**
  * Region material mix. `intensity` (0…1) comes from the host and carries the
- * MAGNITUDE of the change, so +12 % burns brighter than +2 %.
+ * MAGNITUDE of the change, so +12 % burns brighter than +3 %.
  *
- *   color    = lerp(BODY_BASE_COLOR, STATE_COLOR[state].model, mix * intensity)
+ *   color    = lerp(ground, STATE_COLOR[state].model, mix * intensity)
  *   emissive = STATE_COLOR[state].model at emissiveIntensity * intensity
  *   rim      = STATE_COLOR[state].model at rim * intensity   (Fresnel, pow 2.6)
+ *
+ * The ground is white for every trained group, so the mix is what makes a
+ * tint: three quarters of the way to the status colour at full strength,
+ * three tenths at the weakest — from the tones the contract's mock-ups were
+ * coloured with, the weakest raised a little so that +3 % is plainly green
+ * beside a white group at 393px under today's light. Roughness, the lights and the tone mapping are block 7A's.
  */
 export const REGION_MATERIAL = {
   roughness: 0.74,
   metalness: 0,
-  resting:  { mix: 0.55, emissiveIntensity: 0.11, rim: 0.42 },
-  selected: { mix: 0.72, emissiveIntensity: 0.26, rim: 0.95 },
+  resting:  { mix: 0.75, emissiveIntensity: 0.11, rim: 0.42 },
+  selected: { mix: 0.88, emissiveIntensity: 0.26, rim: 0.95 },
   /** Exponential ease rate; 1 - exp(-dt * rate) settles in ~250 ms. */
   easeRate: 12,
 } as const;
 
-/** The intensity curve the approved design uses. */
+/**
+ * The strength of a tint (contract §7): it grows evenly from 2.5 % to 12 %
+ * and stays there. 2.5 % is where the band ends — the smallest change that
+ * is shown as ±3 % — and it starts at `TINT_STRENGTH.min`, the least at
+ * which +3 % reads as green beside a held, white group on a phone.
+ */
+export const TINT_STRENGTH = {
+  fromPercent: 2.5,
+  toPercent: 12,
+  min: 0.4,
+  /** "Zu wenig Vergleichsdaten": lightly blue, whatever its ratio. */
+  awaitingBaseline: 0.5,
+} as const;
+
+/** The strength of a state's tint, from the unrounded change. */
 export function stateIntensity(state: MuscleState, deltaPercent: number): number {
-  if (state === 'noData') return 0;                  // stays base grey
-  if (state === 'awaitingBaseline') return 0.42;
-  if (state === 'unchanged') return 0.4;
-  const pct = Math.abs(deltaPercent);
-  return Math.max(0.34, Math.min(1, 0.34 + (pct / 12) * 0.66));
+  // Held is white and untrained is dimmed: neither carries a tint.
+  if (state === 'noData' || state === 'unchanged') return 0;
+  if (state === 'awaitingBaseline') return TINT_STRENGTH.awaitingBaseline;
+  const { fromPercent, toPercent, min } = TINT_STRENGTH;
+  const along = (Math.abs(deltaPercent) - fromPercent) / (toPercent - fromPercent);
+  return min + Math.max(0, Math.min(1, along)) * (1 - min);
 }

@@ -2,15 +2,14 @@ import { useMemo } from 'react';
 import { MUSCLE_GROUPS } from '../../core/model';
 import type { DateKey } from '../../core/dates';
 import { useToday } from '../../app/useToday';
-import { percentChange } from '../../core/gym/performance';
 import { Section } from '../../components';
 import { ChevronRightIcon } from '../../components/Icons';
 import { useT } from '../../i18n/I18nProvider';
 import { NBSP } from '../../i18n/typography';
 import type { GymHistory } from '../../storage/services/gymService';
-import type { MuscleState } from '../../components/BodyRenderer';
+import { changeWords } from './changeWords';
 import { muscleGap } from './muscleGap';
-import { muscleStateOf } from './muscleState';
+import { NOTHING_SHOWN, shownPerformance } from './muscleState';
 import bodyPreview from './assets/body-preview.webp';
 import './gymHub.css';
 
@@ -30,8 +29,9 @@ import './gymHub.css';
  * the facts. The 3D body is **not** here: it loads only in the destination
  * this card opens.
  *
- * Nothing is computed: the states and the overall figure are the ones
- * `GymProgress` shows, from the same loaded history.
+ * Nothing is computed here: the states, the count of rated groups and the
+ * trend are `shownPerformance()`'s — what `GymProgress` shows for the same
+ * loaded history, by the one rule in `muscleState.ts`.
  */
 export function MuscleEntryCard({
   history,
@@ -54,17 +54,17 @@ export function MuscleEntryCard({
 }) {
   const t = useT();
   const today = useToday();
-  const states: { muscle: (typeof MUSCLE_GROUPS)[number]; state: MuscleState }[] = useMemo(
-    () =>
-      (history?.overall.muscles ?? MUSCLE_GROUPS.map((muscle) => ({ muscle, status: 'noData' as const, ratio: null, exercises: 0, compared: 0, latestScore: null }))).map(
-        (entry) => ({ muscle: entry.muscle, state: muscleStateOf(entry) }),
-      ),
+  const shown = useMemo(
+    () => (history ? shownPerformance(history.days, history.overall) : NOTHING_SHOWN),
     [history],
   );
+  const states = shown.muscles;
 
   const trained = states.filter((view) => view.state !== 'noData').length;
-  const measured = history?.overall.measured.length ?? 0;
-  const change = percentChange(history?.overall.ratio ?? null);
+  // "Gewertet" is the groups whose row prints a figure — not the groups the
+  // comparison could compute, some of which have too little to compare.
+  const measured = shown.rated.length;
+  const trend = changeWords(shown.change, t);
   const hasData = (history?.days.length ?? 0) > 0;
 
   // An empty range is "never trained" only before the first session; with
@@ -88,24 +88,13 @@ export function MuscleEntryCard({
       ? t('gymHub.muscles.summary', { count: measured, total: MUSCLE_GROUPS.length })
       : t('gymHub.muscles.trained', { count: trained, total: MUSCLE_GROUPS.length });
   const overall =
-    hasData && measured > 0 && change !== null
-      ? t('gymHub.muscles.overall', {
-          change:
-            Math.round(change) === 0
-              ? t('gym.change.unchanged')
-              : Math.round(change) > 0
-                ? t('gym.change.improved', { percent: Math.round(change) })
-                : t('gym.change.declined', { percent: Math.round(change) }),
-        })
+    hasData && measured > 0 && trend !== null
+      ? t('gymHub.muscles.overall', { change: trend.text })
       : null;
-  // The figure's colour follows the figure as printed (B6): green for a
-  // rounded rise, red for a rounded fall, the text colour when it is held.
+  // The figure's colour follows the figure as printed (B6) and the band
+  // (contract §7): green from +3 %, red from −3 %, the text colour when held.
   const overallTone =
-    change === null || Math.round(change) === 0
-      ? ''
-      : Math.round(change) > 0
-        ? 'gym-hub__musclesOverall--improved'
-        : 'gym-hub__musclesOverall--declined';
+    trend === null || trend.trend === 'unchanged' ? '' : `gym-hub__musclesOverall--${trend.trend}`;
 
   return (
     // No section label: the card names itself, and it is the section's only

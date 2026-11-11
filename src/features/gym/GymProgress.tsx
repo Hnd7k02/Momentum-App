@@ -6,7 +6,6 @@ import { MetricDetailSheet, MetricTile } from '../../components/metrics';
 import { ChevronRightIcon, PlusIcon } from '../../components/Icons';
 import { MUSCLE_LABEL_KEYS, type MuscleView } from '../../components/BodyRenderer';
 import type { DateKey } from '../../core/dates';
-import { percentChange } from '../../core/gym/performance';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useToday } from '../../app/useToday';
 import { exerciseHistory, type GymHistory } from '../../storage/services/gymService';
@@ -14,8 +13,11 @@ import { ExerciseDetail } from './ExerciseDetail';
 import { useExerciseNamer } from './exerciseNames';
 import { MuscleModule } from './MuscleModule';
 import { toMuscleAnalytics } from './muscleAnalytics';
-import { muscleGap, muscleGapText } from './muscleGap';
-import { muscleStateOf, shownTrend } from './muscleState';
+import { MUSCLE_STATE_KEYS } from '../../components/BodyRenderer';
+import { changeWords } from './changeWords';
+import { exerciseDaysText, muscleGap, muscleGapText } from './muscleGap';
+import { shownChangeText, shownPerformance } from './muscleState';
+import { percentChange } from '../../core/gym/performance';
 import './gym.css';
 import { useWeights } from '../../app/useWeights';
 
@@ -35,22 +37,6 @@ import { useWeights } from '../../app/useWeights';
  * none of them is.
  */
 
-// The state mapping lives in its own module so the adapters can share it
-// without importing a screen; re-exported here for the callers that had it.
-export { muscleStateOf };
-
-const changeText = (
-  ratio: number | null,
-  t: (key: 'gym.change.improved' | 'gym.change.declined' | 'gym.change.unchanged', params?: Record<string, string | number>) => string,
-): string | null => {
-  const change = percentChange(ratio);
-  if (change === null) return null;
-  const rounded = Math.round(change);
-  if (rounded === 0) return t('gym.change.unchanged');
-  return rounded > 0
-    ? t('gym.change.improved', { percent: rounded })
-    : t('gym.change.declined', { percent: rounded });
-};
 
 export function GymProgress({
   history,
@@ -75,17 +61,25 @@ export function GymProgress({
   const [openExercise, setOpenExercise] = useState<string | null>(null);
   const [overallOpen, setOverallOpen] = useState(false);
 
+  /**
+   * The range as the screen shows it: each group's state, which groups are
+   * rated, and the trend above them — from the one rule (`muscleState.ts`).
+   * The body, the flat figure, the rows, the count and the figure all read
+   * this one value.
+   */
+  const shown = useMemo(() => shownPerformance(history.days, history.overall), [history]);
+
   /** The rows' view model: states, deltas, recency and the trends. */
-  const analytics = useMemo(() => toMuscleAnalytics(history), [history]);
+  const analytics = useMemo(() => toMuscleAnalytics(history, shown), [history, shown]);
 
   const views: MuscleView[] = useMemo(
     () =>
-      history.overall.muscles.map((entry) => ({
+      shown.muscles.map((entry) => ({
         muscle: entry.muscle,
-        state: muscleStateOf(entry),
-        detail: changeText(entry.ratio, t as never),
+        state: entry.state,
+        detail: changeWords(entry.change, t)?.text ?? null,
       })),
-    [history, t],
+    [shown, t],
   );
 
   /** The exercises that reached the selected group, newest comparison first. */
@@ -118,7 +112,7 @@ export function GymProgress({
 
   /*
    * Why there is nothing here, or nothing to compare, in so many words
-   * (contract §11). The range holds only the last 7 or 30 days, so "nothing
+   * (contract §11). The range holds only the last 30 or 90 days, so "nothing
    * in the range" is not "never trained": the second names the last session
    * and says that only the range is shown (STOP 6b).
    */
@@ -154,9 +148,12 @@ export function GymProgress({
             </div>
           ) : null}
           <MuscleModule
-            muscles={history.overall.muscles}
+            muscles={shown.muscles}
             analytics={analytics}
             views={views}
+            // Ten untrained groups: a row of five states would explain
+            // colours that are not there (contract §11, mock-up 1).
+            legend={false}
             selected={selected}
             onSelect={(muscle) => setSelected(muscle)}
             onToggle={(muscle) => setSelected((current) => (current === muscle ? null : muscle))}
@@ -166,7 +163,22 @@ export function GymProgress({
     );
   }
 
-  const overall = changeText(history.overall.ratio, t as never);
+  /*
+   * The figure above the rows: the trend of the rated groups, in the state
+   * the band gives it (contract §7). The figure and its word stand
+   * together — "+2 % Gehalten" — and only a rise or a fall is coloured.
+   */
+  const overall = shownChangeText(shown.change);
+  const overallValue =
+    overall === null || shown.trend === null ? null : (
+      <span className={`gym-progress__trend gym-progress__trend--${shown.trend}`}>{overall}</span>
+    );
+  const overallState = shown.trend === null ? undefined : t(MUSCLE_STATE_KEYS[shown.trend]);
+  const counted = t('gym.progress.groupsCounted', {
+    count: shown.rated.length,
+    total: MUSCLE_GROUPS.length,
+  });
+  const chosen = selected === null ? null : (analytics.find((view) => view.id === selected) ?? null);
 
   return (
     <>
@@ -180,14 +192,12 @@ export function GymProgress({
         id="gym-overall"
         title={t('gym.progress.overall')}
         value={
-          overall ?? (
+          overallValue ?? (
             <span className="metric-tile__state">{t('gym.progress.noBaseline')}</span>
           )
         }
-        line={t('gym.progress.groupsCounted', {
-          count: history.overall.measured.length,
-          total: MUSCLE_GROUPS.length,
-        })}
+        scale={overallState}
+        line={counted}
         // This screen's one main number (contract §3).
         primary
         onOpen={() => setOverallOpen(true)}
@@ -196,13 +206,11 @@ export function GymProgress({
       <MetricDetailSheet
         open={overallOpen}
         title={t('gym.progress.overall')}
-        value={overall ?? t('gym.progress.noBaseline')}
-        scale={t('gym.progress.groupsCounted', {
-          count: history.overall.measured.length,
-          total: MUSCLE_GROUPS.length,
-        })}
+        value={overallValue ?? t('gym.progress.noBaseline')}
+        scale={overallState ? `${overallState} · ${counted}` : counted}
         onClose={() => setOverallOpen(false)}
       >
+        <p>{t('gym.progress.explainTrend')}</p>
         <p>{t('gym.progress.explainGroups')}</p>
         <p>{t('gym.progress.explainMetric', { unit: weights.unitLabel })}</p>
         <p>{t('gym.progress.ratingNote')}</p>
@@ -211,11 +219,11 @@ export function GymProgress({
 
       <Section label={t('gym.progress.muscles')}>
         <Card>
-          {/* Trained, but no exercise has a second day yet: the rows' "Noch
-              kein Vergleich" is explained once, here. */}
+          {/* Trained, but no group has enough to compare yet: the rows' "Zu
+              wenig Vergleichsdaten" is explained once, here. */}
           {explanation}
           <MuscleModule
-            muscles={history.overall.muscles}
+            muscles={shown.muscles}
             analytics={analytics}
             views={views}
             selected={selected}
@@ -234,16 +242,26 @@ export function GymProgress({
         }
       >
         <Card>
+          {/* The chosen group has too little to compare: one sentence says
+              how many exercise days there are and from when a trend
+              appears (contract §7). */}
+          {chosen && chosen.state === 'awaitingBaseline' ? (
+            <p className="gym-progress__tooFew" role="status">
+              {exerciseDaysText(chosen.exerciseDays, chosen.compared, { t, rangeDays })}
+            </p>
+          ) : null}
           {exercises.length === 0 ? (
             <EmptyState title={t('gym.progress.exercises')} body={t('gym.progress.noData')} />
           ) : (
             exercises.map((entry) => {
-              const change = changeText(entry.comparison?.ratio ?? null, t as never);
-              // The colour follows the rounded figure, as the text does (B6).
-              const kind =
+              // Words and colour from the one rule: an exercise's change
+              // reads by the band its group reads by (contract §7).
+              const words =
                 !entry.comparison || entry.comparison.kind === 'noBaseline'
-                  ? 'noBaseline'
-                  : (shownTrend(entry.comparison.ratio) ?? 'noBaseline');
+                  ? null
+                  : changeWords(percentChange(entry.comparison.ratio), t);
+              const change = words?.text ?? null;
+              const kind = words?.trend ?? 'noBaseline';
               return (
                 <button
                   key={entry.id}

@@ -4,6 +4,7 @@ import { Card, Section, splitFigure } from '../../components';
 import { MetricBoard, MetricDetailSheet, MetricTile } from '../../components/metrics';
 import { useT } from '../../i18n/I18nProvider';
 import type { GymRatingState } from '../../storage/services/gymRatingService';
+import { changeWords } from './changeWords';
 import './gym.css';
 
 /**
@@ -36,17 +37,17 @@ import './gym.css';
  * there is only one place either of them could have come from.
  */
 
-/** A percentage change, spoken. `null` becomes the "no baseline" phrase. */
+/**
+ * A percentage change, spoken. `null` becomes the "no baseline" phrase.
+ * Rounding and band are the muscle status's (`muscleState.ts`, contract §7);
+ * its rule on how much there must be to compare is not — this figure is the
+ * rating's own window and says what the rating computed.
+ */
 function changeText(
   change: number | null,
   t: ReturnType<typeof useT>,
 ): string {
-  if (change === null) return t('gym.performance.none');
-  const rounded = Math.round(change);
-  if (rounded === 0) return t('gym.change.unchanged');
-  return rounded > 0
-    ? t('gym.change.improved', { percent: rounded })
-    : t('gym.change.declined', { percent: rounded });
+  return changeWords(change, t)?.text ?? t('gym.performance.none');
 }
 
 type Detail = 'rating' | 'ytd' | 'attendance' | 'endurance' | 'decay';

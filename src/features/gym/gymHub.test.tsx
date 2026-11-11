@@ -102,12 +102,13 @@ describe('the muscle entry card before the first workout', () => {
     expect(html).not.toContain(de['gymHub.muscles.noneHint']);
   });
 
-  it('states the counted groups and the overall change once there is history', () => {
-    const days = exerciseDays([
-      { date: '2026-03-02', exerciseId: 'ex_squat', muscles: ['quadriceps'], primaryMuscles: ['quadriceps'], sets: [{ id: 'a', reps: 5, weightGrams: 100000, order: 0 }] },
-      { date: '2026-03-09', exerciseId: 'ex_squat', muscles: ['quadriceps'], primaryMuscles: ['quadriceps'], sets: [{ id: 'b', reps: 5, weightGrams: 110000, order: 0 }] },
-    ]);
-    const history: GymHistory = {
+  const squat = (date: string, weightGrams: number) => ({
+    date, exerciseId: 'ex_squat', muscles: ['quadriceps' as const], primaryMuscles: ['quadriceps' as const],
+    sets: [{ id: date, reps: 5, weightGrams, order: 0 }],
+  });
+  const historyOf = (inputs: Parameters<typeof exerciseDays>[0]): GymHistory => {
+    const days = exerciseDays(inputs);
+    return {
       days,
       comparisons: latestComparisons(days),
       recent: gymPerformance(days),
@@ -115,14 +116,37 @@ describe('the muscle entry card before the first workout', () => {
       names: new Map([['ex_squat', 'Back Squat']]),
       awaitingBodyweight: [],
     };
-    const html = render(history);
+  };
+
+  it('states the rated groups and the performance trend once a group has enough to compare', () => {
+    const html = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-05', 104000), squat('2026-03-09', 110000)]));
     expect(html).toContain('1 von 10 gewertet');
-    expect(html).toContain('Gesamt +10\u00A0%');
+    expect(html).toContain('Leistungstrend +10\u00A0%');
+    expect(html).toContain('gym-hub__musclesOverall--improved');
     expect(html).toContain('Letzte 30 Tage');
     expect(html).not.toContain(de['gymHub.muscles.none']);
-    // One marker lit for the one measured group, the other nine grey.
+    // The old word for the figure is gone (contract §13).
+    expect(html).not.toContain('Gesamt');
+    // One marker lit for the one rated group, the other nine grey.
     expect(html.match(/gym-hub__previewState--improved/g)?.length ?? 0).toBe(1);
     expect(html.match(/gym-hub__previewState--noData/g)?.length ?? 0).toBe(MUSCLE_GROUPS.length - 1);
+  });
+
+  it('counts a group as rated only when its row prints a figure (contract §7)', () => {
+    // Two exercise days: the comparison exists, and it is too little.
+    const html = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-09', 110000)]));
+    expect(html).not.toContain('gewertet');
+    expect(html).not.toContain('Leistungstrend');
+    expect(html).toContain('1 von 10 trainiert');
+    expect(html.match(/gym-hub__previewState--awaitingBaseline/g)?.length ?? 0).toBe(1);
+    expect(html.match(/gym-hub__previewState--improved/g)?.length ?? 0).toBe(0);
+  });
+
+  it('reads a trend inside the band as held, in the text colour', () => {
+    const html = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-05', 100000), squat('2026-03-09', 102000)]));
+    expect(html).toContain('Leistungstrend Gehalten');
+    expect(html).not.toContain('gym-hub__musclesOverall--');
+    expect(html.match(/gym-hub__previewState--unchanged/g)?.length ?? 0).toBe(1);
   });
 });
 

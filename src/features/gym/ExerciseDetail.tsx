@@ -5,7 +5,7 @@ import { percentChange, type ExerciseComparison, type ExerciseDay } from '../../
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { useWeights } from '../../app/useWeights';
-import { roundShown, shownTrend } from './muscleState';
+import { changeWords } from './changeWords';
 import './gym.css';
 import { useWorld } from '../../app/world';
 
@@ -71,8 +71,12 @@ export function ExerciseDetail({
 
   const latest = days[0] ?? null;
   const change = percentChange(comparison?.ratio ?? null);
-  const shown =
-    !comparison || comparison.kind === 'noBaseline' ? null : shownTrend(comparison.ratio);
+  // Words and colour from the one rule (`muscleState.ts`): an exercise's
+  // change reads by the same rounding and the same band as its group's, so
+  // the list and the group never contradict each other. The group's rule on
+  // how much there must be to compare does not apply to one exercise.
+  const words = !comparison || comparison.kind === 'noBaseline' ? null : changeWords(change, t);
+  const shown = words?.trend ?? null;
   const oldest = days[days.length - 1] ?? null;
   /*
    * The chart's scale runs from zero to the largest day (contract §6), and
@@ -131,16 +135,11 @@ export function ExerciseDetail({
                 </div>
                 <div className="gym-detail__figure">
                   <span className="gym-detail__label">{t('gym.detail.change')}</span>
-                  {/* Text and colour from the one rounded figure (WP3, B6): a
-                      +0.4 % change is "Gehalten", not a green "+0 %". */}
+                  {/* Text and colour from the one rounded figure (WP3, B6) and
+                      the band (contract §7): +2 % is "Gehalten", in the text
+                      colour; from +3 % the figure is green. */}
                   <span className={`gym-detail__value gym-detail__value--${shown ?? 'noBaseline'}`}>
-                    {shown === null || change === null
-                      ? t('gym.progress.noBaseline')
-                      : shown === 'unchanged'
-                        ? t('gym.change.unchanged')
-                        : t(shown === 'improved' ? 'gym.change.improved' : 'gym.change.declined', {
-                            percent: roundShown(change) ?? 0,
-                          })}
+                    {words?.text ?? t('gym.progress.noBaseline')}
                   </span>
                 </div>
               </div>

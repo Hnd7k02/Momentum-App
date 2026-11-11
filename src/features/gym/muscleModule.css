@@ -202,7 +202,9 @@
   background: var(--surface-secondary);
 }
 
-/* State — how the group is doing — on the number and the badge only. */
+/* State — how the group is doing — on the number and the badge only. A rise
+   and a fall take their status colour; a held figure is the text colour
+   with the word beneath it (contract §7), never the warning yellow. */
 .muscle-row__right--improved {
   color: var(--status-strong-ink);
 }
@@ -216,10 +218,7 @@
   background: var(--status-weak-tint);
 }
 .muscle-row__right--unchanged {
-  color: var(--status-mixed-ink);
-}
-.muscle-row__right--unchanged .muscle-row__badge {
-  background: var(--status-mixed-tint);
+  color: var(--text-primary);
 }
 .muscle-row__right--awaitingBaseline {
   color: var(--sky-ink);
@@ -278,4 +277,101 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
+}
+
+/* ── The five states, under the body (contract §7, mock-up 1) ───────────────
+
+   A mark and the word each, wrapping to two lines on a phone. The marks are
+   the tones of the body: green, white as a ring, red, blue, dimmed. Colour
+   is never alone here — each mark stands before its word. */
+.muscle-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-3);
+  list-style: none;
+  border-bottom: 1px solid var(--separator);
+}
+
+.muscle-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--type-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.muscle-legend__mark {
+  display: block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.muscle-legend__mark--improved {
+  background: var(--status-strong);
+}
+/* Held is white on the body: a ring in the data ink, on either ground. */
+.muscle-legend__mark--unchanged {
+  border: 2px solid var(--data-ink);
+}
+.muscle-legend__mark--declined {
+  background: var(--status-weak);
+}
+.muscle-legend__mark--awaitingBaseline {
+  background: var(--sky-fill);
+}
+.muscle-legend__mark--noData {
+  background: var(--text-tertiary);
+}
+
+/* ── The legend sheet, behind ⓘ ─────────────────────────────────────────── */
+
+.muscle-legend-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.muscle-legend-sheet__lead {
+  font-size: var(--type-body);
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.muscle-legend-sheet__states {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.muscle-legend-sheet__state {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--separator);
+}
+
+.muscle-legend-sheet__state dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.muscle-legend-sheet__state dd {
+  margin: 2px 0 0 calc(8px + var(--space-2));
+  font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+.muscle-legend-sheet__note {
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
 }

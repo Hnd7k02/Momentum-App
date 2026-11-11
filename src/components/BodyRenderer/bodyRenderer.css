@@ -25,10 +25,12 @@
 }
 
 /*
- * State is carried by fill *and* by the words in the legend. Each status
- * region is also outlined in its own ink: the status fills are bright by
- * design and yellow or green alone would not separate from the silhouette,
- * so the outline is what keeps a region a shape rather than a wash.
+ * State is carried by fill *and* by the words in the legend, in the tones of
+ * the 3D body it stands in for (contract §7): green and red tinted, lightly
+ * blue with too little to compare, the neutral data ink for held — a
+ * trained group with no change — and the dimmed empty tone for untrained.
+ * Each status region is also outlined in its own ink, which is what keeps a
+ * region a shape rather than a wash.
  */
 .body-renderer__muscle {
   transition: fill var(--duration-base) var(--ease-standard);
@@ -50,9 +52,7 @@
 }
 
 .body-renderer__muscle--unchanged {
-  fill: var(--status-mixed);
-  stroke: var(--status-mixed-ink);
-  stroke-width: 1;
+  fill: var(--data-ink);
 }
 
 .body-renderer__muscle--declined {
@@ -111,8 +111,7 @@
   box-shadow: inset 0 0 0 1px var(--status-strong-ink);
 }
 .body-renderer__swatch--unchanged {
-  background: var(--status-mixed);
-  box-shadow: inset 0 0 0 1px var(--status-mixed-ink);
+  background: var(--data-ink);
 }
 .body-renderer__swatch--declined {
   background: var(--status-weak);
@@ -140,7 +139,7 @@
   color: var(--status-weak-ink);
 }
 .body-renderer__state--unchanged {
-  color: var(--status-mixed-ink);
+  color: var(--text-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {

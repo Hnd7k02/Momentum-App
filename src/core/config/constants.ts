@@ -175,8 +175,13 @@ export const XP = {
   PER_WEEKLY_TARGET_MET: 60,
 } as const;
 
-/** Trend ranges offered on the Progress screen. 90 is reserved for later. */
+/** Trend ranges offered on the Progress screen. */
 export const TREND_RANGES = [7, 30] as const;
+/**
+ * The ranges of the muscle trend (contract §7): 30 days, the default, and 90.
+ * A week holds too few exercise days for a group to state a trend at all.
+ */
+export const MUSCLE_TREND_RANGES = [30, 90] as const;
 export const HEATMAP_DAYS = 30;
 /** Window of the rolling average used to suppress daily noise in the curve. */
 export const TREND_SMOOTHING_DAYS = 7;

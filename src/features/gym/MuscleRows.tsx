@@ -79,7 +79,14 @@ export function MuscleRows({
          * read against the others: the Übungen list below already answers
          * "what did I do for this muscle", for whichever group is selected.
          */
-        const sub = lastTrainedText(view.lastTrainedAt, today, t);
+        const recency = lastTrainedText(view.lastTrainedAt, today, t);
+        // A group with too little to compare also says how much there is:
+        // "Vor 2 Tagen · 2 Übungstage" (contract §7). The full sentence
+        // stands with the group's exercises once the row is chosen.
+        const sub =
+          view.state === 'awaitingBaseline' && recency
+            ? `${recency} · ${t(view.exerciseDays === 1 ? 'muscle.exerciseDays.shortOne' : 'muscle.exerciseDays.short', { count: view.exerciseDays })}`
+            : recency;
         // Sign, number and colour from the one rounded figure (B6).
         const delta = shownChangeText(view.delta);
 
@@ -97,8 +104,8 @@ export function MuscleRows({
                 {sub ? <span className="muscle-row__sub">{sub}</span> : null}
               </span>
 
-              {/* No trend is no chart: an untrained group and one waiting for
-                  a baseline have nothing to draw, and drawing a flat line
+              {/* No trend is no chart: an untrained group and one with too
+                  little to compare have nothing to draw, and drawing a line
                   there would state a result they do not have. */}
               <span className="muscle-row__chart" aria-hidden="true">
                 {view.trend.length > 0 ? (
@@ -112,10 +119,10 @@ export function MuscleRows({
 
               {/*
                 The number with its state in words beneath it where there is
-                one, the state as a chip where there is not. The number is
-                read in the state colour and never left to carry the meaning
-                alone (contract §12): the sign says which way it went, and
-                the word says it again.
+                one, the state as a chip where there is not. A rise or a fall
+                is read in its status colour, a held figure in the text
+                colour (contract §7), and the number is never left to carry
+                the meaning alone (contract §12): the word says it again.
               */}
               <span className={`muscle-row__right muscle-row__right--${view.state}`}>
                 {delta === null ? (

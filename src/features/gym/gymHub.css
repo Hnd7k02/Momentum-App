@@ -108,8 +108,9 @@
   background: var(--status-strong);
 }
 
+/* Held is neutral: the data ink, the tone of a trained group (contract §7). */
 .gym-hub__previewState--unchanged {
-  background: var(--status-mixed);
+  background: var(--data-ink);
 }
 
 .gym-hub__previewState--declined {

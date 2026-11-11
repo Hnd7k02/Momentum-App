@@ -356,10 +356,14 @@
   --shadow-brand-mark: 0 10px 30px rgba(125, 118, 235, 0.32), 0 2px 6px rgba(16, 24, 40, 0.06);
 
   /* The 3D body's material and light — read through `statusPalette.ts`,
-     never by CSS: the untinted grey, the colour of a term that adds no
-     light, the hemisphere's sky and ground and the cool fill. Unchanged in
-     Stage 6b; block 7A owns them. */
-  --body-base: #c9c9d2;
+     never by CSS. Two neutral tones (contract §8, D161): white is a trained
+     muscle with no change, "Gehalten"; dimmed is what says nothing — an
+     untrained muscle, and the head, hands and feet. Which state takes which
+     tone is the colour rules' and stays; block 7A sets the light and may
+     retune these two values under it. Then the colour of a term that adds
+     no light, the hemisphere's sky and ground and the cool fill. */
+  --body-held: #e9e9ee;
+  --body-dimmed: #7d7d8a;
   --body-unlit: #000000;
   --body-light-sky: #ffffff;
   --body-light-ground: #cdcdda;

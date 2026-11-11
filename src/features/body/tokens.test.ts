@@ -5,7 +5,8 @@ import { MUSCLE_GROUPS } from '../../core/model';
 import { MUSCLE_STATE_KEYS, type MuscleState as RendererMuscleState } from '../../components/BodyRenderer';
 import { BODY_REGIONS, REGION_FACING } from './muscleMeshMap';
 import {
-  BODY_BASE_COLOR,
+  BODY_DIMMED_COLOR,
+  BODY_HELD_COLOR,
   BODY_LIGHT,
   BODY_UNLIT,
   IDENTITY_COLOR,
@@ -114,10 +115,31 @@ describe('the muscle dot', () => {
 
 describe('the body\'s material and light are read, never restated', () => {
   it('keeps the approved values, from tokens.css', () => {
-    // Stage 6b moved where these are written, not what they are.
-    expect(BODY_BASE_COLOR).toBe('#c9c9d2');
+    // Two neutral tones since the colour rules (contract §8, D161): white is
+    // a trained muscle with no change, dimmed is what says nothing. Block 7A
+    // may retune the two values under its light; which state takes which
+    // tone is pinned below and stays.
+    expect(BODY_HELD_COLOR).toBe('#e9e9ee');
+    expect(BODY_DIMMED_COLOR).toBe('#7d7d8a');
+    expect(TOKENS_CSS).not.toMatch(/--body-base\b/);
     expect(BODY_UNLIT).toBe('#000000');
     expect(NEUTRAL_HIGHLIGHT).toBe('#5e5ce6');
     expect(BODY_LIGHT).toEqual({ sky: '#ffffff', ground: '#cdcdda', fill: '#dfe4f5' });
+  });
+
+  it('gives each of the five states its tone (contract §7)', () => {
+    // Held is white and untrained is dimmed; neither is a status colour.
+    expect(STATE_COLOR.unchanged).toMatchObject({ model: BODY_HELD_COLOR, ground: BODY_HELD_COLOR });
+    expect(STATE_COLOR.noData).toMatchObject({ model: BODY_DIMMED_COLOR, ground: BODY_DIMMED_COLOR });
+    // The three tinted states are mixed from white, with the status palette.
+    const token = (name: string) => TOKENS_CSS.match(new RegExp(`${name}:\\s*(#[0-9a-f]{6});`, 'i'))![1]!.toLowerCase();
+    expect(STATE_COLOR.improved).toMatchObject({ model: token('--status-strong'), ground: BODY_HELD_COLOR });
+    expect(STATE_COLOR.declined).toMatchObject({ model: token('--status-weak'), ground: BODY_HELD_COLOR });
+    expect(STATE_COLOR.awaitingBaseline).toMatchObject({ model: token('--sky-fill'), ground: BODY_HELD_COLOR });
+    // "Gehalten" is no longer the warning yellow, anywhere in the table.
+    const yellow = TOKENS_CSS.match(/--status-mixed:\s*(#[0-9a-f]{6});/i)![1]!.toLowerCase();
+    for (const tokens of Object.values(STATE_COLOR)) {
+      expect(Object.values(tokens)).not.toContain(yellow);
+    }
   });
 });

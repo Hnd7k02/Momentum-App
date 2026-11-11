@@ -341,6 +341,35 @@
   margin-bottom: var(--space-7);
 }
 
+/* The trend above the rows carries the state the band gives it (contract
+   §7): a rise and a fall in their status colour, held in the text colour. */
+.gym-progress__trend--improved {
+  color: var(--status-strong-ink);
+}
+.gym-progress__trend--declined {
+  color: var(--status-weak-ink);
+}
+
+/* What a group with too little to compare is missing, above its exercises. */
+.gym-progress__tooFew {
+  padding-bottom: var(--space-3);
+  font-size: var(--type-footnote);
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* ⓘ in the header of Muskelgruppen: 44px, at the trailing edge. */
+.gym-muscles__legendButton {
+  flex: none;
+  margin-left: auto;
+  margin-right: -12px;
+  min-width: 44px;
+  min-height: 44px;
+  padding-left: 11px;
+  padding-right: 11px;
+  color: var(--text-secondary);
+}
+
 
 
 
@@ -393,9 +422,10 @@
   color: var(--status-weak-ink);
 }
 /* "Gehalten" is a word standing where a number would: one step smaller, so
-   it does not outweigh the figures above and below it. */
+   it does not outweigh the figures above and below it — and in the text
+   colour, never the warning yellow (contract §7). */
 .gym-progress__change--unchanged {
-  color: var(--status-mixed-ink);
+  color: var(--text-primary);
   font-size: var(--type-subhead);
 }
 .gym-progress__change--noBaseline {
@@ -456,7 +486,7 @@
   color: var(--status-weak-ink);
 }
 .gym-detail__value--unchanged {
-  color: var(--status-mixed-ink);
+  color: var(--text-primary);
 }
 .gym-detail__value--noBaseline {
   color: var(--text-secondary);

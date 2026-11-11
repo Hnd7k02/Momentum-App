@@ -1,8 +1,9 @@
 import { Suspense, useMemo } from 'react';
 import type { MuscleGroup } from '../../core/model';
 import { useToday } from '../../app/useToday';
-import type { MusclePerformance } from '../../core/gym/performance';
-import { BodyRenderer, type MuscleView } from '../../components/BodyRenderer';
+import { BodyRenderer, MUSCLE_STATE_KEYS, type MuscleState, type MuscleView } from '../../components/BodyRenderer';
+import { useT } from '../../i18n/I18nProvider';
+import type { ShownMuscle } from './muscleState';
 import { BodyBoundary, BodyViewer, toBodyVisuals, visualsByMuscle } from '../body';
 import type { MuscleAnalyticsView } from './muscleAnalytics';
 import { MuscleRows } from './MuscleRows';
@@ -22,7 +23,12 @@ import './muscleModule.css';
  * where tapping the highlighted row again is a deliberate act.
  *
  * It computes nothing: the visuals are `toBodyVisuals()` and the rows are
- * `toMuscleAnalytics()`, both over what the screen already loaded.
+ * `toMuscleAnalytics()`, both over what the screen already shows.
+ *
+ * Under the body stands the row of the five states (contract §7, mock-up
+ * 1): a mark and the word, in the order the legend sheet explains them. It
+ * is hidden from assistive technology — every row below says its state in
+ * words, and the sheet behind ⓘ is the readable legend.
  *
  * The 3D body is behind `React.lazy`, so three.js reaches a device only when
  * this module renders — entering Mind never fetches it. Where
@@ -30,20 +36,32 @@ import './muscleModule.css';
  * SVG figure takes its place with the same states and the same selection,
  * and the rows below are untouched either way.
  */
+/** The five states, in the legend's order. */
+export const LEGEND_STATES: readonly MuscleState[] = [
+  'improved',
+  'unchanged',
+  'declined',
+  'awaitingBaseline',
+  'noData',
+];
+
 export function MuscleModule({
   muscles,
   analytics,
   views,
+  legend = true,
   selected,
   onSelect,
   onToggle,
 }: {
-  /** Already derived by the Gym domain for the range on screen. */
-  muscles: readonly MusclePerformance[];
+  /** The ten groups as the screen shows them for the range (`shownPerformance`). */
+  muscles: readonly ShownMuscle[];
   /** The rows' view model, over the same range. */
   analytics: readonly MuscleAnalyticsView[];
   /** The same groups in the SVG figure's shape, for the stand-in. */
   views: readonly MuscleView[];
+  /** The row of the five states under the body; off where nothing is coloured. */
+  legend?: boolean;
   selected: MuscleGroup | null;
   /** A tap on the body: select, never clear. */
   onSelect: (muscle: MuscleGroup) => void;
@@ -52,6 +70,7 @@ export function MuscleModule({
 }) {
   // "Vor 3 Tagen" counts from the day the app shows, which moves (B3).
   const today = useToday();
+  const t = useT();
   const visuals = useMemo(() => visualsByMuscle(toBodyVisuals(muscles)), [muscles]);
 
   // One figure, whichever way it is drawn: the SVG stands in for the canvas
@@ -76,6 +95,17 @@ export function MuscleModule({
           />
         </Suspense>
       </BodyBoundary>
+
+      {legend ? (
+        <ul className="muscle-legend" aria-hidden="true">
+          {LEGEND_STATES.map((state) => (
+            <li key={state} className="muscle-legend__item">
+              <i className={`muscle-legend__mark muscle-legend__mark--${state}`} />
+              {t(MUSCLE_STATE_KEYS[state])}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <MuscleRows views={analytics} today={today} selected={selected} onSelect={onToggle} />
     </div>

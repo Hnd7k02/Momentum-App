@@ -8,7 +8,7 @@ import { useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
 import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
-import { BODY_BASE_COLOR } from './tokens';
+import { BODY_DIMMED_COLOR } from './tokens';
 
 /**
  * Where the shipped model lives, under whatever base the app is served from
@@ -61,7 +61,7 @@ export function BodyModel({
       gltf.scene.traverse((o) => {
         const mesh = o as Mesh;
         if (!mesh.isMesh || mesh.userData.muscle) return;
-        const material = new MeshStandardMaterial({ color: BODY_BASE_COLOR, roughness: 0.8, metalness: 0 });
+        const material = new MeshStandardMaterial({ color: BODY_DIMMED_COLOR, roughness: 0.8, metalness: 0 });
         material.name = INERT_REGION;
         mesh.material = material;
         inert.push(material);

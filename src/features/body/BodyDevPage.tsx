@@ -21,30 +21,56 @@ import { IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, STATE_COLOR, mutedIdentity, s
 type Fixture = { state: MuscleState; delta: number };
 
 /** Every state at least once, and two magnitudes of improvement. */
-const FIXTURE: Record<MuscleGroup, Fixture> = {
+const MIXED: Record<MuscleGroup, Fixture> = {
   chest: { state: 'improved', delta: 12 },
   back: { state: 'improved', delta: 3 },
   shoulders: { state: 'unchanged', delta: 0 },
   biceps: { state: 'declined', delta: -6 },
   triceps: { state: 'awaitingBaseline', delta: 0 },
   core: { state: 'improved', delta: 7 },
-  quadriceps: { state: 'declined', delta: -2 },
+  quadriceps: { state: 'declined', delta: -3 },
   hamstringsGlutes: { state: 'unchanged', delta: 0 },
   calves: { state: 'noData', delta: 0 },
   forearms: { state: 'noData', delta: 0 },
+};
+
+const all = (fixture: Fixture): Record<MuscleGroup, Fixture> =>
+  Object.fromEntries(MUSCLE_GROUPS.map((id) => [id, fixture])) as Record<MuscleGroup, Fixture>;
+
+/**
+ * `?fixture=` picks the bodies the colour rules are judged on (contract §7,
+ * §8): nothing trained, everything held, and the smallest improvement and
+ * decline beside held groups.
+ */
+const FIXTURES: Record<string, Record<MuscleGroup, Fixture>> = {
+  mixed: MIXED,
+  empty: all({ state: 'noData', delta: 0 }),
+  held: all({ state: 'unchanged', delta: 1 }),
+  edge: {
+    ...all({ state: 'unchanged', delta: 0 }),
+    chest: { state: 'improved', delta: 2.5 },
+    back: { state: 'improved', delta: 2.5 },
+    quadriceps: { state: 'declined', delta: -2.5 },
+    hamstringsGlutes: { state: 'declined', delta: -2.5 },
+  },
 };
 
 function visualsOf(fixture: Record<MuscleGroup, Fixture>): Partial<Record<MuscleGroup, MuscleVisual>> {
   const out: Partial<Record<MuscleGroup, MuscleVisual>> = {};
   for (const id of MUSCLE_GROUPS) {
     const { state, delta } = fixture[id];
-    out[id] = { tint: STATE_COLOR[state].model, intensity: stateIntensity(state, delta) };
+    out[id] = {
+      tint: STATE_COLOR[state].model,
+      ground: STATE_COLOR[state].ground,
+      intensity: stateIntensity(state, delta),
+    };
   }
   return out;
 }
 
 /** `?lang=en` and `?model=missing` drive the two cases a fixture cannot. */
 const params = new URLSearchParams(window.location.search);
+const FIXTURE = FIXTURES[params.get('fixture') ?? 'mixed'] ?? MIXED;
 const LANG: Language = params.get('lang') === 'en' ? 'en' : 'de';
 const MODEL_URL = params.get('model') === 'missing' ? `${import.meta.env.BASE_URL}models/does-not-exist.glb` : undefined;
 
