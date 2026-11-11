@@ -15,6 +15,7 @@
   --info-fill: #62b4f7; --info-ink: #166db6; --info-tint: #e6f2fd;
   --untrained: #c9c9d2;
   --alt-mint-ink: #0a6e55; --alt-mint-tint: #e3f7ef;
+  --met-fill: var(--status-strong-ink);
   --glass-fill: rgba(255, 255, 255, 0.5); --glass-solid: #ffffff;
   --glass-edge: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.4) 39%, rgba(173,216,255,.25) 40%, rgba(173,216,255,.7));
   --ground:
@@ -39,6 +40,7 @@
   --info-fill: #62c6ff; --info-ink: #93d6ff; --info-tint: #14334c;
   --untrained: #7d7d8a;
   --alt-mint-ink: #7cf3cb; --alt-mint-tint: #163a30;
+  --met-fill: var(--status-strong);
   --glass-fill: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); --glass-solid: #1a1a22;
   --glass-edge: linear-gradient(135deg, rgba(255,255,255,.6), rgba(255,255,255,.1) 39%, rgba(173,216,255,.05) 40%, rgba(173,216,255,.6));
   --ground: radial-gradient(90% 55% at 15% 0%, rgba(163, 157, 255, 0.28), transparent 60%), linear-gradient(180deg, #14141b 0%, #0f0f14 100%);
@@ -150,7 +152,7 @@ svg .bar { fill: var(--data-ink); fill-opacity: .55; }
 .meter { height: 7px; border-radius: 4px; background: var(--data-track); overflow: hidden; }
 .meter b { display: block; height: 100%; border-radius: 4px; background: var(--data-ink); }
 .week { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
-.week b { height: 7px; border-radius: 4px; background: var(--data-track); } .week b.on { background: var(--data-ink); }
+.week b { height: 7px; border-radius: 4px; background: var(--data-track); } .week b.on { background: var(--data-ink); } .week b.met { background: var(--met-fill); }
 
 /* iPhone SE: keine Aussparung oben, kein Balken unten. */
 @media (max-width: 340px) { :root { --safe-top: 20px; --safe-bottom: 0px; } .row { grid-template-columns: 14px minmax(0, 1fr) 64px 88px; } .row .name { white-space: normal; } }

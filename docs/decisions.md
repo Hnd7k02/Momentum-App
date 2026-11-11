@@ -121,6 +121,10 @@ in D15 and D16.
 
 ## D14 — Two weights per pastel, and they are not interchangeable
 
+> **Status note (D160).** The pastel families lilac, mint, peach, rose and
+> sand leave the tokens with WP3 Stage 6b, and areas no longer carry a
+> colour of their own. Sky stays, as the information colour.
+
 Each identity colour has a decorative `-fill`, a `-mid` for controls, and a
 text-safe `-ink`, plus a `-tint` for backgrounds. On a light ground a pastel
 that looks right as a switch cannot carry 17px text at 4.5:1, and the
@@ -3599,3 +3603,49 @@ The remaining work runs as blocks — the contract, 6b, the colour rules, 5b,
 7A, 7B, 7C, 9 — each in a fresh cloud session started from its prompt under
 `docs/wp3/prompts/`, each ending at a STOP. One model does all of it
 (Fable 5.2); subagents only for pure search runs, on Sonnet.
+
+## D160 — The visual contract is approved; areas carry no colour, and a met weekly target is the one coloured bar
+
+**Decision (owner, STOP 0, 2026-11-11).** `docs/wp3/vertrag.md` is approved
+as written, with every value it proposed: the figure steps, the density, the
+shared scale of the trend lines, the tertiary greys of D149, graphite for
+the two navy leftovers of variant A, one wash on Gym's ground and two on
+Mind's.
+
+- **Areas carry no colour of their own.** The `--domain-*` aliases go, and
+  with them the pastel families lilac, mint, peach, rose and sand (D14). A
+  selection takes the accent; a destructive or failing thing takes the
+  `weak` companions, a positive message the `strong` ones. Sky stays as the
+  information colour.
+- **A bar that shows a value is neutral** — `--data-ink` on `--data-track`
+  — with one exception the owner added: a weekly target that has been met
+  carries the status colour `strong`. In Gym that is the fill (5.4:1 on the
+  track). On light it is the status's ink (4.8:1), because the fill reaches
+  only 2.1:1 on the light track and a bar needs 3:1. "Ziel erreicht" stays
+  beside it as a word.
+- **The four status fills stay the same in both worlds**; D123 stands. The
+  review had called them too loud on graphite. Measured as the small marks
+  they are in Gym, they hold, and a muted set was shown and not chosen.
+
+Built in Stage 6b.
+
+## D161 — The body's neutral tones, its stage, the way to it, and the sheet
+
+**Decision (owner, STOP 0, 2026-11-11).**
+
+- White is *held*: the tone of a trained muscle with nothing to report. What
+  says nothing is dimmed — a muscle not trained in the range, and the inert
+  zone of head, hands and feet. A body without data is one calm grey
+  figure, and training makes it light.
+- The body takes at least 55 % of the screen's height and stands on the
+  ground without a card. A compact header, the range control and a strip of
+  three figures sit above it.
+- The Gym tile on Heute leads straight to the muscle screen. The Gym hub
+  stays the place for training, plans and Laufen.
+- The muscle sheet opens at two thirds of the height and can be drawn to
+  92 %. The body above it turns to the chosen group and then stands still.
+- The owner has no Mac, so frame rate and load time are measured by a
+  readout in the app itself.
+
+Built in blocks 7A, 7B and 7C; the target is `docs/wp3/vertrag.md` §8
+and §9.

@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D159). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D161). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -549,9 +549,17 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   anatomical body with inert hands, stage 1 of the model plus a BodyParts3D
   proof gate, the tidy-up of the public repository and the licence.
 - **Block 0 — the visual contract** (no production code):
-  `docs/wp3/vertrag.md`, a draft for STOP 0, with three mock-ups under
-  `docs/wp3/mockups/`. It replaces D89 and marks every rule as decided or
-  proposed.
+  `docs/wp3/vertrag.md`, **approved at STOP 0 on 2026-11-11** (D160, D161),
+  with three mock-ups under `docs/wp3/mockups/`. It replaces D89. Areas
+  carry no colour of their own; a value bar is neutral, and a met weekly
+  target is the one bar in the `strong` status; the status fills stay as
+  they are; white is held and the dimmed tone is untrained and the inert
+  zone; the body stage takes 55 % of the height; the Gym tile on Heute
+  leads to the body; the muscle sheet opens at two thirds.
+- **Still open from the owner:** his usual rep ranges and whether warm-up
+  sets, pyramids, drop sets or deloads occur in his history (needed by
+  Stage 5b); the iPhone model and iOS version (needed by 7B). He has no
+  Mac.
 - **Order from here** (D159): Stage 6b, the colour rules of the muscle
   status, Stage 5b, 7A (stage 1 of the body and the proof gate), 7B, 7C, 9;
   the tidy-up of D157 as a block of its own. Each block starts in a fresh

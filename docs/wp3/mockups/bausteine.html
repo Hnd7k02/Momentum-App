@@ -50,9 +50,9 @@
   <div class="swatches">
     <div class="sw"><b style="background:#00b85b"></b>stark</div><div class="sw"><b style="background:#4cde24"></b>gut</div><div class="sw"><b style="background:#ffd600"></b>wechselhaft</div><div class="sw"><b style="background:#ff3b5c"></b>schwach</div><div class="sw"><b style="background:var(--info-fill)"></b>Hinweis</div>
   </div>
-  <div data-gedaempft></div>
 
   <h3>Ohne Mint: vorher und nachher</h3>
+  <p class="caption" style="margin:0 0 6px">Balken sind neutral. Nur ein erreichtes Wochenziel trägt die Statusfarbe «stark».</p>
   <div class="pair">
     <div><small>vorher</small>
       <div class="week"><b style="background:var(--alt-mint-ink)"></b><b style="background:var(--alt-mint-ink)"></b><b style="background:var(--alt-mint-tint)"></b></div>
@@ -60,15 +60,15 @@
       <div class="btn" style="margin-top:8px;background:var(--alt-mint-tint);color:var(--alt-mint-ink)">+ Satz</div>
       <div style="margin-top:8px;color:var(--alt-mint-ink);font-weight:600">Gym ›</div>
     </div>
-    <div><small>nachher (Vorschlag)</small>
+    <div><small>nachher</small>
       <div class="week"><b class="on"></b><b class="on"></b><b></b></div>
+      <div class="week" style="margin-top:5px"><b class="met"></b><b class="met"></b><b class="met"></b></div>
+      <div class="caption t-improved" style="margin-top:2px">Ziel erreicht</div>
       <div class="meter" style="margin-top:8px"><b style="width:83%"></b></div>
       <div class="btn second" style="margin-top:8px">+ Satz</div>
       <div style="margin-top:8px;font-weight:600">Gym <span style="color:var(--accent-ink)">›</span></div>
     </div>
   </div>
-  <div style="margin-top:10px"><small class="caption">Variante: Balken im Akzent statt neutral</small>
-    <div class="meter" style="margin-top:4px"><b style="width:83%;background:var(--accent)"></b></div></div>
 </template>
 <section class="sheetpage" id="mind"><h2>Mind · hell</h2></section>
 <section class="sheetpage" id="gym" data-world="gym" style="color:var(--text-primary)"><h2>Gym · dunkel</h2></section>
@@ -84,9 +84,6 @@
     const werte = [80.5, 84.6, 88.8, 85.8, 90, 94.4];
     s.querySelector('[data-balken]').innerHTML = werte.map((v, i) => { const h = (v - 76) / (94.4 - 76) * 56 + 4; return `<rect ${i === 5 ? 'fill="var(--status-strong)"' : 'class="bar"'} x="${52 + i * 50}" y="${70 - h}" width="34" height="${h}" rx="4"/>`; }).join('');
   }
-  // Nur in der dunklen Welt: die gedämpfte Fassung der Statusfarben zum Vergleich (Frage 2 im Vertrag).
-  document.querySelector('#gym [data-gedaempft]').innerHTML = `<small class="caption" style="display:block;margin:8px 0 4px">Zum Vergleich: gedämpft für dunklen Grund</small><div class="swatches">
-    <div class="sw"><b style="background:#33c27a"></b>stark</div><div class="sw"><b style="background:#77d95a"></b>gut</div><div class="sw"><b style="background:#e8c93a"></b>wechselhaft</div><div class="sw"><b style="background:#f0607a"></b>schwach</div><div class="sw"><b style="background:#6bb8ea"></b>Hinweis</div></div>`;
 </script>
 </body>
 </html>
