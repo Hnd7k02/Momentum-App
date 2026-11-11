@@ -7,6 +7,8 @@ Dieser Vertrag legt fest, wie Momentum aussieht und spricht. Die folgenden Blöc
 - **festgelegt** heisst: Dario hat entschieden; die Nummer verweist auf `docs/decisions.md`.
 - **Vorschlag** heisst: Die Regel wird am STOP 0 bestätigt oder geändert.
 
+Eine Regel ohne Marke ist ein Vorschlag.
+
 Belege sind die drei Mockups unter `docs/wp3/mockups/` (Screenshots in `bilder/`, je 393 und 320 px breit).
 
 ## §1 Leitbild und Geltung

@@ -80,7 +80,7 @@ body { font: 400 var(--type-body)/1.35 system-ui, -apple-system, 'Segoe UI', Rob
 .views span { padding: 6px 11px; font-size: var(--type-caption); border-radius: 999px; color: var(--text-secondary); }
 .views span[aria-current="true"] { background: var(--surface-selected); color: var(--text-primary); font-weight: 600; }
 .stage .tool { position: absolute; right: var(--page-gutter); top: 6px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-input); color: var(--text-secondary); z-index: 1; }
-.stage .note { position: absolute; right: var(--page-gutter); bottom: 30px; max-width: 34%; text-align: right; font-size: 10px; line-height: 1.3; color: var(--text-tertiary); opacity: .8; }
+.stage .note { position: absolute; right: var(--page-gutter); bottom: 30px; max-width: 34%; text-align: right; font-size: var(--type-caption); line-height: 1.3; color: var(--text-tertiary); opacity: .8; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 8px 0 6px; font-size: var(--type-caption); color: var(--text-secondary); }
 .legend i, .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
@@ -143,7 +143,7 @@ svg .bar { fill: var(--data-ink); fill-opacity: .55; }
 .sheetpage h2 { margin: 0 0 2px; font-size: var(--type-title); }
 .sheetpage h3 { margin: 18px 0 8px; font-size: var(--type-footnote); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
 .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
-.sw { width: 54px; font-size: 10px; color: var(--text-tertiary); text-align: center; }
+.sw { width: 62px; font-size: var(--type-caption); color: var(--text-tertiary); text-align: center; }
 .sw b { display: block; height: 30px; border-radius: 8px; margin-bottom: 3px; }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
 .pair > div > small { display: block; font-size: var(--type-caption); color: var(--text-tertiary); margin-bottom: 4px; }

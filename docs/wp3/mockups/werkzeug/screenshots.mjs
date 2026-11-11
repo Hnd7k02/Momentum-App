@@ -21,7 +21,7 @@ for (const [breite, hoehe] of [[393, 852], [320, 693]]) {
     await page.goto(BASIS + datei);
     await page.waitForLoadState('networkidle');
     const zuBreit = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-    const klein = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && e.textContent.trim() && parseFloat(getComputedStyle(e).fontSize) < 10.5 && !e.closest('.note,.sw')).length);
+    const klein = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && e.textContent.trim() && parseFloat(getComputedStyle(e).fontSize) < 10.5).length);
     await page.screenshot({ path: `docs/wp3/mockups/bilder/${name}-${breite}.png`, fullPage: ganz });
     console.log(`${name}-${breite}: zu breit=${zuBreit}, Text unter 11 px=${klein}`);
   }
