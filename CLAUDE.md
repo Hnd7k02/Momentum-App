@@ -324,8 +324,12 @@ Never conflate them.
   "Zu wenig Vergleichsdaten". The body, the flat figure, the rows, the
   hub's card, the trend above the rows, the exercise list and detail and
   the golden test all read it; none rounds, compares or counts on its own.
-  "Gewertet" means the row prints a figure. All of it is presentation:
-  the rating reads its own windows and `src/core` knows none of it.
+  "Gewertet" means the row prints a figure. Which group an exercise
+  belongs to is asked once as well (`exerciseGroups`): the domain's answer,
+  its roles as of its latest day in the range — for the count, a row's
+  recency, the trend's days and the exercises of a chosen group. All of it
+  is presentation: the rating reads its own windows and `src/core` knows
+  none of it.
 - **"Gehalten" is neutral, never the warning yellow** (D153, D161): the
   text colour in a row, the data ink as a mark, white on the body. The
   body has two neutral tones, `--body-held` (a trained muscle with no

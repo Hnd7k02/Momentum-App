@@ -3927,10 +3927,17 @@ by `muscleState.test.ts` at every edge and by `farbregeln.mjs` on the
 production build. The file's windows stay 7, 30 and 90 days.
 
 **An exercise day is an entry, not a calendar day** (*open*). One
-exercise on one day, counted for every group that exercise gave a weight
-above zero on that day — bench press and incline press on Monday and
-bench press on Thursday are three exercise days for the chest, on two
-calendar days. The other reading, three different calendar days, is
+exercise on one day, counted for every group that exercise gives a weight
+above zero — bench press and incline press on Monday and bench press on
+Thursday are three exercise days for the chest, on two calendar days.
+Which groups an exercise belongs to is the domain's answer:
+`musclePerformance()` reads an exercise's groups and roles from its latest
+day in the range, and the count follows it. The prompt named both "on
+that day" and "the membership `musclePerformance` computes with"; they are
+the same number until an exercise's mapping changes inside a range, and
+there the count by each day's own roles would have left a group untrained
+in the domain with three exercise days, or a figure resting on days that
+were not counted for it (found by the review of the block). The other reading, three different calendar days, is
 stricter. In the test profile with sets the two readings differ in no
 group and no window (18 group-windows, each on as many calendar days as
 exercise days); the owner's own data has not been counted — his backup
@@ -3966,7 +3973,8 @@ comparison, not the colour rule, and stays as it is.)
 
 **The sentence for too little to compare stands with the group's
 exercises**, shown when its row is chosen, and the row itself says how
-many exercise days there are ("Vor 9 Tagen · 2 Übungstage"). The muscle
+many exercise days there are, on a line of its own under the recency
+("2 Übungstage"). The muscle
 sheet, where the contract places the sentence (§9), is block 7C's. With
 three exercise days and no exercise on two of them the sentence says that
 instead of "ab dem dritten".
@@ -3974,9 +3982,15 @@ instead of "ab dem dritten".
 **The body.** Two tokens, `--body-held` `#e9e9ee` and `--body-dimmed`
 `#7d7d8a`, the tones the mock-ups were coloured with; `--body-base` is
 gone. A tint is mixed from white: three quarters of the way to the status
-colour at full strength, three tenths at the weakest (the mock-ups' tool
-had a quarter; raised so that +3 % is plainly green beside a white group
-at 393px under today's light). Too little to compare is the sky fill at
+colour at full strength, three eighths at the weakest. The mock-ups' tool
+had a quarter; it is raised because under today's light and tone mapping
+green arrives much weaker than red. Measured on the rendered body at
+393px, as the median difference of every lit pixel of the chest at +3 %
+from the same chest held: 4.1 ΔE at a quarter, 4.8 at three tenths, 6.5 at
+three eighths; the quadriceps at −3 % 9.0, 10.8 and 14.7. From the back
+the same strength reads far stronger (21 and 25). `farbregeln.mjs` holds
+both at 5 or more, read zone by zone from the pictures it saves, against
+a figure in which the same groups are held. Too little to compare is the sky fill at
 half strength. With tinting off the body is the dimmed figure. Light,
 roughness and tone mapping are untouched; block 7A may retune the two
 tones and the numbers of the strength, never which state takes which
@@ -3986,6 +4000,40 @@ tone or that the strength grows evenly from 2.5 % to 12 %.
 from the contract, although the metric is the best set until block 5b.
 One line beneath the five states says what an exercise day is — an
 addition, because the rule for "Zu wenig Vergleichsdaten" uses the word.
+
+**The flat figure's selection is the accent.** Held fills with the data
+ink, and the text colour that outlined a chosen group was that fill's own
+colour in the Gym world. The chosen group is outlined in `--accent`, like
+every selection and like the neutral cue of the 3D body.
+
+**Seen by the review and not changed here: the offline cache is named
+without its base.** `sw/serviceWorker.js` names its cache
+`momentum-<revision>` and, on activation, deletes every other cache that
+begins with `momentum-`. Cache Storage is shared by an origin as the
+database is. Today that touches nothing — the preview deliberately
+publishes no worker — but a preview that ever did would delete the live
+app's offline cache and the live app the preview's. The cache name should
+carry the base before that happens; it is block 9's or the tidy-up
+block's, with the offline check.
+
+**The block was reviewed twice** by read-only readers, one lens each, and
+each finding by a refuter. First pass, five readers: fifteen findings,
+nine confirmed. Fixed: the membership the exercise days are counted with;
+the hub's "Leistungstrend Gehalten" running under the chevron at 320px;
+the flat figure's selection on a held group; four places where
+`farbregeln.mjs` could pass on nothing (contrast with no named run, the
+body's colours unread, the yellow scan blind to pseudo-elements, gradients
+and the sheet); two sentences of HANDOVER. Left as recorded above: the
+cache name. Second pass, three readers over those fixes: eight findings,
+six confirmed, all fixed — the rows' recency, the trend's days and the
+exercise list of a chosen group read the same membership as the count
+(`exerciseGroups`), so a row can no longer say "Noch nicht trainiert"
+over "Vor 3 Tagen" across an edit of an exercise's mapping, which it
+could before the block as well; the test of that membership compares
+counts and not only presence; the body's pictures are taken once two
+frames in a row are the same and are read zone by zone against a held
+figure; the yellow scan compares colours by channel at any transparency;
+a named contrast run is named by its element.
 
 **Words left alone.** "Leistungsentwicklung" and "Tempoentwicklung" name
 the 60 % of a rating and stay; the contract's "nie Entwicklung" is about

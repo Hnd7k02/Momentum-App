@@ -585,11 +585,7 @@ for (const width of WIDTHS) {
   await scrollTop(page);
   await pressRange(page, '90 Tage');
   await waitBody(page);
-  // Choosing a row turned the body to that group; the picture is of the front.
-  if ((await page.locator('.body-viewer canvas').count()) > 0) {
-    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne', exact: true }).click();
-    await page.waitForTimeout(2500);
-  }
+
   const rows90 = await readRows(page);
   const calves90 = rows90.find((r) => r.name === NAME.calves);
   check(`${W}: at 90 days Waden appears: +10 %, improved, last trained 45 days ago`,
@@ -602,6 +598,11 @@ for (const width of WIDTHS) {
   check(`${W}: the sentence names the range on show`, sentence90 === '2 Übungstage in den letzten 90 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.', String(sentence90));
   await pick('hamstringsGlutes');
   await scrollTop(page);
+  // Choosing a row turned the body to that group; the picture is of the front.
+  if ((await page.locator('.body-viewer canvas').count()) > 0) {
+    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne', exact: true }).click();
+    await page.waitForTimeout(3000);
+  }
   await shot(page, width, 'muskelgruppen-90-oben');
   await scrollTo(page, '.muscle-legend', 12);
   await page.waitForTimeout(400);

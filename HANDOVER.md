@@ -562,21 +562,47 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   (read as: no special rule — section 4 of the 5b prompt). His phone is an
   iPhone 15 Pro on the newest iOS; the exact version is recorded with the
   first measurements at STOP 7B. He has no Mac.
-- **Still open from the owner:** his points on the first MakeHuman proof
-  of the body (section 4 of the 7A prompt has the place for them); under
-  which address he opens the live app (the documents say
-  `dario02king.github.io`, the repository is under `Hnd7k02` — asked at the
-  start of block 5b and again in block 9, because pages of one origin share
-  the `momentum` database in one browser, and the preview runs under
-  `hnd7k02.github.io`); the name for the licence file (tidy-up block).
+- **Answered by the owner on 2026-11-11, at the start of the colour-rules
+  block** (his answers to the questions the prompt session left open):
+  - *The live address.* His account used to be `dario02king`; GitHub does
+    not redirect Pages after a rename. The live app is at
+    <https://hnd7k02.github.io/Momentum-App/> — **the same origin as the
+    preview**. He checked in Safari that the new address loads. What the
+    old address does was left unfilled in his answer ("alte Adresse
+    [ lädt]") — read as not confirmed either way; ask once more in block
+    5b. He opens the live app **as an app from the Home Screen**.
+  - *The preview gets its own database from this block on.* A preview build
+    is built with `VITE_MOMENTUM_DB=momentum-preview` and opens that
+    database; the ordinary build stays `momentum` (`storage/db.ts`,
+    `databaseName()`). It is the one change this block was allowed under
+    `src/storage`. The live app's data is therefore out of the preview's
+    reach, and the preview starts empty: **the owner imports his backup
+    into the preview again**, and the iPhone checklist says so.
+  - *For block 9, noted:* check which address his installed app comes from
+    (an app added to the Home Screen under `dario02king.github.io` would
+    hold its data under an origin that no longer serves the app), and plan
+    the move by backup — export, install anew from the new address, import,
+    and remove the old app only after the check.
+  - *The licence file:* Dario Moffa, 2026 (tidy-up block, D157).
+  - *Readings 5–9 and the resolution of the contradictions,* as the prompt
+    session put them to him at its STOP: agreed. (Their wording is in that
+    session's report, not in the repository; the prompts as committed in
+    `9e4f546` already carry them.)
+  - *His backup* comes with block 5b; *his points on the MakeHuman proof*
+    come with block 7A (section 4 of the 7A prompt has the place for them).
+- **Still open from the owner:** whether the old address
+  `dario02king.github.io/Momentum-App/` still loads anything (see above);
+  his backup (5b); his points on the proof of the body (7A).
 - **Order from here** (D159): Stage 6b (done and accepted, see below), the
-  colour rules of the muscle status, Stage 5b, 7A, 7B, 7C, 9, and the
+  colour rules of the muscle status (built, at its STOP — see the block
+  after Stage 6b), Stage 5b, 7A, 7B, 7C, 9, and the
   tidy-up of D157 last — the order the owner gave on 2026-11-11. Each block
   starts in a fresh session from its prompt under `docs/wp3/prompts/`:
   `prompt-farbregeln-muskelstatus.md`, `prompt-5b-kennzahl.md`,
   `prompt-7a-koerpermodell.md`, `prompt-7b-interaktion.md`,
   `prompt-7c-muskel-sheet.md`, `prompt-9-haertung.md`,
-  `prompt-aufraeumen.md`. Written on 2026-11-11; none of them has run.
+  `prompt-aufraeumen.md`. Written on 2026-11-11; the first has run, the
+  next is `prompt-5b-kennzahl.md`.
 - **Block 7A takes a different road from D156.** The owner asked for a new
   base model from MakeHuman, built by script after the guide on his
   reference page, with a gate before anything is swapped in the app; if the
@@ -739,6 +765,136 @@ this block)
   `default` so that the `theme-color` per world could be judged (D149).
   After STOP 6b the build of `a956ecb` — with everything of D163 — was
   published as `3d3545d`; the status bar stays `default`, now as decided.
+
+**WP3 — the colour rules of the muscle status** (branch
+`claude/momentum-wp3`, not merged; **built, at its STOP — waiting for the
+owner's acceptance on his iPhone**)
+- **What it is.** What the muscle status *shows*, and nothing about what is
+  computed (contract §7, D153, D160, D161, D164). No ratio, rating or day
+  value moves. `src/core` changed by one constant (`MUSCLE_TREND_RANGES`),
+  `src/storage` by the database name a preview build may carry and by the
+  golden test calling the rule with its new argument.
+- **One place makes a number a state:** `features/gym/muscleState.ts`.
+  Rounding half away from zero in both directions (−2.5 was −2); the state
+  follows the shown whole percent — −2 to +2 held, from ±3 the direction;
+  a group states a trend only with three exercise days in the range and an
+  exercise on two days, otherwise it is "Zu wenig Vergleichsdaten" with no
+  figure and no line. An exercise day is one exercise on one day (an entry
+  of `GymHistory.days`), counted for every group the exercise gives a
+  weight above zero — by the membership `musclePerformance()` computes
+  with, an exercise's roles as of its latest day in the range
+  (`exerciseGroups`, which the rows' recency, the trend's days and the
+  exercise list of a chosen group read as well). `shownPerformance()` is the range as the screen shows it: the ten
+  states, the rated groups, and the trend above them — the mean of the
+  rated groups with a state by the same band. The body, the flat figure,
+  the rows, the hub's card, the trend tile, the exercise list, the exercise
+  detail, the year-to-date tile and the golden test read it; the three
+  places that rounded on their own (`MuscleEntryCard`, two `changeText`
+  helpers) no longer do (`changeWords.ts`).
+- **"Gewertet" means the row prints a figure.** The counter and the trend
+  read the rated groups, not the domain's `measured` list; they differ by
+  the groups that have a ratio on fewer than three exercise days.
+- **"Gehalten" is neutral** — the text colour in a row, the data ink as a
+  mark, white on the body; the warning yellow is gone from every Gym
+  screen and from the flat figure. The body has two neutral tones in
+  `tokens.css`, `--body-held` and `--body-dimmed` (`--body-base` is gone):
+  dimmed is an untrained muscle and the head, hands and feet. A tint is
+  mixed from white and grows evenly from 2.5 % to 12 %
+  (`TINT_STRENGTH`, `REGION_MATERIAL` in `features/body/tokens.ts`); the
+  weakest is three eighths of the way to the status colour, measured on
+  the rendered body: the chest at +3 % lies 6.5 ΔE from the same chest
+  held, the quadriceps at −3 % 14.7. The flat figure outlines the chosen
+  group in the accent.
+  Light, roughness, tone mapping, the GLB and `body-preview.webp` are
+  untouched — block 7A.
+- **Ranges.** Muskelgruppen reads 30 days, the default, or 90; Verlauf
+  keeps 7 and 30; the hub's card stays on 30. Two constants.
+- **Words.** "Leistungstrend" for "Gesamtentwicklung" and the card's
+  "Gesamt"; "Zu wenig Vergleichsdaten" for "Noch kein Vergleich" and "Kein
+  Vergleich", in both languages. A group with too little says how many
+  exercise days it has in its row, and once chosen one sentence says what
+  is missing; `muscleGap.ts` has a fifth absence, `tooFewDays`.
+- **The legend.** ⓘ in the header of Muskelgruppen (44px, named) opens a
+  sheet with the contract's sentence word for word and the five states
+  with their rule in words; under the body stands the row of the five
+  states. Below 370px the title of this one screen takes the 22px step so
+  that the button fits (at the large title's size it has the room from
+  366px). The sentence says "bester Arbeitssatz" ahead of
+  block 5b.
+- **No golden file changed** — the prompt expected the Gym file of the
+  profile with sets to change in the state column. In that profile every
+  rated group lies far outside the band and has three exercise days or
+  more in every window, so no state moves; nothing was frozen anew.
+  `git diff af89fd9 -- .github/fixtures` is empty; all fingerprints hold.
+- **A preview build opens a database of its own**
+  (`VITE_MOMENTUM_DB=momentum-preview`), because the live app and the
+  preview share an origin (see "Answered by the owner … at the start of
+  the colour-rules block" above). Checked in a browser: the preview build
+  opens `momentum-preview`, the ordinary build `momentum`.
+- **Verification** (source as of `67db6d2`; the commit that carries this
+  block adds the record and the pictures): `tsc -b` 0; `npm run test` exit
+  0, 111 files, 1786 tests (1728 before); build `index.css` 90.21 kB,
+  `index.js` 507.06 kB (88.25 and 501.14 before). Browser suites, all of
+  them in one run, the four 3D suites alone: 37 with an exit code, 36
+  green, 4075 of 4076 checks — before the block 36 suites, 35 green, 3720
+  of 3721. The one red check is still the offline one in
+  `release-proof.mjs`, the tidy-up block's (D163), untouched. New:
+  `farbregeln.mjs`, 319/319 at 320, 360, 393 and 430. `design-system.mjs`
+  1156/1156 over 42 screens (the empty range at 90 days is the new one);
+  `gym-muscles` 73/73, `body-reach` 3/3, `body` 39/39, `wp3-reload`
+  125/125. Lowest text contrast unchanged: Mind 4.70:1, Gym 4.79:1.
+  `git diff af89fd9 -- .github/fixtures` is empty. Screenshots under
+  `docs/design/wp3/farbregeln/`: ten screens at each of the four widths,
+  seven pictures of the body and their overview
+  (`koerper-uebersicht.jpg`), the flat figure, and three before-and-after
+  pairs (`vorher-nachher-*.jpg`, the "before" from the build of `9e4f546`
+  with the same seeded history).
+- **Rewritten checks** (old rule → new, none weakened): `seedMuscles`
+  (forearms a third exercise day; biceps stay at two and read "too
+  little"; `older` adds shoulder work 44–80 days back); `wp3-reload` (the
+  7/30 toggle → 30/90); `wp3-stage1` B6 (two → three exercise days for the
+  zero-change groups); `gym-muscles` (the word, plus state-fits-figure on
+  all ten rows and the chip for fewer than three exercise days);
+  `design-system` (taps "90 Tage" instead of "7 Tage" and finds the
+  sessions of 45 days ago); `phase4` (a third bench day); `phase4-a11y`,
+  `wp2-2-shots`, `release-proof` (the words; the biceps draw nothing).
+- **Seen and left for later blocks:** the hands still take the forearms'
+  colour and three strips of the inert zone show on the torso (7A); the
+  body's tints are pale under today's tone mapping (7A);
+  `tools/render-body-preview.mjs` renders the body with tinting off, which
+  is now the dimmed figure, while the committed `body-preview.webp` is
+  still the old grey — 7A re-renders it with its light; the sentence for
+  too little to compare belongs in the muscle sheet (7C); a group's row
+  compares the last day of the range with the first, the exercise list
+  the last with the one before, so the two can print different numbers
+  for one exercise (7C shows both); "Leistungsentwicklung" still names the
+  rating's 60 % (not the muscle trend; not touched); the documents that
+  still name `dario02king.github.io` (`docs/device-tests.md`,
+  `docs/release-candidates.md`, the muscle-map QA) are the tidy-up block's.
+- **The commits.** `e073c65` (the database name), `70c4d0b` (the rule
+  and everything that shows it), `7f19fd4` (the header at 320px — it also
+  carries D164, `CLAUDE.md`, the verify README, `farbregeln.mjs` and most
+  of the suite rewrites, which were staged when it was made; its message
+  names only the header), `84950df` (the rest of the suites), `d71ec5a`
+  (the title's breakpoint), `06de798` (the first review), `a06380e` (the
+  second), `67db6d2` (the count of exercise days on its own line), and the
+  record that follows them.
+- **Open at the STOP:** whether an exercise day is an entry or a calendar
+  day (in the test profile the two readings never differ; the owner's data
+  is not counted yet); whether a held figure on a single line should also
+  print its number; the weakest tint on his screen.
+- **Reviewed twice** by read-only readers and a refuter each (D164):
+  fifteen findings in the first pass, nine confirmed, eight fixed; eight
+  in the second pass over those fixes, six confirmed, all fixed. The one
+  recorded and left: the offline cache is named `momentum-<revision>` without its base,
+  and each worker deletes the other `momentum-` caches of its origin — it
+  touches nothing while the preview publishes no worker, and it has to
+  carry the base before one ever does (block 9 or the tidy-up block).
+- Real-device preview: the build of `67db6d2` is published to
+  Momentum-preview as `88b2999`
+  (https://hnd7k02.github.io/Momentum-preview/), built with
+  `VITE_MOMENTUM_DB=momentum-preview`; the status bar stays `default`
+  (D163). It starts empty — the owner imports his backup there.
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
@@ -1225,7 +1381,11 @@ branch since RC2, so every green build published nothing (D122).
 this branch. Pages is already enabled on the repository; the base path
 `/Momentum-App/` in `vite.config.ts` matches the project-site path, so the
 build needs no deployment-specific configuration. Live at
-<https://dario02king.github.io/Momentum-App/>.
+<https://hnd7k02.github.io/Momentum-App/> — the account was renamed from
+`dario02king`, and GitHub does not redirect Pages after a rename, so the
+old address no longer leads here (owner, 2026-11-11). It is the same origin
+as the preview, which is why a preview build opens a database of its own
+(`VITE_MOMENTUM_DB`, see the colour-rules block).
 
 Genuine post-V1 work, none of it blocking:
 
