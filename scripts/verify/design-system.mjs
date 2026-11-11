@@ -493,13 +493,15 @@ for (const width of WIDTHS) {
     await page.waitForTimeout(1200);
     await look(page, width, 'uebungsdetail', 'gym');
     // The bars (contract §6): neutral, the latest in the colour of its
-    // change and never out of view, the scale named on the left with each
-    // label at the height of the bar it names, the first and the last date
-    // beneath.
+    // change and never out of view; they start at zero, so a bar's height
+    // is its day's share of the largest day; zero and the largest value are
+    // named on the left, each on its line; the first and the last date
+    // stand beneath.
     const bars = await page.evaluate(() => {
-      const plot = document.querySelector('.gym-detail__bars').getBoundingClientRect();
+      const box = document.querySelector('.gym-detail__bars');
+      const plot = box.getBoundingClientRect();
+      const inner = { top: plot.top + box.clientTop, bottom: plot.top + box.clientTop + box.clientHeight };
       const all = [...document.querySelectorAll('.gym-detail__bar')];
-      const tops = all.map((bar) => bar.getBoundingClientRect().top);
       const middle = (selector) => {
         const el = document.querySelector(selector);
         if (!el) return null;
@@ -508,14 +510,22 @@ for (const width of WIDTHS) {
       };
       const fill = (el) => getComputedStyle(el).backgroundColor;
       const latest = all[all.length - 1];
-      const level = document.querySelector('.gym-detail__level')?.getBoundingClientRect().top ?? null;
+      // The table beside the chart names every day's best set, newest
+      // first: "8 × 60 kg" is 480 kg-reps, the value its bar stands for.
+      const scores = [...document.querySelectorAll('.gym-detail .visually-hidden tbody td')]
+        .map((el) => el.textContent.match(/([\d.]+)\s*×\s*([\d.]+)/))
+        .map((m) => (m ? Number(m[1]) * Number(m[2]) : null))
+        .reverse();
       return {
         count: all.length,
-        tallest: Math.round(Math.min(...tops) * 10) / 10,
-        shortest: Math.round(Math.max(...tops) * 10) / 10,
+        heights: all.map((bar) => Math.round((bar.getBoundingClientRect().height / (inner.bottom - inner.top)) * 1000) / 10),
+        scores,
+        tallest: Math.round(Math.min(...all.map((bar) => bar.getBoundingClientRect().top)) * 10) / 10,
+        baseline: Math.round(inner.bottom * 10) / 10,
+        bottoms: Math.round(Math.max(...all.map((bar) => Math.abs(bar.getBoundingClientRect().bottom - inner.bottom))) * 10) / 10,
         max: middle('.gym-detail__axisMax'),
-        min: middle('.gym-detail__axisMin'),
-        level,
+        zero: middle('.gym-detail__axisZero'),
+        zeroText: document.querySelector('.gym-detail__axisZero')?.textContent ?? null,
         latestIsLast: latest.classList.contains('gym-detail__bar--latest'),
         coloured: all.filter((bar) => fill(bar) !== fill(all[0])).length,
         latestRight: latest.getBoundingClientRect().right,
@@ -523,10 +533,18 @@ for (const width of WIDTHS) {
         dates: [...document.querySelectorAll('.gym-detail__dates span')].map((span) => span.textContent),
       };
     });
-    check(`${width}: the bars' largest value is named at the top of the tallest bar`,
-      bars.count > 1 && bars.max !== null && Math.abs(bars.max - bars.tallest) <= 2, short(bars));
-    check(`${width}: the bars' smallest value is named at the top of the shortest bar, on its line`,
-      bars.min !== null && Math.abs(bars.min - bars.shortest) <= 2 && bars.level !== null && Math.abs(bars.level - bars.shortest) <= 2, short(bars));
+    const peak = Math.max(...bars.scores.filter((score) => score !== null));
+    const offScale = bars.scores.length === bars.count
+      ? bars.heights.map((height, index) => Math.abs(height - Math.max(8, (bars.scores[index] / peak) * 100)))
+      : [Infinity];
+    check(`${width}: the bars start at zero — every bar is its day's share of the largest (${bars.count} days)`,
+      bars.count > 1 && bars.bottoms <= 0.6 && Math.max(...offScale) <= 1.5,
+      short({ heights: bars.heights, scores: bars.scores, off: Math.max(...offScale), bottoms: bars.bottoms }));
+    check(`${width}: a fall of a tenth is drawn as a tenth, not as a collapse`,
+      Math.min(...bars.heights) >= Math.round((Math.min(...bars.scores) / peak) * 100) - 2, short(bars.heights));
+    check(`${width}: the bars' largest value is named at the top of the tallest bar, and zero on the baseline`,
+      bars.max !== null && Math.abs(bars.max - bars.tallest) <= 2 && bars.zeroText === '0' && bars.zero !== null && Math.abs(bars.zero - bars.baseline) <= 2,
+      short({ max: bars.max, tallest: bars.tallest, zero: bars.zero, baseline: bars.baseline, zeroText: bars.zeroText }));
     check(`${width}: only the latest bar carries a colour, and it is in view`,
       bars.latestIsLast && bars.coloured === 1 && bars.latestRight <= bars.plotRight + 0.5, short(bars));
     check(`${width}: the first and the last date stand beneath the bars`, bars.dates.length === 2 && bars.dates[0] !== bars.dates[1], short(bars.dates));

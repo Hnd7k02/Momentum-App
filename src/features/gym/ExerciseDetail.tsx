@@ -19,8 +19,21 @@ import { useWorld } from '../../app/world';
  * underneath, where they answer "how did I get there".
  */
 
-/** Where the smallest day's bar stands, in percent of the plot's height. */
-const BAR_FOOT = 30;
+/**
+ * A bar's height in percent of the plot: the day's score over the largest
+ * day's, **from zero** (STOP 6b; contract §6).
+ *
+ * A scale from the smallest day to the largest made a fall of a tenth look
+ * like a collapse, which is the very thing the shared scale of the muscle
+ * rows was introduced to end (D160): a small change must look small. So a
+ * day at 90 % of the best day is a bar at 90 % of the height. The floor of
+ * 8 % only keeps a very small day a visible bar; it is the floor these bars
+ * had before Stage 6b.
+ */
+export function barHeight(score: number, peak: number): number {
+  return peak > 0 ? Math.max(BAR_FLOOR, (score / peak) * 100) : BAR_FLOOR;
+}
+const BAR_FLOOR = 8;
 /**
  * From this many training days the bars stand closer together, so that a
  * season of one exercise still fits a 320px phone with its latest bar — the
@@ -62,31 +75,15 @@ export function ExerciseDetail({
     !comparison || comparison.kind === 'noBaseline' ? null : shownTrend(comparison.ratio);
   const oldest = days[days.length - 1] ?? null;
   /*
-   * The chart's scale runs from the smallest day to the largest (contract
-   * §6), and both are named beside it as the sets that produced them — the
-   * way this screen prints a day's value everywhere else. Where every day
-   * is the same there is one value, and it is named once.
+   * The chart's scale runs from zero to the largest day (contract §6), and
+   * the largest is named beside its line as the set that produced it — the
+   * way this screen prints a day's value everywhere else.
    */
   const largest = days.reduce<ExerciseDay | null>(
     (top, day) => (top === null || day.best.score > top.best.score ? day : top),
     null,
   );
-  const smallest = days.reduce<ExerciseDay | null>(
-    (low, day) => (low === null || day.best.score < low.best.score ? day : low),
-    null,
-  );
-  const spread = largest && smallest ? largest.best.score - smallest.best.score : 0;
-  /**
-   * A bar's height in percent: the smallest day stands at `BAR_FOOT`, the
-   * largest at 100. The two labels stand at exactly those two heights, each
-   * beside the bar it names, with a fine line across the plot — the scale is
-   * what lies between the lines, and the foot beneath the lower one only
-   * keeps the smallest day a bar rather than nothing.
-   */
-  const barHeight = (day: ExerciseDay): number =>
-    spread > 0 && smallest
-      ? BAR_FOOT + ((day.best.score - smallest.best.score) / spread) * (100 - BAR_FOOT)
-      : 100;
+  const peak = largest?.best.score ?? 0;
 
   return (
     <div className="screen gym-detail">
@@ -160,19 +157,12 @@ export function ExerciseDetail({
                 <div className="gym-detail__chart" aria-hidden="true">
                   <div className="gym-detail__axis">
                     <span className="gym-detail__axisMax">{largest ? score(largest) : null}</span>
-                    {spread > 0 && smallest ? (
-                      <span className="gym-detail__axisMin" style={{ bottom: `${BAR_FOOT}%` }}>
-                        {score(smallest)}
-                      </span>
-                    ) : null}
+                    <span className="gym-detail__axisZero">0</span>
                   </div>
                   <div className="gym-detail__plot">
                     <div
                       className={`gym-detail__bars ${days.length > DENSE_FROM ? 'gym-detail__bars--dense' : ''}`.trim()}
                     >
-                      {spread > 0 ? (
-                        <span className="gym-detail__level" style={{ bottom: `${BAR_FOOT}%` }} />
-                      ) : null}
                       {[...days].reverse().map((day, index) => {
                         // The last bar — the latest day — carries the state
                         // of the change the figures above state; the bars
@@ -184,7 +174,7 @@ export function ExerciseDetail({
                             className={`gym-detail__bar ${
                               isLatest ? `gym-detail__bar--latest gym-detail__bar--${shown ?? 'noBaseline'}` : ''
                             }`.trim()}
-                            style={{ height: `${barHeight(day)}%` }}
+                            style={{ height: `${barHeight(day.best.score, peak)}%` }}
                           />
                         );
                       })}

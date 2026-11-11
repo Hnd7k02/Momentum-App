@@ -471,11 +471,11 @@
 }
 
 /*
- * The bars of an exercise's days (contract §6): the scale's smallest and
- * largest value named on the left, the first and the last date beneath, a
- * fine line under the bars and a dotted one at the largest value. The bars
- * are the neutral data ink at 55 %; the last one carries the state of the
- * change.
+ * The bars of an exercise's days (contract §6): they start at zero, so a
+ * day's bar is its share of the largest day. Zero and the largest value are
+ * named on the left, each on its line; the first and the last date stand
+ * beneath. The bars are the neutral data ink at 55 %; the last one carries
+ * the state of the change.
  */
 .gym-detail__chart {
   display: flex;
@@ -499,21 +499,19 @@
 }
 
 .gym-detail__axisMax,
-.gym-detail__axisMin {
+.gym-detail__axisZero {
   grid-area: 1 / 1;
 }
 
-/* Centred on the line it labels: the largest day on the plot's top edge,
-   the smallest on the level its bar reaches (set inline, from the same
-   constant the bars are drawn with). */
+/* Each centred on the line it labels: the largest day on the plot's top
+   edge, zero on the baseline. */
 .gym-detail__axisMax {
   align-self: start;
   transform: translateY(-50%);
 }
 
-.gym-detail__axisMin {
+.gym-detail__axisZero {
   align-self: end;
-  position: relative;
   transform: translateY(50%);
 }
 
@@ -544,14 +542,6 @@
 
 .gym-detail__bars--dense {
   gap: 1px;
-}
-
-/* The level of the smallest day, drawn like the largest day's edge. */
-.gym-detail__level {
-  position: absolute;
-  left: 0;
-  right: 0;
-  border-top: 1px dashed var(--separator-strong);
 }
 
 .gym-detail__bar {

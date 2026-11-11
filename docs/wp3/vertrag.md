@@ -197,7 +197,7 @@ Eine Rangfolge, auf jedem Screen dieselbe (festgelegt, D160):
 - **Nulllinie:** immer sichtbar, fein.
 - **Verlaufslinie in der Zeile** (80 × 24 px, bei 320 px Breite 64 × 24): Alle Zeilen einer Liste teilen eine Skala von −12 % bis +12 %, die Nulllinie liegt in der Mitte (festgelegt, D160). Heute skaliert jede Zeile für sich, sodass +1 % so steil aussieht wie +60 %. Was über 12 % hinausgeht, bleibt am Rand stehen; die Zahl daneben nennt den Wert.
 - **Diagramm im Sheet:** links zwei Beschriftungen («0 %» und «+12 %» oder «−12 %»), unten das erste und das letzte Datum, am Endpunkt der Wert.
-- **Balken:** `--data-ink` mit 55 % Deckkraft, der letzte Balken in der Statusfarbe seiner Veränderung, links der kleinste und der grösste Wert, unten erstes und letztes Datum.
+- **Balken:** `--data-ink` mit 55 % Deckkraft, der letzte Balken in der Statusfarbe seiner Veränderung. Die Balken beginnen bei null (festgelegt am STOP 6b, D163): Die Höhe eines Balkens ist sein Anteil am grössten Wert. Eine Skala vom kleinsten zum grössten Wert liesse einen kleinen Rückgang wie einen Absturz aussehen und widerspräche der gemeinsamen Skala der Zeilen (D160). Links stehen die Null und der grösste Wert, jede Beschriftung auf ihrer Linie, unten erstes und letztes Datum. Ob eine Linie besser passt als Balken, klärt Block 5b mit der neuen Kennzahl.
 - **Ohne Messwert kein Diagramm.** Ein einzelner Messwert ist ein Punkt, keiner ist nichts. Das bleibt, wie es gebaut ist.
 - Diagramme in Zeilen sind für Vorlesehilfen unsichtbar, weil die Zeile alles in Worten sagt; ein grosses Diagramm trägt eine Beschreibung.
 
