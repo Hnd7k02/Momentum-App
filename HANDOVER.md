@@ -666,6 +666,10 @@ iPhone at STOP 6b)
   still while it loads (7A, 7B); the running workout's companion is still
   a placeholder (P12); seven target bubbles wrap to a lone "7" under
   430px; `tokens.css` travels as text inside the script.
+- Real-device preview: the Stage 6b build (`6447ba8`) is published to
+  Momentum-preview (`e8617a7`, https://hnd7k02.github.io/Momentum-preview/),
+  for this acceptance with the status-bar style `default` so that the
+  `theme-color` per world can be judged (D149).
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
