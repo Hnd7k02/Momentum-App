@@ -73,8 +73,8 @@ Fehlt das, bau nichts. Sag Dario, was fehlt, und halte an.
 
 - `README.md` (88 Zeilen): eine Tabelle von Stufen bis «Sports domain: weekly target tracking», die Aussage, `c3e8b7f` sei ein Kandidat, der nie auf einem echten Gerät lief, kein Wort zu Mind und Gym.
 - `docs/release-candidates.md` und `docs/device-tests.md` beschrieben RC2; Block 9 hat sie für den neuen Kandidaten nachgezogen. Prüf das, statt es zu wiederholen.
-- Die Adresse `dario02king.github.io` steht in `HANDOVER.md` (um Zeile 1210), `docs/device-tests.md`, `docs/release-candidates.md` und `docs/design/muscle-map/INTEGRATION-QA.md` (Zeilen 14 und 87). Das Repo liegt heute unter `Hnd7k02`.
-- `HANDOVER.md`: Der Titel lautet «Handover — Momentum V1, released»; die Tabelle «Repository state» beschreibt ältere Branches; die Blöcke zu WP2-1 und WP2-2 (um die Zeilen 136 und 164) sagen «not merged», obwohl `e30becd` der Merge von WP2 ist; «Verification status» nannte die drei iPad-Screenshots als Beleg einer iPhone-Abnahme.
+- Die Adresse `dario02king.github.io` steht in `HANDOVER.md` (um Zeile 1227 als «Live at …»; um Zeile 568 als offene Frage), `docs/device-tests.md`, `docs/release-candidates.md` und `docs/design/muscle-map/INTEGRATION-QA.md` (Zeilen 14 und 87). Das Repo liegt heute unter `Hnd7k02`.
+- `HANDOVER.md`: Der Titel lautet «Handover — Momentum V1, released»; die Tabelle «Repository state» beschreibt ältere Branches; die Blöcke zu WP2-1 und WP2-2 (um die Zeilen 136 und 164) sagen «not merged», obwohl `e30becd` der Merge von WP2 ist; «Verification status» nannte die drei iPad-Screenshots als Beleg einer iPhone-Abnahme. «Repository state» und «Verification status» hat Block 9 nachgezogen.
 - `scripts/verify/README.md`: In der Tabelle fehlen mindestens `stage2-shots.mjs`, `stage4-shots.mjs` und `status-shots.mjs`.
 - Drei Commits tragen eine private E-Mail-Adresse in den Autor-Daten. Das lässt sich ohne Umschreiben der Historie nicht ändern und bleibt.
 
@@ -111,7 +111,7 @@ Entfern mit `git rm` genau diese fünf Dateien: `momentumpreview 2.zip`, `.githu
 - **`LICENSE`** im Wurzelordner: Alle Rechte vorbehalten, mit Darios Antwort auf deine erste Frage als Urhebervermerk. Bis die Antwort da ist, bereitest du die Datei vor und committest sie nicht.
 - Die Datei sagt drei Dinge und nicht mehr: Die App (Code, Gestaltung, Texte) ist urheberrechtlich geschützt, alle Rechte vorbehalten. Das 3D-Modell hat seine eigene Lizenz; sie steht in `THIRD-PARTY-NOTICES.md`. Darios Zeichnungen sind ausgenommen, wie D157 es sagt. Du gibst keine Rechtsauskunft und formulierst keine eigenen Klauseln.
 - `package.json` bekommt den passenden Eintrag im Feld `license`.
-- **`THIRD-PARTY-NOTICES.md`** beschreibt, was ausgeliefert wird: das Modell aus Block 7A mit seiner Quelle und Lizenz. Solange im Repo Dateien liegen, die vom alten Modell abstammen (die Kopie im Übergabe-Ordner, Bilder davon), bleibt dessen Nennung als eigener Abschnitt stehen. Die Nennung in der App stimmt mit der Datei überein.
+- **`THIRD-PARTY-NOTICES.md`** und die Nennung in der App hat Block 7A auf das ausgelieferte Modell umgestellt. Schreib sie nicht neu. Prüf, dass Datei, App und `LICENSE` dasselbe sagen: was ausgeliefert wird, mit Quelle und Lizenz, und, solange im Repo Dateien vom alten Modell liegen (die Kopie im Übergabe-Ordner, Bilder davon), dessen Nennung als eigener Abschnitt. Ergänz nur, was fehlt.
 
 ### Schritt 3 – Dokumente
 
@@ -120,15 +120,15 @@ Berichtige, was falsch ist; schreib nichts neu, was stimmt.
 - **`README.md`** ist das Gesicht des öffentlichen Repos. Schreib es neu, englisch und kurz: was Momentum ist (Mind und Gym, lokal, ohne Konto), wie man es baut, testet und prüft, wo die Regeln (`CLAUDE.md`), der Stand (`HANDOVER.md`), die Entscheide und der Vertrag liegen, und die Lizenz. Keine Stufentabelle von damals, keine persönlichen Angaben.
 - **Die sechs Widersprüche aus dem Review, Abschnitt B.** Geh sie einzeln durch. Führ im Bericht eine Tabelle: Widerspruch, heutiger Stand, was du getan hast. Manche haben die Blöcke davor schon aufgelöst; dann belegst du das mit der Stelle.
 - **Die Adresse.** Überall, wo `dario02king.github.io` als geltende Adresse steht, steht künftig die, die Dario bestätigt hat. In Dokumenten, die Geschichte festhalten (`INTEGRATION-QA.md`), bleibt die alte Adresse stehen, mit dem Vermerk, dass sie damals galt.
-- **`HANDOVER.md`:** Titel, «Repository state», die beiden «not merged» zu WP2, «Verification status», der Verweis auf den höchsten Entscheid. Den Aufbau und die Stage-Blöcke lässt du stehen; sie sind das Gedächtnis des Projekts.
+- **`HANDOVER.md`:** der Titel, die beiden «not merged» zu WP2, der Verweis auf den höchsten Entscheid. «Repository state» und «Verification status» prüfst du nur; sie gehörten Block 9. Den Aufbau und die Stage-Blöcke lässt du stehen; sie sind das Gedächtnis des Projekts.
 - **`scripts/verify/README.md`:** Jede Suite im Ordner steht in der Tabelle, und kein Eintrag nennt eine Datei, die es nicht mehr gibt.
 - **`CLAUDE.md`:** nur Tatsachen, die nicht mehr stimmen (Dateinamen, Zahlen, Verweise). Keine Regel ändert sich in diesem Block.
-- **Die Kommentare zur neutralen Zone** (`muscleMeshMap.ts`, `tools/validate-body-glb.mjs`, die Übergabe-Datei `HANDOFF.txt`) sagen «Kopf, Hände, Füsse». Prüf, ob das seit Block 7A auch für das Modell stimmt, und berichtige die Stelle, die noch abweicht.
+- **Die Kommentare zur neutralen Zone** in `muscleMeshMap.ts` und `tools/validate-body-glb.mjs` sagen «Kopf, Hände, Füsse»; Block 7A hat sie mit dem Modell in Einklang gebracht. Prüf das, und berichtige nur, was noch abweicht. Die Übergabe-Datei `HANDOFF.txt` beschreibt das alte Modell und bleibt, wie sie ist.
 
 ### Schritt 4 – «Pläne verwalten» führt zu den Plänen
 
 - Wer in der Planwahl «Pläne verwalten» antippt, steht danach bei den Trainingsplänen in der Gym-Übersicht: aus dem leeren Muskelgruppen-Screen (der Befund aus D163) und von Heute aus. Beides hat dieselbe Ursache; behebe sie einmal.
-- Zurück führt dorthin, woher man kam.
+- Zurück, als Taste und als Geste des Systems, führt von dort zum vorigen Ort: zu Muskelgruppen oder zu Heute.
 - Der Fokus steht danach bei den Plänen, damit auch Vorlesehilfen dort ankommen.
 - Die Adresse bekommt keinen neuen Ort, ausser du begründest, warum es ohne nicht geht.
 - Ein Komponententest und eine Prüfung in einer Browser-Suite halten beide Wege fest.
@@ -148,7 +148,7 @@ Mach ein Inventar, ohne etwas zu entfernen: die grössten Dateien im aktuellen S
 ### Schritt 7 – Schlussprüfung und Vorschau
 
 1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Suites über den Befehl aus Block 9, lokal und auf GitHub. Es gibt keine bekannte rote Prüfung mehr, oder du sagst genau, warum doch.
-2. `git diff <Commit vor diesem Block> -- .github/fixtures` ist leer. Unter `src/` hat sich nur geändert, was die Schritte 4 und 5 verlangen.
+2. `git diff <Commit vor diesem Block> -- .github/fixtures` ist leer. Unter `src/` haben sich Logik und Verhalten nur dort geändert, wo die Schritte 4 und 5 es verlangen; dazu dürfen Kommentare und die Texte der Nennung berichtigt sein.
 3. `git status` ist sauber; die fünf Dateien sind weg; `LICENSE` steht, sobald Dario den Namen genannt hat.
 4. Trag den Stand in `HANDOVER.md` ein und halt in `docs/decisions.md` fest, was du entschieden hast.
 5. Veröffentlich den Build in `Momentum-preview` nach dessen `README.md`, ohne `sw.js`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen.
@@ -202,7 +202,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 
 1. Muskelgruppen ohne Training im Zeitraum öffnen, «Training erfassen» antippen, dann «Pläne verwalten»: Du stehst bei den Trainingsplänen in der Gym-Übersicht.
 2. Dasselbe von Heute aus: Planwahl öffnen, «Pläne verwalten» antippen.
-3. Zurück führt beide Male dorthin, woher du kamst.
+3. Zurück führt beide Male zum vorigen Screen: zu Muskelgruppen oder zu Heute.
 4. Bereiche → Einstellungen: Die Nennung des 3D-Modells stimmt.
 5. Eine Stichprobe, dass sonst nichts anders ist: Heute, Muskelgruppen mit einem Sheet, ein Workout.
 6. Auf GitHub im Browser: Die drei Altdateien sind im aktuellen Stand weg, die Lizenzdatei steht, und die Startseite des Repos beschreibt die App von heute.

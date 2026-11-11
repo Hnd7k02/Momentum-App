@@ -110,13 +110,13 @@ Dario prüft auf einem **iPhone 15 Pro mit dem neusten iOS**. Die genaue Version
 
 Bau sie vor allem anderen; dann misst du jede weitere Änderung damit.
 
-- **Was sie zeigt.** Ladezeit vom Öffnen von Muskelgruppen bis zum ersten Bild mit Modell, getrennt nach Code, Modell und erstem Bild, und ob aus dem Netz oder aus dem Speicher. Beim Drehen: mittlere Bildrate, Anteil der Bilder unter 25 ms, das längste Bild. Bilder in der letzten Sekunde Leerlauf. Zeichenaufrufe und Dreiecke aus dem Renderer. Die benutzte Pixeldichte, die beobachtete Bildrate des Bildschirms, Gerät und iOS-Version aus dem Browser, die Grösse des sichtbaren Bereichs.
+- **Was sie zeigt.** Ladezeit vom Öffnen von Muskelgruppen bis zum ersten Bild mit Modell, getrennt nach Code, Modell und erstem Bild, und ob aus dem Netz oder aus dem Speicher. Beim Drehen: mittlere Bildrate, Anteil der Bilder unter 25 ms, das längste Bild. Bilder in der letzten Sekunde Leerlauf. Zeichenaufrufe, Dreiecke und Texturen (Anzahl und Grösse) aus dem Renderer. Die benutzte Pixeldichte, die beobachtete Bildrate des Bildschirms, Gerät und iOS-Version aus dem Browser, die Grösse des sichtbaren Bereichs.
 - **Sie verfälscht nichts.** Sie fordert selbst kein Bild an und hält die Schleife nicht wach; sie aktualisiert sich nur mit Bildern, die ohnehin entstehen, und nach dem Ende einer Geste.
 - **Sie ist für Dario bedienbar.** Aus, bis er sie einschaltet. Einschalten geht in der App vom Home-Bildschirm, ohne Adresszeile, und die Einstellung überlebt ein Neuladen, denn die Ladezeit misst man beim Neuladen. Eine Taste kopiert das Ergebnis als Text, damit er es in den Chat einfügen kann. Kein technisches Wort mehr als nötig; Zahlen mit Einheit.
 - **Sie gehört nicht zu den Daten.** Kein Feld im Datenschema, nichts im Backup.
 - Ob sie im Release bleibt, fragst du am STOP, mit Empfehlung.
 
-Die Ziele aus dem Review, als Ziel und nicht als Garantie: Körper sichtbar nach höchstens 2,5 Sekunden beim ersten Laden und 1 Sekunde aus dem Speicher; beim Drehen im Mittel mindestens 55 Bilder pro Sekunde und 95 % der Bilder unter 25 ms; im Leerlauf kein Bild; höchstens 12 Zeichenaufrufe und 80'000 Dreiecke.
+Die Ziele aus dem Review, als Ziel und nicht als Garantie: Körper sichtbar nach höchstens 2,5 Sekunden beim ersten Laden und 1 Sekunde aus dem Speicher; beim Drehen im Mittel mindestens 55 Bilder pro Sekunde und 95 % der Bilder unter 25 ms; im Leerlauf kein Bild; höchstens 12 Zeichenaufrufe, 80'000 Dreiecke und eine Textur von 1024 × 1024.
 
 ### Schritt 2 – Bewegung nach Zeit
 
@@ -133,8 +133,8 @@ Die Ziele aus dem Review, als Ziel und nicht als Garantie: Körper sichtbar nach
 
 ### Schritt 4 – Treffen
 
-- Kopf, Hände und Füsse sind neutral: Ein Tipp dort wählt nichts.
 - **Toleranz** (Vertrag §8): Ein Tipp bis 12 px neben einer Gruppe wählt die nächstliegende. Die 12 px sind Bildschirm-Pixel, unabhängig von Zoom und Pixeldichte. Das gleicht die schmalen Unterarme aus.
+- **Neutral.** Kopf, Hände und Füsse sind nie wählbar. Die Toleranz gilt auch an ihrem Rand: Ein Tipp auf die Hand, der höchstens 12 px vom sichtbaren Rand des Unterarms liegt, wählt den Unterarm. Ein Tipp, der weiter als 12 px von jeder Gruppe entfernt auf einer neutralen Fläche landet, wählt nichts.
 - Entscheide, was ein Tipp auf eine neutrale Fläche tut, hinter der eine Gruppe liegt (eine Hand vor dem Oberschenkel), und begründ es im STOP-Bericht.
 - Ein Fehltipp lässt die Auswahl weiterhin stehen.
 - **Ziel:** `body-reach.mjs` erreicht bei 320, 393 und 430 px von vorne und von hinten 10 von 10 Gruppen. Erreichst du es bei 320 px nicht, nenn die Zahl und den Grund; frier keine schwächere Erwartung ein, ohne es zu sagen.
@@ -164,15 +164,17 @@ Nach Vertrag §8 und Mockup 1:
 ### Schritt 7 – Robust
 
 - **Verlorener Kontext.** Geht der Grafik-Kontext verloren (iOS tut das bei Apps im Hintergrund), steht danach der Körper wieder oder der flache Ersatzkörper, nie eine leere Fläche. Belege es mit einer Prüfung, die den Kontext absichtlich verliert.
-- **Die Pause.** Ein Wirt kann den Viewer anhalten: Es entsteht kein Bild, und das letzte bleibt stehen. Bau das hier und benutz es sofort für jedes Sheet, das über Muskelgruppen aufgeht (die Legende, die Erklärung der Kennzahl). Eine Prüfung in `gym-muscles.mjs` hält fest: Unter einem offenen Sheet entsteht kein Bild (Vertrag §14). Block 7C benutzt dieselbe Pause für das Muskel-Sheet.
+- **Die Pause.** Ein Wirt kann den Viewer anhalten: Von selbst entsteht dann kein Bild, und das letzte bleibt stehen. Die Pause ist ein gesteuerter Zustand mit drei Eigenschaften, die Block 7C braucht: Sie greift erst, wenn eine laufende Kamerafahrt zur Ruhe gekommen ist. Der Wirt kann unter der Pause genau ein Bild anfordern, wenn sich ändert, was der Körper zeigen muss. Und sie endet, bevor eine neue Kamerafahrt beginnt. Bau das hier und benutz es sofort für jedes Sheet, das über Muskelgruppen aufgeht (die Legende, die Erklärung der Kennzahl). Eine Prüfung in `gym-muscles.mjs` hält fest: Unter einem offenen Sheet entsteht kein Bild, solange keines angefordert wurde (Vertrag §14).
 - Was schon gilt, bleibt: kein Bild im Leerlauf, im verdeckten Tab und aus dem Bild gescrollt; nach Verlassen und Wiederbetreten genau ein Viewer.
 
 ### Schritt 8 – Der Weg von Heute
 
 - Die Gym-Kachel auf Heute führt direkt zu Muskelgruppen (D161). Ihr Name für Vorlesehilfen sagt, wohin sie führt.
-- Zurück führt dorthin, woher man kam. Von Muskelgruppen aus ist die Gym-Übersicht mit einem Tipp erreichbar; sie bleibt der Ort für Training, Pläne und Laufen. Die Knöpfe auf Heute, die ein Training erfassen oder fortsetzen, bleiben, wie sie sind.
+- Zurück, als Taste und als Geste, führt zum vorigen Ort der App: nach Heute, wenn man von dort kam, sonst in die Gym-Übersicht. Nach einem direkten Aufruf der Adresse führt es in die Gym-Übersicht.
+- Von Muskelgruppen aus ist die Gym-Übersicht mit einem Tipp erreichbar; sie bleibt der Ort für Training, Pläne und Laufen. Die Knöpfe auf Heute, die ein Training erfassen oder fortsetzen, bleiben, wie sie sind.
+- `GymMusclesScreen.tsx:39` gibt sein `onBack` heute auch als `onManagePlans` an die Planwahl weiter. Trenn die beiden: «Pläne verwalten» führt weiter in die Gym-Übersicht, auch wenn Zurück jetzt nach Heute führen kann. Dass man dort bei den Plänen landet, baut der Aufräum-Block.
 - Heute lädt weder den Viewer noch das Modell; erst der Tipp tut es. Hältst du ein Vorladen für nötig, um das Ladeziel zu erreichen, ist das eine Frage für den STOP, kein stiller Schritt.
-- Schreib die Prüfungen um, die den alten Weg gehen (`wp2-2-shots.mjs`, `design-system.mjs`).
+- Schreib die Prüfungen um, die den alten Weg gehen: `wp2-2-shots.mjs`, `wp3-reload.mjs`, `wp3-stage1.mjs` und `wp3-stage2.mjs` tippen auf Heute «Gym öffnen» und erwarten danach die Gym-Übersicht. `design-system.mjs` geht nicht über Heute; sie bekommt nur die Prüfungen der Bühne aus Schritt 9.
 
 ### Schritt 9 – Suites und Durchsicht
 
@@ -239,7 +241,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 1. Auf Heute die Gym-Kachel antippen: Du landest direkt beim Körper. Zurück führt zu Heute. Die Gym-Übersicht erreichst du von dort mit einem Tipp.
 2. Der Körper füllt gut die Hälfte des Bildschirms, ohne Rahmen. Kopf und Füsse sind nie abgeschnitten, als App vom Home-Bildschirm und in Safari.
 3. Zehnmal auf verschiedene Muskeln tippen, auch auf die Unterarme: Der Körper dreht sich dabei nie. Notier, wie oft die richtige Gruppe gewählt wurde.
-4. Ein Tipp auf Hand, Fuss oder Kopf wählt nichts.
+4. Ein Tipp mitten auf Hand, Fuss oder Kopf wählt nichts.
 5. In der Liste eine Gruppe der Rückseite wählen: Der Körper dreht zu ihr.
 6. Zehnmal drehen und loslassen: Er läuft weich aus, ohne Ruckeln und ohne hartes Einrasten. Die Zeilen darunter bleiben mit einer Hand erreichbar.
 7. Mit zwei Fingern zoomen: bis etwa 1,8-fach und nicht weiter. Doppeltipp und ↺ setzen zurück. Die Seite selbst zoomt dabei nicht mit.

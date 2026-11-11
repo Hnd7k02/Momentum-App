@@ -49,6 +49,8 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 - `src/features/gym/muscleState.ts` (57 Zeilen) ist die eine Stelle. `roundShown` (Zeile 19) rundet mit `Math.round`, also −2,5 auf −2 und +2,5 auf +3. `shownTrend` (29) liest das Vorzeichen der gerundeten Zahl. `muscleStateOf(entry: MusclePerformance)` (53) liefert `noData`, bei `insufficientBaseline` den Zustand `awaitingBaseline`, sonst die Richtung.
 - Die fünf Zustände heissen im Code `improved`, `unchanged`, `declined`, `awaitingBaseline` und `noData` (`src/features/body/tokens.ts:25–30`).
 - Wer dort liest: `src/features/body/bodyVisuals.ts:3` (3D-Körper), `MuscleRows.tsx:10`, `MuscleEntryCard.tsx:13` (Karte in der Gym-Übersicht), `GymProgress.tsx:18` (mit Re-Export in Zeile 40), `muscleAnalytics.ts:10`, `ExerciseDetail.tsx:8` (`roundShown` und `shownTrend` für die Veränderung einer einzelnen Übung) und der flache Ersatzkörper unter `src/components/BodyRenderer/`.
+- **Drei Stellen runden noch selbst** und leiten daraus Wort und Farbe ab, ohne `muscleState.ts` zu fragen: die Kennzahl auf der Karte in der Gym-Übersicht (`MuscleEntryCard.tsx:90–106`), `changeText` in `GymProgress.tsx:42–53` und `changeText` in `GymOverview.tsx:40–50` (dort für die Leistung seit Jahresbeginn im Rating).
+- Der Zähler «n von 10 Gruppen gewertet» und die Kennzahl darüber lesen heute `history.overall.measured` und `history.overall.ratio` aus der Rechnung (`GymProgress.tsx:187–188`, `MuscleEntryCard.tsx:66`), nicht den Anzeigezustand.
 - `MusclePerformance` (`src/core/gym/performance.ts:256`) trägt `status`, `ratio`, `exercises`, `compared` und `latestScore`, aber keine Zahl der Übungstage. Sie lässt sich dort auch nicht zählen: `gymPerformanceOverSpan` (435) reicht je Übung nur den ersten und den letzten Tag weiter. Die Übungstage des Zeitraums stehen in `GymHistory.days`; `muscleAnalytics.ts` liest sie bereits (`trainingDays`, Zeile 101).
 
 **Der Körper**
@@ -59,7 +61,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 
 **Gelb für «Gehalten»**
 
-`muscleModule.css:218–222`, `gym.css:397–398`, `458–459` und `573`, `gymHub.css:111–112`.
+`muscleModule.css:218–222`, `gym.css:397–398` und `458–459`, `gymHub.css:111–112`, und der flache Ersatzkörper mit seiner Legende in `src/components/BodyRenderer/bodyRenderer.css` (Zeilen 53–54, 114–115 und 143).
 
 **Zeiträume**
 
@@ -67,7 +69,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 
 **Wörter**
 
-- `src/i18n/de.ts:375` `muscle.state.awaitingBaseline` «Noch kein Vergleich»; `422` `gym.progress.overall` «Gesamtentwicklung»; `427–429` `gym.progress.noBaseline` mit dem Hinweis «… an zwei Trainingstagen in den letzten {days} Tagen»; `tokens.ts:100` führt für denselben Zustand den Text «Kein Vergleich».
+- `src/i18n/de.ts:375` `muscle.state.awaitingBaseline` «Noch kein Vergleich»; `422` `gym.progress.overall` «Gesamtentwicklung»; `427–429` `gym.progress.noBaseline` mit dem Hinweis «… an zwei Trainingstagen in den letzten {days} Tagen»; `tokens.ts:100` führt für denselben Zustand den Text «Kein Vergleich». Die Karte in der Gym-Übersicht schreibt «Gesamt {change}» (`gymHub.muscles.overall`, Zeile 730). Englisch stehen in `en.ts` «No comparison yet» (369 und 419) und «Overall progress» (414).
 - `src/features/gym/muscleGap.ts` unterscheidet vier Arten von «leer» und nennt den Zeitraum in Tagen (`gymHub.muscles.*`, `de.ts:732–741`).
 - Eine Legende oder einen Knopf ⓘ gibt es auf dem Screen nicht.
 
@@ -79,7 +81,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 
 **Suites, die alte Wörter oder Regeln prüfen**
 
-`scripts/verify/gym-muscles.mjs:151` und `wp3-reload.mjs:296` («Noch kein Vergleich»; `wp3-reload` prüft ausserdem den Wechsel zwischen 7 und 30 Tagen), `wp3-stage1.mjs:763–787` («Gehalten» bei einer Veränderung, die auf 0 % rundet), `phase4-a11y.mjs:106` (die Namen der Zustände), `design-system.mjs` (Muskelgruppen mit leerem Zeitraum, 45 Tage nach der letzten Session).
+`scripts/verify/gym-muscles.mjs:151` und `wp3-reload.mjs:296` («Noch kein Vergleich»; `wp3-reload` prüft ausserdem den Wechsel zwischen 7 und 30 Tagen), `wp3-stage1.mjs:763–787` («Gehalten» bei einer Veränderung, die auf 0 % rundet), `phase4-a11y.mjs:106` (die Namen der Zustände), `design-system.mjs` (Muskelgruppen mit leerem Zeitraum, 45 Tage nach der letzten Session; in den Zeilen 645–648 tippt sie dort auf «7 Tage» und erwartet «Kein Training in den letzten 7 Tagen»).
 
 **Prüfung**
 
@@ -103,6 +105,8 @@ In `muscleState.ts`, mit Tests in `muscleState.test.ts` (Vertrag §14):
 - **Eine andere Lesart gibt es:** drei verschiedene Kalendertage statt drei Einträge. Bankdrücken und Schrägbank am Montag und Bankdrücken am Donnerstag sind drei Übungstage, aber zwei Kalendertage. Bau die Lesart oben. Zähl für das Testprofil mit Sätzen (und für Darios Daten, falls er sein Backup anhängt), in wie vielen Gruppen und Zeiträumen die beiden Lesarten auseinandergehen, und leg das am STOP als Frage vor.
 - **Die Zahl der Übungstage kommt aus der History**, nicht aus `src/core`. Körper, Zeile, Chip, Karte und der Golden-Test rufen dieselbe Funktion; keiner zählt selbst.
 - **Die Kennzahl darüber** (der Trend aller gewerteten Gruppen) trägt denselben Zustand nach demselben Band.
+- **Was «gewertet» heisst.** Eine Gruppe mit «Zu wenig Vergleichsdaten» zählt in der Anzeige nicht als gewertet: Der Zähler «n von 10» und die Kennzahl darüber lesen nur Gruppen, die verbessert, gehalten oder zurückgegangen sind. Sonst stünde über sieben Zeilen mit Zahl «9 von 10 gewertet». Die Kennzahl ist dann das Mittel dieser Gruppen, jede mit gleichem Gewicht, wie `gymPerformance` es bildet. Das ist eine Zahl der Anzeige, gebildet an derselben einen Stelle; das Rating rechnet weiter mit seinen eigenen Fenstern, und `src/core` bleibt unberührt. Zeig am STOP, wo Zähler und Kennzahl dadurch von heute abweichen.
+- **Die drei Stellen, die heute selbst runden,** lesen danach dieselbe Funktion. Für die Leistung seit Jahresbeginn in `GymOverview.tsx` gelten Rundung und Band wie für jede gefärbte Veränderung; die Mindestdaten-Regel gilt dort nicht.
 - **Einzelne Übungen.** `shownTrend` färbt heute auch die Veränderung einer einzelnen Übung (Übungsliste, Übungsdetail, letzter Balken). Vertrag und D153 sprechen von der Gruppe. Damit Liste und Gruppe sich nicht widersprechen, gilt das Band für jede Veränderung, die als Zustand gefärbt wird; die Mindestdaten-Regel gilt nur für die Gruppe und die Kennzahl darüber. Führ das im STOP-Bericht als eigene kleine Entscheidung auf.
 - **Die Namen der Zustände im Code bleiben** (`unchanged`, `awaitingBaseline`). Benennst du sie um, ändert sich die Golden-Datei in jeder Zeile statt nur dort, wo ein Zustand wechselt.
 
@@ -124,6 +128,7 @@ Zieh die Texte nach, die den Zeitraum nennen (`muscleGap.ts`, die leeren Zustän
 ### Schritt 4 – Farbe am Körper
 
 - **Zwei neutrale Töne statt einem** (Vertrag §8, D161): Weiss für «Gehalten», den Ton eines trainierten Muskels ohne Veränderung; gedimmt für «Noch nicht trainiert» und für die neutrale Zone (Kopf, Hände, Füsse). Ein Körper ohne Daten ist eine ruhige graue Figur, und Training macht ihn hell. Beide Töne sind Tokens in `tokens.css`; nimm als Ausgang die Töne aus dem Werkzeug der Mockups.
+- **Wem was gehört.** Dieser Block legt die zwei Tokens an und bestimmt, welcher Zustand welchen Ton bekommt; das bleibt. Block 7A stellt Licht und Tone Mapping ein und darf die Werte der Tokens danach nachziehen.
 - **Verbessert** grün getönt, **zurückgegangen** rot getönt, **zu wenig Vergleichsdaten** leicht blau getönt.
 - **Stärke.** Sie wächst gleichmässig von 2,5 % bis 12 % und bleibt darüber gleich. Wähl die kleinste Stärke so, dass +3 % bei 393 px neben einer gehaltenen, weissen Gruppe als Grün erkennbar ist.
 - Der flache Ersatzkörper zeigt dieselben fünf Zustände mit denselben Tönen.
@@ -136,7 +141,7 @@ Zeig das Ergebnis an fünf Bildern aus `#/dev/body` oder dem echten Screen: gemi
 
 Nach der Tabelle in Vertrag §7:
 
-- **Gehalten:** Linie, Zahl in Textfarbe, das Wort. Kein Gelb mehr, an keiner der Stellen aus Abschnitt 5.
+- **Gehalten:** Linie, Zahl in Textfarbe, das Wort. Kein Gelb mehr, an keiner der Stellen aus Abschnitt 5, auch nicht am flachen Ersatzkörper und in seiner Legende.
 - **Verbessert, zurückgegangen:** Linie, Zahl in der Statusfarbe, das Wort.
 - **Zu wenig Vergleichsdaten:** blauer Chip, keine Linie.
 - **Noch nicht trainiert:** neutraler Chip, der Punkt blass.
@@ -145,15 +150,15 @@ Nach der Tabelle in Vertrag §7:
 
 ### Schritt 6 – Wörter und Legende
 
-- «Leistungstrend» ersetzt «Gesamtentwicklung», «Zu wenig Vergleichsdaten» ersetzt «Noch kein Vergleich» und «Kein Vergleich», in beiden Sprachen nach der Tabelle in Vertrag §13. Nie «Entwicklung», nie «gewachsen».
+- «Leistungstrend» ersetzt «Gesamtentwicklung» und das «Gesamt» auf der Karte in der Gym-Übersicht; «Zu wenig Vergleichsdaten» ersetzt «Noch kein Vergleich» und «Kein Vergleich». Das gilt in beiden Sprachen, nach den Tabellen in Vertrag §7 und §13. Nie «Entwicklung», nie «gewachsen».
 - Wo eine Gruppe zu wenig Daten hat, sagt ein Satz, wie viele Übungstage es im Zeitraum gibt und ab wann ein Trend erscheint (Muster im Mockup: «2 Übungstage in den letzten 30 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.»). `muscleGap.ts` lernt denselben Grund für den Fall, dass keine einzige Gruppe genug Daten hat.
-- **Die Legende.** Ein Knopf ⓘ in der Kopfzeile von Muskelgruppen (44 px Trefferfläche, mit Namen für Vorlesehilfen) öffnet ein Sheet mit dem Legendensatz aus Vertrag §7, wörtlich, und den fünf Zuständen mit ihrer Regel in Worten. Unter dem Körper steht die Reihe der fünf Zustände wie im Mockup 1.
+- **Die Legende.** Ein Knopf ⓘ in der Kopfzeile von Muskelgruppen (44 px Trefferfläche, mit Namen für Vorlesehilfen) öffnet ein Sheet mit dem Legendensatz aus Vertrag §7, wörtlich, und den fünf Zuständen mit ihrer Regel in Worten. Unter dem Körper steht die Reihe der fünf Zustände wie im Mockup 1. Der Satz sagt schon «bester Arbeitssatz», obwohl die Kennzahl bis Block 5b der beste Satz ist; bau ihn trotzdem wörtlich und nenn die Vorwegnahme im STOP-Bericht.
 - Die Zahlen folgen den drei Textregeln aus D163 (`i18n/typography.ts`).
 - «Bester Satz» bleibt in der übrigen Oberfläche stehen; «Bester Arbeitssatz» führt Block 5b ein. «uneinheitlich» baut Block 7C mit dem Sheet.
 
 ### Schritt 7 – Suites und Durchsicht
 
-- Schreib jede Prüfung, die ein altes Wort oder die alte Regel prüft, auf die neue Regel um, genauso streng. `wp3-reload.mjs` prüft danach den Wechsel zwischen 30 und 90 Tagen; `design-system.mjs` behält den leeren Zeitraum und prüft zusätzlich, dass 90 Tage die Session von vor 45 Tagen zeigt.
+- Schreib jede Prüfung, die ein altes Wort oder die alte Regel prüft, auf die neue Regel um, genauso streng. `wp3-reload.mjs` prüft danach den Wechsel zwischen 30 und 90 Tagen. `design-system.mjs` behält den leeren Zeitraum bei 30 Tagen, der Vorgabe; ihr Tipp auf «7 Tage» wird ein Tipp auf «90 Tage», und sie prüft dort, dass die Session von vor 45 Tagen erscheint.
 - Neu in einer Browser-Suite: Für jede der zehn Zeilen passt der Zustand zur gedruckten Zahl (−2 bis +2 gehalten, sonst die Richtung), und eine Gruppe mit weniger als drei Übungstagen zeigt den Chip und keine Linie.
 - Erzeug Screenshots von Muskelgruppen (oben, bei den Zeilen, mit offener Legende, 30 und 90 Tage, leerer Zeitraum), der Gym-Übersicht und des Übungsdetails bei 320, 360, 393 und 430 px unter `docs/design/wp3/farbregeln/`. Sieh dir jeden an.
 
@@ -193,7 +198,8 @@ Fällt dir unterwegs etwas auf, das in einen dieser Blöcke gehört, schreib es 
 - `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, jede Suite aus Schritt 0 besteht.
 - «Gehalten» ist nirgends mehr gelb; Körper, Zeile, Karte und Legende zeigen für jede Gruppe denselben Zustand.
 - Muskelgruppen bietet 30 und 90 Tage, der Verlauf 7 und 30.
-- «Gesamtentwicklung», «Noch kein Vergleich» und «Kein Vergleich» kommen in der Oberfläche nicht mehr vor.
+- «Gesamtentwicklung», «Noch kein Vergleich» und «Kein Vergleich» kommen im Gym-Bereich nicht mehr vor, ebenso wenig «Overall progress» und «No comparison yet». Laufen behält seine eigenen Texte.
+- Der Zähler «n von 10» nennt genau die Gruppen, deren Zeile eine Zahl zeigt.
 - Jeder Text hält 4,5:1 an den gerenderten Pixeln (`design-system.mjs`), auch im Sheet der Legende.
 - Der Vorschau-Build ist erreichbar und zeigt die neuen Regeln.
 

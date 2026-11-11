@@ -145,7 +145,7 @@ Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block
 
 - Ergänz, was sich im Browser prüfen lässt und fehlt: reduzierte Transparenz auf jedem Screen mit Glas (alles bleibt lesbar bei 4,5:1), reduzierte Bewegung auf dem Muskelgruppen-Screen mit Sheet, das Vergrössern der Seite ist nirgends gesperrt, 44 px auf den neuen Screens, kein seitliches Überlaufen bei vier Breiten.
 - Für den Weg mit Vorlesehilfen prüfst du den Zugänglichkeitsbaum der neuen Screens: Jede der zehn Zeilen sagt Gruppe, Zahl und Zustand; das Sheet hat einen Namen und gibt den Fokus zurück; das Diagramm trägt seine Beschreibung; der Körper ist für Vorlesehilfen kein Hindernis.
-- Schreib `docs/device-tests.md` neu, für diesen Stand: die Prüfliste, die Dario auf dem iPhone abarbeitet, mit Platz für Gerät, iOS-Version, Datum und Ergebnis. Was dort über RC2 steht, ist Geschichte und steht bereits in `docs/release-candidates.md`.
+- Schreib `docs/device-tests.md` neu, für diesen Stand: die Prüfliste, die Dario auf dem iPhone abarbeitet, mit Platz für Gerät, iOS-Version, Datum und Ergebnis, und mit den Messwerten neben den Zielen aus dem Review, Abschnitt I. Was dort über RC2 steht, ist Geschichte und steht bereits in `docs/release-candidates.md`.
 
 ### Schritt 9 – Die Unterlagen der Freigabe
 
@@ -157,7 +157,7 @@ Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block
 ### Schritt 10 – Schlussprüfung und Vorschau
 
 1. Der Befehl aus Schritt 1, lokal und auf GitHub, in Chromium und in WebKit. Vergleich mit Schritt 0.
-2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt nur neue Dateien; unter `src/` haben sich nur Fehlerbehebungen geändert, und jede steht im Bericht.
+2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt nur neue Dateien. Unter `src/` sind neue Tests dazugekommen; am übrigen Code haben sich nur Fehlerbehebungen geändert, und jede steht im Bericht.
 3. Veröffentlich den Release-Kandidaten in `Momentum-preview` nach dessen `README.md`, ohne `sw.js`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen.
 
 ## 7. Was sich nicht ändern darf, und was nicht hierher gehört
@@ -198,7 +198,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 3. Das Update: was beim ersten Laden geschieht, was erhalten bleibt, was sich ab dem Tag des Updates bewegt.
 4. Der Rückweg in drei Schritten, und was er kostet.
 5. Jeder Fehler, den dieser Block gefunden und behoben hat.
-6. Was nur das Gerät zeigen kann und noch offen ist.
+6. Was nur das Gerät zeigen kann und noch offen ist. Darios Messwerte aus Block 7B stehen neben den Zielen aus dem Review, Abschnitt I: Körper sichtbar nach 2,5 Sekunden beim ersten Laden und 1 Sekunde aus dem Speicher; beim Drehen mindestens 55 Bilder pro Sekunde und 95 % der Bilder unter 25 ms; im Leerlauf kein Bild; höchstens 12 Zeichenaufrufe, 80'000 Dreiecke, eine Textur von 1024 × 1024.
 7. Bekannte Grenzen: die rote Offline-Prüfung, was WebKit unter Linux nicht belegt, die Frage der Adresse.
 8. Was sich für ihn am Tag des Updates ändert (aus Schritt 9).
 9. Die Adresse der Vorschau und die Prüfliste fürs iPhone.

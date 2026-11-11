@@ -19,11 +19,11 @@ Die wichtigste Eigenschaft dieses Blocks: **Die neue Kennzahl ist eine Era.** Si
 - **Modell.** Dieser Block ist für das Modell geschrieben, das D159 nennt. Läufst du als anderes Modell, sag es in der ersten Zeile deiner ersten Antwort.
 - **Subagenten.** Nur für reine Such- und Leseläufe über viele Dateien, und nur auf Sonnet. Jede Entscheidung und jede Änderung machst du selbst, auch den Schluss-Review der Era-Mechanik.
 - **Branch.** Du committest und pushst auf `claude/momentum-wp3` im Repo `Momentum-App`. Dario erlaubt das ausdrücklich, auch wenn deiner Session ein anderer Arbeitsbranch zugeteilt wurde. Kein anderer Branch, kein Pull Request, kein Merge, kein Push auf den Default-Branch: Er veröffentlicht die Live-App bei jedem Push.
-- **Eine Veröffentlichung.** Am Schluss, und nur dann, veröffentlichst du den Vorschau-Build im Repo `Momentum-preview` auf `main` (Abschnitt 6, Schritt 9). Auch das erlaubt Dario ausdrücklich.
+- **Eine Veröffentlichung.** Am Schluss, und nur dann, veröffentlichst du den Vorschau-Build im Repo `Momentum-preview` auf `main` (Abschnitt 7, Schritt 9). Auch das erlaubt Dario ausdrücklich.
 - **Commits.** Kleine, benannte Commits im Stil der bestehenden Historie, englisch. Neue Golden-Dateien kommen als eigene Commits dazu. Eine bestehende Golden-Datei wird nicht neu eingefroren; die eine Ausnahme steht in Schritt 4.
 - **Darios Backup ist privat.** Hängt er es an, liegt es nur ausserhalb der Repo-Ordner, etwa in deinem Scratchpad. Es wird nie committet, nie veröffentlicht und nie an einen Dienst geschickt. In Bericht und Repo stehen daraus nur Zahlen zu Übungen und Muskelgruppen, keine Antworten aus Mind und keine Fragetexte. Am Ende der Session löschst du die Datei.
 - **Sprache.** Chat und STOP-Bericht auf Deutsch in Schweizer Schreibweise. `docs/decisions.md`, `HANDOVER.md`, `CLAUDE.md`, Code-Kommentare und Commit-Nachrichten englisch wie bisher.
-- **Zu Ende arbeiten.** Halte nicht an, solange du noch Teile schuldest. Hindernisse diagnostizierst und umgehst du. Angehalten wird am STOP 5b in Abschnitt 9, oder vorher, wenn die Voraussetzung in Abschnitt 3 fehlt.
+- **Zu Ende arbeiten.** Halte nicht an, solange du noch Teile schuldest. Hindernisse diagnostizierst und umgehst du. Angehalten wird am STOP 5b in Abschnitt 10, oder vorher, wenn die Voraussetzung in Abschnitt 3 fehlt.
 
 ## 3. Voraussetzung
 
@@ -147,7 +147,7 @@ Lies den Entwurf danach einmal als Gegner: Wo könnte ein Tag vor der Grenze ein
 
 In der neuen Era gehen die Übungstage eines Tages nach Übungs-ID sortiert in die Muskelsummen ein, wie Gate G es gemessen hat. Zwei Geräte mit denselben Sätzen unter verschiedenen IDs rechnen danach bit-genau gleich; ein Test belegt das mit vertauschten IDs.
 
-Bau es an die Era gebunden: Tage vor der Grenze behalten ihre Reihenfolge, und keine bestehende Golden-Datei ändert sich. Geht es nur für alle Tage, ist das der Fall, den D150 nennt: genau eine Gym-Golden-Datei mit neuer Zeilenfolge und keinem neuen Wert. Dann, und nur dann, frierst du diese eine Datei neu ein, als eigener Commit, mit einem Skript, das die Gleichheit aller Werte bis zur neunten Stelle belegt.
+Bau es an die Era gebunden: Tage vor der Grenze behalten ihre Reihenfolge, und keine bestehende Golden-Datei ändert sich. Geht es nur für alle Tage, ist das der Fall, den D150 nennt: genau eine Gym-Golden-Datei mit neuer Zeilenfolge und keinem neuen Wert, und mit ihr der eine Gym-Fingerabdruck in `domainOutputs.test.ts`, der die Reihenfolge mitliest. Dann, und nur dann, frierst du diese eine Datei neu ein und trägst diesen einen Fingerabdruck neu ein, als eigener Commit, mit einem Skript, das die Gleichheit aller Werte bis zur neunten Stelle belegt.
 
 ### Schritt 5 – Der Aufwärmsatz
 
@@ -156,7 +156,8 @@ Bau es an die Era gebunden: Tage vor der Grenze behalten ihre Reihenfolge, und k
 - **Was er tut und was nicht.** Ein Aufwärmsatz eröffnet die Session und zählt für die Anwesenheit wie jeder Satz (D128). Er stellt nie die Kennzahl, erscheint nie als «Bester Arbeitssatz» und geht später nicht ins Arbeitsvolumen ein.
 - **Rückgängig** bringt den Satz mit seinem Flag zurück (D131). Eine Aktion entscheidet aus dem, was gespeichert ist, wenn sie in der Schreibschlange an der Reihe ist.
 - **Die Bedienung** entwirfst du klein und nach Vertrag §5: in der Satzzeile, mit 44 px Trefferfläche, als Wort erkennbar und nie nur als Farbe, mit einem Namen für Vorlesehilfen, ohne Umbruch bei 320 px auch in Pfund. Zeig sie am STOP in vier Breiten.
-- **Die Zeile «Letztes Mal»** in einem geplanten Workout und jede andere Stelle, die einen früheren Satz als Marke nennt, nennt einen Arbeitssatz. Führ jede solche Stelle im STOP-Bericht auf.
+- **Die Zeile «Zuletzt am …»** in einem geplanten Workout (`LastTimeLine` in `GymSessionScreen.tsx`, `gym.lastTime`) listet heute alle Sätze des letzten Mals. Sie zeigt künftig nur die Arbeitssätze. Entscheide, was sie zeigt, wenn das letzte Mal nur aus Aufwärmsätzen bestand, und nenn es. Dasselbe gilt für jede andere Stelle, die frühere Sätze als Marke nennt; führ jede im STOP-Bericht auf.
+- **«+ Satz»** (`repeatLastSet`, `gymService.ts:560`) kopiert Wiederholungen und Gewicht des letzten Satzes. Die Markierung kopiert er nicht: Ein neuer Satz ist ein Arbeitssatz, bis Dario ihn markiert. Ein Test hält das fest.
 - **Backup.** Das Feld überlebt Export und Import; ein Test belegt es. `SCHEMA_VERSION` und `BACKUP_FORMAT_VERSION` bleiben, wie sie sind. Hältst du eine Erhöhung für nötig, begründ sie im Entwurf, bevor du sie baust.
 
 ### Schritt 6 – Wörter und Übungsdetail
@@ -189,7 +190,7 @@ Er steht im STOP-Bericht und, ohne private Daten, in `docs/design/wp3/stage5b-ke
 ### Schritt 9 – Schlussprüfung, Dokumente, Vorschau
 
 1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Browser-Suites, die 3D-Suites einzeln. Vergleich mit Schritt 0.
-2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt nur neue Dateien, ausser im Fall aus Schritt 4.
+2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt nur neue Dateien, und die bestehenden Fingerabdrücke in `domainOutputs.test.ts` sind unverändert, beides ausser im Fall aus Schritt 4.
 3. Dokumente: der Stand in `HANDOVER.md` (ein Stage-Block; «Gym performance» unter den Wertungsregeln; der Rückweg aus Review-Risiko 9 unter den Risiken). In `CLAUDE.md` die Sätze, die nicht mehr stimmen: was Gym vergleicht, die neue Era in der Liste unter «Configuration is historical», der Aufwärmsatz als Fakt am Satz und die dokumentierte Ausnahme von «keine fremden Normen» mit Verweis auf D150. In `docs/decisions.md` neue Einträge für das, was du entschieden hast.
 4. Veröffentlich den Build in `Momentum-preview` nach dessen `README.md`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen.
 
@@ -197,7 +198,7 @@ Er steht im STOP-Bericht und, ohne private Daten, in `docs/design/wp3/stage5b-ke
 
 **Unverändert bleiben:**
 
-- jeder Wert jedes Tages vor der Grenze, jede bestehende Golden-Datei und jeder bestehende Fingerabdruck;
+- jeder Wert jedes Tages vor der Grenze, jede bestehende Golden-Datei und jeder bestehende Fingerabdruck (die eine mögliche Ausnahme steht in Schritt 4);
 - alles nach der prozentualen Veränderung: `src/core/scoring/`, die Kurve und ihre Steilheit (Review-Risiko 10 ist eine spätere Frage), 40/60, Endurance, Abbau;
 - Laufen, Mind, der Boss ausser über das Gym-Rating;
 - die Anwesenheit: Ein Satz eröffnet eine Session, ob Aufwärmsatz oder nicht;

@@ -71,12 +71,12 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 - `src/features/gym/muscleAnalytics.ts`: `toMuscleAnalytics(history)` (121) liefert je Gruppe Zustand, Veränderung und Verlauf; `muscleTrend(days, muscle)` (110) liefert einen Punkt je Trainingstag der Gruppe, die Zeile zeigt davon die letzten zwölf (`SPARKLINE_POINTS`, 89).
 - `src/features/gym/Sparkline.tsx`: feste Skala von −12 % bis +12 %, 80 × 24 px, für Vorlesehilfen unsichtbar.
 - Die Veränderung einer einzelnen Übung im Zeitraum gibt die Rechnung nicht nach aussen: `gymPerformanceOverSpan` (`src/core/gym/performance.ts`) bildet sie und reicht nur das Mittel der Gruppe weiter.
-- Ein Arbeitsvolumen rechnet nirgends etwas. Die Wörter «Arbeitsvolumen», «nicht gewertet», «uneinheitlich» und «Erfasst» gibt es in `src/i18n/` nicht.
+- Ein Arbeitsvolumen rechnet nirgends etwas. Texte für «Arbeitsvolumen», den Vermerk «nicht gewertet», «uneinheitlich» und die Überschrift «Erfasst» gibt es in `src/i18n/` nicht. Die Wortfolge «nicht gewertet» steht dort nur in einem Hinweis zum Körpergewicht (`de.ts:502`), der damit nichts zu tun hat.
 
 **Der Körper**
 
 - Der Viewer schreibt nur `data-azimuth` und `data-view` an sein Element (`src/features/body/BodyViewer.tsx`). Welchen Zustand er für welche Gruppe zeichnet, lässt sich von aussen nicht lesen.
-- Seit Block 7B lässt er sich anhalten, und unter der Legende entsteht kein Bild.
+- Seit Block 7B lässt er sich anhalten: Die Pause greift, wenn die Kamera zur Ruhe gekommen ist, erlaubt ein einzelnes angefordertes Bild und endet, bevor die Kamera wieder fährt. Unter der Legende entsteht so schon heute kein Bild.
 
 **Tokens**
 
@@ -117,8 +117,9 @@ Die Sheet-Komponente lernt beides, ohne dass ein bestehendes Sheet sein Verhalte
 
 - Beim Öffnen rückt die Kamera die Gruppe in das Fenster, das über dem Sheet frei bleibt (auf einem iPhone rund 190 px), und bleibt dann stehen (D161).
 - **Nach einem Tipp auf den Körper ändert sich der Drehwinkel nicht:** Die Gruppe ist schon zugewandt, die Kamera rückt sie nur ins Fenster. Aus der Liste geöffnet dreht der Körper zuerst hin, wenn die Gruppe abgewandt ist. So gelten §8 («ein Tipp dreht nie») und §9 zugleich.
-- **Solange das Sheet offen ist, wird der Körper nicht neu gezeichnet** (D155). Du benutzt die Pause aus Block 7B. Ändert sich unter dem offenen Sheet, was er zeigen muss (der Zeitraum), entsteht genau ein Bild, und er steht wieder.
-- Beim Schliessen fährt die Kamera in die Ansicht der Bühne zurück, und die Schleife läuft wieder nach Bedarf.
+- **Die Reihenfolge beim Öffnen:** Das Sheet fährt hoch, die Kamera fährt zur Gruppe, und sobald sie ruht, greift die Pause aus Block 7B. «Kein Bild» zählt ab diesem Moment.
+- **Solange das Sheet offen ist, wird der Körper nicht neu gezeichnet** (D155). Ändert sich unter dem offenen Sheet, was er zeigen muss (der Zeitraum), forderst du genau ein Bild an, und er steht wieder.
+- **Beim Schliessen** endet zuerst die Pause, dann fährt die Kamera in die Ansicht der Bühne zurück, und die Schleife läuft wieder nach Bedarf.
 - Bei reduzierter Bewegung springt die Kamera.
 
 ### Schritt 4 – Der Inhalt
@@ -149,7 +150,7 @@ Dazu:
 - **Was es ist** (D152): die Summe aus Wiederholungen × Last über die Arbeitssätze, je Muskelgruppe und Woche. Aufwärmsätze zählen nicht. Die Last ist die effektive Last, wie die Kennzahl sie liest. Die Woche beginnt am Montag wie überall in der App.
 - **Wie viel einer Gruppe zusteht:** Eine Übung trifft mehrere Gruppen. Nimm dafür die Anteile, mit denen die Wertung eine Übung auf ihre Gruppen verteilt (`core/gym/muscles.ts`), damit eine Verbundübung nicht für jede Gruppe voll zählt. Nenn die Regel am STOP; hältst du eine andere für besser, begründ sie dort.
 - **Eine reine, getestete Funktion.** Sie darf unter `src/core/gym/` stehen. Nichts unter `src/core/scoring/`, kein Rating-Dienst und `muscleState.ts` lesen sie; ein Test über die Quelltexte hält das fest, wie `foodRetirement.test.ts` es für Food tut.
-- **Die Balken** (Vertrag §6, D163): neutral, ab null, die Wochen des gewählten Zeitraums, jede mit Kalenderwoche und Wert in der gewählten Einheit. Kein Balken trägt eine Statusfarbe: Das Volumen ist kein Zustand. Bei 90 Tagen und 320 px passen dreizehn Wochen in die Breite; entscheide, welche Beschriftungen dann stehen bleiben.
+- **Die Balken** (Vertrag §6, D163): neutral in `--data-ink` mit 55 % Deckkraft, ab null, die Wochen des gewählten Zeitraums, jede mit Kalenderwoche und Wert in der gewählten Einheit. Kein Balken trägt eine Statusfarbe, auch der letzte nicht: Nach D152 geht das Volumen in keine Farbe ein. Das weicht bewusst vom Satz in §6 über den letzten Balken ab; nenn es am STOP. Bei 90 Tagen und 320 px passen dreizehn Wochen in die Breite; entscheide, welche Beschriftungen dann stehen bleiben.
 - Eine Woche ohne Arbeitssatz der Gruppe ist eine Lücke, kein Balken der Höhe null mit einer Zahl darüber.
 - Die Balken haben eine Entsprechung in Worten für Vorlesehilfen.
 
@@ -157,7 +158,7 @@ Dazu:
 
 - **Dieselbe Zahl** (Vertrag §14), in einer Browser-Suite: Für ein Profil, das alle fünf Zustände enthält, stimmen für jede der zehn Gruppen überein: Zahl und Wort der Zeile, Zahl und Chip im Sheet, und der Zustand, den der Körper zeichnet. Dafür gibt der Viewer seinen Zustand je Gruppe nach aussen, unsichtbar und aus denselben Werten, die er zeichnet.
 - **Kein Diagramm ohne Messwert:** Die Zustände «zu wenig Vergleichsdaten» und «noch nicht trainiert» haben keines.
-- **Unter dem offenen Muskel-Sheet entsteht kein Bild** (`gym-muscles.mjs`); ein Wechsel des Zeitraums erzeugt genau eines.
+- **Unter dem offenen Muskel-Sheet entsteht kein Bild** (`gym-muscles.mjs`), gezählt ab dem Moment, in dem die Kamera ruht; ein Wechsel des Zeitraums erzeugt genau eines.
 - **Jeder Weg zurück** schliesst das Sheet und lässt den Screen stehen; aus dem Übungsdetail führt Zurück ins Sheet.
 - **Die Höhenstufen** und das Wegziehen mit Zeigergesten; die Falz bei 393 und 320 px.
 - `design-system.mjs` nimmt das Sheet in beiden Stufen und in den Zuständen aus Schritt 4 auf: jeder Text bei 4,5:1 an den gerenderten Pixeln, keiner unter 11 px, nichts scrollt seitwärts.

@@ -119,7 +119,7 @@ Trag in `docs/decisions.md` einen neuen Eintrag ein (nächste freie Nummer), der
 - Es gibt ein Gate mit den Kriterien der Anleitung; vorher wird in der App nichts getauscht.
 - Fällt das Gate durch, gilt Stufe 1 auf dem heutigen Modell, und das Körperthema kommt nach WP3.
 
-Zieh `HANDOVER.md` nach, wo es noch «stage 1 of the body and the proof gate» sagt. Am Ende des Blocks ergänzt du den Eintrag um den Ausgang des Gates.
+Zieh `HANDOVER.md` nach: Der Absatz «Block 7A takes a different road from D156» sagt dort, der Entscheid stehe noch nicht in `docs/decisions.md`; setz die Nummer ein. Am Ende des Blocks ergänzt du den Eintrag um den Ausgang des Gates.
 
 ### Schritt 2 – Die Pipeline ins Repo
 
@@ -142,7 +142,7 @@ Nach §4 der Anleitung, mit Darios Punkten aus Abschnitt 4 als erster Vorgabe:
 - **Pose.** Die Zielwinkel der Anleitung; die Ruhepose von MakeHuman weicht stark davon ab. Nach der Pose Ellbogen und Handgelenk auf Einschnürungen prüfen.
 - **Relief.** Das ist der wichtigste Hebel: MakeHuman allein bleibt glatt. Zuerst Weg A (unterteilen und Rillen per Skript formen). Weg B nur, wenn A nicht reicht, und dann mit Namensnennung.
 - **Kopf.** Zwei Varianten: natürlich und ruhig, oder vereinfacht wie eine Schaufensterpuppe.
-- **Dreiecke.** Weniger in Kopf, Händen und Füssen, mehr in Rumpf und Gliedern. Höchstens 80'000, Ziel 40'000–60'000, mindestens 400 je Gruppe, das GLB höchstens 700 KB.
+- **Dreiecke.** Weniger in Kopf, Händen und Füssen, mehr in Rumpf und Gliedern. Höchstens 80'000, Ziel 40'000–60'000, mindestens 400 je Gruppe, das GLB höchstens 700 KB. Kommt mit Weg B eine Textur dazu: höchstens eine, 1024 × 1024.
 - **Regionen.** Einmal pro Punkt der festen Topologie festgelegt und als Datei gespeichert, nach der anatomischen Zuordnung der Anleitung. Kopf mit Hals, Hände ab dem Handgelenk und Füsse ab dem Knöchel sind `none`.
 - **Achtung bei `refine-body.mjs`:** Seine Streu-Erkennung gab im Proof den oberen Trapezius vorne an die Nachbarn zurück. Sichere den Zusammenhang oder die Schwelle, und halt es mit einem Prüfpunkt fest.
 
@@ -154,10 +154,10 @@ Nach Vertrag §8, beurteilt am neuen Körper, nicht am alten:
 
 - weniger Grundlicht, ein Hauptlicht von schräg oben, ein Kantenlicht von hinten;
 - ein Tone Mapping, das die Statusfarben hält, statt sie zu Pastell zu machen. Die Farbe am Körper muss der Legende entsprechen. Bleib bei `three` 0.160.1; hältst du ein Upgrade für den einzigen Weg, ist das eine Frage fürs Gate, kein stiller Schritt;
-- Weiss für «Gehalten», gedimmt für «Noch nicht trainiert» und die neutrale Zone, deutlich unterscheidbar auf Graphit;
+- Weiss für «Gehalten», gedimmt für «Noch nicht trainiert» und die neutrale Zone, deutlich unterscheidbar auf Graphit. Die zwei Tokens dafür hat der Block «Farbregeln» angelegt; du stellst ihre Werte unter dem neuen Licht ein. Welcher Zustand welchen Ton bekommt, bleibt;
 - jeder Wert ist ein Token in `tokens.css`; `tokens.test.ts` hält die neuen Werte.
 
-Zeig es an fünf Bildern: die fünf Zustände am neuen Körper, von vorne und von hinten, dazu ein Körper ohne Daten.
+Zeig es an genau diesen fünf Bildern des neuen Körpers: gemischte Datenlage von vorne; dieselbe von hinten; ein Körper ohne Daten; einer nur mit gehaltenen Gruppen; die schwächste Stufe (±3 %) neben der stärksten (ab ±12 %), in Grün und in Rot.
 
 ### Schritt 6 – Das Gate
 
@@ -197,7 +197,7 @@ Dazu eine Frage mit Empfehlung: Wird `body-preview.webp` mit dem gewählten Kör
 - `public/models/momentum-body.glb` wird ersetzt; der Build läuft aus `tools/body/` mit einem Befehl.
 - **Validator.** Die Hüllen kommen aus den gemessenen Proportionen des neuen Körpers, jede mit Begründung, keine wird einfach geweitet. Die Lizenzprüfung gilt der neuen Quelle. Neu dazu kommen die Masse aus Schritt 3 und die neutrale Zone.
 - **Prüfpunkte** (Vertrag §14), im Validator und in einem eigenen Test: Hand, Fuss und Kopf sind `none`; die Aussenseite des Oberschenkels gehört zum Bein; der obere Trapezius gehört zum Rücken; jede der zehn Gruppen wird an einem festen Punkt getroffen.
-- `muscleMeshMap.ts`: die Tabelle der Dreieckszahlen und der Kommentar zur neutralen Zone.
+- `muscleMeshMap.ts`: die Tabelle der Dreieckszahlen. Die Kommentare zur neutralen Zone dort und im Validator stimmen danach mit dem Modell überein; sie gehören diesem Block.
 - **Nennung.** `THIRD-PARTY-NOTICES.md` und die Texte in der App in beiden Sprachen: Für das ausgelieferte Modell fällt patmateee weg; MakeHuman wird genannt, freiwillig und empfohlen. Solange im Repo Dateien liegen, die vom alten Modell abstammen (die Kopie des GLB unter `docs/design/muscle-map/momentum-muscle-map-handoff/`, Bilder davon), bleibt dessen Nennung in `THIRD-PARTY-NOTICES.md` als eigener Abschnitt stehen, und `ATTRIBUTION.txt` und `license.txt` dort bleiben, wie sie sind. Der Satz zur Modelllizenz in der Lizenzdatei der App gehört dem Aufräum-Block; halt in `HANDOVER.md` fest, was er wissen muss.
 - **Rahmen.** Kopf und Füsse berühren den Rand bei 320, 393 und 430 px in keiner Ansicht (`body.mjs`). Miss `body-reach.mjs` neu und nenn das Ergebnis; die Treffertoleranz für die Unterarme baut Block 7B.
 - `body-preview.webp` nach Darios Antwort am Gate.
@@ -225,7 +225,7 @@ Dazu eine Frage mit Empfehlung: Wird `body-preview.webp` mit dem gewählten Kör
 
 Erlaubt sind nur: das Modell und seine Pipeline, der Validator, die Tabelle in `muscleMeshMap.ts`, die Licht- und Materialstellen samt ihren Tokens, die Nennung, das Standbild und die Entwicklerseite `#/dev/body` (etwa ein Parameter, der dort einen Kandidaten lädt).
 
-**Nicht tun:** kein Blender von Hand; keine gekauften Modelle und keine von Sketchfab; keine Datei aus dem GitHub-Mirror von BodyParts3D im Repo (er trägt CC BY-SA 2.1 Japan); kein Referenzbild im Repo; kein Merge, kein Deploy.
+**Nicht tun:** kein Blender von Hand; keine gekauften Modelle und keine von Sketchfab; keine Datei aus dem GitHub-Mirror von BodyParts3D im Repo (er trägt CC BY-SA 2.1 Japan); kein Referenzbild im Repo; kein Merge, kein Deploy der Live-App.
 
 **Eigene Blöcke, nicht dieser:** die Körperbühne, Zoom, Tippen und Drehen, die Treffertoleranz, die Messanzeige (7B); das Muskel-Sheet (7C); die Lizenzdatei der App (Aufräumen).
 
@@ -235,7 +235,7 @@ Erlaubt sind nur: das Modell und seine Pipeline, der Validator, die Tabelle in `
 - Die Pipeline liegt unter `tools/body/`, baut mit einem Befehl und ergibt zweimal dasselbe GLB; die Lizenz jeder Datenquelle ist im Wortlaut gelesen und im Repo abgelegt.
 - Das Gate fand statt, bevor in der App etwas getauscht wurde.
 - Der Validator und der Prüfpunkt-Test sind grün; Hände, Kopf und Füsse sind neutral.
-- Die Farben am Körper entsprechen der Legende, belegt an fünf Bildern.
+- Die Farben am Körper entsprechen der Legende, belegt an den fünf Bildern aus Schritt 5.
 - `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, jede Suite aus Schritt 0 besteht.
 - Das GLB hat höchstens 80'000 Dreiecke und 700 KB.
 - Der Vorschau-Build ist erreichbar.
