@@ -50,6 +50,38 @@ and the mesh is not closed. The proof has the proportions nearly right but
 straight arms, straight feet, a trapezius that was handed to the inert zone,
 and two thirds of its triangles in head, hands and feet.
 
+## The four candidates of the gate
+
+Measured on 12 November 2026, by the same script.
+
+| measure | target | schlank-a | athletisch-a | athletisch-b | kraeftig-a |
+|---|---|---|---|---|---|
+| Height | — | 1.780 m | 1.780 m | 1.780 m | 1.780 m |
+| Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | 12.6 % ✓ | 12.9 % ✓ | 12.6 % ✓ |
+| Shoulder height (acromion) | 80.0–83.0 % | 82.9 % ✓ | 82.8 % ✓ | 82.8 % ✓ | 82.7 % ✓ |
+| Knee height (joint line) | 27.0–30.0 % | 29.9 % ✓ | 29.9 % ✓ | 29.9 % ✓ | 29.9 % ✓ |
+| Crotch height | 45.0–49.0 % | 49.2 % ✗ | 49.0 % ✓ | 49.0 % ✓ | 48.8 % ✓ |
+| Upper arm | 16.7–20.5 % | 18.4 % ✓ | 18.3 % ✓ | 18.3 % ✓ | 18.1 % ✓ |
+| Forearm | 13.1–16.1 % | 15.0 % ✓ | 15.2 % ✓ | 15.2 % ✓ | 15.0 % ✓ |
+| Hand | 9.7–11.9 % | 11.0 % ✓ | 10.8 % ✓ | 10.8 % ✓ | 11.0 % ✓ |
+| Foot length | 14.5–16.0 % | 14.7 % ✓ | 14.7 % ✓ | 14.7 % ✓ | 14.7 % ✓ |
+| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.1 % ✓ | 29.6 % ✓ | 29.6 % ✓ | 30.3 % ✗ |
+| Neck width to head width | 0.75–0.90 | 0.81 ✓ | 0.79 ✓ | 0.79 ✓ | 0.78 ✓ |
+| Symmetry (largest mirrored distance) | ≤ 2 mm | 0.1 mm ✓ | 0.1 mm ✓ | 0.1 mm ✓ | 0.1 mm ✓ |
+| Upper arm away from the trunk | 15–25° | 21.5° ✓ | 21.1° ✓ | 21.1° ✓ | 19.6° ✓ |
+| Elbow bend | 5–15° | 7.9° ✓ | 7.7° ✓ | 7.7° ✓ | 6.9° ✓ |
+| Toes turned out | 5–10° | 6.4° ✓ | 6.4° ✓ | 6.4° ✓ | 6.4° ✓ |
+| Met | of 14 | 13 | 14 | 14 | 13 |
+| Triangles | ≤ 80,000 | 50142 | 50232 | 50236 | 50238 |
+| Inert zone | 25–35 % | 34 % | 34 % | 34 % | 34 % |
+| Smallest group | ≥ 400 | 1632 | 1642 | 1642 | 1672 |
+| File | ≤ 700 KB | 690 KB | 691 KB | 691 KB | 691 KB |
+| Closed surface | yes | yes | yes | yes | yes |
+
+All four: hand, sole, crown and face are `none`; the ridge between neck and
+shoulder, and the same slope from the front, are `back`; the outside of the
+thigh is `quadriceps`.
+
 ## What the targets were checked against
 
 The guide (`koerper-anleitung-7a.md` §3) gives them as starting values after

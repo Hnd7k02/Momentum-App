@@ -984,7 +984,23 @@ merged; **in progress, runs up to its gate and stops there**)
     (`vertexColors`, conditional — today's model has none). **After the
     gate** the look moves to the tokens (`tokens.css`, `tokens.test.ts`),
     whichever body it is then tuned on.
-  - [ ] Step 6 — the gate: the comparison sheet, the checklist, STOP
+  - [x] Step 6 — **the gate is reached; the block waits here for the
+    owner's decision.** The comparison sheet is a private Artifact page,
+    «Körper-Gate 7A» (https://claude.ai/artifact/WdwyQ1we3wQe14VoJr8saz):
+    today's body beside the four candidates in four views, neutral and
+    with status colours, in both worlds at 393 and 320 px, close-ups, the
+    five pictures of the light, the measures, triangles, bytes and sha256,
+    an assessment of each candidate, the checklist for the iPhone and four
+    questions. Its key pictures are in `docs/design/wp3/7a-gate/`. The
+    recommendation is `athletisch-a`. **Nothing in the app is replaced:**
+    `public/models/momentum-body.glb`, the validator, `muscleMeshMap.ts`,
+    the tokens, the attribution and `body-preview.webp` are as they were.
+    What follows depends on the answer — the owner picks a pair (step 7a),
+    a pair with up to three corrections (one more round, a new sheet), or
+    none (step 7b: stage 1 on today's model). D165 gets the outcome then.
+    Not done yet and owed after the gate: the full run of the browser
+    suites against step 0 (step 8); before the gate only `tsc -b`,
+    `npm run test`, the build and the 3D suites were run.
 - **Baseline for this block** is the closing run of the colour rules on
   `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
   only the record, the pictures and one line of a verify script): `tsc -b`
