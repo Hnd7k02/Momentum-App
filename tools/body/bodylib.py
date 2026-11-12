@@ -1066,7 +1066,8 @@ def geodesic(P, adj, sources_mask, limit):
 
 # ── GLB ───────────────────────────────────────────────────────────────────────
 
-COPYRIGHT = 'Body: MakeHuman base mesh and targets via MPFB2, CC0 1.0 Universal'
+COPYRIGHT = ('Body built from the MakeHuman base mesh and targets and the skinning weights of Anny '
+             '(NAVER Corp.), all CC0 1.0 Universal')
 
 
 def write_glb(path, P, tris, tri_labels, generator, copyright=COPYRIGHT):

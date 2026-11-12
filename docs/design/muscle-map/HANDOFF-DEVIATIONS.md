@@ -34,13 +34,19 @@ listed here is verbatim.
 | 26 | 4 | `bodyViewer.css` / `muscleModule.css` | The viewer's box is the host card's: full width, aspect 1:1.02, 280–360px. At ≤360px the rows wrap to two lines rather than truncating a name. | Stage 4a decision; Stage 4b §6. |
 | 27 | 4 | `BodyViewer.tsx` | `frameloop` drops to `never` while the tab is hidden or the card is scrolled out of view, and returns to `demand` with one `invalidate()` on the way back. One listener and one observer, both released on unmount. | Stage 4b visibility hardening. |
 | 28 | 4 | `BodyBoundary.tsx` (new) | The smallest local error boundary around the lazy viewer: a chunk that cannot be fetched and a throw after mount both fall back to the SVG figure. No global error infrastructure. | Stage 4b §14. |
+| 29 | WP3 7A | `public/models/momentum-body.glb` | **The model is another one.** The handoff's body (patmateee, CC BY 4.0, 40,000 triangles) is replaced by a body built by script from MakeHuman's base mesh (CC0 1.0), `tools/body/`: 49,988 triangles, 704,044 bytes, 1.75 m tall like the body it replaces. The contract is the handoff's — one mesh, eleven primitives, the material name is the muscle-group id, shared position and normal lists, `KHR_mesh_quantization` — with one addition, row 31. The handoff's copy of the old file stays where it is, untouched. | D165: the old body's neck, head, hands and feet, and the loss of its relief; the original it was reduced from is gone (D156). |
+| 30 | WP3 7A | `tools/validate-body-glb.mjs` | No longer the handoff's script. The envelopes are measured on the new body and say how far a region may and must reach, for all ten groups; new are a closed surface, the size, the inert zone as five straight cuts, the check points of the regions, eleven measures of proportion and posture, and a licence check that asks for MakeHuman and CC0. `tools/validate-body-glb.test.mjs` holds it. | The handoff's envelopes and its licence check described the old body. Contract §14 asks for check points in the validator and in a test. |
+| 31 | WP3 7A | `BodyModel.tsx`, `useMuscleHighlight.ts` | **The model carries a vertex colour**, `COLOR_0`: a shade baked from its grooves and its occlusion, grey, which both materials multiply into their colour (`vertexColors`, switched on only where the attribute exists). HANDOFF §18 says "no vertex colours". The body is still one colour; the tint still comes from the data alone. | D165 and the guide: at the size of the app the relief does not read from the light alone. |
+| 32 | WP3 7A | `tokens.ts`, `tokens.css`, `BodyViewer.tsx`, `BodyModel.tsx` | **The light and the neutral tones are no longer the handoff's.** The lights' strengths and places, the roughness, the reflection of the room and "no tone mapping" (the handoff: ACES) are tokens in `tokens.css`, read into `BODY_LOOK`. The inert zone has a tone of its own (`--body-inert`, D166) instead of sharing the untrained muscle's, and with the data colours off the whole body takes that tone. | Contract §8 and the owner's decisions at the gate of block 7A (D165, D166). |
 | 20 | 2 | reference-only | `body-viewer.js` (source of the material port), `demo.js`, `index.html`, `styles.css`, `reference/*` are not copied into `src`. | Demo and reference material. |
 
 ## Not deviations
 
-- `public/models/momentum-body.glb` is byte-identical to the handoff's
-  (md5 `24fd71a7fc5249137eb6684b45336c35`).
-- Every colour, number and function in `tokens.ts` is unchanged.
+- Until WP3 block 7A, `public/models/momentum-body.glb` was byte-identical
+  to the handoff's (md5 `24fd71a7fc5249137eb6684b45336c35`) and every
+  colour, number and function in `tokens.ts` was unchanged. Rows 29 to 32
+  record what block 7A replaced; the colour rules of WP3 (D164) changed the
+  state colours before it.
 - The handoff's German `text` labels inside `STATE_COLOR` are kept as data
   but are **not** what the rows display; the rows keep the catalogue strings
   (`muscle.state.*`), which differ in one place ("Noch kein Vergleich").

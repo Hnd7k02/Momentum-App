@@ -4088,6 +4088,15 @@ parameters are not a specification.
 `anny/data/mpfb2/`, never the package's code. Its `LICENSE.md` was read in
 full on 2026-11-11: it is the text of Creative Commons CC0 1.0 Universal.
 
+*Found on 2026-11-12, during production:* the folder holds MakeHuman's
+assets **as the Anny project adapted them from MPFB2** — the package's own
+words — and one of the files used is that project's own work: the default
+skinning weights, "Copyright (C) 2025 NAVER Corp.", "license": "CC0". All
+of it is CC0, so nothing is owed and nothing had to stop; but "MPFB2's data,
+unchanged" was not accurate. `tools/body/README.md`,
+`THIRD-PARTY-NOTICES.md` and the notice inside the model say it as it is,
+and name Anny beside MakeHuman.
+
 **The outcome of the gate (2026-11-12).** The owner chose **`athletisch-a`**
 — the athletic body type with head A — **with three corrections**, and
 production without a second sheet:

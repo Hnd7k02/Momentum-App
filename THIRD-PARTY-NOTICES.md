@@ -15,9 +15,18 @@ under **Creative Commons CC0 1.0 Universal**
 (https://creativecommons.org/publicdomain/zero/1.0/): a dedication to the
 public domain, with no condition and no duty to name the source.
 
-The files used lie unchanged in `tools/body/makehuman/`, beside the licence
-text they came with (`tools/body/makehuman/LICENSE.md`) and a manifest of
-their sha256; `tools/body/README.md` says where they were taken from.
+The files were taken from the data folder of the Python package **Anny**
+0.6.2 (NAVER Corp.), which calls them "MakeHuman assets adapted from MPFB2 …
+licensed under the CC0 1.0 Universal License". One of them is that project's
+own work: the skinning weights the body is posed with, "Anny default
+skinning weights", Copyright (C) 2025 NAVER Corp., released under CC0 as
+well. Nothing of Anny's code, which is under the Apache License 2.0, is used
+or shipped.
+
+The files lie unchanged in `tools/body/makehuman/`, beside the licence text
+they came with (`tools/body/makehuman/LICENSE.md`) and a manifest of their
+sha256; `tools/body/README.md` says what was read and where they were taken
+from.
 
 What Momentum made of them, by script and reproducibly (`tools/body/`):
 
@@ -32,7 +41,7 @@ What Momentum made of them, by script and reproducibly (`tools/body/`):
 - a shade baked into the vertex colours; quantized with
   `KHR_mesh_quantization`; no textures, no UVs, no rig, no animation
 
-`asset.copyright` inside the GLB names MakeHuman and CC0, and
+`asset.copyright` inside the GLB names MakeHuman, Anny and CC0, and
 `npm run validate:body` checks it on every build.
 
 ## Kept in the repository, not shipped

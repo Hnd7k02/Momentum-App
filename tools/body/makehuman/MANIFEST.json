@@ -1,5 +1,5 @@
 {
-  "about": "MakeHuman base mesh, rig and targets as MPFB2 ships them, copied unchanged. Licence: CC0 1.0 Universal, see LICENSE.md beside this file. Written by tools/body/vendor.py; do not edit.",
+  "about": "MakeHuman base mesh, rig and targets, copied unchanged from the folder anny/data/mpfb2/ of the wheel named below \u2014 \"MakeHuman assets adapted from MPFB2\", in that package's own words. One file is the Anny project's own work and says so: rigs/standard/weights.default.json, \"Anny default skinning weights\", Copyright (C) 2025 NAVER Corp., license CC0. Licence of all of it: CC0 1.0 Universal, see LICENSE.md beside this file. Written by tools/body/vendor.py; do not edit.",
   "source": {
     "package": "anny",
     "version": "0.6.2",

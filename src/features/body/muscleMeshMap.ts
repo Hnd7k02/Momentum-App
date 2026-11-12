@@ -104,7 +104,7 @@ export function resolveMuscleMeshes(root: Object3D): MuscleMeshes {
  * There is no per-id lookup table by design: the GLB carries exactly one
  * primitive per region and the primitive's MATERIAL NAME *is* the id, so the
  * mapping cannot drift from the asset. The table below is documentation of
- * the asset as shipped — the body of block 7A (D165), 49,996 triangles — and
+ * the asset as shipped — the body of block 7A (D165), 49,988 triangles — and
  * `tools/validate-body-glb.test.mjs` holds it to the file.
  */
 export const MUSCLE_MESH_MAP: Readonly<Record<MuscleGroup, {
@@ -119,14 +119,14 @@ export const MUSCLE_MESH_MAP: Readonly<Record<MuscleGroup, {
   /** camera azimuth in degrees at which the region is visible. */
   facing: 0 | 180;
 }>> = {
-  chest:            { mesh: 0, primitive: 1,  material: 'chest',            triangles: 4836, facing: 0 },
-  back:             { mesh: 0, primitive: 2,  material: 'back',             triangles: 5549, facing: 180 },
-  shoulders:        { mesh: 0, primitive: 3,  material: 'shoulders',        triangles: 2272, facing: 0 },
+  chest:            { mesh: 0, primitive: 1,  material: 'chest',            triangles: 4834, facing: 0 },
+  back:             { mesh: 0, primitive: 2,  material: 'back',             triangles: 5504, facing: 180 },
+  shoulders:        { mesh: 0, primitive: 3,  material: 'shoulders',        triangles: 2264, facing: 0 },
   biceps:           { mesh: 0, primitive: 4,  material: 'biceps',           triangles: 1750, facing: 0 },
   triceps:          { mesh: 0, primitive: 5,  material: 'triceps',          triangles: 1642, facing: 180 },
-  core:             { mesh: 0, primitive: 6,  material: 'core',             triangles: 2573, facing: 0 },
-  quadriceps:       { mesh: 0, primitive: 7,  material: 'quadriceps',       triangles: 3774, facing: 0 },
-  hamstringsGlutes: { mesh: 0, primitive: 8,  material: 'hamstringsGlutes', triangles: 3404, facing: 180 },
+  core:             { mesh: 0, primitive: 6,  material: 'core',             triangles: 2619, facing: 0 },
+  quadriceps:       { mesh: 0, primitive: 7,  material: 'quadriceps',       triangles: 3770, facing: 0 },
+  hamstringsGlutes: { mesh: 0, primitive: 8,  material: 'hamstringsGlutes', triangles: 3409, facing: 180 },
   calves:           { mesh: 0, primitive: 9,  material: 'calves',           triangles: 3804, facing: 180 },
   forearms:         { mesh: 0, primitive: 10, material: 'forearms',         triangles: 4062, facing: 0 },
 };

@@ -21,8 +21,8 @@ export const de = {
   'areas.credits.bodySubtitle': 'Aus MakeHuman, CC0 1.0',
   'areas.credits.modified':
     'Für Momentum geformt: in eine entspannte Haltung gebracht, mit Muskelzeichnung versehen '
-    + 'und in zehn Muskelregionen unterteilt. Die Lizenz verlangt keine Nennung; '
-    + 'die Quelle steht hier trotzdem.',
+    + 'und in zehn Muskelregionen unterteilt. Für die Haltung dienen Daten des Projekts Anny '
+    + '(NAVER Corp.), ebenfalls CC0. Die Lizenz verlangt keine Nennung; die Quellen stehen hier trotzdem.',
   'gym.body.credit':
     '3D-Modell: gebaut aus dem Grundkörper und den Formdaten von MakeHuman, '
     + 'freigegeben unter CC0 1.0 (gemeinfrei).',

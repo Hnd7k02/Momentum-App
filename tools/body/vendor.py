@@ -6,7 +6,8 @@
 
 The data comes from the PyPI wheel `anny==0.6.2`, folder `anny/data/mpfb2/`
 only — never its code. The folder carries its own LICENSE.md (CC0 1.0
-Universal), which is copied with the files and read in tools/body/README.md.
+Universal), which is copied with the files; tools/body/README.md says what
+was read and what the files are.
 
 The first form shapes every candidate of candidates.json against the full
 folder, notes each file that was opened, and copies exactly those, byte for
@@ -75,8 +76,11 @@ def vendor(source: Path, wheel: Path | None):
         if not any(folder.iterdir()):
             folder.rmdir()
     manifest = {
-        'about': 'MakeHuman base mesh, rig and targets as MPFB2 ships them, copied unchanged. '
-                 'Licence: CC0 1.0 Universal, see LICENSE.md beside this file. '
+        'about': 'MakeHuman base mesh, rig and targets, copied unchanged from the folder anny/data/mpfb2/ '
+                 'of the wheel named below — "MakeHuman assets adapted from MPFB2", in that package\'s own '
+                 'words. One file is the Anny project\'s own work and says so: rigs/standard/weights.default.json, '
+                 '"Anny default skinning weights", Copyright (C) 2025 NAVER Corp., license CC0. '
+                 'Licence of all of it: CC0 1.0 Universal, see LICENSE.md beside this file. '
                  'Written by tools/body/vendor.py; do not edit.',
         'source': WHEEL,
         'files': {relative: {'bytes': (TARGET / relative).stat().st_size, 'sha256': sha256(TARGET / relative)}

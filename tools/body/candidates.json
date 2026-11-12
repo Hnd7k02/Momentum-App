@@ -1,7 +1,7 @@
 {
   "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named. '_base' holds the settings and is not built itself; 'momentum-body' is the body the app ships (the owner's choice at the gate of block 7A: the athletic type with head A), installed to public/models/ with --install.",
   "_base": {
-    "height": 1.78,
+    "height": 1.75,
     "macro": { "gender": 1.0, "age": 0.5, "muscle": 0.9, "weight": 0.35, "proportions": 1.0, "height": 0.5 },
     "local": {
       "hands/l-hand-fingers-distance-decr": 1.0,

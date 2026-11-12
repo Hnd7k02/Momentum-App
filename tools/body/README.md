@@ -49,11 +49,29 @@ targets come from the PyPI wheel **`anny` 0.6.2**
 `bad70bdc2be0dfa9880d60129c3a1339678f08f493184f637dc2825c3e27b8d2`), and from
 its folder `anny/data/mpfb2/` only. None of the wheel's code is used or kept.
 
-That folder carries its own `LICENSE.md` (sha256
-`f6089cba…956d2c`, copied to `makehuman/LICENSE.md`). It was read in full on
-11 November 2026: it is the complete text of **CC0 1.0 Universal**, the public
-domain dedication, and nothing else. No attribution is required; MakeHuman is
-named in the model's `asset.copyright` all the same.
+What was read, in full, on 11 and 12 November 2026:
+
+- **The folder's own `LICENSE.md`** (sha256 `f6089cba…956d2c`, copied to
+  `makehuman/LICENSE.md`): the complete text of **CC0 1.0 Universal**, the
+  public domain dedication, and nothing else.
+- **The wheel's licence file**: the Apache License 2.0, for "the code of
+  Anny, Copyright (c) 2025 NAVER Corp." — the code, which is not used here.
+- **The wheel's own statement about the folder**: "*Anny* relies on MakeHuman
+  assets adapted from MPFB2 that are licensed under the CC0 1.0 Universal
+  License."
+
+So the files are **MakeHuman's assets as the Anny project adapted them from
+MPFB2**, not MPFB2's files byte for byte. Which of them differ from MPFB2's
+own was not checked — with one exception that says so itself:
+
+- **`rigs/standard/weights.default.json` is the Anny project's own work.** Its
+  header reads: name "Anny default skinning weights", "Copyright (C) 2025
+  NAVER Corp.", "license": "CC0", "symmetrized and island-free, baked from
+  weights.legacy.json". The pose of the body is skinned with these weights.
+
+All of it is CC0: no attribution is required, for MakeHuman or for Anny. The
+model's `asset.copyright` names both all the same, and so does
+`THIRD-PARTY-NOTICES.md`.
 
 The files are kept in the repository (18 files, 4.3 MB) rather than fetched
 from the wheel at build time, for three reasons: the build then runs offline
@@ -79,7 +97,7 @@ result, and two builds in a row were compared byte for byte.
 
 | body | bytes | sha256 |
 |---|---|---|
-| `momentum-body` | 704,100 | `924a501bc5fed71dd229a00e619e1d5942ebad962432aa0c25294f6da48a3318` |
+| `momentum-body` | 704,044 | `a72c84170fce64dd34723994ddb0612f6230be5183d454827a95ec989b44d796` |
 
 `digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has this sha256. The digests hold for the
 versions named above: another numpy may add in another order, and the last
@@ -159,6 +177,10 @@ built, and git has them.
   behind each pair of lids is turned inside out into a calm eyeball
   (`fill_eyes`). Head B, the same head softened to a mannequin's
   (`smooth_face`), was the alternative at the gate and is still a setting.
+- **The height** is 1.75 m, the height of the model it replaced, so that
+  the body stands in the viewer's frame exactly where that one stood. The
+  candidates of the gate were shown at 1.78 m; every measure is a share of
+  the height and is the same.
 - **The pose** is the guide's: upper arms 20° from the trunk, elbows bent
   (20° at the joints, which reads as 8° on the arm), palms to the thighs,
   fingers together and lightly curled, the thumb laid on, legs nearly
@@ -174,7 +196,7 @@ built, and git has them.
   along the seam between fine and coarse mesh is cut in saw teeth. Hands and
   feet are thinned to 45 % by a quadric edge collapse; the head is left as it
   is, because a face with half its triangles shows them as flat panels.
-  49,996 triangles, 33 % of them in the inert zone, 704,100 bytes — 688 KB
+  49,988 triangles, 33 % of them in the inert zone, 704,044 bytes — 688 KB
   as this project counts (the model of D156: 478,008 bytes, "467 KB").
 
 ## What changed against the scripts of the reference page

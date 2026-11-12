@@ -20,8 +20,8 @@ export const en: Translations = {
   'areas.credits.bodySubtitle': 'From MakeHuman, CC0 1.0',
   'areas.credits.modified':
     'Shaped for Momentum: brought into a relaxed posture, given its muscle relief '
-    + 'and split into ten muscle regions. The licence asks for no credit; '
-    + 'the source is named here all the same.',
+    + 'and split into ten muscle regions. The posture uses data of the Anny project '
+    + '(NAVER Corp.), also CC0. The licence asks for no credit; the sources are named here all the same.',
   'gym.body.credit':
     '3D model: built from the base body and the shape data of MakeHuman, '
     + 'released under CC0 1.0 (public domain).',
