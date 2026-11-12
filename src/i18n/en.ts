@@ -17,14 +17,15 @@ export const en: Translations = {
   'areas.general': 'More',
   'areas.credits': 'Credits',
   'areas.credits.body': '3D body model',
-  'areas.credits.bodySubtitle': 'By patmateee, CC BY 4.0',
+  'areas.credits.bodySubtitle': 'From MakeHuman, CC0 1.0',
   'areas.credits.modified':
-    'Modified for Momentum: merged into one surface, re-posed, simplified, normals recomputed '
-    + 'and split into ten muscle regions. Textures and animation were removed.',
+    'Shaped for Momentum: brought into a relaxed posture, given its muscle relief '
+    + 'and split into ten muscle regions. The licence asks for no credit; '
+    + 'the source is named here all the same.',
   'gym.body.credit':
-    '3D model: "Muscular Athletic Body – Male Base Mesh" by patmateee, '
-    + 'licensed under CC BY 4.0, modified for Momentum.',
-  'gym.body.credit.model': 'View model',
+    '3D model: built from the base body and the shape data of MakeHuman, '
+    + 'released under CC0 1.0 (public domain).',
+  'gym.body.credit.model': 'View MakeHuman',
   'gym.body.credit.license': 'License',
   'areas.standing': 'Rating in this area',
   'areas.standing.value': '{value} of 1000',

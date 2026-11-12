@@ -18,15 +18,15 @@ export const de = {
   'areas.general': 'Weiteres',
   'areas.credits': 'Danksagungen',
   'areas.credits.body': '3D-Körpermodell',
-  'areas.credits.bodySubtitle': 'Von patmateee, CC BY 4.0',
+  'areas.credits.bodySubtitle': 'Aus MakeHuman, CC0 1.0',
   'areas.credits.modified':
-    'Für Momentum bearbeitet: zu einer Fläche zusammengeführt, in eine entspannte Haltung gebracht, '
-    + 'vereinfacht, mit neu berechneten Normalen und in zehn Muskelregionen unterteilt. '
-    + 'Texturen und Animationen wurden entfernt.',
+    'Für Momentum geformt: in eine entspannte Haltung gebracht, mit Muskelzeichnung versehen '
+    + 'und in zehn Muskelregionen unterteilt. Die Lizenz verlangt keine Nennung; '
+    + 'die Quelle steht hier trotzdem.',
   'gym.body.credit':
-    '3D-Modell: „Muscular Athletic Body – Male Base Mesh" von patmateee, '
-    + 'lizenziert unter CC BY 4.0, für Momentum bearbeitet.',
-  'gym.body.credit.model': 'Modell ansehen',
+    '3D-Modell: gebaut aus dem Grundkörper und den Formdaten von MakeHuman, '
+    + 'freigegeben unter CC0 1.0 (gemeinfrei).',
+  'gym.body.credit.model': 'MakeHuman ansehen',
   'gym.body.credit.license': 'Lizenz',
   'areas.standing': 'Rating in diesem Bereich',
   'areas.standing.value': '{value} von 1000',

@@ -7,31 +7,35 @@ import { writeFileSync } from 'node:fs';
  *
  * `src/features/gym/assets/body-preview.webp` is a still of
  * `public/models/momentum-body.glb`, drawn once through the real
- * `BodyViewer` in its neutral tint on the dev harness (`#/dev/body`) with a
- * transparent background, turned a little towards three-quarter, cropped to
- * the figure and encoded as WebP in the browser. It is presentation only —
+ * `BodyViewer` on the dev harness (`#/dev/body`) with its data colours off —
+ * one figure in the neutral tone, which says neither "trained" nor "not
+ * trained yet" (D166) — on a transparent background, turned a little towards
+ * three-quarter, cropped to the figure and encoded as WebP in the browser. It is presentation only —
  * a picture of the destination — and it is regenerated from here whenever
  * the model changes, never drawn by hand:
  *
  *   npx vite --port 5173 &
  *   node tools/render-body-preview.mjs
  *
- * Arguments: [out-path-without-extension] [azimuth°] [width px] [quality].
+ * Arguments: [out-path-without-extension] [azimuth°] [width px] [quality] [state].
+ * `state` is `off` — the data colours off, the default — or a fixture of the
+ * dev harness (`held`, `empty`, …), drawn with its colours.
  * A `.png` twin is written beside the WebP for inspection; do not commit it.
  */
 const OUT = process.argv[2] ?? 'src/features/gym/assets/body-preview';
 const AZIMUTH = Number(process.argv[3] ?? 25);
 const TARGET_WIDTH = Number(process.argv[4] ?? 240);
 const QUALITY = Number(process.argv[5] ?? 0.8);
+const STATE = process.argv[6] ?? 'off';
 
 const browser = await chromium.launch({ executablePath: CHROMIUM, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const ctx = await browser.newContext({ viewport: { width: 430, height: 900 }, deviceScaleFactor: 3, reducedMotion: 'reduce' });
 const page = await ctx.newPage();
 page.on('pageerror', (e) => console.error('pageerror', e));
-await page.goto('http://127.0.0.1:5173/Momentum-App/#/dev/body', { waitUntil: 'networkidle' });
+await page.goto(`http://127.0.0.1:5173/Momentum-App/${STATE === 'off' ? '' : `?fixture=${STATE}`}#/dev/body`, { waitUntil: 'networkidle' });
 await page.waitForSelector('.body-viewer canvas', { timeout: 30000 });
 await page.waitForTimeout(2500);
-await page.click('[data-action="toggle-tint"]');
+if (STATE === 'off') await page.click('[data-action="toggle-tint"]');
 await page.waitForTimeout(500);
 
 // Rotate by dragging: 0.55° per px, reduced motion → no coast.
@@ -50,6 +54,7 @@ console.log('angle readout', await page.locator('[data-angle]').textContent(), a
 await page.evaluate(() => {
   document.documentElement.style.background = 'transparent';
   document.body.style.background = 'transparent';
+  document.querySelector('main').style.background = 'transparent';
   document.querySelector('[data-host]').style.background = 'transparent';
   document.querySelector('.body-viewer__views').style.visibility = 'hidden';
 });

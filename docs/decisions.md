@@ -4131,9 +4131,10 @@ another skin colour, not as "neutral".
   muscles are dimmed and its head, hands and feet are a step lighter. The
   owner asked to be shown both — the white body and the untrained one — at
   STOP 7A, and judges the second there.
-- **With the data colours switched off** the body says nothing at all and is
-  one quiet figure, the inert zone dimmed like the rest. Only the still on
-  the Gym card is drawn that way; the app never switches the colours off.
+- **With the data colours switched off** the body says nothing at all — not
+  even "not trained yet" — and is one figure in the inert zone's tone. Only
+  the still on the Gym card is drawn that way; the app never switches the
+  colours off.
 
 `tokens.test.ts` holds the tone halfway between the two and at a distance
 from both. The flat fallback figure draws no head, hands or feet of its own

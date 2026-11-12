@@ -22,7 +22,7 @@ import { Color, MeshStandardMaterial } from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { MuscleGroup } from '../../core/model';
 import type { MuscleMeshes } from './muscleMeshMap';
-import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_LOOK, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, type BodyLook } from './tokens';
+import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_INERT_COLOR, BODY_LOOK, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, type BodyLook } from './tokens';
 
 export type MuscleVisual = {
   /** 0–1, already normalised by the Gym domain. Drives tint strength. */
@@ -154,8 +154,10 @@ export function regionTargets(
 ): RegionTarget {
   const { resting, selected: chosen } = REGION_MATERIAL;
   const amount = visual?.intensity == null ? 1 : Math.max(0, Math.min(1, visual.intensity));
-  // With tinting off the body says nothing at all, so it is the dimmed figure.
-  const ground = tinted ? (visual?.ground ?? BODY_DIMMED_COLOR) : BODY_DIMMED_COLOR;
+  // With tinting off the body says nothing at all — not even "not trained
+  // yet". It is one figure in the tone of the inert zone, which is no state
+  // (D166): the still on the Gym card.
+  const ground = tinted ? (visual?.ground ?? BODY_DIMMED_COLOR) : BODY_INERT_COLOR;
   if (!tinted || !visual?.tint || amount === 0) {
     return {
       color: ground,

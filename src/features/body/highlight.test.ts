@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { regionTargets } from './useMuscleHighlight';
-import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, STATE_COLOR, stateIntensity } from './tokens';
+import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_INERT_COLOR, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, STATE_COLOR, stateIntensity } from './tokens';
 
 /**
  * The one rule that is easy to get wrong: a group with nothing to report
@@ -77,7 +77,9 @@ describe('regionTargets', () => {
 
   it('with tinting off every group falls back to the neutral treatment', () => {
     expect(regionTargets(improved, true, false).rimColor).toBe(NEUTRAL_HIGHLIGHT);
-    expect(regionTargets(improved, false, false).color).toBe(BODY_DIMMED_COLOR);
-    expect(regionTargets(held, false, false).color).toBe(BODY_DIMMED_COLOR);
+    // …and is one figure in the inert zone's tone: neither trained nor untrained (D166).
+    expect(regionTargets(improved, false, false).color).toBe(BODY_INERT_COLOR);
+    expect(regionTargets(held, false, false).color).toBe(BODY_INERT_COLOR);
+    expect(regionTargets(untrained, false, false).color).toBe(BODY_INERT_COLOR);
   });
 });

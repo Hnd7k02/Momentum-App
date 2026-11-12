@@ -8,7 +8,7 @@ import { useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
 import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
-import { BODY_DIMMED_COLOR, BODY_INERT_COLOR, BODY_LOOK, type BodyLook } from './tokens';
+import { BODY_INERT_COLOR, BODY_LOOK, type BodyLook } from './tokens';
 
 /**
  * Where the shipped model lives, under whatever base the app is served from
@@ -46,8 +46,6 @@ export function BodyModel({
   const [meshes, setMeshes] = useState<MuscleMeshes | null>(null);
   const { gltf, error } = useGLTF(modelUrl);
   const raycaster = useMemo(() => new Raycaster(), []);
-  const inertMaterials = useRef<MeshStandardMaterial[]>([]);
-  const inertTone = useRef(tinted === false ? BODY_DIMMED_COLOR : BODY_INERT_COLOR);
 
   // A fetch or parse failure is the viewer's to show, not ours to hide.
   useEffect(() => {
@@ -67,7 +65,7 @@ export function BodyModel({
         const mesh = o as Mesh;
         if (!mesh.isMesh || mesh.userData.muscle) return;
         const material = new MeshStandardMaterial({
-          color: inertTone.current,
+          color: BODY_INERT_COLOR,
           roughness: surface.inertRoughness,
           metalness: 0,
         });
@@ -79,7 +77,6 @@ export function BodyModel({
         mesh.material = material;
         inert.push(material);
       });
-      inertMaterials.current = inert;
       // Compile before the model enters the scene: without this the first
       // frame stalls on shader compilation, which is very visible on iOS.
       gl.compileAsync(gltf.scene, camera, scene).then(() => {
@@ -93,19 +90,9 @@ export function BodyModel({
     }
     return () => {
       cancelled = true;
-      inertMaterials.current = [];
       for (const material of inert) material.dispose();
     };
   }, [gltf, gl, camera, scene, onReady, onError, invalidate, surface]);
-
-  // With the data colours off the body says nothing at all: one quiet figure,
-  // the inert zone in the same dimmed tone as the rest. That is the still on
-  // the Gym card; the app itself never turns the colours off.
-  useEffect(() => {
-    inertTone.current = tinted === false ? BODY_DIMMED_COLOR : BODY_INERT_COLOR;
-    for (const material of inertMaterials.current) material.color.set(inertTone.current);
-    invalidate();
-  }, [tinted, invalidate]);
 
   useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface });
 

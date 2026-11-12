@@ -17,9 +17,10 @@ import './gymHub.css';
  * The door to muscle-group progress, on the Gym hub (WP2-2).
  *
  * A whole card that is one button, so the destination is obvious and the
- * tap target is the card. The figure inside it is a still of the approved
- * body — `momentum-body.glb`, rendered once through the real viewer in its
- * neutral tint and saved as a small image (`tools/render-body-preview.mjs`).
+ * tap target is the card. The figure inside it is a still of the body —
+ * `momentum-body.glb`, rendered once through the real viewer with its data
+ * colours off, one figure in the neutral tone (D166), and saved as a small
+ * image (`tools/render-body-preview.mjs`).
  * It is a picture of the destination, not a second body: it has no regions,
  * takes no colour and answers no tap of its own. What the data says is
  * carried by the text and, as an accent, by ten small markers in the
@@ -108,7 +109,7 @@ export function MuscleEntryCard({
         onClick={onOpen}
       >
         <span className="gym-hub__preview" aria-hidden="true">
-          <img className="gym-hub__previewBody" src={bodyPreview} alt="" width={240} height={472} decoding="async" />
+          <img className="gym-hub__previewBody" src={bodyPreview} alt="" width={240} height={521} decoding="async" />
           <span className="gym-hub__previewStates">
             {states.map(({ muscle, state }) => (
               <i key={muscle} className={`gym-hub__previewState gym-hub__previewState--${state}`} />

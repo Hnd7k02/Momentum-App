@@ -1027,8 +1027,8 @@ merged; **in progress, runs up to its gate and stops there**)
   - [x] correction 1 — the inert zone's own tone: `--body-inert` `#b3b3bc`,
     halfway between dimmed and white (**D166**, departs from D161).
     `BodyModel.tsx` gives it to head, hands and feet; "Noch nicht
-    trainiert" stays dimmed. With the data colours off the whole figure is
-    dimmed (the still on the Gym card). Contract §8 and `CLAUDE.md` say
+    trainiert" stays dimmed. With the data colours off the whole figure
+    takes the inert tone (the still on the Gym card). Contract §8 and `CLAUDE.md` say
     three tones now. **Owed at STOP 7A: show the white body and the
     untrained one** — on the second the inert zone is lighter than the
     muscles, and the owner judges that there.

@@ -249,14 +249,15 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   await page.waitForTimeout(700);
   const sheet = page.locator('.sheet');
   const credit = (await sheet.textContent())?.replace(/\s+/g, ' ') ?? '';
-  check('the credits sheet names the author, the licence and the modification',
-    /patmateee/.test(credit) && /CC BY 4\.0/.test(credit) && /bearbeitet/.test(credit), credit.slice(0, 120));
+  check('the credits sheet names the source, the licence and what was made of it',
+    /MakeHuman/.test(credit) && /CC0 1\.0/.test(credit) && /geformt/.test(credit), credit.slice(0, 120));
+  check('and no longer names the model it replaced', !/patmateee|CC BY/.test(credit), credit.slice(0, 120));
   const links = await sheet.locator('a').evaluateAll((els) => els.map((a) => [a.getAttribute('href'), a.target, a.rel]));
   check('and links to the model and the licence, safely', links.length === 2 && links.every(([href, target, rel]) => /^https?:\/\//.test(href) && target === '_blank' && /noopener/.test(rel)), JSON.stringify(links));
   await page.keyboard.press('Escape');
   await page.waitForTimeout(400);
   await openMuscles(page, { wait: 3000 });
-  check('the licence is nowhere near the body itself', !(await page.locator('.muscle-module').textContent())?.includes('CC BY'));
+  check('the licence is nowhere near the body itself', !/CC0|CC BY|MakeHuman/.test((await page.locator('.muscle-module').textContent()) ?? ''));
   await ctx.close();
 }
 
