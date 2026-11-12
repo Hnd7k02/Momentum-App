@@ -1151,7 +1151,7 @@ merged; **built, at STOP 7A — waiting for the owner on his iPhone**)
   ends with; the baseline is the one below): `tsc -b` 0; `npm run test`
   exit 0, **113 files, 1854 tests** (111 and 1786: the two new files are
   the pipeline's and the validator's tests, 66 between them, and
-  `tokens.test.ts` and `highlight.test.ts` grew by two); `npm run build`
+  `tokens.test.ts` grew by two); `npm run build`
   with the validator, `index.css` 90.57 kB (90.21), `index.js` 509.36 kB
   (507.06), the viewer's chunk 235 kB compressed as before, the model
   704 044 bytes (478 008). **All 37 browser suites, 36 green, 4080 of 4081
