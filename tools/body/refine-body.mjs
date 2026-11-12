@@ -46,6 +46,9 @@
  *   --prior <n>       pull towards today's assignment                [0.15]
  *   --stray <0..1>    a piece of a region smaller than this share of its
  *                     largest piece is handed back to its neighbours   [0.2]
+ *   --straymax <n>    …unless it has this many triangles or more: a piece
+ *                     that large is a part of the body — a hand beside an
+ *                     unthinned head — and never a stray              [no limit]
  *   --hold <list>     region pairs whose border keeps its place and is only
  *                     smoothed: the documented lumbar waistband and calf cut
  *                     [back|hamstringsGlutes,calves|quadriceps,calves|hamstringsGlutes]
@@ -63,7 +66,7 @@ import { createHash } from 'node:crypto';
 const argv = process.argv.slice(2);
 const positional = [];
 const opt = {
-  band: 0.03, groove: 6, prior: 0.15, stray: 0.2,
+  band: 0.03, groove: 6, prior: 0.15, stray: 0.2, straymax: Infinity,
   hold: 'back|hamstringsGlutes,calves|quadriceps,calves|hamstringsGlutes',
   shade: 1, cavity: 0.5, ao: 0.4, floor: 0.55, white: 0.85,
 };
@@ -520,7 +523,7 @@ function findStrays() {
   const patches = new Map();
   for (let t = 0; t < M; t++) {
     const r = find(t);
-    if (size.get(r) >= opt.stray * largest[TL[t]]) continue;
+    if (size.get(r) >= opt.stray * largest[TL[t]] || size.get(r) >= opt.straymax) continue;
     mask[t] = 1;
     const y = (P[T[t * 3] * 3 + 1] + P[T[t * 3 + 1] * 3 + 1] + P[T[t * 3 + 2] * 3 + 1]) / 3;
     const patch = patches.get(r) ?? { label: regionNames[TL[t]], triangles: 0, low: Infinity, high: -Infinity };

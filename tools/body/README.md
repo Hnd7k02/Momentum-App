@@ -11,7 +11,7 @@ built here are shown to the owner first (block 7A, step 6).
 ## One command
 
 ```sh
-python3 tools/body/build.py detail2        # → tools/body/out/detail2.glb, its sha256 on the last line
+python3 tools/body/build.py athletisch-a   # → tools/body/out/athletisch-a.glb, its sha256 on the last line
 python3 tools/body/build.py --all          # every candidate of candidates.json
 ```
 
@@ -78,9 +78,12 @@ result, and two builds in a row were compared byte for byte.
 
 | candidate | bytes | sha256 |
 |---|---|---|
-| `detail2` | 608,656 | `fb794d96b9f1861d0e4c5af773239769005b0a39b089ea6ef5f493e113d1b50b` |
+| `athletisch-a` | 672,068 | `c0ff91b8b1b9da5b94cf787db566077f6a308dd74efad07c9dfcdb12824ab775` |
+| `athletisch-b` | 672,068 | `11110125ac39c5e457359d32a2d71dcff9faea7a8e77998c527199642ed23838` |
+| `schlank-a` | 671,392 | `39cdf914f26ad280ca72b4896c0550bdc98110de19d0a7ada8eb9d41c276b9d8` |
+| `kraeftig-a` | 672,320 | `da1b39da37a74550448f9ef9a2b4735375eae52a5ee3607a0a02e111e6f21ea4` |
 
-The other candidates are listed in `digests.json`. The digests hold for the
+These are the four pairs of body type and head shown at the gate; `digests.json` holds the same figures for the build to check. The digests hold for the
 versions named above: another numpy may add in another order, and the last
 bit of a position can then land on the other side of a rounding.
 
@@ -100,7 +103,7 @@ to the step after the gate.
 
 A region belongs to a vertex of MakeHuman's fixed topology, so one stored
 labelling serves every body shape. `regions.json` is that labelling. It was
-made by `regionrules.py` on the posed candidate `detail2` — planes and
+made by `regionrules.py` on the posed candidate `athletisch-a` — planes and
 distances at the joints, the dominant bone of each vertex — and is read, never
 recomputed, by an ordinary build.
 
@@ -111,7 +114,41 @@ Two things are secured there, because the proof lost them:
   `refine-body.mjs` handed its 688 triangles to the neighbours as a stray
   patch. The neck rule now keeps it connected, and `build.py` stops when
   `refine-body.mjs` hands back any piece of 100 triangles or more.
-- **Hands and feet are inert** from the wrist and the ankle on.
+- **Hands and feet are inert** from the wrist and the ankle on. They are
+  small beside an unthinned head, and `refine-body.mjs` would hand them to
+  the forearms and calves as strays of `none`; the build passes
+  `--straymax 150`, above which no piece is a stray.
+
+## The candidates
+
+Three body types after the guide (§4.2) and two heads:
+
+| | muscle | weight | head |
+|---|---|---|---|
+| `schlank-a` | 1.0 | 0.25 | A |
+| `athletisch-a` | 0.9 | 0.35 | A |
+| `athletisch-b` | 0.9 | 0.35 | B |
+| `kraeftig-a` | 1.0 | 0.45 | A |
+
+- **Head A** is MakeHuman's head with the eye sockets closed: the pocket
+  behind each pair of lids is turned inside out into a calm eyeball
+  (`fill_eyes`). **Head B** is the same head softened to a mannequin's
+  (`smooth_face`): the cavities of mouth and nostrils are closed, the skin of
+  the face is smoothed without shrinking, skull, jaw and ears stay.
+- **The pose** is the guide's: upper arms 20° from the trunk, elbows bent
+  (20° at the joints, which reads as 8° on the arm), palms to the thighs,
+  fingers together and lightly curled, the thumb laid on, legs nearly
+  straight, toes 8° out.
+- **The relief** is MakeHuman's own: the difference between the body at full
+  and at average muscle, high-passed so that the bulk goes and the lines
+  stay, added three and a half times and bounded softly at 9 mm. The guide
+  names 2–6 mm for a groove; at that depth nothing reads at the size of the
+  app, and without a bound the sharpest lines of the data become creases of
+  two centimetres.
+- **The triangles**: the muscle regions are subdivided once (Catmull-Clark),
+  hands and feet are thinned to half by a quadric edge collapse, the head is
+  left as it is — a face with half its triangles shows them as flat panels.
+  About 47,700 triangles, 30 % of them in the inert zone, 672 KB.
 
 ## What changed against the scripts of the reference page
 
@@ -133,7 +170,7 @@ Two things are secured there, because the proof lost them:
 
 ```sh
 npx vite --port 5173 &
-node tools/body/render.mjs tools/body/out/detail2.glb /tmp/detail2.png \
+node tools/body/render.mjs tools/body/out/athletisch-a.glb /tmp/athletisch-a.png \
   '{"views":[{"yaw":0},{"yaw":90},{"yaw":180},{"yaw":35}],"bg":"#22222c","w":330,"h":640}'
 ```
 

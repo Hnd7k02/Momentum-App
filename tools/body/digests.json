@@ -1,26 +1,18 @@
 {
-  "base": {
-    "bytes": 609244,
-    "sha256": "879bfed403122a1ada82c407f8c189275b8639cab11c4447a193fe3069a39025"
+  "athletisch-a": {
+    "bytes": 672068,
+    "sha256": "c0ff91b8b1b9da5b94cf787db566077f6a308dd74efad07c9dfcdb12824ab775"
   },
-  "plain": {
-    "bytes": 609244,
-    "sha256": "53cced428dec185e8fba19d0e09f96720b8cbfcde1aff2c3c2cf49d99fffde1d"
+  "athletisch-b": {
+    "bytes": 672068,
+    "sha256": "11110125ac39c5e457359d32a2d71dcff9faea7a8e77998c527199642ed23838"
   },
-  "detail2": {
-    "bytes": 608712,
-    "sha256": "430ee2438b7085f834f0dce3acaf8fe9c4345f605c8a534a02a8d68ceeab2b04"
+  "schlank-a": {
+    "bytes": 671392,
+    "sha256": "39cdf914f26ad280ca72b4896c0550bdc98110de19d0a7ada8eb9d41c276b9d8"
   },
-  "detail4": {
-    "bytes": 611764,
-    "sha256": "5a1dc3877ff785bab0a8cf37e27acaaee1f4c4b6456a6d5dfcc2f07f0080d1f9"
-  },
-  "detail2u": {
-    "bytes": 608940,
-    "sha256": "eeef48a78a31d4e45f9c7c9e328897ec326c63c3fc5d002e89da46f8fe482231"
-  },
-  "detail3": {
-    "bytes": 610276,
-    "sha256": "5504cc90534621f72798fd82c15f657acf2b74ab03cd1db164f4d6d20422c862"
+  "kraeftig-a": {
+    "bytes": 672320,
+    "sha256": "da1b39da37a74550448f9ef9a2b4735375eae52a5ee3607a0a02e111e6f21ea4"
   }
 }

@@ -1,20 +1,20 @@
 {
-  "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named.",
-  "base": {
+  "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named. '_base' holds what they share and is not built itself; the four entries below it are the pairs of body type and head shown at the gate of block 7A.",
+  "_base": {
     "height": 1.78,
     "macro": { "gender": 1.0, "age": 0.5, "muscle": 0.9, "weight": 0.35, "proportions": 1.0, "height": 0.5 },
     "local": {
       "hands/l-hand-fingers-distance-decr": 1.0,
       "hands/r-hand-fingers-distance-decr": 1.0
     },
+    "head": "A",
     "pose": { "arm": 20, "armfwd": 2, "elbow": 20, "palm": 0, "fingers": 20, "spread": 0.9, "thumb": 28, "clavicle": 4, "leg": 3.5, "shin": 1.5, "toes": 8 },
-    "relief": {},
+    "relief": { "muscle_detail": 3.5, "limit_mm": 9 },
     "inert_share": 0.5,
-    "refine": { "cavity": 0.8, "ao": 0.5 }
+    "refine": { "cavity": 0.8, "ao": 0.5, "straymax": 150 }
   },
-  "plain": { "like": "base" },
-  "detail2": { "like": "base", "relief": { "muscle_detail": 2.0 } },
-  "detail4": { "like": "base", "relief": { "muscle_detail": 4.0 } },
-  "detail2u": { "like": "base", "relief": { "muscle_detail": 2.0, "unsharp": 0.6 } },
-  "detail3": { "like": "base", "relief": { "muscle_detail": 3.0 } }
+  "athletisch-a": { "like": "_base" },
+  "athletisch-b": { "like": "_base", "head": "B", "head_smoothing": { "pairs": 140 } },
+  "schlank-a": { "like": "_base", "macro": { "muscle": 1.0, "weight": 0.25 } },
+  "kraeftig-a": { "like": "_base", "macro": { "muscle": 1.0, "weight": 0.45 } }
 }

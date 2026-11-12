@@ -954,7 +954,17 @@ merged; **in progress, runs up to its gate and stops there**)
     unchecked. One finding for the gate: the guide's window for the
     shoulder breadth (25–30 % H) is too low for a bideltoid breadth — ANSUR
     II's mean is 29.0 %.
-  - [ ] Step 4 — the candidates
+  - [x] Step 4 — the candidates: `schlank-a`, `athletisch-a`,
+    `athletisch-b`, `kraeftig-a` (three body types of the guide, head A
+    natural with closed eye sockets, head B softened to a mannequin's). Each
+    about 47,700 triangles, 30 % in the inert zone, 672 KB, closed, byte
+    for byte the same on a second build. Measured: `athletisch` meets 14 of
+    14 targets, `schlank` 13 (crotch 49.2 %), `kraeftig` 13 (shoulder
+    breadth 30.3 % against the guide's 30 %). The relief is MakeHuman's own
+    muscle detail in multiples, bounded at 9 mm — deeper than the guide's
+    2–6 mm, because that depth does not read at the size of the app.
+    `refine-body.mjs` got a second, small change: `--straymax`, without
+    which hands and feet are handed away beside an unthinned head.
   - [ ] Step 5 — light, material, tone mapping (on a candidate, in
     `#/dev/body` only)
   - [ ] Step 6 — the gate: the comparison sheet, the checklist, STOP

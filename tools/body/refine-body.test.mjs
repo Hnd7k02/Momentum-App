@@ -304,6 +304,18 @@ describe('refine-body.mjs — stray patches', () => {
     expect(chestOnTheBack(gone.result)).toBe(0);
   });
 
+  it('never hands back a piece of --straymax triangles or more, however small its share', () => {
+    const labels = paint(body, 0.42);
+    const island = chestOnTheBack({ ...body, labels });
+
+    const kept = refine('stray-max-kept', body, labels, ['--straymax', String(island)]);
+    expect(chestOnTheBack(kept.result)).toBeGreaterThan(island * 0.6);
+    expect(kept.log).toMatch(/stray patches handed back: 0 /);
+
+    const gone = refine('stray-max-gone', body, labels, ['--straymax', String(island + 1)]);
+    expect(chestOnTheBack(gone.result)).toBe(0);
+  });
+
   it('leaves two equal pieces of one region alone — a left and a right arm', () => {
     const labels = paint(body);
     const { result, log } = refine('stray-two-sides', body, labels);

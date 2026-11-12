@@ -68,9 +68,26 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     macro, local = spec.get('macro', {}), spec.get('local', {})
     V, applied = B.shape(base, macro, local)
 
+    # The head, before anything moves: 'A' is natural with a calm eyeball,
+    # 'B' a mannequin's, its features smoothed away; 'raw' is MakeHuman's own.
+    head = spec.get('head', 'A')
+    if head in ('A', 'B'):
+        V = B.fill_eyes(base, V)
+    if head == 'B':
+        V = B.smooth_face(base, V, **spec.get('head_smoothing', {}))
+
     relief = spec.get('relief', {})
     if relief.get('muscle_detail'):
-        V = V + relief['muscle_detail'] * B.muscle_detail(base, macro, local, relief.get('muscle_detail_scale', 10))
+        # MakeHuman's own muscle lines, in multiples — and no deeper than the
+        # guide allows a groove to be. Unbounded, the few sharpest lines of the
+        # data (above the buttocks, along the hip) become creases of two
+        # centimetres while the rest has hardly begun to show.
+        moved = relief['muscle_detail'] * B.muscle_detail(base, macro, local, relief.get('muscle_detail_scale', 10))
+        limit = relief.get('limit_mm', 0) / 100.0            # the base mesh counts in decimetres
+        if limit:
+            size = np.linalg.norm(moved, axis=1)
+            moved = moved * (limit * np.tanh(size / limit) / np.maximum(size, 1e-12))[:, None]
+        V = V + moved
 
     posed = B.pose(base, V, **spec.get('pose', {}))
     Vp = posed.skin()
@@ -92,8 +109,15 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         ps = labels[list(parents[i])]
         vertex_region[i] = np.bincount(ps).argmax()
     if spec.get('inert_share', 1.0) < 1.0:
+        # Hands and feet are thinned; the head is not. A face with half its
+        # triangles shows them as flat panels, close up and in the silhouette.
         before = int((tri_labels == B.NONE).sum())
-        P, tris, tri_labels, kept = B.decimate(P, tris, tri_labels, B.NONE, spec['inert_share'])
+        HEAD = len(B.REGIONS)
+        centre_y = P[tris].mean(axis=1)[:, 1]
+        part = tri_labels.copy()
+        part[(tri_labels == B.NONE) & (centre_y > 0.78 * P[:, 1].max())] = HEAD
+        P, tris, part, kept = B.decimate(P, tris, part, B.NONE, spec['inert_share'])
+        tri_labels = np.where(part == HEAD, B.NONE, part)
         vertex_region = vertex_region[kept]
         say(f'inert zone: {before} → {int((tri_labels == B.NONE).sum())} triangles')
     muscle = np.zeros(len(P), dtype=bool)
@@ -148,7 +172,7 @@ def load_digests():
 
 def resolve(candidates, name):
     """A candidate with everything it takes over from the one it is 'like'."""
-    if name not in candidates or name.startswith('_'):
+    if name not in candidates or name == '_about':
         known = ', '.join(key for key in candidates if not key.startswith('_'))
         raise SystemExit(f'unknown candidate {name}; known: {known}')
     spec = candidates[name]

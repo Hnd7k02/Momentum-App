@@ -167,6 +167,183 @@ def joint(base: Base, V, name: str):
     return V[base.vertex_groups[name]].mean(axis=0)
 
 
+# ── the head ──────────────────────────────────────────────────────────────────
+
+def _base_normals(base: Base, V):
+    quads = base.body_quads
+    tris = np.concatenate([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]])
+    normals = np.zeros_like(V)
+    face = np.cross(V[tris[:, 1]] - V[tris[:, 0]], V[tris[:, 2]] - V[tris[:, 0]])
+    for corner in range(3):
+        np.add.at(normals, tris[:, corner], face)
+    return normals / np.maximum(np.linalg.norm(normals, axis=1, keepdims=True), 1e-12)
+
+
+def _base_neighbours(base: Base, n):
+    neighbours = [set() for _ in range(n)]
+    for quad in base.body_quads:
+        for k in range(4):
+            a, b = int(quad[k]), int(quad[(k + 1) % 4])
+            neighbours[a].add(b)
+            neighbours[b].add(a)
+    return neighbours
+
+
+def fill_eyes(base: Base, V):
+    """Close the eye sockets with a calm eyeball, as a statue has it.
+
+    The body mesh has no eyes: behind each pair of lids it has a pocket that
+    holds MakeHuman's separate eyeball, and without the eyeball one looks into
+    a dark slit. The pocket is turned inside out here. Its bottom, behind the
+    eye, becomes the front of the eyeball; its rim at the lids stays where it
+    is. No vertex is added and no face changes, so every target and every
+    region still refers to the same indices.
+    """
+    V = V.copy()
+    normals = _base_normals(base, V)
+    neighbours = _base_neighbours(base, len(V))
+    body = set(int(i) for i in base.body_vertices)
+    BINS = 24
+    for side in ('l', 'r'):
+        centre = joint(base, V, f'joint-{side}-eye')
+        eyeball = np.linalg.norm(V[base.vertex_groups[f'helper-{side}-eye']] - centre, axis=1).max()
+        near = [i for i in body if np.linalg.norm(V[i] - centre) < 1.5 * eyeball]
+        towards = {i for i in near
+                   if np.dot(normals[i], _unit(centre - V[i])) > 0.3}
+        # The pocket is what can be reached from its bottom without crossing a lid.
+        start = min(towards, key=lambda i: V[i][2])
+        pocket, stack = {start}, [start]
+        while stack:
+            for j in neighbours[stack.pop()]:
+                if j in towards and j not in pocket:
+                    pocket.add(j)
+                    stack.append(j)
+        index = np.array(sorted(pocket))
+        rel = V[index] - centre
+        dist = np.linalg.norm(rel, axis=1)
+        polar = np.arccos(np.clip(rel[:, 2] / dist, -1, 1))        # 0 at the front of the eye
+        around = np.arctan2(rel[:, 1], rel[:, 0])
+        bins = np.floor((around + math.pi) / (2 * math.pi) * BINS).astype(int) % BINS
+        rim_polar = np.full(BINS, np.nan)
+        rim_dist = np.full(BINS, np.nan)
+        for b in range(BINS):
+            here = np.where(bins == b)[0]
+            if len(here):
+                k = here[polar[here].argmin()]
+                rim_polar[b], rim_dist[b] = polar[k], dist[k]
+        known = np.where(~np.isnan(rim_polar))[0]
+        for b in range(BINS):                                       # an empty sector takes its neighbours'
+            if np.isnan(rim_polar[b]):
+                nearest = known[np.argmin(np.minimum((known - b) % BINS, (b - known) % BINS))]
+                rim_polar[b], rim_dist[b] = rim_polar[nearest], rim_dist[nearest]
+        # The rim, smooth around the eye: each sector between its two neighbours.
+        position = (around + math.pi) / (2 * math.pi) * BINS - 0.5
+        lower = np.floor(position).astype(int) % BINS
+        upper = (lower + 1) % BINS
+        t = position - np.floor(position)
+        rim_p = (1 - t) * rim_polar[lower] + t * rim_polar[upper]
+        rim_d = (1 - t) * rim_dist[lower] + t * rim_dist[upper]
+        deepest = polar.max()
+        share = np.clip((deepest - polar) / np.maximum(deepest - rim_p, 1e-9), 0, 1)   # 1 at the rim, 0 at the bottom
+        new_polar = rim_p * share
+        new_dist = rim_d * share + eyeball * (1 - share)
+        moved = share < 0.999
+        target = centre + np.c_[np.sin(new_polar) * np.cos(around), np.sin(new_polar) * np.sin(around),
+                                np.cos(new_polar)] * new_dist[:, None]
+        V[index[moved]] = target[moved]
+        # Two rounds of smoothing, the rim held: the sectors leave no steps.
+        free = [int(i) for i in index[moved]]
+        for _ in range(2):
+            V[free] = np.array([0.5 * V[i] + 0.5 * np.mean([V[j] for j in neighbours[i]], axis=0) for i in free])
+    return V
+
+
+def smooth_face(base: Base, V, pairs=14, strength=1.0):
+    """The mannequin's head: the skull and the jaw stay, the features go soft.
+
+    Three steps. The cavities of the mouth and the nostrils are found first —
+    a vertex whose own normal runs into the head again within three
+    centimetres lies inside one. The skin of the face is then smoothed without
+    them, by Taubin's pairs of steps, which do not shrink the head; the
+    smoothing fades out towards the ears, the crown and the throat. Last, each
+    cavity is drawn tight across its own rim, so that nothing of it shows
+    through the softened lips or nose.
+    """
+    V = V.copy()
+    neighbours = _base_neighbours(base, len(V))
+    head = set()
+    for name, pairs_ in base.weights.items():
+        if bone_segment(name.split('.')[0]) != 'head' or not pairs_:
+            continue
+        for index, weight in pairs_:
+            if weight > 0.5:
+                head.add(int(index))
+    head &= set(int(i) for i in base.body_vertices)
+    eye = joint(base, V, 'joint-l-eye')
+    top = max(V[i][1] for i in head)
+    chin = min(V[i][1] for i in head if V[i][2] > eye[2] - 0.3 and abs(V[i][0]) < 0.2)
+    size = top - chin
+
+    # The cavities: below the eyes and near the middle, a normal that meets the head again.
+    normals = _base_normals(base, V)
+    quads = np.array([q for q in base.body_quads if all(int(v) in head for v in q)])
+    tris = np.concatenate([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]])
+    A, e1, e2 = V[tris[:, 0]], V[tris[:, 1]] - V[tris[:, 0]], V[tris[:, 2]] - V[tris[:, 0]]
+    hidden = set()
+    for i in sorted(head):
+        x, y, z = V[i]
+        if abs(x) > 0.38 or y > eye[1] - 0.12 or z < eye[2] - 0.45:
+            continue
+        d = normals[i]
+        o = V[i] + 0.003 * d
+        h = np.cross(d, e2)
+        det = (e1 * h).sum(axis=1)
+        ok = np.abs(det) > 1e-12
+        det = np.where(ok, det, 1.0)
+        sv = o - A
+        u = (sv * h).sum(axis=1) / det
+        q = np.cross(sv, e1)
+        v = (q @ d) / det
+        t = (e2 * q).sum(axis=1) / det
+        if (ok & (u >= 0) & (v >= 0) & (u + v <= 1) & (t > 1e-4) & (t < 0.3)).any():
+            hidden.add(i)
+
+    weight = np.zeros(len(V))
+    for i in head:
+        x, y, z = V[i]
+        front = np.clip((z - (eye[2] - 0.75)) / 0.3, 0, 1)                 # fades out before the ears
+        below = np.clip((top - 0.10 * size - y) / (0.12 * size), 0, 1)     # the crown keeps its shape
+        above = np.clip((y - (chin - 0.10 * size)) / (0.15 * size), 0, 1)  # the throat is not the face
+        weight[i] = strength * front * below * above
+    # A vertex on a cavity's rim with fewer than three neighbours on the skin
+    # would be smoothed between those two alone — and its twin across the rim
+    # with it, onto the same spot. It goes with the cavity instead.
+    grew = True
+    while grew:
+        grew = False
+        for i in sorted(head):
+            if i not in hidden and weight[i] > 0 and any(j in hidden for j in neighbours[i]) \
+                    and sum(1 for j in neighbours[i] if j not in hidden) < 3:
+                hidden.add(i)
+                grew = True
+    skin = [i for i in sorted(head) if weight[i] > 0 and i not in hidden]
+    skin_neighbours = {i: [j for j in neighbours[i] if j not in hidden] for i in skin}
+    for _ in range(pairs):
+        for factor in (0.5, -0.53):
+            mean = np.array([np.mean([V[j] for j in skin_neighbours[i]], axis=0) if skin_neighbours[i] else V[i]
+                             for i in skin])
+            V[skin] += factor * weight[skin][:, None] * (mean - V[skin])
+    # Drawn tight, but not flat: three tenths of each cavity's depth stay, inside
+    # the head. Drawn quite flat its faces lose their area, refine-body.mjs
+    # drops them, and the body is no longer closed.
+    inside = sorted(hidden)
+    before = V[inside].copy()
+    for _ in range(300):
+        V[inside] = np.array([np.mean([V[j] for j in neighbours[i]], axis=0) for i in inside])
+    V[inside] = 0.7 * V[inside] + 0.3 * before
+    return V
+
+
 # ── pose ──────────────────────────────────────────────────────────────────────
 
 def _unit(v):
