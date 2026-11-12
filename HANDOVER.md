@@ -998,6 +998,14 @@ merged; **in progress, runs up to its gate and stops there**)
     What follows depends on the answer — the owner picks a pair (step 7a),
     a pair with up to three corrections (one more round, a new sheet), or
     none (step 7b: stage 1 on today's model). D165 gets the outcome then.
+    **Checked at the gate, against the baseline below:** `tsc -b` 0;
+    `npm run test` exit 0, 112 files, 1801 tests (the fifteen new ones are
+    the pipeline's); the build with the validator, `index.js` 507.25 kB for
+    507.06; all 37 browser suites, 36 green, 4075 of 4076 checks, the one
+    red being the offline check of `release-proof.mjs` as before;
+    `gym-muscles` 73/73, `body-reach` 3/3, `farbregeln` 319/319, `body`
+    39/39, each alone. `git diff fec6d5c -- .github/fixtures src/core
+    src/storage` is empty.
     A read-only review of the block's diff (four readers on Sonnet, each
     finding checked by a refuter) found nothing in the viewer and nothing
     in the pipeline; it found three defects in the measuring script (the
