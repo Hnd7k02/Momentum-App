@@ -908,8 +908,28 @@ owner's acceptance on his iPhone**)
   (D163). It starts empty — the owner imports his backup there.
 
 **WP3 Block 7A — the body model** (branch `claude/momentum-wp3`, not
-merged; **production paused by the owner — a second sheet with two more
-corrections is with him; the app still ships the body of STOP 7A**)
+merged; **production of the second sheet's candidate is running — see
+"The owner's word" just below**)
+- **The owner's word on the second sheet (2026-11-13, 00:45 Zurich).** After
+  the sheet was reported he wrote that he is going to sleep and that the
+  session is **not to stop until the task is done**, restarting itself at
+  04:30 Zurich if the usage limit cuts it (a message is scheduled for
+  then). He did not answer the sheet's three questions. That is read as
+  his go-ahead: **production runs with the sheet's recommendations** —
+  relief bounded at 4 mm (A), the nipples smoothed away and the navel a
+  soft hollow, the arms as shown. `gate-2-b` (6 mm) and the body of STOP 7A
+  (`stop-7a`) stay in `candidates.json` and can be built and installed
+  with one command each, should he decide otherwise in the morning; the
+  commit before production is `2215a51`. The steps, ticked as they are
+  done:
+  - [ ] `gate-2` becomes `momentum-body`: `candidates.json`, `build.py
+    momentum-body --record --install`, the table in `muscleMeshMap.ts`,
+    the still on the Gym card
+  - [ ] the closing run: `tsc -b`, `npm run test`, the build with the
+    validator, the four 3D suites one at a time, then every suite
+  - [ ] the record (README, MEASURES, deviations, D165's outcome), the
+    preview in `Momentum-preview`
+  - [ ] STOP 7A anew
 - **Where it stands now (2026-11-12, after STOP 7A).** The owner added two
   corrections to the gate and stopped production until he has seen them
   (D165, "After the gate"): *2b* the surface — no folds at collarbone,
