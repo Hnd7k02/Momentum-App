@@ -53,10 +53,8 @@ and two thirds of its triangles in head, hands and feet.
 ## The four candidates of the gate
 
 Measured on 12 November 2026, by the same script, as they were shown. The
-body the app ships is `athletisch-a` after the owner's three corrections; its
-measures are the same, and `tools/validate-body-glb.mjs` holds eleven of them
-on every build — all but knee height, crotch height and shoulder breadth,
-whose targets are still to be checked at their source.
+body the app ships is `athletisch-a` after the owner's three corrections; it
+is measured in the next section.
 
 | measure | target | schlank-a | athletisch-a | athletisch-b | kraeftig-a |
 |---|---|---|---|---|---|
@@ -85,6 +83,44 @@ whose targets are still to be checked at their source.
 All four: hand, sole, crown and face are `none`; the ridge between neck and
 shoulder, and the same slope from the front, are `back`; the outside of the
 thigh is `quadriceps`.
+
+## The body the app ships
+
+`public/models/momentum-body.glb`, measured on 12 November 2026:
+`athletisch-a` with the straight cuts at neck, wrists and ankles, the
+collarbone redrawn, and built 1.75 m tall like the body it replaced. Every
+measure is a share of the height, so the candidate's figures stand; the
+largest mirrored distance is 0.6 mm for 0.1 mm, which is the cuts — each
+side is cut along its own plane.
+
+| measure | target | the shipped body | held by the validator |
+|---|---|---|---|
+| Height | — | 1.750 m | |
+| Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | yes |
+| Shoulder height (acromion) | 80.0–83.0 % | 82.8 % ✓ | yes |
+| Knee height (joint line) | 27.0–30.0 % | 29.9 % ✓ | no — target not checked at its source |
+| Crotch height | 45.0–49.0 % | 49.0 % ✓ | no — target not checked at its source |
+| Upper arm | 16.7–20.5 % | 18.3 % ✓ | yes |
+| Forearm | 13.1–16.1 % | 15.2 % ✓ | yes |
+| Hand | 9.7–11.9 % | 10.8 % ✓ | yes |
+| Foot length | 14.5–16.0 % | 14.9 % ✓ | yes |
+| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.6 % ✓ | no — the window is to become 27–32 % once checked at its source (D165) |
+| Neck width to head width | 0.75–0.90 | 0.79 ✓ | yes |
+| Symmetry (largest mirrored distance) | ≤ 2 mm | 0.6 mm ✓ | yes |
+| Upper arm away from the trunk | 15–25° | 21.1° ✓ | yes |
+| Elbow bend | 5–15° | 7.7° ✓ | yes |
+| Toes turned out | 5–10° | 6.4° ✓ | yes |
+| Met | of 14 | 14 | 11 held |
+| Triangles | ≤ 80,000 | 49,988 | yes |
+| Inert zone | 25–35 % | 33 % | |
+| Smallest group | ≥ 400 | 1,642 (triceps) | yes |
+| File | ≤ 700 KB | 688 KB | yes |
+| Closed surface | yes | yes | yes |
+
+Hand, sole, crown and face are `none`; the ridge between neck and shoulder,
+and the same slope from the front, are `back`; the outside of the thigh is
+`quadriceps`. `tools/body/checkpoints.mjs` asks 33 such places on every
+build.
 
 ## What the targets were checked against
 

@@ -649,25 +649,36 @@ for (const width of WIDTHS) {
 /**
  * The zones a picture of the body is read in, as shares of the frame: the
  * middle sixth of its width — the trunk and the legs, without the
- * shoulders, arms and hands beside them — and three bands of its height.
- * From the front they are the chest, the quadriceps and the calves; from
- * the back the upper back, the hamstrings and the calves.
+ * shoulders, arms and hands beside them — and four bands of its height.
+ * From the front they are the chest, the quadriceps, the calves and the
+ * feet; from the back the upper back, the hamstrings, the calves and the
+ * heels. The feet are the inert zone (D166): no state ever reaches them.
  */
-const ZONES = { upper: [0.26, 0.36], thigh: [0.5, 0.68], calf: [0.72, 0.84] };
+const ZONES = { upper: [0.26, 0.36], thigh: [0.5, 0.68], calf: [0.72, 0.84], foot: [0.86, 0.9] };
 const ZONE_X = [0.42, 0.58];
+/**
+ * The card behind the body, as a lightness. The Gym card reads L* 10; the
+ * darkest tone of the body, an untrained muscle in its own shadow, stays
+ * above 23 under the light of D165 — which has no tone mapping, so a held
+ * muscle is no longer one flat white and an untrained one no longer one
+ * flat grey. What a tone *is* is therefore read as the median of a zone,
+ * never as a share of pixels above a fixed lightness.
+ */
+const CARD = 20;
 
 /**
  * The picture of the body as numbers (contract §7, §8). Every pixel that is
- * not the dark card is classified in CIELAB: green or red by its a*, white
- * by its lightness, dimmed below it. With a second picture from the same
- * angle, each zone reports how the lit pixels of the two differ: the share
- * that moved by more than 3 ΔE, and the median — over **all** lit pixels
- * of the zone, moved or not — of the difference and of its three parts:
- * lightness (dL), green–red (dA) and blue–yellow (dB). Read from the PNG
- * the suite saves, so what is measured is what is shown.
+ * neither the dark card nor under the view buttons is the body; over the
+ * whole figure it is counted as green or red by its a*. Each zone reports
+ * its tone — the median L*, a* and b* of its lit pixels. With a second
+ * picture from the same angle, each zone also reports how the lit pixels of
+ * the two differ: the share that moved by more than 3 ΔE, and the median —
+ * over **all** lit pixels of the zone, moved or not — of the difference and
+ * of its three parts: lightness (dL), green–red (dA) and blue–yellow (dB).
+ * Read from the PNG the suite saves, so what is measured is what is shown.
  */
-const readBody = (page, png, against = null) =>
-  page.evaluate(async ({ png, against, zones, zoneX }) => {
+const readBody = (page, png, controls, against = null) =>
+  page.evaluate(async ({ png, against, zones, zoneX, card, controls }) => {
     const load = async (b64) => {
       const img = new Image();
       img.src = `data:image/png;base64,${b64}`;
@@ -692,55 +703,63 @@ const readBody = (page, png, against = null) =>
     const round = (v) => (v === null ? null : Math.round(v * 10) / 10);
 
     const a = await load(png);
-    const count = { body: 0, green: 0, red: 0, white: 0, dimmed: 0 };
+    // The view buttons stand over the top of the stage and are not the body.
+    const under = (x, y) => controls !== null
+      && x >= controls[0] * a.w && x <= controls[2] * a.w && y >= controls[1] * a.h && y <= controls[3] * a.h;
+    const count = { body: 0, green: 0, red: 0 };
     let lightness = 0;
     for (let y = 0; y < a.h; y += 2) {
       for (let x = 0; x < a.w; x += 2) {
+        if (under(x, y)) continue;
         const i = (y * a.w + x) * 4;
         const [L, A] = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
-        if (L < 45) continue; // the card behind the body
+        if (L < card) continue; // the card behind the body
         count.body += 1;
         lightness += L;
         if (A < -5) count.green += 1;
         else if (A > 5) count.red += 1;
-        else if (L > 88) count.white += 1;
-        else if (L < 80) count.dimmed += 1;
       }
     }
     const share = (n, of) => Math.round((n / Math.max(1, of)) * 1000) / 1000;
-    const out = {
+    const b = against ? await load(against) : null;
+    const sameFrame = b === null ? null : b.w === a.w && b.h === a.h;
+    const result = {
       body: count.body, green: share(count.green, count.body), red: share(count.red, count.body),
-      white: share(count.white, count.body), dimmed: share(count.dimmed, count.body),
       lightness: round(lightness / Math.max(1, count.body)),
+      ...(sameFrame === null ? {} : { sameFrame }),
     };
-    if (!against) return out;
-
-    const b = await load(against);
-    if (b.w !== a.w || b.h !== a.h) return { ...out, sameFrame: false };
-    const result = { ...out, sameFrame: true };
     for (const [name, [from, to]] of Object.entries(zones)) {
+      const L = [], A = [], B = [];
       const dE = [], dL = [], dA = [], dB = [];
       let moved = 0;
       for (let y = Math.round(a.h * from); y < Math.round(a.h * to); y += 2) {
         for (let x = Math.round(a.w * zoneX[0]); x < Math.round(a.w * zoneX[1]); x += 2) {
           const i = (y * a.w + x) * 4;
           const p = lab(a.data[i], a.data[i + 1], a.data[i + 2]);
+          if (p[0] < card) continue;
+          L.push(p[0]); A.push(p[1]); B.push(p[2]);
+          if (!sameFrame) continue;
           const q = lab(b.data[i], b.data[i + 1], b.data[i + 2]);
-          if (p[0] < 45 || q[0] < 45) continue; // lit body in both pictures
+          if (q[0] < card) continue; // lit body in both pictures
           const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
           dE.push(d); dL.push(p[0] - q[0]); dA.push(p[1] - q[1]); dB.push(p[2] - q[2]);
           if (d > 3) moved += 1;
         }
       }
-      result[name] = { pixels: dE.length, moved: share(moved, dE.length), dE: round(median(dE)), dL: round(median(dL)), dA: round(median(dA)), dB: round(median(dB)) };
+      result[name] = {
+        lit: L.length, L: round(median(L)), a: round(median(A)), b: round(median(B)),
+        ...(sameFrame ? { pixels: dE.length, moved: share(moved, dE.length), dE: round(median(dE)), dL: round(median(dL)), dA: round(median(dA)), dB: round(median(dB)) } : {}),
+      };
     }
     return result;
-  }, { png: png.toString('base64'), against: against ? against.toString('base64') : null, zones: ZONES, zoneX: ZONE_X });
+  }, { png: png.toString('base64'), against: against ? against.toString('base64') : null, zones: ZONES, zoneX: ZONE_X, card: CARD, controls });
 
 if (process.env.NO_BODY) {
   console.log('NO_BODY: the pictures of the body and their pixel checks were skipped.');
 } else {
   const pictures = {};
+  /** Where the view buttons stand in a picture, as shares of its frame. */
+  const controls = {};
   /**
    * A picture of the body once it stands still: the tints ease in and a
    * turn coasts, and the viewer has no "settled" signal, so the frame is
@@ -762,6 +781,10 @@ if (process.env.NO_BODY) {
     check(`body ${name}: the picture was taken of a body that stands still`, still);
     writeFileSync(`${OUT}/koerper-${name}.png`, frame);
     pictures[name] = frame;
+    const views = await page.locator('.body-viewer__views').first().boundingBox();
+    controls[name] = views
+      ? [(views.x - box.x) / box.width, (views.y - box.y) / box.height, (views.x + views.width - box.x) / box.width, (views.y + views.height - box.y) / box.height]
+      : null;
   };
   const turn = async (page, label) => {
     await page.getByRole('button', { name: label, exact: true }).click();
@@ -797,26 +820,52 @@ if (process.env.NO_BODY) {
   const have = NEEDED.every((name) => pictures[name]);
   check('body: every picture was taken', have && probe !== null, Object.keys(pictures).join(', '));
   if (have && probe) {
-    const read = (name, against = null) => readBody(probe.page, pictures[name], against ? pictures[against] : null);
-    const empty = await read('leer-vorne');
+    const read = (name, against = null) => readBody(probe.page, pictures[name], controls[name], against ? pictures[against] : null);
+    const empty = await read('leer-vorne', 'gehalten-vorne');
     const held = await read('gehalten-vorne');
+    const heldBack = await read('gehalten-hinten');
     const edge = await read('schwelle-vorne', 'gehalten-vorne');
     const edgeBack = await read('schwelle-hinten', 'gehalten-hinten');
     const mixed = await read('gemischt-vorne', 'gehalten-vorne');
     const mixedBack = await read('gemischt-hinten', 'gehalten-hinten');
-    console.log('\n[the body, in numbers]', JSON.stringify({ empty, held, edge, edgeBack, mixed, mixedBack }));
+    console.log('\n[the body, in numbers]', JSON.stringify({ empty, held, heldBack, edge, edgeBack, mixed, mixedBack }));
 
-    check('body, no data: a quiet grey figure — dimmed, with no white and no colour',
-      empty.body > 3000 && empty.dimmed >= 0.6 && empty.white <= 0.08 && empty.green + empty.red <= 0.01, short(empty));
+    // The three tones, read where they stand (D161, D165, D166). Under the
+    // light of D165 a held muscle reads L* 68–86 by where the light falls, an
+    // untrained one 38–50 and the inert feet 68–72; the limits below leave
+    // each of them room and keep the three apart.
+    const same = (a) => a.sameFrame === true;
+    const MUSCLES = ['upper', 'thigh', 'calf'];
+    const tones = (picture) => short(Object.fromEntries([...MUSCLES, 'foot'].map((zone) => [zone, [picture[zone].L, picture[zone].a]])));
+    const neutral = (zone) => zone.lit >= 100 && Math.abs(zone.a) <= 3;
+    check('body, no data: a quiet grey figure — chest, thighs and calves in the dimmed tone, and no colour',
+      empty.body > 3000 && MUSCLES.every((zone) => neutral(empty[zone]) && empty[zone].L <= 58) && empty.green + empty.red <= 0.01,
+      `${tones(empty)} · green ${empty.green}, red ${empty.red}`);
     check('body, held only: white — a trained muscle with no change — and no colour at all',
-      held.body > 3000 && held.white >= 0.45 && held.green + held.red <= 0.01, short(held));
-    check('body: an untrained figure is clearly darker than a held one',
-      held.lightness - empty.lightness >= 8 && held.white >= empty.white + 0.4, `held L ${held.lightness}, empty L ${empty.lightness}`);
+      held.body > 3000 && MUSCLES.every((zone) => neutral(held[zone]) && held[zone].L >= 62) && held.green + held.red <= 0.01,
+      `${tones(held)} · green ${held.green}, red ${held.red}`);
+    check('body, held only, from the back: the back, the hamstrings and the calves are white there too',
+      heldBack.body > 3000 && MUSCLES.every((zone) => neutral(heldBack[zone]) && heldBack[zone].L >= 62) && heldBack.green + heldBack.red <= 0.01,
+      `${tones(heldBack)} · green ${heldBack.green}, red ${heldBack.red}`);
+    check('body: an untrained muscle is clearly darker than the same muscle held — every zone, pixel for pixel, by 20 L* and more',
+      same(empty) && MUSCLES.every((zone) => empty[zone].pixels >= 100 && empty[zone].moved >= 0.9 && empty[zone].dL <= -20),
+      short(Object.fromEntries(MUSCLES.map((zone) => [zone, empty[zone].dL]))));
+    // The two pictures are not laid over each other pixel for pixel here: a
+    // page with nothing coloured has no row of states under the figure, and
+    // its stage stands one CSS pixel apart, so the outline of the feet
+    // differs. Their tone is compared instead — a tint or the dimmed tone
+    // on the feet would move it by far more than these limits.
+    check('body, the inert zone (D166): the feet take no state — one tone in the untrained figure and in the held one',
+      same(empty) && empty.foot.lit >= 100 && held.foot.lit >= 100 && empty.foot.dE <= 1.5
+        && Math.abs(empty.foot.L - held.foot.L) <= 1 && Math.abs(empty.foot.a - held.foot.a) <= 0.5 && Math.abs(empty.foot.b - held.foot.b) <= 0.5,
+      `untrained ${short([empty.foot.L, empty.foot.a, empty.foot.b])}, held ${short([held.foot.L, held.foot.a, held.foot.b])}, median ΔE ${empty.foot.dE}`);
+    check('body, the inert zone (D166): its own tone — neutral, and clearly lighter than the untrained calves above it',
+      neutral(empty.foot) && neutral(held.foot) && empty.foot.L - empty.calf.L >= 15,
+      `feet L ${empty.foot.L}, untrained calves L ${empty.calf.L}, held calves L ${held.calf.L}`);
 
     // EDGE against HELD, same angle. The chest and the back are at +3 %,
     // the quadriceps and the hamstrings at −3 %, everything else is held in
     // both — the calves stand for "everything else".
-    const same = (a) => a.sameFrame === true;
     // The zone also holds the strip under the chest that belongs to no group,
     // so not every pixel of it moves; the median over all of them still must.
     check('body, +3 % beside held: the chest has turned green — the median of every lit pixel of the zone, by a difference the eye can see (ΔE ≥ 5)',

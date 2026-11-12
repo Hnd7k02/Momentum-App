@@ -191,12 +191,18 @@ export const BODY_LOOK: BodyLook = {
  *
  * The ground is white for every trained group, so the mix is what makes a
  * tint: three quarters of the way to the status colour at full strength,
- * three eighths at the weakest. The mock-ups' tool had a quarter there; it
- * is raised because under today's light and tone mapping green arrives much
- * weaker than red. Measured on the rendered body at 393px, as the median
- * difference of the chest at +3 % from the same chest held: 4.1 ΔE at a
- * quarter, 4.8 at three tenths, 6.5 at three eighths; the quadriceps at
- * −3 % 9.0, 10.8 and 14.7. `farbregeln.mjs` holds both at 5 or more. Roughness, the lights and the tone mapping are block 7A's.
+ * three eighths at the weakest. The mock-ups' tool had a quarter there; the
+ * block "Farbregeln" raised it under the light and the tone mapping of its
+ * day, which let green arrive much weaker than red: the chest at +3 % stood
+ * 6.5 ΔE from the same chest held, the quadriceps at −3 % 14.7.
+ *
+ * Block 7A left these numbers as they are (D165). Without a tone mapping
+ * the colour of the material is the colour on the screen, and both
+ * directions arrive alike: measured on the rendered body at 393px, as the
+ * median difference from the same zone held, the chest at +3 % stands
+ * 33.6 ΔE away and the quadriceps at −3 % 30.3; +9 % is half as green
+ * again as +3 % (a* −44 against −30). `farbregeln.mjs` holds ±3 % at 5 or
+ * more and the order of the strengths.
  */
 export const REGION_MATERIAL = {
   roughness: BODY_LOOK.surface.roughness,

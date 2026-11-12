@@ -239,25 +239,42 @@ async function shot(page, name) {
   // after a hit on the far side the body is put back to the pass's view
   // before the next tap — otherwise the rest of the "front" pass taps a body
   // facing away, and the chest is reached or not depending on timing.
+  //
+  // The same holds for a tap that reaches no region at all: the top row of
+  // the grid ends inside the 44px target of the view buttons, which stand
+  // over the stage, and such a tap presses "Seite". The next tap then stops
+  // that turn halfway, and until block 7A the whole "front" pass ran on a
+  // body standing at 57° — unnoticed, because the model of the day happened
+  // to show all ten groups from there. So the body is put back whenever it
+  // does not face the pass's view, whatever the tap reached, and the pass
+  // says how often it had to.
   const FACES_BACK = new Set(['back', 'hamstringsGlutes', 'triceps', 'calves']); // REGION_FACING 180
   const hits = new Set();
+  const seenFrom = { Vorne: new Set(), Hinten: new Set() };
+  let turnedAway = 0;
+  let offView = 0;
   const grid = [];
   for (const fy of [0.13, 0.2, 0.27, 0.34, 0.42, 0.5, 0.58, 0.66, 0.74, 0.82, 0.9]) for (const fx of [0.3, 0.34, 0.37, 0.4, 0.44, 0.5, 0.56, 0.6, 0.63, 0.66, 0.7]) grid.push([fx, fy]);
   for (const [view, facing] of [['Vorne', 0], ['Hinten', 180]]) {
     await pills.getByRole('button', { name: view }).click();
     await settle(page);
     for (const [fx, fy] of grid) {
+      if ((await azimuthAttr(page)) !== facing) offView += 1;
       const h = await tapAt(page, fx, fy);
-      if (!h) continue;
-      hits.add(h);
-      for (let tries = 0; FACES_BACK.has(h) !== (facing === 180) && tries < 3; tries += 1) {
+      if (h) { hits.add(h); seenFrom[view].add(h); }
+      const farSide = h !== null && FACES_BACK.has(h) !== (facing === 180);
+      if (!farSide && (await azimuthAttr(page)) === facing) continue;
+      turnedAway += 1;
+      for (let tries = 0; tries < 3; tries += 1) {
         await pills.getByRole('button', { name: view }).click();
         await settle(page);
         if ((await azimuthAttr(page)) === facing) break;
       }
     }
   }
-  check('all ten regions are reachable by a tap, front and back', hits.size === 10, [...hits].sort().join(','));
+  check('every tap of the two passes met a body that faced the pass\'s view', offView === 0, `${offView} taps off the view; the body was put back ${turnedAway} times`);
+  check('all ten regions are reachable by a tap, front and back', hits.size === 10,
+    `${[...hits].sort().join(',')} — front: ${[...seenFrom.Vorne].sort().join(',')} · back: ${[...seenFrom.Hinten].sort().join(',')}`);
   check('a tap that hits nothing leaves the selection alone', (await tapAt(page, 0.05, 0.05)) === null && (await (async () => { await page.locator('[data-muscle="calves"]').click(); const b = await canvasBox(page); await page.mouse.click(b.x + 4, b.y + 4); await page.waitForTimeout(120); return readout(page, '[data-selected-readout]'); })()) === 'calves');
 
   // Idle: a demand loop runs no frame once everything has settled.
