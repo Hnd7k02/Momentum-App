@@ -149,6 +149,105 @@ function principalAxis(pointsList) {
   return { centre, axis: v };
 }
 
+/**
+ * Where a ray meets the surface of a body: the nearest hit, or the farthest.
+ * `{ distance, triangle, point, region }`, or null where it meets nothing.
+ */
+export function castRay(body, origin, direction, farthest = false) {
+  const { points: P, tris: T, labels: TL, names } = body;
+  const M = TL.length;
+  const at = (i) => [P[i * 3], P[i * 3 + 1], P[i * 3 + 2]];
+  let best = null;
+  for (let t = 0; t < M; t++) {
+    const a = at(T[t * 3]), b = at(T[t * 3 + 1]), c = at(T[t * 3 + 2]);
+    const e1 = sub(b, a), e2 = sub(c, a);
+    const h = cross(direction, e2);
+    const det = dot(e1, h);
+    if (Math.abs(det) < 1e-14) continue;
+    const s = sub(origin, a);
+    const u = dot(s, h) / det;
+    if (u < -1e-9 || u > 1 + 1e-9) continue;
+    const q = cross(s, e1);
+    const v = dot(direction, q) / det;
+    if (v < -1e-9 || u + v > 1 + 1e-9) continue;
+    const distance = dot(e2, q) / det;
+    if (distance <= 1e-9) continue;
+    if (!best || (farthest ? distance > best.distance : distance < best.distance)) best = { distance, triangle: t };
+  }
+  if (!best) return null;
+  return { ...best, point: add(origin, mul(direction, best.distance)), region: names[TL[best.triangle]] };
+}
+
+/**
+ * The borders of one region against the rest, each as a closed loop: its
+ * points, their centre, the plane that fits them best and how far the
+ * farthest point lies from that plane. A straight cut is a loop that lies in
+ * its plane.
+ */
+export function regionBorders(body, name) {
+  const { points: P, tris: T, labels: TL, names } = body;
+  const region = names.indexOf(name);
+  const sides = new Map();
+  for (let t = 0; t < TL.length; t++) {
+    for (let c = 0; c < 3; c++) {
+      const a = T[t * 3 + c], b = T[t * 3 + ((c + 1) % 3)];
+      const key = a < b ? a * 4194304 + b : b * 4194304 + a;
+      const seen = sides.get(key) ?? { a, b, inside: 0, outside: 0 };
+      if (TL[t] === region) seen.inside++; else seen.outside++;
+      sides.set(key, seen);
+    }
+  }
+  const edges = [...sides.values()].filter((edge) => edge.inside > 0 && edge.outside > 0);
+  const parent = new Map();
+  const find = (x) => {
+    while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x); }
+    return x;
+  };
+  for (const { a, b } of edges) {
+    if (!parent.has(a)) parent.set(a, a);
+    if (!parent.has(b)) parent.set(b, b);
+    parent.set(find(a), find(b));
+  }
+  const loops = new Map();
+  for (const vertex of parent.keys()) {
+    const root = find(vertex);
+    if (!loops.has(root)) loops.set(root, []);
+    loops.get(root).push([P[vertex * 3], P[vertex * 3 + 1], P[vertex * 3 + 2]]);
+  }
+  return [...loops.values()].map((loop) => {
+    const centre = [0, 1, 2].map((c) => mean(loop.map((p) => p[c])));
+    // The plane's normal is the direction the loop is thinnest in: three
+    // rounds of deflation on the covariance would do, but a loop around a
+    // limb is far from flat only if the cut is not straight, so the cross
+    // product of its two widest directions is enough.
+    const first = principalAxis(loop).axis;
+    const flat = loop.map((p) => { const d = sub(p, centre); return sub(d, mul(first, dot(d, first))); });
+    const second = principalAxis(flat.map((d) => add(d, centre))).axis;
+    const normal = unit(cross(first, second));
+    const deviation = Math.max(...loop.map((p) => Math.abs(dot(sub(p, centre), normal))));
+    return { count: loop.length, centre, normal, deviation };
+  }).sort((x, y) => y.centre[1] - x.centre[1] || y.centre[0] - x.centre[0]);
+}
+
+/** The lowest and the highest point of each region, as shares of the body's height. */
+export function regionSpans(body) {
+  const { points: P, tris: T, labels: TL, names } = body;
+  let low = Infinity, high = -Infinity;
+  for (let i = 0; i < body.count; i++) { low = Math.min(low, P[i * 3 + 1]); high = Math.max(high, P[i * 3 + 1]); }
+  const spans = Object.fromEntries(names.map((name) => [name, { low: Infinity, high: -Infinity, left: 0, right: 0 }]));
+  for (let t = 0; t < TL.length; t++) {
+    const span = spans[names[TL[t]]];
+    for (let c = 0; c < 3; c++) {
+      const y = (P[T[t * 3 + c] * 3 + 1] - low) / (high - low);
+      const x = P[T[t * 3 + c] * 3];
+      if (y < span.low) span.low = y;
+      if (y > span.high) span.high = y;
+      if (x < -0.08) span.right++; else if (x > 0.08) span.left++;
+    }
+  }
+  return spans;
+}
+
 /* ── the measuring ─────────────────────────────────────────────────────── */
 
 export function measure(body, skeleton = null) {
@@ -261,28 +360,7 @@ export function measure(body, skeleton = null) {
     return loops.length ? Math.max(...loops.map((l) => l.maxX)) - Math.min(...loops.map((l) => l.minX)) : 0;
   };
 
-  /** Where a ray meets the surface: the nearest hit, or the farthest. */
-  function cast(origin, direction, farthest = false) {
-    let best = null;
-    for (let t = 0; t < M; t++) {
-      const a = point(T[t * 3]), b = point(T[t * 3 + 1]), c = point(T[t * 3 + 2]);
-      const e1 = sub(b, a), e2 = sub(c, a);
-      const h = cross(direction, e2);
-      const det = dot(e1, h);
-      if (Math.abs(det) < 1e-14) continue;
-      const s = sub(origin, a);
-      const u = dot(s, h) / det;
-      if (u < -1e-9 || u > 1 + 1e-9) continue;
-      const q = cross(s, e1);
-      const v = dot(direction, q) / det;
-      if (v < -1e-9 || u + v > 1 + 1e-9) continue;
-      const distance = dot(e2, q) / det;
-      if (distance <= 1e-9) continue;
-      if (!best || (farthest ? distance > best.distance : distance < best.distance)) best = { distance, triangle: t };
-    }
-    if (!best) return null;
-    return { ...best, point: add(origin, mul(direction, best.distance)), region: names[TL[best.triangle]] };
-  }
+  const cast = (origin, direction, farthest = false) => castRay(body, origin, direction, farthest);
 
   /* legs: the highest cut in which no loop spans the middle */
   let crotch = null;

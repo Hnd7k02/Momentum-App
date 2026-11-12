@@ -7,7 +7,8 @@
  * Contract (enforced at build time by tools/validate-body-glb.mjs and at
  * runtime by resolveMuscleMeshes below): the GLB has exactly one mesh with one
  * primitive per region, and each primitive's material name IS the MuscleGroup
- * id, verbatim, plus one `none` primitive for head, hands and feet.
+ * id, verbatim, plus one `none` primitive for the inert zone: the head with
+ * the neck, the hands from the wrist and the feet from the ankle.
  */
 import type { Object3D, Mesh } from 'three';
 import type { MuscleGroup } from '../../core/model';
@@ -103,7 +104,8 @@ export function resolveMuscleMeshes(root: Object3D): MuscleMeshes {
  * There is no per-id lookup table by design: the GLB carries exactly one
  * primitive per region and the primitive's MATERIAL NAME *is* the id, so the
  * mapping cannot drift from the asset. The table below is documentation of
- * the asset as shipped — triangle counts are from the validator.
+ * the asset as shipped — the body of block 7A (D165), 49,996 triangles — and
+ * `tools/validate-body-glb.test.mjs` holds it to the file.
  */
 export const MUSCLE_MESH_MAP: Readonly<Record<MuscleGroup, {
   /** glTF mesh index — the model has a single mesh. */
@@ -117,17 +119,23 @@ export const MUSCLE_MESH_MAP: Readonly<Record<MuscleGroup, {
   /** camera azimuth in degrees at which the region is visible. */
   facing: 0 | 180;
 }>> = {
-  chest:            { mesh: 0, primitive: 1,  material: 'chest',            triangles: 1450, facing: 0 },
-  back:             { mesh: 0, primitive: 2,  material: 'back',             triangles: 3603, facing: 180 },
-  shoulders:        { mesh: 0, primitive: 3,  material: 'shoulders',        triangles: 3624, facing: 0 },
-  biceps:           { mesh: 0, primitive: 4,  material: 'biceps',           triangles: 1781, facing: 0 },
-  triceps:          { mesh: 0, primitive: 5,  material: 'triceps',          triangles: 1868, facing: 180 },
-  core:             { mesh: 0, primitive: 6,  material: 'core',             triangles: 2341, facing: 0 },
-  quadriceps:       { mesh: 0, primitive: 7,  material: 'quadriceps',       triangles: 4554, facing: 0 },
-  hamstringsGlutes: { mesh: 0, primitive: 8,  material: 'hamstringsGlutes', triangles: 5175, facing: 180 },
-  calves:           { mesh: 0, primitive: 9,  material: 'calves',           triangles: 3863, facing: 180 },
-  forearms:         { mesh: 0, primitive: 10, material: 'forearms',         triangles: 4785, facing: 0 },
+  chest:            { mesh: 0, primitive: 1,  material: 'chest',            triangles: 4836, facing: 0 },
+  back:             { mesh: 0, primitive: 2,  material: 'back',             triangles: 5549, facing: 180 },
+  shoulders:        { mesh: 0, primitive: 3,  material: 'shoulders',        triangles: 2272, facing: 0 },
+  biceps:           { mesh: 0, primitive: 4,  material: 'biceps',           triangles: 1750, facing: 0 },
+  triceps:          { mesh: 0, primitive: 5,  material: 'triceps',          triangles: 1642, facing: 180 },
+  core:             { mesh: 0, primitive: 6,  material: 'core',             triangles: 2573, facing: 0 },
+  quadriceps:       { mesh: 0, primitive: 7,  material: 'quadriceps',       triangles: 3774, facing: 0 },
+  hamstringsGlutes: { mesh: 0, primitive: 8,  material: 'hamstringsGlutes', triangles: 3404, facing: 180 },
+  calves:           { mesh: 0, primitive: 9,  material: 'calves',           triangles: 3804, facing: 180 },
+  forearms:         { mesh: 0, primitive: 10, material: 'forearms',         triangles: 4062, facing: 0 },
 };
 
-/** Primitive 0 is the inert `none` region: head, hands, feet. 6956 triangles. */
+/**
+ * Primitive 0 is the inert `none` region: the head with the neck, the hands
+ * and the feet. It is a third of the triangles, because a face and ten
+ * fingers need them; it is never tinted and never chosen.
+ */
 export const INERT_PRIMITIVE = 0;
+/** Its triangles in the shipped asset. */
+export const INERT_TRIANGLES = 16330;

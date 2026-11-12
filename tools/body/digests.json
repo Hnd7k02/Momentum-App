@@ -1,18 +1,6 @@
 {
-  "athletisch-a": {
+  "momentum-body": {
     "bytes": 704100,
-    "sha256": "f7a6f584876670b028524927e28e88d9f21cf6b1a39fa8b4ad19bbbd38ca5a74"
-  },
-  "athletisch-b": {
-    "bytes": 707436,
-    "sha256": "ba9bb3ac0f1a0f66ad3bd21595cf1f76c963ae2e2ce05346b298e16349462e8d"
-  },
-  "schlank-a": {
-    "bytes": 706120,
-    "sha256": "a3f3e5c06b3468fe5a0025a820f63d6027739ce0682644a31d48cc3f75fe427e"
-  },
-  "kraeftig-a": {
-    "bytes": 707460,
-    "sha256": "a091ac181d53aa97e8958deaefa4d64780cd5fb0f0ce7d32ad2f6b83c6e43814"
+    "sha256": "924a501bc5fed71dd229a00e619e1d5942ebad962432aa0c25294f6da48a3318"
   }
 }

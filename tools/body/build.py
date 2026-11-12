@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build one Momentum body from the MakeHuman data, with one command.
 
+    python3 tools/body/build.py momentum-body --install
     python3 tools/body/build.py <candidate>… [--out DIR] [--data DIR] [--record] [--relabel] [--keep]
     python3 tools/body/build.py --all
 
@@ -14,7 +15,10 @@ other bytes than the ones recorded says so and ends with exit code 1;
 `--record` writes the new digest instead, which is how a deliberate change is
 made. `--relabel` makes regions.json anew from the rules (regionrules.py), on
 the candidate named; without it the stored regions are read and the rules
-never run. `--keep` leaves the unrefined GLB beside the result.
+never run. `--keep` leaves the unrefined GLB beside the result. `--install`
+copies the result to public/models/momentum-body.glb, the file the app loads
+— only for the one candidate of that name, and only when its bytes are the
+recorded ones.
 """
 from __future__ import annotations
 
@@ -33,6 +37,9 @@ import regionrules
 
 HERE = Path(__file__).resolve().parent
 REGIONS_FILE = HERE / 'regions.json'
+#: The body the app ships, and where it lies.
+SHIPPED = 'momentum-body'
+INSTALLED = HERE.parent.parent / 'public' / 'models' / 'momentum-body.glb'
 DIGESTS_FILE = HERE / 'digests.json'
 
 #: refine-body.mjs hands a piece of a region back to its neighbours when it is
@@ -217,6 +224,7 @@ def main():
     parser.add_argument('--record', action='store_true', help='write the digest to digests.json')
     parser.add_argument('--relabel', action='store_true')
     parser.add_argument('--keep', action='store_true')
+    parser.add_argument('--install', action='store_true', help=f'copy {SHIPPED}.glb to public/models/')
     args = parser.parse_args()
     candidates = json.loads(Path(args.candidates).read_text())
     names = [key for key in candidates if not key.startswith('_')] if args.all else args.candidate
@@ -224,6 +232,8 @@ def main():
         parser.error('name a candidate, or pass --all')
     if args.relabel and len(names) != 1:
         parser.error('--relabel takes the one candidate the regions are made on')
+    if args.install and names != [SHIPPED]:
+        parser.error(f'--install is for {SHIPPED} alone')
     digests = load_digests()
     differs = []
     for name in names:
@@ -244,6 +254,10 @@ def main():
         DIGESTS_FILE.write_text(json.dumps(kept, indent=2) + '\n')
     if differs:
         raise SystemExit(1)
+    if args.install:
+        built = Path(args.out) / f'{SHIPPED}.glb'
+        INSTALLED.write_bytes(built.read_bytes())
+        print(f'installed: {INSTALLED}  ({INSTALLED.stat().st_size} bytes)')
 
 
 if __name__ == '__main__':

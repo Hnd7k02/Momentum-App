@@ -52,7 +52,11 @@ and two thirds of its triangles in head, hands and feet.
 
 ## The four candidates of the gate
 
-Measured on 12 November 2026, by the same script.
+Measured on 12 November 2026, by the same script, as they were shown. The
+body the app ships is `athletisch-a` after the owner's three corrections; its
+measures are the same, and `tools/validate-body-glb.mjs` holds eleven of them
+on every build — all but knee height, crotch height and shoulder breadth,
+whose targets are still to be checked at their source.
 
 | measure | target | schlank-a | athletisch-a | athletisch-b | kraeftig-a |
 |---|---|---|---|---|---|

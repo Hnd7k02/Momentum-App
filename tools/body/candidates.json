@@ -1,5 +1,5 @@
 {
-  "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named. '_base' holds what they share and is not built itself; the four entries below it are the pairs of body type and head shown at the gate of block 7A.",
+  "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named. '_base' holds the settings and is not built itself; 'momentum-body' is the body the app ships (the owner's choice at the gate of block 7A: the athletic type with head A), installed to public/models/ with --install.",
   "_base": {
     "height": 1.78,
     "macro": { "gender": 1.0, "age": 0.5, "muscle": 0.9, "weight": 0.35, "proportions": 1.0, "height": 0.5 },
@@ -13,8 +13,5 @@
     "inert_share": 0.45,
     "refine": { "cavity": 0.8, "ao": 0.5, "straymax": 150, "freeze": "none", "hold": "back|hamstringsGlutes,calves|quadriceps,calves|hamstringsGlutes,back|chest" }
   },
-  "athletisch-a": { "like": "_base" },
-  "athletisch-b": { "like": "_base", "head": "B", "head_smoothing": { "pairs": 140 } },
-  "schlank-a": { "like": "_base", "macro": { "muscle": 1.0, "weight": 0.25 } },
-  "kraeftig-a": { "like": "_base", "macro": { "muscle": 1.0, "weight": 0.45 } }
+  "momentum-body": { "like": "_base" }
 }

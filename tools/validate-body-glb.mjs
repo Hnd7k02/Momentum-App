@@ -7,12 +7,28 @@
  * Exits non-zero on any contract violation. A broken muscle mapping must fail
  * loudly in CI rather than reach a device as a dead region.
  *
+ * The model is the one block 7A built (D165): MakeHuman's base mesh, shaped,
+ * posed and cut by tools/body/, licensed CC0 1.0. What is checked:
+ *
+ *   structure     one mesh, eleven primitives, the material name is the
+ *                 muscle-group id, shared position and normal lists,
+ *                 KHR_mesh_quantization, a closed surface, the size
+ *   frame         height, width, feet on the ground, the body on its axis
+ *   envelopes     where each region lies, as a share of the body's height
+ *   inert zone    head with neck, two hands, two feet: five pieces, each
+ *                 cut straight (D165, correction 2)
+ *   check points  a ray at a fixed place meets the region it must (§14)
+ *   measures      the proportions and the posture of tools/body/MEASURES.md
+ *                 whose targets are confirmed
+ *   licence       the file names its source
+ *
  * The ten ids below are a copy of `MuscleGroup` in src/core/model/index.ts.
  * They are duplicated here on purpose: this script must be runnable without
- * the TypeScript build, and the assertion at the end of this file is what
- * catches the two lists drifting apart.
+ * the TypeScript build.
  */
 import { readFileSync } from 'node:fs';
+import { TARGETS, format, measure, passes, readBody, regionBorders, regionSpans, targetText } from './body/measure-body.mjs';
+import { runCheckPoints } from './body/checkpoints.mjs';
 
 const MUSCLE_GROUPS = [
   'chest', 'back', 'shoulders', 'biceps', 'triceps',
@@ -28,7 +44,56 @@ const EXPECT = {
   centreX: 0.03,                      // |centre.x| — the body stands on the axis
   maxTriangles: 80000,
   minTrianglesPerGroup: 400,
+  // 700 KB as this project counts them (the model of D156 was 478,008 bytes,
+  // "467 KB"): the guide's ceiling for the download on a phone.
+  maxBytes: 700 * 1024,
 };
+
+/**
+ * Where each region lies, as shares of the body's height: the lowest it may
+ * reach, the highest it may reach, and how far it must reach at least
+ * (`from` down to, `to` up to). Measured on the body of block 7A (in
+ * brackets), with two percent of slack: enough for another body type of the
+ * same pipeline, too little for a region that crossed a joint.
+ */
+const ENVELOPE = {
+  // The lower leg, from the ankle's cut [6.0] to the knee [31.1; the joint
+  // line is at 29.9]. Must not reach the foot, must not climb into the thigh.
+  calves: { low: 0.04, high: 0.33, from: 0.09, to: 0.28 },
+  // The thigh, front and inside, from the knee [29.3] to the groin [57.0].
+  quadriceps: { low: 0.27, high: 0.59, from: 0.33, to: 0.53 },
+  // The back of the thigh and the buttocks, from the knee [28.7] to the iliac
+  // crest [57.0]. Must not reach the lumbar region, must not cross the knee.
+  hamstringsGlutes: { low: 0.27, high: 0.59, from: 0.33, to: 0.53 },
+  // The belly, from the pubic bone [49.0] to under the chest [73.2].
+  core: { low: 0.47, high: 0.75, from: 0.52, to: 0.69 },
+  // The pectoral, from its lower edge [66.1] to the neck's cut, which it
+  // reaches through the pit of the throat [85.4].
+  chest: { low: 0.64, high: 0.87, from: 0.69, to: 0.81 },
+  // Latissimus, erectors, trapezius: from the iliac crest [55.2] — the back
+  // must reach DOWN to it — to the neck's cut at the trapezius [85.6].
+  back: { low: 0.53, high: 0.87, from: 0.58, to: 0.82 },
+  // The deltoid, from its insertion on the arm [72.9] to the acromion [83.8].
+  shoulders: { low: 0.71, high: 0.86, from: 0.76, to: 0.81 },
+  // The upper arm, front [65.1–75.6] and back [64.9–74.8]: from the elbow's
+  // plane to the armpit. Must not cross the elbow, must not reach the shoulder's top.
+  biceps: { low: 0.63, high: 0.78, from: 0.67, to: 0.73 },
+  triceps: { low: 0.63, high: 0.77, from: 0.67, to: 0.72 },
+  // The forearm, from the wrist's cut [51.4] to the elbow [67.2]. Must not
+  // reach the hand.
+  forearms: { low: 0.49, high: 0.69, from: 0.54, to: 0.64 },
+};
+
+/**
+ * The measures that are held, of the fourteen in tools/body/MEASURES.md. Out
+ * are the three whose targets are not yet checked at their source — knee
+ * height, crotch height and the shoulder breadth, whose window is to become
+ * 27–32 % once it is (the owner at the gate, D165). They enter here then.
+ */
+const HELD_MEASURES = [
+  'headHeight', 'acromionHeight', 'upperArm', 'forearm', 'hand', 'footLength',
+  'neckToHead', 'symmetry', 'armAbduction', 'elbowFlexion', 'toeOut',
+];
 
 const file = process.argv[2];
 if (!file) {
@@ -103,18 +168,28 @@ const KNOWN = ['KHR_mesh_quantization'];   // decoder-free; anything else needs 
 for (const e of ext) if (!KNOWN.includes(e)) fail(`unsupported required extension "${e}" — needs a local decoder`);
 notes.push(`extensionsRequired: ${ext.length ? ext.join(', ') : '(none)'}`);
 
+if (raw.byteLength > EXPECT.maxBytes) {
+  fail(`the file is ${raw.byteLength} bytes — over ${EXPECT.maxBytes} (700 KB), the ceiling for the download on a phone`);
+}
+
 /* ── attributes ────────────────────────────────────────────────────────── */
 
-const posIdx = new Set(), nrmIdx = new Set();
+const posIdx = new Set(), nrmIdx = new Set(), colIdx = new Set();
 for (const p of prims) {
   if (p.attributes.POSITION === undefined) fail('a primitive has no POSITION');
   if (p.attributes.NORMAL === undefined) fail('a primitive has no NORMAL — the body would render faceted');
   if (p.indices === undefined) fail('a primitive is not indexed');
   posIdx.add(p.attributes.POSITION);
   nrmIdx.add(p.attributes.NORMAL);
+  colIdx.add(p.attributes.COLOR_0);
 }
 if (posIdx.size !== 1) fail(`primitives must share ONE position accessor (found ${posIdx.size}) — shared buffers are what keep this asset cheap`);
 if (nrmIdx.size !== 1) fail(`primitives must share ONE normal accessor (found ${nrmIdx.size})`);
+// The baked shade is a vertex colour. All regions carry the same list, or
+// none does: a region without it would be drawn without its shade, and the
+// viewer switches vertex colours on per mesh.
+if (colIdx.size !== 1) fail('some primitives carry a vertex colour and some do not — the baked shade must be on all or on none');
+notes.push(`baked shade: ${[...colIdx][0] === undefined ? 'none' : 'COLOR_0, shared'}`);
 
 /* ── muscle mapping ────────────────────────────────────────────────────── */
 
@@ -170,6 +245,7 @@ if (height < width) fail('model does not look Y-up: it is wider than it is tall'
 /* ── indices ───────────────────────────────────────────────────────────── */
 
 let totalTris = 0;
+const edgeUse = new Map();
 for (const p of prims) {
   const { data } = read(p.indices);
   totalTris += data.length / 3;
@@ -179,6 +255,10 @@ for (const p of prims) {
     const a = data[i], b = data[i + 1], c = data[i + 2];
     if (a >= vertexCount || b >= vertexCount || c >= vertexCount) bad++;
     if (a === b || b === c || a === c) degenerate++;
+    for (const [u, v] of [[a, b], [b, c], [c, a]]) {
+      const key = u < v ? u * 4194304 + v : v * 4194304 + u;
+      edgeUse.set(key, (edgeUse.get(key) ?? 0) + 1);
+    }
   }
   const name = json.materials[p.material].name;
   if (bad) fail(`region "${name}": ${bad} triangles index past the vertex buffer`);
@@ -187,62 +267,92 @@ for (const p of prims) {
 notes.push(`vertices ${vertexCount} · triangles ${totalTris}`);
 if (totalTris > EXPECT.maxTriangles) fail(`${totalTris} triangles exceeds the budget of ${EXPECT.maxTriangles}`);
 
-/* ── bilateral check ───────────────────────────────────────────────────── */
-// Paired groups must own geometry on BOTH sides of x=0: one Momentum group is
-// two limbs, and a region that lost a side would still pass every count check.
-const PAIRED = ['shoulders', 'biceps', 'triceps', 'forearms', 'quadriceps', 'hamstringsGlutes', 'calves'];
-for (const p of prims) {
-  const name = json.materials[p.material].name;
-  if (!PAIRED.includes(name)) continue;
-  const { data } = read(p.indices);
-  let left = 0, right = 0;
-  for (let i = 0; i < data.length; i++) {
-    const x = posA.data[data[i] * 3] * scale[0] + translation[0];
-    if (x < -0.08) left++; else if (x > 0.08) right++;
-  }
-  if (!left || !right) fail(`region "${name}" is not bilateral (left=${left}, right=${right})`);
-}
+// A body is a closed surface: every edge lies between exactly two triangles.
+// An open edge is a hairline that the background shows through.
+let openEdges = 0;
+for (const n of edgeUse.values()) if (n !== 2) openEdges++;
+if (openEdges) fail(`the surface is not closed: ${openEdges} edges do not lie between exactly two triangles`);
+
+/* ── what follows reads the surface itself ─────────────────────────────── */
+
+const structural = problems.length;
+const body = structural ? null : readBody(file);
 
 /* ── anatomical envelopes ──────────────────────────────────────────────── */
-// Guards against the region-assignment regressions fixed in v2.1. Bounds are
-// fractions of body height, so they survive a re-scaled re-export. Landmarks
-// measured on this mesh: lumbar apex 0.605 h, glute mass from 0.585 h, knee
-// section 0.25 h.
-const ENVELOPE = {
-  // region:          [minY, maxY] as a fraction of height, with slack
-  hamstringsGlutes: [0.21, 0.64],  // must not reach the lumbar, must not cross the knee
-  quadriceps:       [0.21, 0.60],  // must not cross the knee
-  calves:           [0.03, 0.28],  // must not climb into the thigh
-  back:             [0.55, 0.90],  // must reach DOWN to the sacrum
-  core:             [0.54, 0.75],
-  chest:            [0.62, 0.84],
-};
-const REACH_DOWN = { back: 0.62 };  // back must own geometry at or below this
 
-for (const p of prims) {
-  const name = json.materials[p.material].name;
-  const env = ENVELOPE[name];
-  if (!env) continue;
-  const { data } = read(p.indices);
-  let lo = Infinity, hi = -Infinity;
-  for (let i = 0; i < data.length; i++) {
-    const y = (posA.data[data[i] * 3 + 1] * scale[1] + translation[1]) / height;
-    if (y < lo) lo = y;
-    if (y > hi) hi = y;
+if (body) {
+  const spans = regionSpans(body);
+  const pct = (v) => `${(v * 100).toFixed(1)}%`;
+  for (const id of MUSCLE_GROUPS) {
+    const span = spans[id];
+    const env = ENVELOPE[id];
+    if (span.low < env.low) fail(`region "${id}" reaches down to ${pct(span.low)} of height, below its envelope (${pct(env.low)})`);
+    if (span.high > env.high) fail(`region "${id}" reaches up to ${pct(span.high)} of height, above its envelope (${pct(env.high)})`);
+    if (span.low > env.from) fail(`region "${id}" stops at ${pct(span.low)} of height — it must reach down to ${pct(env.from)}`);
+    if (span.high < env.to) fail(`region "${id}" ends at ${pct(span.high)} of height — it must reach up to ${pct(env.to)}`);
+    // One Momentum group is two limbs, or two halves of the trunk: a region
+    // that lost a side would still pass every count.
+    if (!span.left || !span.right) fail(`region "${id}" is not on both sides of the body (left=${span.left}, right=${span.right})`);
+    notes.push(`envelope ${id.padEnd(17)} y ${pct(span.low)}–${pct(span.high)} of height`);
   }
-  if (lo < env[0]) fail(`region "${name}" reaches down to ${(lo * 100).toFixed(1)}% of height, below its envelope (${(env[0] * 100).toFixed(0)}%)`);
-  if (hi > env[1]) fail(`region "${name}" reaches up to ${(hi * 100).toFixed(1)}% of height, above its envelope (${(env[1] * 100).toFixed(0)}%)`);
-  if (REACH_DOWN[name] !== undefined && lo > REACH_DOWN[name]) {
-    fail(`region "${name}" stops at ${(lo * 100).toFixed(1)}% of height — it must extend down to ${(REACH_DOWN[name] * 100).toFixed(0)}% (the sacrum)`);
-  }
-  notes.push(`envelope ${name.padEnd(17)} y ${(lo * 100).toFixed(1)}%–${(hi * 100).toFixed(1)}% of height`);
 }
 
-/* ── attribution ───────────────────────────────────────────────────────── */
+/* ── the inert zone, and its straight cuts ─────────────────────────────── */
 
+if (body) {
+  // Head with neck, two hands, two feet — and each of them ends where the
+  // build cut it: on a plane. A border that has left its plane by a
+  // millimetre has been moved or smoothed by a later step.
+  const borders = regionBorders(body, INERT);
+  if (borders.length !== 5) fail(`the inert zone has ${borders.length} borders, not five — head, two hands, two feet`);
+  for (const border of borders) {
+    const where = `(${border.centre.map((v) => v.toFixed(2)).join(', ')})`;
+    if (border.deviation > 0.001) {
+      fail(`the inert zone's border at ${where} is not a straight cut: it leaves its plane by ${(border.deviation * 1000).toFixed(1)} mm`);
+    }
+  }
+  if (borders.length === 5) {
+    // The first is the highest: the neck. Nearly level — within ten degrees.
+    const tilt = Math.acos(Math.min(1, Math.abs(borders[0].normal[1]))) * 180 / Math.PI;
+    if (tilt > 10) fail(`the neck's cut is tilted by ${tilt.toFixed(1)}° — it is to be nearly level`);
+    notes.push(`inert zone: five straight cuts, the largest ${(Math.max(...borders.map((b) => b.deviation)) * 1000).toFixed(2)} mm off its plane; the neck tilted ${tilt.toFixed(1)}°`);
+  }
+}
+
+/* ── check points ──────────────────────────────────────────────────────── */
+
+if (body) {
+  const results = runCheckPoints(body);
+  for (const result of results.filter((r) => !r.ok)) {
+    fail(`check point "${result.name}"${result.side ? ` (${result.side})` : ''}: the ray meets ${result.found ?? 'nothing'}, not ${result.expected.join(' or ')}`);
+  }
+  notes.push(`check points: ${results.filter((r) => r.ok).length} of ${results.length}`);
+}
+
+/* ── proportions and posture ───────────────────────────────────────────── */
+
+if (body) {
+  const { values, notes: measuring } = measure(body);
+  for (const note of measuring) fail(`measuring: ${note}`);
+  for (const key of HELD_MEASURES) {
+    if (!passes(key, values[key])) {
+      fail(`${TARGETS[key].label}: ${format(key, values[key])}, outside ${targetText(key)}`);
+    }
+  }
+  notes.push(`measures: ${HELD_MEASURES.map((key) => format(key, values[key])).join(' · ')}`);
+}
+
+/* ── licence ───────────────────────────────────────────────────────────── */
+
+// The body is MakeHuman's base mesh and targets, CC0 1.0. No attribution is
+// owed; the file says where it comes from all the same, and it must not carry
+// the notice of the model it replaced.
 const copyright = (json.asset || {}).copyright || '';
-if (!/patmateee/i.test(copyright) || !/CC-BY/i.test(copyright)) {
-  fail('asset.copyright must name patmateee and CC-BY-4.0');
+if (!/MakeHuman/i.test(copyright) || !/CC0/i.test(copyright)) {
+  fail('asset.copyright must name MakeHuman and CC0 — the source and the licence of the body');
+}
+if (/patmateee|CC-BY/i.test(copyright)) {
+  fail('asset.copyright names the model of D156 — that body is no longer shipped');
 }
 
 /* ── report ────────────────────────────────────────────────────────────── */
@@ -258,6 +368,7 @@ for (const id of [...MUSCLE_GROUPS, INERT]) {
 if (problems.length) {
   console.error(`\n✗ ${problems.length} contract violation(s):`);
   for (const p of problems) console.error(`  - ${p}`);
+  if (structural) console.error('  (the surface itself was not read: the structure must hold first)');
   process.exit(1);
 }
 console.log(`\n✓ muscle mapping ${MUSCLE_GROUPS.length}/${MUSCLE_GROUPS.length} · contract satisfied\n`);

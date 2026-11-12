@@ -4,15 +4,16 @@ Builds the Momentum body model from the MakeHuman base mesh, by script only:
 no Blender, no hand work, the same bytes every time. Decision D165; the guide
 it follows is `koerper-anleitung-7a.md` on the owner's reference page.
 
-**Status: before the gate.** No model built here is in the app yet. The app
-still loads `public/models/momentum-body.glb`, the model of D156; the
-candidates are shown to the owner first (block 7A, step 6).
+**Status: in the app.** The owner chose the athletic body type with head A at
+the gate (D165), with three corrections; `momentum-body` is that body, and
+`public/models/momentum-body.glb` is its build, byte for byte.
 
 ## One command
 
 ```sh
-python3 tools/body/build.py athletisch-a   # → tools/body/out/athletisch-a.glb, its sha256 on the last line
-python3 tools/body/build.py --all          # every candidate of candidates.json
+python3 tools/body/build.py momentum-body --install   # builds, checks the digest, copies to public/models/
+python3 tools/body/build.py momentum-body             # builds only → tools/body/out/momentum-body.glb
+node tools/validate-body-glb.mjs public/models/momentum-body.glb
 ```
 
 Needs Python 3 with numpy, and Node. Built and recorded with Python 3.13.18,
@@ -76,23 +77,24 @@ Everything between the input files and the GLB is deterministic: no random
 start, no threads, no timestamp in the file. `digests.json` records the
 result, and two builds in a row were compared byte for byte.
 
-| candidate | bytes | sha256 |
+| body | bytes | sha256 |
 |---|---|---|
-| `athletisch-a` | 707,380 | `e764af2fde318e08bdda3dfb5316db8703c8a33d4b6f357edabf5d66374754f6` |
-| `athletisch-b` | 707,436 | `ba9bb3ac0f1a0f66ad3bd21595cf1f76c963ae2e2ce05346b298e16349462e8d` |
-| `schlank-a` | 706,120 | `a3f3e5c06b3468fe5a0025a820f63d6027739ce0682644a31d48cc3f75fe427e` |
-| `kraeftig-a` | 707,460 | `a091ac181d53aa97e8958deaefa4d64780cd5fb0f0ce7d32ad2f6b83c6e43814` |
+| `momentum-body` | 704,100 | `924a501bc5fed71dd229a00e619e1d5942ebad962432aa0c25294f6da48a3318` |
 
-These are the four pairs of body type and head shown at the gate; `digests.json` holds the same figures for the build to check. The digests hold for the
+`digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has this sha256. The digests hold for the
 versions named above: another numpy may add in another order, and the last
 bit of a position can then land on the other side of a rounding.
 
 ## The contract with the app
 
-Unchanged from today's model, and checked by `tools/validate-body-glb.mjs`
-once a candidate is chosen: one mesh; eleven primitives, one per region; the
-material name is the muscle-group id (`none` for head, neck, hands and feet);
-one shared position and normal list; `KHR_mesh_quantization`.
+Unchanged from the model of D156, and checked by `tools/validate-body-glb.mjs`
+on every build: one mesh; eleven primitives, one per region; the material name
+is the muscle-group id (`none` for head, neck, hands and feet); one shared
+position and normal list; `KHR_mesh_quantization`. The validator also holds
+where each region lies, the five straight cuts of the inert zone, the check
+points of the regions (`checkpoints.mjs`, contract §14), the measures whose
+targets are confirmed, the size and the licence notice;
+`tools/validate-body-glb.test.mjs` holds the validator.
 
 The baked shade is a vertex colour (`COLOR_0`). The app's two body materials
 read it where a model brings one —
@@ -145,22 +147,18 @@ with the chest, and the trapezius begins at the side of the neck. The border
 of chest and trapezius runs along the collarbone and is held (`--hold`), so it
 is smoothed and not moved into a groove.
 
-## The candidates
+## The body
 
-Three body types after the guide (§4.2) and two heads:
-
-| | muscle | weight | head |
-|---|---|---|---|
-| `schlank-a` | 1.0 | 0.25 | A |
-| `athletisch-a` | 0.9 | 0.35 | A |
-| `athletisch-b` | 0.9 | 0.35 | B |
-| `kraeftig-a` | 1.0 | 0.45 | A |
+Four pairs of body type and head were shown at the gate — `schlank-a`,
+`athletisch-a`, `athletisch-b`, `kraeftig-a`; their pictures are in
+`docs/design/wp3/7a-gate/`. The owner chose `athletisch-a`: muscle 0.9,
+weight 0.35, head A. That is `momentum-body`; the other three are no longer
+built, and git has them.
 
 - **Head A** is MakeHuman's head with the eye sockets closed: the pocket
   behind each pair of lids is turned inside out into a calm eyeball
-  (`fill_eyes`). **Head B** is the same head softened to a mannequin's
-  (`smooth_face`): the cavities of mouth and nostrils are closed, the skin of
-  the face is smoothed without shrinking, skull, jaw and ears stay.
+  (`fill_eyes`). Head B, the same head softened to a mannequin's
+  (`smooth_face`), was the alternative at the gate and is still a setting.
 - **The pose** is the guide's: upper arms 20° from the trunk, elbows bent
   (20° at the joints, which reads as 8° on the arm), palms to the thighs,
   fingers together and lightly curled, the thumb laid on, legs nearly
@@ -176,8 +174,8 @@ Three body types after the guide (§4.2) and two heads:
   along the seam between fine and coarse mesh is cut in saw teeth. Hands and
   feet are thinned to 45 % by a quadric edge collapse; the head is left as it
   is, because a face with half its triangles shows them as flat panels.
-  About 50,200 triangles, 34 % of them in the inert zone, 707,400 bytes —
-  691 KB as this project counts (today's model: 478,008 bytes, "467 KB").
+  49,996 triangles, 33 % of them in the inert zone, 704,100 bytes — 688 KB
+  as this project counts (the model of D156: 478,008 bytes, "467 KB").
 
 ## What changed against the scripts of the reference page
 
