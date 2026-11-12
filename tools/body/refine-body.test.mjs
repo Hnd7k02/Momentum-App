@@ -414,6 +414,56 @@ describe('refine-body.mjs — the surface', () => {
     const again = refine('surface', body, labels);
     expect(Buffer.compare(again.result.buffer, run.result.buffer)).toBe(0);
   });
+
+  /** The baked shade of a result: one value in [0, 1] for every vertex. */
+  const shadeOf = ({ json, buffer }) => {
+    const accessor = json.accessors[json.meshes[0].primitives[0].attributes.COLOR_0];
+    const view = json.bufferViews[accessor.bufferView];
+    const start = 28 + new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength).getUint32(12, true) + (view.byteOffset || 0);
+    return Array.from({ length: accessor.count }, (_, i) => buffer[start + i * (view.byteStride || 4)] / 255);
+  };
+  /** The largest step of the shade from a vertex to its neighbour. */
+  const steepest = (result) => {
+    const shade = shadeOf(result);
+    let most = 0;
+    for (const [a, b, c] of result.tris) most = Math.max(most, Math.abs(shade[a] - shade[b]), Math.abs(shade[b] - shade[c]), Math.abs(shade[c] - shade[a]));
+    return most;
+  };
+
+  it('records the later options of the shade only where they are used', () => {
+    // A body built without them is byte for byte the file it was before they existed.
+    const before = run.result.json.asset.extras.options;
+    for (const key of ['shadedepth', 'shadefine', 'shadesmooth']) expect(before).not.toHaveProperty(key);
+    expect(before).toHaveProperty('cavity');
+    const used = refine('shade-used', body, labels, ['--shadedepth', '0.002', '--shadesmooth', '3']).result.json.asset.extras.options;
+    expect(used).toMatchObject({ shadedepth: 0.002, shadesmooth: 3 });
+    expect(used).not.toHaveProperty('shadefine');
+  });
+
+  it('measures a groove for the shade in metres when told: against a depth it never reaches, nothing is painted', () => {
+    // By default a groove is measured against the body's own deepest, so the deepest are always painted in full.
+    const own = shadeOf(run.result);
+    const never = shadeOf(refine('shade-depth', body, labels, ['--shadedepth', '1', '--ao', '0']).result);
+    const plain = shadeOf(refine('shade-noao', body, labels, ['--ao', '0']).result);
+    expect(Math.min(...plain)).toBeLessThan(0.9);
+    expect(Math.min(...never)).toBeGreaterThan(0.98);
+    expect(Math.min(...own)).toBeLessThan(Math.min(...never));
+  });
+
+  it('smooths the shade further when asked: its steepest step gets smaller, and with 0 it is not smoothed at all', () => {
+    const more = refine('shade-smooth', body, labels, ['--shadesmooth', '4']).result;
+    expect(steepest(more)).toBeLessThan(0.8 * steepest(run.result));
+    const none = refine('shade-raw', body, labels, ['--shadesmooth', '0']).result;
+    expect(steepest(none)).toBeGreaterThan(steepest(run.result));
+    expect(none.json.asset.extras.options).toMatchObject({ shadesmooth: 0 });
+  });
+
+  it('weighs the fine grooves less when told, which changes the shade and nothing else', () => {
+    const broad = refine('shade-fine', body, labels, ['--shadefine', '0.1']).result;
+    expect(shadeOf(broad)).not.toEqual(shadeOf(run.result));
+    expect(broad.points).toEqual(run.result.points);
+    expect(broad.tris).toEqual(run.result.tris);
+  });
 });
 
 describe('refine-body.mjs — a frozen region', () => {

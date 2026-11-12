@@ -73,7 +73,7 @@ All of it is CC0: no attribution is required, for MakeHuman or for Anny. The
 model's `asset.copyright` names both all the same, and so does
 `THIRD-PARTY-NOTICES.md`.
 
-The files are kept in the repository (18 files, 4.3 MB) rather than fetched
+The files are kept in the repository (21 files, 4.3 MB) rather than fetched
 from the wheel at build time, for three reasons: the build then runs offline
 and gives the same bytes when the package is no longer on PyPI; the wheel is
 sixty megabytes of which the code must never come near this repository; and
@@ -98,8 +98,10 @@ result, and two builds in a row were compared byte for byte.
 | body | bytes | sha256 |
 |---|---|---|
 | `momentum-body` | 704,044 | `a72c84170fce64dd34723994ddb0612f6230be5183d454827a95ec989b44d796` |
+| `gate-2` | 703,752 | `d835f8fab2b024db56b2010118a9ae6ea85ad4227ecfede9dedd80c71dded07a` |
+| `gate-2-b` | 703,360 | `87d7a76e665735dfc6b1f3f5b5bfcbb609ad084f566223c3c1fbdfc1ebcc7d97` |
 
-`digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has this sha256. The digests hold for the
+`digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has the sha256 of `momentum-body`. `gate-2` and `gate-2-b` are candidates and are installed nowhere (see "After the gate"). The digests hold for the
 versions named above: another numpy may add in another order, and the last
 bit of a position can then land on the other side of a rounding.
 
@@ -199,11 +201,80 @@ built, and git has them.
   49,988 triangles, 33 % of them in the inert zone, 704,044 bytes — 688 KB
   as this project counts (the model of D156: 478,008 bytes, "467 KB").
 
+## After the gate: the surface and the arms
+
+The owner added two corrections after the gate and stopped production until
+he has seen them (D165). They are a candidate, **`gate-2`**, beside the
+shipped body: `python3 tools/body/build.py gate-2` builds it into `out/`,
+and nothing installs it. Its pictures are in `docs/design/wp3/7a-gate-2/`.
+
+**The surface.** The folds at the collarbone, under the chest, on the belly
+and in the groin are the relief, not the base body — a body built without
+relief has none of them. Three things made them, each measured:
+
+- *The relief's narrowest lines.* In multiples, a line one vertex wide is a
+  crease. `relief.soften` averages the displacement over the neighbours
+  before it is laid on (2 passes), which takes the narrow lines out and
+  leaves the forms. `relief.smooth` is the same with Taubin's two steps,
+  for a sharper cut; `gate-2` does not use it.
+- *The relief's bound.* At the waist the displacement ran into its bound of
+  9 mm from both sides: a ridge of 8 mm with a trough of 5 mm right above
+  it, a step of 13 mm round the whole body, which read as a belt. No amount of smoothing removes what is
+  clipped at the bound; the bound does. At 4 mm (`relief.limit_mm`) the
+  line across the back is as strong as on a body with no relief at all
+  (2.0 lightness steps per row in the stage, for 5.2 on the shipped body and
+  2.7 at 6 mm). 4 mm is inside the guide's 2–6 mm. `gate-2-b` is the same
+  body at 6 mm, the sheet's alternative.
+- *The nipples and the navel.* MakeHuman models them in rings of edges one
+  or two millimetres long; with the relief on top they were spikes that
+  caught the light. `spots` finds them as the sharpest vertices of chest
+  and core (mean curvature above 40 1/m — eight and six vertices), takes
+  everything within 25 and 20 mm of them, and relaxes it between its rim:
+  80 passes take the nipples out, 8 leave the navel as a soft hollow.
+
+`relief.sharpest` (40 1/m) is a guard on top: after the cuts, no place on
+the muscles may bend harder than that. It moves a handful of vertices by a
+millimetre or two and nothing else; it is what `limit_curvature` does.
+
+**The rings at wrist and ankle** were the subdivision. A Catmull-Clark step
+rounds the surface, and it was applied in full up to the last ring of the
+fine mesh and not at all beyond: the rounding ended in a step, two rings
+into the hand. With `seam_fade` a vertex takes all of the rounding on the
+muscles, half of it one ring into the inert zone and none where the coarse
+mesh begins.
+
+**The shade** painted the folds darker than they were: it measured every
+groove against the deepest 3 % of the same body, so the shallowest body
+still had its grooves painted in full, down to 55 % of the base colour.
+`refine-body.mjs` has three options for it now. `--shadedepth` measures a
+groove in metres (2.5 mm counts as a full one); `--shadefine` weighs the
+fine scale, which draws lines, at 0.15 instead of 0.65 against the broad
+one, which draws forms; `--shadesmooth` averages the result four times
+instead of once. With `--white 0.7` and `--floor 0.6` the shade lies
+broader and never darker than 60 %. The three options are written into the
+file's record only where they are used, so `momentum-body` is byte for byte
+the file it was.
+
+What that does, measured on the white body in the real stage at 393 px
+(`tools/body/out/` against the shipped body, one stage pixel about 3 mm):
+what is 1.5–6 cm across — the muscles — reads 27.3 for 26.7, unchanged;
+what is under 1 cm across — wrinkles, lines, speckle — reads 1.37 for 2.81.
+
+**The arms** use MakeHuman's own targets: `arms/measure-lowerarm-length-decr`
+at 0.2 and `arms/{l,r}-lowerarm-muscle-incr` at 0.8, three files more from
+the same folder under the same CC0 text. The forearm reads 14.6 % of the
+height for 15.2 % and is 88 mm across at its thickest for 84; the pose
+holds the upper arm 17.0° from the trunk for 21.1° (`arm` 16 for 20) and
+bends the fingers a little more (`fingers` 28 for 20).
+
+Both candidates pass `tools/validate-body-glb.mjs` as it stands: the
+envelopes, the five cuts, all 33 check points and the eleven measures.
+
 ## What changed against the scripts of the reference page
 
 - `build_mh.py` and `label_mh.py` were proof scripts. Their steps live in
   `bodylib.py` and `regionrules.py` now, behind `build.py`.
-- `refine-body.mjs` is the script of the reference page with **three
+- `refine-body.mjs` is the script of the reference page with **four
   changes**. The first is a correction. Where a border crossing was snapped onto a vertex, the
   remaining quad was split along a diagonal that made a triangle without
   area; that triangle was dropped, and the crossing on the other edge was
@@ -214,7 +285,8 @@ built, and git has them.
   nothing. The third is `--freeze <region>`: the borders of that region
   stay exactly on the edges they lie on. The build passes `--freeze none`,
   because it has cut the inert zone's borders itself (see "The straight
-  cuts").
+  cuts"). The fourth is the three options of the shade (see "After the
+  gate"); without them the shade is the reference page's.
 - `bpy` (Blender as a Python module, which the guide names) installs from
   PyPI here but does not import: the container lacks `libtbb.so.12`. Nothing
   in the pipeline needs it. Subdivision, skinning, the thinning of the inert

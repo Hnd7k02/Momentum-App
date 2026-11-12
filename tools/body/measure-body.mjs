@@ -15,7 +15,8 @@
  *               closed loops. The loop that spans the middle is the trunk, and
  *               a loop beside it is an arm; where no loop spans the middle the
  *               body has divided into legs, and a loop beside a leg is a hand.
- *   crotch      the highest cut in which no loop spans the middle.
+ *   crotch      where the legs part: between the highest cut in which no loop
+ *               spans the middle and the cut above it, found by halving.
  *   elbow, knee the border ring between the regions: upper arm | forearms,
  *               thigh | calves. It is where the model itself puts the joint.
  *   wrist       the narrowest cut of the arm between elbow and fingertip.
@@ -362,7 +363,7 @@ export function measure(body, skeleton = null) {
 
   const cast = (origin, direction, farthest = false) => castRay(body, origin, direction, farthest);
 
-  /* legs: the highest cut in which no loop spans the middle */
+  /* legs: the highest cut in which no loop spans the middle, and then the place above it */
   let crotch = null;
   for (const s of slices) {
     if (s.y > low + 0.65 * H) break;

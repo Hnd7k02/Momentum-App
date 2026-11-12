@@ -99,7 +99,7 @@ side is cut along its own plane.
 | Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | yes |
 | Shoulder height (acromion) | 80.0–83.0 % | 82.8 % ✓ | yes |
 | Knee height (joint line) | 27.0–30.0 % | 29.9 % ✓ | no — target not checked at its source |
-| Crotch height | 45.0–49.0 % | 49.0 % ✓ | no — target not checked at its source |
+| Crotch height | 45.0–49.0 % | 49.1 % ✗ | no — target not checked at its source |
 | Upper arm | 16.7–20.5 % | 18.3 % ✓ | yes |
 | Forearm | 13.1–16.1 % | 15.2 % ✓ | yes |
 | Hand | 9.7–11.9 % | 10.8 % ✓ | yes |
@@ -110,7 +110,7 @@ side is cut along its own plane.
 | Upper arm away from the trunk | 15–25° | 21.1° ✓ | yes |
 | Elbow bend | 5–15° | 7.7° ✓ | yes |
 | Toes turned out | 5–10° | 6.4° ✓ | yes |
-| Met | of 14 | 14 | 11 held |
+| Met | of 14 | 13 | 11 held |
 | Triangles | ≤ 80,000 | 49,988 | yes |
 | Inert zone | 25–35 % | 33 % | |
 | Smallest group | ≥ 400 | 1,642 (triceps) | yes |
@@ -121,6 +121,61 @@ Hand, sole, crown and face are `none`; the ridge between neck and shoulder,
 and the same slope from the front, are `back`; the outside of the thigh is
 `quadriceps`. `tools/body/checkpoints.mjs` asks 33 such places on every
 build.
+
+*Corrected on 12 November 2026, after the gate:* this table read "Crotch
+height 49.0 % ✓" and "14 met". The script took the crotch as the highest of
+its 900 cuts in which the legs are still two loops — the cut **below** the
+crotch, up to 0.11 % of the height too low, and jumping by that much when
+the surface moves by half a millimetre. It now finds the place between two
+cuts by halving, and the same body reads 49.10 %: two millimetres above a
+window that is itself not checked at its source (the one ANSUR II figure
+found is 47.4 %). The body did not change; the reading did. The candidates
+of the gate read the same way: `athletisch-a` 49.1 %, `schlank-a` 49.2 %,
+`kraeftig-a` 48.9 %, and their table above stands as it was shown.
+
+A second reading was made safer at the same time and changes no figure of
+a body measured before: the hand's reach is taken from the hand's own cuts,
+because with the arm held closer the thigh lay within a hand's breadth of
+the wrist and was taken for the hand (13.4 % for 9.7 %).
+
+## The candidates of the second sheet
+
+Measured on 12 November 2026. `gate-2` is the shipped body with the two
+corrections the owner added after the gate — the surface and the arms —
+and `gate-2-b` the same with the relief bounded at 6 mm instead of 4. They
+are candidates; the app ships `momentum-body`.
+
+| measure | target | momentum-body | gate-2 | gate-2-b |
+|---|---|---|---|---|
+| Height | — | 1.750 m | 1.750 m | 1.750 m |
+| Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | 12.6 % ✓ | 12.6 % ✓ |
+| Shoulder height (acromion) | 80.0–83.0 % | 82.8 % ✓ | 82.8 % ✓ | 82.8 % ✓ |
+| Knee height (joint line) | 27.0–30.0 % | 29.9 % ✓ | 30.0 % ✓ | 30.0 % ✓ |
+| Crotch height | 45.0–49.0 % | 49.1 % ✗ | 49.1 % ✗ | 49.1 % ✗ |
+| Upper arm | 16.7–20.5 % | 18.3 % ✓ | 18.2 % ✓ | 18.3 % ✓ |
+| Forearm | 13.1–16.1 % | 15.2 % ✓ | 14.6 % ✓ | 14.6 % ✓ |
+| Hand | 9.7–11.9 % | 10.8 % ✓ | 10.1 % ✓ | 10.1 % ✓ |
+| Foot length | 14.5–16.0 % | 14.9 % ✓ | 14.9 % ✓ | 14.9 % ✓ |
+| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.6 % ✓ | 29.7 % ✓ | 29.7 % ✓ |
+| Neck width to head width | 0.75–0.90 | 0.79 ✓ | 0.78 ✓ | 0.79 ✓ |
+| Symmetry (largest mirrored distance) | ≤ 2 mm | 0.6 mm ✓ | 0.6 mm ✓ | 0.6 mm ✓ |
+| Upper arm away from the trunk | 15–25° | 21.1° ✓ | 17.0° ✓ | 17.2° ✓ |
+| Elbow bend | 5–15° | 7.7° ✓ | 7.4° ✓ | 7.5° ✓ |
+| Toes turned out | 5–10° | 6.4° ✓ | 6.4° ✓ | 6.4° ✓ |
+| Met | of 14 | 13 | 13 | 13 |
+| Triangles | ≤ 80,000 | 49988 | 49964 | 49936 |
+| Inert zone | 25–35 % | 33 % | 33 % | 33 % |
+| Smallest group | ≥ 400 | 1642 | 1654 | 1654 |
+| File | ≤ 700 KB | 688 KB | 687 KB | 687 KB |
+| Closed surface | yes | yes | yes | yes |
+
+The hand's figure is the reach from the wrist to the farthest point of the
+hand, so it is shorter with the fingers bent more (28° for 20°); the hand
+itself is the same, 12.1 % of the height laid flat along its joints. Arm
+and hand together read 42.9 % for 44.3 %.
+
+Both pass `tools/validate-body-glb.mjs` as it stands, with all 33 check
+points and its eleven measures.
 
 ## What the targets were checked against
 

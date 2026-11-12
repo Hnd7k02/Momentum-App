@@ -4122,7 +4122,11 @@ height enter the validator only after the same check.
 `athletisch-a` with the three corrections: 49,988 triangles, a third of them
 in the inert zone, 704,044 bytes (688 KB; 475 KB compressed, for 345 KB
 before), closed, built byte for byte by `python3 tools/body/build.py
-momentum-body --install`. It meets all fourteen measures of the guide.
+momentum-body --install`. It meets thirteen of the fourteen measures of the
+guide — the report of STOP 7A said fourteen; the crotch height reads 49.1 %
+for a window of 45–49 % once it is measured between the script's cuts
+instead of at the cut below it (`tools/body/MEASURES.md`). That measure is
+not held by the validator and its window is not checked at its source.
 
 - *The cuts.* The build cuts the mesh itself along five planes — the neck
   6 mm below its joint and tilted 5°, wrists and ankles across the limb —
@@ -4165,6 +4169,59 @@ momentum-body --install`. It meets all fourteen measures of the guide.
   had run its front pass on a body standing at 57° since before this block
   — one tap of its top row presses "Seite" — and puts the body back now.
   Neither is a change to the product.
+
+**After the gate: two more corrections, a second sheet, production
+paused (owner, 2026-11-12).** The owner's message reached the session after
+production and STOP 7A were done. He stops production and adds:
+
+- *2b, the surface.* The crumples and specks must go — folds at the
+  collarbone, under the chest, on the belly and in the groin, rings at wrist
+  and ankle. The relief in multiples is to be smoothed softly, so that the
+  muscles' forms stay and no folds do; the baked shade is to be dosed so
+  that it brings out forms and paints neither lines nor specks; in the
+  neutral state no border between two regions is to be seen. The depth of
+  the relief may stay if the folds are gone.
+- *3, the arms.* They measure normal (44.3 % of the height) and look too
+  long: the forearm to the mean, 14.6 % for 15.2 %; the forearms a little
+  stronger; the fingers bent a little more; the upper arms a little closer
+  to the trunk, about 17° for 21°.
+
+All corrections are to be shown as a new sheet with close-ups before and
+after — chest, belly and groin, shoulder, the arm, in the stage at 393 px.
+Production goes on only after his word, and what is built is then brought
+along.
+
+What was done: **nothing in the app.** `public/models/momentum-body.glb`,
+the table, the still, the validator and the preview are as STOP 7A left
+them, and the shipped body still builds to its recorded bytes. The two
+corrections are a candidate, `gate-2`, built beside it
+(`tools/body/README.md`, "After the gate").
+
+- *Where the folds came from* was measured before anything was changed: the
+  relief, not the base body and not first of all the shade. Its narrowest
+  lines are creases in multiples; at the waist it ran into its bound of
+  9 mm from both sides, a step of 13 mm round the body; the nipples and the
+  navel, modelled in millimetre rings, became spikes. The shade then
+  painted every groove against the body's own deepest. The rings at wrist
+  and ankle were the subdivision's rounding ending in a step.
+- *The depth of the relief did not stay.* The owner allowed it to stay if
+  the folds went; the fold at the waist is the relief at its bound, and it
+  goes only with the bound. `gate-2` bounds the relief at 4 mm for 9 mm,
+  inside the guide's 2–6 mm — the depth the block had left "because it does
+  not read at the size of the app" (step 4). What is the size of a muscle
+  reads as strongly as before on the white body in the stage, and what is
+  the size of a wrinkle half as strongly. `gate-2-b`, at 6 mm, is on the
+  sheet as the alternative: more drawing, a trace of the waist.
+- *The nipples are gone and the navel is a soft hollow.* Not asked for in
+  those words; they were the specks.
+- *The arms* use MakeHuman's own targets, three files more from the same
+  folder under the same CC0 text, and the pose: forearm 14.6 %, 88 mm
+  across for 84, upper arm 17.0° from the trunk, fingers 28° for 20°.
+- *Two readings of the measuring script were wrong* and are corrected: the
+  crotch (49.1 %, not 49.0 %, for the shipped body as for every candidate —
+  see above) and the hand's reach with the arm held close.
+
+The outcome of the second sheet is the owner's to give.
 
 ## D166 — The inert zone has a tone of its own
 

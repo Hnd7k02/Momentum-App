@@ -69,7 +69,8 @@
  *                     shallowest body still gets its lines painted in full [0 = relative]
  *   --shadefine <0..1> the share of the fine scale in the shade's grooves:
  *                     the fine scale draws lines, the broad one forms [0.65]
- *   --shadesmooth <n> how often the shade is averaged over the neighbours [1]
+ *   --shadesmooth <n> how often the shade is averaged over the neighbours;
+ *                     0 leaves it as computed, triangle by triangle [1]
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -716,7 +717,7 @@ function bakeShade() {
   // of them (--shadesmooth) widen a painted line into a soft form.
   let from = out;
   let smooth = out;
-  for (let pass = 0; pass < Math.max(1, opt.shadesmooth); pass++) {
+  for (let pass = 0; pass < opt.shadesmooth; pass++) {
     smooth = new Float64Array(V0);
     for (let i = 0; i < V0; i++) {
       let acc = from[i] * 2, n = 2;

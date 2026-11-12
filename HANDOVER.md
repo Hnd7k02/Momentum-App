@@ -908,7 +908,59 @@ owner's acceptance on his iPhone**)
   (D163). It starts empty — the owner imports his backup there.
 
 **WP3 Block 7A — the body model** (branch `claude/momentum-wp3`, not
-merged; **built, at STOP 7A — waiting for the owner on his iPhone**)
+merged; **production paused by the owner — a second sheet with two more
+corrections is with him; the app still ships the body of STOP 7A**)
+- **Where it stands now (2026-11-12, after STOP 7A).** The owner added two
+  corrections to the gate and stopped production until he has seen them
+  (D165, "After the gate"): *2b* the surface — no folds at collarbone,
+  chest, belly and groin, no rings at wrist and ankle, a shade that brings
+  out forms and paints no lines — and *3* the arms — forearm 14.6 % for
+  15.2 %, a little stronger, fingers bent more, upper arms about 17° from
+  the trunk. **Nothing in the app was changed for them.** They are a
+  candidate, `gate-2` (`python3 tools/body/build.py gate-2`, into
+  `tools/body/out/`, installed nowhere), with `gate-2-b` as the sheet's
+  alternative (relief bounded at 6 mm for 4). The second sheet is a private
+  Artifact page, «Körper-Gate 7A, Blatt 2» (https://claude.ai/artifact/Sr45ZS6gT3QeEeNJFbRjyw); its pictures are
+  in `docs/design/wp3/7a-gate-2/`.
+  - *What the sheet asks him:* how much relief (A 4 mm, recommended, or B
+    6 mm), the nipples and the navel (gone and a soft hollow, as shown),
+    and the arms (as shown, or what to adjust). The five questions of
+    STOP 7A are still open and do not hang on the sheet.
+  - *Checked:* `tsc -b` 0; `npm run test` exit 0, 113 files, 1858 tests;
+    `git diff 552802c -- src public .github` is empty; all three bodies of
+    `candidates.json` build to their recorded bytes; both candidates pass
+    the validator as it stands. No browser suite was run: the app did not
+    change. A read-only review of the pipeline's diff (three readers on
+    Sonnet, each finding checked by a refuter) found nothing in the
+    geometry and two small things, both corrected (`--shadesmooth 0`
+    smoothed once all the same; a stale comment on the crotch).
+  - *What the pipeline learned* (every one an option, off for the shipped
+    body, which builds to its recorded bytes): `relief.soften`,
+    `relief.smooth`, `relief.sharpest`, `spots`, `seam_fade` in
+    `candidates.json`; `--shadedepth`, `--shadefine`, `--shadesmooth` in
+    `refine-body.mjs` (four tests more, 70 in the `tools` project). Three
+    more MakeHuman files are vendored for the arms (21 files; the same
+    folder, the same CC0 text). `tools/body/README.md`, "After the gate",
+    has the causes as measured.
+  - *Two readings of `measure-body.mjs` were wrong and are corrected.* The
+    crotch was the cut below it; found between the cuts it reads 49.1 %
+    for the shipped body too, so **the shipped body meets 13 of the 14
+    measures, not 14** as STOP 7A reported (the window is 45–49 %, not
+    checked at its source, not in the validator). The hand's reach took the
+    thigh for the hand once the arm hung closer.
+  - **When the owner says go** (and names A or B): make the chosen
+    candidate `momentum-body` in `candidates.json` and drop the other;
+    `build.py momentum-body --record --install`; the table in
+    `muscleMeshMap.ts` (the test names the counts); the still
+    (`tools/render-body-preview.mjs`, and his answer to question 2 of
+    STOP 7A decides its tone); the validator needs no change — both
+    candidates pass it as it stands; `tools/body/README.md` ("The body",
+    the digest table), `MEASURES.md`, D165's outcome; then the closing run
+    again (the four 3D suites one at a time — `body-reach.mjs` matters, the
+    arms hang closer), the preview, and STOP 7A anew.
+  - **If he asks for more on the sheet:** change `gate-2` in
+    `candidates.json`, `build.py gate-2 --record`, and rebuild the pictures
+    with the two scripts named in `docs/design/wp3/7a-gate-2/README.md`.
 - **What the app ships now.** `public/models/momentum-body.glb` is a new
   body: `athletisch-a` of the gate with the owner's three corrections,
   built by one command from MakeHuman's base mesh (CC0 1.0) — 49 988
@@ -948,7 +1000,8 @@ merged; **built, at STOP 7A — waiting for the owner on his iPhone**)
   - [x] Step 1 — the decision that supplements D156: **D165**.
   - [x] Step 2 — the pipeline under `tools/body/` (its `README.md` has the
     commands). One command, `python3 tools/body/build.py <candidate>`;
-    numpy and Node only. The eighteen MakeHuman files the candidates read
+    numpy and Node only. The eighteen MakeHuman files (21 since the second
+    sheet) the candidates read
     lie in `tools/body/makehuman/` with their `LICENSE.md` (CC0 1.0
     Universal, read in full) and a manifest of sha256 — in the repository
     rather than pinned to the wheel, so the build runs offline and the
