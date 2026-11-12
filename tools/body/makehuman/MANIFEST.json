@@ -28,6 +28,18 @@
       "bytes": 1633269,
       "sha256": "c3df45e2f2165663b483b7fa3dfed6f1bd5e2dd48d8825308de1a8453a88b111"
     },
+    "targets/arms/l-lowerarm-muscle-incr.target.gz": {
+      "bytes": 1613,
+      "sha256": "29077b022632174656b8404ae12f68f62059f2fbc774b24885ec5b7460b72992"
+    },
+    "targets/arms/measure-lowerarm-length-decr.target.gz": {
+      "bytes": 13026,
+      "sha256": "c2ebdaf38b9fedc6db399039d95303adc6bc7614f007416f4ace0b573ecfd4c2"
+    },
+    "targets/arms/r-lowerarm-muscle-incr.target.gz": {
+      "bytes": 1598,
+      "sha256": "84777a42af2cefbabcea15820c61dfd23a800d9a2583b23d063a1566052da226"
+    },
     "targets/hands/l-hand-fingers-distance-decr.target.gz": {
       "bytes": 3671,
       "sha256": "e11663e967bf3d1478ee5e707c9412b753ea7fa90e05728155780d3ed91425f5"

@@ -846,13 +846,21 @@ def face_labels(vertex_labels, quads):
 
 # ── subdivision ───────────────────────────────────────────────────────────────
 
-def subdivide(P, quads, labels, refine_mask):
+def subdivide(P, quads, labels, refine_mask, weight=None):
     """One Catmull-Clark step on the quads of `refine_mask`; the rest stays coarse.
 
     Positions are those of a Catmull-Clark step over the whole mesh, so the
     surface is one smooth surface. Where a coarse quad meets a refined one it
     takes the new point on the shared edge into its outline and is closed as
     a fan around its centre: no gap, no T-junction.
+
+    The step rounds the surface a little, and the coarse zone is not rounded:
+    where the two meet, the rounded side ends in a step — a ring round the
+    limb. `weight`, one number in [0, 1] for every old vertex, says how much
+    of the rounding a vertex takes; falling to 0 towards the coarse zone, it
+    lets the rounding run out instead of ending. A new point on an edge takes
+    the mean of its ends' weights. Without it every touched vertex is rounded
+    in full, as before.
 
     Returns the new positions, the triangles, their regions, and for every new
     vertex the old vertices it is the mean of (for carrying fields across).
@@ -889,6 +897,9 @@ def subdivide(P, quads, labels, refine_mask):
         fs = edge_faces[e]
         if len(fs) == 2:
             edge_point[e] = (P[a] + P[b] + face_point[fs[0]] + face_point[fs[1]]) / 4.0
+            if weight is not None:
+                share = (weight[a] + weight[b]) / 2.0
+                edge_point[e] = (1.0 - share) * (P[a] + P[b]) / 2.0 + share * edge_point[e]
         else:
             edge_point[e] = (P[a] + P[b]) / 2.0
 
@@ -914,6 +925,8 @@ def subdivide(P, quads, labels, refine_mask):
     touched[np.unique(quads[refine_mask])] = True
     interior = (face_count == edge_count) & (face_count >= 3)
     vertex_point = np.where((touched & interior)[:, None], smooth, P)
+    if weight is not None:
+        vertex_point = P + np.asarray(weight, dtype=np.float64)[:, None] * (vertex_point - P)
 
     edge_used = np.zeros(ne, dtype=bool)
     edge_used[np.unique(face_edges[refine_mask])] = True
@@ -1037,6 +1050,37 @@ def taubin(P, adj, iterations, mask=None):
             if mask is not None:
                 step[~mask] = 0
             cur = cur + step
+    return cur
+
+
+def limit_curvature(P, tris, mask, sharpest, passes=120):
+    """No fold sharper than `sharpest`: bend the surface back wherever it bends harder.
+
+    A muscle is a broad form and a wrinkle is a narrow one, and what tells
+    them apart is how hard the surface bends. The bend at a vertex is read as
+    its mean curvature H (in 1/m; a rod of radius r has H = 1/2r), from how
+    far the vertex stands off the mean of its neighbours along its normal:
+    off = H * h^2 / 2 for edges of length h. Where |H| is above `sharpest`
+    the vertex is moved half of the way back to where it would be just at
+    the limit, and that is repeated: a crease opens into a soft valley, a
+    spike settles into a low dome, and everything that bends more gently
+    than the limit is not touched at all. Only the masked vertices move, and
+    only along their normals, so the mesh does not slide.
+    """
+    adj = adjacency(len(P), tris)
+    offset, targets, sources = adj
+    cur = P.copy()
+    for _ in range(passes):
+        N = vertex_normals(cur, tris)
+        mean = neighbour_mean(cur, offset, targets, sources)
+        off = np.einsum('ij,ij->i', mean - cur, N)
+        edge2 = np.zeros(len(cur))
+        np.add.at(edge2, sources, ((cur[targets] - cur[sources]) ** 2).sum(axis=1))
+        degree = np.maximum((offset[1:] - offset[:-1]).astype(np.float64), 1)
+        allowed = sharpest * (edge2 / degree) / 2.0
+        excess = np.sign(off) * np.maximum(np.abs(off) - allowed, 0.0)
+        excess[~mask] = 0
+        cur = cur + 0.5 * excess[:, None] * N
     return cur
 
 
@@ -1172,7 +1216,7 @@ def high_pass(field, adj, iterations):
     return field - low
 
 
-def muscle_detail(base: Base, macro: dict, local: dict | None, iterations=10):
+def muscle_detail(base: Base, macro: dict, local: dict | None, iterations=10, soften=0, smooth=0):
     """What MakeHuman's own muscle slider adds in fine form, as a displacement.
 
     The difference between this body at full muscle and at average muscle is
@@ -1180,6 +1224,14 @@ def muscle_detail(base: Base, macro: dict, local: dict | None, iterations=10):
     between the muscles. High-passed, the bulk goes and the lines stay. Added
     to a body in multiples it sharpens the definition without making the body
     bigger — relief from the data itself, with no line drawn by hand.
+
+    In multiples the finest part of it turns into folds: a line one vertex
+    wide, three times as deep, is a crease. `soften` averages the
+    displacement over the neighbours that many times, which takes the
+    narrowest lines out and leaves the forms between the muscles — the
+    relief is then a band of scales, neither the bulk nor the wrinkles.
+    `smooth` does the same with Taubin's two steps, which cut the narrow
+    lines off more sharply and take less from the forms beside them.
     """
     full, _ = shape(base, {**macro, 'muscle': 1.0}, local)
     plain, _ = shape(base, {**macro, 'muscle': 0.5}, local)
@@ -1188,8 +1240,65 @@ def muscle_detail(base: Base, macro: dict, local: dict | None, iterations=10):
     remap[used] = np.arange(len(used))
     adj = quad_adjacency(len(used), remap[base.body_quads])
     detail = high_pass((full - plain)[used], adj, iterations)
+    offset, targets, sources = adj
+    for _ in range(soften):
+        detail = 0.5 * detail + 0.5 * neighbour_mean(detail, offset, targets, sources)
+    if smooth:
+        detail = taubin(detail, adj, smooth)
     out = np.zeros_like(base.V)
     out[used] = detail
+    return out
+
+
+def sharp_spots(base: Base, V, labels, regions, sharper_than, reach):
+    """Where the base body has something small and sharp in the named regions.
+
+    On MakeHuman's body that is the nipples and the navel: modelled in rings
+    of edges a millimetre or two long, they bend the surface harder than
+    anything a muscle does. On a body in one colour, an inch tall on a phone,
+    they are specks — and with the relief in multiples, spikes. A vertex is
+    a seed where the mean curvature (1/m, read as in `limit_curvature`) is
+    above `sharper_than`; the spot is everything within `reach` metres of a
+    seed along the surface, inside the muscles. Returns the spot as a mask
+    over the body's vertices, and how many seeds it grew from.
+    """
+    used = base.body_vertices
+    remap = -np.ones(len(base.V), dtype=np.int64)
+    remap[used] = np.arange(len(used))
+    quads = remap[base.body_quads]
+    P = V[used] / 10.0                                    # the base mesh counts in decimetres
+    adj = quad_adjacency(len(P), quads)
+    offset, targets, sources = adj
+    tris = np.concatenate([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]])
+    N = vertex_normals(P, tris)
+    off = np.einsum('ij,ij->i', neighbour_mean(P, offset, targets, sources) - P, N)
+    edge2 = np.zeros(len(P))
+    np.add.at(edge2, sources, ((P[targets] - P[sources]) ** 2).sum(axis=1))
+    degree = np.maximum((offset[1:] - offset[:-1]).astype(np.float64), 1)
+    curvature = 2.0 * off / np.maximum(edge2 / degree, 1e-12)
+    labels = np.asarray(labels)
+    seeds = np.isin(labels, [R[name] for name in regions]) & (np.abs(curvature) > sharper_than)
+    dist = geodesic(P, adj, seeds, reach)
+    return np.isfinite(dist) & (dist <= reach) & (labels != NONE), int(seeds.sum())
+
+
+def relax_spots(base: Base, V, spot, passes=80):
+    """The surface inside `spot` (a mask from `sharp_spots`), drawn smooth between its rim.
+
+    Each pass moves every vertex of the spot halfway to the mean of its
+    neighbours while the rim stays: after enough of them the spot is the
+    calm surface its surroundings would have without it.
+    """
+    used = base.body_vertices
+    remap = -np.ones(len(base.V), dtype=np.int64)
+    remap[used] = np.arange(len(used))
+    offset, targets, sources = quad_adjacency(len(used), remap[base.body_quads])
+    cur = V[used].copy()
+    for _ in range(passes):
+        mean = neighbour_mean(cur, offset, targets, sources)
+        cur[spot] = 0.5 * cur[spot] + 0.5 * mean[spot]
+    out = V.copy()
+    out[used] = cur
     return out
 
 

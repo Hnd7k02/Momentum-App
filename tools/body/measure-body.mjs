@@ -368,6 +368,19 @@ export function measure(body, skeleton = null) {
     if (s.y > low + 0.65 * H) break;
     if (s.loops.some((loop) => loop.leg === 1) && s.loops.some((loop) => loop.leg === -1)) crotch = s.y;
   }
+  // The cuts lie a 900th of the height apart, and the crotch lies between
+  // two of them: the cut below it alone reads up to 0.11 % too low and jumps
+  // by that much when the surface moves by a hair. Halving the gap finds it.
+  if (crotch !== null) {
+    let below = crotch, above = crotch + H / STEPS;
+    for (let k = 0; k < 12; k++) {
+      const y = (below + above) / 2;
+      const loops = slice(y);
+      if (loops.some((loop) => loop.leg === 1) && loops.some((loop) => loop.leg === -1)) below = y;
+      else above = y;
+    }
+    crotch = (below + above) / 2;
+  }
 
   /* per-vertex regions, for the border rings */
   const mask = new Int32Array(V);
@@ -463,11 +476,31 @@ export function measure(body, skeleton = null) {
     if (!wrist) { notes.push(`no wrist found on side ${side}`); continue; }
     result.wrist = [wrist.loop.cx, wrist.y, wrist.loop.cz];
 
+    // The hand is what the cuts below the wrist show on this side, and
+    // nothing else: with the arm held close, the thigh lies within a hand's
+    // breadth of the wrist and is not the hand. Every such cut gives the box
+    // of its loops, and a point counts if it lies in the box of the cut at
+    // its height.
+    const STEP = H / STEPS;
+    const boxes = new Map();
+    for (const s of slices) {
+      if (s.y > wrist.y + STEP || s.y < tipY - STEP) continue;
+      const here = s.loops.filter((candidate) => candidate.side === side);
+      if (!here.length) continue;
+      boxes.set(Math.round((s.y - low) / STEP), {
+        minX: Math.min(...here.map((l) => l.minX)), maxX: Math.max(...here.map((l) => l.maxX)),
+        minZ: Math.min(...here.map((l) => l.minZ)), maxZ: Math.max(...here.map((l) => l.maxZ)),
+      });
+    }
+    const MARGIN = 0.003 * H;
     let reach = 0;
     for (let i = 0; i < V; i++) {
-      // Below the wrist and within a hand's reach of it: the leg beside is farther.
       if (P[i * 3] * side <= 0 || P[i * 3 + 1] > wrist.y || P[i * 3 + 1] < tipY - 0.002 * H) continue;
       if (Math.abs(P[i * 3] - wrist.loop.cx) > 0.09 * H) continue;
+      const k = Math.round((P[i * 3 + 1] - low) / STEP);
+      const box = boxes.get(k) ?? boxes.get(k + 1) ?? boxes.get(k - 1);
+      if (!box) continue;
+      if (P[i * 3] < box.minX - MARGIN || P[i * 3] > box.maxX + MARGIN || P[i * 3 + 2] < box.minZ - MARGIN || P[i * 3 + 2] > box.maxZ + MARGIN) continue;
       const d = norm(sub(point(i), result.wrist));
       if (d > reach) { reach = d; result.fingertip = point(i); }
     }

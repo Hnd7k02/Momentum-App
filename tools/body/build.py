@@ -83,18 +83,32 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     if head == 'B':
         V = B.smooth_face(base, V, **spec.get('head_smoothing', {}))
 
+    # The nipples and the navel, found before the relief is laid on (it would
+    # hide what is the body's own) and smoothed away after it.
+    # One entry for each kind: how sharp, how far round it, and how many
+    # passes — many take a spot out, a few leave it as a soft hollow.
+    spots = []
+    for kind in spec.get('spots', []):
+        spot, seeds = B.sharp_spots(base, V, load_regions(), kind['regions'], kind['sharper_than'], kind['reach_mm'] / 1000.0)
+        spots.append((spot, kind.get('passes', 80)))
+        say(f'spots: {seeds} sharp vertices in {", ".join(kind["regions"])}, {int(spot.sum())} vertices smoothed '
+            f'in {kind.get("passes", 80)} passes')
+
     relief = spec.get('relief', {})
     if relief.get('muscle_detail'):
         # MakeHuman's own muscle lines, in multiples — and no deeper than the
         # guide allows a groove to be. Unbounded, the few sharpest lines of the
         # data (above the buttocks, along the hip) become creases of two
         # centimetres while the rest has hardly begun to show.
-        moved = relief['muscle_detail'] * B.muscle_detail(base, macro, local, relief.get('muscle_detail_scale', 10))
+        moved = relief['muscle_detail'] * B.muscle_detail(base, macro, local, relief.get('muscle_detail_scale', 10),
+                                                          relief.get('soften', 0), relief.get('smooth', 0))
         limit = relief.get('limit_mm', 0) / 100.0            # the base mesh counts in decimetres
         if limit:
             size = np.linalg.norm(moved, axis=1)
             moved = moved * (limit * np.tanh(size / limit) / np.maximum(size, 1e-12))[:, None]
         V = V + moved
+    for spot, passes in spots:
+        V = B.relax_spots(base, V, spot, passes)
 
     posed = B.pose(base, V, **spec.get('pose', {}))
     Vp = posed.skin()
@@ -114,11 +128,22 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     # mesh is cut in saw teeth, one tooth for each coarse quad; two rings on,
     # refine-body.mjs draws it through an even mesh.
     refine_mask = quad_labels != B.NONE
-    for _ in range(spec.get('seam_rings', 2)):
+    rings = spec.get('seam_rings', 2)
+    # How much of the subdivision's rounding a vertex takes: all of it on the
+    # muscles, and with 'seam_fade' less with every ring into the inert zone,
+    # down to none where the coarse mesh begins. Without the fade the
+    # rounding ends there in a step — a ring round wrist and ankle.
+    reach = np.full(len(body.P), rings + 1, dtype=np.int64)
+    reach[body.quads[refine_mask].ravel()] = 0
+    for ring in range(1, rings + 1):
         touched = np.zeros(len(body.P), dtype=bool)
         touched[body.quads[refine_mask].ravel()] = True
         refine_mask = refine_mask | touched[body.quads].any(axis=1)
-    P, tris, tri_labels, parents = B.subdivide(body.P, body.quads, quad_labels, refine_mask)
+        fresh = np.zeros(len(body.P), dtype=bool)
+        fresh[body.quads[refine_mask].ravel()] = True
+        reach[fresh & (reach > ring)] = ring
+    weight = np.clip(1.0 - reach / max(rings, 1), 0.0, 1.0) if spec.get('seam_fade') else None
+    P, tris, tri_labels, parents = B.subdivide(body.P, body.quads, quad_labels, refine_mask, weight)
     n_old = len(body.P)
     if spec.get('inert_share', 1.0) < 1.0:
         # Hands and feet are thinned; the head is not. A face with half its
@@ -153,6 +178,15 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
 
     if relief.get('unsharp'):
         P = B.unsharp(P, tris, free, relief['unsharp'], relief.get('unsharp_scale', 6), relief.get('unsharp_limit', 0.004))
+    if relief.get('sharpest'):
+        # No fold: nowhere on the muscles may the surface bend harder than
+        # this (1/m). The relief keeps its depth and loses its creases.
+        P = B.limit_curvature(P, tris, free, relief['sharpest'], relief.get('sharpest_passes', 120))
+    if relief.get('fair'):
+        # The last of the folds: what is narrower than a few edges of the fine
+        # mesh is smoothed away without shrinking the forms (Taubin). The
+        # seam to the inert zone keeps its place, and with it the five cuts.
+        P = B.taubin(P, B.adjacency(len(P), tris), relief['fair'], free)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     raw = out_dir / f'{name}.regions.glb'

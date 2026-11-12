@@ -63,6 +63,13 @@
  *   --ao <0..1>       strength of the ambient occlusion              [0.4]
  *   --floor <0..1>    darkest allowed shade                          [0.55]
  *   --white <0..1>    share of the surface that keeps the full base colour [0.85]
+ *   --shadedepth <m>  for the shade alone: the depth of a groove that counts
+ *                     as a full one, in metres. Without it a groove is
+ *                     measured against the deepest 3 % of the body, so the
+ *                     shallowest body still gets its lines painted in full [0 = relative]
+ *   --shadefine <0..1> the share of the fine scale in the shade's grooves:
+ *                     the fine scale draws lines, the broad one forms [0.65]
+ *   --shadesmooth <n> how often the shade is averaged over the neighbours [1]
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -75,7 +82,12 @@ const opt = {
   band: 0.03, groove: 6, prior: 0.15, stray: 0.2, straymax: Infinity, freeze: '',
   hold: 'back|hamstringsGlutes,calves|quadriceps,calves|hamstringsGlutes',
   shade: 1, cavity: 0.5, ao: 0.4, floor: 0.55, white: 0.85,
+  shadedepth: 0, shadefine: 0.65, shadesmooth: 1,
 };
+// The file records the options it was made with. The three of the shade
+// that came after the first shipped body are recorded only where they are
+// used, so a body built without them is byte for byte the file it was.
+const LATER = { shadedepth: 0, shadefine: 0.65, shadesmooth: 1 };
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
   if (a.startsWith('--')) {
@@ -685,8 +697,14 @@ function dijkstra(sources, limit) {
 function bakeShade() {
   const ao = ambientOcclusion(64, 0.35);
   const out = new Float64Array(V0);
+  // The borders are walked along grooves measured against the body's own
+  // deepest ones. For the shade that measure paints the shallowest body as
+  // dark as the deepest: with --shadedepth a groove is measured in metres.
+  const depthOf = (relief, i) => (relief[i] < 0 ? Math.min(1, -relief[i] / opt.shadedepth) : 0);
   for (let i = 0; i < V0; i++) {
-    const cavity = Math.min(1, 0.65 * grooveFine[i] + 0.35 * grooveBroad[i]);
+    const narrow = opt.shadedepth > 0 ? depthOf(fine, i) : grooveFine[i];
+    const wide = opt.shadedepth > 0 ? depthOf(broad, i) : grooveBroad[i];
+    const cavity = Math.min(1, opt.shadefine * narrow + (1 - opt.shadefine) * wide);
     out[i] = (1 - opt.cavity * Math.pow(cavity, 0.85)) * (1 - opt.ao * (1 - ao[i]));
   }
   // Most of the body keeps the full base colour; only grooves and occluded
@@ -694,12 +712,18 @@ function bakeShade() {
   const sorted = Array.from(out).sort((a, b) => a - b);
   const reference = sorted[Math.floor(sorted.length * (1 - opt.white))] || 1;
   for (let i = 0; i < V0; i++) out[i] = Math.max(opt.floor, Math.min(1, out[i] / reference));
-  // One light smoothing pass so the shade never shows the triangles.
-  const smooth = new Float64Array(V0);
-  for (let i = 0; i < V0; i++) {
-    let acc = out[i] * 2, n = 2;
-    for (let e = adjacency.offset[i]; e < adjacency.offset[i + 1]; e++) { acc += out[adjacency.list[e]]; n++; }
-    smooth[i] = acc / n;
+  // One light smoothing pass so the shade never shows the triangles; more
+  // of them (--shadesmooth) widen a painted line into a soft form.
+  let from = out;
+  let smooth = out;
+  for (let pass = 0; pass < Math.max(1, opt.shadesmooth); pass++) {
+    smooth = new Float64Array(V0);
+    for (let i = 0; i < V0; i++) {
+      let acc = from[i] * 2, n = 2;
+      for (let e = adjacency.offset[i]; e < adjacency.offset[i + 1]; e++) { acc += from[adjacency.list[e]]; n++; }
+      smooth[i] = acc / n;
+    }
+    from = smooth;
   }
   return smooth;
 }
@@ -972,7 +996,10 @@ function writeGlb() {
       version: '2.0',
       generator: 'Momentum body pipeline v3 (tools/body/refine-body.mjs: groove borders + baked shade)',
       copyright: json.asset.copyright,
-      extras: { refinedFrom: { sha256: sourceHash, generator: json.asset.generator }, options: opt },
+      extras: {
+        refinedFrom: { sha256: sourceHash, generator: json.asset.generator },
+        options: Object.fromEntries(Object.entries(opt).filter(([key, value]) => !(key in LATER) || value !== LATER[key])),
+      },
     },
     extensionsUsed: ['KHR_mesh_quantization'],
     extensionsRequired: ['KHR_mesh_quantization'],
