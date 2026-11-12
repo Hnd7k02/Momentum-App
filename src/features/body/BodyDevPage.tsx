@@ -4,7 +4,9 @@ import { signedPercentText } from '../../i18n/typography';
 import type { Language } from '../../i18n';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { BodyViewer, type BodyView, type MuscleVisual } from './index';
-import { IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, STATE_COLOR, mutedIdentity, stateIntensity, type MuscleState } from './tokens';
+// The size of the stage in Muskelgruppen, for `?world=`: the body is judged in the box the app gives it.
+import '../gym/muscleModule.css';
+import { BODY_LOOK, IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, STATE_COLOR, mutedIdentity, stateIntensity, type BodyLook, type MuscleState } from './tokens';
 
 /**
  * The isolation harness for the 3D body — development only.
@@ -53,6 +55,23 @@ const FIXTURES: Record<string, Record<MuscleGroup, Fixture>> = {
     quadriceps: { state: 'declined', delta: -2.5 },
     hamstringsGlutes: { state: 'declined', delta: -2.5 },
   },
+  // The weakest tint beside the strongest, once in green and once in red
+  // (block 7A, the fifth picture): chest and thighs at ±3 %, trunk and
+  // shoulders at ±12 %, the arms held.
+  greens: {
+    ...all({ state: 'unchanged', delta: 0 }),
+    chest: { state: 'improved', delta: 2.5 },
+    quadriceps: { state: 'improved', delta: 2.5 },
+    core: { state: 'improved', delta: 12 },
+    shoulders: { state: 'improved', delta: 12 },
+  },
+  reds: {
+    ...all({ state: 'unchanged', delta: 0 }),
+    chest: { state: 'declined', delta: -2.5 },
+    quadriceps: { state: 'declined', delta: -2.5 },
+    core: { state: 'declined', delta: -12 },
+    shoulders: { state: 'declined', delta: -12 },
+  },
 };
 
 function visualsOf(fixture: Record<MuscleGroup, Fixture>): Partial<Record<MuscleGroup, MuscleVisual>> {
@@ -68,11 +87,49 @@ function visualsOf(fixture: Record<MuscleGroup, Fixture>): Partial<Record<Muscle
   return out;
 }
 
-/** `?lang=en` and `?model=missing` drive the two cases a fixture cannot. */
+/**
+ * The look block 7A proposes, judged on its candidates and shown at the gate
+ * (`?look=7a`). It is not the app's: the app keeps `BODY_LOOK` until the
+ * owner has chosen a body, and these values move to the tokens then.
+ *
+ * Less light from everywhere, one key from above and to the side, a light
+ * from behind for the edge — and no tone mapping, so that a status colour on
+ * the body is the colour of the legend and not a pastel of it (contract §8).
+ */
+const LOOK_7A: BodyLook = {
+  toneMapping: 'none',
+  exposure: 1,
+  hemisphere: 0.6,
+  key: { position: [-1.9, 3.0, 2.2], intensity: 1.9 },
+  fill: { position: [2.4, 0.9, 1.5], intensity: 0.3 },
+  back: { position: [0.9, 2.4, -2.6], intensity: 2.0 },
+  surface: { roughness: 0.62, inertRoughness: 0.7, environment: 0.3 },
+};
+
+/**
+ * `?lang=en` and `?model=missing` drive the two cases a fixture cannot.
+ * `?model=<path>` loads another file the dev server can reach — a candidate
+ * of the body pipeline, `tools/body/out/<name>.glb` — which is a path that
+ * exists here and nowhere in the app. `?look=7a` shows it in the proposed
+ * light, and `?world=gym|light` on the stage of that world, sized as the
+ * card in Muskelgruppen sizes it.
+ */
 const params = new URLSearchParams(window.location.search);
 const FIXTURE = FIXTURES[params.get('fixture') ?? 'mixed'] ?? MIXED;
 const LANG: Language = params.get('lang') === 'en' ? 'en' : 'de';
-const MODEL_URL = params.get('model') === 'missing' ? `${import.meta.env.BASE_URL}models/does-not-exist.glb` : undefined;
+const MODEL = params.get('model');
+const MODEL_URL =
+  MODEL === 'missing' ? `${import.meta.env.BASE_URL}models/does-not-exist.glb`
+  : MODEL ? `${import.meta.env.BASE_URL}${MODEL}`
+  : undefined;
+const LOOK = params.get('look') === '7a' ? LOOK_7A : BODY_LOOK;
+/** The stage of each world: `--surface-base` around `--surface-secondary`. */
+const WORLDS = {
+  gym: { page: '#0f0f14', stage: '#232330', ink: '#f2f2f7' },
+  light: { page: '#f4f4f8', stage: '#f1f1f5', ink: '#16161d' },
+} as const;
+const WORLD = WORLDS[params.get('world') as keyof typeof WORLDS] ?? null;
+if (params.get('world') === 'gym') document.documentElement.dataset.world = 'gym';
 
 export function BodyDevPage() {
   const [selected, setSelected] = useState<MuscleGroup | null>(null);
@@ -89,7 +146,7 @@ export function BodyDevPage() {
           canvas with rounded corners, and `body.mjs` holds the canvas's top
           and bottom bands at zero non-white pixels — the ground's lilac wash
           showing through a corner would count as the body touching the frame. */}
-      <main style={{ maxWidth: 430, margin: '0 auto', padding: 16, fontFamily: 'system-ui', background: '#fff', minHeight: '100%' }}>
+      <main style={{ maxWidth: 430, margin: '0 auto', padding: 16, fontFamily: 'system-ui', background: WORLD?.page ?? '#fff', color: WORLD?.ink, minHeight: '100%' }}>
         <h1 style={{ fontSize: 17 }}>Body viewer — dev harness</h1>
         <p data-readout style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
           <span data-angle>{angle}</span>° · <span data-view-readout>{view}</span> ·{' '}
@@ -110,7 +167,11 @@ export function BodyDevPage() {
           </button>
         </div>
 
-        <div data-host style={{ background: '#fff', borderRadius: 20, overflow: 'hidden' }}>
+        <div
+          data-host
+          className={WORLD ? 'muscle-module' : undefined}
+          style={{ background: WORLD?.stage ?? '#fff', borderRadius: WORLD ? 14 : 20, overflow: 'hidden' }}
+        >
           {mounted ? (
             <Suspense fallback={<div data-loading style={{ aspectRatio: '1 / 0.97' }} />}>
               <BodyViewer
@@ -123,6 +184,7 @@ export function BodyDevPage() {
                 onViewChange={setView}
                 onRotate={setAngle}
                 fallback={<p data-fallback>WebGL not available</p>}
+                look={LOOK}
               />
             </Suspense>
           ) : null}

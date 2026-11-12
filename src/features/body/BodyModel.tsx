@@ -8,7 +8,7 @@ import { useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
 import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
-import { BODY_DIMMED_COLOR } from './tokens';
+import { BODY_DIMMED_COLOR, type BodyLook } from './tokens';
 
 /**
  * Where the shipped model lives, under whatever base the app is served from
@@ -27,6 +27,8 @@ export type BodyModelProps = {
   onError?: (error: Error) => void;
   /** Registers the tap handler with the parent so CameraRig can drive it. */
   registerPick?: (pick: (ndc: { x: number; y: number }) => MuscleGroup | null) => void;
+  /** A look's surface values; absent leaves every material as approved. */
+  surface?: BodyLook['surface'];
 };
 
 export function BodyModel({
@@ -37,6 +39,7 @@ export function BodyModel({
   onReady,
   onError,
   registerPick,
+  surface,
 }: BodyModelProps) {
   const { camera, invalidate, gl, scene } = useThree();
   const root = useRef<Group>(null);
@@ -61,7 +64,15 @@ export function BodyModel({
       gltf.scene.traverse((o) => {
         const mesh = o as Mesh;
         if (!mesh.isMesh || mesh.userData.muscle) return;
-        const material = new MeshStandardMaterial({ color: BODY_DIMMED_COLOR, roughness: 0.8, metalness: 0 });
+        const material = new MeshStandardMaterial({
+          color: BODY_DIMMED_COLOR,
+          roughness: surface?.inertRoughness ?? 0.8,
+          metalness: 0,
+        });
+        if (surface?.environment !== undefined) material.envMapIntensity = surface.environment;
+        // A model may bring a baked shade as a vertex colour (tools/body).
+        // Conditional on purpose: without the attribute it would render black.
+        material.vertexColors = mesh.geometry.hasAttribute('color');
         material.name = INERT_REGION;
         mesh.material = material;
         inert.push(material);
@@ -81,9 +92,9 @@ export function BodyModel({
       cancelled = true;
       for (const material of inert) material.dispose();
     };
-  }, [gltf, gl, camera, scene, onReady, onError, invalidate]);
+  }, [gltf, gl, camera, scene, onReady, onError, invalidate, surface]);
 
-  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate });
+  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface });
 
   const pick = useCallback(
     (ndc: { x: number; y: number }): MuscleGroup | null => {

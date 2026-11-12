@@ -16,7 +16,7 @@
  */
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ACESFilmicToneMapping, PMREMGenerator, SRGBColorSpace, type Texture } from 'three';
+import { ACESFilmicToneMapping, AgXToneMapping, NoToneMapping, PMREMGenerator, SRGBColorSpace, type Texture } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import type { MuscleGroup } from '../../core/model';
 import { useT } from '../../i18n/I18nProvider';
@@ -24,7 +24,7 @@ import { BodyModel } from './BodyModel';
 import { CameraRig, VIEW_AZIMUTH, type BodyView, type CameraRigHandle } from './CameraRig';
 import { REGION_FACING } from './muscleMeshMap';
 import type { MuscleVisual } from './useMuscleHighlight';
-import { BODY_LIGHT } from './tokens';
+import { BODY_LIGHT, BODY_LOOK, type BodyLook } from './tokens';
 import './bodyViewer.css';
 
 export type { BodyView, MuscleVisual };
@@ -47,7 +47,14 @@ export type BodyViewerProps = {
   onRotate?: (angle: number, view: BodyView) => void;
   /** Rendered instead of the canvas when WebGL is unavailable or the load fails. */
   fallback?: React.ReactNode;
+  /**
+   * Lights, tone mapping and surface. The app never passes it and gets
+   * `BODY_LOOK`; the dev harness passes a candidate (block 7A).
+   */
+  look?: BodyLook;
 };
+
+const TONE_MAPPING = { aces: ACESFilmicToneMapping, agx: AgXToneMapping, none: NoToneMapping } as const;
 
 const VIEW_LABEL_KEYS = {
   front: 'body.view.front',
@@ -91,6 +98,7 @@ export default function BodyViewer({
   onViewChange,
   onRotate,
   fallback = null,
+  look = BODY_LOOK,
 }: BodyViewerProps) {
   const t = useT();
   const [supported] = useState(hasWebGL);
@@ -214,7 +222,8 @@ export default function BodyViewer({
           const { gl, scene } = state;
           invalidate.current = state.invalidate;
           gl.outputColorSpace = SRGBColorSpace;
-          gl.toneMapping = ACESFilmicToneMapping;
+          gl.toneMapping = TONE_MAPPING[look.toneMapping];
+          gl.toneMappingExposure = look.exposure;
           // Studio lighting with ZERO bytes over the wire: RoomEnvironment is
           // code, not an asset. No remote HDRI, no CDN — HANDOFF.txt §12.
           const pmrem = new PMREMGenerator(gl);
@@ -224,10 +233,10 @@ export default function BodyViewer({
           pmrem.dispose();
         }}
       >
-        <hemisphereLight args={[BODY_LIGHT.sky, BODY_LIGHT.ground, 1.35]} />
-        <directionalLight position={[-1.7, 2.6, 2.4]} intensity={2.15} />
-        <directionalLight position={[2.4, 0.9, 1.5]} intensity={0.75} color={BODY_LIGHT.fill} />
-        <directionalLight position={[0.4, 1.9, -2.8]} intensity={1.05} />
+        <hemisphereLight args={[BODY_LIGHT.sky, BODY_LIGHT.ground, look.hemisphere]} />
+        <directionalLight position={[...look.key.position]} intensity={look.key.intensity} />
+        <directionalLight position={[...look.fill.position]} intensity={look.fill.intensity} color={BODY_LIGHT.fill} />
+        <directionalLight position={[...look.back.position]} intensity={look.back.intensity} />
         <CameraRig ref={rig} onTap={onTap} onAzimuthChange={onAzimuthChange} />
         <Suspense fallback={null}>
           <BodyModel
@@ -237,6 +246,7 @@ export default function BodyViewer({
             tinted={tinted}
             registerPick={registerPick}
             onError={onError}
+            surface={look.surface}
           />
         </Suspense>
       </Canvas>

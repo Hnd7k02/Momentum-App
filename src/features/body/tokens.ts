@@ -142,6 +142,34 @@ export const BODY_LIGHT = {
 } as const;
 
 /**
+ * The light the body stands in and how the picture reaches the screen, as
+ * data. `BODY_LOOK` is what the app shows: the values approved with the
+ * muscle map, unchanged. Block 7A judges a new look on its candidates through
+ * the dev harness (`#/dev/body?look=7a`) and moves it here once the owner has
+ * chosen a body at the gate — until then nothing in the app changes.
+ */
+export type BodyLook = {
+  toneMapping: 'aces' | 'agx' | 'none';
+  exposure: number;
+  /** The hemisphere's strength: the light that comes from everywhere. */
+  hemisphere: number;
+  key: { position: readonly [number, number, number]; intensity: number };
+  fill: { position: readonly [number, number, number]; intensity: number };
+  back: { position: readonly [number, number, number]; intensity: number };
+  /** How the surface takes the light; absent leaves each material its own value. */
+  surface?: { roughness?: number; inertRoughness?: number; environment?: number };
+};
+
+export const BODY_LOOK: BodyLook = {
+  toneMapping: 'aces',
+  exposure: 1,
+  hemisphere: 1.35,
+  key: { position: [-1.7, 2.6, 2.4], intensity: 2.15 },
+  fill: { position: [2.4, 0.9, 1.5], intensity: 0.75 },
+  back: { position: [0.4, 1.9, -2.8], intensity: 1.05 },
+};
+
+/**
  * Region material mix. `intensity` (0…1) comes from the host and carries the
  * MAGNITUDE of the change, so +12 % burns brighter than +3 %.
  *

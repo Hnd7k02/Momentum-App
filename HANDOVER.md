@@ -965,8 +965,24 @@ merged; **in progress, runs up to its gate and stops there**)
     2–6 mm, because that depth does not read at the size of the app.
     `refine-body.mjs` got a second, small change: `--straymax`, without
     which hands and feet are handed away beside an unthinned head.
-  - [ ] Step 5 — light, material, tone mapping (on a candidate, in
-    `#/dev/body` only)
+  - [x] Step 5 — light, material, tone mapping, **on the dev harness
+    only**. The viewer takes its lights, tone mapping and surface values as
+    one object now (`BodyLook` in `tokens.ts`); the app passes none and gets
+    `BODY_LOOK`, which is today's values to the digit (`body.mjs` 39/39
+    after the change). The proposed look is `LOOK_7A` in `BodyDevPage.tsx`:
+    less light from everywhere (hemisphere 0.6 for 1.35), a key from above
+    left (1.9), a light from behind (2.0), **no tone mapping**, roughness
+    0.62. Measured on `athletisch-a`: the strongest green reaches the screen
+    with a chroma of 56 where ACES and today's light leave 27, at the hue of
+    the material; ±3 % reads as a colour beside a held, white group (chroma
+    27 against 4). The numbers of the tint strength are untouched. The dev
+    page takes `?model=<path>` (a candidate of `tools/body/out/`),
+    `?look=7a`, `?world=gym|light` and two more fixtures, `greens` and
+    `reds`; `tools/body/gate-shots.mjs` takes the stills through it. Both
+    materials read a baked shade where a model brings one
+    (`vertexColors`, conditional — today's model has none). **After the
+    gate** the look moves to the tokens (`tokens.css`, `tokens.test.ts`),
+    whichever body it is then tuned on.
   - [ ] Step 6 — the gate: the comparison sheet, the checklist, STOP
 - **Baseline for this block** is the closing run of the colour rules on
   `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
