@@ -1176,6 +1176,18 @@ merged; **built, at STOP 7A — waiting for the owner on his iPhone**)
   behind it (as built and as the comment says — interaction is 7B's), and
   a body left off its view after the very last tap of `body.mjs` (no tap
   follows; counted now all the same).
+- **Preview.** `Momentum-preview` `2c007e4`, built from `6eb5f3a` with
+  `--base=/Momentum-preview/` and `VITE_MOMENTUM_DB=momentum-preview`; the
+  status bar stays `default`, `sw.js` and the sourcemaps are not published.
+  Its files are the build's, byte for byte; opened from a local server it
+  starts empty in its own database, walks through the first start and
+  draws the body on the muscle screen without an error. The address
+  `hnd7k02.github.io` itself is not reachable from the session.
+- **The pictures of STOP 7A** are in `docs/design/wp3/7a/`: four pairs
+  before and after from the app (Muskelgruppen from the front, the stage
+  from the back, the Gym card, a close-up), the white body beside the
+  untrained one, the borders at neck, wrist and ankle, and the still in
+  the tone it has beside the white alternative the owner is asked about.
 - **Baseline for this block** is the closing run of the colour rules on
   `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
   only the record, the pictures and a moved block in one verify script): `tsc -b`
