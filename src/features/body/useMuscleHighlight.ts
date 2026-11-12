@@ -22,7 +22,7 @@ import { Color, MeshStandardMaterial } from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { MuscleGroup } from '../../core/model';
 import type { MuscleMeshes } from './muscleMeshMap';
-import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, type BodyLook } from './tokens';
+import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_LOOK, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, type BodyLook } from './tokens';
 
 export type MuscleVisual = {
   /** 0–1, already normalised by the Gym domain. Drives tint strength. */
@@ -45,7 +45,7 @@ export type HighlightOptions = {
   tinted?: boolean;
   /** Ask the render loop for a frame; pairs with frameloop="demand". */
   invalidate: () => void;
-  /** A look's surface values; absent leaves the material as approved. */
+  /** A look's surface values; absent is the app's own (`BODY_LOOK`). */
   surface?: BodyLook['surface'];
 };
 
@@ -182,7 +182,7 @@ export function useMuscleHighlight({
   selected,
   tinted = true,
   invalidate,
-  surface,
+  surface = BODY_LOOK.surface,
 }: HighlightOptions): void {
   const slots = useRef<Map<MuscleGroup, Slot>>(new Map());
 
@@ -204,8 +204,8 @@ export function useMuscleHighlight({
     for (const [id, mesh] of meshes) {
       const { material, rim } = regionMaterial();
       material.name = id;
-      if (surface?.roughness !== undefined) material.roughness = surface.roughness;
-      if (surface?.environment !== undefined) material.envMapIntensity = surface.environment;
+      material.roughness = surface.roughness;
+      material.envMapIntensity = surface.environment;
       // A baked shade, where the model brings one (see BodyModel).
       material.vertexColors = mesh.geometry.hasAttribute('color');
       mesh.material = material;

@@ -88,31 +88,12 @@ function visualsOf(fixture: Record<MuscleGroup, Fixture>): Partial<Record<Muscle
 }
 
 /**
- * The look block 7A proposes, judged on its candidates and shown at the gate
- * (`?look=7a`). It is not the app's: the app keeps `BODY_LOOK` until the
- * owner has chosen a body, and these values move to the tokens then.
- *
- * Less light from everywhere, one key from above and to the side, a light
- * from behind for the edge — and no tone mapping, so that a status colour on
- * the body is the colour of the legend and not a pastel of it (contract §8).
- */
-const LOOK_7A: BodyLook = {
-  toneMapping: 'none',
-  exposure: 1,
-  hemisphere: 0.6,
-  key: { position: [-1.9, 3.0, 2.2], intensity: 1.9 },
-  fill: { position: [2.4, 0.9, 1.5], intensity: 0.3 },
-  back: { position: [0.9, 2.4, -2.6], intensity: 2.0 },
-  surface: { roughness: 0.62, inertRoughness: 0.7, environment: 0.3 },
-};
-
-/**
  * `?lang=en` and `?model=missing` drive the two cases a fixture cannot.
- * `?model=<path>` loads another file the dev server can reach — a candidate
- * of the body pipeline, `tools/body/out/<name>.glb` — which is a path that
- * exists here and nowhere in the app. `?look=7a` shows it in the proposed
- * light, and `?world=gym|light` on the stage of that world, sized as the
- * card in Muskelgruppen sizes it.
+ * `?model=<path>` loads another file the dev server can reach — a build of
+ * the body pipeline, `tools/body/out/<name>.glb` — which is a path that
+ * exists here and nowhere in the app. `?world=gym|light` shows the body on
+ * the stage of that world, sized as the card in Muskelgruppen sizes it, and
+ * `?key=<number>` tries another strength of the key light on the app's look.
  */
 const params = new URLSearchParams(window.location.search);
 const FIXTURE = FIXTURES[params.get('fixture') ?? 'mixed'] ?? MIXED;
@@ -122,7 +103,10 @@ const MODEL_URL =
   MODEL === 'missing' ? `${import.meta.env.BASE_URL}models/does-not-exist.glb`
   : MODEL ? `${import.meta.env.BASE_URL}${MODEL}`
   : undefined;
-const LOOK = params.get('look') === '7a' ? LOOK_7A : BODY_LOOK;
+const KEY = Number(params.get('key'));
+const LOOK: BodyLook = params.get('key') && Number.isFinite(KEY)
+  ? { ...BODY_LOOK, key: { ...BODY_LOOK.key, intensity: KEY } }
+  : BODY_LOOK;
 /** The stage of each world: `--surface-base` around `--surface-secondary`. */
 const WORLDS = {
   gym: { page: '#0f0f14', stage: '#232330', ink: '#f2f2f7' },

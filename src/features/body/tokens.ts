@@ -22,7 +22,7 @@
  */
 
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
-import { STATUS_PALETTE, cssToken } from '../../styles/statusPalette';
+import { STATUS_PALETTE, cssKeyword, cssNumber, cssToken, cssVector } from '../../styles/statusPalette';
 
 export type MuscleState =
   | 'improved'          // Verbessert
@@ -110,11 +110,18 @@ const SKY_FILL = cssToken('--sky-fill');
 export const BODY_HELD_COLOR = cssToken('--body-held');
 
 /**
- * Dimmed: what says nothing. An untrained muscle, and the inert `none`
- * region (head, hands, feet). A body with no data is a quiet grey figure,
- * and training makes it light (contract §8, D161).
+ * Dimmed: a muscle that is not trained yet. A body with no data is a quiet
+ * grey figure, and training makes it light (contract §8, D161).
  */
 export const BODY_DIMMED_COLOR = cssToken('--body-dimmed');
+
+/**
+ * The inert zone — head with neck, hands, feet: a tone of its own, between
+ * dimmed and white (D166). It is no state and never takes a tint. Until
+ * D166 it shared the dimmed tone; beside a white body and a real face that
+ * read as another skin colour, not as neutral.
+ */
+export const BODY_INERT_COLOR = cssToken('--body-inert');
 
 export const STATE_COLOR: Readonly<Record<MuscleState, StateTokens>> = {
   improved:         { text: 'Verbessert',               ink: STATUS_PALETTE.strong.ink,  tint: STATUS_PALETTE.strong.tint, model: STATUS_PALETTE.strong.fill, ground: BODY_HELD_COLOR },
@@ -133,7 +140,7 @@ export const BODY_UNLIT = cssToken('--body-unlit');
 /**
  * The colours of the lights the body stands in: the hemisphere's sky and
  * ground, and the cool fill from the right. The key and the back light are
- * white by default. Values as approved; block 7A owns the lighting.
+ * white. Their strengths and places are `BODY_LOOK`, below.
  */
 export const BODY_LIGHT = {
   sky: cssToken('--body-light-sky'),
@@ -143,10 +150,10 @@ export const BODY_LIGHT = {
 
 /**
  * The light the body stands in and how the picture reaches the screen, as
- * data. `BODY_LOOK` is what the app shows: the values approved with the
- * muscle map, unchanged. Block 7A judges a new look on its candidates through
- * the dev harness (`#/dev/body?look=7a`) and moves it here once the owner has
- * chosen a body at the gate — until then nothing in the app changes.
+ * data. `BODY_LOOK` is what the app shows, and every value of it is a token
+ * in `tokens.css` (block 7A, contract §8): little light from everywhere, a
+ * key from above and to the side, a light from behind for the edge, no tone
+ * mapping. The dev harness may pass another look to try one.
  */
 export type BodyLook = {
   toneMapping: 'aces' | 'agx' | 'none';
@@ -156,17 +163,22 @@ export type BodyLook = {
   key: { position: readonly [number, number, number]; intensity: number };
   fill: { position: readonly [number, number, number]; intensity: number };
   back: { position: readonly [number, number, number]; intensity: number };
-  /** How the surface takes the light; absent leaves each material its own value. */
-  surface?: { roughness?: number; inertRoughness?: number; environment?: number };
+  /** How the surface takes the light: roughness, the inert zone's, and the room's reflection. */
+  surface: { roughness: number; inertRoughness: number; environment: number };
 };
 
 export const BODY_LOOK: BodyLook = {
-  toneMapping: 'aces',
-  exposure: 1,
-  hemisphere: 1.35,
-  key: { position: [-1.7, 2.6, 2.4], intensity: 2.15 },
-  fill: { position: [2.4, 0.9, 1.5], intensity: 0.75 },
-  back: { position: [0.4, 1.9, -2.8], intensity: 1.05 },
+  toneMapping: cssKeyword('--body-tone-mapping', ['none', 'aces', 'agx']),
+  exposure: cssNumber('--body-exposure'),
+  hemisphere: cssNumber('--body-light-hemisphere'),
+  key: { position: cssVector('--body-light-key-position'), intensity: cssNumber('--body-light-key') },
+  fill: { position: cssVector('--body-light-fill-position'), intensity: cssNumber('--body-light-fill-strength') },
+  back: { position: cssVector('--body-light-back-position'), intensity: cssNumber('--body-light-back') },
+  surface: {
+    roughness: cssNumber('--body-roughness'),
+    inertRoughness: cssNumber('--body-roughness-inert'),
+    environment: cssNumber('--body-environment'),
+  },
 };
 
 /**
@@ -187,7 +199,7 @@ export const BODY_LOOK: BodyLook = {
  * −3 % 9.0, 10.8 and 14.7. `farbregeln.mjs` holds both at 5 or more. Roughness, the lights and the tone mapping are block 7A's.
  */
 export const REGION_MATERIAL = {
-  roughness: 0.74,
+  roughness: BODY_LOOK.surface.roughness,
   metalness: 0,
   resting:  { mix: 0.75, emissiveIntensity: 0.11, rim: 0.42 },
   selected: { mix: 0.88, emissiveIntensity: 0.26, rim: 0.95 },

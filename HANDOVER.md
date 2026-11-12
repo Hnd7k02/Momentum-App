@@ -1024,9 +1024,25 @@ merged; **in progress, runs up to its gate and stops there**)
     trapezius begins at the side of the neck, and the border of chest and
     trapezius along the collarbone is held. `tools/body/README.md`, "The
     straight cuts".
-  - [ ] correction 1 — the inert zone's own, lighter tone (D166, departs
-    from D161)
-  - [ ] correction 3 — the key light, and the look moved into the tokens
+  - [x] correction 1 — the inert zone's own tone: `--body-inert` `#b3b3bc`,
+    halfway between dimmed and white (**D166**, departs from D161).
+    `BodyModel.tsx` gives it to head, hands and feet; "Noch nicht
+    trainiert" stays dimmed. With the data colours off the whole figure is
+    dimmed (the still on the Gym card). Contract §8 and `CLAUDE.md` say
+    three tones now. **Owed at STOP 7A: show the white body and the
+    untrained one** — on the second the inert zone is lighter than the
+    muscles, and the owner judges that there.
+  - [x] correction 3 — the key light is 1.1 for 1.9. Measured on the white
+    body through the real viewer at 393 px: the share of burnt-out pixels
+    (every channel 252 or more) is 5.0 % at 1.9, 1.3 % at 1.5, 0.4 % at 1.3
+    and 0.1 % at 1.1, where only single points on the ridge of the
+    trapezius are left; the chest goes from 215 to 198 of 255. The look is
+    the app's now: every value is a token in `tokens.css`
+    (`--body-light-*`, `--body-roughness*`, `--body-environment`,
+    `--body-tone-mapping: none`), read by `cssNumber`, `cssVector` and
+    `cssKeyword` in `statusPalette.ts` into `BODY_LOOK`, and held by
+    `tokens.test.ts`. `LOOK_7A` and `?look=7a` are gone from the dev page;
+    it takes `?key=` to try a strength.
   - [ ] step 7a — the model replaced, validator, check points, the table in
     `muscleMeshMap.ts`, attribution, the still on the Gym card
   - [ ] step 8 — the closing run, the record, the preview published

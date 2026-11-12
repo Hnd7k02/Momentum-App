@@ -5,10 +5,10 @@
  *   npx vite --port 5173 &
  *   node tools/body/gate-shots.mjs <out-dir> '<json list of shots>'
  *
- * A shot is { name, model?, look?, world?, fixture?, width?, view?, azimuth?, tint? }:
+ * A shot is { name, model?, key?, world?, fixture?, width?, view?, azimuth?, tint?, pills? }:
  *   model    a path the dev server can reach, e.g. tools/body/out/athletisch-a.glb;
  *            absent is the app's own model
- *   look     '7a' for the proposed light; absent is the app's
+ *   key      another strength of the key light, to try one; absent is the app's
  *   world    'gym' | 'light': the stage of that world, sized as in Muskelgruppen
  *   fixture  mixed | empty | held | edge (BodyDevPage.tsx)
  *   width    the viewport's width in px (393)
@@ -39,7 +39,7 @@ for (const shot of shots) {
   const page = await context.newPage();
   page.on('pageerror', (error) => console.error('page error:', error.message));
   const query = new URLSearchParams();
-  for (const key of ['model', 'look', 'world', 'fixture']) if (shot[key]) query.set(key, shot[key]);
+  for (const key of ['model', 'key', 'world', 'fixture']) if (shot[key]) query.set(key, String(shot[key]));
   await page.goto(`http://127.0.0.1:5173/Momentum-App/?${query}#/dev/body`, { waitUntil: 'networkidle' });
   await page.waitForSelector('.body-viewer canvas', { timeout: 60000 });
   await page.waitForTimeout(2200);

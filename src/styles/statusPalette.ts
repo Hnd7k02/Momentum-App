@@ -53,6 +53,44 @@ export function cssToken(name: string): string {
   return value.toLowerCase();
 }
 
+/** A token's raw text, with `var(--x)` aliases followed. */
+function rawToken(name: string): string {
+  let value = TOKENS.get(name);
+  for (let depth = 0; depth < 4 && value?.startsWith('var('); depth += 1) {
+    value = TOKENS.get(value.slice(4, value.indexOf(')')));
+  }
+  if (!value) throw new Error(`tokens.css does not define ${name}`);
+  return value;
+}
+
+/**
+ * A token that is a plain number — the strength of a light, a roughness.
+ * As strict as `cssToken`: anything but a number throws at module load.
+ */
+export function cssNumber(name: string): number {
+  const value = rawToken(name);
+  if (!/^-?\d+(\.\d+)?$/.test(value)) throw new Error(`${name} is not a plain number: ${value}`);
+  return Number(value);
+}
+
+/** A token that is three numbers, "x y z" — the place of a light. */
+export function cssVector(name: string): readonly [number, number, number] {
+  const parts = rawToken(name).split(/\s+/);
+  if (parts.length !== 3 || parts.some((part) => !/^-?\d+(\.\d+)?$/.test(part))) {
+    throw new Error(`${name} is not three plain numbers: ${rawToken(name)}`);
+  }
+  return [Number(parts[0]), Number(parts[1]), Number(parts[2])];
+}
+
+/** A token that is one of a few words. */
+export function cssKeyword<const T extends string>(name: string, allowed: readonly T[]): T {
+  const value = rawToken(name);
+  if (!(allowed as readonly string[]).includes(value)) {
+    throw new Error(`${name} is none of ${allowed.join(', ')}: ${value}`);
+  }
+  return value as T;
+}
+
 function statusColours(key: StatusKey): StatusColours {
   const on = key === 'empty' ? cssToken('--text-primary') : cssToken(`--status-${key}-on`);
   return {

@@ -3654,6 +3654,10 @@ Built in Stage 6b.
 Built in blocks 7A, 7B and 7C; the target is `docs/wp3/vertrag.md` §8
 and §9.
 
+*Status (2026-11-12, D166):* the first point is changed for the inert zone.
+Head, hands and feet no longer share the dimmed tone; they have a tone of
+their own. White for held and dimmed for untrained stand.
+
 ## D162 — Stage 6b: what the contract left open, and the two values the pixels overruled
 
 **Accepted at STOP 6b on 2026-11-11 with one change** — the bars of the
@@ -4105,3 +4109,32 @@ anew with the chosen body; no tone mapping; the relief stays as it is
 the body height **once it is checked at the source**, and knee and crotch
 height enter the validator only after the same check.
 
+## D166 — The inert zone has a tone of its own
+
+**Decision (owner, at the gate of block 7A, 2026-11-12). Departs from D161.**
+
+D161 gave the body two neutral tones: white for a trained muscle with no
+change, and dimmed for everything that says nothing — an untrained muscle,
+and the inert zone of head, hands and feet. On the body the owner chose at
+the gate (D165) that no longer holds. The new head has a real face, and a
+dimmed head, dimmed hands and dimmed feet beside a white body read as
+another skin colour, not as "neutral".
+
+- **The inert zone — head with neck, hands, feet — takes its own tone,
+  `--body-inert`, about halfway between dimmed and white** (`#b3b3bc`
+  between `#7d7d8a` and `#e9e9ee`). It is no state: it never takes a tint,
+  is never chosen, and no row, legend or figure refers to it.
+- **"Noch nicht trainiert" stays dimmed** and stays clearly apart from
+  "Gehalten", white. Which state takes which tone is unchanged
+  (`muscleState.ts`, contract §7).
+- **A body without data is therefore no longer one grey figure**: its
+  muscles are dimmed and its head, hands and feet are a step lighter. The
+  owner asked to be shown both — the white body and the untrained one — at
+  STOP 7A, and judges the second there.
+- **With the data colours switched off** the body says nothing at all and is
+  one quiet figure, the inert zone dimmed like the rest. Only the still on
+  the Gym card is drawn that way; the app never switches the colours off.
+
+`tokens.test.ts` holds the tone halfway between the two and at a distance
+from both. The flat fallback figure draws no head, hands or feet of its own
+and is unchanged.

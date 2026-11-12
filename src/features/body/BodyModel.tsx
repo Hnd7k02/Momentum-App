@@ -8,7 +8,7 @@ import { useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
 import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
-import { BODY_DIMMED_COLOR, type BodyLook } from './tokens';
+import { BODY_DIMMED_COLOR, BODY_INERT_COLOR, BODY_LOOK, type BodyLook } from './tokens';
 
 /**
  * Where the shipped model lives, under whatever base the app is served from
@@ -27,7 +27,7 @@ export type BodyModelProps = {
   onError?: (error: Error) => void;
   /** Registers the tap handler with the parent so CameraRig can drive it. */
   registerPick?: (pick: (ndc: { x: number; y: number }) => MuscleGroup | null) => void;
-  /** A look's surface values; absent leaves every material as approved. */
+  /** A look's surface values; absent is the app's own (`BODY_LOOK`). */
   surface?: BodyLook['surface'];
 };
 
@@ -39,13 +39,15 @@ export function BodyModel({
   onReady,
   onError,
   registerPick,
-  surface,
+  surface = BODY_LOOK.surface,
 }: BodyModelProps) {
   const { camera, invalidate, gl, scene } = useThree();
   const root = useRef<Group>(null);
   const [meshes, setMeshes] = useState<MuscleMeshes | null>(null);
   const { gltf, error } = useGLTF(modelUrl);
   const raycaster = useMemo(() => new Raycaster(), []);
+  const inertMaterials = useRef<MeshStandardMaterial[]>([]);
+  const inertTone = useRef(tinted === false ? BODY_DIMMED_COLOR : BODY_INERT_COLOR);
 
   // A fetch or parse failure is the viewer's to show, not ours to hide.
   useEffect(() => {
@@ -56,8 +58,8 @@ export function BodyModel({
     if (!gltf) return;
     let cancelled = false;
     // The inert primitive (head, hands, feet) keeps a material of its own so
-    // it can never be tinted, as in body-viewer.js. Created here, with the
-    // scene, and disposed with it.
+    // it can never be tinted, as in body-viewer.js — and a tone of its own
+    // (D166). Created here, with the scene, and disposed with it.
     const inert: MeshStandardMaterial[] = [];
     try {
       const resolved = resolveMuscleMeshes(gltf.scene);
@@ -65,11 +67,11 @@ export function BodyModel({
         const mesh = o as Mesh;
         if (!mesh.isMesh || mesh.userData.muscle) return;
         const material = new MeshStandardMaterial({
-          color: BODY_DIMMED_COLOR,
-          roughness: surface?.inertRoughness ?? 0.8,
+          color: inertTone.current,
+          roughness: surface.inertRoughness,
           metalness: 0,
         });
-        if (surface?.environment !== undefined) material.envMapIntensity = surface.environment;
+        material.envMapIntensity = surface.environment;
         // A model may bring a baked shade as a vertex colour (tools/body).
         // Conditional on purpose: without the attribute it would render black.
         material.vertexColors = mesh.geometry.hasAttribute('color');
@@ -77,6 +79,7 @@ export function BodyModel({
         mesh.material = material;
         inert.push(material);
       });
+      inertMaterials.current = inert;
       // Compile before the model enters the scene: without this the first
       // frame stalls on shader compilation, which is very visible on iOS.
       gl.compileAsync(gltf.scene, camera, scene).then(() => {
@@ -90,9 +93,19 @@ export function BodyModel({
     }
     return () => {
       cancelled = true;
+      inertMaterials.current = [];
       for (const material of inert) material.dispose();
     };
   }, [gltf, gl, camera, scene, onReady, onError, invalidate, surface]);
+
+  // With the data colours off the body says nothing at all: one quiet figure,
+  // the inert zone in the same dimmed tone as the rest. That is the still on
+  // the Gym card; the app itself never turns the colours off.
+  useEffect(() => {
+    inertTone.current = tinted === false ? BODY_DIMMED_COLOR : BODY_INERT_COLOR;
+    for (const material of inertMaterials.current) material.color.set(inertTone.current);
+    invalidate();
+  }, [tinted, invalidate]);
 
   useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface });
 

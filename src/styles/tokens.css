@@ -356,18 +356,40 @@
   --shadow-brand-mark: 0 10px 30px rgba(125, 118, 235, 0.32), 0 2px 6px rgba(16, 24, 40, 0.06);
 
   /* The 3D body's material and light — read through `statusPalette.ts`,
-     never by CSS. Two neutral tones (contract §8, D161): white is a trained
-     muscle with no change, "Gehalten"; dimmed is what says nothing — an
-     untrained muscle, and the head, hands and feet. Which state takes which
-     tone is the colour rules' and stays; block 7A sets the light and may
-     retune these two values under it. Then the colour of a term that adds
-     no light, the hemisphere's sky and ground and the cool fill. */
+     never by CSS. Three neutral tones (contract §8; D161, D166): white is a
+     trained muscle with no change, "Gehalten"; dimmed is a muscle that is
+     not trained yet; and the inert zone — head, hands, feet — has a tone of
+     its own between the two, because beside a white body a dimmed head
+     reads as another skin colour, not as neutral. Which state takes which
+     tone is the colour rules' and stays. Then the colour of a term that
+     adds no light, the hemisphere's sky and ground and the cool fill. */
   --body-held: #e9e9ee;
   --body-dimmed: #7d7d8a;
+  --body-inert: #b3b3bc;
   --body-unlit: #000000;
   --body-light-sky: #ffffff;
   --body-light-ground: #cdcdda;
   --body-light-fill: #dfe4f5;
+
+  /* The light the body stands in (block 7A, contract §8), as plain numbers:
+     little light from everywhere, a key from above and to the side, a light
+     from behind for the edge, a weak fill. A position is "x y z" in metres,
+     the body looking along +z. No tone mapping: a status colour on the body
+     is the colour of its material, not a pastel of it. The key is as strong
+     as white bears on the shoulders without burning out. Then the surface:
+     its roughness, the inert zone's, and how much of the room it mirrors. */
+  --body-tone-mapping: none;
+  --body-exposure: 1;
+  --body-light-hemisphere: 0.6;
+  --body-light-key: 1.1;
+  --body-light-key-position: -1.9 3 2.2;
+  --body-light-fill-strength: 0.3;
+  --body-light-fill-position: 2.4 0.9 1.5;
+  --body-light-back: 2;
+  --body-light-back-position: 0.9 2.4 -2.6;
+  --body-roughness: 0.62;
+  --body-roughness-inert: 0.7;
+  --body-environment: 0.3;
 
   /* Touch targets never go below this. */
   --touch-min: 44px;

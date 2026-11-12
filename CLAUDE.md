@@ -332,12 +332,22 @@ Never conflate them.
   none of it.
 - **"Gehalten" is neutral, never the warning yellow** (D153, D161): the
   text colour in a row, the data ink as a mark, white on the body. The
-  body has two neutral tones, `--body-held` (a trained muscle with no
-  change) and `--body-dimmed` (untrained, and the head, hands and feet);
-  a tint is mixed from white and grows evenly from 2.5 % to 12 %. Block 7A
-  may retune the two values under its light, never which state takes
-  which tone. The muscle trend reads 30 or 90 days, Verlauf 7 or 30 — two
-  constants, never one again.
+  body has three neutral tones: `--body-held` (a trained muscle with no
+  change), `--body-dimmed` (a muscle not trained yet) and `--body-inert`
+  (head with neck, hands, feet — a tone of its own, halfway between the
+  two, D166). The inert zone is no state: it takes no tint, is never
+  chosen, and nothing refers to it. A tint is mixed from white and grows
+  evenly from 2.5 % to 12 %. Which state takes which tone never changes.
+  The muscle trend reads 30 or 90 days, Verlauf 7 or 30 — two constants,
+  never one again.
+- **The body's light is tokens, and it has no tone mapping** (D165,
+  contract §8): `--body-light-*`, `--body-roughness*`, `--body-environment`
+  and `--body-tone-mapping: none` in `tokens.css`, read into `BODY_LOOK`
+  (`features/body/tokens.ts`) and held by `tokens.test.ts`. No strength or
+  position of a light is written in a component. A status colour on the
+  body is the colour of its material; a tone mapping makes a pastel of it.
+  The key light is as strong as white bears on the shoulders without
+  burning out — measure before raising it.
 - **Type and numbers.** The scale is 34, 22, 17, 15, 13, 11 and no text is
   under 11px. A number takes a figure step — `--type-figure-xl` for the one
   main number of a screen, `-l` on a tile and in a sheet's head, `-m` in a

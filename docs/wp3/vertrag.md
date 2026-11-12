@@ -228,9 +228,9 @@ Diese Regeln baut der Block «Farbregeln», nicht 6b. Er muss wissen: Die Gym-Go
 Zielbild für die Blöcke 7A und 7B.
 
 - **Grösse und Rahmen** (festgelegt, D161): Der Körper nimmt mindestens 55 % der Bildschirmhöhe ein und steht ohne Kartenrahmen auf dem Grund. Darüber liegen nur die Kopfzeile in 17 px, die Zeitraumwahl und die Kennzahlenleiste. Unter den Füssen liegen ein kleiner Kontaktschatten und ein schwacher Schein.
-- **Material** (festgelegt, D155): einfarbig, ohne Anatomiefarben. Ein trainierter Muskel ohne Veränderung ist weiss. Was nichts aussagt, ist gedimmt: ein Muskel ohne Training, und Kopf, Hände und Füsse (festgelegt, D161). So ist ein Körper ohne Daten eine ruhige graue Figur, und Training macht ihn hell.
-- **Farbe am Körper** muss der Legende entsprechen. Das heutige Tone Mapping macht aus den Statusfarben Pastell; Block 7A wählt eines, das sie hält, und zeigt es an fünf Bildern.
-- **Licht:** weniger Grundlicht, ein Hauptlicht von schräg oben, ein Kantenlicht von hinten.
+- **Material** (festgelegt, D155): einfarbig, ohne Anatomiefarben. Ein trainierter Muskel ohne Veränderung ist weiss, ein Muskel ohne Training gedimmt (festgelegt, D161). Die neutrale Zone – Kopf mit Hals, Hände und Füsse – hat einen eigenen Ton, etwa in der Mitte zwischen gedimmt und Weiss (festgelegt, D166; weicht von D161 ab): Neben einem weissen Körper las sich ein gedimmter Kopf als andere Hautfarbe statt als neutral. Training macht den Körper hell.
+- **Farbe am Körper** muss der Legende entsprechen. Der Körper wird ohne Tone Mapping gezeichnet (festgelegt am Gate von 7A, D165): Eine Statusfarbe am Körper ist die Farbe ihres Materials, nicht ein Pastell davon.
+- **Licht:** wenig Grundlicht, ein Hauptlicht von schräg oben, ein Kantenlicht von hinten. Das Hauptlicht ist so stark, wie Weiss es an den Schultern verträgt, ohne auszufressen. Jeder Wert ist ein Token (`--body-light-*`, `--body-roughness*`, `--body-environment`).
 - **Bedienung:** Ansichtstasten Vorne, Seite, Hinten und Zurücksetzen stehen oben in der Bühne, als feste Flächen. Zoomen mit zwei Fingern zwischen 1,0 und 1,8; Doppeltipp setzt zurück.
 - **Bewegung** (festgelegt, D155): Drehen mit Schwung und weichem Auslaufen. Ein Tipp dreht den Körper nie; eine Auswahl in der Liste dreht ihn, wenn die Gruppe abgewandt ist.
 - **Der Weg dorthin** (festgelegt, D161): Die Gym-Kachel auf Heute führt direkt zum Muskelgruppen-Screen. Die Gym-Übersicht bleibt der Ort für Training, Pläne und Laufen.
