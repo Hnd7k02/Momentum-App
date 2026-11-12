@@ -1123,7 +1123,15 @@ merged; **built, at STOP 7A — waiting for the owner on his iPhone**)
     built", D166's measured tones, `CLAUDE.md`'s rule that the model is
     built and never edited, `tools/body/README.md`, `MEASURES.md`), and the
     preview published in `Momentum-preview`.
-  - [ ] STOP 7A — reported; the owner checks on his iPhone.
+  - [ ] STOP 7A — reported on 2026-11-12; the owner checks on his iPhone.
+    The report is a private Artifact page, «Körper STOP 7A»
+    (https://claude.ai/artifact/V6EXnbcNemqc63rpxCxpQG): the pairs, the
+    numbers, the checklist of ten points and five questions — the inert
+    zone on a wholly untrained body, the tone of the still on the Gym
+    card, the strength of a small change, the three targets not checked
+    at their source, and his findings on the colour rules. What he finds
+    is corrected in the session that built the block and the preview is
+    published again; 7B starts in a new session after that.
   The owner's line on the colour rules came without findings (the
   checklist was left as its template); "an exercise day is an entry, as
   built" is confirmed. Asked again at STOP 7A.
