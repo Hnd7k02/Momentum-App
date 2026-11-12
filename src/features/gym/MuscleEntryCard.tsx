@@ -109,7 +109,7 @@ export function MuscleEntryCard({
         onClick={onOpen}
       >
         <span className="gym-hub__preview" aria-hidden="true">
-          <img className="gym-hub__previewBody" src={bodyPreview} alt="" width={240} height={522} decoding="async" />
+          <img className="gym-hub__previewBody" src={bodyPreview} alt="" width={240} height={574} decoding="async" />
           <span className="gym-hub__previewStates">
             {states.map(({ muscle, state }) => (
               <i key={muscle} className={`gym-hub__previewState gym-hub__previewState--${state}`} />
