@@ -957,8 +957,9 @@ merged; **in progress, runs up to its gate and stops there**)
   - [x] Step 4 — the candidates: `schlank-a`, `athletisch-a`,
     `athletisch-b`, `kraeftig-a` (three body types of the guide, head A
     natural with closed eye sockets, head B softened to a mannequin's). Each
-    about 47,700 triangles, 30 % in the inert zone, 672 KB, closed, byte
-    for byte the same on a second build. Measured: `athletisch` meets 14 of
+    about 50,200 triangles, 34 % in the inert zone, 707,400 bytes (691 KB
+    as the prompt counts), closed, byte for byte the same on a second
+    build. Measured: `athletisch` meets 14 of
     14 targets, `schlank` 13 (crotch 49.2 %), `kraeftig` 13 (shoulder
     breadth 30.3 % against the guide's 30 %). The relief is MakeHuman's own
     muscle detail in multiples, bounded at 9 mm — deeper than the guide's

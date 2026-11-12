@@ -78,10 +78,10 @@ result, and two builds in a row were compared byte for byte.
 
 | candidate | bytes | sha256 |
 |---|---|---|
-| `athletisch-a` | 672,068 | `c0ff91b8b1b9da5b94cf787db566077f6a308dd74efad07c9dfcdb12824ab775` |
-| `athletisch-b` | 672,068 | `11110125ac39c5e457359d32a2d71dcff9faea7a8e77998c527199642ed23838` |
-| `schlank-a` | 671,392 | `39cdf914f26ad280ca72b4896c0550bdc98110de19d0a7ada8eb9d41c276b9d8` |
-| `kraeftig-a` | 672,320 | `da1b39da37a74550448f9ef9a2b4735375eae52a5ee3607a0a02e111e6f21ea4` |
+| `athletisch-a` | 707,380 | `e764af2fde318e08bdda3dfb5316db8703c8a33d4b6f357edabf5d66374754f6` |
+| `athletisch-b` | 707,436 | `ba9bb3ac0f1a0f66ad3bd21595cf1f76c963ae2e2ce05346b298e16349462e8d` |
+| `schlank-a` | 706,120 | `a3f3e5c06b3468fe5a0025a820f63d6027739ce0682644a31d48cc3f75fe427e` |
+| `kraeftig-a` | 707,460 | `a091ac181d53aa97e8958deaefa4d64780cd5fb0f0ce7d32ad2f6b83c6e43814` |
 
 These are the four pairs of body type and head shown at the gate; `digests.json` holds the same figures for the build to check. The digests hold for the
 versions named above: another numpy may add in another order, and the last
@@ -146,9 +146,12 @@ Three body types after the guide (§4.2) and two heads:
   app, and without a bound the sharpest lines of the data become creases of
   two centimetres.
 - **The triangles**: the muscle regions are subdivided once (Catmull-Clark),
-  hands and feet are thinned to half by a quadric edge collapse, the head is
-  left as it is — a face with half its triangles shows them as flat panels.
-  About 47,700 triangles, 30 % of them in the inert zone, 672 KB.
+  and with them two rings of the inert zone beside them — a border that runs
+  along the seam between fine and coarse mesh is cut in saw teeth. Hands and
+  feet are thinned to 45 % by a quadric edge collapse; the head is left as it
+  is, because a face with half its triangles shows them as flat panels.
+  About 50,200 triangles, 34 % of them in the inert zone, 707,400 bytes —
+  691 KB as this project counts (today's model: 478,008 bytes, "467 KB").
 
 ## What changed against the scripts of the reference page
 

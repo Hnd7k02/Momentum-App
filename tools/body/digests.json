@@ -1,18 +1,18 @@
 {
   "athletisch-a": {
-    "bytes": 672068,
-    "sha256": "c0ff91b8b1b9da5b94cf787db566077f6a308dd74efad07c9dfcdb12824ab775"
+    "bytes": 707380,
+    "sha256": "e764af2fde318e08bdda3dfb5316db8703c8a33d4b6f357edabf5d66374754f6"
   },
   "athletisch-b": {
-    "bytes": 672068,
-    "sha256": "11110125ac39c5e457359d32a2d71dcff9faea7a8e77998c527199642ed23838"
+    "bytes": 707436,
+    "sha256": "ba9bb3ac0f1a0f66ad3bd21595cf1f76c963ae2e2ce05346b298e16349462e8d"
   },
   "schlank-a": {
-    "bytes": 671392,
-    "sha256": "39cdf914f26ad280ca72b4896c0550bdc98110de19d0a7ada8eb9d41c276b9d8"
+    "bytes": 706120,
+    "sha256": "a3f3e5c06b3468fe5a0025a820f63d6027739ce0682644a31d48cc3f75fe427e"
   },
   "kraeftig-a": {
-    "bytes": 672320,
-    "sha256": "da1b39da37a74550448f9ef9a2b4735375eae52a5ee3607a0a02e111e6f21ea4"
+    "bytes": 707460,
+    "sha256": "a091ac181d53aa97e8958deaefa4d64780cd5fb0f0ce7d32ad2f6b83c6e43814"
   }
 }

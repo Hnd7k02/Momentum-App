@@ -101,7 +101,15 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     labels = load_regions()
     quad_labels = B.face_labels(labels, body.quads)
 
+    # The muscle regions are subdivided — and two rings of the inert zone
+    # beside them. A border that runs along the seam between fine and coarse
+    # mesh is cut in saw teeth, one tooth for each coarse quad; two rings on,
+    # refine-body.mjs draws it through an even mesh.
     refine_mask = quad_labels != B.NONE
+    for _ in range(spec.get('seam_rings', 2)):
+        touched = np.zeros(len(body.P), dtype=bool)
+        touched[body.quads[refine_mask].ravel()] = True
+        refine_mask = refine_mask | touched[body.quads].any(axis=1)
     P, tris, tri_labels, parents = B.subdivide(body.P, body.quads, quad_labels, refine_mask)
     n_old = len(body.P)
     vertex_region = np.concatenate([labels, np.full(len(P) - n_old, -1)])
@@ -112,10 +120,13 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         # Hands and feet are thinned; the head is not. A face with half its
         # triangles shows them as flat panels, close up and in the silhouette.
         before = int((tri_labels == B.NONE).sum())
+        # Nor are the subdivided rings beside the muscles: they are known by
+        # a vertex the subdivision made.
         HEAD = len(B.REGIONS)
         centre_y = P[tris].mean(axis=1)[:, 1]
         part = tri_labels.copy()
         part[(tri_labels == B.NONE) & (centre_y > 0.78 * P[:, 1].max())] = HEAD
+        part[(tri_labels == B.NONE) & (tris >= n_old).any(axis=1)] = HEAD
         P, tris, part, kept = B.decimate(P, tris, part, B.NONE, spec['inert_share'])
         tri_labels = np.where(part == HEAD, B.NONE, part)
         vertex_region = vertex_region[kept]

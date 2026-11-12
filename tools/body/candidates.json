@@ -10,7 +10,7 @@
     "head": "A",
     "pose": { "arm": 20, "armfwd": 2, "elbow": 20, "palm": 0, "fingers": 20, "spread": 0.9, "thumb": 28, "clavicle": 4, "leg": 3.5, "shin": 1.5, "toes": 8 },
     "relief": { "muscle_detail": 3.5, "limit_mm": 9 },
-    "inert_share": 0.5,
+    "inert_share": 0.45,
     "refine": { "cavity": 0.8, "ao": 0.5, "straymax": 150 }
   },
   "athletisch-a": { "like": "_base" },
