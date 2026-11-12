@@ -4118,6 +4118,54 @@ anew with the chosen body; no tone mapping; the relief stays as it is
 the body height **once it is checked at the source**, and knee and crotch
 height enter the validator only after the same check.
 
+**What was built (2026-11-12).** `public/models/momentum-body.glb` is
+`athletisch-a` with the three corrections: 49,988 triangles, a third of them
+in the inert zone, 704,044 bytes (688 KB; 475 KB compressed, for 345 KB
+before), closed, built byte for byte by `python3 tools/body/build.py
+momentum-body --install`. It meets all fourteen measures of the guide.
+
+- *The cuts.* The build cuts the mesh itself along five planes — the neck
+  6 mm below its joint and tilted 5°, wrists and ankles across the limb —
+  and `refine-body.mjs` leaves those borders where they are. The pit of the
+  throat goes with the chest; the trapezius begins at the side of the neck.
+- *The light.* The key is 1.1 for the 1.9 of the gate: on the white body
+  0.1 % of the pixels are burnt out for 5.0 %. Every value of the look is a
+  token (`--body-light-*`, `--body-roughness*`, `--body-environment`,
+  `--body-tone-mapping: none`).
+- *The height is 1.75 m,* not the 1.78 m the candidates were shown at: the
+  height of the model it replaces, so the body stands in the viewer's frame
+  where that one stood and the frame did not have to move. Every measure is
+  a share of the height.
+- *The numbers of the tint strength are unchanged.* The prompt allowed them
+  to follow the light if +3 % no longer read as a colour or ±12 % glared.
+  Neither is so: without a tone mapping +3 % stands 34 ΔE from the same
+  chest held where it stood 6.5, and green and red now arrive alike. That
+  +3 % is a clear colour rather than a hint is put to the owner at STOP 7A.
+- *The validator* (`tools/validate-body-glb.mjs`, first in `npm run build`)
+  holds the structure, an envelope per group from the measured body, the
+  five straight cuts, 33 check points of the regions (contract §14: hand,
+  foot, head and neck inert; the outside of the thigh the leg's; the upper
+  trapezius the back's; each group met at a fixed place), eleven of the
+  fourteen measures, the ceiling of 700 KB and the licence notice. Knee
+  height, crotch height and shoulder breadth are measured and reported but
+  not held: their targets could not be checked at their sources from this
+  session (the ANSUR II report and the Penn State tables are not reachable
+  through its network rules). The shoulder window therefore still reads
+  25–30 %, and the body's 29.6 % meets both that and the owner's 27–32 %.
+- *The attribution.* The shipped model owes none (CC0 1.0); Einstellungen
+  names MakeHuman and Anny all the same. The model of D156 is no longer
+  shipped; its credit stays in `THIRD-PARTY-NOTICES.md` for as long as the
+  files derived from it stay under `docs/design/muscle-map/`. D157's
+  sentence for the licence file — "the 3D model keeps its own licence
+  (CC BY 4.0)" — is true of that kept model only; the tidy-up block words
+  it for a shipped model that is CC0.
+- *What it cost in the suites.* The body's pixel checks in
+  `farbregeln.mjs` had the old light built in (a share of pixels above a
+  fixed lightness) and read tones by zone now; the tap grid of `body.mjs`
+  had run its front pass on a body standing at 57° since before this block
+  — one tap of its top row presses "Seite" — and puts the body back now.
+  Neither is a change to the product.
+
 ## D166 — The inert zone has a tone of its own
 
 **Decision (owner, at the gate of block 7A, 2026-11-12). Departs from D161.**
@@ -4139,7 +4187,9 @@ another skin colour, not as "neutral".
 - **A body without data is therefore no longer one grey figure**: its
   muscles are dimmed and its head, hands and feet are a step lighter. The
   owner asked to be shown both — the white body and the untrained one — at
-  STOP 7A, and judges the second there.
+  STOP 7A, and judges the second there. Measured on the screen (L*, the
+  median of a zone at 393 px): the feet 73 in both figures; chest, thighs
+  and calves 51, 38 and 39 untrained, 87, 68 and 71 held.
 - **With the data colours switched off** the body says nothing at all — not
   even "not trained yet" — and is one figure in the inert zone's tone. Only
   the still on the Gym card is drawn that way; the app never switches the

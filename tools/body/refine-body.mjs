@@ -570,6 +570,8 @@ function findStrays() {
     return x;
   };
   const firstOnEdge = new Map();
+  // Triangles of two free regions that share an edge, in pairs.
+  const acrossBorder = [];
   for (let t = 0; t < M; t++) {
     for (let c = 0; c < 3; c++) {
       const a = T[t * 3 + c], b = T[t * 3 + ((c + 1) % 3)];
@@ -579,9 +581,14 @@ function findStrays() {
       else if (TL[other] === TL[t]) {
         const ra = find(other), rb = find(t);
         if (ra !== rb) parent[ra] = rb;
-      }
+      } else if (TL[other] !== FROZEN && TL[t] !== FROZEN) acrossBorder.push(other, t);
     }
   }
+  // A piece with the frozen region all round it lies beside no region it
+  // could be handed to — the frozen one takes nothing (its border stays
+  // where it is). Such a piece is left as it is, whatever its size.
+  const besideFree = new Set();
+  for (const t of acrossBorder) besideFree.add(find(t));
   const size = new Map();
   for (let t = 0; t < M; t++) { const r = find(t); size.set(r, (size.get(r) ?? 0) + 1); }
   const largest = new Array(L).fill(0);
@@ -591,6 +598,7 @@ function findStrays() {
   for (let t = 0; t < M; t++) {
     const r = find(t);
     if (TL[t] === FROZEN) continue;
+    if (FROZEN >= 0 && !besideFree.has(r)) continue;
     if (size.get(r) >= opt.stray * largest[TL[t]] || size.get(r) >= opt.straymax) continue;
     mask[t] = 1;
     const y = (P[T[t * 3] * 3 + 1] + P[T[t * 3 + 1] * 3 + 1] + P[T[t * 3 + 2] * 3 + 1]) / 3;

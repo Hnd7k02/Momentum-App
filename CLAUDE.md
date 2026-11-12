@@ -348,6 +348,16 @@ Never conflate them.
   body is the colour of its material; a tone mapping makes a pastel of it.
   The key light is as strong as white bears on the shoulders without
   burning out — measure before raising it.
+- **The body model is built, never edited** (D165).
+  `public/models/momentum-body.glb` comes out of `python3
+  tools/body/build.py momentum-body --install`, byte for byte, from the
+  data in `tools/body/makehuman/`; a change to the body is a change to
+  that pipeline, and `digests.json`, the table in `muscleMeshMap.ts` and
+  the still on the Gym card follow it. Head with neck, hands and feet are
+  the inert zone and end in straight cuts; the validator's check points
+  (`tools/body/checkpoints.mjs`) hold where every region lies, and it runs
+  first in `npm run build`. No data enters `tools/body/` whose licence was
+  not read in its own wording, and no Blender by hand.
 - **Type and numbers.** The scale is 34, 22, 17, 15, 13, 11 and no text is
   under 11px. A number takes a figure step — `--type-figure-xl` for the one
   main number of a screen, `-l` on a tile and in a sheet's head, `-m` in a

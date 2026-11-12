@@ -860,7 +860,7 @@ if (process.env.NO_BODY) {
         && Math.abs(empty.foot.L - held.foot.L) <= 1 && Math.abs(empty.foot.a - held.foot.a) <= 0.5 && Math.abs(empty.foot.b - held.foot.b) <= 0.5,
       `untrained ${short([empty.foot.L, empty.foot.a, empty.foot.b])}, held ${short([held.foot.L, held.foot.a, held.foot.b])}, median ΔE ${empty.foot.dE}`);
     check('body, the inert zone (D166): its own tone — neutral, and clearly lighter than the untrained calves above it',
-      neutral(empty.foot) && neutral(held.foot) && empty.foot.L - empty.calf.L >= 15,
+      neutral(empty.foot) && neutral(held.foot) && empty.calf.lit >= 100 && empty.foot.L - empty.calf.L >= 15,
       `feet L ${empty.foot.L}, untrained calves L ${empty.calf.L}, held calves L ${held.calf.L}`);
 
     // EDGE against HELD, same angle. The chest and the back are at +3 %,
@@ -875,7 +875,8 @@ if (process.env.NO_BODY) {
     check('body, ±3 % beside held: the calves, held in both, are the same white',
       same(edge) && edge.calf.pixels >= 100 && edge.calf.moved <= 0.1 && edge.calf.dE <= 1.5, short(edge.calf));
     check('body, from the back: the back at +3 % has turned green, the hamstrings at −3 % red, the calves not at all',
-      same(edgeBack) && edgeBack.upper.dA <= -3 && edgeBack.upper.dE >= 5 && edgeBack.thigh.dA >= 3 && edgeBack.thigh.dE >= 5 && edgeBack.calf.moved <= 0.1,
+      same(edgeBack) && edgeBack.upper.pixels >= 300 && edgeBack.upper.dA <= -3 && edgeBack.upper.dE >= 5
+        && edgeBack.thigh.pixels >= 300 && edgeBack.thigh.dA >= 3 && edgeBack.thigh.dE >= 5 && edgeBack.calf.pixels >= 100 && edgeBack.calf.moved <= 0.1,
       short({ upper: edgeBack.upper, thigh: edgeBack.thigh, calf: edgeBack.calf }, 400));
 
     // MIXED against HELD. From the front: the chest at +9 %, the quadriceps
@@ -888,9 +889,9 @@ if (process.env.NO_BODY) {
     check('body, mixed from the back: the held back is the same white as in the held figure',
       same(mixedBack) && mixedBack.upper.pixels >= 300 && mixedBack.upper.moved <= 0.1, short(mixedBack.upper));
     check('body, mixed from the back: the hamstrings, with too little to compare, are lightly blue — bluer than held, neither green nor red',
-      same(mixedBack) && mixedBack.thigh.moved >= 0.6 && mixedBack.thigh.dB <= -4 && Math.abs(mixedBack.thigh.dA) < Math.abs(mixedBack.thigh.dB) && mixedBack.thigh.dE >= 4, short(mixedBack.thigh));
+      same(mixedBack) && mixedBack.thigh.pixels >= 300 && mixedBack.thigh.moved >= 0.6 && mixedBack.thigh.dB <= -4 && Math.abs(mixedBack.thigh.dA) < Math.abs(mixedBack.thigh.dB) && mixedBack.thigh.dE >= 4, short(mixedBack.thigh));
     check('body, mixed from the back: the untrained calves are dimmed there too',
-      same(mixedBack) && mixedBack.calf.moved >= 0.8 && mixedBack.calf.dL <= -8, short(mixedBack.calf));
+      same(mixedBack) && mixedBack.calf.pixels >= 100 && mixedBack.calf.moved >= 0.8 && mixedBack.calf.dL <= -8, short(mixedBack.calf));
     await probe.ctx.close();
   } else if (probe) {
     await probe.ctx.close();

@@ -253,6 +253,7 @@ async function shot(page, name) {
   const seenFrom = { Vorne: new Set(), Hinten: new Set() };
   let turnedAway = 0;
   let offView = 0;
+  let stuck = 0;
   const grid = [];
   for (const fy of [0.13, 0.2, 0.27, 0.34, 0.42, 0.5, 0.58, 0.66, 0.74, 0.82, 0.9]) for (const fx of [0.3, 0.34, 0.37, 0.4, 0.44, 0.5, 0.56, 0.6, 0.63, 0.66, 0.7]) grid.push([fx, fy]);
   for (const [view, facing] of [['Vorne', 0], ['Hinten', 180]]) {
@@ -265,14 +266,17 @@ async function shot(page, name) {
       const farSide = h !== null && FACES_BACK.has(h) !== (facing === 180);
       if (!farSide && (await azimuthAttr(page)) === facing) continue;
       turnedAway += 1;
-      for (let tries = 0; tries < 3; tries += 1) {
+      let back = false;
+      for (let tries = 0; tries < 3 && !back; tries += 1) {
         await pills.getByRole('button', { name: view }).click();
         await settle(page);
-        if ((await azimuthAttr(page)) === facing) break;
+        back = (await azimuthAttr(page)) === facing;
       }
+      if (!back) stuck += 1;
     }
   }
-  check('every tap of the two passes met a body that faced the pass\'s view', offView === 0, `${offView} taps off the view; the body was put back ${turnedAway} times`);
+  check('every tap of the two passes met a body that faced the pass\'s view', offView === 0 && stuck === 0,
+    `${offView} taps off the view; the body was put back ${turnedAway} times and would not go back ${stuck} times`);
   check('all ten regions are reachable by a tap, front and back', hits.size === 10,
     `${[...hits].sort().join(',')} — front: ${[...seenFrom.Vorne].sort().join(',')} · back: ${[...seenFrom.Hinten].sort().join(',')}`);
   check('a tap that hits nothing leaves the selection alone', (await tapAt(page, 0.05, 0.05)) === null && (await (async () => { await page.locator('[data-muscle="calves"]').click(); const b = await canvasBox(page); await page.mouse.click(b.x + 4, b.y + 4); await page.waitForTimeout(120); return readout(page, '[data-selected-readout]'); })()) === 'calves');

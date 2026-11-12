@@ -175,13 +175,24 @@ if (raw.byteLength > EXPECT.maxBytes) {
 /* ── attributes ────────────────────────────────────────────────────────── */
 
 const posIdx = new Set(), nrmIdx = new Set(), colIdx = new Set();
+// What every later check indexes into: without it the file is not read on.
+let whole = prims.length > 0;
+if (!prims.length) fail('the file has no mesh with primitives');
 for (const p of prims) {
-  if (p.attributes.POSITION === undefined) fail('a primitive has no POSITION');
-  if (p.attributes.NORMAL === undefined) fail('a primitive has no NORMAL — the body would render faceted');
-  if (p.indices === undefined) fail('a primitive is not indexed');
-  posIdx.add(p.attributes.POSITION);
-  nrmIdx.add(p.attributes.NORMAL);
-  colIdx.add(p.attributes.COLOR_0);
+  const attributes = p.attributes ?? {};
+  if (attributes.POSITION === undefined) { fail('a primitive has no POSITION'); whole = false; }
+  if (attributes.NORMAL === undefined) fail('a primitive has no NORMAL — the body would render faceted');
+  if (p.indices === undefined) { fail('a primitive is not indexed'); whole = false; }
+  if ((json.materials ?? [])[p.material] === undefined) { fail('a primitive has no material — a region is the name of its material'); whole = false; }
+  posIdx.add(attributes.POSITION);
+  nrmIdx.add(attributes.NORMAL);
+  colIdx.add(attributes.COLOR_0);
+}
+if (!whole) {
+  console.error(`\n✗ ${problems.length} contract violation(s):`);
+  for (const p of problems) console.error(`  - ${p}`);
+  console.error('  (the file was not read further: every primitive needs its points, its triangles and its material first)');
+  process.exit(1);
 }
 if (posIdx.size !== 1) fail(`primitives must share ONE position accessor (found ${posIdx.size}) — shared buffers are what keep this asset cheap`);
 if (nrmIdx.size !== 1) fail(`primitives must share ONE normal accessor (found ${nrmIdx.size})`);

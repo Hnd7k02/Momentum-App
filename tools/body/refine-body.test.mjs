@@ -463,6 +463,21 @@ describe('refine-body.mjs — a frozen region', () => {
     expect(island(refine('frozen-island-not', body, withIsland).result)).toBeLessThan(placed / 4);
   });
 
+  it('leaves a small piece of another region alone when the frozen region lies all round it', () => {
+    // A patch of the chest on top of the cap: a stray by its size, but the
+    // only region beside it is the frozen one, which takes nothing.
+    const withIsland = labels.map((label, t) => {
+      const [x, y, z] = centroid(body.points, body.tris[t]);
+      return Math.acos(Math.max(-1, Math.min(1, y / Math.hypot(x, y, z)))) < 0.2 ? 1 : label;
+    });
+    const island = (mesh) => mesh.tris.filter((tri, t) => mesh.labels[t] === 1 && centroid(mesh.points, tri)[1] > 0.9 * RADIUS).length;
+    const placed = island({ ...body, labels: withIsland });
+    expect(placed).toBeGreaterThan(20);
+    const { result, log } = refine('frozen-round', body, withIsland, ['--freeze', 'none']);
+    expect(island(result)).toBe(placed);
+    expect(log).toMatch(/stray patches handed back: 0 /);
+  });
+
   it('refuses a name the file does not have', () => {
     expect(() => refine('frozen-unknown', body, labels, ['--freeze', 'elbow'])).toThrow();
   });

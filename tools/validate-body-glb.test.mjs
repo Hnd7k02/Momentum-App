@@ -162,6 +162,23 @@ describe('the validator refuses', () => {
     expect(problems).toMatch(/unknown region "shins"/);
   });
 
+  it('a primitive without its triangles, and says so instead of stopping on an error of its own', () => {
+    const path = changed('unindexed', (json) => { delete json.meshes[0].primitives[2].indices; });
+    const { status, problems } = validate(path);
+    expect(status).toBe(1);
+    expect(problems).toMatch(/a primitive is not indexed/);
+    expect(problems).toMatch(/not read further/);
+    expect(problems).not.toMatch(/TypeError/);
+  });
+
+  it('a primitive without a material, the same way', () => {
+    const path = changed('no-material', (json) => { delete json.meshes[0].primitives[5].material; });
+    const { status, problems } = validate(path);
+    expect(status).toBe(1);
+    expect(problems).toMatch(/a primitive has no material/);
+    expect(problems).not.toMatch(/TypeError/);
+  });
+
   it('the model of D156: not closed, and another model\'s notice', () => {
     const { status, problems } = validate(MODEL_OF_D156);
     expect(status).toBe(1);
