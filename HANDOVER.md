@@ -938,12 +938,12 @@ merged; **in progress, runs up to its gate and stops there**)
     The regions are stored per vertex (`regions.json`); the upper trapezius
     stays with the back, and the build stops if `refine-body.mjs` hands
     back a piece of 100 triangles or more. `refine-body.mjs` has tests now
-    (vitest project `tools`, 14 tests, part of `npm run test`), and **they
-    found a defect in the script as the reference page has it**: a border
-    crossing snapped onto a vertex left a T-junction, so the body was not
-    closed (30 open edges in the proof, 84 in the first candidate). One
-    branch is corrected; the body is closed. `npm run test` is 112 files
-    and 1800 tests from here on.
+    (vitest project `tools`, 15 tests by the end of the block, part of
+    `npm run test`), and **they found a defect in the script as the
+    reference page has it**: a border crossing snapped onto a vertex left a
+    T-junction, so the body was not closed (30 open edges in the proof, 84
+    in the first candidate). One branch is corrected; the body is closed.
+    `npm run test` is 112 files and 1801 tests by the end of the block.
   - [x] Step 3 — measuring. `node tools/body/measure-body.mjs <glb>…` reads
     fourteen measures from the surface of any GLB (no skeleton needed) and
     says where the regions lie; `tools/body/MEASURES.md` has the definitions,
@@ -998,12 +998,16 @@ merged; **in progress, runs up to its gate and stops there**)
     What follows depends on the answer — the owner picks a pair (step 7a),
     a pair with up to three corrections (one more round, a new sheet), or
     none (step 7b: stage 1 on today's model). D165 gets the outcome then.
-    Not done yet and owed after the gate: the full run of the browser
-    suites against step 0 (step 8); before the gate only `tsc -b`,
-    `npm run test`, the build and the 3D suites were run.
+    A read-only review of the block's diff (four readers on Sonnet, each
+    finding checked by a refuter) found nothing in the viewer and nothing
+    in the pipeline; it found three defects in the measuring script (the
+    verdict judged the raw value beside a rounded figure, the foot was
+    measured between triangle centres, the chin's edge lay up to 3 mm high)
+    and four slips in the record. All are corrected; the counts of targets
+    met did not change, the foot length reads 14.9 % for 14.7 %.
 - **Baseline for this block** is the closing run of the colour rules on
   `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
-  only the record, the pictures and one line of a verify script): `tsc -b`
+  only the record, the pictures and a moved block in one verify script): `tsc -b`
   0; `npm run test` exit 0, 111 files, 1786 tests; build `index.css`
   90.21 kB, `index.js` 507.06 kB; 37 browser suites with an exit code, 36
   green, 4075 of 4076 checks, the one red being the offline check of

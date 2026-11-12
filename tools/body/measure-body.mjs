@@ -31,7 +31,8 @@
  *   neck, head  the narrowest cut between shoulders and head; the widest cut
  *               of the skull above the ears.
  *   foot        the surface below 0.04 H on one side; its long axis runs from
- *               the middle of the heel to the middle of the forefoot.
+ *               the middle of the heel to the middle of the forefoot, and its
+ *               length between the outermost points of the skin along it.
  *   breadth     the shoulder joints' distance plus, on each side, how far the
  *               shoulder muscle stands out from the arm's line — the bideltoid
  *               breadth as if the arms hung straight down, as it is taped.
@@ -42,7 +43,8 @@
  * to about one percent of H; the table says which is which.
  *
  * The targets are the ones of the guide (koerper-anleitung-7a.md §3). What
- * they were checked against is said in tools/body/MEASURES.md.
+ * they were checked against is said in tools/body/MEASURES.md. A measure is
+ * judged on the figure as it is printed, so a row never contradicts itself.
  *
  * Dependency-free on purpose, like the validator, which takes these measures
  * over once a body is chosen.
@@ -310,11 +312,13 @@ export function measure(body, skeleton = null) {
 
     /* the foot: its long axis runs from the middle of the heel to the middle of the forefoot */
     const foot = [];
+    const footPoints = [];
     for (let t = 0; t < M; t++) {
       const corners = [point(T[t * 3]), point(T[t * 3 + 1]), point(T[t * 3 + 2])];
       const centre = [0, 1, 2].map((c) => (corners[0][c] + corners[1][c] + corners[2][c]) / 3);
       if (Math.sign(centre[0]) !== side || centre[1] > low + 0.04 * H) continue;
       foot.push({ x: centre[0], z: centre[2], weight: norm(cross(sub(corners[1], corners[0]), sub(corners[2], corners[0]))) / 2 });
+      footPoints.push(...corners);
     }
     if (foot.length > 20) {
       let forward = [0, 1];
@@ -332,8 +336,11 @@ export function measure(body, skeleton = null) {
         const heel = middle(0, 0.15), ball = middle(0.6, 0.8);
         const length = Math.hypot(ball[0] - heel[0], ball[1] - heel[1]);
         forward = [(ball[0] - heel[0]) / length, (ball[1] - heel[1]) / length];
-        result.footLength = front - back;
       }
+      // The length is taken along the axis as it stands at the end, between
+      // the outermost points of the skin — the heel's and the longest toe's.
+      const reachAlong = footPoints.map((q) => q[0] * forward[0] + q[2] * forward[1]);
+      result.footLength = Math.max(...reachAlong) - Math.min(...reachAlong);
       result.toeOut = degrees(Math.atan2(side * forward[0], forward[1]));
     }
 
@@ -471,7 +478,15 @@ export function measure(body, skeleton = null) {
       const slope = a === null || b === null ? 0 : (b - a) / 0.006;
       if (slope > threshold) run++;
       else {
-        if (run >= 5) menton = profile[k - 1].y;
+        if (run >= 5) {
+          // The slope is taken over six millimetres, so it stays high for a
+          // little while after the stretch has ended. Step back to the last
+          // millimetre that is itself as steep: that is the chin's edge.
+          let j = k - 1;
+          const local = (i) => (profile[i].z === null || profile[i - 1].z === null ? 0 : (profile[i].z - profile[i - 1].z) / 0.001);
+          while (j > k - 5 && j > 1 && local(j) <= threshold) j--;
+          menton = profile[j].y;
+        }
         run = 0;
       }
     }
@@ -715,10 +730,23 @@ export function targetText(key) {
   return `${range[0].toFixed(2)}–${range[1].toFixed(2)}`;
 }
 
+/** The digits a measure is printed with: a percentage of H to one decimal is three of the ratio. */
+function digits(key) {
+  const unitOf = TARGETS[key].unit;
+  return unitOf === '%H' ? 3 : unitOf === 'ratio' ? 2 : 1;
+}
+
+/**
+ * Whether a measure meets its target — judged on the figure as it is
+ * printed, against the limits as they are printed. A crotch height of
+ * 49.04 % prints as "49.0 %" beside "45.0–49.0 %"; marking that row as
+ * failed would let the table contradict itself.
+ */
 export function passes(key, value) {
   if (value === null || value === undefined) return false;
+  const round = (v) => Number(v.toFixed(digits(key)));
   const [lowest, highest] = TARGETS[key].range;
-  return value >= lowest - 1e-9 && value <= highest + 1e-9;
+  return round(value) >= round(lowest) && round(value) <= round(highest);
 }
 
 export function measureFile(path) {

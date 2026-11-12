@@ -4,9 +4,9 @@ Builds the Momentum body model from the MakeHuman base mesh, by script only:
 no Blender, no hand work, the same bytes every time. Decision D165; the guide
 it follows is `koerper-anleitung-7a.md` on the owner's reference page.
 
-**Status: before the gate.** Nothing here is in the app yet. The app still
-loads `public/models/momentum-body.glb`, the model of D156; the candidates
-built here are shown to the owner first (block 7A, step 6).
+**Status: before the gate.** No model built here is in the app yet. The app
+still loads `public/models/momentum-body.glb`, the model of D156; the
+candidates are shown to the owner first (block 7A, step 6).
 
 ## One command
 
@@ -94,10 +94,11 @@ once a candidate is chosen: one mesh; eleven primitives, one per region; the
 material name is the muscle-group id (`none` for head, neck, hands and feet);
 one shared position and normal list; `KHR_mesh_quantization`.
 
-The baked shade is a vertex colour (`COLOR_0`). The app shows it only with one
-line in the two places that make the body's materials —
-`material.vertexColors = mesh.geometry.hasAttribute('color')` — which belongs
-to the step after the gate.
+The baked shade is a vertex colour (`COLOR_0`). The app's two body materials
+read it where a model brings one —
+`material.vertexColors = mesh.geometry.hasAttribute('color')`, in
+`BodyModel.tsx` and `useMuscleHighlight.ts` — and only then: today's model has
+no such attribute and is drawn as before.
 
 ## The regions
 
@@ -157,13 +158,15 @@ Three body types after the guide (§4.2) and two heads:
 
 - `build_mh.py` and `label_mh.py` were proof scripts. Their steps live in
   `bodylib.py` and `regionrules.py` now, behind `build.py`.
-- `refine-body.mjs` is the script of the reference page with **one
-  correction**. Where a border crossing was snapped onto a vertex, the
+- `refine-body.mjs` is the script of the reference page with **two
+  changes**. The first is a correction. Where a border crossing was snapped onto a vertex, the
   remaining quad was split along a diagonal that made a triangle without
   area; that triangle was dropped, and the crossing on the other edge was
   left as a T-junction. The body was no longer closed: 30 open edges in the
   proof, 84 in the first candidate. The quad is now split from the other
-  corner, and `refine-body.test.mjs` holds the body closed.
+  corner, and `refine-body.test.mjs` holds the body closed. The second is
+  the option `--straymax` (see "The regions"): without a value it changes
+  nothing.
 - `bpy` (Blender as a Python module, which the guide names) installs from
   PyPI here but does not import: the container lacks `libtbb.so.12`. Nothing
   in the pipeline needs it. Subdivision, skinning, the thinning of the inert

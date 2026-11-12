@@ -19,7 +19,7 @@ Measured on 12 November 2026. H is the body height.
 | Upper arm | 16.7–20.5 % | 23.6 % ✗ | 17.7 % ✓ |
 | Forearm | 13.1–16.1 % | 13.9 % ✓ | 15.1 % ✓ |
 | Hand | 9.7–11.9 % | 10.1 % ✓ | 12.3 % ✗ |
-| Foot length | 14.5–16.0 % | 14.1 % ✗ | 14.7 % ✓ |
+| Foot length | 14.5–16.0 % | 14.2 % ✗ | 14.9 % ✓ |
 | Shoulder breadth (bideltoid) | 25.0–30.0 % | 25.2 % ✓ | 31.5 % ✗ |
 | Neck width to head width | 0.75–0.90 | 0.65 ✗ | 0.79 ✓ |
 | Symmetry (largest mirrored distance) | ≤ 2 mm | 1.8 mm ✓ | 2.2 mm ✗ |
@@ -64,7 +64,7 @@ Measured on 12 November 2026, by the same script.
 | Upper arm | 16.7–20.5 % | 18.4 % ✓ | 18.3 % ✓ | 18.3 % ✓ | 18.1 % ✓ |
 | Forearm | 13.1–16.1 % | 15.0 % ✓ | 15.2 % ✓ | 15.2 % ✓ | 15.0 % ✓ |
 | Hand | 9.7–11.9 % | 11.0 % ✓ | 10.8 % ✓ | 10.8 % ✓ | 11.0 % ✓ |
-| Foot length | 14.5–16.0 % | 14.7 % ✓ | 14.7 % ✓ | 14.7 % ✓ | 14.7 % ✓ |
+| Foot length | 14.5–16.0 % | 14.9 % ✓ | 14.9 % ✓ | 14.9 % ✓ | 14.9 % ✓ |
 | Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.1 % ✓ | 29.6 % ✓ | 29.6 % ✓ | 30.3 % ✗ |
 | Neck width to head width | 0.75–0.90 | 0.81 ✓ | 0.79 ✓ | 0.79 ✓ | 0.78 ✓ |
 | Symmetry (largest mirrored distance) | ≤ 2 mm | 0.1 mm ✓ | 0.1 mm ✓ | 0.1 mm ✓ | 0.1 mm ✓ |
@@ -104,6 +104,9 @@ marked open.
 | Knee height | 0.285 H | Not checked. | open |
 | Neck to head width | 0.75–0.90 | No source names this ratio; it is a criterion of look. Measured as the narrowest cut of the neck against the widest cut of the skull above the ears. | the guide's own |
 | Symmetry, posture angles | 2 mm; 15–25°, 5–15°, 5–10° | Criteria of the guide, not anthropometry. | the guide's own |
+
+A measure is judged on the figure as it is printed, against the limits as
+they are printed: 49.04 % reads "49.0 %" and meets "45.0–49.0 %".
 
 Two definitions are a choice and are said here because another choice gives
 another number:
