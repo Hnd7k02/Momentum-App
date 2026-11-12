@@ -94,8 +94,9 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     body = B.body_only(base, Vp, height=spec.get('height', 1.78))
     bones, dominant = posed.dominant_bones()
 
+    cuts = B.cut_planes(body.joints, spec.get('height', 1.78), spec.get('cuts'))
     if relabel:
-        labels = regionrules.label_by_rules(body.P, body.joints, dominant[body.origin], bones, body.P[:, 1].max())
+        labels = regionrules.label_by_rules(body.P, body.joints, dominant[body.origin], bones, body.P[:, 1].max(), cuts)
         save_regions(labels, name)
         say(f'regions.json written from the rules, on {name}')
     labels = load_regions()
@@ -112,10 +113,6 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         refine_mask = refine_mask | touched[body.quads].any(axis=1)
     P, tris, tri_labels, parents = B.subdivide(body.P, body.quads, quad_labels, refine_mask)
     n_old = len(body.P)
-    vertex_region = np.concatenate([labels, np.full(len(P) - n_old, -1)])
-    for i in range(n_old, len(P)):
-        ps = labels[list(parents[i])]
-        vertex_region[i] = np.bincount(ps).argmax()
     if spec.get('inert_share', 1.0) < 1.0:
         # Hands and feet are thinned; the head is not. A face with half its
         # triangles shows them as flat panels, close up and in the silhouette.
@@ -129,8 +126,18 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         part[(tri_labels == B.NONE) & (tris >= n_old).any(axis=1)] = HEAD
         P, tris, part, kept = B.decimate(P, tris, part, B.NONE, spec['inert_share'])
         tri_labels = np.where(part == HEAD, B.NONE, part)
-        vertex_region = vertex_region[kept]
         say(f'inert zone: {before} → {int((tri_labels == B.NONE).sum())} triangles')
+    # The straight cuts: level at the neck, across the limb at wrist and
+    # ankle. Each becomes a loop of edges exactly on its plane, and
+    # refine-body.mjs is told to leave the inert zone's borders where they are.
+    for cut_name in sorted(cuts):
+        point, normal, radius = cuts[cut_name]
+        P, tris, tri_labels = B.cut(P, tris, tri_labels, point, normal, radius, B.NONE)
+    inert_pieces = B.pieces(tris, tri_labels, B.NONE)
+    if len(inert_pieces) != 5:
+        sizes = ', '.join(str(len(piece)) for piece in inert_pieces)
+        raise SystemExit(f'{name}: the inert zone is {len(inert_pieces)} pieces ({sizes} triangles), not five — '
+                         f'head, two hands, two feet. regions.json and the cuts disagree.')
     muscle = np.zeros(len(P), dtype=bool)
     muscle[np.unique(tris[tri_labels != B.NONE])] = True
     inert = np.zeros(len(P), dtype=bool)

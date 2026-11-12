@@ -1016,8 +1016,14 @@ merged; **in progress, runs up to its gate and stops there**)
 - **The gate is decided (2026-11-12): `athletisch-a`, with three
   corrections, then production (step 7a) and STOP 7A.** The corrections
   and the owner's answers are in D165. What is owed, in this order:
-  - [ ] correction 2 — borders: a level cut at the neck, straight cuts at
-    wrist and ankle, the collarbone redrawn
+  - [x] correction 2 — borders. The build cuts the mesh itself along five
+    planes (`bodylib.cut_planes`): the neck 6 mm below its joint, tilted 5°;
+    wrist and ankle across the limb. `refine-body.mjs` got `--freeze none`
+    (its third change, with four tests) and leaves those borders exactly
+    where they are. The pit of the throat goes with the chest, the
+    trapezius begins at the side of the neck, and the border of chest and
+    trapezius along the collarbone is held. `tools/body/README.md`, "The
+    straight cuts".
   - [ ] correction 1 — the inert zone's own, lighter tone (D166, departs
     from D161)
   - [ ] correction 3 — the key light, and the look moved into the tokens

@@ -49,6 +49,12 @@
  *   --straymax <n>    …unless it has this many triangles or more: a piece
  *                     that large is a part of the body — a hand beside an
  *                     unthinned head — and never a stray              [no limit]
+ *   --freeze <name>   one region whose borders stay exactly on the edges
+ *                     they lie on: no walk moves them, no cut reshapes them,
+ *                     no piece of it is a stray. For a region whose border
+ *                     the builder has already cut where it belongs — the
+ *                     inert zone, cut level at the neck and straight at
+ *                     wrist and ankle                                  [none frozen]
  *   --hold <list>     region pairs whose border keeps its place and is only
  *                     smoothed: the documented lumbar waistband and calf cut
  *                     [back|hamstringsGlutes,calves|quadriceps,calves|hamstringsGlutes]
@@ -66,7 +72,7 @@ import { createHash } from 'node:crypto';
 const argv = process.argv.slice(2);
 const positional = [];
 const opt = {
-  band: 0.03, groove: 6, prior: 0.15, stray: 0.2, straymax: Infinity,
+  band: 0.03, groove: 6, prior: 0.15, stray: 0.2, straymax: Infinity, freeze: '',
   hold: 'back|hamstringsGlutes,calves|quadriceps,calves|hamstringsGlutes',
   shade: 1, cavity: 0.5, ao: 0.4, floor: 0.55, white: 0.85,
 };
@@ -108,6 +114,8 @@ const regionNames = prims.map((p) => json.materials[p.material].name);
 const L = regionNames.length;
 const NONE = regionNames.indexOf('none');
 if (NONE < 0) die('no inert "none" region');
+const FROZEN = opt.freeze ? regionNames.indexOf(opt.freeze) : -1;
+if (opt.freeze && FROZEN < 0) die(`--freeze names no region of this file: ${opt.freeze}`);
 
 const posQ = readAccessor(posIndex);
 const nrmQ = readAccessor(nrmIndex);
@@ -136,6 +144,25 @@ prims.forEach((p, label) => {
 const T = Int32Array.from(triList);
 const TL = Int32Array.from(triLabel);
 const M = TL.length;
+
+// The frozen region, if one is named. A vertex of it either lies wholly
+// inside — every triangle around it is frozen — or on its rim, where it also
+// belongs to a region that is free to move. Everything below keeps the two
+// apart: the inside never changes, and the rim is a vertex of its free region
+// that can never be handed to the frozen one.
+const edgeKey = (i, j) => (i < j ? i * 1048576 + j : j * 1048576 + i);
+const touchesFree = new Uint8Array(V0);
+const touchesFrozen = new Uint8Array(V0);
+const freeEdges = new Set();
+for (let t = 0; t < M; t++) {
+  const frozen = TL[t] === FROZEN;
+  for (let c = 0; c < 3; c++) {
+    const a = T[t * 3 + c], b = T[t * 3 + ((c + 1) % 3)];
+    if (frozen) touchesFrozen[a] = 1;
+    else { touchesFree[a] = 1; freeEdges.add(edgeKey(a, b)); }
+  }
+}
+const frozenInside = (i) => touchesFrozen[i] === 1 && touchesFree[i] === 0;
 
 /* ── topology ──────────────────────────────────────────────────────────── */
 
@@ -176,10 +203,12 @@ for (let t = 0; t < M; t++) {
   for (let c = 0; c < 3; c++) {
     const v = T[t * 3 + c];
     if (stray[t]) strayMask[v] |= 1 << TL[t];
-    else vertexLabelArea[v * L + TL[t]] += triArea[t] / 3;
+    // A vertex on the frozen region's rim is counted for its free region alone.
+    else if (!(TL[t] === FROZEN && touchesFree[v])) vertexLabelArea[v * L + TL[t]] += triArea[t] / 3;
   }
 }
-const forbidden = (i, k) => ((strayMask[i] >> k) & 1) === 1 && vertexLabelArea[i * L + k] === 0;
+const forbidden = (i, k) =>
+  (k === FROZEN && touchesFree[i] === 1) || (((strayMask[i] >> k) & 1) === 1 && vertexLabelArea[i * L + k] === 0);
 
 /* ── 1. borders that follow the grooves ────────────────────────────────── */
 
@@ -223,6 +252,7 @@ const heldDistance = dijkstra(heldBorder, opt.band);
 const inBand = new Uint8Array(V0);
 const held = new Uint8Array(V0);
 for (let i = 0; i < V0; i++) {
+  if (frozenInside(i)) continue;          // the frozen region takes no part in any walk
   if (strayMask[i]) { inBand[i] = 1; continue; }
   if (freeDistance[i] <= opt.band) inBand[i] = 1;
   else if (heldDistance[i] <= opt.band) { inBand[i] = 1; held[i] = 1; }
@@ -314,14 +344,15 @@ for (let pass = 0; pass < 50; pass++) {
 for (let pass = 0; pass < 2; pass++) {
   for (const i of bandVertices) {
     const votes = new Float64Array(L);
-    let same = false;
+    let same = false, voted = false;
     for (let e = adjacency.offset[i]; e < adjacency.offset[i + 1]; e++) {
       const j = adjacency.list[e];
-      if (newLabel[j] < 0) continue;
+      if (newLabel[j] < 0 || newLabel[j] === FROZEN) continue;
       votes[newLabel[j]] += 1;
+      voted = true;
       if (newLabel[j] === newLabel[i]) same = true;
     }
-    if (!same) {
+    if (!same && voted) {
       let best = 0;
       for (let k = 1; k < L; k++) if (votes[k] > votes[best]) best = k;
       newLabel[i] = best;
@@ -341,7 +372,7 @@ const crossing = new Map();
 let created = 0, snapped = 0;
 
 function vertexOnEdge(i, j) {
-  const key = i < j ? i * 1048576 + j : j * 1048576 + i;
+  const key = edgeKey(i, j);
   const hit = crossing.get(key);
   if (hit !== undefined) return hit;
   const a = newLabel[i], b = newLabel[j];
@@ -379,8 +410,44 @@ function emit(label, a, b, c) {
   outTris[label].push(a, b, c);
 }
 
+/**
+ * A triangle of the frozen region keeps its region and its place. Only where
+ * a border between two free regions ends on one of its edges — both ends on
+ * the rim, in different regions, a free triangle on the other side — does
+ * that triangle put a vertex on the edge; this one takes the same vertex, so
+ * the surface stays closed. A crossing snapped onto an end of the edge adds
+ * no vertex and needs no split.
+ */
+function emitFrozen(a, b, c) {
+  const crossingOn = (i, j) => {
+    if (!touchesFree[i] || !touchesFree[j] || newLabel[i] === newLabel[j] || !freeEdges.has(edgeKey(i, j))) return -1;
+    const m = vertexOnEdge(i, j);
+    return m === i || m === j ? -1 : m;
+  };
+  let v = [a, b, c];
+  let m = [crossingOn(a, b), crossingOn(b, c), crossingOn(c, a)];
+  const count = m.filter((x) => x >= 0).length;
+  if (count === 0) { emit(FROZEN, a, b, c); return; }
+  if (count === 3) {
+    emit(FROZEN, a, m[0], m[2]); emit(FROZEN, m[0], b, m[1]); emit(FROZEN, m[1], c, m[2]); emit(FROZEN, m[0], m[1], m[2]);
+    return;
+  }
+  // Turn the triangle, winding kept, until the first edge carries a crossing
+  // and — with two of them — the last one does not.
+  while (m[0] < 0 || (count === 2 && m[2] >= 0)) {
+    v = [v[1], v[2], v[0]];
+    m = [m[1], m[2], m[0]];
+  }
+  if (count === 1) {
+    emit(FROZEN, v[0], m[0], v[2]); emit(FROZEN, m[0], v[1], v[2]);
+  } else {
+    emit(FROZEN, v[0], m[0], m[1]); emit(FROZEN, m[0], v[1], m[1]); emit(FROZEN, v[0], m[1], v[2]);
+  }
+}
+
 for (let t = 0; t < M; t++) {
   const v = [T[t * 3], T[t * 3 + 1], T[t * 3 + 2]];
+  if (TL[t] === FROZEN) { emitFrozen(v[0], v[1], v[2]); continue; }
   const l = v.map((x) => newLabel[x]);
   // Triangles away from every border keep their region.
   if (v.every((x) => !inBand[x])) { emit(TL[t], v[0], v[1], v[2]); continue; }
@@ -523,6 +590,7 @@ function findStrays() {
   const patches = new Map();
   for (let t = 0; t < M; t++) {
     const r = find(t);
+    if (TL[t] === FROZEN) continue;
     if (size.get(r) >= opt.stray * largest[TL[t]] || size.get(r) >= opt.straymax) continue;
     mask[t] = 1;
     const y = (P[T[t * 3] * 3 + 1] + P[T[t * 3 + 1] * 3 + 1] + P[T[t * 3 + 2] * 3 + 1]) / 3;

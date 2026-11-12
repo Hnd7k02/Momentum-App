@@ -120,6 +120,31 @@ Two things are secured there, because the proof lost them:
   the forearms and calves as strays of `none`; the build passes
   `--straymax 150`, above which no piece is a stray.
 
+## The straight cuts
+
+The owner's correction at the gate: "at the base of the neck a calm, nearly
+level cut without a V and without waves; at wrist and ankle a straight cut."
+A border that `refine-body.mjs` draws follows the grooves and is smoothed; it
+is never straight. These five are therefore cut by the build itself
+(`bodylib.cut_planes`, `bodylib.cut`):
+
+| cut | where | which way |
+|---|---|---|
+| neck | 6 mm below the neck joint — the lowest height at which the neck is still a column | tilted 5°, the front lower |
+| wrist, each side | at the wrist joint | across the forearm |
+| ankle, each side | 35 mm above the ankle joint, so that the ankle bones go with the foot | across the shin |
+
+Every triangle a plane crosses is split, so the plane's line on the body is a
+loop of edges; no vertex moves. Beyond the plane everything is inert, before
+it nothing is. `regionrules.py` labels the vertices by the same planes, and
+`refine-body.mjs --freeze none` leaves these borders where they are. The
+build stops if the inert zone is not exactly five pieces.
+
+Below the neck's cut, the pit of the throat between the two collarbones goes
+with the chest, and the trapezius begins at the side of the neck. The border
+of chest and trapezius runs along the collarbone and is held (`--hold`), so it
+is smoothed and not moved into a groove.
+
 ## The candidates
 
 Three body types after the guide (§4.2) and two heads:
@@ -158,7 +183,7 @@ Three body types after the guide (§4.2) and two heads:
 
 - `build_mh.py` and `label_mh.py` were proof scripts. Their steps live in
   `bodylib.py` and `regionrules.py` now, behind `build.py`.
-- `refine-body.mjs` is the script of the reference page with **two
+- `refine-body.mjs` is the script of the reference page with **three
   changes**. The first is a correction. Where a border crossing was snapped onto a vertex, the
   remaining quad was split along a diagonal that made a triangle without
   area; that triangle was dropped, and the crossing on the other edge was
@@ -166,7 +191,10 @@ Three body types after the guide (§4.2) and two heads:
   proof, 84 in the first candidate. The quad is now split from the other
   corner, and `refine-body.test.mjs` holds the body closed. The second is
   the option `--straymax` (see "The regions"): without a value it changes
-  nothing.
+  nothing. The third is `--freeze <region>`: the borders of that region
+  stay exactly on the edges they lie on. The build passes `--freeze none`,
+  because it has cut the inert zone's borders itself (see "The straight
+  cuts").
 - `bpy` (Blender as a Python module, which the guide names) installs from
   PyPI here but does not import: the container lacks `libtbb.so.12`. Nothing
   in the pipeline needs it. Subdivision, skinning, the thinning of the inert

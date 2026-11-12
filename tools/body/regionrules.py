@@ -25,22 +25,42 @@ from __future__ import annotations
 
 import numpy as np
 
-from bodylib import R, bone_segment
+from bodylib import R, bone_segment, cut_planes
 
 
 def _unit(v):
     return v / np.linalg.norm(v)
 
 
-def label_by_rules(P, joints, dominant, bones, height):
-    """Vertex labels for a posed body `P` (metres) of height `height`."""
+#: How far the collarbone's line on the skin lies above the line of its
+#: joints, and half the width of the pit of the throat between its two heads
+#: (metres on a body of 1.78 m). Set on renderings of `athletisch-a`.
+CLAVICLE_LIFT = 0.020
+THROAT_HALF_WIDTH = 0.045
+#: The pit widens upwards: its edge runs out to the side of the neck, where
+#: the trapezius begins, instead of standing under the neck as a tab.
+THROAT_FLARE = 0.75
+
+
+def label_by_rules(P, joints, dominant, bones, height, cuts=None):
+    """Vertex labels for a posed body `P` (metres) of height `height`.
+
+    `cuts` are the straight cuts between the inert zone and the muscles
+    (`bodylib.cut_planes`): the same planes the build cuts the mesh along.
+    """
     J = joints
     H = height
     k = H / 1.78          # the rules' lengths were set on a body of 1.78 m
+    cuts = cuts or cut_planes(J, H)
     seg = np.array([bone_segment(bones[int(b)]) if b >= 0 else 'torso' for b in dominant])
 
-    # Elbow, wrist, knee and ankle: the cut is the plane through the joint that
-    # bisects the two segments, not where the skinning weights change bones.
+    def beyond(name):
+        point, normal, _ = cuts[name]
+        return (P - point) @ normal > 0
+
+    # Elbow and knee: the cut is the plane through the joint that bisects the
+    # two segments, not where the skinning weights change bones. Wrist and
+    # ankle: the straight cut of `cut_planes`.
     for side, sx in (('l', 1.0), ('r', -1.0)):
         mine = P[:, 0] * sx > 0
         S, E, Hd = J[f'joint-{side}-shoulder'], J[f'joint-{side}-elbow'], J[f'joint-{side}-hand']
@@ -49,37 +69,31 @@ def label_by_rules(P, joints, dominant, bones, height):
         above = (P - E) @ n < 0
         seg[m & above] = 'upperarm'
         seg[m & ~above] = 'lowerarm'
-        # The wrist: across the forearm's axis, at the wrist joint.
-        n = _unit(Hd - E)
         m = np.isin(seg, ['lowerarm', 'hand']) & mine
-        above = (P - Hd) @ n < 0
-        seg[m & above] = 'lowerarm'
-        seg[m & ~above] = 'hand'
+        far = beyond(f'wrist-{side}')
+        seg[m & ~far] = 'lowerarm'
+        seg[m & far] = 'hand'
         Hj, K, A = J[f'joint-{side}-upper-leg'], J[f'joint-{side}-knee'], J[f'joint-{side}-ankle']
         n = _unit(_unit(K - Hj) + _unit(A - K))
         m = np.isin(seg, ['upperleg', 'lowerleg']) & mine
         above = (P - K) @ n < 0
         seg[m & above] = 'upperleg'
         seg[m & ~above] = 'lowerleg'
-        # The ankle: across the shin's axis, a little above the joint, so the
-        # malleoli belong to the foot.
-        n = _unit(A - K)
         m = np.isin(seg, ['lowerleg', 'foot']) & mine
-        above = (P - A) @ n < -0.035 * k
-        seg[m & above] = 'lowerleg'
-        seg[m & ~above] = 'foot'
+        far = beyond(f'ankle-{side}')
+        seg[m & ~far] = 'lowerleg'
+        seg[m & far] = 'foot'
 
-    # Head and neck are inert, but the neck's bones also carry the slope of
-    # the trapezius between neck and shoulder. The neck is what lies within a
-    # neck's radius of its axis; what the neck bones carry beyond that, below
-    # the jaw, is the trapezius and belongs to the back.
-    neck_low, neck_high = J['joint-neck'], J['joint-head']
-    axis = _unit(neck_high - neck_low)
-    rel = P - neck_low
-    along = rel @ axis
-    radial = np.linalg.norm(rel - np.outer(along, axis), axis=1)
-    slope = (seg == 'head') & (along < 0.75 * np.linalg.norm(neck_high - neck_low)) & (radial > 0.072 * k)
-    seg[slope] = 'torso'
+    # Head and neck are inert down to the neck's cut: a nearly level plane at
+    # the base of the neck. What the neck's bones carry below it — the slope
+    # of the trapezius, the pit between the collarbones — belongs to the
+    # trunk; what the trunk's bones carry above it, close to the neck, to the
+    # neck.
+    point, _, radius = cuts['neck']
+    near = np.linalg.norm(P - point, axis=1) < radius
+    above_cut = beyond('neck')
+    seg[(seg == 'head') & near & ~above_cut] = 'torso'
+    seg[(seg == 'torso') & near & above_cut] = 'head'
 
     lab = np.full(len(P), -1)
     lab[np.isin(seg, ['head', 'hand', 'foot'])] = R['none']
@@ -169,17 +183,22 @@ def label_by_rules(P, joints, dominant, bones, height):
     y = P[:, 1]
     m = lab < 0
     pec_bottom = yS - 0.205 * k + 0.85 * np.clip(x - 0.065 * k, 0, None)
-    chest = m & front & (y >= pec_bottom) & (y < yClav - 0.004 * k) & (x < xS - 0.01 * k)
+    # The collarbone: a line on the skin from the pit of the throat out to the
+    # shoulder, lying a little above the line of the bone's two joints. The
+    # pectoral reaches up to it; above it, beside the neck, is the trapezius.
+    C, A = J['joint-l-clavicle'], J['joint-l-scapula']
+    collarbone = C[1] + (A[1] - C[1]) / (A[0] - C[0]) * (x - C[0]) + CLAVICLE_LIFT * k
+    chest = m & front & (y >= pec_bottom) & (y < collarbone) & (x < xS - 0.01 * k)
     lab[chest] = R['chest']
     m = lab < 0
-    # Everything above the clavicle line that is not neck: the trapezius —
-    # where it is the slope beside the neck. Right under the neck in front,
-    # between the two clavicles, there is no muscle of the back; that hollow
-    # goes with the neck.
-    above = m & (y >= yClav - 0.004 * k)
-    hollow = above & front & (x < 0.060 * k)
-    lab[hollow] = R['none']
-    lab[above & ~hollow] = R['back']
+    # Above the collarbone. Between the heads of the two collarbones, under
+    # the neck's cut, lies the pit of the throat: no muscle of the back is
+    # there, and since the neck is cut level above it, it goes with the chest
+    # below. Everything else up there is the trapezius.
+    above = m & (y >= collarbone)
+    pit = above & front & (x < THROAT_HALF_WIDTH * k + THROAT_FLARE * (y - collarbone))
+    lab[pit] = R['chest']
+    lab[above & ~pit] = R['back']
     m = lab < 0
     below = y < yBelt
     hipside = x > 0.085 * k

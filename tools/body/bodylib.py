@@ -595,6 +595,187 @@ def pose(base: Base, V, arm=-1.0, armfwd=0.0, elbow=0.0, palm=None, fingers=0.0,
     return p
 
 
+# ── the straight cuts between the inert zone and the muscles ─────────────────
+
+#: Where each cut lies, relative to its joint (metres on a body of 1.78 m,
+#: degrees). The owner's wording at the gate of block 7A: "at the base of the
+#: neck a calm, nearly level cut without a V and without waves; at wrist and
+#: ankle a straight cut."
+CUTS = {
+    # The neck is a clean column from about a centimetre below the neck joint
+    # upwards; lower, the slope of the trapezius leaves it and a level plane
+    # would run out along the shoulders. Tilted a little, the front lower: a
+    # collar, not a V.
+    'neck_drop': 0.006, 'neck_tilt': 5.0,
+    # Across the forearm, at the wrist joint.
+    'wrist_shift': 0.0,
+    # Across the shin, above the joint, so that the ankle bones go with the foot.
+    'ankle_lift': 0.035,
+}
+
+
+def cut_planes(joints, height, overrides=None):
+    """The five cuts: name → (a point on the plane, its normal, the radius it holds in).
+
+    The normal points to the inert side — up the neck, down the hand, down the
+    foot. One definition serves the rules that label the vertices and the
+    build that cuts the mesh, so the two cannot part.
+    """
+    k = height / 1.78
+    o = {**CUTS, **(overrides or {})}
+    tilt = math.radians(o['neck_tilt'])
+    cuts = {'neck': (joints['joint-neck'] - np.array([0.0, o['neck_drop'] * k, 0.0]),
+                     np.array([0.0, math.cos(tilt), math.sin(tilt)]), 0.17 * k)}
+    for side in ('l', 'r'):
+        E, Hd = joints[f'joint-{side}-elbow'], joints[f'joint-{side}-hand']
+        n = _unit(Hd - E)
+        cuts[f'wrist-{side}'] = (Hd + n * o['wrist_shift'] * k, n, 0.09 * k)
+        K, A = joints[f'joint-{side}-knee'], joints[f'joint-{side}-ankle']
+        n = _unit(A - K)
+        cuts[f'ankle-{side}'] = (A - n * o['ankle_lift'] * k, n, 0.11 * k)
+    return cuts
+
+
+def cut(P, tris, labels, point, normal, radius, inert, snap=0.0003, margin=0.012):
+    """Cut the mesh along a plane and give the far side to the inert zone.
+
+    Within `radius` of `point`, every triangle the plane crosses is split, so
+    that the plane's line on the body becomes a loop of edges; no vertex is
+    moved, a new one lies on an old edge, and the surface is the one it was.
+    What then lies beyond the plane is inert. What lies before it and was
+    inert takes the region of the muscle next to it.
+
+    A vertex within `snap` of the plane counts as on it: the cut goes through
+    it rather than leaving a sliver beside it.
+    """
+    P = np.asarray(P, dtype=np.float64)
+    tris = np.asarray(tris, dtype=np.int64)
+    labels = np.asarray(labels).copy()
+    d = (P - point) @ normal
+    d[np.abs(d) < snap] = 0.0
+    centre = P[tris].mean(axis=1)
+    away = np.linalg.norm(centre - point, axis=1)
+    td = d[tris]
+    crossing = (td.max(axis=1) > 0) & (td.min(axis=1) < 0)
+    # The loop must lie well inside the radius: a crossing triangle at its
+    # edge would be split while its neighbour beyond is not.
+    if (crossing & (np.abs(away - radius) < margin)).any():
+        raise SystemExit('a cut reaches the edge of the zone it holds in — its radius is wrong for this body')
+    todo = crossing & (away < radius)
+
+    points = [row for row in P]
+    made = {}
+
+    def on_edge(a, b):
+        key = (a, b) if a < b else (b, a)
+        if key not in made:
+            t = d[a] / (d[a] - d[b])
+            made[key] = len(points)
+            points.append(P[a] + t * (P[b] - P[a]))
+        return made[key]
+
+    out_tris, out_labels, out_side = [], [], []
+
+    def emit(a, b, c, label, side):
+        out_tris.append((a, b, c))
+        out_labels.append(label)
+        out_side.append(side)
+
+    for t in range(len(tris)):
+        a, b, c = (int(x) for x in tris[t])
+        if not todo[t]:
+            side = 0
+            if away[t] < radius:
+                side = 1 if td[t].sum() > 0 else -1
+            emit(a, b, c, labels[t], side)
+            continue
+        # Turn the triangle, winding kept, so that the corner that stands
+        # alone — on the plane, or alone on its side — comes first.
+        corners = [(a, d[a]), (b, d[b]), (c, d[c])]
+        zero = [i for i, (_, x) in enumerate(corners) if x == 0]
+        if zero:
+            first = zero[0]
+        else:
+            signs = [x > 0 for _, x in corners]
+            first = next(i for i in range(3) if signs[i] != signs[(i + 1) % 3] and signs[i] != signs[(i + 2) % 3])
+        (a, da), (b, db), (c, dc) = corners[first], corners[(first + 1) % 3], corners[(first + 2) % 3]
+        if da == 0:
+            m = on_edge(b, c)
+            emit(a, b, m, labels[t], 1 if db > 0 else -1)
+            emit(a, m, c, labels[t], 1 if dc > 0 else -1)
+        else:
+            mab, mca = on_edge(a, b), on_edge(c, a)
+            emit(a, mab, mca, labels[t], 1 if da > 0 else -1)
+            other = 1 if db > 0 else -1
+            # The quad that is left: along its shorter diagonal.
+            if np.linalg.norm(points[mab] - P[c]) <= np.linalg.norm(P[b] - points[mca]):
+                emit(mab, b, c, labels[t], other)
+                emit(mab, c, mca, labels[t], other)
+            else:
+                emit(mab, b, mca, labels[t], other)
+                emit(b, c, mca, labels[t], other)
+
+    P2 = np.array(points)
+    tris2 = np.array(out_tris, dtype=np.int64)
+    labels2 = np.array(out_labels)
+    side = np.array(out_side)
+    labels2[side > 0] = inert
+    # Before the plane nothing is inert: such a triangle takes the region of
+    # the nearest triangle that has one, across shared edges, ring by ring.
+    owners = {}
+    for t, tri in enumerate(tris2):
+        if side[t] < 0:
+            for i in range(3):
+                x, y = int(tri[i]), int(tri[(i + 1) % 3])
+                owners.setdefault((x, y) if x < y else (y, x), []).append(t)
+    pending = [t for t in range(len(tris2)) if side[t] < 0 and labels2[t] == inert]
+    while pending:
+        taken = {}
+        for t in pending:
+            tri = tris2[t]
+            for i in range(3):
+                x, y = int(tri[i]), int(tri[(i + 1) % 3])
+                for other in owners[(x, y) if x < y else (y, x)]:
+                    if other != t and labels2[other] != inert and t not in taken:
+                        taken[t] = labels2[other]
+        if not taken:
+            raise SystemExit('a cut left an inert piece with no muscle beside it')
+        for t, label in taken.items():
+            labels2[t] = label
+        pending = [t for t in pending if t not in taken]
+    return P2, tris2, labels2
+
+
+def pieces(tris, labels, label):
+    """The connected pieces of one region: a list of arrays of triangle indices, largest first."""
+    index = np.where(np.asarray(labels) == label)[0]
+    position = {int(t): n for n, t in enumerate(index)}
+    parent = list(range(len(index)))
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    first = {}
+    for t in index:
+        tri = tris[t]
+        for i in range(3):
+            x, y = int(tri[i]), int(tri[(i + 1) % 3])
+            key = (x, y) if x < y else (y, x)
+            if key in first:
+                ra, rb = find(position[int(t)]), find(first[key])
+                if ra != rb:
+                    parent[ra] = rb
+            else:
+                first[key] = position[int(t)]
+    groups = {}
+    for n, t in enumerate(index):
+        groups.setdefault(find(n), []).append(int(t))
+    return sorted((np.array(g) for g in groups.values()), key=lambda g: (-len(g), int(g[0])))
+
+
 # ── the body alone, in metres ────────────────────────────────────────────────
 
 class Body:

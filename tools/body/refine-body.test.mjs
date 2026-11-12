@@ -416,6 +416,58 @@ describe('refine-body.mjs — the surface', () => {
   });
 });
 
+describe('refine-body.mjs — a frozen region', () => {
+  const body = ball();
+  const labels = paint(body);
+  const regionArea = ({ points, tris, labels: of }, region) =>
+    area({ points, tris: tris.filter((_, t) => of[t] === region) });
+  const lowestOf = ({ points, tris, labels: of }, region) =>
+    Math.min(...tris.filter((_, t) => of[t] === region).flat().map((i) => points[i][1]));
+
+  it('keeps its border exactly on the edges it lies on', () => {
+    const before = { ...body, labels };
+    const frozen = refine('frozen', body, labels, ['--freeze', 'none']).result;
+    // Not a square millimetre changes hands, and the lowest point of the cap is where it was.
+    expect(Math.abs(regionArea(frozen, 0) - regionArea(before, 0)) / regionArea(before, 0)).toBeLessThan(1e-4);
+    expect(Math.abs(lowestOf(frozen, 0) - lowestOf(before, 0))).toBeLessThan(2 * frozen.step);
+    // Without the option the same border is smoothed, which moves it: the option is what holds it.
+    const free = refine('frozen-not', body, labels).result;
+    expect(Math.abs(regionArea(free, 0) - regionArea(before, 0)) / regionArea(before, 0)).toBeGreaterThan(1e-3);
+  });
+
+  it('still cuts the borders between the other regions, and the body stays closed', () => {
+    const { result } = refine('frozen-closed', body, labels, ['--freeze', 'none']);
+    expect(result.points.length).toBeGreaterThan(body.points.length);
+    const edges = new Map();
+    for (const [a, b, c] of result.tris) {
+      for (const [u, v] of [[a, b], [b, c], [c, a]]) {
+        const key = u < v ? `${u}|${v}` : `${v}|${u}`;
+        edges.set(key, (edges.get(key) ?? 0) + 1);
+      }
+    }
+    expect([...edges.values()].filter((n) => n !== 2)).toHaveLength(0);
+    expect(Math.abs(area(result) - area(body)) / area(body)).toBeLessThan(1e-4);
+  });
+
+  it('never hands a piece of it back, however small', () => {
+    // A patch of the frozen region in the middle of the back: a stray by its size.
+    const withIsland = labels.map((label, t) => {
+      const [x, y, z] = centroid(body.points, body.tris[t]);
+      return Math.acos(Math.max(-1, Math.min(1, -z / Math.hypot(x, y, z)))) < 0.2 ? 0 : label;
+    });
+    const island = (mesh) => mesh.tris.filter((tri, t) => mesh.labels[t] === 0 && centroid(mesh.points, tri)[2] < -0.6 * RADIUS).length;
+    const placed = island({ ...body, labels: withIsland });
+    expect(placed).toBeGreaterThan(20);
+    expect(island(refine('frozen-island', body, withIsland, ['--freeze', 'none']).result)).toBe(placed);
+    // Without the option it is a stray, and nearly all of it goes to the back around it.
+    expect(island(refine('frozen-island-not', body, withIsland).result)).toBeLessThan(placed / 4);
+  });
+
+  it('refuses a name the file does not have', () => {
+    expect(() => refine('frozen-unknown', body, labels, ['--freeze', 'elbow'])).toThrow();
+  });
+});
+
 describe('refine-body.mjs — the notice', () => {
   const body = ball(3);
   const labels = paint(body);
