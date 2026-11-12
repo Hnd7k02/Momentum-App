@@ -984,8 +984,8 @@ merged; **in progress, runs up to its gate and stops there**)
     (`vertexColors`, conditional — today's model has none). **After the
     gate** the look moves to the tokens (`tokens.css`, `tokens.test.ts`),
     whichever body it is then tuned on.
-  - [x] Step 6 — **the gate is reached; the block waits here for the
-    owner's decision.** The comparison sheet is a private Artifact page,
+  - [x] Step 6 — **the gate was reached and is decided** (see below; the
+    text that follows describes the sheet as it was shown). The comparison sheet is a private Artifact page,
     «Körper-Gate 7A» (https://claude.ai/artifact/WdwyQ1we3wQe14VoJr8saz):
     today's body beside the four candidates in four views, neutral and
     with status colours, in both worlds at 393 and 320 px, close-ups, the
@@ -1013,6 +1013,21 @@ merged; **in progress, runs up to its gate and stops there**)
     measured between triangle centres, the chin's edge lay up to 3 mm high)
     and four slips in the record. All are corrected; the counts of targets
     met did not change, the foot length reads 14.9 % for 14.7 %.
+- **The gate is decided (2026-11-12): `athletisch-a`, with three
+  corrections, then production (step 7a) and STOP 7A.** The corrections
+  and the owner's answers are in D165. What is owed, in this order:
+  - [ ] correction 2 — borders: a level cut at the neck, straight cuts at
+    wrist and ankle, the collarbone redrawn
+  - [ ] correction 1 — the inert zone's own, lighter tone (D166, departs
+    from D161)
+  - [ ] correction 3 — the key light, and the look moved into the tokens
+  - [ ] step 7a — the model replaced, validator, check points, the table in
+    `muscleMeshMap.ts`, attribution, the still on the Gym card
+  - [ ] step 8 — the closing run, the record, the preview published
+  - [ ] STOP 7A
+  The owner's line on the colour rules came without findings (the
+  checklist was left as its template); "an exercise day is an entry, as
+  built" is confirmed. Ask again at STOP 7A.
 - **Baseline for this block** is the closing run of the colour rules on
   `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
   only the record, the pictures and a moved block in one verify script): `tsc -b`

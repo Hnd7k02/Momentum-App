@@ -4084,5 +4084,24 @@ parameters are not a specification.
 `anny/data/mpfb2/`, never the package's code. Its `LICENSE.md` was read in
 full on 2026-11-11: it is the text of Creative Commons CC0 1.0 Universal.
 
-*The outcome of the gate is entered here when the owner has decided.*
+**The outcome of the gate (2026-11-12).** The owner chose **`athletisch-a`**
+— the athletic body type with head A — **with three corrections**, and
+production without a second sheet:
+
+1. the inert zone (head, hands, feet) is to be lighter than a muscle that
+   is "not trained yet" — its own tone, about halfway between dimmed and
+   white. Beside a white body and a real face, the dimmed head and hands
+   read as another skin colour, not as neutral. That departs from D161 and
+   is its own decision, D166;
+2. the borders: at the base of the neck a calm, nearly level cut without a
+   V and without waves; at wrist and ankle a straight cut; the border of
+   chest, shoulder and trapezius along the collarbone redrawn;
+3. the key light taken back until white no longer burns out on the
+   shoulders.
+
+His answers to the sheet's questions: the still on the Gym card is rendered
+anew with the chosen body; no tone mapping; the relief stays as it is
+(bounded at 9 mm); the window for the shoulder breadth becomes 27–32 % of
+the body height **once it is checked at the source**, and knee and crotch
+height enter the validator only after the same check.
 
