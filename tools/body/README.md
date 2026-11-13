@@ -97,11 +97,10 @@ result, and two builds in a row were compared byte for byte.
 
 | body | bytes | sha256 |
 |---|---|---|
-| `momentum-body` | 703,760 | `202c8045249b57f5a732b5085daf6defa1e5a38a8019109b521938bcabf286e2` |
-| `gate-2-b` | 703,360 | `87d7a76e665735dfc6b1f3f5b5bfcbb609ad084f566223c3c1fbdfc1ebcc7d97` |
-| `stop-7a` | 704,036 | `68d1c148ea614fe7bd55a362722ae585062caeef4b500cd1b652be813e850df0` |
+| `momentum-body` | 706,392 | `0416b4ea0a1ece20c74ff0121f29498da58e206461577d84ac8d06d11a26e7d2` |
 
-`digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has the sha256 of `momentum-body`. `gate-2-b` and `stop-7a` are kept buildable beside it and are installed nowhere (see "After the gate"). The digests hold for the
+`digests.json` holds the same figures for the build to check, and
+`public/models/momentum-body.glb` has the sha256 of `momentum-body`. The digests hold for the
 versions named above: another numpy may add in another order, and the last
 bit of a position can then land on the other side of a rounding.
 
@@ -111,7 +110,8 @@ Unchanged from the model of D156, and checked by `tools/validate-body-glb.mjs`
 on every build: one mesh; eleven primitives, one per region; the material name
 is the muscle-group id (`none` for head, neck, hands and feet); one shared
 position and normal list; `KHR_mesh_quantization`. The validator also holds
-where each region lies, the five straight cuts of the inert zone, the check
+where each region lies, the five straight cuts of the inert zone and the two
+of each lower leg, the check
 points of the regions (`checkpoints.mjs`, contract §14), the measures whose
 targets are confirmed, the size and the licence notice;
 `tools/validate-body-glb.test.mjs` holds the validator.
@@ -163,9 +163,67 @@ it nothing is. `regionrules.py` labels the vertices by the same planes, and
 build stops if the inert zone is not exactly five pieces.
 
 Below the neck's cut, the pit of the throat between the two collarbones goes
-with the chest, and the trapezius begins at the side of the neck. The border
-of chest and trapezius runs along the collarbone and is held (`--hold`), so it
-is smoothed and not moved into a groove.
+with the chest, and the trapezius begins at the side of the neck.
+
+**The knee** is the sixth and seventh cut: the plane through the joint that
+halves the angle of thigh and shin. Beyond it lies the calf
+(`bodylib.cut_into`), before it the thigh, front and back.
+
+## The lines on the trunk
+
+After the owner had accepted the body he asked for two things more: the
+chest's lower edge ran to a point under the breastbone, and the borders at
+the knee and at the outer end of the collarbone were in steps. The app never
+turns its colours off (D166): as soon as two neighbours stand in different
+states, their border is a line on the screen.
+
+The steps were the base mesh. A region belongs to a vertex of MakeHuman's
+topology, a border therefore ran along the edges of its quads, two
+centimetres each, and `refine-body.mjs` could smooth such a staircase but
+not straighten it: pulled hard to its place it kept the teeth, pulled
+loosely it wandered — at the collarbone it ate the trapezius.
+
+So the build draws the lines the rules mean, on the fine mesh. Each is a
+field over the posed body, zero on the line (`regionrules.Lines`):
+
+| line | what it is |
+|---|---|
+| the pectoral's lower edge | lowest in the fold under the nipple, 14.2 cm below the shoulder joints; level from there to the middle, 6 mm higher over the breastbone; to the side an arc up to the fold of the armpit |
+| the collarbone | from the pit of the throat out to the deltoid's edge, 2 cm above the line of the bone's joints |
+| the pit of the throat | its two edges, from the heads of the collarbones up to the neck's cut |
+| the deltoid's edge against the trunk | one plane: in front from the armpit's fold up over the collarbone, over the top of the shoulder, and down the back. The pectoral lies against it below the collarbone, the trapezius above, the back behind |
+
+`bodylib.cut_field` splits every triangle a line crosses — no vertex moves —
+and `Lines.paint` then gives each triangle near a line to the side its
+middle lies on. The rules label the base mesh by the same fields, so
+`regions.json` and the cuts cannot part. Each line is cut on its own: a
+corner made of two fields in one (`min`) is interpolated wrongly on the
+edges beside it, and came out with three teeth.
+
+Every vertex a cut puts on its line is marked, and the marks go to
+`refine-body.mjs` as the attribute `_EXACT` of the raw file. Where two
+regions meet at marked vertices, that script leaves the border on its edges,
+and a line of marked vertices is a wall no region is handed a vertex across.
+The build checks it: after `refine-body.mjs`, every edge of a cut line must
+still part two regions, or the build stops (`build.lines_kept`); with the
+script as it was before, 509 of 1,064 such edges had moved. It also stops if
+a cut has left an edge that is not shared by two triangles.
+
+How smooth a border is, measured as its distance from itself smoothed over
+14 mm (root mean square and largest, in millimetres, before and after):
+
+| border | before | after |
+|---|---|---|
+| chest and core | 0.36 / 2.7 | 0.10 / 0.3 |
+| chest and shoulders | 0.53 / 1.6 | 0.29 / 0.9 |
+| back and shoulders | 0.51 / 2.3 | 0.22 / 0.8 |
+| calves and quadriceps | 0.49 / 1.5 | 0.27 / 0.8 |
+| calves and hamstrings | 0.46 / 1.8 | 0.20 / 0.5 |
+
+A loop cut on a plane reads 0.4 / 1.3 at the ankle by the same measure: the
+skin it runs over is not flat. The borders the build does not draw — along
+the arm, at the elbow, the waistband, the groin, the side of the trunk and
+of the thigh — are `refine-body.mjs`'s as before, between 0.2 and 0.4.
 
 ## The body
 
@@ -206,8 +264,8 @@ three are no longer built, and git has them.
   feet are thinned to 45 % by a quadric edge collapse; the head is left as it
   is, because a face with half its triangles shows them as flat panels.
   The rounding of that step runs out across the two rings instead of
-  ending in a step. 49,964 triangles, 33 % of them in the inert zone,
-  703,760 bytes — 687 KB as this project counts (the model of D156:
+  ending in a step. 50,152 triangles, 33 % of them in the inert zone,
+  706,392 bytes — 690 KB as this project counts (the model of D156:
   478,008 bytes, "467 KB").
 
 ## After the gate: the surface and the arms
@@ -216,11 +274,10 @@ The owner added two corrections after the gate (D165). They were built as
 a candidate, `gate-2`, beside the body of STOP 7A and shown on a second
 sheet (`docs/design/wp3/7a-gate-2/`); on his word that candidate became
 **`momentum-body`**, the body the app ships. What follows is why each
-setting is what it is. Two bodies are kept buildable beside the shipped one
-until he has accepted it: `stop-7a`, the body of STOP 7A (the "shipped
-body" of the measurements below), and `gate-2-b`, the alternative of the
-sheet. `python3 tools/body/build.py stop-7a gate-2-b` builds them into
-`out/`.
+setting is what it is. Two bodies were kept buildable beside it until he
+had accepted it, and are gone from `candidates.json` since: `stop-7a`, the
+body of STOP 7A (the "shipped body" of the measurements below), and
+`gate-2-b`, the alternative of the sheet. Commit `8537f79` has both.
 
 **The surface.** The folds at the collarbone, under the chest, on the belly
 and in the groin are the relief, not the base body — a body built without
@@ -283,14 +340,14 @@ height for 15.2 % and is 88 mm across at its thickest for 84; the pose
 holds the upper arm 17.0° from the trunk for 21.1° (`arm` 16 for 20) and
 bends the fingers a little more (`fingers` 28 for 20).
 
-All three bodies pass `tools/validate-body-glb.mjs` as it stands: the
+All three bodies passed `tools/validate-body-glb.mjs` as it stood then: the
 envelopes, the five cuts, all 33 check points and the eleven measures.
 
 ## What changed against the scripts of the reference page
 
 - `build_mh.py` and `label_mh.py` were proof scripts. Their steps live in
   `bodylib.py` and `regionrules.py` now, behind `build.py`.
-- `refine-body.mjs` is the script of the reference page with **four
+- `refine-body.mjs` is the script of the reference page with **five
   changes**. The first is a correction. Where a border crossing was snapped onto a vertex, the
   remaining quad was split along a diagonal that made a triangle without
   area; that triangle was dropped, and the crossing on the other edge was
@@ -302,7 +359,9 @@ envelopes, the five cuts, all 33 check points and the eleven measures.
   stay exactly on the edges they lie on. The build passes `--freeze none`,
   because it has cut the inert zone's borders itself (see "The straight
   cuts"). The fourth is the three options of the shade (see "After the
-  gate"); without them the shade is the reference page's.
+  gate"); without them the shade is the reference page's. The fifth is the
+  marks of the builder (see "The lines on the trunk"): a file without the
+  attribute `_EXACT` is refined as before.
 - `bpy` (Blender as a Python module, which the guide names) installs from
   PyPI here but does not import: the container lacks `libtbb.so.12`. Nothing
   in the pipeline needs it. Subdivision, skinning, the thinning of the inert

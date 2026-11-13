@@ -35,6 +35,13 @@
  *   uint16 positions with a uniform node scale (KHR_mesh_quantization),
  *   int8 normals, asset.copyright verbatim, primitive order unchanged.
  *
+ * A border the builder has already drawn is left alone. The input may mark
+ * vertices with the attribute _EXACT: those the builder put on a line it cut
+ * the mesh along — a joint's plane, the pectoral's lower edge, the
+ * collarbone. Where two regions meet at marked vertices, the border runs
+ * through them, edge by edge, and no walk moves it; a border that arrives
+ * there from elsewhere ends on the vertex.
+ *
  * Dependency-free on purpose, like the validator: runs on plain Node 18+.
  *
  *   node tools/body/refine-body.mjs public/models/momentum-body.glb out.glb
@@ -133,6 +140,9 @@ if (opt.freeze && FROZEN < 0) die(`--freeze names no region of this file: ${opt.
 const posQ = readAccessor(posIndex);
 const nrmQ = readAccessor(nrmIndex);
 const V0 = posQ.count;
+// The vertices the builder has put on a line it cut, if the file marks any
+// (the attribute _EXACT, read here and not written on).
+const marked = prims[0].attributes._EXACT === undefined ? null : readAccessor(prims[0].attributes._EXACT).data;
 
 // World positions in metres (the node carries the dequantisation).
 const P = new Float64Array(V0 * 3);
@@ -220,8 +230,12 @@ for (let t = 0; t < M; t++) {
     else if (!(TL[t] === FROZEN && touchesFree[v])) vertexLabelArea[v * L + TL[t]] += triArea[t] / 3;
   }
 }
+// With exact vertices in the file (below): the regions that may be handed a
+// vertex of a band, one bit each.
+let reach = null;
 const forbidden = (i, k) =>
-  (k === FROZEN && touchesFree[i] === 1) || (((strayMask[i] >> k) & 1) === 1 && vertexLabelArea[i * L + k] === 0);
+  (k === FROZEN && touchesFree[i] === 1) || (((strayMask[i] >> k) & 1) === 1 && vertexLabelArea[i * L + k] === 0)
+  || (reach !== null && inBand[i] === 1 && ((reach[i] >> k) & 1) === 0);
 
 /* ── 1. borders that follow the grooves ────────────────────────────────── */
 
@@ -240,7 +254,20 @@ for (let i = 0; i < V0; i++) {
   if (count > 1) isBorder[i] = 1;
 }
 
-// Every border may be smoothed. Most may also move towards a groove; the
+// A marked vertex on a border is exact: the builder drew that border along a
+// line and put the vertex on it, so the border goes through the vertex and
+// stays there. Such a vertex is no part of any walk. It belongs to every
+// region that meets at it, in equal shares — which is what puts a cut on an
+// edge that leaves it exactly at the vertex — and each triangle around it
+// reads it as a vertex of its own region. And a line of them is a wall
+// (`reach`, below): no region is handed a vertex on the far side of it.
+const exact = new Uint8Array(V0);
+if (marked) {
+  for (let i = 0; i < V0; i++) if (marked[i] && isBorder[i] && !strayMask[i] && !frozenInside(i)) exact[i] = 1;
+}
+const meetsAt = (i, k) => vertexLabelArea[i * L + k] > 0;
+
+// Every other border may be smoothed. Most may also move towards a groove; the
 // documented cuts (the lumbar waistband, the calf cut) only lose their saw
 // teeth and keep their place: there the walk ignores grooves and is pulled
 // hard towards today's assignment.
@@ -249,7 +276,7 @@ const freeBorder = new Uint8Array(V0);
 const heldBorder = new Uint8Array(V0);
 for (let i = 0; i < V0; i++) {
   if (strayMask[i]) { freeBorder[i] = 1; continue; }
-  if (!isBorder[i]) continue;
+  if (!isBorder[i] || exact[i]) continue;
   const present = [];
   for (let k = 0; k < L; k++) if (vertexLabelArea[i * L + k] > 0) present.push(k);
   let free = false;
@@ -265,10 +292,36 @@ const heldDistance = dijkstra(heldBorder, opt.band);
 const inBand = new Uint8Array(V0);
 const held = new Uint8Array(V0);
 for (let i = 0; i < V0; i++) {
-  if (frozenInside(i)) continue;          // the frozen region takes no part in any walk
+  if (frozenInside(i) || exact[i]) continue;   // neither the frozen region nor an exact vertex takes part in a walk
   if (strayMask[i]) { inBand[i] = 1; continue; }
   if (freeDistance[i] <= opt.band) inBand[i] = 1;
   else if (heldDistance[i] <= opt.band) { inBand[i] = 1; held[i] = 1; }
+}
+
+// A line of exact vertices is a wall. An exact vertex gives its neighbours a
+// share of every region that meets at it, those of the far side too, and
+// where three regions meet near a line the one from across can be the
+// largest of three small shares: the calf, a few millimetres up the thigh,
+// where front and back of the thigh part. So a vertex of a band may be
+// handed only a region that reaches it along edges without passing through
+// an exact vertex.
+if (marked) {
+  reach = new Int32Array(V0);
+  const queue = [];
+  for (let i = 0; i < V0; i++) {
+    if (exact[i]) continue;
+    for (let k = 0; k < L; k++) if (meetsAt(i, k)) reach[i] |= 1 << k;
+    if (reach[i]) queue.push(i);
+  }
+  while (queue.length) {
+    const i = queue.pop();
+    for (let e = adjacency.offset[i]; e < adjacency.offset[i + 1]; e++) {
+      const j = adjacency.list[e];
+      if (exact[j] || !inBand[j] || (reach[i] & ~reach[j]) === 0) continue;
+      reach[j] |= reach[i];
+      queue.push(j);
+    }
+  }
 }
 
 // Region probabilities. Outside the band a vertex is certain of its region;
@@ -276,9 +329,16 @@ for (let i = 0; i < V0; i++) {
 const F = new Float64Array(V0 * L);
 const prior = new Float64Array(V0 * L);
 for (let i = 0; i < V0; i++) {
-  let total = 0;
-  for (let k = 0; k < L; k++) total += vertexLabelArea[i * L + k];
+  let total = 0, meeting = 0;
   for (let k = 0; k < L; k++) {
+    total += vertexLabelArea[i * L + k];
+    if (meetsAt(i, k)) meeting++;
+  }
+  for (let k = 0; k < L; k++) {
+    if (exact[i]) {
+      prior[i * L + k] = F[i * L + k] = meetsAt(i, k) ? 1 / meeting : 0;
+      continue;
+    }
     const share = total > 0 ? vertexLabelArea[i * L + k] / total : 0;
     prior[i * L + k] = share;
     F[i * L + k] = inBand[i] ? share : (k === vertexLabel[i] ? 1 : 0);
@@ -343,6 +403,7 @@ for (let pass = 0; pass < 50; pass++) {
     let any = false;
     for (let e = adjacency.offset[i]; e < adjacency.offset[i + 1]; e++) {
       const j = adjacency.list[e];
+      if (exact[j]) continue;
       if (newLabel[j] >= 0 && !forbidden(i, newLabel[j])) { votes[newLabel[j]] += 1; any = true; }
     }
     if (!any) { open++; continue; }
@@ -361,6 +422,8 @@ for (let pass = 0; pass < 2; pass++) {
     for (let e = adjacency.offset[i]; e < adjacency.offset[i + 1]; e++) {
       const j = adjacency.list[e];
       if (newLabel[j] < 0 || newLabel[j] === FROZEN) continue;
+      // An exact neighbour is of this vertex's region if that region meets at it.
+      if (exact[j]) { if (meetsAt(j, newLabel[i])) same = true; continue; }
       votes[newLabel[j]] += 1;
       voted = true;
       if (newLabel[j] === newLabel[i]) same = true;
@@ -384,17 +447,20 @@ const outTris = Array.from({ length: L }, () => []);
 const crossing = new Map();
 let created = 0, snapped = 0;
 
-function vertexOnEdge(i, j) {
+/** Where the border between region `a` at vertex i and region `b` at vertex j crosses their edge. */
+function vertexOnEdge(i, j, a, b) {
   const key = edgeKey(i, j);
   const hit = crossing.get(key);
   if (hit !== undefined) return hit;
-  const a = newLabel[i], b = newLabel[j];
   const si = F[i * L + a] - F[i * L + b];
   const sj = F[j * L + a] - F[j * L + b];
   let t = si - sj !== 0 ? si / (si - sj) : 0.5;
   if (!(t > 0 && t < 1)) t = 0.5;
   let index;
-  if (t < 0.03) { index = i; snapped++; }
+  // Both regions meet at an exact vertex: the border is at the vertex.
+  if (exact[i] && si === 0) { index = i; snapped++; }
+  else if (exact[j] && sj === 0) { index = j; snapped++; }
+  else if (t < 0.03) { index = i; snapped++; }
   else if (t > 0.97) { index = j; snapped++; }
   else {
     index = outPos.length / 3;
@@ -434,7 +500,7 @@ function emit(label, a, b, c) {
 function emitFrozen(a, b, c) {
   const crossingOn = (i, j) => {
     if (!touchesFree[i] || !touchesFree[j] || newLabel[i] === newLabel[j] || !freeEdges.has(edgeKey(i, j))) return -1;
-    const m = vertexOnEdge(i, j);
+    const m = vertexOnEdge(i, j, newLabel[i], newLabel[j]);
     return m === i || m === j ? -1 : m;
   };
   let v = [a, b, c];
@@ -461,13 +527,13 @@ function emitFrozen(a, b, c) {
 for (let t = 0; t < M; t++) {
   const v = [T[t * 3], T[t * 3 + 1], T[t * 3 + 2]];
   if (TL[t] === FROZEN) { emitFrozen(v[0], v[1], v[2]); continue; }
-  const l = v.map((x) => newLabel[x]);
   // Triangles away from every border keep their region.
   if (v.every((x) => !inBand[x])) { emit(TL[t], v[0], v[1], v[2]); continue; }
+  const l = v.map((x) => (exact[x] && meetsAt(x, TL[t]) ? TL[t] : newLabel[x]));
   if (l[0] === l[1] && l[1] === l[2]) { emit(l[0], v[0], v[1], v[2]); continue; }
   if (l[0] !== l[1] && l[1] !== l[2] && l[0] !== l[2]) {
     const [i, j, k] = v;
-    const mij = vertexOnEdge(i, j), mjk = vertexOnEdge(j, k), mki = vertexOnEdge(k, i);
+    const mij = vertexOnEdge(i, j, l[0], l[1]), mjk = vertexOnEdge(j, k, l[1], l[2]), mki = vertexOnEdge(k, i, l[2], l[0]);
     const c = centreOf(i, j, k);
     emit(l[0], i, mij, c); emit(l[0], i, c, mki);
     emit(l[1], j, mjk, c); emit(l[1], j, c, mij);
@@ -480,7 +546,7 @@ for (let t = 0; t < M; t++) {
   else if (l[2] !== l[0] && l[2] !== l[1]) r = 2;
   const i = v[r], j = v[(r + 1) % 3], k = v[(r + 2) % 3];
   const A = l[r], B = l[(r + 1) % 3];
-  const mij = vertexOnEdge(i, j), mki = vertexOnEdge(k, i);
+  const mij = vertexOnEdge(i, j, A, B), mki = vertexOnEdge(k, i, B, A);
   emit(A, i, mij, mki);
   // The rest is the quad mij–j–k–mki. Where the crossing on i–j was snapped
   // onto i, three of its corners lie in one line (i, mki, k), and the diagonal

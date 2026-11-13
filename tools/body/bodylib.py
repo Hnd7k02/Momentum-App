@@ -615,11 +615,14 @@ CUTS = {
 
 
 def cut_planes(joints, height, overrides=None):
-    """The five cuts: name → (a point on the plane, its normal, the radius it holds in).
+    """The straight cuts: name → (a point on the plane, its normal, the radius it holds in).
 
-    The normal points to the inert side — up the neck, down the hand, down the
-    foot. One definition serves the rules that label the vertices and the
-    build that cuts the mesh, so the two cannot part.
+    Five of them end the inert zone, and their normals point to it — up the
+    neck, down the hand, down the foot. Two are the knees: the plane through
+    the joint that halves the angle of thigh and shin, its normal down the
+    leg; beyond it lies the calf (`cut_into`). One definition serves the
+    rules that label the vertices and the build that cuts the mesh, so the
+    two cannot part.
     """
     k = height / 1.78
     o = {**CUTS, **(overrides or {})}
@@ -633,20 +636,31 @@ def cut_planes(joints, height, overrides=None):
         K, A = joints[f'joint-{side}-knee'], joints[f'joint-{side}-ankle']
         n = _unit(A - K)
         cuts[f'ankle-{side}'] = (A - n * o['ankle_lift'] * k, n, 0.11 * k)
+        Hj = joints[f'joint-{side}-upper-leg']
+        cuts[f'knee-{side}'] = (K, _unit(_unit(K - Hj) + _unit(A - K)), 0.10 * k)
     return cuts
 
 
-def cut(P, tris, labels, point, normal, radius, inert, snap=0.0003, margin=0.012):
-    """Cut the mesh along a plane and give the far side to the inert zone.
+def cut_into(name: str) -> str:
+    """The region that lies beyond the cut `name` of `cut_planes`."""
+    return 'calves' if name.startswith('knee') else 'none'
+
+
+def cut(P, tris, labels, point, normal, radius, inert, snap=0.0003, margin=0.012, line=None):
+    """Cut the mesh along a plane and give the far side to the region `inert`.
 
     Within `radius` of `point`, every triangle the plane crosses is split, so
     that the plane's line on the body becomes a loop of edges; no vertex is
     moved, a new one lies on an old edge, and the surface is the one it was.
-    What then lies beyond the plane is inert. What lies before it and was
-    inert takes the region of the muscle next to it.
+    What then lies beyond the plane is `inert` — the inert zone at neck,
+    wrist and ankle, the calf at the knee. What lies before it and was
+    `inert` takes the region next to it.
 
     A vertex within `snap` of the plane counts as on it: the cut goes through
     it rather than leaving a sliver beside it.
+
+    With `line`, one flag for every vertex, a fourth value comes back: the
+    flags, and set for every vertex this cut put on its plane.
     """
     P = np.asarray(P, dtype=np.float64)
     tris = np.asarray(tris, dtype=np.int64)
@@ -743,7 +757,166 @@ def cut(P, tris, labels, point, normal, radius, inert, snap=0.0003, margin=0.012
         for t, label in taken.items():
             labels2[t] = label
         pending = [t for t in pending if t not in taken]
-    return P2, tris2, labels2
+    if line is None:
+        return P2, tris2, labels2
+    return P2, tris2, labels2, _with_line(line, len(P2), d, tris[away < radius])
+
+
+def _with_line(line, count, d, zone_tris):
+    """The flags of `line`, and set for every vertex a cut put on its line:
+    each new one, and each old one of the zone that the line goes through."""
+    out = np.ones(count, dtype=bool)
+    out[:len(line)] = line
+    on = np.zeros(len(line), dtype=bool)
+    on[np.unique(zone_tris)] = True
+    out[:len(line)] |= on & (d == 0)
+    return out
+
+
+def cut_field(P, tris, labels, d, zone, inside=None, snap=0.0003, line=None):
+    """Cut the mesh along the line where the field `d` is zero.
+
+    `d` is one number for every vertex, `zone` one flag for every triangle.
+    Every triangle of the zone that the line crosses is split along it — no
+    vertex is moved, a new one lies on an old edge, the surface is the one it
+    was. Afterwards no triangle of the zone lies on both sides of the line,
+    and the caller can give each to a region by where its middle lies.
+
+    With `inside`, the cut draws the border itself: in the zone, what lies
+    on the positive side belongs to that region; what lies on the negative
+    side and was of it takes the region of the nearest triangle on that side
+    that has another one.
+
+    Where the line leaves the zone it simply ends. The triangle beyond takes
+    the new point on the shared edge into its outline and is split into two
+    or three of its own region, so that no edge is left open.
+
+    A vertex within `snap` of the line counts as on it. `line` is `cut`'s.
+    """
+    P = np.asarray(P, dtype=np.float64)
+    tris = np.asarray(tris, dtype=np.int64)
+    labels = np.asarray(labels).copy()
+    zone = np.asarray(zone, dtype=bool)
+    d = np.asarray(d, dtype=np.float64).copy()
+    d[np.abs(d) < snap] = 0.0
+    td = d[tris]
+    crossing = zone & (td.max(axis=1) > 0) & (td.min(axis=1) < 0)
+
+    points = [row for row in P]
+    made = {}
+
+    def on_edge(a, b):
+        key = (a, b) if a < b else (b, a)
+        if key not in made:
+            lo, hi = key
+            t = d[lo] / (d[lo] - d[hi])
+            made[key] = len(points)
+            points.append(P[lo] + t * (P[hi] - P[lo]))
+        return made[key]
+
+    # First every point the line makes, so that a neighbour outside the zone
+    # knows which of its edges were split.
+    for t in np.nonzero(crossing)[0]:
+        a, b, c = (int(x) for x in tris[t])
+        for u, v in ((a, b), (b, c), (c, a)):
+            if d[u] * d[v] < 0:
+                on_edge(u, v)
+
+    out_tris, out_labels, out_side, out_zone = [], [], [], []
+
+    def emit(a, b, c, label, side, in_zone):
+        out_tris.append((a, b, c))
+        out_labels.append(label)
+        out_side.append(side)
+        out_zone.append(in_zone)
+
+    def split_of(u, v):
+        return made.get((u, v) if u < v else (v, u))
+
+    for t in range(len(tris)):
+        a, b, c = (int(x) for x in tris[t])
+        label = labels[t]
+        if crossing[t]:
+            corners = [(a, d[a]), (b, d[b]), (c, d[c])]
+            zero = [i for i, (_, x) in enumerate(corners) if x == 0]
+            if zero:
+                first = zero[0]
+            else:
+                signs = [x > 0 for _, x in corners]
+                first = next(i for i in range(3) if signs[i] != signs[(i + 1) % 3] and signs[i] != signs[(i + 2) % 3])
+            (a, da), (b, db), (c, dc) = corners[first], corners[(first + 1) % 3], corners[(first + 2) % 3]
+            if da == 0:
+                m = on_edge(b, c)
+                emit(a, b, m, label, 1 if db > 0 else -1, True)
+                emit(a, m, c, label, 1 if dc > 0 else -1, True)
+            else:
+                mab, mca = on_edge(a, b), on_edge(c, a)
+                emit(a, mab, mca, label, 1 if da > 0 else -1, True)
+                other = 1 if db > 0 else -1
+                if np.linalg.norm(points[mab] - P[c]) <= np.linalg.norm(P[b] - points[mca]):
+                    emit(mab, b, c, label, other, True)
+                    emit(mab, c, mca, label, other, True)
+                else:
+                    emit(mab, b, mca, label, other, True)
+                    emit(b, c, mca, label, other, True)
+            continue
+        side = 0
+        if zone[t]:
+            total = td[t].sum()
+            side = 1 if total > 0 else (-1 if total < 0 else 0)
+        # A triangle the line does not cross may still have a split edge: its
+        # neighbour across that edge was cut.
+        mids = [split_of(a, b), split_of(b, c), split_of(c, a)]
+        count = sum(m is not None for m in mids)
+        if count == 0:
+            emit(a, b, c, label, side, bool(zone[t]))
+            continue
+        # Its outline with the new points in it, turned to begin at one of
+        # them, and a fan from there: no piece of it is three points in a row.
+        ring = []
+        for corner, mid in zip((a, b, c), mids):
+            ring.append(corner)
+            if mid is not None:
+                ring.append(mid)
+        at = ring.index(next(m for m in mids if m is not None))
+        ring = ring[at:] + ring[:at]
+        for i in range(1, len(ring) - 1):
+            emit(ring[0], ring[i], ring[i + 1], label, side, bool(zone[t]))
+
+    P2 = np.array(points)
+    tris2 = np.array(out_tris, dtype=np.int64)
+    labels2 = np.array(out_labels)
+    side = np.array(out_side)
+    in_zone = np.array(out_zone, dtype=bool)
+    if inside is None:
+        return (P2, tris2, labels2) if line is None else (P2, tris2, labels2, _with_line(line, len(P2), d, tris[zone]))
+    target = R[inside] if isinstance(inside, str) else inside
+    labels2[in_zone & (side > 0)] = target
+    owners = {}
+    negative = in_zone & (side < 0)
+    for t in np.nonzero(negative)[0]:
+        tri = tris2[t]
+        for i in range(3):
+            x, y = int(tri[i]), int(tri[(i + 1) % 3])
+            owners.setdefault((x, y) if x < y else (y, x), []).append(int(t))
+    pending = [int(t) for t in np.nonzero(negative & (labels2 == target))[0]]
+    while pending:
+        taken = {}
+        for t in pending:
+            tri = tris2[t]
+            for i in range(3):
+                x, y = int(tri[i]), int(tri[(i + 1) % 3])
+                for other in owners[(x, y) if x < y else (y, x)]:
+                    if other != t and labels2[other] != target and t not in taken:
+                        taken[t] = labels2[other]
+        if not taken:
+            raise SystemExit(f'a border drawn for {REGIONS[target]} left a piece of it on the wrong side with no other region beside it')
+        for t, label in taken.items():
+            labels2[t] = label
+        pending = [t for t in pending if t not in taken]
+    if line is None:
+        return P2, tris2, labels2
+    return P2, tris2, labels2, _with_line(line, len(P2), d, tris[zone])
 
 
 def pieces(tris, labels, label):
@@ -1114,8 +1287,13 @@ COPYRIGHT = ('Body built from the MakeHuman base mesh and targets and the skinni
              '(NAVER Corp.), all CC0 1.0 Universal')
 
 
-def write_glb(path, P, tris, tri_labels, generator, copyright=COPYRIGHT):
-    """The body as refine-body.mjs reads it: float positions, one primitive per region."""
+def write_glb(path, P, tris, tri_labels, generator, copyright=COPYRIGHT, exact=None):
+    """The body as refine-body.mjs reads it: float positions, one primitive per region.
+
+    `exact`, one flag for every vertex, is written as the attribute `_EXACT`:
+    the vertices the builder has put on a line it cut. A border through them
+    stays where it is (refine-body.mjs).
+    """
     N = vertex_normals(P, tris)
     pos = P.astype(np.float32)
     nrm = N.astype(np.float32)
@@ -1126,6 +1304,15 @@ def write_glb(path, P, tris, tri_labels, generator, copyright=COPYRIGHT):
                       min=pos.min(0).tolist(), max=pos.max(0).tolist()),
                  dict(bufferView=1, componentType=5126, count=len(nrm), type='VEC3')]
     offset = len(blobs[0]) + len(blobs[1])
+    attributes = dict(POSITION=0, NORMAL=1)
+    if exact is not None:
+        flags = np.asarray(exact, dtype=np.uint8).tobytes()
+        pad = (-len(flags)) % 4
+        blobs.append(flags + b'\0' * pad)
+        views.append(dict(buffer=0, byteOffset=offset, byteLength=len(flags), target=34962))
+        offset += len(flags) + pad
+        accessors.append(dict(bufferView=len(views) - 1, componentType=5121, count=len(pos), type='SCALAR'))
+        attributes['_EXACT'] = len(accessors) - 1
     primitives = []
     counts = {}
     for ri, name in enumerate(REGIONS):
@@ -1137,7 +1324,7 @@ def write_glb(path, P, tris, tri_labels, generator, copyright=COPYRIGHT):
         views.append(dict(buffer=0, byteOffset=offset, byteLength=len(raw), target=34963))
         offset += len(raw) + pad
         accessors.append(dict(bufferView=len(views) - 1, componentType=5125, count=len(idx), type='SCALAR'))
-        primitives.append(dict(attributes=dict(POSITION=0, NORMAL=1), indices=len(accessors) - 1, material=ri))
+        primitives.append(dict(attributes=dict(attributes), indices=len(accessors) - 1, material=ri))
     gltf = dict(asset=dict(version='2.0', generator=generator, copyright=copyright),
                 scene=0, scenes=[dict(nodes=[0])], nodes=[dict(mesh=0, name='MomentumBody')],
                 meshes=[dict(name='MomentumBody', primitives=primitives)],

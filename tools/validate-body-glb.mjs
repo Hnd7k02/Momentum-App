@@ -57,23 +57,26 @@ const EXPECT = {
  * same pipeline, too little for a region that crossed a joint.
  */
 const ENVELOPE = {
-  // The lower leg, from the ankle's cut [6.0] to the knee [31.1; the joint
-  // line is at 29.9]. Must not reach the foot, must not climb into the thigh.
+  // The lower leg, from the ankle's cut [6.0] to the knee's [30.2; the joint
+  // is at 29.9]. Must not reach the foot, must not climb into the thigh.
   calves: { low: 0.04, high: 0.33, from: 0.09, to: 0.28 },
-  // The thigh, front and inside, from the knee [29.3] to the groin [57.0].
+  // The thigh, front and inside, from the knee's cut [29.6] to the groin [56.8].
   quadriceps: { low: 0.27, high: 0.59, from: 0.33, to: 0.53 },
-  // The back of the thigh and the buttocks, from the knee [28.7] to the iliac
-  // crest [57.0]. Must not reach the lumbar region, must not cross the knee.
+  // The back of the thigh and the buttocks, from the knee's cut [29.6] to the
+  // iliac crest [57.0]. Must not reach the lumbar region, must not cross the knee.
   hamstringsGlutes: { low: 0.27, high: 0.59, from: 0.33, to: 0.53 },
-  // The belly, from the pubic bone [49.0] to under the chest [73.2].
+  // The belly, from the pubic bone [49.1] to under the chest, highest at the
+  // side, where the pectoral's edge rises to the armpit [73.0].
   core: { low: 0.47, high: 0.75, from: 0.52, to: 0.69 },
-  // The pectoral, from its lower edge [66.1] to the neck's cut, which it
-  // reaches through the pit of the throat [85.4].
-  chest: { low: 0.64, high: 0.87, from: 0.69, to: 0.81 },
+  // The pectoral, from its fold under the nipple [71.1] to the neck's cut,
+  // which it reaches through the pit of the throat [85.4]. Until the edge
+  // was drawn level it ran to a point under the breastbone, at 66.1: a
+  // chest that reaches below 69 has that point again.
+  chest: { low: 0.69, high: 0.87, from: 0.73, to: 0.81 },
   // Latissimus, erectors, trapezius: from the iliac crest [55.2] — the back
   // must reach DOWN to it — to the neck's cut at the trapezius [85.6].
   back: { low: 0.53, high: 0.87, from: 0.58, to: 0.82 },
-  // The deltoid, from its insertion on the arm [72.9] to the acromion [83.8].
+  // The deltoid, from its insertion on the arm [73.1] to the acromion [83.8].
   shoulders: { low: 0.71, high: 0.86, from: 0.76, to: 0.81 },
   // The upper arm, front [65.1–75.6] and back [64.9–74.8]: from the elbow's
   // plane to the armpit. Must not cross the elbow, must not reach the shoulder's top.
@@ -327,6 +330,25 @@ if (body) {
     const tilt = Math.acos(Math.min(1, Math.abs(borders[0].normal[1]))) * 180 / Math.PI;
     if (tilt > 10) fail(`the neck's cut is tilted by ${tilt.toFixed(1)}° — it is to be nearly level`);
     notes.push(`inert zone: five straight cuts, the largest ${(Math.max(...borders.map((b) => b.deviation)) * 1000).toFixed(2)} mm off its plane; the neck tilted ${tilt.toFixed(1)}°`);
+  }
+}
+
+/* ── the knee, a straight cut as well ──────────────────────────────────── */
+
+if (body) {
+  // The lower leg ends twice, and both times on a plane: at the ankle, where
+  // the inert zone begins, and at the knee, where the thigh does. A knee
+  // that has left its plane is a border in steps again.
+  const borders = regionBorders(body, 'calves');
+  if (borders.length !== 4) fail(`the calves have ${borders.length} borders, not four — a knee and an ankle on each leg`);
+  for (const border of borders) {
+    if (border.deviation > 0.001) {
+      const where = `(${border.centre.map((v) => v.toFixed(2)).join(', ')})`;
+      fail(`the calves' border at ${where} is not a straight cut: it leaves its plane by ${(border.deviation * 1000).toFixed(1)} mm`);
+    }
+  }
+  if (borders.length === 4) {
+    notes.push(`calves: four straight cuts, the largest ${(Math.max(...borders.map((b) => b.deviation)) * 1000).toFixed(2)} mm off its plane`);
   }
 }
 

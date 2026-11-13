@@ -1,14 +1,6 @@
 {
   "momentum-body": {
-    "bytes": 703760,
-    "sha256": "202c8045249b57f5a732b5085daf6defa1e5a38a8019109b521938bcabf286e2"
-  },
-  "gate-2-b": {
-    "bytes": 703360,
-    "sha256": "87d7a76e665735dfc6b1f3f5b5bfcbb609ad084f566223c3c1fbdfc1ebcc7d97"
-  },
-  "stop-7a": {
-    "bytes": 704036,
-    "sha256": "68d1c148ea614fe7bd55a362722ae585062caeef4b500cd1b652be813e850df0"
+    "bytes": 706392,
+    "sha256": "0416b4ea0a1ece20c74ff0121f29498da58e206461577d84ac8d06d11a26e7d2"
   }
 }

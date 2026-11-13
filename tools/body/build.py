@@ -69,6 +69,54 @@ def save_regions(labels, made_on):
     REGIONS_FILE.write_text(text + '\n')
 
 
+def lines_kept(P, tris, tri_labels, line, final):
+    """What refine-body.mjs did to the lines the build cut: nothing, or a list of what.
+
+    Every edge between two marked vertices that parts two regions before
+    must part two regions after, between the same two points. Which two
+    regions may differ where a border that is free to move ends on the line;
+    that the edge is no border any more means a region has crossed the line.
+    """
+    after = B.read_glb(final)
+    Q, after_tris, after_labels = after['P'], after['tris'], after['labels']
+
+    def borders(tris, labels):
+        pairs = np.sort(np.concatenate([tris[:, [0, 1]], tris[:, [1, 2]], tris[:, [2, 0]]]), axis=1)
+        owner = np.concatenate([labels, labels, labels])
+        order = np.lexsort((pairs[:, 1], pairs[:, 0]))
+        pairs, owner = pairs[order], owner[order]
+        same = (pairs[1:] == pairs[:-1]).all(axis=1)
+        first = np.nonzero(same)[0]
+        return pairs[first], owner[first] != owner[first + 1]
+
+    edges, parts = borders(np.asarray(tris), np.asarray(tri_labels))
+    drawn = edges[parts & line[edges[:, 0]] & line[edges[:, 1]]]
+    marked = np.unique(drawn)
+    # The vertices of before, found again after: the file's positions are
+    # rounded to a few hundredths of a millimetre.
+    where = np.full(len(P), -1)
+    for start in range(0, len(marked), 256):
+        part = marked[start:start + 256]
+        distance = np.linalg.norm(P[part][:, None, :] - Q[None, :, :], axis=2)
+        nearest = distance.argmin(axis=1)
+        if (distance[np.arange(len(part)), nearest] > 1e-4).any():
+            return [f'a vertex of a cut line is not in the file any more ({len(marked)} asked)']
+        where[part] = nearest
+    after_edges, after_parts = borders(after_tris, after_labels)
+    state = {(int(a), int(b)): bool(p) for (a, b), p in zip(after_edges, after_parts)}
+    lost = []
+    for a, b in drawn:
+        key = tuple(sorted((int(where[a]), int(where[b]))))
+        # An edge that is not there was split in two, by a border that ends on it.
+        if key in state and not state[key]:
+            lost.append(0.5 * (P[a] + P[b]))
+    if not lost:
+        return []
+    spot = lost[0]
+    return [f'{len(lost)} of {len(drawn)} edges of the cut lines are no border any more, '
+            f'the first at ({spot[0]:.3f}, {spot[1]:.3f}, {spot[2]:.3f})']
+
+
 def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     say = (lambda *a: None) if quiet else print
     base = B.Base(data)
@@ -116,8 +164,9 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
     bones, dominant = posed.dominant_bones()
 
     cuts = B.cut_planes(body.joints, spec.get('height', 1.78), spec.get('cuts'))
+    tall = body.P[:, 1].max()
     if relabel:
-        labels = regionrules.label_by_rules(body.P, body.joints, dominant[body.origin], bones, body.P[:, 1].max(), cuts)
+        labels = regionrules.label_by_rules(body.P, body.joints, dominant[body.origin], bones, tall, cuts)
         save_regions(labels, name)
         say(f'regions.json written from the rules, on {name}')
     labels = load_regions()
@@ -159,12 +208,30 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         P, tris, part, kept = B.decimate(P, tris, part, B.NONE, spec['inert_share'])
         tri_labels = np.where(part == HEAD, B.NONE, part)
         say(f'inert zone: {before} → {int((tri_labels == B.NONE).sum())} triangles')
-    # The straight cuts: level at the neck, across the limb at wrist and
-    # ankle. Each becomes a loop of edges exactly on its plane, and
-    # refine-body.mjs is told to leave the inert zone's borders where they are.
+    # The straight cuts: level at the neck, across the limb at wrist, ankle
+    # and knee. Each becomes a loop of edges exactly on its plane. Then the
+    # lines of the rules on the front of the trunk — the pectoral's lower
+    # edge, the deltoid's front edge, the collarbone, the pit of the throat:
+    # the mesh is cut along each, and every triangle near one is given to the
+    # side it lies on. Every vertex on a cut is marked, and refine-body.mjs
+    # leaves a border through marked vertices where it is.
+    line = np.zeros(len(P), dtype=bool)
     for cut_name in sorted(cuts):
         point, normal, radius = cuts[cut_name]
-        P, tris, tri_labels = B.cut(P, tris, tri_labels, point, normal, radius, B.NONE)
+        P, tris, tri_labels, line = B.cut(P, tris, tri_labels, point, normal, radius,
+                                          B.R[B.cut_into(cut_name)], line=line)
+    seg = regionrules.segments(body.P, body.joints, dominant[body.origin], bones, tall, cuts)
+    lines = regionrules.Lines(body.P, seg, body.joints, tall)
+    for along in lines.cuts():
+        d, zone = along(P, tris, tri_labels)
+        P, tris, tri_labels, line = B.cut_field(P, tris, tri_labels, d, zone, line=line)
+    tri_labels = lines.paint(P[tris].mean(axis=1), tri_labels)
+    # A cut splits triangles and their neighbours alike. An edge left with
+    # one triangle would be a hole in the body.
+    edges = np.sort(np.concatenate([tris[:, [0, 1]], tris[:, [1, 2]], tris[:, [2, 0]]]), axis=1)
+    _, uses = np.unique(edges, axis=0, return_counts=True)
+    if (uses != 2).any():
+        raise SystemExit(f'{name}: the cuts left {int((uses != 2).sum())} edges that are not shared by two triangles')
     inert_pieces = B.pieces(tris, tri_labels, B.NONE)
     if len(inert_pieces) != 5:
         sizes = ', '.join(str(len(piece)) for piece in inert_pieces)
@@ -190,7 +257,8 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
 
     out_dir.mkdir(parents=True, exist_ok=True)
     raw = out_dir / f'{name}.regions.glb'
-    counts = B.write_glb(raw, P, tris, tri_labels, f'Momentum body pipeline (tools/body/build.py, candidate {name})')
+    counts = B.write_glb(raw, P, tris, tri_labels, f'Momentum body pipeline (tools/body/build.py, candidate {name})',
+                         exact=line)
     final = out_dir / f'{name}.glb'
     options = []
     for key, value in sorted(spec.get('refine', {}).items()):
@@ -204,6 +272,10 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         sys.stdout.write(result.stdout)
     if not keep:
         raw.unlink()
+    moved = lines_kept(P, tris, tri_labels, line, final)
+    if moved:
+        final.unlink()
+        raise SystemExit(f'{name}: refine-body.mjs did not leave the cut lines where they were — {"; ".join(moved)}')
     limit = spec.get('stray_limit', STRAY_LIMIT)
     lost = [(label, int(count)) for label, count in
             re.findall(r'^\s+(\w+)\s+(\d+) triangles at y', result.stdout, flags=re.M) if int(count) >= limit]

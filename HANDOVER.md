@@ -912,6 +912,34 @@ iPhone on 2026-11-13, without findings**)
 **WP3 Block 7A — the body model** (branch `claude/momentum-wp3`, not
 merged; **built and accepted by the owner on his iPhone on 2026-11-13 —
 the body of the second sheet stands**)
+- **The owner's addendum to the acceptance (2026-11-13), before 5b
+  starts.** Three things: the weakest tint is to be 0.3 for 0.5 (he meant
+  his fourth question that way — the 0.5 made up for a tone mapping that is
+  gone); the chest's lower edge ran to a point under the breastbone and is
+  to lie level from the middle to under the nipples; and the borders at the
+  knee, front and back, and at the outer end of the collarbone are to be
+  smooth, since the app never turns its colours off (D166). `gate-2-b` and
+  `stop-7a` go on the way. He looks at chest, knee and tint on a new preview
+  and confirms. **No merge.** The steps, ticked as they are done:
+  - [x] the borders (D167): the build cuts the knee as a plane, and the
+    pectoral's lower edge, the collarbone, the pit of the throat and the
+    deltoid's edge against the trunk as lines, into the fine mesh
+    (`bodylib.cut_field`, `regionrules.Lines`); every vertex on a cut is
+    marked and `refine-body.mjs` leaves a border through marked vertices on
+    its edges, a line of them a wall. The build stops if a cut line has
+    moved or an edge is left open. `tools/body/README.md`, "The lines on
+    the trunk", has the measurements. `gate-2-b` and `stop-7a` are gone
+    from `candidates.json` and `digests.json`. `momentum-body` is 706 392
+    bytes, 50 152 triangles, and builds to its recorded bytes twice in a
+    row; the table in `muscleMeshMap.ts` and the still follow it. The
+    validator: the chest's envelope (it must end between 69 and 73 % of the
+    height; it ended at 66.1), the two cuts of each lower leg on their
+    planes, 59 check points for 33. `tsc -b` 0; `npm run test` exit 0, 113
+    files, 1891 tests.
+  - [ ] the tint: `TINT_STRENGTH.min` 0.3, measured anew on the new body,
+    +3 % and +9 % at 0.5 and at 0.3 side by side.
+  - [ ] the closing run: the validator, the four 3D suites, all suites.
+  - [ ] the preview, the STOP page, D167 and this file.
 - **The owner's word on the second sheet (2026-11-13, 00:45 Zurich).** After
   the sheet was reported he wrote that he is going to sleep and that the
   session is **not to stop until the task is done**, restarting itself at

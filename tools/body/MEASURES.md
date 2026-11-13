@@ -98,7 +98,7 @@ arm 17° from the trunk, the fingers bent a little more).
 | Height | — | 1.750 m | |
 | Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | yes |
 | Shoulder height (acromion) | 80.0–83.0 % | 82.8 % ✓ | yes |
-| Knee height (joint line) | 27.0–30.0 % | 30.0 % ✓ | no — target not checked at its source |
+| Knee height (joint line) | 27.0–30.0 % | 29.8 % ✓ | no — target not checked at its source |
 | Crotch height | 45.0–49.0 % | 49.1 % ✗ | no — target not checked at its source |
 | Upper arm | 16.7–20.5 % | 18.2 % ✓ | yes |
 | Forearm | 13.1–16.1 % | 14.6 % ✓ | yes |
@@ -111,10 +111,10 @@ arm 17° from the trunk, the fingers bent a little more).
 | Elbow bend | 5–15° | 7.4° ✓ | yes |
 | Toes turned out | 5–10° | 6.4° ✓ | yes |
 | Met | of 14 | 13 | 11 held |
-| Triangles | ≤ 80,000 | 49,964 | yes |
+| Triangles | ≤ 80,000 | 50,152 | yes |
 | Inert zone | 25–35 % | 33 % | |
-| Smallest group | ≥ 400 | 1,654 (triceps) | yes |
-| File | ≤ 700 KB | 687 KB | yes |
+| Smallest group | ≥ 400 | 1,674 (triceps) | yes |
+| File | ≤ 700 KB | 690 KB | yes |
 | Closed surface | yes | yes | yes |
 
 Hand, sole, crown and face are `none`; the ridge between neck and shoulder,
@@ -146,10 +146,13 @@ the wrist and was taken for the hand (13.4 % for 9.7 %).
 
 ## The second sheet: the shipped body, the one before it, and the alternative
 
-Measured on 13 November 2026. `stop-7a` is the body the app shipped at
+Measured on 13 November 2026, on the shipped body as it was accepted — its
+borders were drawn anew afterwards, which changed no measure of the body and
+three of the file (see below). `stop-7a` is the body the app shipped at
 STOP 7A, before the second sheet; `gate-2-b` is the shipped body with the
-relief bounded at 6 mm instead of 4, the sheet's alternative. Both are kept
-in `candidates.json` until the owner has accepted the shipped body.
+relief bounded at 6 mm instead of 4, the sheet's alternative. Both were kept
+in `candidates.json` until the owner had accepted the shipped body, and are
+in commit `8537f79`.
 
 | measure | target | momentum-body | stop-7a | gate-2-b |
 |---|---|---|---|---|
@@ -175,8 +178,31 @@ in `candidates.json` until the owner has accepted the shipped body.
 | File | ≤ 700 KB | 687 KB | 688 KB | 687 KB |
 | Closed surface | yes | yes | yes | yes |
 
-All three pass `tools/validate-body-glb.mjs` as it stands, with all 33
-check points and its eleven measures.
+All three passed `tools/validate-body-glb.mjs` as it stood then, with all
+33 check points and its eleven measures.
+
+## The borders drawn anew
+
+After the acceptance the build cut the knee, the pectoral's lower edge, the
+collarbone and the deltoid's edge into the mesh as lines (README, "The lines
+on the trunk"). No vertex of the body moved, and thirteen of the fourteen
+measures read as above, to the digit. The fourteenth is read from the border
+of calf and thigh: the knee's height is 29.8 % for 30.0 %, now that the
+border is the joint's plane. What changed besides is the mesh along the
+lines — 50,152
+triangles for 49,964, the smallest group 1,674 for 1,654, the file 690 KB
+for 687 — and where the regions end:
+
+| region | before | now |
+|---|---|---|
+| chest, its lowest point | 66.1 % of the height, under the breastbone | 71.1 %, under the nipple; 71.5 % at the breastbone |
+| calves, their highest point | 31.1 % | 29.9 %, the knee's cut (the joint is at 29.9 %) |
+| quadriceps and hamstrings, their lowest | 29.3 % and 28.7 % | 29.6 % both |
+
+The validator holds it with 59 check points for 33 — the pectoral's edge at
+the breastbone and under the nipple, both sides of the knee's cut and of
+the deltoid's edge — and with the two cuts of each lower leg, each within a
+millimetre of its plane (0.2 mm).
 
 ## What the targets were checked against
 

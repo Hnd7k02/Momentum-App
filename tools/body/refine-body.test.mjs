@@ -10,7 +10,9 @@
  *      is handed back;
  *   2. cutting the borders never moves the surface: every new vertex lies on
  *      the old surface, the area stays, the body stays closed;
- *   3. the copyright notice of the input is written to the output unchanged.
+ *   3. the copyright notice of the input is written to the output unchanged;
+ *   4. a border through vertices the builder has marked stays on its edges,
+ *      and no region crosses it.
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
@@ -89,7 +91,7 @@ function paint({ points, tris }, islandAngle = 0) {
   });
 }
 
-function writeGlb(path, { points, tris }, labels, copyright = COPYRIGHT) {
+function writeGlb(path, { points, tris }, labels, copyright = COPYRIGHT, marked = null) {
   const normals = points.map(() => [0, 0, 0]);
   for (const [a, b, c] of tris) {
     const u = [0, 1, 2].map((k) => points[b][k] - points[a][k]);
@@ -116,10 +118,13 @@ function writeGlb(path, { points, tris }, labels, copyright = COPYRIGHT) {
     Float32Array.from(normals.flatMap((n) => n.map((v) => v / (Math.hypot(...n) || 1)))),
     { componentType: 5126, count: points.length, type: 'VEC3' },
   );
+  // The vertices the builder has put on a line it cut, as build.py marks them.
+  const attributes = { POSITION: position, NORMAL: normal };
+  if (marked) attributes._EXACT = add(Uint8Array.from(marked), { componentType: 5121, count: points.length, type: 'SCALAR' });
   const primitives = REGIONS.map((_, region) => {
     const indices = tris.filter((__, t) => labels[t] === region).flat();
     return {
-      attributes: { POSITION: position, NORMAL: normal },
+      attributes,
       indices: add(Uint32Array.from(indices), { componentType: 5125, count: indices.length, type: 'SCALAR' }),
       material: region,
     };
@@ -195,10 +200,10 @@ function readGlb(path) {
   return { json, points, tris, labels, step: scale[0], buffer };
 }
 
-function refine(name, body, labels, options = [], copyright = COPYRIGHT) {
+function refine(name, body, labels, options = [], copyright = COPYRIGHT, marked = null) {
   const input = join(dir, `${name}.in.glb`);
   const output = join(dir, `${name}.out.glb`);
-  writeGlb(input, body, labels, copyright);
+  writeGlb(input, body, labels, copyright, marked);
   const log = execFileSync('node', [SCRIPT, input, output, ...options], { encoding: 'utf8' });
   return { input, output, log, result: readGlb(output) };
 }
@@ -530,6 +535,101 @@ describe('refine-body.mjs — a frozen region', () => {
 
   it('refuses a name the file does not have', () => {
     expect(() => refine('frozen-unknown', body, labels, ['--freeze', 'elbow'])).toThrow();
+  });
+});
+
+describe('refine-body.mjs — a border the builder has drawn', () => {
+  const body = ball();
+  const labels = paint(body);
+  const regionArea = ({ points, tris, labels: of }, region) =>
+    area({ points, tris: tris.filter((_, t) => of[t] === region) });
+
+  /** The edges that part the regions `one` and `two`, each as its two end points. */
+  function borderOf({ points, tris, labels: of }, one, two) {
+    const sides = new Map();
+    tris.forEach(([a, b, c], t) => {
+      for (const [u, v] of [[a, b], [b, c], [c, a]]) {
+        const key = u < v ? `${u}|${v}` : `${v}|${u}`;
+        sides.set(key, [...(sides.get(key) ?? []), of[t]]);
+      }
+    });
+    return [...sides].filter(([, [x, y]]) => (x === one && y === two) || (x === two && y === one))
+      .map(([key]) => key.split('|').map((i) => points[Number(i)]));
+  }
+  /** Every vertex on a border of `region` with one of `others`. */
+  function marksOn(region, others) {
+    const marked = body.points.map(() => 0);
+    const around = body.points.map(() => new Set());
+    body.tris.forEach((tri, t) => tri.forEach((i) => around[i].add(labels[t])));
+    around.forEach((set, i) => { if (set.has(region) && others.some((other) => set.has(other))) marked[i] = 1; });
+    return marked;
+  }
+  /** How many edges of `before` are not an edge of `after`, end point for end point. */
+  function moved(before, after, tolerance) {
+    const near = (p, q) => Math.hypot(...sub(p, q)) < tolerance;
+    return before.filter(([p, q]) => !after.some(([u, v]) => (near(p, u) && near(q, v)) || (near(p, v) && near(q, u)))).length;
+  }
+
+  it('leaves it on the edges it lies on, to the vertex', () => {
+    // The seam between chest and back, front to back round the ball: every vertex of it marked.
+    const seam = borderOf({ ...body, labels }, 1, 2);
+    expect(seam.length).toBeGreaterThan(20);
+    const { result } = refine('exact', body, labels, [], COPYRIGHT, marksOn(1, [2]));
+    const after = borderOf(result, 1, 2);
+    expect(after).toHaveLength(seam.length);
+    expect(moved(seam, after, 2 * result.step)).toBe(0);
+    // Without the marks the same seam is smoothed, and hardly an edge of it is left where it was.
+    const free = borderOf(refine('exact-not', body, labels).result, 1, 2);
+    expect(moved(seam, free, 2 * result.step)).toBeGreaterThan(seam.length / 2);
+  });
+
+  it('is a wall: nothing crosses it, though the borders that end on it still move', () => {
+    // Both side caps, outlined: chest and back end on that outline, and
+    // their own seam, free to move, ends on it at four places where three
+    // regions meet.
+    const marked = marksOn(3, [1, 2]);
+    const before = { ...body, labels };
+    const { result } = refine('exact-wall', body, labels, [], COPYRIGHT, marked);
+    // Not a square millimetre changes hands: what is left is the rounding of the file's positions.
+    expect(Math.abs(regionArea(result, 3) - regionArea(before, 3)) / regionArea(before, 3)).toBeLessThan(1e-5);
+    // Unmarked, the same outline is smoothed, and the caps change their size a hundred times as much.
+    const loose = refine('exact-wall-not', body, labels).result;
+    expect(Math.abs(regionArea(loose, 3) - regionArea(before, 3)) / regionArea(before, 3)).toBeGreaterThan(1e-3);
+    for (const other of [1, 2]) {
+      const outline = borderOf(before, 3, other);
+      expect(moved(outline, [...borderOf(result, 3, 1), ...borderOf(result, 3, 2)], 2 * result.step)).toBe(0);
+    }
+    // The seam between chest and back did move: it was not marked.
+    const seam = borderOf(before, 1, 2);
+    expect(moved(seam, borderOf(result, 1, 2), 2 * result.step)).toBeGreaterThan(seam.length / 2);
+  });
+
+  it('keeps the body closed and the surface where it was', () => {
+    const { result } = refine('exact-closed', body, labels, [], COPYRIGHT, marksOn(1, [2]));
+    const edges = new Map();
+    for (const [a, b, c] of result.tris) {
+      for (const [u, v] of [[a, b], [b, c], [c, a]]) {
+        const key = u < v ? `${u}|${v}` : `${v}|${u}`;
+        edges.set(key, (edges.get(key) ?? 0) + 1);
+      }
+    }
+    expect([...edges.values()].filter((n) => n !== 2)).toHaveLength(0);
+    expect(Math.abs(area(result) - area(body)) / area(body)).toBeLessThan(1e-4);
+  });
+
+  it('takes a mark that lies on no border for nothing', () => {
+    // Every vertex marked: only those on a border count, and those hold every border.
+    const all = body.points.map(() => 1);
+    const { result } = refine('exact-all', body, labels, [], COPYRIGHT, all);
+    for (let region = 0; region < REGIONS.length; region++) {
+      expect(count(result.labels, region), REGIONS[region]).toBe(count(labels, region));
+    }
+    expect(result.points).toHaveLength(body.points.length);
+  });
+
+  it('does not write the marks on', () => {
+    const { result } = refine('exact-attribute', body, labels, [], COPYRIGHT, marksOn(1, [2]));
+    for (const primitive of result.json.meshes[0].primitives) expect(primitive.attributes._EXACT).toBeUndefined();
   });
 });
 

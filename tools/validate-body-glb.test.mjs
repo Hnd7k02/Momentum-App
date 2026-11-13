@@ -69,6 +69,7 @@ describe('the body model the app ships', () => {
     expect(out).toMatch(/contract satisfied/);
     expect(out).toMatch(/check points: (\d+) of \1/);
     expect(out).toMatch(/inert zone: five straight cuts/);
+    expect(out).toMatch(/calves: four straight cuts/);
   });
 
   const results = runCheckPoints(readBody(SHIPPED));
@@ -114,6 +115,15 @@ describe('the body model the app ships', () => {
     // Then the two wrists and the two ankles, a left and a right of each.
     expect(borders.slice(1).map((border) => Math.sign(border.centre[0]))).toEqual([1, -1, 1, -1]);
   });
+
+  it('ends its calves in four straight cuts: a knee and an ankle on each leg', () => {
+    const borders = regionBorders(readBody(SHIPPED), 'calves');
+    expect(borders).toHaveLength(4);
+    for (const border of borders) expect(border.deviation).toBeLessThan(0.001);
+    // The two knees first, then the two ankles; a left and a right of each.
+    expect(borders.map((border) => Math.sign(border.centre[0]))).toEqual([1, -1, 1, -1]);
+    expect(borders[1].centre[1] - borders[2].centre[1]).toBeGreaterThan(0.3);
+  });
 });
 
 describe('the validator refuses', () => {
@@ -145,6 +155,21 @@ describe('the validator refuses', () => {
     expect(problems).toMatch(/check point "the hand is inert" \(left\): the ray meets forearms, not none/);
     expect(problems).toMatch(/check point "forearms" \(right\): the ray meets none, not forearms/);
     expect(problems).toMatch(/check point "the face is inert": the ray meets forearms/);
+  });
+
+  it('a lower leg that does not end at the knee', () => {
+    // The calves and the front of the thigh change names: the "calves" now
+    // end at the groin and along the thigh's sides, on no plane at all.
+    const path = changed('knee', (json) => {
+      const calves = json.materials.find((m) => m.name === 'calves');
+      const quadriceps = json.materials.find((m) => m.name === 'quadriceps');
+      calves.name = 'quadriceps';
+      quadriceps.name = 'calves';
+    });
+    const { status, problems } = validate(path);
+    expect(status).toBe(1);
+    expect(problems).toMatch(/the calves(' border at .* is not a straight cut| have \d+ borders, not four)/);
+    expect(problems).toMatch(/check point "below the knee's cut is the calf, in front" \(left\): the ray meets quadriceps, not calves/);
   });
 
   it('a baked shade on only some of the regions', () => {

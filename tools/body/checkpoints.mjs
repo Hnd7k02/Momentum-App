@@ -25,7 +25,7 @@ const FROM = {
  */
 export const CHECK_POINTS = [
   // Each of the ten groups, at a place in its middle.
-  { name: 'chest', at: [0.05, 0.72, 0], from: 'front', region: ['chest'] },
+  { name: 'chest', at: [0.05, 0.76, 0], from: 'front', region: ['chest'] },
   { name: 'core', at: [0.03, 0.62, 0], from: 'front', region: ['core'] },
   { name: 'quadriceps', at: [0.06, 0.40, 0], from: 'front', region: ['quadriceps'] },
   { name: 'shoulders', at: [0.115, 0.79, 0], from: 'front', region: ['shoulders'] },
@@ -45,6 +45,26 @@ export const CHECK_POINTS = [
   { name: 'the upper trapezius belongs to the back, from above', at: [0.055, 0, 0], from: 'above', region: ['back'] },
   { name: 'the upper trapezius belongs to the back, from the front', at: [0.06, 0.845, 0], from: 'front', region: ['back'] },
   { name: 'the pit of the throat goes with the chest', at: [0, 0.84, 0], from: 'front', region: ['chest'], once: true },
+  // The pectoral's lower edge: lowest in its fold under the nipple, about
+  // level from there to the middle, and not a point at the breastbone. A
+  // centimetre and a half above the edge and two below, at both places.
+  { name: 'the pectoral reaches down to its fold, under the nipple', at: [0.055, 0.72, 0], from: 'front', region: ['chest'] },
+  { name: 'under the pectoral\'s fold is the core', at: [0.055, 0.70, 0], from: 'front', region: ['core'] },
+  { name: 'the chest is as low at the breastbone as under the nipple', at: [0, 0.725, 0], from: 'front', region: ['chest'], once: true },
+  { name: 'under the breastbone is the core, not a point of the chest', at: [0, 0.70, 0], from: 'front', region: ['core'], once: true },
+  // The knee's cut: two centimetres above and below the joint, front and back.
+  { name: 'above the knee\'s cut is the thigh, in front', at: [0.051, 0.31, 0], from: 'front', region: ['quadriceps'] },
+  { name: 'below the knee\'s cut is the calf, in front', at: [0.051, 0.285, 0], from: 'front', region: ['calves'] },
+  { name: 'above the knee\'s cut is the thigh, behind', at: [0.051, 0.31, 0], from: 'back', region: ['hamstringsGlutes'] },
+  { name: 'below the knee\'s cut is the calf, behind', at: [0.051, 0.285, 0], from: 'back', region: ['calves'] },
+  // The deltoid's edge against the trunk, on both sides of it: in front
+  // under the collarbone, on top of the shoulder, and behind.
+  { name: 'inside the deltoid\'s edge, under the collarbone, is the chest', at: [0.085, 0.815, 0], from: 'front', region: ['chest'] },
+  { name: 'outside the deltoid\'s edge is the shoulder, in front', at: [0.105, 0.825, 0], from: 'front', region: ['shoulders'] },
+  { name: 'inside the deltoid\'s edge, on top, is the trapezius', at: [0.085, 0, 0.01], from: 'above', region: ['back'] },
+  { name: 'outside the deltoid\'s edge is the shoulder, on top', at: [0.105, 0, 0.01], from: 'above', region: ['shoulders'] },
+  { name: 'inside the deltoid\'s edge, behind, is the back', at: [0.085, 0.80, 0], from: 'back', region: ['back'] },
+  { name: 'outside the deltoid\'s edge is the shoulder, behind', at: [0.112, 0.80, 0], from: 'back', region: ['shoulders'] },
 ];
 
 /**

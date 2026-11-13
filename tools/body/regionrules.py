@@ -40,27 +40,50 @@ THROAT_HALF_WIDTH = 0.045
 #: The pit widens upwards: its edge runs out to the side of the neck, where
 #: the trapezius begins, instead of standing under the neck as a tab.
 THROAT_FLARE = 0.75
+#: The lower edge of the pectoral (metres on a body of 1.78 m; x is the
+#: distance from the body's middle). It is lowest under the nipple, where
+#: the muscle's fold lies on the body — read from the surface: under the
+#: nipple the chest stands out until 14 cm below the shoulder joints and
+#: falls back by a centimetre and a half within the next two. From there
+#: to the middle it runs about level, a few millimetres higher over the
+#: breastbone; to the side it rises in an arc to the fold of the armpit.
+PEC_FOLD = 0.142          # below the shoulder joints, under the nipple
+PEC_NIPPLE = 0.098        # the nipple's distance from the middle
+PEC_MIDDLE_LIFT = 0.006   # how much higher the edge lies over the breastbone
+PEC_ARC = 4.9             # the arc to the armpit: rise = PEC_ARC * (x - nipple)^2
+#: The deltoid's edge against the trunk: a plane, seen from the front as a
+#: straight line from the fold of the armpit up over the collarbone and the
+#: top of the shoulder, and down the back to the armpit's rear fold. It
+#: leans outwards as it goes down. In front the pectoral lies against it
+#: below the collarbone, the trapezius above; behind, the back. Read from
+#: the body: the groove between deltoid and pectoral lies 3.4 cm inside the
+#: shoulder joint at the joint's height, and the deltoid's rear edge on the
+#: same plane to within half a centimetre.
+DELT_EDGE_IN = 0.0345     # inside the shoulder joint, at its height
+DELT_EDGE_LEAN = 0.145    # further out by this much for every metre down
+DELT_EDGE_DOWN = 0.050    # the line ends this far below the shoulder joints
+#: How far from one of the lines a vertex may lie and still be given to the
+#: side of the line it is on.
+LINE_REACH = 0.035
 
 
-def label_by_rules(P, joints, dominant, bones, height, cuts=None):
-    """Vertex labels for a posed body `P` (metres) of height `height`.
+def segments(P, joints, dominant, bones, height, cuts=None):
+    """The limb or the trunk every vertex of the posed body `P` belongs to.
 
-    `cuts` are the straight cuts between the inert zone and the muscles
-    (`bodylib.cut_planes`): the same planes the build cuts the mesh along.
+    The skinning weights say it roughly; the joints' planes and the straight
+    cuts of `bodylib.cut_planes` say it exactly.
     """
     J = joints
-    H = height
-    k = H / 1.78          # the rules' lengths were set on a body of 1.78 m
-    cuts = cuts or cut_planes(J, H)
+    cuts = cuts or cut_planes(J, height)
     seg = np.array([bone_segment(bones[int(b)]) if b >= 0 else 'torso' for b in dominant])
 
     def beyond(name):
         point, normal, _ = cuts[name]
         return (P - point) @ normal > 0
 
-    # Elbow and knee: the cut is the plane through the joint that bisects the
-    # two segments, not where the skinning weights change bones. Wrist and
-    # ankle: the straight cut of `cut_planes`.
+    # The elbow: the cut is the plane through the joint that bisects the two
+    # segments, not where the skinning weights change bones. Knee, wrist and
+    # ankle: the straight cuts of `cut_planes`.
     for side, sx in (('l', 1.0), ('r', -1.0)):
         mine = P[:, 0] * sx > 0
         S, E, Hd = J[f'joint-{side}-shoulder'], J[f'joint-{side}-elbow'], J[f'joint-{side}-hand']
@@ -73,12 +96,10 @@ def label_by_rules(P, joints, dominant, bones, height, cuts=None):
         far = beyond(f'wrist-{side}')
         seg[m & ~far] = 'lowerarm'
         seg[m & far] = 'hand'
-        Hj, K, A = J[f'joint-{side}-upper-leg'], J[f'joint-{side}-knee'], J[f'joint-{side}-ankle']
-        n = _unit(_unit(K - Hj) + _unit(A - K))
         m = np.isin(seg, ['upperleg', 'lowerleg']) & mine
-        above = (P - K) @ n < 0
-        seg[m & above] = 'upperleg'
-        seg[m & ~above] = 'lowerleg'
+        below = beyond(f'knee-{side}')
+        seg[m & ~below] = 'upperleg'
+        seg[m & below] = 'lowerleg'
         m = np.isin(seg, ['lowerleg', 'foot']) & mine
         far = beyond(f'ankle-{side}')
         seg[m & ~far] = 'lowerleg'
@@ -94,31 +115,164 @@ def label_by_rules(P, joints, dominant, bones, height, cuts=None):
     above_cut = beyond('neck')
     seg[(seg == 'head') & near & ~above_cut] = 'torso'
     seg[(seg == 'torso') & near & above_cut] = 'head'
+    return seg
+
+
+class Lines:
+    """The lines the rules draw on the front of the trunk.
+
+    Each is a field over any points of the posed body, zero on the line. The
+    rules label the base mesh's vertices by them, and the build cuts the
+    fine mesh along them (`borders`), so that a border between two regions
+    is the line itself and not the edges of the quads that lie nearest.
+    """
+
+    def __init__(self, P, seg, joints, height):
+        J = joints
+        self.k = k = height / 1.78          # the rules' lengths were set on a body of 1.78 m
+        self.yS = 0.5 * (J['joint-l-shoulder'][1] + J['joint-r-shoulder'][1])
+        self.xS = 0.5 * (J['joint-l-shoulder'][0] - J['joint-r-shoulder'][0])
+        self.C, self.A = J['joint-l-clavicle'], J['joint-l-scapula']
+        # The torso's mid-coronal plane per height: front and back part along
+        # the mid-axillary line.
+        torso = np.isin(seg, ['torso', 'upperleg']) & (np.abs(P[:, 0]) < self.xS * 0.92)
+        ys = np.linspace(P[:, 1].min(), P[:, 1].max(), 120)
+        zmid = np.full_like(ys, np.nan)
+        for i, y in enumerate(ys):
+            m = torso & (np.abs(P[:, 1] - y) < 0.02)
+            if m.sum() > 8:
+                zmid[i] = 0.5 * (P[m, 2].min() + P[m, 2].max())
+        ok = ~np.isnan(zmid)
+        self.ys, self.zmid = ys, np.interp(ys, ys[ok], zmid[ok])
+
+    def front(self, Q):
+        """Positive in front of the mid-axillary line."""
+        return Q[:, 2] - np.interp(Q[:, 1], self.ys, self.zmid) + 0.005 * self.k
+
+    def pec_bottom(self, x):
+        """The height of the pectoral's lower edge, `x` from the middle."""
+        k = self.k
+        inner = np.clip(x / (PEC_NIPPLE * k), 0, 1)
+        outer = np.clip(x - PEC_NIPPLE * k, 0, None)
+        return (self.yS - PEC_FOLD * k
+                + PEC_MIDDLE_LIFT * k * 0.5 * (1 + np.cos(np.pi * inner))
+                + PEC_ARC / k * outer ** 2)
+
+    def collarbone(self, x):
+        """The height of the collarbone's line on the skin, `x` from the middle:
+        from the pit of the throat out to the shoulder, a little above the
+        line of the bone's two joints."""
+        C, A = self.C, self.A
+        return C[1] + (A[1] - C[1]) / (A[0] - C[0]) * (x - C[0]) + CLAVICLE_LIFT * self.k
+
+    def pit(self, x, y):
+        """Positive in the pit of the throat, between the heads of the two collarbones."""
+        return THROAT_HALF_WIDTH * self.k + THROAT_FLARE * (y - self.collarbone(x)) - x
+
+    def delt_edge(self, y):
+        """Where the deltoid's front edge lies, from the middle, at the height `y`."""
+        return self.xS - DELT_EDGE_IN * self.k + DELT_EDGE_LEAN * (self.yS - y)
+
+    def delt_low(self):
+        return self.yS - DELT_EDGE_DOWN * self.k
+
+    def below_pec(self, Q):
+        """Positive under the pectoral's lower edge."""
+        return self.pec_bottom(np.abs(Q[:, 0])) - Q[:, 1]
+
+    def under_collarbone(self, Q):
+        """Positive under the collarbone's line."""
+        return self.collarbone(np.abs(Q[:, 0])) - Q[:, 1]
+
+    def in_pit(self, Q):
+        """Positive in the pit of the throat."""
+        return self.pit(np.abs(Q[:, 0]), Q[:, 1])
+
+    def inside_delt(self, Q):
+        """Positive inside the deltoid's edge, towards the middle."""
+        return self.delt_edge(Q[:, 1]) - np.abs(Q[:, 0])
+
+    def paint(self, Q, labels):
+        """The regions of the points `Q` — vertices, or the middles of
+        triangles — with the lines drawn: every point within reach of one is
+        given to the side of the line it lies on.
+
+        Under the pectoral's edge is the core. Outside the deltoid's edge is
+        the shoulder, all round. Inside it, in front, the chest reaches up
+        to the collarbone and into the pit of the throat; above that, and
+        behind, is the back.
+        """
+        reach = LINE_REACH * self.k
+        out = np.asarray(labels).copy()
+        front = self.front(Q) > 0
+        pec = self.below_pec(Q)
+        near = front & np.isin(out, [R['chest'], R['core']]) & (np.abs(pec) < reach)
+        out[near & (pec > 0)] = R['core']
+        out[near & (pec <= 0)] = R['chest']
+        delt = self.inside_delt(Q)
+        under = np.maximum(self.under_collarbone(Q), self.in_pit(Q))
+        near = (np.isin(out, [R['chest'], R['back'], R['shoulders']]) & (Q[:, 1] > self.delt_low())
+                & ((np.abs(delt) < reach) | (front & (np.abs(under) < reach) & (delt > 0))))
+        chest = front & (under > 0)
+        out[near & (delt <= 0)] = R['shoulders']
+        out[near & (delt > 0) & chest] = R['chest']
+        out[near & (delt > 0) & ~chest] = R['back']
+        return out
+
+    def cuts(self):
+        """The lines the build cuts the fine mesh along before it paints it,
+        in their order: for each a function of the mesh that gives the field
+        and the triangles it holds for. A later line ends on an earlier one:
+        the collarbone at the deltoid's edge, the pit's edge at the collarbone.
+        """
+        reach = LINE_REACH * self.k
+
+        def zone(P, tris, labels, regions, field, all_round=False):
+            centre = P[tris].mean(axis=1)
+            held = np.isin(labels, [R[name] for name in regions]) & (np.abs(field(centre)) < reach)
+            return centre, held if all_round else held & (self.front(centre) > 0)
+
+        def pectoral(P, tris, labels):
+            _, held = zone(P, tris, labels, ('chest', 'core'), self.below_pec)
+            return self.below_pec(P), held
+
+        def deltoid(P, tris, labels):
+            centre, held = zone(P, tris, labels, ('chest', 'back', 'shoulders'), self.inside_delt, all_round=True)
+            return self.inside_delt(P), held & (centre[:, 1] > self.delt_low())
+
+        def collarbone(P, tris, labels):
+            centre, held = zone(P, tris, labels, ('chest', 'back', 'shoulders'), self.under_collarbone)
+            return self.under_collarbone(P), held & (self.inside_delt(centre) > 0)
+
+        def pit(P, tris, labels):
+            centre, held = zone(P, tris, labels, ('chest', 'back'), self.in_pit)
+            return self.in_pit(P), held & (self.under_collarbone(centre) < 0)
+
+        return [pectoral, deltoid, collarbone, pit]
+
+
+def label_by_rules(P, joints, dominant, bones, height, cuts=None):
+    """Vertex labels for a posed body `P` (metres) of height `height`.
+
+    `cuts` are the straight cuts between the inert zone and the muscles, and
+    at the knee (`bodylib.cut_planes`): the same planes the build cuts the
+    mesh along.
+    """
+    J = joints
+    H = height
+    k = H / 1.78          # the rules' lengths were set on a body of 1.78 m
+    seg = segments(P, J, dominant, bones, H, cuts)
+    lines = Lines(P, seg, J, H)
 
     lab = np.full(len(P), -1)
     lab[np.isin(seg, ['head', 'hand', 'foot'])] = R['none']
     lab[seg == 'lowerarm'] = R['forearms']
     lab[seg == 'lowerleg'] = R['calves']
 
-    yS = 0.5 * (J['joint-l-shoulder'][1] + J['joint-r-shoulder'][1])
-    xS = 0.5 * (J['joint-l-shoulder'][0] - J['joint-r-shoulder'][0])
-    yClav = 0.5 * (J['joint-l-clavicle'][1] + J['joint-r-clavicle'][1])
+    xS = lines.xS
     yPelvis = J['joint-pelvis'][1]
     yBelt = yPelvis + 0.045 * k          # the iliac crest, the documented waistband
-
-    # The torso's mid-coronal plane per height: front and back part along the
-    # mid-axillary line.
-    torso = np.isin(seg, ['torso', 'upperleg']) & (np.abs(P[:, 0]) < xS * 0.92)
-    ys = np.linspace(P[:, 1].min(), P[:, 1].max(), 120)
-    zmid = np.full_like(ys, np.nan)
-    for i, y in enumerate(ys):
-        m = torso & (np.abs(P[:, 1] - y) < 0.02)
-        if m.sum() > 8:
-            zmid[i] = 0.5 * (P[m, 2].min() + P[m, 2].max())
-    ok = ~np.isnan(zmid)
-    zmid = np.interp(ys, ys[ok], zmid[ok])
-    zm = np.interp(P[:, 1], ys, zmid)
-    front = P[:, 2] > zm - 0.005 * k
+    front = lines.front(P) > 0
 
     # The deltoid: around the shoulder joint, on the arm's outer side, down to
     # about 45 % of the humerus, lowest on the outside (the V of its insertion).
@@ -182,12 +336,10 @@ def label_by_rules(P, joints, dominant, bones, height, cuts=None):
     x = np.abs(P[:, 0])
     y = P[:, 1]
     m = lab < 0
-    pec_bottom = yS - 0.205 * k + 0.85 * np.clip(x - 0.065 * k, 0, None)
-    # The collarbone: a line on the skin from the pit of the throat out to the
-    # shoulder, lying a little above the line of the bone's two joints. The
-    # pectoral reaches up to it; above it, beside the neck, is the trapezius.
-    C, A = J['joint-l-clavicle'], J['joint-l-scapula']
-    collarbone = C[1] + (A[1] - C[1]) / (A[0] - C[0]) * (x - C[0]) + CLAVICLE_LIFT * k
+    pec_bottom = lines.pec_bottom(x)
+    # The collarbone: the pectoral reaches up to it; above it, beside the
+    # neck, is the trapezius.
+    collarbone = lines.collarbone(x)
     chest = m & front & (y >= pec_bottom) & (y < collarbone) & (x < xS - 0.01 * k)
     lab[chest] = R['chest']
     m = lab < 0
@@ -196,7 +348,7 @@ def label_by_rules(P, joints, dominant, bones, height, cuts=None):
     # there, and since the neck is cut level above it, it goes with the chest
     # below. Everything else up there is the trapezius.
     above = m & (y >= collarbone)
-    pit = above & front & (x < THROAT_HALF_WIDTH * k + THROAT_FLARE * (y - collarbone))
+    pit = above & front & (lines.pit(x, y) > 0)
     lab[pit] = R['chest']
     lab[above & ~pit] = R['back']
     m = lab < 0
@@ -208,4 +360,8 @@ def label_by_rules(P, joints, dominant, bones, height, cuts=None):
     lab[m & ~front & ~below] = R['back']
     lab[m & ~front & below] = R['hamstringsGlutes']
     assert (lab >= 0).all()
-    return lab
+    # The lines. Sphere, cone and plane above give the deltoid its place and
+    # leave its edge against the pectoral and the trapezius in steps; on the
+    # front that edge is one line, like the pectoral's lower edge and the
+    # collarbone.
+    return lines.paint(P, lab)

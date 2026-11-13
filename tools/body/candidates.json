@@ -1,5 +1,5 @@
 {
-  "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named. '_base' holds the settings the gate's candidates shared and is not built itself. 'momentum-body' is the body the app ships, installed to public/models/ with --install: the athletic type with head A that the owner chose at the gate of block 7A, with the corrections of the second sheet — a surface without folds, and shorter, stronger arms held closer. Two bodies are kept buildable beside it until he has accepted it on his iPhone: 'gate-2-b', the same with the relief bounded at 6 mm instead of 4 (the second sheet's alternative), and 'stop-7a', the body the app shipped at STOP 7A, before that sheet.",
+  "_about": "The bodies build.py can make. 'like' takes another entry and changes what is named. '_base' holds the settings the gate's candidates shared and is not built itself. 'momentum-body' is the body the app ships, installed to public/models/ with --install: the athletic type with head A that the owner chose at the gate of block 7A, with the corrections of the second sheet — a surface without folds, and shorter, stronger arms held closer.",
   "_base": {
     "height": 1.75,
     "macro": { "gender": 1.0, "age": 0.5, "muscle": 0.9, "weight": 0.35, "proportions": 1.0, "height": 0.5 },
@@ -28,7 +28,5 @@
     ],
     "seam_fade": true,
     "refine": { "cavity": 0.8, "ao": 0.45, "floor": 0.6, "white": 0.7, "shadedepth": 0.0025, "shadefine": 0.15, "shadesmooth": 4 }
-  },
-  "gate-2-b": { "like": "momentum-body", "relief": { "limit_mm": 6 } },
-  "stop-7a": { "like": "_base" }
+  }
 }
