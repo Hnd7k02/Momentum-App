@@ -1294,9 +1294,10 @@ merged; **production of the second sheet's candidate is running — see
   `hnd7k02.github.io` itself is not reachable from the session.
 - **The pictures of STOP 7A** are in `docs/design/wp3/7a/`: four pairs
   before and after from the app (Muskelgruppen from the front, the stage
-  from the back, the Gym card, a close-up), the white body beside the
-  untrained one, the borders at neck, wrist and ankle, and the still in
-  the tone it has beside the white alternative the owner is asked about.
+  from the back, the Gym card, a close-up) and the white body beside the
+  untrained one — all five with the body shipped since the second sheet —
+  and, from the first version, the borders at neck, wrist and ankle. The
+  close-ups of the second sheet are in `docs/design/wp3/7a-gate-2/`.
 - **Baseline for this block** is the closing run of the colour rules on
   `67db6d2` (the commit before this block's first is `fec6d5c`, which adds
   only the record, the pictures and a moved block in one verify script): `tsc -b`
