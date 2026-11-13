@@ -927,11 +927,31 @@ merged; **production of the second sheet's candidate is running — see
     `muscleMeshMap.ts`, the still on the Gym card (240 × 574 now: the arms
     hang closer, so the figure is narrower). The validator passes as it
     stood. `gate-2-b` and `stop-7a` build to their recorded bytes.
-  - [ ] the closing run: `tsc -b`, `npm run test`, the build with the
-    validator, the four 3D suites one at a time, then every suite
-  - [ ] the record (README, MEASURES, deviations, D165's outcome), the
-    preview in `Momentum-preview`
-  - [ ] STOP 7A anew
+  - [x] the closing run, on `534515d` (the commits after it are the
+    record alone): `tsc -b` 0; `npm run test` exit 0, **113 files, 1858
+    tests**; `npm run build` with the validator, `index.css` 90.57 kB,
+    `index.js` 509.36 kB, the model 703 760 bytes; **all 37 browser suites,
+    36 green, 4080 of 4081 checks** — the one red is the offline check of
+    `release-proof.mjs`, as in the baseline; `gym-muscles` 74/74,
+    `farbregeln` 322/322, `body` 40/40, `body-reach` 3/3 with 10 of 10
+    groups at 320, 393 and 430 px (the biceps and the triceps are two 12px
+    cells wide at 320 now, for one), the four of them one at a time. No
+    suite had to be changed for the new body. `git diff fec6d5c --
+    .github/fixtures src/core src/storage` and the diff of `muscleState.ts`
+    are empty. Measured again on the way: the chest at +3 % stands 34.1 ΔE
+    from the same chest held, the quadriceps at −3 % 30.2.
+  - [x] the record (`tools/body/README.md`, `MEASURES.md`, the deviations
+    table, D165's outcome, D166's measured tones), and the preview:
+    `Momentum-preview` `0414126`, built from `534515d`; its files are the
+    build's byte for byte, and from a local server it starts empty in its
+    own database, walks through the first start and draws the body on the
+    muscle screen without an error.
+  - [ ] STOP 7A anew — reported on 2026-11-13; the page «Körper STOP 7A»
+    (https://claude.ai/artifact/V6EXnbcNemqc63rpxCxpQG) carries the second
+    version. Five questions are with the owner: how much relief (4 mm is
+    built, 6 mm is `gate-2-b`), the inert zone on a wholly untrained body,
+    the tone of the still, the strength of a small change, and his findings
+    on the colour rules.
 - **Where it stands now (2026-11-12, after STOP 7A).** The owner added two
   corrections to the gate and stopped production until he has seen them
   (D165, "After the gate"): *2b* the surface — no folds at collarbone,
