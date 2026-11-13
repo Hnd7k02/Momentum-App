@@ -4221,7 +4221,19 @@ corrections are a candidate, `gate-2`, built beside it
   crotch (49.1 %, not 49.0 %, for the shipped body as for every candidate —
   see above) and the hand's reach with the arm held close.
 
-The outcome of the second sheet is the owner's to give.
+**The outcome of the second sheet (2026-11-13).** The sheet was reported in
+the night; the owner answered that he was going to sleep and that the
+session was not to stop until the task was done, and left the sheet's
+three questions unanswered. That was read as his go-ahead, and production
+ran with the sheet's recommendations: the relief bounded at 4 mm, the
+nipples smoothed away and the navel a soft hollow, the arms as shown.
+`gate-2` became `momentum-body` — 49,964 triangles, 703,760 bytes; the
+validator passes as it stood. It is a reading of his words, not his answer
+to the questions, so nothing was burnt: the alternative (`gate-2-b`, the
+relief at 6 mm) and the body of STOP 7A (`stop-7a`) are kept in
+`candidates.json`, build to recorded bytes and are installed with one
+command each, and the commit before production is `2215a51`. His
+acceptance on the iPhone at STOP 7A decides whether it stands.
 
 ## D166 — The inert zone has a tone of its own
 
@@ -4245,8 +4257,9 @@ another skin colour, not as "neutral".
   muscles are dimmed and its head, hands and feet are a step lighter. The
   owner asked to be shown both — the white body and the untrained one — at
   STOP 7A, and judges the second there. Measured on the screen (L*, the
-  median of a zone at 393 px): the feet 73 in both figures; chest, thighs
-  and calves 51, 38 and 39 untrained, 87, 68 and 71 held.
+  median of a zone at 393 px, on the body shipped since the second sheet):
+  the feet 73 in both figures; chest, thighs and calves 52, 37 and 39
+  untrained, 89, 68 and 71 held.
 - **With the data colours switched off** the body says nothing at all — not
   even "not trained yet" — and is one figure in the inert zone's tone. Only
   the still on the Gym card is drawn that way; the app never switches the

@@ -200,8 +200,8 @@ export const BODY_LOOK: BodyLook = {
  * the colour of the material is the colour on the screen, and both
  * directions arrive alike: measured on the rendered body at 393px, as the
  * median difference from the same zone held, the chest at +3 % stands
- * 33.6 ΔE away and the quadriceps at −3 % 30.3; +9 % is half as green
- * again as +3 % (a* −44 against −30). `farbregeln.mjs` holds ±3 % at 5 or
+ * 34.1 ΔE away and the quadriceps at −3 % 30.2; +9 % is half as green
+ * again as +3 % (a* −45 against −30). `farbregeln.mjs` holds ±3 % at 5 or
  * more and the order of the strengths.
  */
 export const REGION_MATERIAL = {
