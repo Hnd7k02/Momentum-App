@@ -3910,6 +3910,11 @@ scrolling to the plans.
 build needed, each kept small. Those marked *open* are put to him at the
 STOP of the block.
 
+*Status (2026-11-13):* accepted by the owner on his iPhone, on the preview
+build `0414126`, without findings ("alles ok"). The readings marked *open*
+stand as built; "an exercise day is an entry" he had confirmed at the gate
+of block 7A.
+
 **The owner's decisions at the start of the block.** A preview build opens
 a database of its own (`VITE_MOMENTUM_DB`, `storage/db.ts`): the live app
 is at `hnd7k02.github.io/Momentum-App/`, the same origin as the preview,
@@ -4234,6 +4239,15 @@ relief at 6 mm) and the body of STOP 7A (`stop-7a`) are kept in
 `candidates.json`, build to recorded bytes and are installed with one
 command each, and the commit before production is `2215a51`. His
 acceptance on the iPhone at STOP 7A decides whether it stands.
+
+**Accepted (owner, 2026-11-13).** He checked block 7A on his iPhone, on the
+preview build `0414126`: "alles ok". The body of the second sheet stands as
+built — the relief at 4 mm, the nipples smoothed away and the navel a soft
+hollow, the arms — and so do the answers the build had given to the other
+questions of STOP 7A: the inert zone keeps its one tone on an untrained
+body too (D166), the still on the Gym card is drawn in that tone, and the
+strength of a small change is unchanged. The three targets that could not
+be checked at their sources stay open for block 9.
 
 ## D166 — The inert zone has a tone of its own
 
