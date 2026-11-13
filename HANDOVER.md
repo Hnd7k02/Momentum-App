@@ -100,7 +100,7 @@ records (answers, sessions, sets, snapshots)
 | `src/features/areas/DomainSwitch.tsx`, `GymTerminal.tsx`, `RunningTerminal.tsx`, `CreditsSection.tsx` | **Bereiche is the terminal**: Mind · Gym (D143), one area at a time. Gym carries its board, the muscle module, and Laufen as a separate section; Einstellungen names the body model's source (MakeHuman, CC0 1.0 — no credit is owed, D165) |
 | `src/features/body/` | **The 3D body.** `BodyViewer` (R3F canvas, camera rig, tap-vs-drag, the approved material treatment with the neutral selection cue), `useGLTF`, `BodyBoundary`, `bodyVisuals.ts` (the adapter from `MusclePerformance` to tint and intensity), `muscleMeshMap.ts` (the id ↔ GLB contract), `tokens.ts` (identity and state colours, the single colour source). `index.ts` is the **lazy boundary**: three.js and the renderer live in their own chunk and are fetched only when the Gym module renders |
 | `src/features/gym/MuscleModule.tsx`, `MuscleRows.tsx`, `Sparkline.tsx`, `muscleAnalytics.ts` | **Muskelgruppen.** The body above, the ten rows below, one selected group held by `GymProgress`. `toMuscleAnalytics()` derives each row read-only from the loaded history: state, delta, last trained day, and the trend — the group's over-span change since the range began, as of each training day, via `gymPerformanceOverSpan()` on the history prefix, so the last point *is* the row's delta. The chart is the handoff's `spark80`: per-row min/max, flat when equal, a dot for one observation, nothing for none |
-| `public/models/momentum-body.glb`, `tools/validate-body-glb.mjs` | The model (built by `tools/body/` from MakeHuman's base mesh, CC0 1.0; 49 988 triangles, one primitive per muscle id plus `none`; D165) and the contract validator that runs first in `npm run build`: structure, envelopes, the inert zone's five straight cuts, the check points of the regions, eleven measures, the licence notice |
+| `public/models/momentum-body.glb`, `tools/validate-body-glb.mjs` | The model (built by `tools/body/` from MakeHuman's base mesh, CC0 1.0; 49 964 triangles, one primitive per muscle id plus `none`; D165) and the contract validator that runs first in `npm run build`: structure, envelopes, the inert zone's five straight cuts, the check points of the regions, eleven measures, the licence notice |
 | `tools/body/` | **The body's pipeline.** One command builds the model byte for byte (`build.py momentum-body --install`); `README.md` has the commands, the data's source and licence, `MEASURES.md` the measures. `measure-body.mjs` and `checkpoints.mjs` are what the validator reads the surface with |
 | `src/components/BodyRenderer/index.tsx` | Muscle diagram; presentation only |
 | `src/features/gym/*` | Session logging, picker, bodyweight, overview, exercise detail, progress |
@@ -922,9 +922,11 @@ merged; **production of the second sheet's candidate is running — see
   with one command each, should he decide otherwise in the morning; the
   commit before production is `2215a51`. The steps, ticked as they are
   done:
-  - [ ] `gate-2` becomes `momentum-body`: `candidates.json`, `build.py
-    momentum-body --record --install`, the table in `muscleMeshMap.ts`,
-    the still on the Gym card
+  - [x] `gate-2` becomes `momentum-body` (`5514ba8`): `candidates.json`,
+    `build.py momentum-body --record --install`, the table in
+    `muscleMeshMap.ts`, the still on the Gym card (240 × 574 now: the arms
+    hang closer, so the figure is narrower). The validator passes as it
+    stood. `gate-2-b` and `stop-7a` build to their recorded bytes.
   - [ ] the closing run: `tsc -b`, `npm run test`, the build with the
     validator, the four 3D suites one at a time, then every suite
   - [ ] the record (README, MEASURES, deviations, D165's outcome), the
@@ -982,16 +984,22 @@ merged; **production of the second sheet's candidate is running — see
     `candidates.json`, `build.py gate-2 --record`, and rebuild the pictures
     with the two scripts named in `docs/design/wp3/7a-gate-2/README.md`.
 - **What the app ships now.** `public/models/momentum-body.glb` is a new
-  body: `athletisch-a` of the gate with the owner's three corrections,
-  built by one command from MakeHuman's base mesh (CC0 1.0) — 49 988
-  triangles, 704 044 bytes (688 KB; 475 KB compressed for 345 KB before),
-  closed, 1.75 m tall like the body it replaces, sha256
-  `a72c8417…9b44d796` (`tools/body/digests.json`). Head with neck, hands and
-  feet are an inert zone with straight cuts and a tone of its own (D166);
-  the light is tokens and has no tone mapping (D165). Nothing computed
-  moved: `src/core`, `src/storage`, `muscleState.ts`, every golden file and
-  fingerprint are as they were, and so are the body's interaction, the
-  stage's size and frame and the flat fallback figure.
+  body: `athletisch-a` of the gate with the owner's three corrections at
+  the gate and the two of its second sheet, built by one command from
+  MakeHuman's base mesh (CC0 1.0) — 49 964 triangles, 703 760 bytes
+  (687 KB; 479 KB compressed, for 345 KB of the model of D156), closed,
+  1.75 m tall like the body it replaces, sha256 `202c8045…bcabf286e2`
+  (`tools/body/digests.json`). Head with neck, hands and feet are an inert
+  zone with straight cuts and a tone of its own (D166); the light is tokens
+  and has no tone mapping (D165). Since the second sheet the surface has
+  no folds — the relief is softened and bounded at 4 mm, the nipples are
+  smoothed away, the navel is a soft hollow — and the arms are shorter,
+  stronger and held closer (forearm 14.6 % of the height, upper arm 17°
+  from the trunk). Nothing computed moved: `src/core`, `src/storage`,
+  `muscleState.ts`, every golden file and fingerprint are as they were, and
+  so are the body's interaction, the stage's size and frame and the flat
+  fallback figure. (The body the app shipped at STOP 7A is `stop-7a` in
+  `candidates.json`: 49 988 triangles, relief at 9 mm, upper arm 21°.)
 - **How this block is run.** Started by the owner on 2026-11-11, late, in
   the session of the colour rules, from
   `docs/wp3/prompts/prompt-7a-koerpermodell.md`. His points on the first

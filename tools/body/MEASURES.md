@@ -53,8 +53,8 @@ and two thirds of its triangles in head, hands and feet.
 ## The four candidates of the gate
 
 Measured on 12 November 2026, by the same script, as they were shown. The
-body the app ships is `athletisch-a` after the owner's three corrections; it
-is measured in the next section.
+body the app ships is `athletisch-a` after the owner's three corrections and
+the two of the second sheet; it is measured in the next section.
 
 | measure | target | schlank-a | athletisch-a | athletisch-b | kraeftig-a |
 |---|---|---|---|---|---|
@@ -86,35 +86,35 @@ thigh is `quadriceps`.
 
 ## The body the app ships
 
-`public/models/momentum-body.glb`, measured on 12 November 2026:
-`athletisch-a` with the straight cuts at neck, wrists and ankles, the
-collarbone redrawn, and built 1.75 m tall like the body it replaced. Every
-measure is a share of the height, so the candidate's figures stand; the
-largest mirrored distance is 0.6 mm for 0.1 mm, which is the cuts — each
-side is cut along its own plane.
+`public/models/momentum-body.glb`, measured on 13 November 2026:
+`athletisch-a` with the three corrections of the gate — straight cuts at
+neck, wrists and ankles, the collarbone redrawn, built 1.75 m tall like the
+body it replaced — and the two of its second sheet: a surface without folds,
+and the arms (forearm at the mean of 14.6 %, a little stronger, the upper
+arm 17° from the trunk, the fingers bent a little more).
 
 | measure | target | the shipped body | held by the validator |
 |---|---|---|---|
 | Height | — | 1.750 m | |
 | Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | yes |
 | Shoulder height (acromion) | 80.0–83.0 % | 82.8 % ✓ | yes |
-| Knee height (joint line) | 27.0–30.0 % | 29.9 % ✓ | no — target not checked at its source |
+| Knee height (joint line) | 27.0–30.0 % | 30.0 % ✓ | no — target not checked at its source |
 | Crotch height | 45.0–49.0 % | 49.1 % ✗ | no — target not checked at its source |
-| Upper arm | 16.7–20.5 % | 18.3 % ✓ | yes |
-| Forearm | 13.1–16.1 % | 15.2 % ✓ | yes |
-| Hand | 9.7–11.9 % | 10.8 % ✓ | yes |
+| Upper arm | 16.7–20.5 % | 18.2 % ✓ | yes |
+| Forearm | 13.1–16.1 % | 14.6 % ✓ | yes |
+| Hand | 9.7–11.9 % | 10.1 % ✓ | yes |
 | Foot length | 14.5–16.0 % | 14.9 % ✓ | yes |
-| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.6 % ✓ | no — the window is to become 27–32 % once checked at its source (D165) |
-| Neck width to head width | 0.75–0.90 | 0.79 ✓ | yes |
+| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.7 % ✓ | no — the window is to become 27–32 % once checked at its source (D165) |
+| Neck width to head width | 0.75–0.90 | 0.78 ✓ | yes |
 | Symmetry (largest mirrored distance) | ≤ 2 mm | 0.6 mm ✓ | yes |
-| Upper arm away from the trunk | 15–25° | 21.1° ✓ | yes |
-| Elbow bend | 5–15° | 7.7° ✓ | yes |
+| Upper arm away from the trunk | 15–25° | 17.0° ✓ | yes |
+| Elbow bend | 5–15° | 7.4° ✓ | yes |
 | Toes turned out | 5–10° | 6.4° ✓ | yes |
 | Met | of 14 | 13 | 11 held |
-| Triangles | ≤ 80,000 | 49,988 | yes |
+| Triangles | ≤ 80,000 | 49,964 | yes |
 | Inert zone | 25–35 % | 33 % | |
-| Smallest group | ≥ 400 | 1,642 (triceps) | yes |
-| File | ≤ 700 KB | 688 KB | yes |
+| Smallest group | ≥ 400 | 1,654 (triceps) | yes |
+| File | ≤ 700 KB | 687 KB | yes |
 | Closed surface | yes | yes | yes |
 
 Hand, sole, crown and face are `none`; the ridge between neck and shoulder,
@@ -122,60 +122,61 @@ and the same slope from the front, are `back`; the outside of the thigh is
 `quadriceps`. `tools/body/checkpoints.mjs` asks 33 such places on every
 build.
 
-*Corrected on 12 November 2026, after the gate:* this table read "Crotch
-height 49.0 % ✓" and "14 met". The script took the crotch as the highest of
-its 900 cuts in which the legs are still two loops — the cut **below** the
-crotch, up to 0.11 % of the height too low, and jumping by that much when
-the surface moves by half a millimetre. It now finds the place between two
-cuts by halving, and the same body reads 49.10 %: two millimetres above a
-window that is itself not checked at its source (the one ANSUR II figure
-found is 47.4 %). The body did not change; the reading did. The candidates
-of the gate read the same way: `athletisch-a` 49.1 %, `schlank-a` 49.2 %,
-`kraeftig-a` 48.9 %, and their table above stands as it was shown.
+The hand's figure is the reach from the wrist to the farthest point of the
+hand, so it is shorter with the fingers bent more (28° for 20°); the hand
+itself is as long as before, 12.1 % of the height laid flat along its
+joints. Arm and hand together read 42.9 % for the 44.3 % of STOP 7A.
+
+*The crotch height, corrected on 12 November 2026:* for the body of STOP 7A
+this document read "49.0 % ✓" and "14 met". The script took the crotch as
+the highest of its 900 cuts in which the legs are still two loops — the cut
+**below** the crotch, up to 0.11 % of the height too low, and jumping by
+that much when the surface moves by half a millimetre. It now finds the
+place between two cuts by halving, and that body reads 49.10 %: two
+millimetres above a window that is itself not checked at its source (the
+one ANSUR II figure found is 47.4 %). The body did not change; the reading
+did. The candidates of the gate read the same way: `athletisch-a` 49.1 %,
+`schlank-a` 49.2 %, `kraeftig-a` 48.9 %, and their table above stands as it
+was shown.
 
 A second reading was made safer at the same time and changes no figure of
 a body measured before: the hand's reach is taken from the hand's own cuts,
 because with the arm held closer the thigh lay within a hand's breadth of
 the wrist and was taken for the hand (13.4 % for 9.7 %).
 
-## The candidates of the second sheet
+## The second sheet: the shipped body, the one before it, and the alternative
 
-Measured on 12 November 2026. `gate-2` is the shipped body with the two
-corrections the owner added after the gate — the surface and the arms —
-and `gate-2-b` the same with the relief bounded at 6 mm instead of 4. They
-are candidates; the app ships `momentum-body`.
+Measured on 13 November 2026. `stop-7a` is the body the app shipped at
+STOP 7A, before the second sheet; `gate-2-b` is the shipped body with the
+relief bounded at 6 mm instead of 4, the sheet's alternative. Both are kept
+in `candidates.json` until the owner has accepted the shipped body.
 
-| measure | target | momentum-body | gate-2 | gate-2-b |
+| measure | target | momentum-body | stop-7a | gate-2-b |
 |---|---|---|---|---|
 | Height | — | 1.750 m | 1.750 m | 1.750 m |
 | Head height (crown to chin) | 12.5–13.5 % | 12.6 % ✓ | 12.6 % ✓ | 12.6 % ✓ |
 | Shoulder height (acromion) | 80.0–83.0 % | 82.8 % ✓ | 82.8 % ✓ | 82.8 % ✓ |
-| Knee height (joint line) | 27.0–30.0 % | 29.9 % ✓ | 30.0 % ✓ | 30.0 % ✓ |
+| Knee height (joint line) | 27.0–30.0 % | 30.0 % ✓ | 29.9 % ✓ | 30.0 % ✓ |
 | Crotch height | 45.0–49.0 % | 49.1 % ✗ | 49.1 % ✗ | 49.1 % ✗ |
-| Upper arm | 16.7–20.5 % | 18.3 % ✓ | 18.2 % ✓ | 18.3 % ✓ |
-| Forearm | 13.1–16.1 % | 15.2 % ✓ | 14.6 % ✓ | 14.6 % ✓ |
-| Hand | 9.7–11.9 % | 10.8 % ✓ | 10.1 % ✓ | 10.1 % ✓ |
+| Upper arm | 16.7–20.5 % | 18.2 % ✓ | 18.3 % ✓ | 18.3 % ✓ |
+| Forearm | 13.1–16.1 % | 14.6 % ✓ | 15.2 % ✓ | 14.6 % ✓ |
+| Hand | 9.7–11.9 % | 10.1 % ✓ | 10.8 % ✓ | 10.1 % ✓ |
 | Foot length | 14.5–16.0 % | 14.9 % ✓ | 14.9 % ✓ | 14.9 % ✓ |
-| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.6 % ✓ | 29.7 % ✓ | 29.7 % ✓ |
-| Neck width to head width | 0.75–0.90 | 0.79 ✓ | 0.78 ✓ | 0.79 ✓ |
+| Shoulder breadth (bideltoid) | 25.0–30.0 % | 29.7 % ✓ | 29.6 % ✓ | 29.7 % ✓ |
+| Neck width to head width | 0.75–0.90 | 0.78 ✓ | 0.79 ✓ | 0.79 ✓ |
 | Symmetry (largest mirrored distance) | ≤ 2 mm | 0.6 mm ✓ | 0.6 mm ✓ | 0.6 mm ✓ |
-| Upper arm away from the trunk | 15–25° | 21.1° ✓ | 17.0° ✓ | 17.2° ✓ |
-| Elbow bend | 5–15° | 7.7° ✓ | 7.4° ✓ | 7.5° ✓ |
+| Upper arm away from the trunk | 15–25° | 17.0° ✓ | 21.1° ✓ | 17.2° ✓ |
+| Elbow bend | 5–15° | 7.4° ✓ | 7.7° ✓ | 7.5° ✓ |
 | Toes turned out | 5–10° | 6.4° ✓ | 6.4° ✓ | 6.4° ✓ |
 | Met | of 14 | 13 | 13 | 13 |
-| Triangles | ≤ 80,000 | 49988 | 49964 | 49936 |
+| Triangles | ≤ 80,000 | 49964 | 49988 | 49936 |
 | Inert zone | 25–35 % | 33 % | 33 % | 33 % |
-| Smallest group | ≥ 400 | 1642 | 1654 | 1654 |
-| File | ≤ 700 KB | 688 KB | 687 KB | 687 KB |
+| Smallest group | ≥ 400 | 1654 | 1642 | 1654 |
+| File | ≤ 700 KB | 687 KB | 688 KB | 687 KB |
 | Closed surface | yes | yes | yes | yes |
 
-The hand's figure is the reach from the wrist to the farthest point of the
-hand, so it is shorter with the fingers bent more (28° for 20°); the hand
-itself is the same, 12.1 % of the height laid flat along its joints. Arm
-and hand together read 42.9 % for 44.3 %.
-
-Both pass `tools/validate-body-glb.mjs` as it stands, with all 33 check
-points and its eleven measures.
+All three pass `tools/validate-body-glb.mjs` as it stands, with all 33
+check points and its eleven measures.
 
 ## What the targets were checked against
 

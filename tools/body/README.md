@@ -97,11 +97,11 @@ result, and two builds in a row were compared byte for byte.
 
 | body | bytes | sha256 |
 |---|---|---|
-| `momentum-body` | 704,044 | `a72c84170fce64dd34723994ddb0612f6230be5183d454827a95ec989b44d796` |
-| `gate-2` | 703,752 | `d835f8fab2b024db56b2010118a9ae6ea85ad4227ecfede9dedd80c71dded07a` |
+| `momentum-body` | 703,760 | `202c8045249b57f5a732b5085daf6defa1e5a38a8019109b521938bcabf286e2` |
 | `gate-2-b` | 703,360 | `87d7a76e665735dfc6b1f3f5b5bfcbb609ad084f566223c3c1fbdfc1ebcc7d97` |
+| `stop-7a` | 704,036 | `68d1c148ea614fe7bd55a362722ae585062caeef4b500cd1b652be813e850df0` |
 
-`digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has the sha256 of `momentum-body`. `gate-2` and `gate-2-b` are candidates and are installed nowhere (see "After the gate"). The digests hold for the
+`digests.json` holds the same figures for the build to check, and `public/models/momentum-body.glb` has the sha256 of `momentum-body`. `gate-2-b` and `stop-7a` are kept buildable beside it and are installed nowhere (see "After the gate"). The digests hold for the
 versions named above: another numpy may add in another order, and the last
 bit of a position can then land on the other side of a rounding.
 
@@ -172,8 +172,9 @@ is smoothed and not moved into a groove.
 Four pairs of body type and head were shown at the gate — `schlank-a`,
 `athletisch-a`, `athletisch-b`, `kraeftig-a`; their pictures are in
 `docs/design/wp3/7a-gate/`. The owner chose `athletisch-a`: muscle 0.9,
-weight 0.35, head A. That is `momentum-body`; the other three are no longer
-built, and git has them.
+weight 0.35, head A. With his three corrections at the gate and the two of
+its second sheet (see "After the gate") that is `momentum-body`; the other
+three are no longer built, and git has them.
 
 - **Head A** is MakeHuman's head with the eye sockets closed: the pocket
   behind each pair of lids is turned inside out into a calm eyeball
@@ -183,30 +184,43 @@ built, and git has them.
   the body stands in the viewer's frame exactly where that one stood. The
   candidates of the gate were shown at 1.78 m; every measure is a share of
   the height and is the same.
-- **The pose** is the guide's: upper arms 20° from the trunk, elbows bent
-  (20° at the joints, which reads as 8° on the arm), palms to the thighs,
-  fingers together and lightly curled, the thumb laid on, legs nearly
-  straight, toes 8° out.
+- **The pose** is the guide's with the arms a little closer: upper arms 17°
+  from the trunk (16° at the joint; 21° until the second sheet), elbows
+  bent (20° at the joints, which reads as 7° on the arm), palms to the
+  thighs, fingers together and curled 28° a joint, the thumb laid on, legs
+  nearly straight, toes 8° out.
+- **The arms** are shaped with MakeHuman's own targets: the forearm's
+  length at the mean of 14.6 % of the height, and its muscle a little
+  stronger (88 mm across at its thickest).
 - **The relief** is MakeHuman's own: the difference between the body at full
   and at average muscle, high-passed so that the bulk goes and the lines
-  stay, added three and a half times and bounded softly at 9 mm. The guide
-  names 2–6 mm for a groove; at that depth nothing reads at the size of the
-  app, and without a bound the sharpest lines of the data become creases of
-  two centimetres.
+  stay, softened over the neighbours twice so that the narrowest lines go
+  too, added three and a half times and bounded softly at 4 mm — inside the
+  guide's 2–6 mm for a groove. Until the second sheet it was bounded at
+  9 mm and not softened, and it folded: "After the gate" has the
+  measurements. The nipples are smoothed away and the navel is a soft
+  hollow.
 - **The triangles**: the muscle regions are subdivided once (Catmull-Clark),
   and with them two rings of the inert zone beside them — a border that runs
   along the seam between fine and coarse mesh is cut in saw teeth. Hands and
   feet are thinned to 45 % by a quadric edge collapse; the head is left as it
   is, because a face with half its triangles shows them as flat panels.
-  49,988 triangles, 33 % of them in the inert zone, 704,044 bytes — 688 KB
-  as this project counts (the model of D156: 478,008 bytes, "467 KB").
+  The rounding of that step runs out across the two rings instead of
+  ending in a step. 49,964 triangles, 33 % of them in the inert zone,
+  703,760 bytes — 687 KB as this project counts (the model of D156:
+  478,008 bytes, "467 KB").
 
 ## After the gate: the surface and the arms
 
-The owner added two corrections after the gate and stopped production until
-he has seen them (D165). They are a candidate, **`gate-2`**, beside the
-shipped body: `python3 tools/body/build.py gate-2` builds it into `out/`,
-and nothing installs it. Its pictures are in `docs/design/wp3/7a-gate-2/`.
+The owner added two corrections after the gate (D165). They were built as
+a candidate, `gate-2`, beside the body of STOP 7A and shown on a second
+sheet (`docs/design/wp3/7a-gate-2/`); on his word that candidate became
+**`momentum-body`**, the body the app ships. What follows is why each
+setting is what it is. Two bodies are kept buildable beside the shipped one
+until he has accepted it: `stop-7a`, the body of STOP 7A (the "shipped
+body" of the measurements below), and `gate-2-b`, the alternative of the
+sheet. `python3 tools/body/build.py stop-7a gate-2-b` builds them into
+`out/`.
 
 **The surface.** The folds at the collarbone, under the chest, on the belly
 and in the groin are the relief, not the base body — a body built without
@@ -216,15 +230,16 @@ relief has none of them. Three things made them, each measured:
   crease. `relief.soften` averages the displacement over the neighbours
   before it is laid on (2 passes), which takes the narrow lines out and
   leaves the forms. `relief.smooth` is the same with Taubin's two steps,
-  for a sharper cut; `gate-2` does not use it.
+  for a sharper cut; the shipped body does not use it.
 - *The relief's bound.* At the waist the displacement ran into its bound of
   9 mm from both sides: a ridge of 8 mm with a trough of 5 mm right above
   it, a step of 13 mm round the whole body, which read as a belt. No amount of smoothing removes what is
   clipped at the bound; the bound does. At 4 mm (`relief.limit_mm`) the
   line across the back is as strong as on a body with no relief at all
   (2.0 lightness steps per row in the stage, for 5.2 on the shipped body and
-  2.7 at 6 mm). 4 mm is inside the guide's 2–6 mm. `gate-2-b` is the same
-  body at 6 mm, the sheet's alternative.
+  2.7 at 6 mm — "the shipped body" in these figures is `stop-7a`). 4 mm is
+  inside the guide's 2–6 mm. `gate-2-b` is the same body at 6 mm, the
+  sheet's alternative.
 - *The nipples and the navel.* MakeHuman models them in rings of edges one
   or two millimetres long; with the relief on top they were spikes that
   caught the light. `spots` finds them as the sharpest vertices of chest
@@ -252,11 +267,12 @@ fine scale, which draws lines, at 0.15 instead of 0.65 against the broad
 one, which draws forms; `--shadesmooth` averages the result four times
 instead of once. With `--white 0.7` and `--floor 0.6` the shade lies
 broader and never darker than 60 %. The three options are written into the
-file's record only where they are used, so `momentum-body` is byte for byte
-the file it was.
+file's record only where they are used, so a body built without them is
+the file it was: `stop-7a` differs from the model of STOP 7A in its name
+inside the file, eight bytes, and in nothing else.
 
 What that does, measured on the white body in the real stage at 393 px
-(`tools/body/out/` against the shipped body, one stage pixel about 3 mm):
+(the new body against `stop-7a`, one stage pixel about 3 mm):
 what is 1.5–6 cm across — the muscles — reads 27.3 for 26.7, unchanged;
 what is under 1 cm across — wrinkles, lines, speckle — reads 1.37 for 2.81.
 
@@ -267,7 +283,7 @@ height for 15.2 % and is 88 mm across at its thickest for 84; the pose
 holds the upper arm 17.0° from the trunk for 21.1° (`arm` 16 for 20) and
 bends the fingers a little more (`fingers` 28 for 20).
 
-Both candidates pass `tools/validate-body-glb.mjs` as it stands: the
+All three bodies pass `tools/validate-body-glb.mjs` as it stands: the
 envelopes, the five cuts, all 33 check points and the eleven measures.
 
 ## What changed against the scripts of the reference page
