@@ -1,0 +1,5526 @@
+{
+ "format": "momentum-backup",
+ "formatVersion": 3,
+ "schemaVersion": 5,
+ "exportedAt": "2026-11-15T07:30:00.706Z",
+ "app": {
+  "name": "Momentum",
+  "version": "0.1.0"
+ },
+ "data": {
+  "settings": {
+   "id": "settings",
+   "language": "de",
+   "firstUseDate": "2026-10-12",
+   "onboardingCompletedAt": "2026-10-12T06:10:01.186Z",
+   "acknowledgedRankId": null,
+   "promotionConfirmation": {
+    "from": "2026-10-12",
+    "targetRankId": "master",
+    "eligibleDates": [
+     "2026-11-09",
+     "2026-11-10",
+     "2026-11-11",
+     "2026-11-12",
+     "2026-11-13",
+     "2026-11-14"
+    ]
+   },
+   "createdAt": "2026-10-12T06:10:00.103Z",
+   "updatedAt": "2026-11-15T06:38:00.098Z"
+  },
+  "domains": [
+   {
+    "id": "dom_4794d133-620b-4c07-98c4-e66bdd10bd82",
+    "type": "gym",
+    "enabled": true,
+    "order": 1,
+    "settings": {
+     "targetPerWeek": 3
+    },
+    "createdAt": "2026-10-12T06:10:01.175Z",
+    "updatedAt": "2026-10-12T06:10:01.175Z"
+   },
+   {
+    "id": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "type": "mental",
+    "enabled": true,
+    "order": 0,
+    "settings": {},
+    "createdAt": "2026-10-12T06:10:01.166Z",
+    "updatedAt": "2026-10-12T06:10:01.166Z"
+   }
+  ],
+  "questions": [
+   {
+    "id": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "text": "Wie war deine Stimmung heute?",
+    "type": "scale",
+    "category": "mental",
+    "inverted": false,
+    "status": "active",
+    "order": 1,
+    "createdAt": "2026-10-12T06:10:01.173Z",
+    "updatedAt": "2026-10-12T06:10:01.173Z",
+    "archivedAt": null
+   },
+   {
+    "id": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "text": "Wie gut hast du geschlafen?",
+    "type": "scale",
+    "category": "gesundheit",
+    "inverted": false,
+    "status": "active",
+    "order": 0,
+    "createdAt": "2026-10-12T06:10:01.171Z",
+    "updatedAt": "2026-10-12T06:10:01.171Z",
+    "archivedAt": null
+   }
+  ],
+  "answers": [
+   {
+    "id": "2026-10-12#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-12",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-12T06:10:01.467Z",
+    "updatedAt": "2026-10-12T06:10:01.467Z"
+   },
+   {
+    "id": "2026-10-12#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-12",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-12T06:10:01.301Z",
+    "updatedAt": "2026-10-12T06:10:01.301Z"
+   },
+   {
+    "id": "2026-10-13#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-13",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-13T06:17:00.822Z",
+    "updatedAt": "2026-10-13T06:17:00.822Z"
+   },
+   {
+    "id": "2026-10-13#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-13",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-13T06:17:00.656Z",
+    "updatedAt": "2026-10-13T06:17:00.656Z"
+   },
+   {
+    "id": "2026-10-14#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-14",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-14T05:24:00.811Z",
+    "updatedAt": "2026-10-14T05:24:00.811Z"
+   },
+   {
+    "id": "2026-10-14#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-14",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-14T05:24:00.643Z",
+    "updatedAt": "2026-10-14T05:24:00.643Z"
+   },
+   {
+    "id": "2026-10-15#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-15",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-15T06:31:00.797Z",
+    "updatedAt": "2026-10-15T06:31:00.797Z"
+   },
+   {
+    "id": "2026-10-15#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-15",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-15T06:31:00.628Z",
+    "updatedAt": "2026-10-15T06:31:00.628Z"
+   },
+   {
+    "id": "2026-10-16#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-16",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-16T05:38:00.806Z",
+    "updatedAt": "2026-10-16T05:38:00.806Z"
+   },
+   {
+    "id": "2026-10-16#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-16",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-16T05:38:00.642Z",
+    "updatedAt": "2026-10-16T05:38:00.642Z"
+   },
+   {
+    "id": "2026-10-17#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-17",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-17T06:10:00.831Z",
+    "updatedAt": "2026-10-17T06:10:00.831Z"
+   },
+   {
+    "id": "2026-10-17#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-17",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-17T06:10:00.647Z",
+    "updatedAt": "2026-10-17T06:10:00.647Z"
+   },
+   {
+    "id": "2026-10-18#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-18",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-18T05:17:00.856Z",
+    "updatedAt": "2026-10-18T05:17:00.856Z"
+   },
+   {
+    "id": "2026-10-18#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-18",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-18T05:17:00.689Z",
+    "updatedAt": "2026-10-18T05:17:00.689Z"
+   },
+   {
+    "id": "2026-10-19#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-19",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-19T06:24:00.791Z",
+    "updatedAt": "2026-10-19T06:24:00.791Z"
+   },
+   {
+    "id": "2026-10-19#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-19",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-19T06:24:00.625Z",
+    "updatedAt": "2026-10-19T06:24:00.625Z"
+   },
+   {
+    "id": "2026-10-20#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-20",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-20T06:31:00.811Z",
+    "updatedAt": "2026-10-20T06:31:00.811Z"
+   },
+   {
+    "id": "2026-10-20#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-20",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-20T06:31:00.643Z",
+    "updatedAt": "2026-10-20T06:31:00.643Z"
+   },
+   {
+    "id": "2026-10-21#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-21",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-21T05:38:00.803Z",
+    "updatedAt": "2026-10-21T05:38:00.803Z"
+   },
+   {
+    "id": "2026-10-21#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-21",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-21T05:38:00.636Z",
+    "updatedAt": "2026-10-21T05:38:00.636Z"
+   },
+   {
+    "id": "2026-10-22#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-22",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-22T06:10:00.810Z",
+    "updatedAt": "2026-10-22T06:10:00.810Z"
+   },
+   {
+    "id": "2026-10-22#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-22",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-22T06:10:00.643Z",
+    "updatedAt": "2026-10-22T06:10:00.643Z"
+   },
+   {
+    "id": "2026-10-23#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-23",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-23T05:17:00.809Z",
+    "updatedAt": "2026-10-23T05:17:00.809Z"
+   },
+   {
+    "id": "2026-10-23#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-23",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-23T05:17:00.641Z",
+    "updatedAt": "2026-10-23T05:17:00.641Z"
+   },
+   {
+    "id": "2026-10-24#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-24",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-24T06:24:00.790Z",
+    "updatedAt": "2026-10-24T06:24:00.790Z"
+   },
+   {
+    "id": "2026-10-24#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-24",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-24T06:24:00.623Z",
+    "updatedAt": "2026-10-24T06:24:00.623Z"
+   },
+   {
+    "id": "2026-10-25#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-25",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-25T06:31:00.814Z",
+    "updatedAt": "2026-10-25T06:31:00.814Z"
+   },
+   {
+    "id": "2026-10-25#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-25",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-25T06:31:00.648Z",
+    "updatedAt": "2026-10-25T06:31:00.648Z"
+   },
+   {
+    "id": "2026-10-26#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-26",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-26T07:38:00.806Z",
+    "updatedAt": "2026-10-26T07:38:00.806Z"
+   },
+   {
+    "id": "2026-10-26#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-26",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-26T07:38:00.639Z",
+    "updatedAt": "2026-10-26T07:38:00.639Z"
+   },
+   {
+    "id": "2026-10-27#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-27",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-27T07:10:00.808Z",
+    "updatedAt": "2026-10-27T07:10:00.808Z"
+   },
+   {
+    "id": "2026-10-27#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-27",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-27T07:10:00.641Z",
+    "updatedAt": "2026-10-27T07:10:00.641Z"
+   },
+   {
+    "id": "2026-10-28#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-28",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-28T06:17:00.806Z",
+    "updatedAt": "2026-10-28T06:17:00.806Z"
+   },
+   {
+    "id": "2026-10-28#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-28",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-28T06:17:00.641Z",
+    "updatedAt": "2026-10-28T06:17:00.641Z"
+   },
+   {
+    "id": "2026-10-29#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-29",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-29T07:24:00.827Z",
+    "updatedAt": "2026-10-29T07:24:00.827Z"
+   },
+   {
+    "id": "2026-10-29#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-29",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-29T07:24:00.645Z",
+    "updatedAt": "2026-10-29T07:24:00.645Z"
+   },
+   {
+    "id": "2026-10-30#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-30",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-30T06:31:00.794Z",
+    "updatedAt": "2026-10-30T06:31:00.794Z"
+   },
+   {
+    "id": "2026-10-30#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-30",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-30T06:31:00.627Z",
+    "updatedAt": "2026-10-30T06:31:00.627Z"
+   },
+   {
+    "id": "2026-10-31#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-10-31",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-31T07:38:00.817Z",
+    "updatedAt": "2026-10-31T07:38:00.817Z"
+   },
+   {
+    "id": "2026-10-31#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-10-31",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-31T07:38:00.651Z",
+    "updatedAt": "2026-10-31T07:38:00.651Z"
+   },
+   {
+    "id": "2026-11-01#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-01",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-01T06:10:00.821Z",
+    "updatedAt": "2026-11-01T06:10:00.821Z"
+   },
+   {
+    "id": "2026-11-01#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-01",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-01T06:10:00.655Z",
+    "updatedAt": "2026-11-01T06:10:00.655Z"
+   },
+   {
+    "id": "2026-11-02#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-02",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-02T07:17:00.810Z",
+    "updatedAt": "2026-11-02T07:17:00.810Z"
+   },
+   {
+    "id": "2026-11-02#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-02",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-02T07:17:00.643Z",
+    "updatedAt": "2026-11-02T07:17:00.643Z"
+   },
+   {
+    "id": "2026-11-03#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-03",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-03T07:24:00.841Z",
+    "updatedAt": "2026-11-03T07:24:00.841Z"
+   },
+   {
+    "id": "2026-11-03#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-03",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-03T07:24:00.673Z",
+    "updatedAt": "2026-11-03T07:24:00.673Z"
+   },
+   {
+    "id": "2026-11-04#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-04",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-04T06:31:00.802Z",
+    "updatedAt": "2026-11-04T06:31:00.802Z"
+   },
+   {
+    "id": "2026-11-04#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-04",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-04T06:31:00.635Z",
+    "updatedAt": "2026-11-04T06:31:00.635Z"
+   },
+   {
+    "id": "2026-11-05#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-05",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-05T07:38:00.810Z",
+    "updatedAt": "2026-11-05T07:38:00.810Z"
+   },
+   {
+    "id": "2026-11-05#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-05",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-05T07:38:00.644Z",
+    "updatedAt": "2026-11-05T07:38:00.644Z"
+   },
+   {
+    "id": "2026-11-06#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-06",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-06T06:10:00.805Z",
+    "updatedAt": "2026-11-06T06:10:00.805Z"
+   },
+   {
+    "id": "2026-11-06#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-06",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-06T06:10:00.639Z",
+    "updatedAt": "2026-11-06T06:10:00.639Z"
+   },
+   {
+    "id": "2026-11-07#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-07",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-07T07:17:00.836Z",
+    "updatedAt": "2026-11-07T07:17:00.836Z"
+   },
+   {
+    "id": "2026-11-07#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-07",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-07T07:17:00.652Z",
+    "updatedAt": "2026-11-07T07:17:00.652Z"
+   },
+   {
+    "id": "2026-11-08#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-08",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-08T06:24:00.816Z",
+    "updatedAt": "2026-11-08T06:24:00.816Z"
+   },
+   {
+    "id": "2026-11-08#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-08",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-08T06:24:00.650Z",
+    "updatedAt": "2026-11-08T06:24:00.650Z"
+   },
+   {
+    "id": "2026-11-09#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-09",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-09T07:31:00.808Z",
+    "updatedAt": "2026-11-09T07:31:00.808Z"
+   },
+   {
+    "id": "2026-11-09#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-09",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-09T07:31:00.642Z",
+    "updatedAt": "2026-11-09T07:31:00.642Z"
+   },
+   {
+    "id": "2026-11-10#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-10",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-10T07:38:00.814Z",
+    "updatedAt": "2026-11-10T07:38:00.814Z"
+   },
+   {
+    "id": "2026-11-10#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-10",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-10T07:38:00.648Z",
+    "updatedAt": "2026-11-10T07:38:00.648Z"
+   },
+   {
+    "id": "2026-11-11#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-11",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-11T06:10:00.796Z",
+    "updatedAt": "2026-11-11T06:10:00.796Z"
+   },
+   {
+    "id": "2026-11-11#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-11",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-11T06:10:00.629Z",
+    "updatedAt": "2026-11-11T06:10:00.629Z"
+   },
+   {
+    "id": "2026-11-12#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-12",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-12T07:17:00.821Z",
+    "updatedAt": "2026-11-12T07:17:00.821Z"
+   },
+   {
+    "id": "2026-11-12#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-12",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-12T07:17:00.656Z",
+    "updatedAt": "2026-11-12T07:17:00.656Z"
+   },
+   {
+    "id": "2026-11-13#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-13",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-13T06:24:00.819Z",
+    "updatedAt": "2026-11-13T06:24:00.819Z"
+   },
+   {
+    "id": "2026-11-13#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-13",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-13T06:24:00.652Z",
+    "updatedAt": "2026-11-13T06:24:00.652Z"
+   },
+   {
+    "id": "2026-11-14#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-14",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-14T07:31:00.808Z",
+    "updatedAt": "2026-11-14T07:31:00.808Z"
+   },
+   {
+    "id": "2026-11-14#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-14",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-14T07:31:00.641Z",
+    "updatedAt": "2026-11-14T07:31:00.641Z"
+   },
+   {
+    "id": "2026-11-15#q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "date": "2026-11-15",
+    "questionId": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-15T06:38:00.816Z",
+    "updatedAt": "2026-11-15T06:38:00.816Z"
+   },
+   {
+    "id": "2026-11-15#q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "date": "2026-11-15",
+    "questionId": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+    "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-15T06:38:00.649Z",
+    "updatedAt": "2026-11-15T06:38:00.649Z"
+   }
+  ],
+  "sportsSessions": [],
+  "configSnapshots": [
+   {
+    "id": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "effectiveFrom": "2026-10-12",
+    "createdAt": "2026-10-12T06:10:01.169Z",
+    "config": {
+     "boss": {
+      "weights": {
+       "mental": 0.5,
+       "gym": 0.5
+      }
+     },
+     "domains": [
+      {
+       "id": "dom_4794d133-620b-4c07-98c4-e66bdd10bd82",
+       "type": "gym",
+       "enabled": true,
+       "settings": {
+        "targetPerWeek": 3
+       }
+      },
+      {
+       "id": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+       "type": "mental",
+       "enabled": true,
+       "settings": {}
+      }
+     ],
+     "questions": [
+      {
+       "id": "q_4a436cae-48bd-4543-8698-30e2bca00339",
+       "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+       "text": "Wie war deine Stimmung heute?",
+       "type": "scale",
+       "status": "active",
+       "category": "mental"
+      },
+      {
+       "id": "q_ae4bddbe-c0ce-4898-82d8-54dfee69f5d5",
+       "domainId": "dom_87a2d015-00d2-4df4-970b-fb2f7f76ff5b",
+       "text": "Wie gut hast du geschlafen?",
+       "type": "scale",
+       "status": "active",
+       "category": "gesundheit"
+      }
+     ],
+     "scoring": {
+      "editWindowDays": 3,
+      "scaleMin": 1,
+      "scaleMax": 10,
+      "model": "categoryMean",
+      "gymModel": "attendancePerformance",
+      "runningModel": "attendancePerformance"
+     }
+    }
+   }
+  ],
+  "rankEvents": [],
+  "profile": null,
+  "exercises": [
+   {
+    "id": "ex_assisted_dip",
+    "name": "Assisted Dip",
+    "muscles": [
+     "triceps",
+     "chest",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": true,
+    "loadType": "assisted",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_assisted_pull_up",
+    "name": "Assisted Pull-Up",
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "assisted",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_barbell_row",
+    "name": "Barbell Row",
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_bench_press",
+    "name": "Bench Press",
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_biceps_curl",
+    "name": "Biceps Curl",
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_cable_crunch",
+    "name": "Cable Crunch",
+    "muscles": [
+     "core"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_cable_fly_low_to_high",
+    "name": "Low-to-High Cable Fly",
+    "muscles": [
+     "chest"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_cable_lateral_raise",
+    "name": "Cable Lateral Raise",
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_cable_skullcrusher",
+    "name": "Cable Skullcrusher",
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_calf_raise",
+    "name": "Calf Raise",
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_chest_fly",
+    "name": "Cable Fly",
+    "muscles": [
+     "chest"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_close_cable_row",
+    "name": "Close-Grip Cable Row",
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_deadlift",
+    "name": "Deadlift",
+    "muscles": [
+     "back",
+     "hamstringsGlutes",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back",
+     "hamstringsGlutes"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_dip",
+    "name": "Dip",
+    "muscles": [
+     "triceps",
+     "chest",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": true,
+    "loadType": "bodyweight",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_face_pull",
+    "name": "Face Pulls",
+    "muscles": [
+     "shoulders",
+     "back"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_farmers_carry",
+    "name": "Farmer's Carry",
+    "muscles": [
+     "forearms",
+     "core"
+    ],
+    "primaryMuscles": [
+     "forearms"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_hammer_curl",
+    "name": "Hammer Curl",
+    "muscles": [
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_hanging_leg_raise",
+    "name": "Hanging Leg Raise",
+    "muscles": [
+     "core",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "builtIn": true,
+    "loadType": "bodyweight",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_hip_abduction_machine",
+    "name": "Hip Abduction Machine",
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_hip_thrust",
+    "name": "Hip Thrust",
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_incline_curl",
+    "name": "Incline Curl",
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_incline_press",
+    "name": "Incline Dumbbell Press",
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_incline_press_machine",
+    "name": "Incline Press Machine",
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_lat_pulldown",
+    "name": "Lat Pulldown",
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_lat_pulldown_close",
+    "name": "Close-Grip Lat Pulldown",
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_lat_pulldown_neutral",
+    "name": "Neutral-Grip Lat Pulldown",
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_lat_pulldown_wide",
+    "name": "Wide-Grip Lat Pulldown",
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_lateral_raise",
+    "name": "Lateral Raise",
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_lean_away_lateral_raise",
+    "name": "Lean-Away Lateral Raise",
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_leg_curl",
+    "name": "Leg Curl",
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_leg_extension",
+    "name": "Leg Extension",
+    "muscles": [
+     "quadriceps"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_leg_press",
+    "name": "Leg Press",
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_overhead_cable_extension",
+    "name": "Overhead Cable Extension",
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_overhead_press",
+    "name": "Overhead Press",
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_plank",
+    "name": "Plank",
+    "muscles": [
+     "core"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "builtIn": true,
+    "loadType": "bodyweight",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_preacher_curl",
+    "name": "Preacher Curl",
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_pull_up",
+    "name": "Pull-Up",
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "bodyweight",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_push_up",
+    "name": "Push-Up",
+    "muscles": [
+     "chest",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": true,
+    "loadType": "bodyweight",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_reverse_fly_machine",
+    "name": "Reverse Fly Machine",
+    "muscles": [
+     "shoulders",
+     "back"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_romanian_deadlift",
+    "name": "Romanian Deadlift",
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_seated_calf_raise",
+    "name": "Seated Calf Raise",
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_skullcrusher",
+    "name": "Skullcrusher",
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_smith_row",
+    "name": "Smith Machine Row",
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_squat",
+    "name": "Back Squat",
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_straight_arm_pulldown",
+    "name": "Straight-Arm Cable Pullover",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_supinating_curl",
+    "name": "Supinating Curl",
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_triceps_pushdown",
+    "name": "Triceps Pushdown",
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   },
+   {
+    "id": "ex_wrist_curl",
+    "name": "Wrist Curl",
+    "muscles": [
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "forearms"
+    ],
+    "builtIn": true,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-10-14T05:24:00.983Z",
+    "updatedAt": "2026-10-14T05:24:00.983Z"
+   }
+  ],
+  "gymPlans": [],
+  "gymSessions": [
+   {
+    "id": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "date": "2026-11-06",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-06T06:10:00.974Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-06T06:10:00.974Z",
+    "updatedAt": "2026-11-06T06:10:00.974Z"
+   },
+   {
+    "id": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "date": "2026-11-15",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-15T06:38:00.983Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-15T06:38:00.983Z",
+    "updatedAt": "2026-11-15T06:38:00.983Z"
+   },
+   {
+    "id": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "date": "2026-10-16",
+    "weekKey": "2026-W42",
+    "performedAt": "2026-10-16T05:38:00.975Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-16T05:38:00.975Z",
+    "updatedAt": "2026-10-16T05:38:00.975Z"
+   },
+   {
+    "id": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "date": "2026-11-11",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-11T06:10:00.963Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-11T06:10:00.963Z",
+    "updatedAt": "2026-11-11T06:10:00.963Z"
+   },
+   {
+    "id": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "date": "2026-11-04",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-04T06:31:00.969Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-04T06:31:00.969Z",
+    "updatedAt": "2026-11-04T06:31:00.969Z"
+   },
+   {
+    "id": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "date": "2026-10-25",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-25T06:31:00.985Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-25T06:31:00.985Z",
+    "updatedAt": "2026-10-25T06:31:00.985Z"
+   },
+   {
+    "id": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "date": "2026-11-13",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-13T06:24:00.985Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-13T06:24:00.985Z",
+    "updatedAt": "2026-11-13T06:24:00.985Z"
+   },
+   {
+    "id": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "date": "2026-10-14",
+    "weekKey": "2026-W42",
+    "performedAt": "2026-10-14T05:24:00.978Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-14T05:24:00.978Z",
+    "updatedAt": "2026-10-14T05:24:00.978Z"
+   },
+   {
+    "id": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "date": "2026-11-01",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-11-01T06:10:00.989Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-01T06:10:00.989Z",
+    "updatedAt": "2026-11-01T06:10:00.989Z"
+   },
+   {
+    "id": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "date": "2026-11-08",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-08T06:24:00.985Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-11-08T06:24:00.985Z",
+    "updatedAt": "2026-11-08T06:24:00.985Z"
+   },
+   {
+    "id": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "date": "2026-10-28",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-10-28T06:17:00.974Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-28T06:17:00.974Z",
+    "updatedAt": "2026-10-28T06:17:00.974Z"
+   },
+   {
+    "id": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "date": "2026-10-23",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-23T05:17:00.976Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-23T05:17:00.976Z",
+    "updatedAt": "2026-10-23T05:17:00.976Z"
+   },
+   {
+    "id": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "date": "2026-10-30",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-10-30T06:31:00.962Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-30T06:31:00.962Z",
+    "updatedAt": "2026-10-30T06:31:00.962Z"
+   },
+   {
+    "id": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "date": "2026-10-21",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-21T05:38:00.971Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-21T05:38:00.971Z",
+    "updatedAt": "2026-10-21T05:38:00.971Z"
+   },
+   {
+    "id": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "date": "2026-10-18",
+    "weekKey": "2026-W42",
+    "performedAt": "2026-10-18T05:17:01.024Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_8ed7c6e9-f6ac-42ca-880d-fc0bedf1221a",
+    "createdAt": "2026-10-18T05:17:01.024Z",
+    "updatedAt": "2026-10-18T05:17:01.024Z"
+   }
+  ],
+  "gymSets": [
+   {
+    "id": "set_0060d8be-c491-4c5f-9045-d00fc611769b",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-10-25",
+    "weightGrams": 60000,
+    "reps": 15,
+    "order": 10,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:06.331Z"
+   },
+   {
+    "id": "set_01d4ef3b-71c3-4dde-8e63-2f0516725b12",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-08",
+    "weightGrams": 65000,
+    "reps": 14,
+    "order": 10,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:06.832Z"
+   },
+   {
+    "id": "set_02f4acd6-bc40-4530-a0b9-e3b4f7302f80",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-23",
+    "weightGrams": 0,
+    "reps": 6,
+    "order": 1,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-23T05:17:01.690Z"
+   },
+   {
+    "id": "set_04842b26-e3a3-4eab-8d33-20778e84ac4e",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-30",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 4,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:03.276Z"
+   },
+   {
+    "id": "set_04ff15cd-348b-452a-86b5-5391a654e608",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-28",
+    "weightGrams": 40000,
+    "reps": 8,
+    "order": 4,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:03.556Z"
+   },
+   {
+    "id": "set_06daa9fd-3d98-4972-a955-eb44735340dc",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-11-04",
+    "weightGrams": 24000,
+    "reps": 9,
+    "order": 7,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:05.385Z"
+   },
+   {
+    "id": "set_0799278d-bec5-4e8b-a304-0614455f349a",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-11-04",
+    "weightGrams": 42500,
+    "reps": 5,
+    "order": 6,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:04.617Z"
+   },
+   {
+    "id": "set_0873d13e-b77d-475c-8330-40a358374971",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-10-25",
+    "weightGrams": 60000,
+    "reps": 15,
+    "order": 11,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:06.798Z"
+   },
+   {
+    "id": "set_0ad2d278-d314-4627-80b3-a7929dd8ab92",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-11-06",
+    "weightGrams": 0,
+    "reps": 7,
+    "order": 1,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-11-06T06:10:01.870Z"
+   },
+   {
+    "id": "set_0b556614-549d-4629-9019-d90d57e55dee",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-15",
+    "weightGrams": 107500,
+    "reps": 5,
+    "order": 3,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:02.947Z"
+   },
+   {
+    "id": "set_0c0d6430-60ad-47c3-aabe-80ddf61c4b21",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-04",
+    "weightGrams": 27500,
+    "reps": 9,
+    "order": 10,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:06.985Z"
+   },
+   {
+    "id": "set_0ce33920-63d7-4384-97f8-d131eea2a92e",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-30",
+    "weightGrams": 14000,
+    "reps": 8,
+    "order": 11,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:07.275Z"
+   },
+   {
+    "id": "set_0d69947e-28b3-4136-b331-7df14c4b6670",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-25",
+    "weightGrams": 102500,
+    "reps": 5,
+    "order": 1,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:01.813Z"
+   },
+   {
+    "id": "set_12afc547-01b1-492d-8b27-317d7cc8f1db",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-11-04",
+    "weightGrams": 24000,
+    "reps": 8,
+    "order": 9,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:06.234Z"
+   },
+   {
+    "id": "set_13380f7a-1bb4-4685-a961-a65e9cc5b4bd",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-16",
+    "weightGrams": 57500,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:04.572Z"
+   },
+   {
+    "id": "set_15104f45-8dba-4d1d-93b6-3472d4c955ba",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-15",
+    "weightGrams": 85000,
+    "reps": 8,
+    "order": 6,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:04.564Z"
+   },
+   {
+    "id": "set_157d9177-c123-47df-89b1-f503a6f7a231",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-28",
+    "weightGrams": 40000,
+    "reps": 10,
+    "order": 0,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:01.422Z"
+   },
+   {
+    "id": "set_18fd460f-3e7c-4ad5-8549-79346b8ab0f2",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-11-06",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:05.072Z"
+   },
+   {
+    "id": "set_1b968063-864f-49ec-8e0a-69dbdea3dcdf",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-21",
+    "weightGrams": 40000,
+    "reps": 10,
+    "order": 0,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:01.319Z"
+   },
+   {
+    "id": "set_1e678101-f477-4655-b772-084c1eac06f4",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-11",
+    "weightGrams": 27500,
+    "reps": 10,
+    "order": 10,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:06.879Z"
+   },
+   {
+    "id": "set_217bed85-3642-47e1-bfa4-a5c739a99363",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-01",
+    "weightGrams": 80000,
+    "reps": 9,
+    "order": 5,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:03.770Z"
+   },
+   {
+    "id": "set_21cc8758-abf8-4a7f-bb59-b4c4a906aa82",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-30",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 3,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:02.811Z"
+   },
+   {
+    "id": "set_230dd1c6-077b-4c5a-9402-7ccc483b00c4",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-04",
+    "weightGrams": 62500,
+    "reps": 8,
+    "order": 1,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:01.884Z"
+   },
+   {
+    "id": "set_23ed907f-faad-4299-8436-b2d4706476f6",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-08",
+    "weightGrams": 65000,
+    "reps": 13,
+    "order": 11,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:07.333Z"
+   },
+   {
+    "id": "set_278ad88b-4467-4f31-b13f-01dc6aba8691",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-21",
+    "weightGrams": 22000,
+    "reps": 9,
+    "order": 9,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:05.701Z"
+   },
+   {
+    "id": "set_285c13b3-b8e2-45a0-a057-ecce8acdfd73",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-16",
+    "weightGrams": 65000,
+    "reps": 8,
+    "order": 8,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:05.105Z"
+   },
+   {
+    "id": "set_2e029e97-e111-470e-9789-d46e1310b448",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-14",
+    "weightGrams": 25000,
+    "reps": 9,
+    "order": 12,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:07.058Z"
+   },
+   {
+    "id": "set_2ee744b8-fd1f-4554-98e0-bb1ac4d72867",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-11",
+    "weightGrams": 62500,
+    "reps": 8,
+    "order": 3,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:02.844Z"
+   },
+   {
+    "id": "set_31db7e61-0db1-4175-9554-be75af2d1e16",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-11",
+    "weightGrams": 20000,
+    "reps": 15,
+    "order": 13,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:08.211Z"
+   },
+   {
+    "id": "set_31df4774-c22e-443d-8613-b3ff9123a9f9",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-01",
+    "weightGrams": 140000,
+    "reps": 12,
+    "order": 6,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:04.504Z"
+   },
+   {
+    "id": "set_34e942ca-47fa-4190-8fbe-62843ce2940c",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-28",
+    "weightGrams": 25000,
+    "reps": 12,
+    "order": 10,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:06.572Z"
+   },
+   {
+    "id": "set_3519f0d5-6ac7-4639-96fc-bc304cd635f3",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-10-25",
+    "weightGrams": 140000,
+    "reps": 10,
+    "order": 8,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:05.331Z"
+   },
+   {
+    "id": "set_36e5ddb1-7fe5-4611-92f8-a82f03876807",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-21",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 2,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:02.301Z"
+   },
+   {
+    "id": "set_388d83a9-cace-4a57-aee7-8651f29494ed",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-15",
+    "weightGrams": 85000,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:04.131Z"
+   },
+   {
+    "id": "set_38b547c2-16af-4746-8f90-24f02861a40d",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-28",
+    "weightGrams": 40000,
+    "reps": 7,
+    "order": 6,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:04.388Z"
+   },
+   {
+    "id": "set_3a8390c6-3b1a-42f3-805e-7f57c3197bd1",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-30",
+    "weightGrams": 0,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-30T06:31:01.409Z"
+   },
+   {
+    "id": "set_3add48cd-bef4-4033-ba8a-b8a66a4fbefe",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-01",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 2,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:02.169Z"
+   },
+   {
+    "id": "set_3c1c4695-959a-4ead-a669-43b220af2c14",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-11-13",
+    "weightGrams": 65000,
+    "reps": 8,
+    "order": 3,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:02.850Z"
+   },
+   {
+    "id": "set_3c22dc8f-17cf-4618-b2c6-fb40f984cc80",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-01",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 1,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:01.803Z"
+   },
+   {
+    "id": "set_3c460932-3390-4463-9b40-8e863e855ff1",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-16",
+    "weightGrams": 0,
+    "reps": 5,
+    "order": 2,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-16T05:38:02.105Z"
+   },
+   {
+    "id": "set_3c6603b7-4498-48c4-b494-c1ec6d4e7510",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-14",
+    "weightGrams": 22000,
+    "reps": 8,
+    "order": 9,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:05.541Z"
+   },
+   {
+    "id": "set_3ea5b7e6-2c54-46f6-a2b6-1464370a497a",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-10-25",
+    "weightGrams": 60000,
+    "reps": 13,
+    "order": 12,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:07.163Z"
+   },
+   {
+    "id": "set_40d05b19-a85c-4829-9a53-3bcd34a7ab04",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-08",
+    "weightGrams": 150000,
+    "reps": 9,
+    "order": 8,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:05.633Z"
+   },
+   {
+    "id": "set_423f9bdf-f771-4673-b280-2654ebe0cc91",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-08",
+    "weightGrams": 150000,
+    "reps": 8,
+    "order": 9,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:06.032Z"
+   },
+   {
+    "id": "set_431ad862-07ab-488a-a686-82b35a22a452",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-18",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:01.472Z"
+   },
+   {
+    "id": "set_439ccff2-1c30-45d3-894e-969bbe1a287d",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-28",
+    "weightGrams": 40000,
+    "reps": 7,
+    "order": 5,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:04.006Z"
+   },
+   {
+    "id": "set_440cab6c-7cce-473c-91ce-8841197ba1e6",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-04",
+    "weightGrams": 27500,
+    "reps": 9,
+    "order": 11,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:07.485Z"
+   },
+   {
+    "id": "set_457d8bf2-4b06-40fc-8ac1-1acd04c5dbbe",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-14",
+    "weightGrams": 20000,
+    "reps": 13,
+    "order": 13,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:07.391Z"
+   },
+   {
+    "id": "set_481d42ab-7473-4236-aeb6-4934d5466882",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-15",
+    "weightGrams": 107500,
+    "reps": 5,
+    "order": 1,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:01.947Z"
+   },
+   {
+    "id": "set_4906773b-ef34-42ec-8208-113be3ffa1a8",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-08",
+    "weightGrams": 105000,
+    "reps": 4,
+    "order": 3,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:02.865Z"
+   },
+   {
+    "id": "set_4b791efa-65b3-4b74-8894-1920c51d611c",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-01",
+    "weightGrams": 140000,
+    "reps": 11,
+    "order": 7,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:04.970Z"
+   },
+   {
+    "id": "set_519fec3a-5730-494e-859b-f40d59d4c298",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-30",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:04.876Z"
+   },
+   {
+    "id": "set_522aa0c7-17d8-45eb-a7fe-792c3cb48323",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-16",
+    "weightGrams": 12000,
+    "reps": 11,
+    "order": 10,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:06.455Z"
+   },
+   {
+    "id": "set_551b7184-7629-446e-91e8-4903ffaf79de",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-10-18",
+    "weightGrams": 140000,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:04.973Z"
+   },
+   {
+    "id": "set_56140b05-f93c-41db-ba9f-59f60e32a41f",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-16",
+    "weightGrams": 0,
+    "reps": 5,
+    "order": 1,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-16T05:38:01.755Z"
+   },
+   {
+    "id": "set_569f3542-527c-4bb4-bb87-cc9ca7ba04c8",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-28",
+    "weightGrams": 20000,
+    "reps": 14,
+    "order": 13,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:07.788Z"
+   },
+   {
+    "id": "set_57b3d246-89ae-4147-8773-5e2f79633219",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-01",
+    "weightGrams": 80000,
+    "reps": 9,
+    "order": 4,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:03.387Z"
+   },
+   {
+    "id": "set_581a04ef-613a-4cd4-b6bb-7b296fe17c81",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-16",
+    "weightGrams": 50000,
+    "reps": 12,
+    "order": 6,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:04.139Z"
+   },
+   {
+    "id": "set_59032d7b-ae8e-4bd6-9c22-82994b99d160",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-11",
+    "weightGrams": 40000,
+    "reps": 10,
+    "order": 0,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:01.312Z"
+   },
+   {
+    "id": "set_5984eb73-2374-49e9-8c65-affdab1c2bc3",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-23",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:03.606Z"
+   },
+   {
+    "id": "set_5af01f20-5d4c-449e-8c1e-4ee047199357",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-11-13",
+    "weightGrams": 0,
+    "reps": 9,
+    "order": 0,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-11-13T06:24:01.333Z"
+   },
+   {
+    "id": "set_5af83f67-e7a4-458d-8127-7459af0595d9",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-14",
+    "weightGrams": 40000,
+    "reps": 10,
+    "order": 0,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:01.327Z"
+   },
+   {
+    "id": "set_5b4c2e25-ccdc-4fcc-80c6-4994ba5119d5",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-14",
+    "weightGrams": 25000,
+    "reps": 9,
+    "order": 11,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:06.709Z"
+   },
+   {
+    "id": "set_5c86c34a-3207-4d47-8e01-c21a26e89df4",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-15",
+    "weightGrams": 150000,
+    "reps": 9,
+    "order": 8,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:05.798Z"
+   },
+   {
+    "id": "set_62c10f5b-8f97-421c-b21c-542ec8a99e05",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-11-13",
+    "weightGrams": 14000,
+    "reps": 12,
+    "order": 9,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:06.684Z"
+   },
+   {
+    "id": "set_63eb5c20-c7c3-4903-9fa9-bf854683259a",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-16",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 3,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:02.723Z"
+   },
+   {
+    "id": "set_6505ee3b-5fb3-4f89-a88c-bfbe6f9fb7d1",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-10-18",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 4,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:03.488Z"
+   },
+   {
+    "id": "set_6559398f-0767-411b-a756-e983e8ed780e",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-10-18",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:03.922Z"
+   },
+   {
+    "id": "set_65599c8e-a3a4-46d1-a0f6-7d30b3720dde",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-11-13",
+    "weightGrams": 70000,
+    "reps": 8,
+    "order": 8,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:05.666Z"
+   },
+   {
+    "id": "set_674fed81-6241-41c1-9da0-c0182609f8ed",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-23",
+    "weightGrams": 0,
+    "reps": 5,
+    "order": 2,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-23T05:17:02.056Z"
+   },
+   {
+    "id": "set_68baea3a-1238-4cb7-8a2a-f508bb5e6058",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-30",
+    "weightGrams": 0,
+    "reps": 6,
+    "order": 2,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-30T06:31:02.076Z"
+   },
+   {
+    "id": "set_695266c1-2018-4204-ad6a-37cbb9a809d8",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-11-04",
+    "weightGrams": 24000,
+    "reps": 8,
+    "order": 8,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:05.852Z"
+   },
+   {
+    "id": "set_6a241e21-ac43-4b03-89bc-244e4c1c8570",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-15",
+    "weightGrams": 150000,
+    "reps": 9,
+    "order": 9,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:06.216Z"
+   },
+   {
+    "id": "set_6f098bb9-63d6-42f9-870f-350b196905fd",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-16",
+    "weightGrams": 0,
+    "reps": 6,
+    "order": 0,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-16T05:38:01.322Z"
+   },
+   {
+    "id": "set_6f231620-59f7-42a4-9aee-51d377d384b5",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-01",
+    "weightGrams": 140000,
+    "reps": 10,
+    "order": 8,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:05.370Z"
+   },
+   {
+    "id": "set_6f524bff-a6d3-4ff9-9f7b-eed9575a2e7e",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-21",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 3,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:02.634Z"
+   },
+   {
+    "id": "set_72e777e9-f4d4-467c-aab1-bc5a61747527",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-14",
+    "weightGrams": 40000,
+    "reps": 6,
+    "order": 4,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:03.275Z"
+   },
+   {
+    "id": "set_72f15107-05ca-44c9-9974-0542edb4e8a1",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-30",
+    "weightGrams": 14000,
+    "reps": 9,
+    "order": 10,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:06.877Z"
+   },
+   {
+    "id": "set_732049d4-96b0-4e1d-81f8-49a2f4a8e415",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-21",
+    "weightGrams": 40000,
+    "reps": 7,
+    "order": 4,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:03.369Z"
+   },
+   {
+    "id": "set_74c1a376-bf33-4bf7-a40c-0b798ff8f22d",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-11-11",
+    "weightGrams": 42500,
+    "reps": 6,
+    "order": 5,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:04.079Z"
+   },
+   {
+    "id": "set_7527d7f3-8497-4658-be7e-6e7a906fe50a",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-21",
+    "weightGrams": 22000,
+    "reps": 10,
+    "order": 8,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:05.336Z"
+   },
+   {
+    "id": "set_7587d1c7-1c7f-4c0f-8387-a0af0f844ed9",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-23",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 4,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:03.257Z"
+   },
+   {
+    "id": "set_758d687f-8b15-4839-a801-1d438f5d5172",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-11-13",
+    "weightGrams": 14000,
+    "reps": 10,
+    "order": 10,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:07.183Z"
+   },
+   {
+    "id": "set_7622ab62-dd44-483e-8147-5d13563c5847",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-14",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 2,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:02.308Z"
+   },
+   {
+    "id": "set_7688377f-c2c3-4137-8d59-21dcd188a228",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-11-11",
+    "weightGrams": 24000,
+    "reps": 8,
+    "order": 9,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:06.194Z"
+   },
+   {
+    "id": "set_7882490c-bdbd-4abc-b007-b9660fc5fd22",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-11-13",
+    "weightGrams": 55000,
+    "reps": 12,
+    "order": 6,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:04.517Z"
+   },
+   {
+    "id": "set_7a7dd44e-b94f-4be1-a54a-0af01c30f889",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-14",
+    "weightGrams": 22000,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:04.759Z"
+   },
+   {
+    "id": "set_7adb40e9-9d44-462c-bdc8-c422df4aaefe",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-08",
+    "weightGrams": 85000,
+    "reps": 8,
+    "order": 4,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:03.549Z"
+   },
+   {
+    "id": "set_7c2b47c5-5835-4437-b1a6-ab6df79111f8",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-11-04",
+    "weightGrams": 42500,
+    "reps": 6,
+    "order": 4,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:03.785Z"
+   },
+   {
+    "id": "set_7ccc4450-05bf-4e6b-bb61-e7954b1130d3",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-21",
+    "weightGrams": 25000,
+    "reps": 9,
+    "order": 12,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:07.251Z"
+   },
+   {
+    "id": "set_7d3e3fc9-50d8-4fb5-ba82-5ee34cf2f578",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-10-25",
+    "weightGrams": 140000,
+    "reps": 11,
+    "order": 7,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:04.864Z"
+   },
+   {
+    "id": "set_8015f800-abb8-41c3-bd56-5a32caea16cd",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-08",
+    "weightGrams": 65000,
+    "reps": 12,
+    "order": 12,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:07.748Z"
+   },
+   {
+    "id": "set_811371d0-cd2d-4763-b4a5-cc83351d4f84",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-08",
+    "weightGrams": 150000,
+    "reps": 9,
+    "order": 7,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:05.132Z"
+   },
+   {
+    "id": "set_811aca01-e88f-4bf1-8733-f38525c1fcbf",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-21",
+    "weightGrams": 40000,
+    "reps": 6,
+    "order": 6,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:04.168Z"
+   },
+   {
+    "id": "set_812ff2c1-c6bc-44be-8e46-ecc2494be994",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-11-06",
+    "weightGrams": 0,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-11-06T06:10:01.421Z"
+   },
+   {
+    "id": "set_8409a679-57a5-4a2c-a20c-02fcecc02200",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-14",
+    "weightGrams": 60000,
+    "reps": 7,
+    "order": 3,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:02.641Z"
+   },
+   {
+    "id": "set_86b7fc6c-71bf-40e8-b72a-a5391d37359a",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-04",
+    "weightGrams": 62500,
+    "reps": 7,
+    "order": 3,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:03.034Z"
+   },
+   {
+    "id": "set_86c8d1ff-89a3-4677-8fca-20df0da6fc78",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-01",
+    "weightGrams": 65000,
+    "reps": 12,
+    "order": 10,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:06.671Z"
+   },
+   {
+    "id": "set_87697479-5c49-4281-9651-4b5ec7ba40f3",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-11-13",
+    "weightGrams": 14000,
+    "reps": 10,
+    "order": 11,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:07.602Z"
+   },
+   {
+    "id": "set_877b27cb-0f7f-4440-82b4-b701d5d839fd",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-16",
+    "weightGrams": 12000,
+    "reps": 10,
+    "order": 11,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:06.821Z"
+   },
+   {
+    "id": "set_88b85e69-c5d2-42d6-9c53-537cd3208882",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-21",
+    "weightGrams": 25000,
+    "reps": 11,
+    "order": 10,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:06.452Z"
+   },
+   {
+    "id": "set_88ccdf09-8c66-47b0-bb81-f1dd42f4df63",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-08",
+    "weightGrams": 85000,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:04.050Z"
+   },
+   {
+    "id": "set_8a4e64fe-e493-4746-8e54-7457237b52a4",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-21",
+    "weightGrams": 20000,
+    "reps": 13,
+    "order": 13,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:07.618Z"
+   },
+   {
+    "id": "set_8b753c1f-8f40-4339-a6bd-f96e0380fc9f",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-23",
+    "weightGrams": 50000,
+    "reps": 12,
+    "order": 6,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:04.260Z"
+   },
+   {
+    "id": "set_8b83c79c-39a8-445d-8c34-6257f8def5fb",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-11-13",
+    "weightGrams": 0,
+    "reps": 7,
+    "order": 2,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-11-13T06:24:02.066Z"
+   },
+   {
+    "id": "set_8b8d55cd-15ae-458a-ad69-c078ef7ae070",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-30",
+    "weightGrams": 67500,
+    "reps": 8,
+    "order": 8,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:05.458Z"
+   },
+   {
+    "id": "set_8f0136b2-e7b9-41f1-8de8-d2d4602df913",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-08",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:01.350Z"
+   },
+   {
+    "id": "set_8fa4bfe9-48b7-44c2-9332-1590a7e71f6c",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-11",
+    "weightGrams": 27500,
+    "reps": 9,
+    "order": 12,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:07.811Z"
+   },
+   {
+    "id": "set_90149337-8058-4d6b-813d-12e935e7dd4c",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-28",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 1,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:01.888Z"
+   },
+   {
+    "id": "set_913f7b33-c443-4a17-b5a1-a689cead328d",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-28",
+    "weightGrams": 22000,
+    "reps": 12,
+    "order": 7,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:05.040Z"
+   },
+   {
+    "id": "set_91b6c204-8e46-4a7d-b975-ab95b1d70f2f",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-14",
+    "weightGrams": 25000,
+    "reps": 10,
+    "order": 10,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:06.276Z"
+   },
+   {
+    "id": "set_9439306b-de5c-4d02-bcf9-fdbb7309902b",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-14",
+    "weightGrams": 40000,
+    "reps": 6,
+    "order": 5,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:03.691Z"
+   },
+   {
+    "id": "set_94c4d4e3-a1f0-4bcc-8dc9-b5a6716c6024",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-10-18",
+    "weightGrams": 60000,
+    "reps": 12,
+    "order": 12,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:07.221Z"
+   },
+   {
+    "id": "set_99c15f90-7383-43be-a9d5-36a52a9b2a8f",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-23",
+    "weightGrams": 12000,
+    "reps": 12,
+    "order": 9,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:06.141Z"
+   },
+   {
+    "id": "set_9a7adfec-6a72-4ae5-a788-14da948b610c",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-11",
+    "weightGrams": 27500,
+    "reps": 9,
+    "order": 11,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:07.395Z"
+   },
+   {
+    "id": "set_9acb3479-eb4e-4ef1-ac0a-52ec75b8bc9b",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-11-15",
+    "weightGrams": 150000,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:05.264Z"
+   },
+   {
+    "id": "set_9bd3243e-edd4-47a4-84e8-dd28f03cbe53",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-04",
+    "weightGrams": 27500,
+    "reps": 8,
+    "order": 12,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:07.851Z"
+   },
+   {
+    "id": "set_9fca56eb-493b-4543-8dbc-a30e3ad32c86",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-28",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 2,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:02.438Z"
+   },
+   {
+    "id": "set_a17f6281-c744-46eb-b742-bcef081b2157",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-16",
+    "weightGrams": 12000,
+    "reps": 12,
+    "order": 9,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:06.024Z"
+   },
+   {
+    "id": "set_a489d922-4905-4da0-97e5-15a3528943cc",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-11",
+    "weightGrams": 62500,
+    "reps": 8,
+    "order": 2,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:02.428Z"
+   },
+   {
+    "id": "set_a48d7747-fe0d-48e0-b4fe-06b006aba99a",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-23",
+    "weightGrams": 12000,
+    "reps": 12,
+    "order": 10,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:06.608Z"
+   },
+   {
+    "id": "set_a52b1d81-05d0-4c2a-bed9-9a231247df27",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-25",
+    "weightGrams": 102500,
+    "reps": 5,
+    "order": 2,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:02.380Z"
+   },
+   {
+    "id": "set_a56745fe-24b0-4d64-9fd0-7d76b53ca9a6",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-28",
+    "weightGrams": 25000,
+    "reps": 10,
+    "order": 12,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:07.422Z"
+   },
+   {
+    "id": "set_a898463e-3d8d-450d-ad1c-0ada452bc2fa",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-14",
+    "weightGrams": 40000,
+    "reps": 5,
+    "order": 6,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:04.025Z"
+   },
+   {
+    "id": "set_a8c2691c-b0cb-435a-b3e2-4eff6def3951",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-28",
+    "weightGrams": 22000,
+    "reps": 10,
+    "order": 9,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:05.905Z"
+   },
+   {
+    "id": "set_a9f7582d-9992-48ca-8527-5bb8e68a0647",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-18",
+    "weightGrams": 100000,
+    "reps": 5,
+    "order": 1,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:01.905Z"
+   },
+   {
+    "id": "set_aab04b9b-e307-4a43-95df-8e53338c05ea",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-11-06",
+    "weightGrams": 52500,
+    "reps": 12,
+    "order": 6,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:04.605Z"
+   },
+   {
+    "id": "set_aad99a20-2b40-45a0-b642-e6c687132bed",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-11",
+    "weightGrams": 62500,
+    "reps": 9,
+    "order": 1,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:01.811Z"
+   },
+   {
+    "id": "set_ab6f970b-0881-4fd7-ba9f-17bce2fbe838",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-08",
+    "weightGrams": 105000,
+    "reps": 5,
+    "order": 1,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:01.865Z"
+   },
+   {
+    "id": "set_b0709a06-d9fb-4991-b8f0-d5e4c2d5c3cf",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-11-06",
+    "weightGrams": 65000,
+    "reps": 7,
+    "order": 5,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:03.937Z"
+   },
+   {
+    "id": "set_b1af5b73-ad76-4864-b160-4ac1d2307696",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-01",
+    "weightGrams": 65000,
+    "reps": 13,
+    "order": 9,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:06.054Z"
+   },
+   {
+    "id": "set_b26cd206-7c38-4075-a61e-8a846d53d40f",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-10-25",
+    "weightGrams": 80000,
+    "reps": 9,
+    "order": 4,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:03.397Z"
+   },
+   {
+    "id": "set_b31a657c-e13a-4cb1-a1cb-481b182a0784",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-11-06",
+    "weightGrams": 0,
+    "reps": 6,
+    "order": 2,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-11-06T06:10:02.287Z"
+   },
+   {
+    "id": "set_b3b0b46f-8c67-40ac-882a-f03a6c74d1cf",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-25",
+    "weightGrams": 102500,
+    "reps": 5,
+    "order": 3,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:02.748Z"
+   },
+   {
+    "id": "set_b3b395f4-b283-4b26-9550-94db9ae426cb",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-11-06",
+    "weightGrams": 65000,
+    "reps": 8,
+    "order": 3,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:03.071Z"
+   },
+   {
+    "id": "set_b5652cb8-8f2e-41db-ba11-175c866aa196",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-30",
+    "weightGrams": 52500,
+    "reps": 12,
+    "order": 6,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:04.409Z"
+   },
+   {
+    "id": "set_b56a8748-6761-48ee-99f6-b3cd9512ecec",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-23",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 3,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:02.808Z"
+   },
+   {
+    "id": "set_b82da827-60fc-42f6-8675-b8287bf7f649",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-11-06",
+    "weightGrams": 14000,
+    "reps": 9,
+    "order": 11,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:07.570Z"
+   },
+   {
+    "id": "set_b8487c0d-a28c-4400-ac2b-0f0456ea982c",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-11-13",
+    "weightGrams": 65000,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:03.733Z"
+   },
+   {
+    "id": "set_b91e6515-cb0e-4247-858c-7782656b6728",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-11-13",
+    "weightGrams": 65000,
+    "reps": 8,
+    "order": 4,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:03.350Z"
+   },
+   {
+    "id": "set_b9667da7-7a45-46a0-8bf8-f5a1e37ba554",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-23",
+    "weightGrams": 57500,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:04.723Z"
+   },
+   {
+    "id": "set_b99de60a-f9b6-4563-89e2-ec11359925ab",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-15",
+    "weightGrams": 65000,
+    "reps": 14,
+    "order": 11,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:07.514Z"
+   },
+   {
+    "id": "set_bf4082ed-e518-4e9b-a995-d72c31314ba6",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-15",
+    "weightGrams": 65000,
+    "reps": 15,
+    "order": 10,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:07.015Z"
+   },
+   {
+    "id": "set_c00710f8-3f47-4b85-8e08-9c28c2d4907f",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-30",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 5,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:03.642Z"
+   },
+   {
+    "id": "set_c1173f4b-86dd-43f3-b19b-10b5767094e5",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-10-25",
+    "weightGrams": 80000,
+    "reps": 9,
+    "order": 5,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:03.847Z"
+   },
+   {
+    "id": "set_c2946d7a-e99e-43cd-b262-d72f9d28e6b5",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-18",
+    "weightGrams": 100000,
+    "reps": 5,
+    "order": 3,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:02.771Z"
+   },
+   {
+    "id": "set_c2a8989c-a184-4f1f-b48d-81aa43787da1",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-10-25",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 6,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:04.196Z"
+   },
+   {
+    "id": "set_c34f28ba-d855-4d08-81eb-2d3c2acbac59",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-16",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:03.504Z"
+   },
+   {
+    "id": "set_c50e5873-c046-49fc-b519-a2724018a8a6",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-11-13",
+    "weightGrams": 62500,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-13T06:24:05.033Z"
+   },
+   {
+    "id": "set_c514f052-acac-4167-b88e-737ab4dc49c3",
+    "sessionId": "gym_7f721f3e-0c8d-4e6f-94f8-2a3a160621ce",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-11-13",
+    "weightGrams": 0,
+    "reps": 7,
+    "order": 1,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-11-13T06:24:01.633Z"
+   },
+   {
+    "id": "set_c83bf3b9-b374-4e02-9691-f2193f042de7",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-15",
+    "weightGrams": 65000,
+    "reps": 13,
+    "order": 12,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:07.930Z"
+   },
+   {
+    "id": "set_ca876b1f-3ddb-4afe-ba52-124cfb12dee6",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-10-25",
+    "weightGrams": 140000,
+    "reps": 10,
+    "order": 9,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:05.697Z"
+   },
+   {
+    "id": "set_cc8e1602-e2db-4418-b5cf-2ac10d2c05a4",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-11-06",
+    "weightGrams": 14000,
+    "reps": 10,
+    "order": 10,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:07.171Z"
+   },
+   {
+    "id": "set_ce1d0225-6b9d-4229-9f03-18b919248f19",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-14",
+    "weightGrams": 22000,
+    "reps": 9,
+    "order": 8,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:05.192Z"
+   },
+   {
+    "id": "set_cfff35b1-cdc3-47e8-bf49-7fc5ee27471a",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-01",
+    "weightGrams": 80000,
+    "reps": 10,
+    "order": 3,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:02.920Z"
+   },
+   {
+    "id": "set_d1d1706b-10b2-41aa-9c0f-63aefe207a57",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-04",
+    "weightGrams": 62500,
+    "reps": 7,
+    "order": 2,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:02.484Z"
+   },
+   {
+    "id": "set_d28ced84-eeb5-4cb1-bcd2-3c5e76a51c5e",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-10-18",
+    "weightGrams": 140000,
+    "reps": 10,
+    "order": 8,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:05.422Z"
+   },
+   {
+    "id": "set_d4005f27-41f9-4b4d-9183-e6abc2aeb68b",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-11-06",
+    "weightGrams": 14000,
+    "reps": 11,
+    "order": 9,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:06.688Z"
+   },
+   {
+    "id": "set_d47bd6d1-f1a1-4f2f-904f-19a406a25d8b",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-15",
+    "weightGrams": 107500,
+    "reps": 5,
+    "order": 2,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:02.563Z"
+   },
+   {
+    "id": "set_d4ea0630-d161-4812-af09-9ab0af183c59",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-21",
+    "weightGrams": 22000,
+    "reps": 11,
+    "order": 7,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:04.902Z"
+   },
+   {
+    "id": "set_d521ea33-5123-4daf-abdb-376737957e55",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-01",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:01.337Z"
+   },
+   {
+    "id": "set_d59c650e-4c65-479c-b945-9c87c1cf97ee",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-23",
+    "weightGrams": 0,
+    "reps": 7,
+    "order": 0,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-23T05:17:01.424Z"
+   },
+   {
+    "id": "set_d5ae44b8-f237-4bf4-b83b-e271c642f8bc",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_leg_press",
+    "date": "2026-10-18",
+    "weightGrams": 140000,
+    "reps": 9,
+    "order": 9,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:05.754Z"
+   },
+   {
+    "id": "set_d621bb67-ddf3-461a-9d39-0c5109ed58a7",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-23",
+    "weightGrams": 12000,
+    "reps": 11,
+    "order": 11,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:06.973Z"
+   },
+   {
+    "id": "set_d6241d56-4297-4e39-9aed-ad49b3d08ff0",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-10-18",
+    "weightGrams": 80000,
+    "reps": 8,
+    "order": 6,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:04.256Z"
+   },
+   {
+    "id": "set_d69ec997-c68c-4037-84cb-7b2ffc5ec7ab",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-11-04",
+    "weightGrams": 42500,
+    "reps": 6,
+    "order": 5,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:04.253Z"
+   },
+   {
+    "id": "set_dac788df-a416-41d0-8e27-98b9cc6e8a1c",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-28",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 3,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:02.805Z"
+   },
+   {
+    "id": "set_daeb31f9-b5e9-4bea-b632-bf70c0021326",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_biceps_curl",
+    "date": "2026-10-30",
+    "weightGrams": 14000,
+    "reps": 10,
+    "order": 9,
+    "muscles": [
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-30T06:31:06.410Z"
+   },
+   {
+    "id": "set_dbaaef2e-ee10-4dcc-b923-60218121417d",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-10-28",
+    "weightGrams": 22000,
+    "reps": 11,
+    "order": 8,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:05.525Z"
+   },
+   {
+    "id": "set_dccde46d-0491-4c41-b7f7-9943b1033b78",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-11-11",
+    "weightGrams": 42500,
+    "reps": 7,
+    "order": 4,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:03.562Z"
+   },
+   {
+    "id": "set_ddce2e45-5e5f-4146-b262-9c70a0332324",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-10-21",
+    "weightGrams": 40000,
+    "reps": 6,
+    "order": 5,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:03.802Z"
+   },
+   {
+    "id": "set_e0ec9b86-97c7-4b15-98b1-c383cadf64a0",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-15",
+    "weightGrams": 85000,
+    "reps": 9,
+    "order": 4,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:03.633Z"
+   },
+   {
+    "id": "set_e0f63c98-5ecf-42aa-89d5-3ee104ae39c5",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-11-11",
+    "weightGrams": 24000,
+    "reps": 10,
+    "order": 7,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:05.262Z"
+   },
+   {
+    "id": "set_e1d7f172-8b73-410a-82ac-0565e7082504",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_romanian_deadlift",
+    "date": "2026-11-08",
+    "weightGrams": 85000,
+    "reps": 7,
+    "order": 6,
+    "muscles": [
+     "hamstringsGlutes",
+     "back"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:04.448Z"
+   },
+   {
+    "id": "set_e6440892-57d8-4d03-bb9b-f36c15423e84",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_incline_press",
+    "date": "2026-11-11",
+    "weightGrams": 24000,
+    "reps": 9,
+    "order": 8,
+    "muscles": [
+     "chest",
+     "shoulders",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:05.762Z"
+   },
+   {
+    "id": "set_eac54992-4597-4a09-87b7-aab9ba9b3fe7",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-11-04",
+    "weightGrams": 20000,
+    "reps": 15,
+    "order": 13,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:08.251Z"
+   },
+   {
+    "id": "set_eb0ea6f2-5cc8-47d2-96e9-c742d6f6ca78",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-21",
+    "weightGrams": 25000,
+    "reps": 10,
+    "order": 11,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:06.902Z"
+   },
+   {
+    "id": "set_eb80f852-b523-489e-a5f3-110e9336b414",
+    "sessionId": "gym_5819e3f5-f97f-4766-b7dc-249e373a3821",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-11-04",
+    "weightGrams": 40000,
+    "reps": 10,
+    "order": 0,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-04T06:31:01.418Z"
+   },
+   {
+    "id": "set_ebddb9ad-d00b-44f8-a04b-2da43f147f8f",
+    "sessionId": "gym_e3fd2c1e-88ab-4c91-9045-bb4c4c41dc6e",
+    "exerciseId": "ex_triceps_pushdown",
+    "date": "2026-10-28",
+    "weightGrams": 25000,
+    "reps": 11,
+    "order": 11,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-28T06:17:07.039Z"
+   },
+   {
+    "id": "set_ed373595-087d-4d0c-94bc-6ccd6b3efa73",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-10-18",
+    "weightGrams": 60000,
+    "reps": 15,
+    "order": 10,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:06.406Z"
+   },
+   {
+    "id": "set_ee2458e8-f9da-4c6f-9c90-f60067eec4e3",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-18",
+    "weightGrams": 100000,
+    "reps": 5,
+    "order": 2,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:02.438Z"
+   },
+   {
+    "id": "set_f2dbfe36-e443-49e2-90b1-b6d1c99418cb",
+    "sessionId": "gym_9fd26ca0-aaee-40f1-871a-21ea21c33582",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-14",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 1,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-14T05:24:01.758Z"
+   },
+   {
+    "id": "set_f2df63d4-8c69-475e-bb2f-00156273c502",
+    "sessionId": "gym_45ed1123-33a2-4a94-8500-b0d5beea0a58",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-10-16",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 4,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-16T05:38:03.173Z"
+   },
+   {
+    "id": "set_f35e4975-f933-4dfc-88c7-f0c0146ea3d1",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-11-06",
+    "weightGrams": 67500,
+    "reps": 9,
+    "order": 8,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:05.654Z"
+   },
+   {
+    "id": "set_faa443be-b890-4962-8f78-fc25f175bf6d",
+    "sessionId": "gym_5b3a6970-9d40-4b1d-91ec-eeb0d9877a5c",
+    "exerciseId": "ex_squat",
+    "date": "2026-10-25",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-25T06:31:01.347Z"
+   },
+   {
+    "id": "set_fab5aa02-db5c-45bf-97ec-5a90902c0cdb",
+    "sessionId": "gym_01666276-688e-4cb3-a8e9-db2bf3007bbd",
+    "exerciseId": "ex_barbell_row",
+    "date": "2026-11-06",
+    "weightGrams": 65000,
+    "reps": 7,
+    "order": 4,
+    "muscles": [
+     "back",
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-06T06:10:03.554Z"
+   },
+   {
+    "id": "set_fb8613e3-f37a-4abe-9ffe-9121942f8198",
+    "sessionId": "gym_de2ab506-59ac-4a86-9e53-95929493ffd9",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-08",
+    "weightGrams": 105000,
+    "reps": 5,
+    "order": 2,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-08T06:24:02.465Z"
+   },
+   {
+    "id": "set_fcaf28af-dd0d-4266-ac07-000d7cc52cde",
+    "sessionId": "gym_e64fd0fc-e322-49c7-a974-dcb746b5aba3",
+    "exerciseId": "ex_lat_pulldown",
+    "date": "2026-10-23",
+    "weightGrams": 65000,
+    "reps": 9,
+    "order": 8,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-23T05:17:05.290Z"
+   },
+   {
+    "id": "set_fcb4b241-b658-4cce-93ea-6b117e32d381",
+    "sessionId": "gym_f41901d5-10b7-406b-ab06-7c8069789f82",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-10-18",
+    "weightGrams": 60000,
+    "reps": 14,
+    "order": 11,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-18T05:17:06.856Z"
+   },
+   {
+    "id": "set_fd2794ff-18cd-4c64-94f7-51e82747506f",
+    "sessionId": "gym_c4d741ec-73cb-4e97-ab37-fc6de3711127",
+    "exerciseId": "ex_calf_raise",
+    "date": "2026-11-01",
+    "weightGrams": 65000,
+    "reps": 12,
+    "order": 11,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-01T06:10:07.053Z"
+   },
+   {
+    "id": "set_fda99ac1-f747-4706-80d6-f628e1ea1966",
+    "sessionId": "gym_476dacc4-3432-4d7a-b3b7-cc8899a3fbad",
+    "exerciseId": "ex_overhead_press",
+    "date": "2026-11-11",
+    "weightGrams": 42500,
+    "reps": 6,
+    "order": 6,
+    "muscles": [
+     "shoulders",
+     "triceps",
+     "core"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-11T06:10:04.478Z"
+   },
+   {
+    "id": "set_fdeaed4b-617a-41a3-9559-1f47e663ffb1",
+    "sessionId": "gym_eaee2f93-7f14-4459-bf70-ff04cb70afa7",
+    "exerciseId": "ex_pull_up",
+    "date": "2026-10-30",
+    "weightGrams": 0,
+    "reps": 6,
+    "order": 1,
+    "muscles": [
+     "back",
+     "biceps"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "bodyweight",
+    "createdAt": "2026-10-30T06:31:01.692Z"
+   },
+   {
+    "id": "set_ff27dac1-4c51-4988-89f1-b6c5fe38f520",
+    "sessionId": "gym_f135f293-0162-498a-92e3-dbbf6169abac",
+    "exerciseId": "ex_bench_press",
+    "date": "2026-10-21",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 1,
+    "muscles": [
+     "chest",
+     "triceps",
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-10-21T05:38:01.768Z"
+   },
+   {
+    "id": "set_ffa35f37-fd02-4d1d-9f23-5ae3ab276959",
+    "sessionId": "gym_180d8e49-8f53-4f25-89e2-221b3d8e825f",
+    "exerciseId": "ex_squat",
+    "date": "2026-11-15",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 0,
+    "muscles": [
+     "quadriceps",
+     "hamstringsGlutes",
+     "core"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-15T06:38:01.447Z"
+   }
+  ],
+  "runs": [],
+  "foodEntries": [],
+  "foodDays": [],
+  "weightEntries": [
+   {
+    "id": "wt_3f8b22ea-0929-415c-8810-4d8482c2d483",
+    "date": "2026-10-16",
+    "kg": 78.4,
+    "createdAt": "2026-10-16T05:38:01.405Z",
+    "updatedAt": "2026-10-16T05:38:01.405Z"
+   },
+   {
+    "id": "wt_8c983788-2db5-4407-824f-a1c1bfdc8896",
+    "date": "2026-11-06",
+    "kg": 77.6,
+    "createdAt": "2026-11-06T06:10:01.487Z",
+    "updatedAt": "2026-11-06T06:10:01.487Z"
+   }
+  ],
+  "restDays": [],
+  "pausePeriods": [],
+  "tombstones": []
+ }
+}
