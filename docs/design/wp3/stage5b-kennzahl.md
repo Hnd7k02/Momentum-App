@@ -314,3 +314,171 @@ named.
     append "the snapshot in force with one change"; none rebuilds the
     configuration, so none can add another era's field to a day that did
     not have it.
+
+## What was built, against this design
+
+The code follows the sections above; where the block decided something the
+design had left open, it is recorded in D172 (the metric's era) and D173
+(the warm-up mark). Two things came out differently from what the prompt
+expected, both named in section 6 and in D172: the existing fixture profiles
+were already pinned to the old metric, and the fixed order could be bound to
+the era, so no golden file was frozen again.
+
+Tests: `metric.test.ts`, `performance.strength.test.ts` (the eight cases of
+the review, the series from the repository, the median at one to ten days),
+`gymMetricEra.test.ts` (the step case by case, the owner's device, the
+update-day proof over seeded histories, the fixed order under shuffled ids,
+the switch through the replay), `warmUp.test.ts`, `workoutScreen.test.tsx`,
+`stage5bLegacy.test.ts` (four seeded histories frozen from the engine
+before the stage, compared exactly), `stage5bProfiles.test.ts`,
+`stage5bImportFile.test.ts` and the sixteen new golden files of
+`domainOutputs.test.ts`. In the browser: `scripts/verify/wp3-stage5b.mjs`.
+
+## The numbers (step 8)
+
+Every figure is read off the real replay by
+`src/storage/services/stage5bReport.test.ts`
+(`STAGE5B_REPORT=<file> npx vitest run stage5bReport`), never worked out
+beside it. The full tables — every exercise's series, old against new — are
+committed as generated, in the words of the STOP report:
+
+- [`stage5b/zahlen-profile.md`](stage5b/zahlen-profile.md) — the two
+  sixteen-week profiles of `fixtures/trainingProfile.ts`;
+- [`stage5b/zahlen-probelauf-2026-11-15.md`](stage5b/zahlen-probelauf-2026-11-15.md)
+  and [`stage5b/zahlen-probelauf-2026-11-02.md`](stage5b/zahlen-probelauf-2026-11-02.md)
+  — the trial run.
+
+One history is replayed three ways, the update loading on the same day in
+each: **old** (the stage never was: the best set by `reps × load`, the last
+day against the first), **new** (the marker from the update day, with the
+medians) and **new, last against first** (the marker with the switch the
+other way).
+
+**The run with the owner's own data is missing.** He attached no backup, and
+neither repository holds one with a single Gym set — only three files of the
+RC2 era with sport sessions. The trial run therefore uses a backup the live
+build made itself (`scripts/verify/stage5b-live-backup.mjs`: its onboarding,
+its workout screen, its export, on a clock moving from 12 October to
+15 November 2026): five weeks of push, pull and legs, 194 sets, twelve
+exercises, written as strict double progression. It is committed as
+`docs/wp3/stage5b/momentum-pruefdaten-5b.json` and is also the file the
+owner loads into the live app and the preview at his check;
+`stage5bImportFile.test.ts` pins what he will read there.
+
+### One exercise, day by day
+
+The trial run's bench press — the case the owner named: the reps rise, then
+the weight goes up.
+
+| Day | best set | old, to the day before | new, to the day before |
+|---|---|---|---|
+| 14 Oct | 8 × 60 kg | – | – |
+| 21 Oct | 9 × 60 kg | +12.5 % | +2.6 % |
+| 28 Oct | 10 × 60 kg | +11.1 % | +2.6 % |
+| 4 Nov | 8 × 62.5 kg | **−16.7 %** | **−1.0 %** |
+| 11 Nov | 9 × 62.5 kg | +12.5 % | +2.6 % |
+
+First day to last: +17.2 % old, +6.9 % new. The other patterns of the same
+file: the light squat day (8 × 80 kg between fives at 102.5 and 105 kg) is
+the old metric's best day, +24.9 %, and the new one's dip, −15.3 %; the
+pyramid's value was its lightest set (12 × 50 kg) and is its heaviest
+(8 × 65 kg); the drop set (13 × 20 kg) was the day's value and the working
+set before it (10 × 25 kg) is now; pull-ups over a falling bodyweight read
++48.5 % old and +7.2 % new over the five weeks.
+
+### The muscle groups
+
+The trial run, on the day the file was made (15 November):
+
+| Group | 30 days: old | new (median) | new (last/first) | 90 days: old | new (median) | new (last/first) |
+|---|---|---|---|---|---|---|
+| Chest | +1.7 %, held | +2.7 %, improved | +5.3 % | +13.1 % | +5.3 % | +8.0 % |
+| Back | +12.2 % | +3.6 % | +5.5 % | +21.9 % | +5.8 % | +7.9 % |
+| Shoulders | +4.9 % | +3.2 % | +6.0 % | +20.7 % | +6.0 % | +8.8 % |
+| Biceps | +15.6 % | +6.5 % | +11.6 % | +20.3 % | +11.1 % | +12.8 % |
+| Triceps | +7.3 % | +4.1 % | +6.8 % | +15.8 % | +6.8 % | +9.5 % |
+| Core | +6.9 % | +4.2 % | +6.9 % | +15.7 % | +5.6 % | +8.4 % |
+| Quadriceps | +7.3 % | +4.7 % | +7.3 % | +7.3 % | +4.7 % | +7.3 % |
+| Hamstrings and glutes | +14.7 % | +5.6 % | +8.3 % | +14.7 % | +5.6 % | +8.3 % |
+| Calves | +8.3 % | +7.1 % | +8.3 % | +8.3 % | +7.1 % | +8.3 % |
+| Forearms | **−3.7 %, declined** | **+4.2 %, improved** | +5.6 % | +8.3 % | +6.9 % | +8.3 % |
+| **Trend** | +7.5 % | +4.6 % | +7.2 % | +14.6 % | +6.5 % | +8.8 % |
+
+The forearms are the row that went from 9 × 60 to 8 × 65 kg inside the
+window: a fall by `reps × load`, a rise by the strength score.
+
+The crossing profile (sixteen weeks, a four-day split), 30 days, read on
+17 June, thirty days after its update:
+
+| Group | old | new (median) | new (last/first) |
+|---|---|---|---|
+| Chest | −12.5 %, declined | +1.0 %, held | −8.0 %, declined |
+| Back | +2.5 %, held | +0.8 %, held | +0.8 %, held |
+| Shoulders | +5.1 %, improved | −1.0 %, held | −3.0 %, declined |
+| Biceps | +2.9 %, improved | +1.0 %, held | +1.5 %, held |
+| Triceps | +3.0 %, improved | +0.9 %, held | +1.0 %, held |
+| Core | +24.4 %, improved | +4.6 %, improved | +7.0 %, improved |
+| Quadriceps | +5.6 %, improved | +3.3 %, improved | +5.6 %, improved |
+| Hamstrings and glutes | +1.7 %, held | +1.0 %, held | +1.7 %, held |
+| Calves | 0.0 %, held | 0.0 %, held | 0.0 %, held |
+| Forearms | 0.0 %, held | +2.8 %, improved | +5.7 %, improved |
+| **Trend** | +3.3 % | +1.4 % | +1.2 % |
+
+### The rating round the update
+
+The review estimated the one-off step at about 50 points in the target at
+most, and about −26 in the rating after a week. **The replay gives more**,
+and how much depends on how the history progressed:
+
+| History, update | Target on the day | Gym rating on the day | +1 day | +7 days | +14 days | +30 days | Boss, largest in 30 days |
+|---|---|---|---|---|---|---|---|
+| Sixteen weeks, Monday of week 11 | +13.5 (800 → 814) | +1.3 | +1.2 | +9.2 | +28.5 | −8.1 | +15.2 |
+| the same, Monday of week 5 | −122.3 | −6.7 | −12.7 | −29.8 | −46.4 | −67.9 | −35.0 |
+| the same, Monday of week 8 | −117.5 | −6.4 | −12.0 | −37.3 | −37.6 | −0.9 | −21.8 |
+| Trial run, 2 Nov (inside the five weeks) | −197 (964 → 767) | −9.6 | −18.4 | −41.8 | −50.6 | (a break, below) | −25.4 until day 14 |
+| Trial run, 15 Nov (the day of the import) | −104 (930 → 826) | −3.7 | −3.7 | −3.7 | (a break, below) | | −1.9 until day 7 |
+
+The seven update days of the sixteen-week profile are all in
+`stage5b/zahlen-profile.md`; over them the target moves by −122.6 to +13.5
+on the day, the rating by −6.8 to +1.3 on the day and by −37.3 to +9.2 after
+a week, and the largest difference inside thirty days is −67.9 to +30.3 for
+the Gym rating and −35.0 to +15.2 for the Boss.
+
+Why it is more than the estimate: under `reps × load` every added rep reads
+as +8 to +17 %, under the strength score as +2 to +3 %. A history that
+progresses by reps — the owner's 6 to 12 — had its old figure four to five
+times as large as the new one, and the curve (untouched, review risk 10)
+turns the old +20 % into a performance of 939 and the new +3 % into 611. The
+rating itself moves towards the lower target at its ordinary pace: single
+points on the day, some thirty to forty after a week, and it settles where
+the new target stands.
+
+**A break after the update can cost a tier.** Not a rule of this stage, but
+it follows from the lower target: abstinence decay removes the progress
+inside the tier held when the episode began. In the trial run, with the
+update on 2 November and no session after 15 November, the missed week
+takes the old rating from 832 to 691 and the new one from 781 to 615. When
+the episode begins on 22 November the old rating still holds the tier that
+starts at 700 and the new one the tier that starts at 560, so the old one
+ends at 700 and the new one at 560 — 140 points apart, 70 in the Boss, for
+as long as the break lasts.
+
+### The median against "last against first"
+
+- **What the median buys.** One light day at an end of a window no longer
+  decides the window. Crossing profile, chest, 30 days: −12.5 % old, −8.0 %
+  by last against first — both "declined", from the single light day of
+  Cable Fly — and +1.0 %, held, by the median.
+- **What it costs.** A steady rise shows about two thirds to three quarters
+  of its size: the comparison runs from the middle of the first days to the
+  middle of the last. Trial run, the trend over 30 days: +4.6 % by the
+  median, +7.2 % by last against first; over 90 days +6.5 % and +8.8 %.
+  Through the untouched curve that is a lower target again — the trial
+  run's Gym rating fourteen days after an update on 2 November: 831.7 old,
+  799.7 by last against first, 781.1 by the median.
+- **Where it is not a median.** With four or five exercise-days in a window
+  k is 2, and the median of two days is their mean: a light day among the
+  first two or the last two moves the comparison by half its size — at the
+  end it softens a dip, at the beginning it lowers the baseline and makes a
+  rise look larger. Only from six exercise-days on (k = 3) does one light
+  day leave the comparison untouched.

@@ -36,16 +36,20 @@ forward-only without any special handling:
 - changing Boss weights does not move historical Boss values
 - moving a question to another category does not rescore a closed day
 - changing the scoring model does not rescore days scored under the old one
+- changing what a Gym exercise-day is worth does not revalue a day scored
+  before the change (D150)
 
 A field that is **absent** from a snapshot marks an era: no `boss` means RC2,
-no `scoring.model` means the flat Wellbeing model. Never backfill those into
+no `scoring.model` means the flat Wellbeing model, no `scoring.gymMetric`
+means the best set by `reps × load` (D84). Never backfill those into
 old snapshots — the absence *is* the information.
 
 Where a fact is cheaper to record than to snapshot, record it on the row: a
 gym set stores the muscle groups it was logged under, which of them were
-primary, and how it was loaded. Same principle, smaller extension — and the
-absence of those fields on an older row is itself an era, never something to
-backfill from today's catalogue.
+primary, how it was loaded, and whether the user marked it as a warm-up
+(D151). Same principle, smaller extension — and the absence of those fields
+on an older row is itself an era, never something to backfill from today's
+catalogue.
 
 A fact that is already dated and stored is **replayed, not copied**: a
 bodyweight set's load reads the most recent weight entry on or before its own
@@ -125,7 +129,11 @@ Never conflate them.
   against anyone else.** No population norms, no absolute-strength scaling, no
   calibration against other people — not as a modifier and not as a starting
   estimate. Absolute benchmarks are Tombstones, which are a separate system
-  and stay separate in both directions.
+  and stay separate in both directions. **One documented exception**
+  (D150): the 30 in Gym's strength score, `load × (1 + reps ÷ 30)`. It
+  converts the user's own sets into one another and compares them with
+  nobody; it is one constant carried in the snapshot, never a table, and
+  nothing of its kind follows it without a decision.
 - **The product is Mind and Gym, with Laufen inside Gym** (D139, D143).
 - Mind's questions are asked **daily**. There is no rhythm engine, no
   per-question schedule, and there never will be.
@@ -194,11 +202,30 @@ Never conflate them.
   one documented curve (`src/core/scoring/performanceCurve.ts`), never
   through a table of branches.
 - **What a domain compares is domain-specific; how it is scored is not.** Gym
-  reduces to the best set of an exercise, Running to pace at a comparable
-  distance. Each produces a percentage change per window, and everything after
-  that — the curve, the 40/60 target, movement, Endurance, decay, Maintenance
-  — is the shared code in `core/scoring/`. Add a domain by adding its
-  evidence, never by copying the model.
+  reduces to the best working set of an exercise, Running to pace at a
+  comparable distance. Each produces a percentage change per window, and
+  everything after that — the curve, the 40/60 target, movement, Endurance,
+  decay, Maintenance — is the shared code in `core/scoring/`. Add a domain by
+  adding its evidence, never by copying the model.
+- **A Gym exercise-day is worth its best working set, as an era** (D150,
+  D151, D172, D173). From the snapshot that carries `scoring.gymMetric` on,
+  the day's value is the highest `effective load × (1 + reps ÷ 30)` among
+  the sets not marked as a warm-up, and a window compares the median of an
+  exercise's last days with the median of its first
+  (`k = min(3, ⌊days ÷ 2⌋)`). Before it, the value is the best set by
+  `reps × load` and the last day against the first (D84), and such a day
+  replays so for good. Each scored day computes its **whole window in its
+  own day's metric**: no ratio mixes the two, and a day before the boundary
+  never sees a strength score. `gymMetricOf()` (`core/gym/metric.ts`) is the
+  field's one reader; the rating asks it for each day, a screen for the day
+  its range ends on (`GymHistory.metric`), and no surface chooses a metric
+  or computes a version of its own. In the new era the order of the sums is
+  fixed — by date, exercise id and set order — so the same sets replay to
+  the same bits on every device. A warm-up is a fact on the set
+  (`warmUp: true` or absent), set by hand, never detected and never
+  backfilled: it opens the session and counts for the week like any set,
+  and never for the metric. There is no rule for pyramids, drop sets or
+  light weeks.
 - **An identity a comparison is grouped by must depend only on the record's
   own facts.** Running's distance bands are a pure function of the run's own
   distance, so adding, editing, deleting or expiring any other run cannot

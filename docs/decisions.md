@@ -4526,3 +4526,197 @@ app, no external database, no API, no pictures, no instructions — and 7D
 words that line so that it says so. And nothing is inferred from a name
 (the catalogue's second property): the movement and the search words of an
 exercise are written down per entry, like its muscles.
+
+## D172 — Stage 5b: how the metric's era is carried and read, and that no golden file moved
+
+**Decisions of the block (2026-11-15), within D150.** The design, with every
+case, is `docs/design/wp3/stage5b-kennzahl.md`; these are the choices it made
+that D150 left open.
+
+- **The marker is `scoring.gymMetric = { id, repsDivisor, comparison }`.**
+  One field for the whole metric rather than a flag and a constant apart:
+  the divisor a day was scored with and the rule its window was compared by
+  travel with the day, so a later build that changes either starts an era of
+  its own and cannot reach a day already scored. `gymMetricOf()`
+  (`core/gym/metric.ts`) is its one reader.
+- **A field that is present but unreadable still marks the era.** A restored
+  file is not validated field by field: a divisor that is not a positive
+  number reads as 30, a comparison that is not `firstLast` as `median`, and
+  nothing throws — a throw in a load step would stop the app from opening on
+  every retry. A value that is not an object is no marker, and the
+  activation step then writes a real one.
+- **The median is a switch inside the field, not an era of its own**, and it
+  is built and on. `GYM_COMPARISON_CONFIRMED` in `core/config/constants.ts`
+  stays `false` until the owner confirms the median at STOP 5b.
+  `exerciseSpans()` is the one place that reads the switch, and tests hold
+  that the rule a snapshot names is the rule that runs — in the pure
+  function and through the rating replay (CLAUDE.md, "wire the shape to the
+  thing it governs"). If he declines, the constant's `comparison` becomes
+  `firstLast`, the new golden files are frozen again, and a device that has
+  already loaded the preview needs a freshly imported backup, because its
+  snapshot carries the switch it was written with.
+- **The score is computed as an integer**, `load × (repsDivisor + reps)`. It
+  orders exactly as `load × (1 + reps ÷ repsDivisor)` and every ratio of two
+  scores is the same, so two identical sets compare equal without a float
+  deciding.
+- **The fixed order is bound to the era, so no golden file was frozen
+  again.** D150 allowed one Gym golden file to change its row order. It did
+  not have to: the old metric's list is still built by the old function from
+  the sets in index order, and only the new metric sorts — the exercise-days
+  by date and exercise id (code-unit order, the same on every device), a
+  day's sets by set order, creation time and id. The roles of an
+  exercise-day are those of its first set in that order; of two sets with
+  the same score the earlier is named, then the heavier.
+- **The existing profiles were already pinned to the old metric.** The
+  prompt expected `currentProfile` to pick the field up from
+  `buildConfigSnapshot()`. The fixture profiles write their snapshots by
+  hand and never go through it, so the first proof needed no change to any
+  fixture: `git diff 16c520c -- .github/fixtures` shows additions only, and
+  every fingerprint in `domainOutputs.test.ts` is the one it was.
+- **The rating replay keeps one track per metric** — the exercise-days under
+  that metric, the three pointers, the cache — and a day reads only the
+  track of its own snapshot's metric. A history has one track before the
+  update and two after it, never one per day;
+  `replayPerformance.test.ts` holds its four bounds unchanged.
+- **The service reads the sets once and hands them out per metric**
+  (`ExerciseDaySource.under(metric)`), and a history says which metric it
+  was built under (`GymHistory.metric`). No screen chooses one.
+- **Eight assertions in `gym.test.ts` and `gymScoring.test.ts` were
+  restated, none loosened.** They build a device through the services, and
+  such a device now carries the field from its first snapshot. Each states
+  the strength score for that device, and the old value for the same
+  history with the field taken off, the way a device before the update
+  holds it (`fixtures/legacyGymMetric.ts`).
+- **`planEquivalence.test.ts` runs in both eras**: the old one within the
+  bounds it had, the new one exact to the last bit — the fixed order is what
+  lets a planned and a free workout with the same sets replay to identical
+  floats.
+
+**Why the screens show the new figures for the whole range from the update
+day.** It is D150's "each scored day computes its whole window in that day's
+metric" applied to today, and it is neither stored nor scored. The rating's
+days before the boundary never read it.
+
+## D173 — Stage 5b: the warm-up mark in the set row, and what a marked set is left out of
+
+**Decisions of the block (2026-11-15), within D151.**
+
+- **The set's number is the control.** Tapping the "1" of a row marks set 1
+  as a warm-up set: the number is a button with a name ("Aufwärmsatz: Satz 1
+  von Bankdrücken"), a pressed state and a 44px target. A row already
+  carries two fields and the remove control; a fourth control beside them
+  does not fit at 320px in pounds, and a switch on a line of its own would
+  have made every set — the unmarked ones included — a line taller. Marked,
+  the row says **"Aufwärmsatz"** in a word above its fields, so colour is
+  not the only carrier, and the number takes the tint of a chosen option
+  (contract §5).
+- **Under 360px the number's cell stays 20px wide**, as it was before the
+  stage, and the target grows to the left instead, so "181.9" still fits
+  the weight field in pounds. Measured by `wp3-stage5b.mjs` at 320, 360, 393
+  and 430.
+- **The field is `warmUp: true` or absent, never `false`.** Taking the mark
+  off removes the field, so a set that was never marked and one that was
+  unmarked are the same record, and so is their backup.
+- **"Satz hinzufügen" copies reps and weight and not the mark**: the set
+  after a warm-up is usually the work.
+- **"Zuletzt" names working sets only**, and passes over a day on which the
+  exercise had warm-up sets only — the line is the suggestion for the next
+  working set, and a warm-up weight is not one.
+- **"Bester Arbeitssatz" in the workout is the service's answer**
+  (`SessionExercise.bestSetId`), in the metric the screens read today — the
+  one the exercise detail and Muskelgruppen name the same day by, so a
+  workout of yesterday opened on the update day never names a marked set
+  either. The screen used to compare `reps × the number typed`, which for a
+  bodyweight exercise was not the set the score took. With warm-up sets only
+  it reads "Noch kein Arbeitssatz."
+- **An exercise with warm-up sets only is no data, never a zero**, and
+  Muskelgruppen says why: a range whose sessions hold warm-up sets only
+  reads "In den letzten 30 Tagen sind nur Aufwärmsätze eingetragen. Gewertet
+  wird der beste Arbeitssatz." — the `unscored` absence of
+  `muscleGap.ts` with the reason named, not a sixth absence.
+- **Read as the owner meant them.** "Ohne dass sie zählen": a warm-up set
+  does not count for the metric and will not count for the work volume
+  (7C); it opens the session and counts for the week like any set (D128).
+  "Pyramiden — eigene Entscheidung": no rule and no detection. The sets of a
+  pyramid are working sets unless he marks the light ones by hand, and the
+  one with the highest score is the day's value — under the strength score
+  that is the heavy set, where `reps × load` named the light one.
+- **Words.** "Bester Arbeitssatz" wherever the best set was named, and the
+  sentence that explains the value carries no formula: "Der Wert einer
+  Übung ist ihr bester Arbeitssatz des Tages. Mehr Gewicht und mehr
+  Wiederholungen zählen beide."
+- **What still counts every set**: the week's attendance, the share of a
+  plan that is done ("Training läuft, 67 % erledigt") and the number of
+  sets a session shows. They say what was done, not what is scored.
+
+## D174 — Stage 5b: a backup made by the live build is the trial run and the owner's import file; what the numbers showed
+
+**Decisions of the block (2026-11-15).**
+
+- **No data with Gym sets exists in either repository**, on any branch or in
+  the history: three files of the RC2 era
+  (`.github/fixtures/rc2-export.json`, its copy and `rc2-synthetic.json`)
+  hold sport sessions and not one set, and `Momentum-preview` holds build
+  output only. The owner attached no backup. **The run with his own data is
+  missing**, and STOP 5b says so.
+- **The trial run's backup is made by the live build itself.**
+  `scripts/verify/stage5b-live-backup.mjs` drives `e30becd` — built in a
+  worktree, served on a port of its own — through its onboarding, its
+  workout screen and its export, on a clock that moves day by day. Nothing
+  is written to its database from outside, so the file is what a device
+  before the update really holds: one snapshot without the one-day window,
+  without the end of Food and without the metric, and sets without a
+  warm-up mark. Seeding the stores directly would have tested this build's
+  idea of the live build's data.
+- **The same file is the owner's import file**, as he asked for one:
+  `docs/wp3/stage5b/momentum-pruefdaten-5b.json`. Five weeks of push, pull
+  and legs, 12 October to 15 November 2026, 194 sets, written as double
+  progression in 6 to 12 reps, with the cases the metric was changed for —
+  the weight increase after rising reps (Bankdrücken), a light day
+  (Kniebeuge), a pyramid (Latzug), a drop set (Pushdown Seil), a bodyweight
+  exercise over two weight entries (Klimmzüge), and a light first set
+  before the bench and the squat, unmarked, for him to mark. Every figure
+  is invented. The last session is on the day the file was made, so that
+  his check does not run into a training break.
+- **What he will read is pinned twice.** `stage5bImportFile.test.ts` holds
+  the file's shape, that its import followed by one load writes exactly one
+  snapshot with all three eras, and the figures of the checklist.
+  `scripts/verify/stage5b-import-check.mjs` imports the file into the live
+  build and into this one through their own "Backup importieren", day by
+  day from 15 to 21 November, and reads the screens. The live build offers
+  7 and 30 days and this build 30 and 90 (D164), so 30 days is the range
+  the two are compared on.
+- **The step is larger than the review estimated** (about 50 points in the
+  target at most, about −26 in the rating after a week). The replay: −197
+  in the target and −42 in the Gym rating after a week for the trial run's
+  strict double progression; −123 to +14 and −37 to +9 over seven update
+  days of the sixteen-week profile. The cause is the curve, which the stage
+  may not touch (review risk 10): under `reps × load` every added rep read
+  as +8 to +17 %, under the strength score it reads as +2 to +3 %, and the
+  same curve turns the smaller change into a lower performance level. The
+  rating then settles where the new target stands. **Whether the curve is
+  set anew is put to the owner at STOP 5b, for a block of its own**;
+  nothing under `src/core/scoring/` was changed.
+- **A break after the update can cost a tier.** Abstinence decay removes
+  the progress inside the tier held when the episode began, and the lower
+  rating may hold the lower tier at that moment — 700 against 560 in the
+  trial run. Existing behaviour, recorded because the stage makes it
+  visible; not changed.
+- **The median, in numbers.** It keeps one light day at the end of a window
+  from deciding the window (chest, sixteen-week profile, 30 days: −8.0 % by
+  last against first, +1.0 % by the median), and it shows a steady rise at
+  two thirds to three quarters of its size (trial run, 30 days: +4.6 %
+  against +7.2 %). With four or five exercise-days in a window k is 2 and
+  the "median" is the mean of two days: a light day among the first two
+  lowers the baseline and makes a rise look larger (quadriceps, trial run,
+  read on 17 November: +7 % against +5 %). The owner decides at STOP 5b
+  (D150).
+- **Line or bars.** The exercise detail keeps its bars in the build. The
+  line by the contract's §6 is `ExerciseLineChart.tsx`, loaded only on the
+  dev server under `?chart=line` and absent from the production bundle:
+  each day as its change since the first day shown, the zero line that day,
+  the shared scale of 12 % widened in steps of six where a series goes
+  further, the end value right of the plot. Three series at 393 and 320:
+  `docs/design/wp3/stage5b/linie-oder-balken-*.png`. The recommendation at
+  the STOP is the line: under the new metric a week's change is two or
+  three percent, and bars from zero stand almost level.
