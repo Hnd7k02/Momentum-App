@@ -33,7 +33,7 @@ Die wichtigste Eigenschaft dieses Blocks: **Er fügt nichts hinzu und ändert ke
 
 ## 3. Voraussetzung
 
-- Die Blöcke «Farbregeln», 5b, 7A, 7B und 7C sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen.
+- Die Blöcke «Farbregeln», 5b, 7A, 7B, 7C und 7D sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen. (7D, der Übungskatalog mit Stichwortsuche, kam am 15.11.2026 dazu: D171.)
 - In `HANDOVER.md` stehen Darios Messwerte vom iPhone aus Block 7B.
 
 Fehlt ein Block, bau nichts. Sag Dario, welcher fehlt, und halte an. Fehlen nur die Messwerte, arbeite weiter und führ sie am Gate als offen.

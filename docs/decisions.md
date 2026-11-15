@@ -3608,6 +3608,11 @@ The remaining work runs as blocks — the contract, 6b, the colour rules, 5b,
 `docs/wp3/prompts/`, each ending at a STOP. One model does all of it
 (Fable 5.2); subagents only for pure search runs, on Sonnet.
 
+*Status (2026-11-15, D171):* the contract, 6b, the colour rules and 7A are
+done and accepted — 7A was pulled before 5b. A block 7D, the exercise
+catalogue and its search, is added. The order from here: 5b, 7B, 7C, 7D, 9,
+and the tidy-up of D157 last.
+
 ## D160 — The visual contract is approved; areas carry no colour, and a met weekly target is the one coloured bar
 
 **Decision (owner, STOP 0, 2026-11-11).** `docs/wp3/vertrag.md` is approved
@@ -4392,3 +4397,132 @@ read the cuts and the rules found nothing; eight findings stood, all small
 comment, passages in four documents that still gave the old file's numbers
 — and all are fixed. Checking the sentence "no vertex moved" found four
 that had, by a tenth of a millimetre, which is why the cuts come last.
+
+*Accepted (owner, 2026-11-15).* He checked the addendum on his iPhone, on
+the preview build `c80b61d`, and accepted it — the straight edge of the
+shoulder included, which was the first of the two things put to him at the
+STOP (the deltoid's edge as one plane all round). The second is answered
+too: **the elbow and the deltoid's lower edge stay as they are**, borders
+`refine-body.mjs` draws and not cuts of the build. Block 7A is closed with
+that.
+
+## D168 — The Muskelgruppen card on the Gym hub holds its height while it loads
+
+**Finding (owner, 2026-11-15, on his iPhone; built in block 7C).** On
+Bereiche › Gym the card's title "Muskelgruppen" now and then stands there
+twice, one copy offset above the other: the upper copy is half cut off and
+the lines of text are missing. A moment later everything is right.
+
+*His reading:* while it loads, `MuscleEntryCard.tsx` holds two one-line
+placeholders; once loaded, "Kein Training in den letzten 30 Tagen" wraps
+onto two lines; the centred block of text jumps by half a line, and iOS
+does not fully repaint the old title under the glass surface.
+
+*Read in the code, not reproduced* (the session has no iPhone, and no
+browser suite shows it):
+
+- The card is a flex row with `align-items: center` (`.gym-hub__muscles`
+  in `gymHub.css`); its text column is centred against the 128px still.
+- While the history loads the column holds the title and two no-break
+  spaces — `summary` and the range line. Loaded, it holds up to four
+  lines: the summary, the trend line `gymHub.muscles.overall`, **which has
+  no placeholder at all**, and the range. The summary of an empty range
+  (`gymHub.muscles.outside`) is the card's longest string and wraps in the
+  column beside the picture.
+- So the block changes its height with the load in every state of the
+  card, not only in the empty one, and the title moves up by half the
+  difference each time. That much is certain. The stale copy fits a
+  repaint that misses text which moved under a `backdrop-filter` layer;
+  that half is his observation and can only be confirmed on the device.
+
+**What is to hold.** The card has the same height and its title the same
+place before and after the load, in every state it has — rated, trained
+without a figure, an empty range, nothing to evaluate, never trained, a
+failed load — at 320, 360, 393 and 430px (`CLAUDE.md`: "A screen that
+loads holds its layout"). A browser check measures the title's position
+before and after the load; the repaint itself is looked at on the iPhone
+at STOP 7C.
+
+## D169 — The trend lines of the muscle rows stand in one column
+
+**Finding (owner, 2026-11-15, on his iPhone; built in block 7C).** In the
+list of Muskelgruppen the line in the row "Trizeps" sits further left than
+in the other rows.
+
+*His reading:* `.muscle-row__right` (`muscleModule.css:162`) has no fixed
+width (62–172px), and "Zurückgegangen" is wider than "Verbessert".
+
+*Read in the code:* that is what it is. The right column is `flex: none`
+with `min-width: 62px` and `max-width: 172px`, so it is as wide as what it
+holds — the figure over the state's word — and the chart
+(`.muscle-row__chart`, 80px, `flex: none`) stands directly left of it. The
+chart's place is therefore the row's right edge less the width of that
+row's word, and the three words under a figure have three widths:
+"Zurückgegangen", "Verbessert", "Gehalten" ("Declined", "Improved",
+"Held").
+
+**What is to hold.** In every row that draws a line, the line stands in the
+same column: equal left and right edges across the ten rows, in both
+languages, at 320, 360, 393 and 430px, with the longest word and a
+three-digit figure. A row without a line (the chip) keeps its room for the
+words. A browser check compares the charts' edges.
+
+## D170 — A single observation as a dot on a line reads as an error; block 7C proposes a better form
+
+**Finding and commission (owner, 2026-11-15; proposed and built in block
+7C).** With only one measurement a row shows a single dot on a line. It
+reads as an error. A better form is to be proposed.
+
+*Read in the code:* this is the rule as written, not a defect of the build.
+`Sparkline.tsx` always draws the zero line and, for one observation, the
+end point in the middle of the chart and no line — contract §6 ("Ein
+einzelner Messwert ist ein Punkt") and `CLAUDE.md` ("one value draws a
+dot"). It is reached more often than its name suggests: a group states a
+trend from three exercise days with one exercise on two of them (D153), and
+its series has one point per training day that already had something to
+compare. Bench press on the first and the third day and an incline press on
+the second are three exercise days and **one** point. `muscleAnalytics.ts`
+already names the case (`single-observation`).
+
+**Commissioned:** a better form for one observation — in the row and in
+the muscle sheet's chart, which must agree. Block 7C draws the candidates
+with real data, recommends one, puts them to him at STOP 7C and builds what
+he chooses; contract §6 and the sentence in `CLAUDE.md` follow his choice.
+Until then the dot stays as built. The 7C prompt lists the candidates to
+weigh; none is decided here.
+
+## D171 — The exercise catalogue grows to at least ten per group, with a keyword search: block 7D
+
+**Decision (owner, 2026-11-15). Amends the order of D159.**
+
+The catalogue has 49 exercises, five of them loaded by bodyweight and two
+assisted. Counted by primary group: back 11, shoulders 7, chest 6,
+triceps 6, biceps 5, hamstrings and glutes 5, quadriceps 3, core 3,
+calves 2, forearms 2 (the deadlift counts for both of its primaries).
+
+- **The aim** is a really large choice of machine, cable and bodyweight
+  exercises for all ten groups, at least ten per group.
+- **Existing ids stay as they are** — ids, roles, load types and the
+  English record names of the 49, as `catalogue.test.ts` pins them.
+- **Every new exercise** gets a name in German and English, a detail, its
+  roles, its equipment and its load type; its roles are pinned in
+  `catalogue.test.ts`.
+- **A keyword search**, in the workout and where a plan is put together.
+  It searches the name, the detail, the muscle group with synonyms (Bauch,
+  Rumpf, Core, Abs; Po, Gesäss; Beine), the movement (drücken, ziehen,
+  rudern, beugen, strecken, heben) and the equipment (Maschine, Kabel,
+  Kurzhantel, Langhantel, Eigengewicht). Case and umlauts do not matter and
+  the beginning of a word is enough: "zieh" finds every pulling exercise.
+  Tests for "bauch", "ziehen", "maschine" and "eigengewicht".
+- **The list of exercises is shown to him on the STOP page** of the block.
+- **A block of its own, 7D**, after 7C and before 9, from
+  `docs/wp3/prompts/prompt-7d-uebungskatalog.md`. The order from here:
+  **5b, 7B, 7C, 7D, 9, and the tidy-up last.**
+
+Two things this does not change, said here because the request touches
+them. `CLAUDE.md` lists "no exercise database" among what the app does not
+do: the catalogue stays what its header says — code that ships with the
+app, no external database, no API, no pictures, no instructions — and 7D
+words that line so that it says so. And nothing is inferred from a name
+(the catalogue's second property): the movement and the search words of an
+exercise are written down per entry, like its muscles.
