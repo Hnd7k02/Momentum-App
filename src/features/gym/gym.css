@@ -280,6 +280,19 @@
   opacity: 0.35;
 }
 
+/* Below 360px the two fields have no width to give: the mark keeps the 20px
+   the set's number always had there, so the weight field holds "181.9" in
+   lb as it did, and the target takes the rest from the card's own inset. */
+@media (max-width: 359px) {
+  .gym-set__number {
+    width: 20px;
+  }
+
+  .gym-set__mark::before {
+    inset: -2px -8px -2px -16px;
+  }
+}
+
 /* A marked set: the word stands above its row, and the row keeps one line. */
 .gym-set--warmUp {
   position: relative;
