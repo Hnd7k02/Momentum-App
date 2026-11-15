@@ -14,6 +14,7 @@ import {
   type AbstinenceEpisode,
 } from '../../core/scoring/abstinence';
 import { enduranceState, type EnduranceState, type EnduranceWeek } from '../../core/scoring/endurance';
+import { gymMetricKey, gymMetricOf, type GymMetric } from '../../core/gym/metric';
 import {
   gymPerformanceInWindow,
   percentChange,
@@ -30,7 +31,7 @@ import { performanceScore, type PerformanceScore } from '../../core/scoring/perf
 import type { AppConfigSnapshot, ConfigSnapshotRecord, GymScoringModel } from '../../core/model';
 import type { DayState, RatingPoint, RatingResult } from '../../core/rating';
 import { computeRating } from '../../core/rating';
-import { loadExerciseDays } from './gymService';
+import { loadExerciseDaySource, type ExerciseDaySource } from './gymService';
 import type { History } from './historyService';
 
 /**
@@ -51,6 +52,18 @@ import type { History } from './historyService';
  * one ordinary step rather than by a jump. Upgrading the app must neither
  * create progress nor take it away, and that rule does not stop applying
  * because the domain is Gym rather than the Boss (D68a, D90).
+ *
+ * ## And two exercise-day metrics, joined by reading each day in its own
+ *
+ * A snapshot with no `gymMetric` was written before WP3 Stage 5b, and the
+ * days it covers read their two windows by the best set of `reps × load`,
+ * as they were scored (D84). From the first snapshot that carries the field
+ * a day reads its windows by the best working set and the strength score —
+ * **the whole window, in that day's metric**, the sets before the boundary
+ * included, so no ratio ever divides one unit by the other and no window is
+ * left without a baseline (D150). The fold itself does not change at the
+ * boundary: the day the update lands takes one ordinary step towards the
+ * target its windows give.
  */
 
 export interface GymRatingState {
@@ -132,10 +145,18 @@ export interface WindowPerformance {
   score: PerformanceScore;
 }
 
-export function performanceOn(days: readonly ExerciseDay[], on: DateKey): WindowPerformance {
+/**
+ * `days` must be the exercise-days as `metric` values them: the windows are
+ * computed in one metric, the one the day `on` was lived under (D150).
+ */
+export function performanceOn(
+  days: readonly ExerciseDay[],
+  on: DateKey,
+  metric: GymMetric | null = null,
+): WindowPerformance {
   const trendFrom = addDays(on, -(TRAINING_RATING.TREND_WINDOW_DAYS - 1));
-  const trend = gymPerformanceInWindow(days, trendFrom, on);
-  const ytd = gymPerformanceInWindow(days, `${on.slice(0, 4)}-01-01`, on);
+  const trend = gymPerformanceInWindow(days, trendFrom, on, metric);
+  const ytd = gymPerformanceInWindow(days, `${on.slice(0, 4)}-01-01`, on, metric);
   return {
     trend,
     ytd,
@@ -153,7 +174,12 @@ export interface GymRatingInput {
   snapshots: readonly ConfigSnapshotRecord[];
   /** Every day a Gym session was saved, whatever else happened that day. */
   sessionDates: ReadonlySet<DateKey>;
-  exerciseDays: readonly ExerciseDay[];
+  /**
+   * The exercise-days of the whole history, under whichever metric a day
+   * asks for (D150) — one read, however many metrics the history was lived
+   * in.
+   */
+  exerciseDays: ExerciseDaySource;
   reference: DateKey;
 }
 
@@ -202,17 +228,14 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
 
   /* ── Which era each day belongs to ───────────────────────────────────── */
 
-  const models = dates.map((date) => {
-    const config = resolveSnapshot(snapshots, date);
-    return config ? gymModelOf(config) : 'attendance';
-  });
+  const configs = dates.map((date) => resolveSnapshot(snapshots, date));
+  const models = configs.map((config) => (config ? gymModelOf(config) : 'attendance'));
   /* The first day the new model is in force. Everything before it keeps the
      number it already had, computed by the fold that produced it. */
   const transition = models.findIndex((model) => model === 'attendancePerformance');
 
   /* ── Performance per day, memoised on the window contents ─────────────── */
 
-  const ordered = [...input.exerciseDays].sort((a, b) => a.date.localeCompare(b.date));
   /*
    * The windows only change when a day enters or leaves one, so the whole
    * pipeline runs once per distinct window rather than once per calendar day.
@@ -223,32 +246,74 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
    * rather than by filtering the array per day. Filtering inside a loop over
    * the history is the quadratic that was already found and removed once
    * here (D73), and it would have come straight back.
+   *
+   * **One set of pointers and one cache per metric** (D150). A day reads
+   * the exercise-days as its own metric values them, so each metric that
+   * occurs in the history has a track of its own: its list in date order,
+   * its three pointers, its cache. A history has one track before the
+   * Stage 5b update and two after it — never one per day — and a day
+   * advances only its own. The pointers only move forward with the dates,
+   * so a track that has not been read for a while catches up when it is,
+   * and nothing computed under one metric can be handed to a day of the
+   * other.
    */
-  const cache = new Map<string, WindowPerformance>();
-  let trendLow = 0;
-  let yearLow = 0;
-  let high = 0;
+  interface Track {
+    metric: GymMetric | null;
+    ordered: ExerciseDay[];
+    trendLow: number;
+    yearLow: number;
+    high: number;
+    cache: Map<string, WindowPerformance>;
+  }
+  const tracks = new Map<string, Track>();
+  const trackOf = (metric: GymMetric | null): Track => {
+    const key = gymMetricKey(metric);
+    let track = tracks.get(key);
+    if (!track) {
+      track = {
+        metric,
+        ordered: [...input.exerciseDays.under(metric).days].sort((a, b) => a.date.localeCompare(b.date)),
+        trendLow: 0,
+        yearLow: 0,
+        high: 0,
+        cache: new Map(),
+      };
+      tracks.set(key, track);
+    }
+    return track;
+  };
   const performanceByDate = new Map<DateKey, WindowPerformance>();
-  for (const date of dates) {
+  dates.forEach((date, index) => {
+    const track = trackOf(gymMetricOf(configs[index]));
+    const { ordered } = track;
     const trendFrom = addDays(date, -(TRAINING_RATING.TREND_WINDOW_DAYS - 1));
     const yearFrom = `${date.slice(0, 4)}-01-01`;
-    while (trendLow < ordered.length && ordered[trendLow]!.date < trendFrom) trendLow += 1;
+    while (track.trendLow < ordered.length && ordered[track.trendLow]!.date < trendFrom) track.trendLow += 1;
     // January the first walks the pointer back, once a year, by at most a
     // year's worth of entries — so the pointer is reset rather than advanced.
-    if (yearLow > 0 && ordered[yearLow - 1]!.date >= yearFrom) yearLow = 0;
-    while (yearLow < ordered.length && ordered[yearLow]!.date < yearFrom) yearLow += 1;
-    while (high < ordered.length && ordered[high]!.date <= date) high += 1;
+    if (track.yearLow > 0 && ordered[track.yearLow - 1]!.date >= yearFrom) track.yearLow = 0;
+    while (track.yearLow < ordered.length && ordered[track.yearLow]!.date < yearFrom) track.yearLow += 1;
+    while (track.high < ordered.length && ordered[track.high]!.date <= date) track.high += 1;
 
-    const key = `${trendLow}:${yearLow}:${high}`;
-    let value = cache.get(key);
+    const key = `${track.trendLow}:${track.yearLow}:${track.high}`;
+    let value = track.cache.get(key);
     if (!value) {
-      value = performanceOn(ordered.slice(Math.min(trendLow, yearLow), high), date);
-      cache.set(key, value);
+      value = performanceOn(
+        ordered.slice(Math.min(track.trendLow, track.yearLow), track.high),
+        date,
+        track.metric,
+      );
+      track.cache.set(key, value);
     }
     performanceByDate.set(date, value);
-  }
-  const performanceFor = (date: DateKey): WindowPerformance =>
-    performanceByDate.get(date) ?? performanceOn(ordered, date);
+  });
+  const performanceFor = (date: DateKey): WindowPerformance => {
+    const known = performanceByDate.get(date);
+    if (known) return known;
+    // A day outside the history: computed in that day's own metric.
+    const track = trackOf(gymMetricOf(resolveSnapshot(snapshots, date)));
+    return performanceOn(track.ordered, date, track.metric);
+  };
 
   /* ── The abstinence run, walked once ─────────────────────────────────── */
 
@@ -424,4 +489,4 @@ function aggregateChange(performance: WindowPerformance): number | null {
 }
 
 export type { RatingResult };
-export { loadExerciseDays };
+export { loadExerciseDaySource };

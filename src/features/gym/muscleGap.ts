@@ -23,9 +23,9 @@ import { MIN_EXERCISE_DAYS, shownPerformance } from './muscleState';
  *
  * - `never` — no Gym session was ever logged.
  * - `outsideRange` — sessions exist, the latest one before the range.
- * - `unscored` — a session lies inside the range, but none of its sets can
- *   be scored: no reps or no weight, or a bodyweight exercise without a
- *   recorded bodyweight.
+ * - `unscored` — a session lies inside the range, but none of its sets
+ *   provides a value: no reps or no weight, a bodyweight exercise without a
+ *   recorded bodyweight, or nothing but sets marked as warm-ups (D151).
  * - `noComparison` — trained and scored inside the range, but no exercise
  *   has a second day yet, so no group has a change to state.
  * - `tooFewDays` — an exercise has its second day, but no group has the
@@ -39,12 +39,12 @@ import { MIN_EXERCISE_DAYS, shownPerformance } from './muscleState';
 export type MuscleGap =
   | { kind: 'never' }
   | { kind: 'outsideRange'; lastSession: DateKey; daysAgo: number }
-  | { kind: 'unscored'; bodyweightMissing: boolean }
+  | { kind: 'unscored'; bodyweightMissing: boolean; warmUpOnly?: true }
   | { kind: 'noComparison' }
   | { kind: 'tooFewDays'; most: number };
 
 export function muscleGap(
-  history: Pick<GymHistory, 'days' | 'overall' | 'awaitingBodyweight'>,
+  history: Pick<GymHistory, 'days' | 'overall' | 'awaitingBodyweight'> & Partial<Pick<GymHistory, 'warmUpOnly'>>,
   /** The date of the most recent Gym session of all, `null` before the first. */
   latestSession: DateKey | null,
   today: DateKey,
@@ -65,7 +65,13 @@ export function muscleGap(
   if (latestSession < from) {
     return { kind: 'outsideRange', lastSession: latestSession, daysAgo: diffInDays(latestSession, today) };
   }
-  return { kind: 'unscored', bodyweightMissing: history.awaitingBodyweight.length > 0 };
+  return {
+    kind: 'unscored',
+    bodyweightMissing: history.awaitingBodyweight.length > 0,
+    // Said only when it is so: the sets are there and would score, and every
+    // one of them is a warm-up.
+    ...((history.warmUpOnly?.length ?? 0) > 0 ? { warmUpOnly: true as const } : {}),
+  };
 }
 
 /** The gap as two lines: what the state is, and what is missing. */
@@ -89,7 +95,9 @@ export function muscleGapText(
         title: t('gymHub.muscles.unscored'),
         hint: gap.bodyweightMissing
           ? t('gym.bodyweight.needed')
-          : t('gymHub.muscles.unscoredHint', { days: rangeDays }),
+          : gap.warmUpOnly
+            ? t('gymHub.muscles.warmUpOnlyHint', { days: rangeDays })
+            : t('gymHub.muscles.unscoredHint', { days: rangeDays }),
       };
     case 'noComparison':
       return { title: t('gym.progress.noBaseline'), hint: t('gym.progress.noBaselineHint', { days: rangeDays }) };

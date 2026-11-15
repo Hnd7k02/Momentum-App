@@ -1,5 +1,6 @@
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import type { DateKey } from '../../core/dates';
+import type { GymMetric } from '../../core/gym/metric';
 import {
   gymPerformanceOverSpan,
   percentChange,
@@ -29,6 +30,11 @@ import { exerciseGroups, shownPerformance, type ShownPerformance } from './muscl
  * to and including that day, expressed with `percentChange()`. So the last
  * point *is* the row's delta, by construction: the chart cannot end on a
  * number the row does not show.
+ *
+ * The helper is called with the metric the history was loaded under
+ * (`GymHistory.metric`, D150), so every point is the comparison the row's
+ * own figure is: under the Stage 5b metric the median of the last days
+ * against the median of the first, as far as the history had come by then.
  *
  * A day on which the group had no exercise with a baseline yet yields
  * nothing: the helper reports `insufficientBaseline`, and an absence is not a
@@ -128,15 +134,19 @@ function trainingDays(days: readonly ExerciseDay[], muscle: MuscleGroup, members
  * The full, deterministic series for one group over the loaded range: one
  * point per training day that had a comparable observation. Same rows in,
  * same points out.
+ *
+ * `metric` is the one `days` were built under — `GymHistory.metric` — and
+ * `null` for the metric before Stage 5b.
  */
 export function muscleTrend(
   days: readonly ExerciseDay[],
   muscle: MuscleGroup,
   membership: Membership = exerciseGroups(days),
+  metric: GymMetric | null = null,
 ): MuscleTrendPoint[] {
   const points: MuscleTrendPoint[] = [];
   for (const date of trainingDays(days, muscle, membership)) {
-    const asOf = gymPerformanceOverSpan(days.filter((day) => day.date <= date));
+    const asOf = gymPerformanceOverSpan(days.filter((day) => day.date <= date), metric);
     const ratio = asOf.muscles.find((entry) => entry.muscle === muscle)?.ratio ?? null;
     const value = percentChange(ratio);
     if (value !== null) points.push({ date, value });
@@ -156,7 +166,7 @@ export function toMuscleAnalytics(
     const state: MuscleState = entry?.state ?? 'noData';
     const delta = entry?.change ?? null;
     // No trend stated, no line drawn.
-    const series = delta === null ? [] : muscleTrend(history.days, id, membership);
+    const series = delta === null ? [] : muscleTrend(history.days, id, membership, history.metric);
     const trained = trainingDays(history.days, id, membership);
     const lastTrainedAt = trained.length > 0 ? trained[trained.length - 1]! : null;
     const latestExerciseIds =

@@ -8,6 +8,7 @@ import { applyOnboarding } from './configurationService';
 import { EditWindowError } from './checkInService';
 import { loadBossProgression } from './bossService';
 import { loadProgression } from './ratingService';
+import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
 import {
   addSet,
   createExercise,
@@ -33,6 +34,14 @@ function freezeAt(day: string, hour = 9): void {
 
 const MONDAY = '2026-03-02';
 const kg = (value: number) => Math.round(value * 1000);
+
+/**
+ * An exercise-day's value under the Stage 5b metric (D150): the strength
+ * score `load × (30 + reps)`. A device set up by these tests carries that
+ * metric from its first day; `withoutGymMetricEra()` reads the same history
+ * the way a device before the update holds it, as `reps × load` (D84).
+ */
+const strength = (reps: number, grams: number) => grams * (30 + reps);
 
 beforeEach(async () => {
   await deleteDatabase();
@@ -140,8 +149,15 @@ describe('logging a session', () => {
       'ex_squat',
     ]);
     expect(view?.exercises[0]?.sets).toHaveLength(2);
-    // 8 × 70 is 560; 10 × 50 is 500.
-    expect(view?.exercises[0]?.bestScore).toBe(kg(70) * 8);
+    // The best working set is 8 × 70, by the strength score (70 × 38 against
+    // 50 × 40) — and it is the set the view names.
+    expect(view?.exercises[0]?.bestScore).toBe(strength(8, kg(70)));
+    expect(view?.exercises[0]?.bestSetId).toBe(view?.exercises[0]?.sets[1]?.id);
+    // Before Stage 5b the same set, as 8 × 70 = 560 against 10 × 50 = 500.
+    await withoutGymMetricEra();
+    const legacy = await loadSession(session.id);
+    expect(legacy?.exercises[0]?.bestScore).toBe(kg(70) * 8);
+    expect(legacy?.exercises[0]?.bestSetId).toBe(view?.exercises[0]?.sets[1]?.id);
   });
 
   it('edits and removes a set', async () => {
@@ -228,7 +244,16 @@ describe('the replay over sets', () => {
     ]);
     const history = await loadGymHistory(MONDAY, MONDAY);
     expect(history.days).toHaveLength(1);
-    expect(history.days[0]?.best.score).toBe(kg(15) * 8);
+    // One value, from one set: the heaviest here, 6 × 20, by the strength
+    // score (20 × 36 against 15 × 38 and 10 × 40).
+    expect(history.days[0]?.best.score).toBe(strength(6, kg(20)));
+    expect(history.days[0]?.best.set.reps).toBe(6);
+    // Before Stage 5b it was 8 × 15: 120 against 100 and 120 — the earlier
+    // of the two sets that tie.
+    await withoutGymMetricEra();
+    const legacy = await loadGymHistory(MONDAY, MONDAY);
+    expect(legacy.days).toHaveLength(1);
+    expect(legacy.days[0]?.best.score).toBe(kg(15) * 8);
   });
 
   it('compares against the previous recorded day and nothing else', async () => {
@@ -250,8 +275,11 @@ describe('the replay over sets', () => {
     const sets = await gymSetsRepository.getAll();
     await updateSet(sets[0]!.id, { weightGrams: kg(65) });
     const after = (await loadGymHistory(MONDAY, MONDAY)).days[0]!.best.score;
-    expect(before).toBe(kg(60) * 8);
-    expect(after).toBe(kg(65) * 8);
+    expect(before).toBe(strength(8, kg(60)));
+    expect(after).toBe(strength(8, kg(65)));
+    // And under the metric before Stage 5b the edit is followed the same way.
+    await withoutGymMetricEra();
+    expect((await loadGymHistory(MONDAY, MONDAY)).days[0]!.best.score).toBe(kg(65) * 8);
   });
 
   it('keeps closed history when an exercise is remapped today', async () => {

@@ -1,5 +1,6 @@
 import {
   EDIT_WINDOW_DAYS,
+  GYM_METRIC,
   GYM_SCORING_MODEL,
   RUNNING_SCORING_MODEL,
   SCALE_MAX,
@@ -116,6 +117,14 @@ export function buildConfigSnapshot(
        * the rules they were lived under.
        */
       sessionWindowDays: SESSION_WINDOW_DAYS,
+      /*
+       * Stage 5b: the exercise-day metric (D150) — the best working set by
+       * the strength score, with its one constant and the window comparison
+       * in force. Absent on every snapshot before it, and that absence keeps
+       * those days on the best set by `reps × load` (D84). A copy, so no
+       * snapshot shares an object with the constant.
+       */
+      gymMetric: { ...GYM_METRIC },
     },
   };
 }

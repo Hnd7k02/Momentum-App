@@ -1,12 +1,18 @@
 import { nowIso, today } from '../../core/clock';
+import { snapshotOn } from '../../core/config/closure';
 import { type DateKey } from '../../core/dates';
 import { catalogueRecords } from '../../core/gym/catalogue';
 import { bodyweightOn, effectiveLoadGrams, type BodyweightPoint } from '../../core/gym/load';
+import { gymMetricKey, gymMetricOf, type GymMetric } from '../../core/gym/metric';
 import {
+  bestSet,
+  bestWorkingSet,
   exerciseDays,
   gymPerformance,
   gymPerformanceOverSpan,
+  isScorableSet,
   latestComparisons,
+  type BestSet,
   type ExerciseComparison,
   type ExerciseDay,
   type ExerciseDayInput,
@@ -26,6 +32,7 @@ import type {
 } from '../../core/model';
 import { ensureCurrentSnapshot } from '../configService';
 import {
+  configSnapshotsRepository,
   exercisesRepository,
   gymSessionsRepository,
   gymSetsRepository,
@@ -180,8 +187,18 @@ export async function bodyweightEntryFor(
 export interface SessionExercise {
   exercise: ExerciseRecord;
   sets: GymSetRecord[];
-  /** The best set of this exercise on this day, if any set is scorable. */
+  /**
+   * The exercise-day value of this exercise on this day, under the metric in
+   * force on the day the screen is read — the best working set since Stage
+   * 5b (D150), the best set before it — or `null` when no set provides one.
+   */
   bestScore: number | null;
+  /**
+   * The set that provides it, for a screen to name: the same set the metric
+   * took, so the workout never names a best set of its own reckoning. A
+   * warm-up set is never it (D151).
+   */
+  bestSetId: string | null;
   /**
    * Where the session says the exercise came from, when the session owns a
    * snapshot; `null` for a session that renders from its sets alone.
@@ -195,6 +212,13 @@ export interface SessionExercise {
   lastRecorded: LastRecorded | null;
 }
 
+/**
+ * What the user did the last time they *worked* at an exercise: the most
+ * recent earlier day with a working set, and that day's working sets in
+ * order. Warm-up sets are not a mark to train against (D151), so they are
+ * left out — and a day that held only warm-up sets is passed over for the
+ * day before it, exactly as it is no exercise-day for the metric.
+ */
 export interface LastRecorded {
   date: DateKey;
   sets: { reps: number; weightGrams: number }[];
@@ -222,14 +246,18 @@ export async function loadSession(
 ): Promise<GymSessionView | null> {
   const session = await gymSessionsRepository.get(sessionId);
   if (!session) return null;
-  const [sets, exercises, bodyweight] = await Promise.all([
+  const [sets, exercises, bodyweight, snapshots] = await Promise.all([
     gymSetsRepository.listBySession(sessionId),
     listExercises(),
     // The weight in force on the session's own day, never today's: a session
     // opened in the edit window still reads the body it was performed with.
     weightEntriesRepository.latestOnOrBefore(session.date),
+    configSnapshotsRepository.list(),
   ]);
-  const grouped = groupSets(sets, exercises, toGrams(bodyweight?.kg ?? null), session.exercises);
+  // The best set is named by the metric the screens read today (D150), the
+  // one the exercise detail and Muskelgruppen name the same day by.
+  const metric = gymMetricOf(snapshotOn(snapshots, reference));
+  const grouped = groupSets(sets, exercises, toGrams(bodyweight?.kg ?? null), session.exercises, metric);
   return {
     session,
     exercises: await withLastRecorded(grouped, session.id, session.date),
@@ -276,7 +304,7 @@ export async function loadDraftView(
   reference: DateKey = today(),
 ): Promise<Omit<GymSessionView, 'session'>> {
   const exercises = await listExercises();
-  const grouped = groupSets([], exercises, null, draft.exercises);
+  const grouped = groupSets([], exercises, null, draft.exercises, null);
   return {
     exercises: await withLastRecorded(grouped, null, date),
     // A draft keeps the day it was opened for; once that day can no longer
@@ -374,7 +402,8 @@ export async function lastRecordedFor(
   before: DateKey = today(),
 ): Promise<LastRecorded | null> {
   const sets = (await gymSetsRepository.listByExercise(exerciseId)).filter(
-    (set) => set.sessionId !== excludeSessionId && set.date <= before && set.reps > 0,
+    (set) =>
+      set.sessionId !== excludeSessionId && set.date <= before && set.reps > 0 && set.warmUp !== true,
   );
   if (sets.length === 0) return null;
   const latest = sets.reduce((max, set) => (set.date > max ? set.date : max), sets[0]!.date);
@@ -406,6 +435,7 @@ function groupSets(
   exercises: ExerciseRecord[],
   bodyweightGrams: number | null,
   snapshot: readonly GymSessionExerciseSnapshot[] | undefined,
+  metric: GymMetric | null,
 ): SessionExercise[] {
   const byId = new Map(exercises.map((exercise) => [exercise.id, exercise]));
   const order: string[] = [];
@@ -430,7 +460,7 @@ function groupSets(
 
   return order.map((exerciseId) => {
     const list = grouped.get(exerciseId)!;
-    const best = bestScoreOf(list, bodyweightGrams);
+    const best = bestOfDay(list, bodyweightGrams, metric);
     return {
       exercise:
         byId.get(exerciseId) ??
@@ -452,7 +482,8 @@ function groupSets(
           updatedAt: '',
         } satisfies ExerciseRecord),
       sets: list,
-      bestScore: best,
+      bestScore: best?.score ?? null,
+      bestSetId: best?.set.id ?? null,
       source: snapshot === undefined ? null : (sources.get(exerciseId) ?? 'extra'),
       lastRecorded: null,
     };
@@ -477,18 +508,31 @@ const toSetInput = (set: GymSetRecord, bodyweightGrams: number | null): SetInput
     bodyweightGrams,
   });
   if (load === null) return null;
-  return { id: set.id, reps: set.reps, weightGrams: load, order: set.order };
+  return {
+    id: set.id,
+    reps: set.reps,
+    weightGrams: load,
+    order: set.order,
+    // Only on a marked set: an unmarked one keeps the shape it always had.
+    ...(set.warmUp === true ? { warmUp: true as const } : {}),
+  };
 };
 
-function bestScoreOf(sets: GymSetRecord[], bodyweightGrams: number | null): number | null {
-  let best: number | null = null;
+/**
+ * The exercise-day value of one exercise's sets on one day, by the same
+ * functions the replay uses — never a reckoning of the screen's own.
+ */
+function bestOfDay(
+  sets: GymSetRecord[],
+  bodyweightGrams: number | null,
+  metric: GymMetric | null,
+): BestSet | null {
+  const inputs: SetInput[] = [];
   for (const set of sets) {
     const input = toSetInput(set, bodyweightGrams);
-    if (!input || input.reps <= 0 || input.weightGrams <= 0) continue;
-    const score = input.reps * input.weightGrams;
-    if (best === null || score > best) best = score;
+    if (input) inputs.push(input);
   }
-  return best;
+  return metric === null ? bestSet(inputs) : bestWorkingSet(inputs, metric.repsDivisor);
 }
 
 export interface AddSetInput {
@@ -556,6 +600,10 @@ export async function addSet(
  * before is read when this runs, so an edit saved a moment earlier is
  * copied too. With no set before it, nothing is added: a 0×0 set is never
  * stored (D128).
+ *
+ * Reps and weight are copied; **the warm-up mark is not** (D151). A new set
+ * is a working set until the user marks it — the set after the last warm-up
+ * is usually the first set of the work.
  */
 export async function repeatLastSet(
   sessionId: string,
@@ -575,9 +623,17 @@ function bySetOrder(a: GymSetRecord, b: GymSetRecord): number {
   return a.order - b.order || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id);
 }
 
+/**
+ * Changes one set, wherever a set may still be changed (D133).
+ *
+ * `warmUp` sets or takes off the warm-up mark (D151): a fact on the set,
+ * written as `true` and removed again — never stored as `false`, so a set
+ * whose mark was taken off is the record it was before. Correcting or
+ * marking a set does not reopen a finished workout; only a new set does.
+ */
 export async function updateSet(
   id: string,
-  patch: { reps?: number; weightGrams?: number },
+  patch: { reps?: number; weightGrams?: number; warmUp?: boolean },
   reference: DateKey = today(),
 ): Promise<GymSetRecord | undefined> {
   const set = await gymSetsRepository.get(id);
@@ -589,8 +645,25 @@ export async function updateSet(
     weightGrams:
       patch.weightGrams === undefined ? set.weightGrams : Math.max(0, Math.round(patch.weightGrams)),
   };
+  if (patch.warmUp === true) next.warmUp = true;
+  else if (patch.warmUp === false) delete next.warmUp;
   await gymSetsRepository.put(next);
   return next;
+}
+
+/**
+ * Sets the warm-up mark of a set, or takes it off (D151).
+ *
+ * Decided from the set as it is stored when this runs, not from the render
+ * the tap came from — the rule every workout action follows (D131).
+ */
+export async function toggleWarmUp(
+  id: string,
+  reference: DateKey = today(),
+): Promise<GymSetRecord | undefined> {
+  const set = await gymSetsRepository.get(id);
+  if (!set) return undefined;
+  return updateSet(id, { warmUp: set.warmUp !== true }, reference);
 }
 
 /** What removing a set took away: the set as stored, and the session if it went too. */
@@ -866,20 +939,43 @@ export interface GymHistory {
   names: Map<string, string>;
   /** Exercises whose sets could not be scored for want of a bodyweight. */
   awaitingBodyweight: string[];
+  /**
+   * Exercises that were logged in the range with sets that would score, all
+   * of them marked as warm-ups — so they have no exercise-day there (D151).
+   * For a screen to say why a range with sets in it has nothing to
+   * evaluate; never a result. Always empty under the metric before Stage
+   * 5b, which does not read the mark.
+   */
+  warmUpOnly: string[];
+  /**
+   * The metric everything above was computed under: the one in force on the
+   * day the range ends (D150), or `null` for the metric before Stage 5b.
+   * A screen that derives more from `days` — a trend over a prefix, say —
+   * hands this on and never chooses one itself.
+   */
+  metric: GymMetric | null;
 }
 
 /**
- * Every exercise-day in a range, with each set's load already resolved.
+ * The sets of a range, read once, with what resolving their loads needs.
  *
- * Split out of `loadGymHistory` because the rating replay needs the same
- * exercise-days over a much longer range than any screen shows, and reading
- * the sets twice would be the expensive half of the work done twice.
+ * Reading is the expensive half of a replay, so it happens here a single
+ * time whatever is derived from it afterwards: the screens need the
+ * exercise-days under one metric, the rating replay under each metric its
+ * history was lived in (D150).
  */
-async function buildExerciseDays(
+interface SetsInRange {
+  /** In the order the `by_date` index returned them: by date, then record id. */
+  sets: GymSetRecord[];
+  byId: Map<string, ExerciseRecord>;
+  bodyweightFor(date: DateKey): number | null;
+}
+
+async function readSetsInRange(
   from: DateKey,
   to: DateKey,
   exercises: ExerciseRecord[],
-): Promise<{ days: ExerciseDay[]; awaitingBodyweight: string[] }> {
+): Promise<SetsInRange> {
   const [sets, weights] = await Promise.all([
     gymSetsRepository.listByDateRange(from, to),
     weightEntriesRepository.getAll(),
@@ -898,7 +994,6 @@ async function buildExerciseDays(
     if (grams !== null) points.push({ date: entry.date, grams });
   }
 
-  const byId = new Map(exercises.map((exercise) => [exercise.id, exercise]));
   /** One lookup per date rather than per set; the history is walked a lot. */
   const bodyweightCache = new Map<DateKey, number | null>();
   const bodyweightFor = (date: DateKey): number | null => {
@@ -909,13 +1004,27 @@ async function buildExerciseDays(
     return value;
   };
 
+  return { sets, byId: new Map(exercises.map((exercise) => [exercise.id, exercise])), bodyweightFor };
+}
+
+/**
+ * One bucket per exercise and day, in the order the sets are given, each
+ * set's load resolved.
+ *
+ * The order given is part of the result: the buckets stand in the order of
+ * their first set, and a bucket takes its groups and roles from that set.
+ */
+function bucketSets(
+  read: SetsInRange,
+  sets: readonly GymSetRecord[],
+): { inputs: ExerciseDayInput[]; awaitingBodyweight: string[] } {
   const awaiting = new Set<string>();
   const buckets = new Map<string, ExerciseDayInput>();
   for (const set of sets) {
     const key = `${set.date}#${set.exerciseId}`;
     let bucket = buckets.get(key);
     if (!bucket) {
-      const exercise = byId.get(set.exerciseId);
+      const exercise = read.byId.get(set.exerciseId);
       // The set carries the mapping it was logged under; the catalogue is
       // consulted only when a legacy row has none of its own.
       const muscles = set.muscles.length > 0 ? set.muscles : (exercise?.muscles ?? []);
@@ -932,14 +1041,86 @@ async function buildExerciseDays(
       };
       buckets.set(key, bucket);
     }
-    const input = toSetInput(set, bodyweightFor(set.date));
+    const input = toSetInput(set, read.bodyweightFor(set.date));
     if (input) (bucket.sets as SetInput[]).push(input);
     else if (set.loadType === 'bodyweight' || set.loadType === 'assisted') {
       awaiting.add(set.exerciseId);
     }
   }
+  return { inputs: [...buckets.values()], awaitingBodyweight: [...awaiting] };
+}
 
-  return { days: exerciseDays([...buckets.values()]), awaitingBodyweight: [...awaiting] };
+/** Code-unit order: the same on every device, whatever its locale collates. */
+const compareText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * The order the Stage 5b metric reads sets in (D150): by day, exercise, the
+ * set's place in its workout, when it was stored, and last its id. Nothing
+ * in it depends on the record ids until two sets agree in everything else,
+ * so the same sets on another device are read in the same order.
+ */
+function byDayExerciseAndOrder(a: GymSetRecord, b: GymSetRecord): number {
+  return (
+    compareText(a.date, b.date) ||
+    compareText(a.exerciseId, b.exerciseId) ||
+    a.order - b.order ||
+    compareText(a.createdAt, b.createdAt) ||
+    compareText(a.id, b.id)
+  );
+}
+
+/** The exercise-days of a range, as one metric values them. */
+export interface MetricExerciseDays {
+  days: ExerciseDay[];
+  /** Exercises whose sets could not be scored for want of a bodyweight. */
+  awaitingBodyweight: string[];
+  /** Exercises with scorable sets in the range, every one a warm-up (D151). */
+  warmUpOnly: string[];
+}
+
+/**
+ * The exercise-days of a range under any metric, from one read.
+ *
+ * `under(null)` is the metric before Stage 5b, built exactly as it always
+ * was: buckets in the order of the set index, the best set by
+ * `reps × load`. `under(metric)` is the Stage 5b metric: the same sets read
+ * in the fixed order, the best working set by the strength score. Each is
+ * built once and remembered, so asking again costs nothing.
+ */
+export interface ExerciseDaySource {
+  under(metric: GymMetric | null): MetricExerciseDays;
+}
+
+function exerciseDaySource(read: SetsInRange): ExerciseDaySource {
+  const built = new Map<string, MetricExerciseDays>();
+  return {
+    under(metric) {
+      const key = gymMetricKey(metric);
+      let value = built.get(key);
+      if (!value) {
+        if (metric === null) {
+          const { inputs, awaitingBodyweight } = bucketSets(read, read.sets);
+          value = { days: exerciseDays(inputs), awaitingBodyweight, warmUpOnly: [] };
+        } else {
+          const { inputs, awaitingBodyweight } = bucketSets(read, [...read.sets].sort(byDayExerciseAndOrder));
+          const days = exerciseDays(inputs, metric);
+          const worked = new Set(days.map((day) => day.exerciseId));
+          const warmUpOnly = new Set<string>();
+          for (const input of inputs) {
+            if (worked.has(input.exerciseId)) continue;
+            if (input.sets.some((set) => set.warmUp === true && isScorableSet(set))) warmUpOnly.add(input.exerciseId);
+          }
+          value = {
+            days,
+            awaitingBodyweight: [...awaitingBodyweight].sort(compareText),
+            warmUpOnly: [...warmUpOnly].sort(compareText),
+          };
+        }
+        built.set(key, value);
+      }
+      return value;
+    },
+  };
 }
 
 /**
@@ -949,24 +1130,33 @@ async function buildExerciseDays(
  * Nothing about a past workout is stored as a score, so an edit inside the
  * edit window simply produces a different answer next time — and an edit is
  * the only thing that can.
+ *
+ * **Computed under the metric in force on `to`** (D150) — today, for every
+ * screen: the whole range is read in that day's metric, the sets before an
+ * era boundary included, so the figures of one screen are never in two
+ * units. The windows a past day of the *rating* was scored with are that
+ * day's own and are not read here.
  */
 export async function loadGymHistory(from: DateKey, to: DateKey): Promise<GymHistory> {
-  const exercises = await listExercises();
-  const { days, awaitingBodyweight } = await buildExerciseDays(from, to, exercises);
+  const [exercises, snapshots] = await Promise.all([listExercises(), configSnapshotsRepository.list()]);
+  const metric = gymMetricOf(snapshotOn(snapshots, to));
+  const { days, awaitingBodyweight, warmUpOnly } = exerciseDaySource(await readSetsInRange(from, to, exercises)).under(metric);
   return {
     days,
     comparisons: latestComparisons(days),
     recent: gymPerformance(days),
-    overall: gymPerformanceOverSpan(days),
+    overall: gymPerformanceOverSpan(days, metric),
     names: new Map(exercises.map((exercise) => [exercise.id, exercise.name])),
     awaitingBodyweight,
+    warmUpOnly,
+    metric,
   };
 }
 
-/** The exercise-days a rating replay needs, over its own long range. */
-export async function loadExerciseDays(from: DateKey, to: DateKey): Promise<ExerciseDay[]> {
+/** The exercise-days a rating replay needs over its own long range, under each metric it asks for. */
+export async function loadExerciseDaySource(from: DateKey, to: DateKey): Promise<ExerciseDaySource> {
   const exercises = await listExercises();
-  return (await buildExerciseDays(from, to, exercises)).days;
+  return exerciseDaySource(await readSetsInRange(from, to, exercises));
 }
 
 /** Every recorded day of one exercise, newest first, for its detail screen. */

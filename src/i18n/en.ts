@@ -414,7 +414,10 @@ export const en: Translations = {
   'gym.removed.set': 'Set {number} of {exercise} removed.',
   'gym.undoRefused': "Couldn't undo — this day is closed.",
   'gym.addSetFor': 'Add a set to {exercise}',
-  'gym.bestSet': 'Best set',
+  'gym.bestSet': 'Best working set',
+  'gym.noWorkingSets': 'No working set yet.',
+  'gym.warmUp': 'Warm-up set',
+  'gym.warmUp.for': 'Warm-up set: set {number} of {exercise}',
   'gym.bestSetValue': '{reps} × {weight} {unit}',
   'gym.noSets': 'No sets yet.',
   'gym.emptyTitle': 'No exercise yet',
@@ -442,7 +445,8 @@ export const en: Translations = {
   'gym.progress.groupsCounted': '{count} of {total} groups counted',
   'gym.progress.explainGroups':
     'Every muscle group counts the same, however many exercises it contains.',
-  'gym.progress.explainMetric': 'Exercise value = the best set of the day (reps × {unit}).',
+  'gym.progress.explainMetric':
+    'An exercise is worth its best working set of the day. More weight and more reps both count.',
   'gym.progress.ratingNote':
     'The Gym rating measures your own development rather than absolute strength: 40\u00A0% attendance, 60\u00A0% personal performance development.',
 
@@ -459,7 +463,7 @@ export const en: Translations = {
 
   'gym.ytd.title': 'Performance year to date',
   'gym.ytd.explain':
-    'Each exercise’s most recent best set is compared with its first one this year.',
+    'For each exercise, the best working set of its latest training days is compared with that of its first ones this year.',
   'gym.trend.title': 'Current trend',
   'gym.trend.window': 'Last {days} days',
   'gym.performance.title': 'Performance development',
@@ -536,12 +540,12 @@ export const en: Translations = {
   'gym.detail.latest': 'Latest',
   'gym.detail.previous': 'Before',
   'gym.detail.change': 'Change',
-  'gym.detail.history': 'Best set per day',
+  'gym.detail.history': 'Best working set per day',
   'gym.detail.recentDays': 'Recent training days',
   'gym.detail.muscles': 'Muscle groups',
-  'gym.detail.tableCaption': 'Best set per training day',
+  'gym.detail.tableCaption': 'Best working set per training day',
   'gym.detail.day': 'Day',
-  'gym.detail.value': 'Best set',
+  'gym.detail.value': 'Best working set',
   'gym.detail.open': 'Open this exercise’s history',
 
   'running.distance': 'Distance',
@@ -751,6 +755,8 @@ export const en: Translations = {
   'gymHub.muscles.unscored': 'Nothing to evaluate yet',
   'gymHub.muscles.unscoredHint':
     'A session was logged in the last {days} days, but no set with reps and weight.',
+  'gymHub.muscles.warmUpOnlyHint':
+    'Only warm-up sets were logged in the last {days} days. What counts is the best working set.',
   'gymHub.muscles.range': 'Last {days} days',
   'gymHub.open': 'Open Gym',
 

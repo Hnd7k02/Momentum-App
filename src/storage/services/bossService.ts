@@ -31,7 +31,7 @@ import {
 } from '../repositories';
 import { reconcilePromotionConfirmation } from './promotionConfirmationService';
 import { buildGymRating, type GymRatingState } from './gymRatingService';
-import { loadExerciseDays } from './gymService';
+import { loadExerciseDaySource, type ExerciseDaySource } from './gymService';
 import {
   buildRunningRating,
   loadRunObservations,
@@ -242,6 +242,9 @@ function startedByDay(days: readonly DayState[]): boolean[] {
   });
 }
 
+/** A history with no day in it has no set to read. */
+const NO_EXERCISE_DAYS: ExerciseDaySource = { under: () => ({ days: [], awaitingBodyweight: [], warmUpOnly: [] }) };
+
 export async function loadBossProgression(
   reference: DateKey = today(),
 ): Promise<BossProgression> {
@@ -271,7 +274,7 @@ export async function loadBossProgression(
     snapshots,
     sessionDates: new Set(gymSessions.map((session) => session.date)),
     exerciseDays:
-      firstDate && lastDate ? await loadExerciseDays(firstDate, lastDate) : [],
+      firstDate && lastDate ? await loadExerciseDaySource(firstDate, lastDate) : NO_EXERCISE_DAYS,
     reference,
   });
 

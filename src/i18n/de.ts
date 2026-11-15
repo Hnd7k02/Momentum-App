@@ -423,7 +423,10 @@ export const de = {
   'gym.removed.set': 'Satz {number} von {exercise} entfernt.',
   'gym.undoRefused': 'Rückgängig ging nicht mehr – dieser Tag ist abgeschlossen.',
   'gym.addSetFor': 'Satz zu {exercise} hinzufügen',
-  'gym.bestSet': 'Bester Satz',
+  'gym.bestSet': 'Bester Arbeitssatz',
+  'gym.noWorkingSets': 'Noch kein Arbeitssatz.',
+  'gym.warmUp': 'Aufwärmsatz',
+  'gym.warmUp.for': 'Aufwärmsatz: Satz {number} von {exercise}',
   'gym.bestSetValue': '{reps} × {weight} {unit}',
   'gym.noSets': 'Noch keine Sätze.',
   'gym.emptyTitle': 'Noch keine Übung',
@@ -451,7 +454,8 @@ export const de = {
   'gym.progress.groupsCounted': '{count} von {total} Gruppen gewertet',
   'gym.progress.explainGroups':
     'Jede Muskelgruppe zählt gleich viel, unabhängig davon, wie viele Übungen sie enthält.',
-  'gym.progress.explainMetric': 'Übungswert = bester Satz des Tages (Wdh. × {unit}).',
+  'gym.progress.explainMetric':
+    'Der Wert einer Übung ist ihr bester Arbeitssatz des Tages. Mehr Gewicht und mehr Wiederholungen zählen beide.',
   'gym.progress.ratingNote':
     'Das Gym-Rating misst deine eigene Entwicklung, nicht absolute Stärke: 40\u00A0% Anwesenheit, 60\u00A0% persönliche Leistungsentwicklung.',
 
@@ -468,7 +472,7 @@ export const de = {
 
   'gym.ytd.title': 'Leistung seit Jahresbeginn',
   'gym.ytd.explain':
-    'Verglichen wird der zuletzt aufgezeichnete beste Satz jeder Übung mit ihrem ersten in diesem Jahr.',
+    'Bei jeder Übung wird der beste Arbeitssatz ihrer letzten Trainingstage mit dem ihrer ersten in diesem Jahr verglichen.',
   'gym.trend.title': 'Aktueller Trend',
   'gym.trend.window': 'Letzte {days} Tage',
   'gym.performance.title': 'Leistungsentwicklung',
@@ -545,12 +549,12 @@ export const de = {
   'gym.detail.latest': 'Zuletzt',
   'gym.detail.previous': 'Davor',
   'gym.detail.change': 'Veränderung',
-  'gym.detail.history': 'Bester Satz pro Tag',
+  'gym.detail.history': 'Bester Arbeitssatz pro Tag',
   'gym.detail.recentDays': 'Letzte Trainingstage',
   'gym.detail.muscles': 'Muskelgruppen',
-  'gym.detail.tableCaption': 'Bester Satz pro Trainingstag',
+  'gym.detail.tableCaption': 'Bester Arbeitssatz pro Trainingstag',
   'gym.detail.day': 'Tag',
-  'gym.detail.value': 'Bester Satz',
+  'gym.detail.value': 'Bester Arbeitssatz',
   'gym.detail.open': 'Verlauf dieser Übung öffnen',
 
   'running.distance': 'Distanz',
@@ -759,6 +763,8 @@ export const de = {
   'gymHub.muscles.unscored': 'Noch nichts auszuwerten',
   'gymHub.muscles.unscoredHint':
     'In den letzten {days} Tagen ist eine Session eingetragen, aber kein Satz mit Wiederholungen und Gewicht.',
+  'gymHub.muscles.warmUpOnlyHint':
+    'In den letzten {days} Tagen sind nur Aufwärmsätze eingetragen. Gewertet wird der beste Arbeitssatz.',
   'gymHub.muscles.range': 'Letzte {days} Tage',
   'gymHub.open': 'Gym öffnen',
 

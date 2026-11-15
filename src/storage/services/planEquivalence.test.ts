@@ -18,6 +18,7 @@ import {
   startSessionFromDraft,
 } from './gymService';
 import { createTrainingPlan } from './trainingPlanService';
+import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
 
 /**
  * Manual entry and plan entry are two doors into one room (WP2-1N).
@@ -47,6 +48,16 @@ import { createTrainingPlan } from './trainingPlanService';
  * HANDOVER.md and deliberately not changed here. If the control ever shows
  * no difference at all, the plan path must be exact — the tolerance exists
  * only because the control demonstrates the phenomenon without plans.
+ *
+ * **Since WP3 Stage 5b each history is read twice** (D150). A device set up
+ * by this build carries the Stage 5b metric from its first day, and that
+ * metric reads a day's sets in a fixed order — so under it the control and
+ * the plan path must both agree **to the bit**, with no tolerance at all
+ * (**E**). The same stored rows are then read the way a device before the
+ * update holds them (`withoutGymMetricEra`), and there A to D hold exactly
+ * as they always did: the order of the set index is still in the sums of a
+ * day lived under the metric before, which is why the order was fixed with
+ * the era and not for every day.
  */
 
 /* ── Seeded ids ─────────────────────────────────────────────────────────── */
@@ -341,6 +352,16 @@ async function outputs(): Promise<Outputs> {
   return { inputs, discrete: canonical(scrub(discrete)), leaves };
 }
 
+/**
+ * The same stored history under both metrics: first as written — the Stage
+ * 5b metric from day one — then as a device before the update holds it.
+ */
+async function bothEras(): Promise<{ stage5b: Outputs; legacy: Outputs }> {
+  const stage5b = await outputs();
+  await withoutGymMetricEra();
+  return { stage5b, legacy: await outputs() };
+}
+
 /* ── The comparison ─────────────────────────────────────────────────────── */
 
 interface Delta {
@@ -389,6 +410,8 @@ function compare(a: Outputs, b: Outputs, label: string): Worst {
 }
 
 const observed = { control: [] as Worst[], plan: [] as Worst[] };
+/** The same two comparisons under the Stage 5b metric, where both must be exact. */
+const observedStage5b = { control: [] as Worst[], plan: [] as Worst[] };
 
 beforeAll(() => {
   // A control and a plan comparison per run, over independently seeded ids.
@@ -407,12 +430,16 @@ afterAll(async () => {
   uuidSpy?.mockRestore();
   await closeDatabase();
   // Documented in the WP2-1 closeout report; printed so the number is never a memory.
+  const report = (label: string, seen: typeof observed): string =>
+    `  ${label}\n` +
+    `    control (manual vs manual)  source ${describeDelta(worstOf(seen.control.map((w) => w.source)))}\n` +
+    `                                derived ${describeDelta(worstOf(seen.control.map((w) => w.derived)))}\n` +
+    `    plan    (manual vs plan)    source ${describeDelta(worstOf(seen.plan.map((w) => w.source)))}\n` +
+    `                                derived ${describeDelta(worstOf(seen.plan.map((w) => w.derived)))}`;
   console.log(
     `[planEquivalence] ${RUNS} runs\n` +
-      `  control (manual vs manual)  source ${describeDelta(worstOf(observed.control.map((w) => w.source)))}\n` +
-      `                              derived ${describeDelta(worstOf(observed.control.map((w) => w.derived)))}\n` +
-      `  plan    (manual vs plan)    source ${describeDelta(worstOf(observed.plan.map((w) => w.source)))}\n` +
-      `                              derived ${describeDelta(worstOf(observed.plan.map((w) => w.derived)))}`,
+      `${report('the metric before Stage 5b (index order):', observed)}\n` +
+      `${report('the Stage 5b metric (fixed order):', observedStage5b)}`,
   );
 });
 
@@ -422,19 +449,19 @@ describe('manual entry versus plan entry', () => {
     const seedB = 2_000 + run;
     const seedPlan = 3_000 + run;
 
-    it(`run ${run}: identical inputs, identical discrete outputs, floating outputs within ${MAX_ULPS_AT_SOURCE}/${MAX_ULPS_DERIVED} ULP (seeds A=${seedA} B=${seedB} plan=${seedPlan})`, async () => {
+    it(`run ${run}: identical inputs, identical discrete outputs, floating outputs within ${MAX_ULPS_AT_SOURCE}/${MAX_ULPS_DERIVED} ULP before Stage 5b and exact under it (seeds A=${seedA} B=${seedB} plan=${seedPlan})`, async () => {
       await fresh(seedA);
       await manual();
-      const viaManualA = await outputs();
+      const { stage5b: newManualA, legacy: viaManualA } = await bothEras();
       expect(viaManualA.inputs.sets.length).toBeGreaterThan(1000);
 
       await fresh(seedB);
       await manual();
-      const viaManualB = await outputs();
+      const { stage5b: newManualB, legacy: viaManualB } = await bothEras();
 
       await fresh(seedPlan);
       await planned();
-      const viaPlan = await outputs();
+      const { stage5b: newPlan, legacy: viaPlan } = await bothEras();
 
       // The schedule did what it claims: the gate opened and a break was taken.
       const state = (viaPlan.discrete as { gym: { endurance: { unlocked: boolean }; abstinence: unknown } }).gym;
@@ -450,8 +477,35 @@ describe('manual entry versus plan entry', () => {
         expect(worst.source.ulps, `${label}: ${describeDelta(worst.source)}`).toBeLessThanOrEqual(MAX_ULPS_AT_SOURCE);
         expect(worst.derived.ulps, `${label}: ${describeDelta(worst.derived)}`).toBeLessThanOrEqual(MAX_ULPS_DERIVED);
       }
+
+      // E: under the Stage 5b metric the same three histories agree to the
+      // bit — inputs, discrete outputs, and every floating output.
+      const newState = (newPlan.discrete as { gym: { endurance: { unlocked: boolean }; abstinence: unknown } }).gym;
+      expect(newState.endurance.unlocked).toBe(true);
+      expect(newState.abstinence).not.toBeNull();
+      const newControl = compare(newManualA, newManualB, `Stage 5b control seeds ${seedA}/${seedB}`);
+      const newPlanned = compare(newManualA, newPlan, `Stage 5b plan seeds ${seedA}/${seedPlan}`);
+      observedStage5b.control.push(newControl);
+      observedStage5b.plan.push(newPlanned);
+      for (const [label, worst] of [[`Stage 5b control seeds ${seedA}/${seedB}`, newControl], [`Stage 5b plan seeds ${seedA}/${seedPlan}`, newPlanned]] as const) {
+        expect(worst.source.ulps, `${label}: ${describeDelta(worst.source)}`).toBe(0);
+        expect(worst.derived.ulps, `${label}: ${describeDelta(worst.derived)}`).toBe(0);
+      }
     }, 60_000);
   }
+
+  it('before Stage 5b the control shows the addition-order effect the bounds are for', () => {
+    // If this ever reads zero, the legacy replay has changed the order it
+    // sums in — which is a changed value for a day lived under it.
+    const controlMax = Math.max(0, ...observed.control.flatMap((w) => [w.source.ulps, w.derived.ulps]));
+    if (RUNS >= 20) expect(controlMax).toBeGreaterThan(0);
+  });
+
+  it('under the Stage 5b metric no run shows any', () => {
+    expect(observedStage5b.control).toHaveLength(RUNS);
+    const max = Math.max(0, ...[...observedStage5b.control, ...observedStage5b.plan].flatMap((w) => [w.source.ulps, w.derived.ulps]));
+    expect(max).toBe(0);
+  });
 
   it('the plan path is exact whenever the control shows no addition-order effect', () => {
     // The tolerance above is justified only by the control demonstrating the

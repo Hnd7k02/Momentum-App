@@ -267,6 +267,43 @@ export const SCORING_MODEL = 'categoryMean' as const;
 export const GYM_SCORING_MODEL = 'attendancePerformance' as const;
 
 /**
+ * The exercise-day metric this build writes into new config snapshots
+ * (WP3 Stage 5b, D150): the best working set by the strength score,
+ * `effective load × (1 + reps ÷ 30)`.
+ *
+ * Same rule as the models above: it decides what *future* days mean. A day
+ * already lived resolves to its own snapshot, and a snapshot with no
+ * `gymMetric` is the best set by `reps × load` (D84) — those days replay as
+ * they were scored. **The replay reads these values from the snapshot of
+ * the day, never from here**, so changing one of them is a new era for the
+ * days after the change and cannot reach a day before it.
+ *
+ * - `repsDivisor` is the score's one constant. It is a deliberate,
+ *   documented exception to "no population norms": it only converts the
+ *   user's own sets into one another (D150). One constant, never a table.
+ * - `comparison` is the window rule, and a **switch**: the median of an
+ *   exercise's last and first days was recommended by the review and is
+ *   built and on; the owner confirms it with numbers at STOP 5b
+ *   (`GYM_COMPARISON_CONFIRMED`). `firstLast` is the rule before it.
+ */
+export const GYM_METRIC = {
+  id: 'bestWorkingSet',
+  repsDivisor: 30,
+  comparison: 'median',
+} as const;
+
+/**
+ * Whether the owner has confirmed the window comparison `GYM_METRIC` names.
+ *
+ * `false` until STOP 5b. It gates nothing at run time — the switch that
+ * governs the calculation is `GYM_METRIC.comparison`, read from each day's
+ * snapshot — and exists so the open decision is a line of code a search
+ * finds, with a test beside it holding that the switch and the calculation
+ * cannot part (`core/gym/metric.test.ts`).
+ */
+export const GYM_COMPARISON_CONFIRMED = false;
+
+/**
  * The Running scoring model this build writes into new config snapshots.
  *
  * Same era rule as `GYM_SCORING_MODEL`: a snapshot with no `runningModel`

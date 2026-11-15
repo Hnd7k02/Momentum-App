@@ -80,6 +80,19 @@ describe('an empty range is not "never trained"', () => {
     expect(gap).toEqual({ kind: 'unscored', bodyweightMissing: true });
     expect(text(gap!).hint).toBe(de['gym.bodyweight.needed']);
   });
+
+  it('says so when the sets in the range are warm-up sets and nothing else (D151)', () => {
+    // The sets are there, with reps and weight: the sentence above would be
+    // untrue. What is missing is a working set.
+    const gap = muscleGap({ ...historyOf([]), warmUpOnly: ['ex_bench_press'] }, '2026-11-10', TODAY, 30);
+    expect(gap).toEqual({ kind: 'unscored', bodyweightMissing: false, warmUpOnly: true });
+    expect(text(gap!)).toEqual({
+      title: 'Noch nichts auszuwerten',
+      hint: 'In den letzten 30 Tagen sind nur Aufwärmsätze eingetragen. Gewertet wird der beste Arbeitssatz.',
+    });
+    // An exercise warmed up beside one that was worked at is no gap at all.
+    expect(muscleGap({ ...historyOf([day('2026-11-03', 100000), day('2026-11-06', 100000), day('2026-11-09', 105000)]), warmUpOnly: ['ex_bench_press'] }, '2026-11-09', TODAY, 30)).toBeNull();
+  });
 });
 
 describe('trained in the range', () => {

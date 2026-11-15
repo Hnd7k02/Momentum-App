@@ -278,6 +278,36 @@ export type GymScoringModel = 'attendance' | 'attendancePerformance';
  */
 export type RunningScoringModel = 'attendance' | 'attendancePerformance';
 
+/**
+ * How a performance window compares the days of one exercise (D150).
+ *
+ * - `median` — the median of its last k exercise-days against the median of
+ *   its first k, with k half the days, rounded down, and three at most. Two
+ *   or three days are the last against the first.
+ * - `firstLast` — the last day against the first, whatever lies between.
+ */
+export type GymWindowComparison = 'median' | 'firstLast';
+
+/**
+ * The exercise-day metric a snapshot was written under (WP3 Stage 5b, D150):
+ * the best **working** set of the day by the strength score,
+ * `effective load × (1 + reps ÷ repsDivisor)`.
+ *
+ * The divisor is the one constant of the score and is carried here, never
+ * in a table: it converts the user's own sets into one another and compares
+ * them with nobody — the documented exception to "no population norms".
+ *
+ * `comparison` is a switch inside this era and not an era of its own: the
+ * owner confirms the median with numbers at STOP 5b.
+ */
+export interface GymMetricSnapshot {
+  /** Names the metric. */
+  id: 'bestWorkingSet';
+  /** The score's one constant: effective load × (1 + reps ÷ repsDivisor). */
+  repsDivisor: number;
+  comparison: GymWindowComparison;
+}
+
 export type DomainConfigSnapshot = {
   [T in StoredDomainType]: {
     id: string;
@@ -335,6 +365,15 @@ export interface AppConfigSnapshot {
      * Never backfilled.
      */
     sessionWindowDays?: number;
+    /**
+     * WP3 Stage 5b (D150): the exercise-day metric. Its presence is the era
+     * of the best working set by the strength score. **Absent means the
+     * metric before it, in all its parts** — the best set by `reps × load`
+     * over every set (a warm-up mark is not read), a window's last day
+     * against its first, and the order of the muscle sums as the set index
+     * gave it (D84). Never backfilled.
+     */
+    gymMetric?: GymMetricSnapshot;
   };
   /** Absent on every snapshot RC2 wrote. Absence means the RC2 era. */
   boss?: BossConfigSnapshot;
@@ -702,7 +741,7 @@ export interface GymSessionRecord {
   updatedAt: string;
 }
 
-/** One set. Never averaged: the primary metric is the best set of the day. */
+/** One set. Never averaged: the metric is the best set of the day — the best working set since Stage 5b (D150). */
 export interface GymSetRecord {
   id: string;
   sessionId: string;
@@ -750,6 +789,17 @@ export interface GymSetRecord {
    * types existed was.
    */
   loadType?: ExerciseLoadType;
+  /**
+   * The user marked this set as a warm-up (D151).
+   *
+   * A fact on the set, off by default: **absent is a working set**. Written
+   * when the mark is set and removed when it is taken off — never `false`,
+   * never backfilled, never detected. A warm-up set is a set: it opens the
+   * session and counts for attendance as any other (D128). It never
+   * provides the exercise-day value of the Stage 5b metric and never enters
+   * the work volume. The metric before Stage 5b does not read it.
+   */
+  warmUp?: true;
   createdAt: string;
 }
 

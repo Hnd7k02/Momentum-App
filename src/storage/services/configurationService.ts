@@ -16,7 +16,7 @@ import type {
   SettingsRecord,
 } from '../../core/model';
 import { normaliseWeights, type BossWeights } from '../../core/boss';
-import { ensureCurrentSnapshot, ensureFoodRetired, ensureSessionWindowEra } from '../configService';
+import { ensureCurrentSnapshot, ensureFoodRetired, ensureGymMetricEra, ensureSessionWindowEra } from '../configService';
 import { ensurePromotionConfirmation } from './promotionConfirmationService';
 import { legacySportPrompt, type LegacySportPrompt } from './legacySportService';
 import {
@@ -75,6 +75,10 @@ export async function loadConfiguration(): Promise<AppConfiguration> {
   // Food is switched off from today wherever it is still on (D139). Before
   // the reads below, so this very load already shows Rang without it.
   await ensureFoodRetired();
+  // The exercise-day metric of Stage 5b begins on this load, effective
+  // today (D150). After the steps above, so the snapshot they wrote for
+  // today is the one that takes the field.
+  await ensureGymMetricEra();
   const [settings, domains, questions, legacySportChoice] = await Promise.all([
     settingsRepository.getOrCreate(),
     domainsRepository.list(),

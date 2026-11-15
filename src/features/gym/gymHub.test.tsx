@@ -38,6 +38,8 @@ const emptyHistory = (): GymHistory => {
     overall: gymPerformanceOverSpan(days),
     names: new Map(),
     awaitingBodyweight: [],
+    warmUpOnly: [],
+    metric: null,
   };
 };
 
@@ -115,6 +117,8 @@ describe('the muscle entry card before the first workout', () => {
       overall: gymPerformanceOverSpan(days),
       names: new Map([['ex_squat', 'Back Squat']]),
       awaitingBodyweight: [],
+      warmUpOnly: [],
+      metric: null,
     };
   };
 

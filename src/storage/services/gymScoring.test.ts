@@ -13,6 +13,7 @@ import {
 import { loadBossProgression } from './bossService';
 import { applyOnboarding } from './configurationService';
 import { gymModelOf } from './gymRatingService';
+import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
 import {
   addSet,
   BuiltInExerciseError,
@@ -39,6 +40,14 @@ function freezeAt(day: string, hour = 9): void {
 /** A Monday, so weeks line up with the fixture dates. */
 const START = '2026-01-05';
 const kg = (value: number) => Math.round(value * 1000);
+
+/**
+ * An exercise-day's value under the Stage 5b metric (D150): the strength
+ * score `load × (30 + reps)`. A device set up by these tests carries that
+ * metric from its first day; `withoutGymMetricEra()` reads the same history
+ * the way a device before the update holds it, as `reps × load` (D84).
+ */
+const strength = (reps: number, grams: number) => grams * (30 + reps);
 
 beforeEach(async () => {
   await deleteDatabase();
@@ -213,7 +222,10 @@ describe('bodyweight exercises through the replay', () => {
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 8, weightGrams: 0 });
 
     const history = await loadGymHistory(START, START);
-    expect(history.days[0]?.best.score).toBe(8 * kg(85));
+    expect(history.days[0]?.best.score).toBe(strength(8, kg(85)));
+    // The same load under the metric before Stage 5b.
+    await withoutGymMetricEra();
+    expect((await loadGymHistory(START, START)).days[0]?.best.score).toBe(8 * kg(85));
   });
 
   it('adds the weight the user hung off themselves', async () => {
@@ -223,8 +235,10 @@ describe('bodyweight exercises through the replay', () => {
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 5, weightGrams: kg(15) });
 
     const history = await loadGymHistory(START, START);
-    // 85 + 15 = 100, then 5 × 100.
-    expect(history.days[0]?.best.score).toBe(5 * kg(100));
+    // 85 + 15 = 100, then five reps at 100.
+    expect(history.days[0]?.best.score).toBe(strength(5, kg(100)));
+    await withoutGymMetricEra();
+    expect((await loadGymHistory(START, START)).days[0]?.best.score).toBe(5 * kg(100));
   });
 
   it('subtracts the machine on an assisted exercise', async () => {
@@ -239,8 +253,10 @@ describe('bodyweight exercises through the replay', () => {
     });
 
     const history = await loadGymHistory(START, START);
-    // 85 − 25 = 60, then 10 × 60.
-    expect(history.days[0]?.best.score).toBe(10 * kg(60));
+    // 85 − 25 = 60, then ten reps at 60.
+    expect(history.days[0]?.best.score).toBe(strength(10, kg(60)));
+    await withoutGymMetricEra();
+    expect((await loadGymHistory(START, START)).days[0]?.best.score).toBe(10 * kg(60));
   });
 
   it('uses the latest bodyweight before the session, never a later one', async () => {
@@ -250,13 +266,18 @@ describe('bodyweight exercises through the replay', () => {
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 5, weightGrams: 0 });
 
     const before = await loadGymHistory(START, addDays(START, 3));
-    expect(before.days[0]?.best.score).toBe(5 * kg(80));
+    expect(before.days[0]?.best.score).toBe(strength(5, kg(80)));
 
     // Weighing in heavier next month must not rewrite that session.
     await recordBodyweight(90, addDays(START, 30), addDays(START, 30));
     const after = await loadGymHistory(START, addDays(START, 40));
     const session1 = after.days.find((entry) => entry.date === addDays(START, 3));
-    expect(session1?.best.score).toBe(5 * kg(80));
+    expect(session1?.best.score).toBe(strength(5, kg(80)));
+
+    // Nor under the metric before Stage 5b.
+    await withoutGymMetricEra();
+    const legacy = await loadGymHistory(START, addDays(START, 40));
+    expect(legacy.days.find((entry) => entry.date === addDays(START, 3))?.best.score).toBe(5 * kg(80));
   });
 
   it('refuses a weigh-in dated into a closed day, exactly as a set is refused (D133)', async () => {
@@ -303,7 +324,9 @@ describe('bodyweight exercises through the replay', () => {
     const session = await openSessionForDay(START);
     await addSet({ sessionId: session.id, exerciseId: 'ex_pull_up', reps: 5, weightGrams: 0 });
     const history = await loadGymHistory(START, START);
-    expect(history.days[0]?.best.score).toBe(5 * kg(86));
+    expect(history.days[0]?.best.score).toBe(strength(5, kg(86)));
+    await withoutGymMetricEra();
+    expect((await loadGymHistory(START, START)).days[0]?.best.score).toBe(5 * kg(86));
   });
 });
 

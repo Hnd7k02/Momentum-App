@@ -23,6 +23,8 @@ function historyOf(inputs: ExerciseDayInput[], names: Record<string, string> = {
     overall: gymPerformanceOverSpan(days),
     names: new Map(Object.entries(names)),
     awaitingBodyweight: [],
+    warmUpOnly: [],
+    metric: null,
   };
 }
 

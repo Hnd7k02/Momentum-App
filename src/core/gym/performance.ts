@@ -1,6 +1,7 @@
 import type { DateKey } from '../dates';
-import { MUSCLE_GROUPS, type MuscleGroup } from '../model';
-import { muscleWeights } from './muscles';
+import { MUSCLE_GROUPS, type GymWindowComparison, type MuscleGroup } from '../model';
+import type { GymMetric } from './metric';
+import { muscleWeights, type MuscleRoles } from './muscles';
 
 /**
  * Gym performance: the whole pipeline, and nothing that touches storage or
@@ -15,6 +16,25 @@ import { muscleWeights } from './muscles';
  * progress screen and the exercise detail all read what this produces; none
  * of them computes any part of it, so there is exactly one place where a Gym
  * number can be wrong.
+ *
+ * ## Two metrics, one per era (WP3 Stage 5b, D150)
+ *
+ * What an exercise-day is worth, and how a window compares an exercise's
+ * days, depend on the era the scored day was lived in. The functions that
+ * differ take a `GymMetric | null`:
+ *
+ * - `null` — the metric before Stage 5b (D84): the best set by
+ *   `reps × load` over every set, a window's last day against its first.
+ *   This is the default, and the code it runs is the code that ran before
+ *   the stage, statement for statement: a day lived under it replays to the
+ *   same bits.
+ * - a `GymMetric` — the best **working** set by the strength score
+ *   `load × (1 + reps ÷ repsDivisor)`, a window by the comparison the
+ *   metric names, and a fixed order: exercise-days sorted by date and
+ *   exercise id, so the same sets under other record ids give the same bits.
+ *
+ * Which of the two a day has is read from that day's config snapshot
+ * (`metric.ts`), never decided here.
  */
 
 /* ── The set, and the day ───────────────────────────────────────────────── */
@@ -38,10 +58,21 @@ export interface SetInput {
   weightGrams: number;
   /** Position within the exercise on that day, for a deterministic tie-break. */
   order: number;
+  /**
+   * Present, and `true`, only on a set the user marked as a warm-up (D151).
+   * Never `false`: an unmarked set has no such key, so it serialises as it
+   * always did. The metric before Stage 5b does not read it.
+   */
+  warmUp?: true;
 }
 
 export interface BestSet {
-  /** `reps × weightGrams`. The exercise-day performance. */
+  /**
+   * The exercise-day performance, in the unit of the metric the day was
+   * built under: `reps × weightGrams` before Stage 5b, the strength score
+   * `weightGrams × (repsDivisor + reps)` from it. An integer either way,
+   * and only ever divided by another score of the same metric.
+   */
   score: number;
   /** One set that achieves it — for display only; ties never change `score`. */
   set: SetInput;
@@ -94,6 +125,60 @@ export function bestSet(sets: readonly SetInput[]): BestSet | null {
   return best;
 }
 
+/**
+ * The strength score of one set (D150), as an integer:
+ * `load × (repsDivisor + reps)`.
+ *
+ * That is `load × (1 + reps ÷ repsDivisor)` times the divisor. It orders
+ * two sets exactly as the score itself does and every ratio of two of them
+ * is the ratio of the scores, but it stays an integer for integer inputs —
+ * so two identical sets always compare equal, which a product of a
+ * fraction would not promise.
+ *
+ * More load and more reps both raise it, and a set at a quarter more load
+ * for half the reps is not a collapse: 8 × 85 kg after 12 × 80 kg is −3.9 %,
+ * where `reps × load` reads −29 %. The divisor is the score's one constant,
+ * carried in the config snapshot; it converts the user's own sets into one
+ * another and compares them with nobody (D150). **It is never printed as
+ * kilograms**: it would read as a maximum the user never lifted.
+ */
+export function strengthScore(set: SetInput, repsDivisor: number): number {
+  return set.weightGrams * (repsDivisor + set.reps);
+}
+
+/**
+ * The best working set of an exercise on one day (D150, D151): the highest
+ * strength score among the scorable sets that are not marked as warm-ups.
+ *
+ * Still a maximum and nothing else — not the mean, not the sum. A lighter
+ * set before or after the work, marked or not, cannot lower the day, and a
+ * marked one can never provide it. `null` when no working set is scorable:
+ * a day of warm-ups only is no exercise-day at all, never a zero.
+ *
+ * Of two sets with the same score a screen names the earlier by `order`,
+ * then the heavier — two sets equal in all three print the same line.
+ */
+export function bestWorkingSet(sets: readonly SetInput[], repsDivisor: number): BestSet | null {
+  let best: BestSet | null = null;
+  for (const set of sets) {
+    if (set.warmUp === true || !isScorableSet(set)) continue;
+    const score = strengthScore(set, repsDivisor);
+    if (best === null || score > best.score || (score === best.score && namedBefore(set, best.set))) {
+      best = { score, set };
+    }
+  }
+  return best;
+}
+
+function namedBefore(a: SetInput, b: SetInput): boolean {
+  return a.order < b.order || (a.order === b.order && a.weightGrams > b.weightGrams);
+}
+
+/** Code-unit order: the same on every device, whatever its locale collates. */
+function compareIds(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /** One exercise on one day, as the rest of the pipeline sees it. */
 export interface ExerciseDay {
   date: DateKey;
@@ -120,16 +205,27 @@ export interface ExerciseDayInput {
 }
 
 /**
- * Collapses a day's sets into one number per exercise.
+ * Collapses a day's sets into one number per exercise, under one metric.
  *
  * An exercise whose sets are all unscorable produces nothing at all rather
  * than a zero: it was not performed, and "not performed" is not a bad
- * performance.
+ * performance. Under the Stage 5b metric the same holds for an exercise
+ * with only warm-up sets that day (D151).
+ *
+ * **The list belongs to the metric it was built under.** Every `best.score`
+ * in it is in that metric's unit; a list is never mixed with another.
+ * Before Stage 5b the entries of one day stand in the order they were
+ * handed in — the order of the set index, which is the record ids'. Under
+ * the Stage 5b metric they are sorted by exercise id, so the sums built on
+ * them do not depend on record ids.
  */
-export function exerciseDays(inputs: readonly ExerciseDayInput[]): ExerciseDay[] {
+export function exerciseDays(
+  inputs: readonly ExerciseDayInput[],
+  metric: GymMetric | null = null,
+): ExerciseDay[] {
   const days: ExerciseDay[] = [];
   for (const input of inputs) {
-    const best = bestSet(input.sets);
+    const best = metric === null ? bestSet(input.sets) : bestWorkingSet(input.sets, metric.repsDivisor);
     if (!best) continue;
     days.push({
       date: input.date,
@@ -139,7 +235,8 @@ export function exerciseDays(inputs: readonly ExerciseDayInput[]): ExerciseDay[]
       best,
     });
   }
-  return days.sort((a, b) => a.date.localeCompare(b.date));
+  if (metric === null) return days.sort((a, b) => a.date.localeCompare(b.date));
+  return days.sort((a, b) => compareIds(a.date, b.date) || compareIds(a.exerciseId, b.exerciseId));
 }
 
 /* ── Comparison with the previous workout ───────────────────────────────── */
@@ -306,6 +403,38 @@ export function musclePerformance(days: readonly ExerciseDay[]): MusclePerforman
     });
   }
 
+  const rows: ExerciseRow[] = [];
+  for (const [exerciseId, roles] of rolesOf) {
+    rows.push({
+      exerciseId,
+      roles,
+      score: latestScore.get(exerciseId) ?? null,
+      ratio: comparisons.get(exerciseId)?.ratio ?? null,
+    });
+  }
+  return musclesFromRows(rows);
+}
+
+/** What one exercise brings to its groups: its roles, its latest score, its one ratio. */
+interface ExerciseRow {
+  exerciseId: string;
+  roles: MuscleRoles;
+  score: number | null;
+  /** `null` while the exercise has nothing to compare. */
+  ratio: number | null;
+}
+
+/**
+ * The muscle sums, from one row per exercise.
+ *
+ * Which ratio an exercise speaks with is the caller's business — its latest
+ * day against the day before (`musclePerformance`), or its window
+ * (`gymPerformanceOverSpan`). How the ratios reach the groups is the one
+ * rule above and lives here once. **The rows are summed in the order
+ * given**: floating-point addition is not associative, so the order is part
+ * of the result.
+ */
+function musclesFromRows(rows: readonly ExerciseRow[]): MusclePerformance[] {
   interface Bucket {
     /** Σ weight × ratio, and Σ weight — a weighted mean, kept as two sums. */
     weightedRatio: number;
@@ -324,15 +453,13 @@ export function musclePerformance(days: readonly ExerciseDay[]): MusclePerforman
     return entry;
   };
 
-  for (const [exerciseId, roles] of rolesOf) {
-    const comparison = comparisons.get(exerciseId);
-    const score = latestScore.get(exerciseId) ?? null;
+  for (const { exerciseId, roles, score, ratio } of rows) {
     for (const { muscle, weight } of muscleWeights(roles)) {
       const entry = bucket(muscle);
       entry.exercises.add(exerciseId);
       if (score !== null) entry.best = Math.max(entry.best ?? 0, score);
-      if (comparison && comparison.ratio !== null && weight > 0) {
-        entry.weightedRatio += weight * comparison.ratio;
+      if (ratio !== null && weight > 0) {
+        entry.weightedRatio += weight * ratio;
         entry.weight += weight;
         entry.compared += 1;
       }
@@ -402,7 +529,11 @@ export interface GymPerformance {
  * says "not started yet" rather than drawing a zero.
  */
 export function gymPerformance(days: readonly ExerciseDay[]): GymPerformance {
-  const muscles = musclePerformance(days);
+  return gymPerformanceOf(musclePerformance(days));
+}
+
+/** The aggregate over the ten groups, whichever comparison produced them. */
+function gymPerformanceOf(muscles: MusclePerformance[]): GymPerformance {
   const measured = muscles.filter((entry) => entry.status === 'measured');
 
   return {
@@ -431,8 +562,32 @@ export function gymPerformance(days: readonly ExerciseDay[]): GymPerformance {
  * speak more loudly than their legs. One span per exercise, one value per
  * group, equal weight per group: frequency changes how much evidence there
  * is, never how much a muscle counts.
+ *
+ * Under the Stage 5b metric the span of an exercise is the comparison the
+ * metric names (`exerciseSpans`) — by default the median of its last days
+ * against the median of its first — and `days` must be the list built under
+ * that same metric.
  */
-export function gymPerformanceOverSpan(days: readonly ExerciseDay[]): GymPerformance {
+export function gymPerformanceOverSpan(
+  days: readonly ExerciseDay[],
+  metric: GymMetric | null = null,
+): GymPerformance {
+  if (metric !== null) {
+    return gymPerformanceOf(
+      musclesFromRows(
+        exerciseSpans(days, metric.comparison).map((span) => ({
+          exerciseId: span.exerciseId,
+          roles: {
+            muscles: span.muscles,
+            ...(span.primaryMuscles === undefined ? {} : { primary: span.primaryMuscles }),
+          },
+          score: span.latestScore,
+          ratio: span.ratio,
+        })),
+      ),
+    );
+  }
+
   const byExercise = new Map<string, ExerciseDay[]>();
   for (const day of days) {
     const list = byExercise.get(day.exerciseId);
@@ -481,10 +636,113 @@ export function gymPerformanceInWindow(
   days: readonly ExerciseDay[],
   from: DateKey,
   to: DateKey,
+  metric: GymMetric | null = null,
 ): GymPerformance {
   return gymPerformanceOverSpan(
     days.filter((day) => day.date >= from && day.date <= to),
+    metric,
   );
+}
+
+/* ── The window comparison of the Stage 5b metric ───────────────────────── */
+
+/**
+ * The median of a non-empty list: the middle value, or the mean of the two
+ * middle ones. Dividing a sum of two integers by two is exact.
+ */
+export function median(values: readonly number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = sorted.length >> 1;
+  return sorted.length % 2 === 1 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
+}
+
+/**
+ * How many exercise-days each end of a window comparison rests on.
+ *
+ * `median`: half the days, rounded down, and three at most — so two or
+ * three days are the last against the first, four or five the two last
+ * against the two first, six or more the three last against the three
+ * first. `firstLast`: one, whatever lies between. With fewer than two days
+ * there is nothing to compare, under either.
+ */
+export function comparedDays(days: number, comparison: GymWindowComparison): number {
+  if (days < 2) return 0;
+  return comparison === 'firstLast' ? 1 : Math.min(3, Math.floor(days / 2));
+}
+
+/** One exercise over a list of its exercise-days: what it compares, and the result. */
+export interface ExerciseSpan {
+  exerciseId: string;
+  /** Its groups and roles as of its latest day in the list. */
+  muscles: MuscleGroup[];
+  primaryMuscles?: MuscleGroup[];
+  /** Its exercise-days in the list. */
+  days: number;
+  /** How many of them each end of the comparison rests on; 0 with fewer than two days. */
+  compared: number;
+  /** Its latest day's score, whether or not it could be compared. */
+  latestScore: number;
+  /** The median of its first `compared` days, or `null`. */
+  baseline: number | null;
+  /** The median of its last `compared` days, or `null`. */
+  current: number | null;
+  /** `current ÷ baseline`, or `null` with nothing to compare. 1 is unchanged. */
+  ratio: number | null;
+}
+
+/**
+ * Each exercise's change over a list of exercise-days, by the comparison a
+ * Stage 5b metric names (D150).
+ *
+ * **The median of the last k days against the median of the first k.** One
+ * comparison per exercise, as before: frequency adds evidence, never
+ * weight. What the median adds is that a single day cannot speak for the
+ * exercise — from six exercise-days a single light day at the end of the
+ * window falls out entirely, with four or five it is halved, and a whole
+ * light week stays visible as the decline it was. With two or three days
+ * the comparison is the last against the first, as it always was.
+ *
+ * **This is the one place the comparison switch is read.** `firstLast`
+ * rests each end on one day whatever the count; nothing else about the
+ * function differs.
+ *
+ * The exercises stand in the order of their first appearance in `days`,
+ * which under the Stage 5b metric is by date and exercise id.
+ */
+export function exerciseSpans(
+  days: readonly ExerciseDay[],
+  comparison: GymWindowComparison,
+): ExerciseSpan[] {
+  const byExercise = new Map<string, ExerciseDay[]>();
+  for (const day of days) {
+    const list = byExercise.get(day.exerciseId);
+    if (list) list.push(day);
+    else byExercise.set(day.exerciseId, [day]);
+  }
+
+  const spans: ExerciseSpan[] = [];
+  for (const [exerciseId, list] of byExercise) {
+    const ordered = [...list].sort((a, b) => compareIds(a.date, b.date));
+    const latest = ordered[ordered.length - 1]!;
+    const compared = comparedDays(ordered.length, comparison);
+    const baseline =
+      compared === 0 ? null : median(ordered.slice(0, compared).map((day) => day.best.score));
+    const current =
+      compared === 0 ? null : median(ordered.slice(-compared).map((day) => day.best.score));
+    spans.push({
+      exerciseId,
+      muscles: latest.muscles,
+      ...(latest.primaryMuscles === undefined ? {} : { primaryMuscles: latest.primaryMuscles }),
+      days: ordered.length,
+      compared,
+      latestScore: latest.best.score,
+      baseline,
+      current,
+      // A scorable set has positive reps and load, so a baseline is positive.
+      ratio: baseline !== null && current !== null && baseline > 0 ? current / baseline : null,
+    });
+  }
+  return spans;
 }
 
 /** A ratio as a percentage change: 1.2 → +20. `null` stays `null`. */
