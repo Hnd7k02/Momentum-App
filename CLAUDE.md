@@ -38,11 +38,14 @@ forward-only without any special handling:
 - changing the scoring model does not rescore days scored under the old one
 - changing what a Gym exercise-day is worth does not revalue a day scored
   before the change (D150)
+- changing how steeply a change becomes a level does not rescore a day
+  mapped by the curve as it was (D177)
 
 A field that is **absent** from a snapshot marks an era: no `boss` means RC2,
 no `scoring.model` means the flat Wellbeing model, no `scoring.gymMetric`
-means the best set by `reps × load` (D84). Never backfill those into
-old snapshots — the absence *is* the information.
+means the best set by `reps × load` (D84), and a `gymMetric` without
+`curveDecadePercent` means the curve at ten (D178). Never backfill those
+into old snapshots — the absence *is* the information.
 
 Where a fact is cheaper to record than to snapshot, record it on the row: a
 gym set stores the muscle groups it was logged under, which of them were
@@ -201,6 +204,22 @@ Never conflate them.
   target buy no more attendance; a rate of change reaches the level through
   one documented curve (`src/core/scoring/performanceCurve.ts`), never
   through a table of branches.
+- **One curve, and the one value a domain may bring to it** (D99, D101,
+  D177). Its five properties — exactly 500 at 0 %, symmetric, monotonic,
+  diminishing, bounded with no cap on the input — are shared and not
+  negotiable per domain. Its one tunable, how many percentage points of
+  change multiply the odds by four, is ten in the constants and may be a
+  domain's own **in an era of its own, carried in that domain's snapshot**:
+  Gym's is `scoring.gymMetric.curveDecadePercent` from the Stage 5b era on
+  — three — handed to the function as an argument and read per day by
+  `gymCurveOf()`, the field's one reader beside `gymMetricOf()` (D178).
+  Running hands in nothing and computes with the constants on every day,
+  as does a Gym day before the era or under a marker without the value.
+  `TRAINING_RATING.CURVE_ODDS_PER_DECADE` and `CURVE_DECADE_PERCENT` are
+  read when the module loads: changing them would revalue every day ever
+  scored, so they stay what they are. No second curve, no table, no branch
+  by sign, no fitting to anyone else's data — and no screen computes the
+  curve.
 - **What a domain compares is domain-specific; how it is scored is not.** Gym
   reduces to the best working set of an exercise, Running to pace at a
   comparable distance. Each produces a percentage change per window, and

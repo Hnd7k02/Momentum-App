@@ -5056,7 +5056,11 @@ snapshot's marker has four fields), `gymScoring.test.ts` (+10 % in both
 windows is 800 before the era and for a marker without the value, 990
 under the complete marker), `gymMetricEra.test.ts` (the update day's level
 and each day of the era are the pure windows mapped by the value the
-snapshot names; the preview device keeps the curve as it was).
+snapshot names; the preview device keeps the curve as it was). And one
+browser suite, found by the closing run of all of them:
+`scripts/verify/wp3-stage5b.mjs` compared the update's marker with the
+three fields Stage 5b wrote — the three are held as they were, and the
+fourth in a check of its own (357 checks where there were 356).
 
 ## D179 — Block "Kurve": a tint on the body is full from 8 %
 
