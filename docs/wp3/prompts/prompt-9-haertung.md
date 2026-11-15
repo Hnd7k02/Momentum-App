@@ -33,7 +33,7 @@ Die wichtigste Eigenschaft dieses Blocks: **Er fügt nichts hinzu und ändert ke
 
 ## 3. Voraussetzung
 
-- Die Blöcke «Farbregeln», 5b, 7A, 7B, 7C und 7D sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen. (7D, der Übungskatalog mit Stichwortsuche, kam am 15.11.2026 dazu: D171.)
+- Die Blöcke «Farbregeln», 5b, «Kurve», 7A, 7B, 7C und 7D sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen. (7D, der Übungskatalog mit Stichwortsuche, kam am 15.11.2026 dazu: D171. «Kurve», die Leistungskurve und die Farbstärke am Körper passend zur neuen Kennzahl, kam am selben Tag am STOP 5b dazu: D175.)
 - In `HANDOVER.md` stehen Darios Messwerte vom iPhone aus Block 7B.
 
 Fehlt ein Block, bau nichts. Sag Dario, welcher fehlt, und halte an. Fehlen nur die Messwerte, arbeite weiter und führ sie am Gate als offen.
@@ -44,7 +44,7 @@ Fehlt ein Block, bau nichts. Sag Dario, welcher fehlt, und halte an. Fehlen nur 
 
 ## 4. Was du zuerst liest
 
-1. `HANDOVER.md` ganz. Es ist das Dokument der Freigabe: «Repository state», jeder WP3-Block, «Invariants», «Risks and known debt», «Verification status», «Next work».
+1. `HANDOVER.md` ganz. Es ist das Dokument der Freigabe: «Repository state», jeder WP3-Block, «Invariants», «Risks and known debt», «Verification status», «Next work». Unter den Risiken steht seit 5b ein Randfall in den drei Aktivierungsschritten (ein Stand, der zwischen heute und einer gehaltenen Grenze datiert ist, bekommt den Marker); er ist diesem Block zugewiesen und gehört in Schritt 4, mit einem Test für alle drei Schritte.
 2. `docs/decisions.md`: ab D132, und jeden Eintrag nach D163.
 3. `docs/wp3/vertrag.md`: §12 und §14, dazu §15.
 4. `docs/wp3/review-2026-11.md`: Abschnitt B («Widersprüche», «Privatsphäre»), die Zeile F10 in Abschnitt F, die Zeile «9» und die Messgrössen in Abschnitt I.

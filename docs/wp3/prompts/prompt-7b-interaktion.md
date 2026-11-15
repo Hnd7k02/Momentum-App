@@ -2,7 +2,7 @@
 
 Für eine frische Session mit dem Modell, das D159 festlegt. Die Session braucht zwei Repos: `Hnd7k02/Momentum-App` (Branch `claude/momentum-wp3`) und `Hnd7k02/Momentum-preview`.
 Start: «Lies `docs/wp3/prompts/prompt-7b-interaktion.md` und führe ihn aus.»
-Geschrieben am 11.11.2026, vor den Blöcken «Farbregeln», 5b und 7A. Zeilennummern beziehen sich auf den Commit `af89fd9`; die Blöcke davor haben Dateien unter `src/features/gym/` und `src/features/body/` verändert. Prüf jede Zeile, bevor du dich darauf verlässt.
+Geschrieben am 11.11.2026, vor den Blöcken «Farbregeln», 5b und 7A. Seit dem 15.11.2026 liegt vor diesem Block auch der Block «Kurve» (D175): Er stellt die Farbstärke am Körper neu ein (`TINT_STRENGTH` in `src/features/body/tokens.ts`). Zeilennummern beziehen sich auf den Commit `af89fd9`; die Blöcke davor haben Dateien unter `src/features/gym/` und `src/features/body/` verändert. Prüf jede Zeile, bevor du dich darauf verlässt.
 
 ## 1. Worum es geht
 
@@ -28,6 +28,7 @@ Die wichtigste Eigenschaft dieses Blocks: **Jede Aussage über «flüssig» und 
 
 - Block 7A ist abgenommen: `HANDOVER.md` nennt, welcher Körper in der App steht (ein neuer nach dem Gate, oder Stufe 1 auf dem alten), und Kopf, Hände und Füsse sind neutral.
 - Der Block «Farbregeln» ist abgenommen: Muskelgruppen hat 30 und 90 Tage und den Knopf ⓘ mit der Legende.
+- Die Blöcke 5b und «Kurve» sind abgenommen (D175): Die Kennzahl ist der beste Arbeitssatz, und die Farbstärke am Körper ist neu skaliert. Was dieser Prompt über die Stärke einer Farbe sagt, gilt in der Fassung, die «Kurve» hinterlassen hat.
 
 Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 

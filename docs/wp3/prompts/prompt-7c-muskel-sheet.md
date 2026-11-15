@@ -39,7 +39,8 @@ Dazu kommen drei Punkte, die Dario am 15.11.2026 auf dem iPhone gefunden und die
 Abgenommen sind, laut `HANDOVER.md` oder Darios Startnachricht:
 
 - **Farbregeln:** `muscleState.ts` trägt Band und Mindestdaten; 30 und 90 Tage; die Legende.
-- **5b:** die Kennzahl ist der beste Arbeitssatz; Sätze können als Aufwärmsatz markiert sein.
+- **5b:** die Kennzahl ist der beste Arbeitssatz; Sätze können als Aufwärmsatz markiert sein; das Übungsdetail zeichnet eine Linie (D175).
+- **Kurve:** die Leistungskurve und die Farbstärke am Körper sind neu eingestellt (D175). Was Dario an ihrem STOP zur Skala der Zeilen und des Übungsdetails entschieden hat, steht in `HANDOVER.md` und geht den 12 % in diesem Prompt vor.
 - **7B:** die Körperbühne steht; ein Tipp dreht nie; der Viewer lässt sich anhalten.
 
 Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
@@ -198,7 +199,7 @@ Drei Punkte aus Darios Prüfung vom 15.11.2026. Was der Code dazu zeigt, steht i
   - **B – Kein Diagramm, ein Wort.** Wie bei «Zu wenig Vergleichsdaten» gibt die Zeile den Platz der Linie den Wörtern: die Zahl, der Zustand und ein kurzer Vermerk, dass es der erste Vergleich ist.
   - **C – Wert gegen null.** Ein kurzer senkrechter Strich von der Nulllinie zum Punkt: ein Wert, keine Richtung.
 - Zu jedem Kandidaten sagst du: Was liest jemand, der die App nicht kennt? Stimmt die Aussage, dass ein Vergleich aus zwei Tagen ein Wert ist und noch kein Verlauf? Passt er zur gemeinsamen Skala von −12 % bis +12 %? Bleibt die Zeile ruhig neben neun anderen?
-- Zeile und Sheet zeigen denselben Fall auf dieselbe Art.
+- Zeile und Sheet zeigen denselben Fall auf dieselbe Art. Seit STOP 5b gibt es eine dritte Stelle: Das Übungsdetail zeichnet eine Linie (`src/features/gym/ExerciseLineChart.tsx`, D175), und ein einzelner Tag ist dort ein Punkt ohne Wert. Dein Vorschlag gilt für alle drei, und die Kandidaten zeigst du auch dort.
 - **Im Build bleibt bis zu Darios Wahl der Punkt.** Die Frage geht mit deiner Empfehlung an den STOP. Wählt er, baust du es in derselben Session, ziehst Vertrag §6 und den Satz in `CLAUDE.md` («one value draws a dot») nach und passt die Prüfungen an, die den Punkt festhalten (`gym-muscles.mjs`, `release-proof.mjs`, `Sparkline.test.ts`), jede mit alter und neuer Regel im Bericht.
 
 ### Schritt 7 – Prüfungen

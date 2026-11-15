@@ -34,7 +34,8 @@ Die wichtigsten Eigenschaften dieses Blocks:
 
 Abgenommen sind, laut `HANDOVER.md` oder Darios Startnachricht:
 
-- **5b:** die Kennzahl ist der beste Arbeitssatz; die Satzzeile trägt die Markierung «Aufwärmsatz».
+- **5b:** die Kennzahl ist der beste Arbeitssatz; die Satzzeile trägt die Markierung «Aufwärmsatz» und, bis zur ersten Markierung, einen Hinweis darunter (D175).
+- **Kurve:** der Block, den Dario am STOP 5b zwischen 5b und 7B gesetzt hat (D175).
 - **7B und 7C:** die Körperbühne und das Muskel-Sheet stehen.
 
 Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
