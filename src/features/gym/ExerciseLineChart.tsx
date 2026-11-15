@@ -6,27 +6,37 @@ import { roundShown, trendOfShown } from './muscleState';
 import './exerciseLineChart.css';
 
 /**
- * The exercise detail's days as a line (contract §6) — **a proposal for
- * STOP 5b, not in the build.**
+ * The exercise detail's days as a line (contract §6; the owner's choice at
+ * STOP 5b, D175).
  *
- * The build draws bars from zero (D163). With the Stage 5b metric a day
- * differs from the next by a few percent, so the bars of a season stand
- * almost level and the plot says little; the contract left "line or bars"
- * to this stage. This is the line by the contract's own rules, drawn from
- * the same days: each day's value as its change since the first day shown.
- * The zero line is that first day. The scale is the one the muscle rows
- * share — 12 % reaches the edge — so that a small change still looks small
- * (D163); a series that goes further widens it in steps of six, and is
- * never cut off. The line is the neutral data ink at 1.5px with round
- * ends; the end point carries the state of the end value by the one band
- * (`muscleState.ts`), the data ink when it is held, and the value stands
- * beside it, right of the plot, as a row's figure stands right of its
- * line; the first and the last date stand beneath.
+ * Until Stage 5b the detail drew bars from zero (D163). Under the Stage 5b
+ * metric a day differs from the next by two or three percent, so the bars
+ * of a season stood almost level and the plot said little. The line is
+ * drawn from the same days: **each day's value as its change since the
+ * first day shown**, and the zero line is that first day.
  *
- * Reached only on the dev server (`GymProgress` loads it under
- * `import.meta.env.DEV` with `?chart=line`), so a production bundle carries
- * neither this file nor its styles. If the owner chooses the line it moves
- * into `ExerciseDetail`.
+ * - **A small change still looks small** (D160, D163). The scale is the one
+ *   the muscle rows share — 12 % reaches the edge — and never a scale from
+ *   the smallest day to the largest, which made a fall of a tenth look like
+ *   a collapse. A series that goes beyond 12 % widens the scale in steps of
+ *   six, so nothing is cut off and nothing stands at the edge unless it is
+ *   there.
+ * - A series that only rises is drawn above its zero line and one that only
+ *   falls below it; one that does both has the zero line in the middle.
+ * - The line is the neutral data ink at 1.5px with round ends. Only the end
+ *   point carries a colour: the state of the end value by the one band
+ *   (`muscleState.ts`), the data ink when it is held. The value stands
+ *   beside it, right of the plot, as a row's figure stands right of its
+ *   line; the first and the last date stand beneath.
+ * - **One day is a dot and no value**: one observation is not a change, and
+ *   the chart does not print one. No day draws nothing — the detail shows
+ *   its empty state instead of this chart.
+ *
+ * The end value compares the last day with the first day *shown*; the
+ * figures above the chart compare the last day with the one before. Both
+ * are true statements about named days, and neither is the window
+ * comparison the rating runs (D150): this chart is a picture of the days
+ * and computes nothing that is scored.
  */
 
 /** The change, in percent, that reaches the edge of the plot at the least. */
@@ -35,17 +45,17 @@ export const LINE_SCALE = 12;
 /** What the reach grows by when a change goes beyond it. */
 const LINE_STEP = 6;
 
-/** How far the plot reaches from its zero line: the shared scale, or the next step above the largest change. */
-export function lineReach(values: readonly number[]): number {
-  const largest = values.reduce((max, value) => Math.max(max, Math.abs(value)), 0);
-  return Math.max(LINE_SCALE, Math.ceil(largest / LINE_STEP - 1e-9) * LINE_STEP);
-}
-
 /** Each day's change against the first day of the list, in percent, oldest first. */
 export function lineValues(days: readonly ExerciseDay[]): number[] {
   const ordered = [...days].sort((a, b) => a.date.localeCompare(b.date));
   const first = ordered[0]?.best.score ?? 0;
   return ordered.map((day) => (first > 0 ? (day.best.score / first - 1) * 100 : 0));
+}
+
+/** How far the plot reaches from its zero line: the shared scale, or the next step above the largest change. */
+export function lineReach(values: readonly number[]): number {
+  const largest = values.reduce((max, value) => Math.max(max, Math.abs(value)), 0);
+  return Math.max(LINE_SCALE, Math.ceil(largest / LINE_STEP - 1e-9) * LINE_STEP);
 }
 
 /**
@@ -61,17 +71,28 @@ export function lineRange(values: readonly number[]): { low: number; high: numbe
   return { low, high };
 }
 
+/**
+ * Where a change stands in the plot, as a share of its height from the top:
+ * 0 is the upper edge, 1 the lower. Linear in the change — twice the change
+ * is twice the distance from the zero line.
+ */
+export function lineY(value: number, range: { low: number; high: number }): number {
+  return (range.high - Math.max(range.low, Math.min(range.high, value))) / (range.high - range.low);
+}
+
 export function ExerciseLineChart({ days }: { /** Newest first, as the detail has them. */ days: ExerciseDay[] }) {
   const { language } = useI18n();
   const ordered = [...days].sort((a, b) => a.date.localeCompare(b.date));
   const values = lineValues(days);
-  const { low, high } = lineRange(values);
-  /** Where a value stands, as a share of the plot's height from its top. */
-  const y = (value: number): number => (high - Math.max(low, Math.min(high, value))) / (high - low);
+  const range = lineRange(values);
+  const { low, high } = range;
+  const y = (value: number): number => lineY(value, range);
   const x = (index: number): number => (values.length === 1 ? 0.5 : index / (values.length - 1));
   const end = values[values.length - 1] ?? 0;
+  /** One day is not a change: its dot is neutral and no value stands beside it. */
+  const compared = values.length > 1;
   const shown = roundShown(end) ?? 0;
-  const state = trendOfShown(shown);
+  const state = compared ? trendOfShown(shown) : 'unchanged';
   const inset = (share: number): string => `calc(3px + (100% - 6px) * ${share.toFixed(4)})`;
   const zero = y(0);
 
@@ -90,7 +111,7 @@ export function ExerciseLineChart({ days }: { /** Newest first, as the detail ha
           {low < 0 ? <span className="exercise-line__bound" style={{ top: inset(1) }} /> : null}
           <span className="exercise-line__zero" style={{ top: inset(zero) }} />
           <svg className="exercise-line__svg" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
-            {values.length > 1 ? (
+            {compared ? (
               <polyline
                 className="exercise-line__line"
                 points={values.map((value, index) => `${(x(index) * 100).toFixed(2)},${(y(value) * 100).toFixed(2)}`).join(' ')}
@@ -114,12 +135,14 @@ export function ExerciseLineChart({ days }: { /** Newest first, as the detail ha
         ) : null}
       </div>
       {/* The end value, beside the end point and clear of the line. */}
-      <div className="exercise-line__endColumn">
-        <span className={`exercise-line__value exercise-line__value--${state}`} style={{ top: inset(y(end)) }}>
-          {signedPercentText(shown)}
-        </span>
-        <span className="exercise-line__sizer">{signedPercentText(shown)}</span>
-      </div>
+      {compared ? (
+        <div className="exercise-line__endColumn">
+          <span className={`exercise-line__value exercise-line__value--${state}`} style={{ top: inset(y(end)) }}>
+            {signedPercentText(shown)}
+          </span>
+          <span className="exercise-line__sizer">{signedPercentText(shown)}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

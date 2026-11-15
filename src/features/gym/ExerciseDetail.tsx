@@ -1,12 +1,14 @@
-import type { ComponentType } from 'react';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { Card, EmptyState, Figure, Section } from '../../components';
 import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
 import { percentChange, type ExerciseComparison, type ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
+import { signedPercentText } from '../../i18n/typography';
 import { useWeights } from '../../app/useWeights';
 import { changeWords } from './changeWords';
+import { ExerciseLineChart, lineValues } from './ExerciseLineChart';
+import { roundShown } from './muscleState';
 import './gym.css';
 import { useWorld } from '../../app/world';
 
@@ -20,46 +22,17 @@ import { useWorld } from '../../app/world';
  * underneath, where they answer "how did I get there".
  */
 
-/**
- * A bar's height in percent of the plot: the day's score over the largest
- * day's, **from zero** (STOP 6b; contract §6).
- *
- * A scale from the smallest day to the largest made a fall of a tenth look
- * like a collapse, which is the very thing the shared scale of the muscle
- * rows was introduced to end (D160): a small change must look small. So a
- * day at 90 % of the best day is a bar at 90 % of the height. The floor of
- * 8 % only keeps a very small day a visible bar; it is the floor these bars
- * had before Stage 6b.
- */
-export function barHeight(score: number, peak: number): number {
-  return peak > 0 ? Math.max(BAR_FLOOR, (score / peak) * 100) : BAR_FLOOR;
-}
-const BAR_FLOOR = 8;
-/**
- * From this many training days the bars stand closer together, so that a
- * season of one exercise still fits a 320px phone with its latest bar — the
- * one that carries the state — in view.
- */
-const DENSE_FROM = 24;
-
 export function ExerciseDetail({
   name,
   days,
   comparison,
   onClose,
-  Chart,
 }: {
   name: string;
   /** Newest first. */
   days: ExerciseDay[];
   comparison: ExerciseComparison | undefined;
   onClose(): void;
-  /**
-   * Another drawing of the same days in place of the bars. The build passes
-   * none: the bars are the chart (D163). It exists for the line the contract
-   * left to Stage 5b to judge, which is shown on the dev server only.
-   */
-  Chart?: ComponentType<{ days: ExerciseDay[] }>;
 }) {
   const t = useT();
   // The exercise detail is a Gym screen (WP3 Stage 6).
@@ -85,17 +58,12 @@ export function ExerciseDetail({
   // how much there must be to compare does not apply to one exercise.
   const words = !comparison || comparison.kind === 'noBaseline' ? null : changeWords(change, t);
   const shown = words?.trend ?? null;
-  const oldest = days[days.length - 1] ?? null;
   /*
-   * The chart's scale runs from zero to the largest day (contract §6), and
-   * the largest is named beside its line as the set that produced it — the
-   * way this screen prints a day's value everywhere else.
+   * What the line draws, for the table that says the same in words: each
+   * day's change since the first day shown, newest first like `days`. The
+   * first day is what the others are measured against and has none.
    */
-  const largest = days.reduce<ExerciseDay | null>(
-    (top, day) => (top === null || day.best.score > top.best.score ? day : top),
-    null,
-  );
-  const peak = largest?.best.score ?? 0;
+  const sinceFirst = lineValues(days).reverse();
 
   return (
     <div className="screen gym-detail">
@@ -157,45 +125,12 @@ export function ExerciseDetail({
             <Section label={t('gym.detail.history')}>
               <Card>
                 {/*
-                  The bars are decorative and the table below carries the same
-                  numbers with their dates, exactly as the Wellbeing history
-                  does. One picture, one semantic alternative.
+                  The line is decorative and the table below carries the
+                  same days in words — each with its best working set and
+                  its change since the first day shown, which is what the
+                  line draws. One picture, one semantic alternative.
                 */}
-                {Chart ? <Chart days={days} /> : (
-                <div className="gym-detail__chart" aria-hidden="true">
-                  <div className="gym-detail__axis">
-                    <span className="gym-detail__axisMax">{largest ? score(largest) : null}</span>
-                    <span className="gym-detail__axisZero">0</span>
-                  </div>
-                  <div className="gym-detail__plot">
-                    <div
-                      className={`gym-detail__bars ${days.length > DENSE_FROM ? 'gym-detail__bars--dense' : ''}`.trim()}
-                    >
-                      {[...days].reverse().map((day, index) => {
-                        // The last bar — the latest day — carries the state
-                        // of the change the figures above state; the bars
-                        // before it are neutral.
-                        const isLatest = index === days.length - 1;
-                        return (
-                          <span
-                            key={day.date}
-                            className={`gym-detail__bar ${
-                              isLatest ? `gym-detail__bar--latest gym-detail__bar--${shown ?? 'noBaseline'}` : ''
-                            }`.trim()}
-                            style={{ height: `${barHeight(day.best.score, peak)}%` }}
-                          />
-                        );
-                      })}
-                    </div>
-                    {oldest ? (
-                      <div className="gym-detail__dates">
-                        <span>{formatDayAndMonth(language, oldest.date)}</span>
-                        {days.length > 1 ? <span>{formatDayAndMonth(language, latest!.date)}</span> : null}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-                )}
+                <ExerciseLineChart days={days} />
 
                 <div className="visually-hidden">
                   <table>
@@ -204,13 +139,19 @@ export function ExerciseDetail({
                       <tr>
                         <th scope="col">{t('gym.detail.day')}</th>
                         <th scope="col">{t('gym.detail.value')}</th>
+                        <th scope="col">{t('gym.detail.sinceFirst')}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {days.map((day) => (
+                      {days.map((day, index) => (
                         <tr key={day.date}>
                           <th scope="row">{formatDayAndMonth(language, day.date)}</th>
                           <td>{scoreText(day)}</td>
+                          <td>
+                            {index === days.length - 1
+                              ? t('gym.detail.firstDay')
+                              : signedPercentText(roundShown(sinceFirst[index] ?? 0) ?? 0)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

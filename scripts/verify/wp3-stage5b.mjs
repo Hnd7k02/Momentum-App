@@ -24,8 +24,12 @@ import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seedLeg
  *                           writes one snapshot with all three eras, the
  *                           earlier one untouched; a second load writes
  *                           nothing
- *   F  the build            draws bars: the line proposed at STOP 5b is not
- *                           in the bundle
+ *   F  the build            draws the line the owner chose at STOP 5b in
+ *                           the exercise detail, and no bars (D175)
+ *
+ * And, in A and C, the hint that says where the mark is (D175): once, under
+ * the sets of the first exercise that has one, until a set has been marked
+ * — then gone, and not back when the mark is taken off or after a reload.
  *
  * Every context runs on a fixed clock (CLOCK=YYYY-MM-DD, default
  * 2026-11-18, a Wednesday) in Europe/Berlin, at 320, 360, 393 and 430.
@@ -478,11 +482,19 @@ for (const [width, height] of SIZES) {
   await ctx.close();
 }
 
-/* ── F: the build draws bars ───────────────────────────────────────────── */
+/* ── F: the build draws the line ───────────────────────────────────────── */
 {
+  // Until STOP 5b this held that the line was *not* in the bundle: the build
+  // drew bars and the line was a proposal on the dev server. The owner chose
+  // the line (D175), so the same check now holds the opposite — the line is
+  // what ships, and nothing of the bars is left. What the line draws is held
+  // on the screen by `design-system.mjs`.
   const assets = readdirSync('dist/assets').filter((file) => /\.(js|css)$/.test(file));
-  const hits = assets.filter((file) => /exercise-line|ExerciseLineChart/.test(readFileSync(`dist/assets/${file}`, 'utf8')));
-  check('F: the line proposed at STOP 5b is not in the production bundle', assets.length > 0 && hits.length === 0, hits.join(', '));
+  const text = assets.map((file) => readFileSync(`dist/assets/${file}`, 'utf8'));
+  const line = text.filter((content) => /exercise-line__line/.test(content)).length;
+  const bars = text.filter((content) => /gym-detail__bar/.test(content)).length;
+  check('F: the production bundle draws the exercise detail as the line, and carries no bar',
+    assets.length > 0 && line >= 2 && bars === 0, `line in ${line} assets, bars in ${bars}`);
 }
 
 await browser.close();

@@ -546,6 +546,8 @@ export const en: Translations = {
   'gym.detail.tableCaption': 'Best working set per training day',
   'gym.detail.day': 'Day',
   'gym.detail.value': 'Best working set',
+  'gym.detail.sinceFirst': 'Change since the first day',
+  'gym.detail.firstDay': 'Starting value',
   'gym.detail.open': 'Open this exercise’s history',
 
   'running.distance': 'Distance',

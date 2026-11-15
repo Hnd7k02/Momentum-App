@@ -1,36 +1,66 @@
 import { describe, expect, it } from 'vitest';
-import { barHeight } from './ExerciseDetail';
+import type { ExerciseDay } from '../../core/gym/performance';
+import { lineRange, lineValues, lineY } from './ExerciseLineChart';
 
 /**
- * The exercise detail's bars start at zero (STOP 6b, contract §6).
+ * A small change must look small in the exercise detail (D160, D163).
  *
- * For one stage they ran from the smallest day to the largest, so the
- * smallest day stood at 30 % whatever it was: a fall from 535 to 480
- * kg-reps — a tenth — was drawn as a bar a third as high. A small change
- * must look small (D160).
+ * Until STOP 5b the detail drew bars, and these four tests held that a bar
+ * was its day's share of the largest day, from zero — for one stage they
+ * had run from the smallest day to the largest, so a fall of a tenth was
+ * drawn as a bar a third as high. The owner chose the line at STOP 5b
+ * (D175), and the same four statements are held for it: a day stands where
+ * its change since the first day shown puts it on a scale that reaches
+ * 12 % at the least, never on a scale from the smallest day to the
+ * largest.
  */
-describe('a bar is its day’s share of the largest day', () => {
-  it('draws the largest day at full height and half of it at half', () => {
-    expect(barHeight(535.5, 535.5)).toBe(100);
-    expect(barHeight(267.75, 535.5)).toBe(50);
+const day = (date: string, score: number): ExerciseDay =>
+  ({ date, exerciseId: 'ex', muscles: [], best: { score, set: { reps: 1, weightGrams: score, order: 0 } } }) as unknown as ExerciseDay;
+
+/** Newest first, as the detail holds its days. */
+const series = (...scores: number[]): ExerciseDay[] =>
+  scores.map((score, index) => day(`2026-06-${String(index + 1).padStart(2, '0')}`, score)).reverse();
+
+describe('a day stands at its change since the first day shown', () => {
+  it('draws the first day on the zero line, the scale’s reach at the edge and half of it halfway', () => {
+    const range = lineRange(lineValues(series(1000, 1060, 1120)));
+    expect(range).toEqual({ low: 0, high: 12 });
+    // From the top: the zero line is the lower edge of a series that only rises.
+    expect(lineY(0, range)).toBe(1);
+    expect(lineY(12, range)).toBe(0);
+    expect(lineY(6, range)).toBeCloseTo(0.5, 10);
   });
 
-  it('draws a fall of a tenth as a tenth', () => {
-    // 8 × 60 kg after 7 × 76.5 kg: 480 against 535.5.
-    expect(barHeight(480, 535.5)).toBeCloseTo(89.64, 2);
-    // And never as the collapse a smallest-to-largest scale made of it.
-    expect(barHeight(480, 535.5)).toBeGreaterThan(85);
+  it('draws a fall of a tenth as a fall of a tenth', () => {
+    // 480 after 535.5: the same two days the bars were held to.
+    const values = lineValues(series(535.5, 480));
+    expect(values[1]).toBeCloseTo(-10.36, 2);
+    const range = lineRange(values);
+    expect(range).toEqual({ low: -12, high: 0 });
+    // Ten twelfths of the way down — and never at the lower edge, which is
+    // where a scale from the smallest day to the largest put it.
+    expect(lineY(values[1]!, range)).toBeCloseTo(10.36 / 12, 2);
+    expect(lineY(values[1]!, range)).toBeLessThan(0.9);
+    // A fall of three percent is a quarter of the way.
+    expect(lineY(-3, range)).toBeCloseTo(0.25, 10);
   });
 
-  it('keeps the ratio between any two days', () => {
-    const peak = 1200;
-    for (const [a, b] of [[300, 600], [450, 900], [1000, 1100]] as const) {
-      expect(barHeight(a, peak) / barHeight(b, peak)).toBeCloseTo(a / b, 10);
+  it('keeps the ratio between any two changes, whatever else the series holds', () => {
+    for (const scores of [[1000, 1030, 1060], [1000, 1100, 1300], [1000, 960, 1080]]) {
+      const values = lineValues(series(...scores));
+      const range = lineRange(values);
+      const zero = lineY(0, range);
+      const [, a, b] = values as [number, number, number];
+      // The distance from the zero line is the change, to scale.
+      expect((zero - lineY(a, range)) / (zero - lineY(b, range))).toBeCloseTo(a / b, 10);
     }
   });
 
-  it('keeps a very small day a visible bar, and survives a history without a score', () => {
-    expect(barHeight(10, 1000)).toBe(8);
-    expect(barHeight(0, 0)).toBe(8);
+  it('keeps one day a dot on its zero line, and survives a history without a score', () => {
+    const one = lineValues(series(720));
+    expect(one).toEqual([0]);
+    expect(lineY(0, lineRange(one))).toBe(1);
+    // A first day that cannot be divided by leaves every day on the zero line.
+    expect(lineValues(series(0, 0, 500))).toEqual([0, 0, 0]);
   });
 });

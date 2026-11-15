@@ -3,14 +3,15 @@ import type { ExerciseDay } from '../../core/gym/performance';
 import { LINE_SCALE, lineRange, lineReach, lineValues } from './ExerciseLineChart';
 
 /**
- * The scale of the line proposed for the exercise detail at STOP 5b. The
- * chart itself is on the dev server only; its arithmetic is held here so
- * that the pictures the owner judges are drawn by a rule and not by eye.
+ * The scale of the exercise detail's line (contract §6; the owner's choice
+ * at STOP 5b, D175): what each point is, how far the plot reaches, and on
+ * which side of the zero line a series is drawn. Where a point stands
+ * inside that range is `ExerciseDetail.test.ts`.
  */
 const day = (date: string, score: number): ExerciseDay =>
   ({ date, exerciseId: 'ex', muscles: [], best: { score, set: { reps: 1, weightGrams: score, order: 0 } } }) as unknown as ExerciseDay;
 
-describe('the proposed line of the exercise detail', () => {
+describe('the line of the exercise detail', () => {
   it('reads each day as its change since the first day shown, oldest first', () => {
     // Handed over newest first, as the detail holds its days.
     const values = lineValues([day('2026-06-08', 1120), day('2026-06-01', 980), day('2026-05-25', 1000)]);

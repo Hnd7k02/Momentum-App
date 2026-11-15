@@ -1,9 +1,12 @@
 /*
- * The exercise detail's days as a line — the proposal for STOP 5b
- * (`ExerciseLineChart.tsx`), loaded on the dev server only. The rules are
- * the contract's (§6): a neutral 1.5px line with round ends, a fine zero
- * line that is always there, the end point in the state's colour and the
- * data ink when it is held, the value beside it.
+ * The exercise detail's days as a line (`ExerciseLineChart.tsx`; contract
+ * §6, the owner's choice at STOP 5b): a neutral 1.5px line with round ends,
+ * a fine zero line that is always there, the end point in the state's
+ * colour and the data ink when it is held, the value beside it.
+ *
+ * The labels on the left are secondary, like the figures' labels above the
+ * chart: the caption grey measured 4.29:1 in the card's lightest corner on
+ * a 440px phone.
  */
 .exercise-line__axis {
   flex: none;

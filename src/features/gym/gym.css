@@ -587,107 +587,18 @@
 }
 
 /*
- * The bars of an exercise's days (contract §6): they start at zero, so a
- * day's bar is its share of the largest day. Zero and the largest value are
- * named on the left, each on its line; the first and the last date stand
- * beneath. The bars are the neutral data ink at 55 %; the last one carries
- * the state of the change.
+ * The chart of an exercise's days (contract §6): a row of the scale's
+ * labels, the plot with the first and the last date beneath, and the end
+ * value. What is drawn in the plot — the line — is `exerciseLineChart.css`.
  */
 .gym-detail__chart {
   display: flex;
   gap: var(--space-2);
 }
 
-.gym-detail__axis {
-  flex: none;
-  /* Both labels share one cell, so the column is as wide as the wider one
-     and each can stand at the height of the bar it names. */
-  display: grid;
-  height: 110px;
-  font-size: var(--type-caption);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  white-space: nowrap;
-  /* Secondary, like the figures' labels above: the largest day's label
-     stands in the card's lightest corner, where the caption grey measured
-     4.29:1 on a 440px phone. */
-  color: var(--text-secondary);
-}
-
-.gym-detail__axisMax,
-.gym-detail__axisZero {
-  grid-area: 1 / 1;
-}
-
-/* Each centred on the line it labels: the largest day on the plot's top
-   edge, zero on the baseline. */
-.gym-detail__axisMax {
-  align-self: start;
-  transform: translateY(-50%);
-}
-
-.gym-detail__axisZero {
-  align-self: end;
-  transform: translateY(50%);
-}
-
-/* The axis is set at caption size throughout, its unit included. */
-.gym-detail__axis .figure__unit {
-  font-size: inherit;
-  color: inherit;
-}
-
 .gym-detail__plot {
   flex: 1;
   min-width: 0;
-}
-
-.gym-detail__bars {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  /* Should there ever be more days than the plot holds, the oldest leave
-     it, never the latest — the one bar that carries the state. */
-  justify-content: flex-end;
-  overflow: hidden;
-  gap: 3px;
-  height: 110px;
-  border-top: 1px dashed var(--separator-strong);
-  border-bottom: 1px solid var(--separator-strong);
-}
-
-.gym-detail__bars--dense {
-  gap: 1px;
-}
-
-.gym-detail__bar {
-  flex: 1;
-  min-width: 3px;
-  max-width: 34px;
-  border-radius: 4px 4px 0 0;
-  background: var(--data-ink);
-  opacity: 0.55;
-}
-
-.gym-detail__bars--dense .gym-detail__bar {
-  min-width: 1px;
-  border-radius: 1px 1px 0 0;
-}
-
-/* The latest day: the status colour of its change, the plain data ink when
-   it is held, and like its neighbours where there is nothing to compare. */
-.gym-detail__bar--latest.gym-detail__bar--improved {
-  background: var(--status-strong);
-  opacity: 1;
-}
-
-.gym-detail__bar--latest.gym-detail__bar--declined {
-  background: var(--status-weak);
-  opacity: 1;
-}
-
-.gym-detail__bar--latest.gym-detail__bar--unchanged {
-  opacity: 1;
 }
 
 .gym-detail__dates {

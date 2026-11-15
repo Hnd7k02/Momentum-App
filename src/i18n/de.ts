@@ -555,6 +555,8 @@ export const de = {
   'gym.detail.tableCaption': 'Bester Arbeitssatz pro Trainingstag',
   'gym.detail.day': 'Tag',
   'gym.detail.value': 'Bester Arbeitssatz',
+  'gym.detail.sinceFirst': 'Veränderung seit dem ersten Tag',
+  'gym.detail.firstDay': 'Ausgangswert',
   'gym.detail.open': 'Verlauf dieser Übung öffnen',
 
   'running.distance': 'Distanz',

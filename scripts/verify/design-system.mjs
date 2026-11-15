@@ -531,65 +531,99 @@ for (const width of WIDTHS) {
     await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Bankdrücken$/ }) }).first().click();
     await page.waitForTimeout(1200);
     await look(page, width, 'uebungsdetail', 'gym');
-    // The bars (contract §6): neutral, the latest in the colour of its
-    // change and never out of view; they start at zero, so a bar's height
-    // is its day's share of the largest day; zero and the largest value are
-    // named on the left, each on its line; the first and the last date
-    // stand beneath.
-    const bars = await page.evaluate(() => {
-      const box = document.querySelector('.gym-detail__bars');
-      const plot = box.getBoundingClientRect();
-      const inner = { top: plot.top + box.clientTop, bottom: plot.top + box.clientTop + box.clientHeight };
-      const all = [...document.querySelectorAll('.gym-detail__bar')];
-      const middle = (selector) => {
-        const el = document.querySelector(selector);
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        return (r.top + r.bottom) / 2;
+    // The line (contract §6; the owner's choice at STOP 5b, D175): each day
+    // stands at its change since the first day shown, on a scale that
+    // reaches 12 % at the least and is never cut off; the zero line is
+    // there and named; the line is neutral and only its end point carries
+    // a colour — the state of the end value, which stands beside it; the
+    // first and the last date stand beneath.
+    //
+    // Until STOP 5b the detail drew bars, and these five checks held them
+    // to the same five things: from zero, a fall of a tenth as a tenth, the
+    // scale named on the left, one colour on the latest and in view, the
+    // two dates. None is dropped; each states what the line does.
+    const line = await page.evaluate(() => {
+      const plot = document.querySelector('.exercise-line__plot');
+      const svg = document.querySelector('.exercise-line__svg').getBoundingClientRect();
+      const poly = document.querySelector('.exercise-line__line');
+      const points = poly ? poly.getAttribute('points').trim().split(/\s+/).map((pair) => pair.split(',').map(Number)) : [];
+      const middle = (el) => { const r = el.getBoundingClientRect(); return (r.top + r.bottom) / 2; };
+      const css = (el, prop) => getComputedStyle(el)[prop];
+      // A token's colour as the Gym world resolves it on this screen.
+      const token = (name) => {
+        const probe = document.createElement('span');
+        probe.style.color = `var(${name})`;
+        plot.appendChild(probe);
+        const colour = getComputedStyle(probe).color;
+        probe.remove();
+        return colour;
       };
-      const fill = (el) => getComputedStyle(el).backgroundColor;
-      const latest = all[all.length - 1];
+      const end = document.querySelector('.exercise-line__end');
+      const endBox = end.getBoundingClientRect();
+      const value = document.querySelector('.exercise-line__value');
       // The table beside the chart names every day's best working set,
-      // newest first, and its bar stands for that set's strength score
-      // (Stage 5b, D150): "8 × 60 kg" is 60 × (30 + 8) = 2280. Before the
-      // stage the value was reps × load, 480, and a device still on that
-      // metric draws its bars by it; this suite onboards on the new build.
-      const scores = [...document.querySelectorAll('.gym-detail .visually-hidden tbody td')]
-        .map((el) => el.textContent.match(/([\d.]+)\s*×\s*([\d.]+)/))
+      // newest first; a day's value is that set's strength score (D150):
+      // "8 × 60 kg" is 60 × (30 + 8) = 2280.
+      const scores = [...document.querySelectorAll('.gym-detail .visually-hidden tbody tr')]
+        .map((tr) => tr.querySelector('td').textContent.match(/([\d.]+)\s*×\s*([\d.]+)/))
         .map((m) => (m ? Number(m[2]) * (30 + Number(m[1])) : null))
         .reverse();
       return {
-        count: all.length,
-        heights: all.map((bar) => Math.round((bar.getBoundingClientRect().height / (inner.bottom - inner.top)) * 1000) / 10),
+        bars: document.querySelectorAll('.gym-detail__bar, .gym-detail__bars').length,
+        points,
         scores,
-        tallest: Math.round(Math.min(...all.map((bar) => bar.getBoundingClientRect().top)) * 10) / 10,
-        baseline: Math.round(inner.bottom * 10) / 10,
-        bottoms: Math.round(Math.max(...all.map((bar) => Math.abs(bar.getBoundingClientRect().bottom - inner.bottom))) * 10) / 10,
-        max: middle('.gym-detail__axisMax'),
-        zero: middle('.gym-detail__axisZero'),
-        zeroText: document.querySelector('.gym-detail__axisZero')?.textContent ?? null,
-        latestIsLast: latest.classList.contains('gym-detail__bar--latest'),
-        coloured: all.filter((bar) => fill(bar) !== fill(all[0])).length,
-        latestRight: latest.getBoundingClientRect().right,
-        plotRight: plot.right,
+        labels: [...document.querySelectorAll('.exercise-line__label')].map((el) => ({ text: el.textContent, y: middle(el) })),
+        svg: { top: svg.top, height: svg.height, left: svg.left, width: svg.width },
+        zeroY: document.querySelector('.exercise-line__zero').getBoundingClientRect().top,
+        bounds: [...document.querySelectorAll('.exercise-line__bound')].map((el) => el.getBoundingClientRect().top),
+        stroke: poly ? css(poly, 'stroke') : null,
+        strokeWidth: poly ? css(poly, 'strokeWidth') : null,
+        ink: token('--data-ink'),
+        strong: token('--status-strong'),
+        weak: token('--status-weak'),
+        end: { cls: end.className, fill: css(end, 'backgroundColor'), x: (endBox.left + endBox.right) / 2, y: (endBox.top + endBox.bottom) / 2, right: endBox.right, size: endBox.width },
+        value: value ? { text: value.textContent, cls: value.className, left: value.getBoundingClientRect().left, y: middle(value) } : null,
+        plotRight: plot.getBoundingClientRect().right,
         dates: [...document.querySelectorAll('.gym-detail__dates span')].map((span) => span.textContent),
       };
     });
-    const peak = Math.max(...bars.scores.filter((score) => score !== null));
-    const offScale = bars.scores.length === bars.count
-      ? bars.heights.map((height, index) => Math.abs(height - Math.max(8, (bars.scores[index] / peak) * 100)))
+    const percent = (text) => Number(text.replace('−', '-').replace(/[^\d.+-]/g, ''));
+    const changes = line.scores.map((score) => (score / line.scores[0] - 1) * 100);
+    const high = Math.max(0, ...line.labels.map((label) => percent(label.text)));
+    const low = Math.min(0, ...line.labels.map((label) => percent(label.text)));
+    const expectedY = (change) => ((high - change) / (high - low)) * 100;
+    const offLine = line.points.length === changes.length
+      ? line.points.map(([x, y], index) => Math.max(Math.abs(y - expectedY(changes[index])), Math.abs(x - (index / (changes.length - 1)) * 100)))
       : [Infinity];
-    check(`${width}: the bars start at zero — every bar is its day's share of the largest (${bars.count} days)`,
-      bars.count > 1 && bars.bottoms <= 0.6 && Math.max(...offScale) <= 1.5,
-      short({ heights: bars.heights, scores: bars.scores, off: Math.max(...offScale), bottoms: bars.bottoms }));
-    check(`${width}: a fall of a tenth is drawn as a tenth, not as a collapse`,
-      Math.min(...bars.heights) >= Math.round((Math.min(...bars.scores) / peak) * 100) - 2, short(bars.heights));
-    check(`${width}: the bars' largest value is named at the top of the tallest bar, and zero on the baseline`,
-      bars.max !== null && Math.abs(bars.max - bars.tallest) <= 2 && bars.zeroText === '0' && bars.zero !== null && Math.abs(bars.zero - bars.baseline) <= 2,
-      short({ max: bars.max, tallest: bars.tallest, zero: bars.zero, baseline: bars.baseline, zeroText: bars.zeroText }));
-    check(`${width}: only the latest bar carries a colour, and it is in view`,
-      bars.latestIsLast && bars.coloured === 1 && bars.latestRight <= bars.plotRight + 0.5, short(bars));
-    check(`${width}: the first and the last date stand beneath the bars`, bars.dates.length === 2 && bars.dates[0] !== bars.dates[1], short(bars.dates));
+    check(`${width}: the line stands on its days — every point is its day's change since the first day shown (${line.points.length} days), and no bar is left`,
+      line.points.length > 1 && line.bars === 0 && Math.max(...offLine) <= 0.6,
+      short({ points: line.points.slice(0, 4), changes: changes.slice(0, 4).map((v) => Math.round(v * 10) / 10), off: Math.max(...offLine), bars: line.bars }));
+    const furthest = Math.max(...changes.map(Math.abs));
+    const reach = Math.max(high, -low);
+    check(`${width}: a small change looks small — the scale reaches 12 % at the least, widens in steps of six and cuts no day off`,
+      reach >= 12 && reach % 6 === 0 && reach === Math.max(12, Math.ceil(furthest / 6 - 1e-9) * 6) &&
+        line.points.every(([, y]) => y >= -0.01 && y <= 100.01),
+      short({ reach, furthest: Math.round(furthest * 10) / 10, labels: line.labels.map((label) => label.text) }));
+    const zeroLabel = line.labels.find((label) => percent(label.text) === 0);
+    const named = line.bounds.every((top) => line.labels.some((label) => percent(label.text) !== 0 && Math.abs(label.y - top) <= 2));
+    check(`${width}: the zero line is there and named, and the scale's reach is named on its line`,
+      Boolean(zeroLabel) && Math.abs(zeroLabel.y - line.zeroY) <= 2 && line.bounds.length >= 1 && named,
+      short({ zero: zeroLabel, zeroY: line.zeroY, bounds: line.bounds, labels: line.labels }));
+    const endChange = changes[changes.length - 1];
+    const endShown = Math.sign(endChange) * Math.round(Math.abs(endChange));
+    const endState = endShown >= 3 ? 'improved' : endShown <= -3 ? 'declined' : 'unchanged';
+    const endFill = { improved: line.strong, declined: line.weak, unchanged: line.ink }[endState];
+    const endText = `${endShown > 0 ? '+' : endShown < 0 ? '−' : ''}${Math.abs(endShown)}\u00A0%`;
+    const lastPoint = line.points[line.points.length - 1] ?? [0, 0];
+    check(`${width}: the line is the neutral ink at 1.5px, and only its end point carries the state — ${endText}, beside it and in view`,
+      line.stroke === line.ink && line.strokeWidth === '1.5px' &&
+        line.end.cls.includes(`exercise-line__end--${endState}`) && line.end.fill === endFill && Math.abs(line.end.size - 6) <= 0.5 &&
+        Math.abs(line.end.y - (line.svg.top + (lastPoint[1] / 100) * line.svg.height)) <= 1.5 &&
+        line.end.right <= line.plotRight + 0.5 &&
+        line.value !== null && line.value.text === endText && line.value.cls.includes(`exercise-line__value--${endState}`) &&
+        line.value.left >= line.plotRight - 0.5 && Math.abs(line.value.y - line.end.y) <= 2,
+      short({ stroke: line.stroke, ink: line.ink, width: line.strokeWidth, end: line.end, value: line.value, plotRight: line.plotRight }));
+    check(`${width}: the first and the last date stand beneath the line`, line.dates.length === 2 && line.dates[0] !== line.dates[1], short(line.dates));
     await page.locator('.gym-detail .gym-session__scroll').evaluate((el) => { el.scrollTop = el.scrollHeight; });
     await page.waitForTimeout(400);
     await look(page, width, 'uebungsdetail-tage', 'gym');
