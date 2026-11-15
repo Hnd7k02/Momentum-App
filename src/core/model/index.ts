@@ -300,6 +300,15 @@ export type GymWindowComparison = 'median' | 'firstLast';
  * `comparison` is a switch inside this era and not an era of its own: the
  * owner confirmed the median, with the numbers before him, at STOP 5b
  * (D175).
+ *
+ * `curveDecadePercent` is the performance curve's one value for Gym in
+ * this era (block "Kurve", D177): how many percentage points of change
+ * multiply the odds by four. The metric reads a week's progress as two or
+ * three percent where `reps × load` read ten and more, so the curve that
+ * turns its changes into a level travels with it — everything a Gym day of
+ * the era was scored with is in this one object. **Absent on a marker a
+ * Stage 5b preview wrote**: the curve as it was, ten, for the days that
+ * snapshot covers; never backfilled.
  */
 export interface GymMetricSnapshot {
   /** Names the metric. */
@@ -307,6 +316,8 @@ export interface GymMetricSnapshot {
   /** The score's one constant: effective load × (1 + reps ÷ repsDivisor). */
   repsDivisor: number;
   comparison: GymWindowComparison;
+  /** Every this many points of improvement multiply the odds by four. Absent: ten. */
+  curveDecadePercent?: number;
 }
 
 export type DomainConfigSnapshot = {

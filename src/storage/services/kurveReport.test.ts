@@ -1,17 +1,20 @@
 import 'fake-indexeddb/auto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
 import { addDays, type DateKey } from '../../core/dates';
+import { gymMetricOf } from '../../core/gym/metric';
 import { percentChange } from '../../core/gym/performance';
+import { mapPerformanceChangeToScore } from '../../core/scoring/performanceCurve';
 import { MUSCLE_GROUPS } from '../../core/model';
 import { roundShown, shownPerformance } from '../../features/gym/muscleState';
 import { closeDatabase, deleteDatabase } from '../db';
 import { ensureFoodRetired, ensureGymMetricEra, ensureSessionWindowEra } from '../configService';
+import { configSnapshotsRepository } from '../repositories';
 import { importBackup } from './backupService';
 import { loadBossProgression, type BossProgression } from './bossService';
 import { loadGymHistory } from './gymService';
-import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
+import { withoutGymCurveValue, withoutGymMetricEra } from './fixtures/legacyGymMetric';
 import {
   PROGRESSION_START,
   PROGRESSION_WEEKS,
@@ -48,22 +51,21 @@ import {
  * candidate's value. The update loads on the same day in each, with the
  * one-day window and Food off as every update brings them.
  *
- * ## How a candidate reaches the replay — before the production code exists
+ * ## How a candidate reaches the replay
  *
- * The design comes before the code (the owner's order), and at that point
- * the replay has one curve for every day. So this report hands the
- * candidate in from outside, without touching a production file: it wraps
- * `performanceScore()` and uses the candidate's steepness **only for a Gym
- * day of the Stage 5b era** — a call that follows `gymPerformanceInWindow()`
- * with a metric, which is how `gymRatingService.performanceOn()` computes
- * exactly those days. Every other call — a Gym day before the boundary,
- * every Running day — goes to the function as it is. The candidate "10" is
- * therefore the replay as it stands, and the report holds that it is, to the
- * last bit, before it prints anything.
+ * As a day's own value does: it is written into the snapshots of the era
+ * (`scoring.gymMetric.curveDecadePercent`), and the replay reads it from
+ * there for those days and for no others (D177). The candidate "10" names
+ * the constants' value; the report holds on every replay that it gives, to
+ * the last bit, what the marker without a value gives — the era as Stage 5b
+ * built it — and that no candidate moves a day before the update.
  *
- * Once the curve's value travels in the snapshot (step 2) this wrapper goes,
- * the candidate is written into the snapshot instead, and the same tables
- * must come out.
+ * The design came before the code (the owner's order), and at that point
+ * the replay had one curve for every day. The first run of this report
+ * therefore handed the candidate in from outside, wrapping
+ * `performanceScore()` for a Gym day of the Stage 5b era and for nothing
+ * else (commit `c175e69`). Once the value travelled in the snapshot the
+ * wrapper went, and the four tables came out byte for byte the same.
  */
 
 const OUT = process.env.KURVE_REPORT;
@@ -71,60 +73,28 @@ const OUT = process.env.KURVE_REPORT;
 /** How many percentage points of change multiply the odds by four. Ten is the curve as it stands. */
 const CANDIDATES = [10, 8, 6, 5, 4, 3.5, 3, 2.5, 2];
 
-/* ── The candidate, handed in from outside ──────────────────────────────── */
+/* ── The candidate, written where a day's value is read ─────────────────── */
 
-const candidate = vi.hoisted(() => ({ decade: null as number | null, gymEraCall: false }));
+/** The curve of `performanceCurve.ts` at a candidate's value. */
+const mapWith = (change: number, decade: number): number => mapPerformanceChangeToScore(change, decade);
 
-/** The curve of `performanceCurve.ts`, with its one value as an argument. */
-function mapWith(change: number, decade: number): number {
-  const k = Math.log(4) / decade;
-  if (!Number.isFinite(change)) return change > 0 ? 1000 : 0;
-  if (change >= 0) return 1000 / (1 + Math.exp(-k * change));
-  const odds = Math.exp(k * change);
-  return (1000 * odds) / (1 + odds);
+/** Writes the candidate into every snapshot of the Stage 5b era: the value the replay reads for those days. */
+async function setCandidate(decade: number): Promise<void> {
+  const all = await configSnapshotsRepository.list();
+  await configSnapshotsRepository.replaceAll(
+    all.map((snapshot) =>
+      gymMetricOf(snapshot.config) === null
+        ? snapshot
+        : {
+            ...snapshot,
+            config: {
+              ...snapshot.config,
+              scoring: { ...snapshot.config.scoring, gymMetric: { ...snapshot.config.scoring.gymMetric!, curveDecadePercent: decade } },
+            },
+          },
+    ),
+  );
 }
-
-vi.mock('../../core/gym/performance', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../core/gym/performance')>();
-  return {
-    ...actual,
-    gymPerformanceInWindow: (...args: Parameters<typeof actual.gymPerformanceInWindow>) => {
-      candidate.gymEraCall = args[3] !== null && args[3] !== undefined;
-      return actual.gymPerformanceInWindow(...args);
-    },
-  };
-});
-vi.mock('../../core/running/performance', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../core/running/performance')>();
-  return {
-    ...actual,
-    runningPerformanceInWindow: (...args: Parameters<typeof actual.runningPerformanceInWindow>) => {
-      candidate.gymEraCall = false;
-      return actual.runningPerformanceInWindow(...args);
-    },
-  };
-});
-vi.mock('../../core/scoring/performanceCurve', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../core/scoring/performanceCurve')>();
-  return {
-    ...actual,
-    performanceScore: (input: Parameters<typeof actual.performanceScore>[0]) => {
-      const use = candidate.gymEraCall && candidate.decade !== null;
-      candidate.gymEraCall = false;
-      if (!use) return actual.performanceScore(input);
-      const decade = candidate.decade!;
-      const trendScore = input.trendChange === null ? null : mapWith(input.trendChange, decade);
-      const ytdScore = input.ytdChange === null ? null : mapWith(input.ytdChange, decade);
-      const components: ('trend' | 'ytd')[] = [];
-      if (trendScore !== null) components.push('trend');
-      if (ytdScore !== null) components.push('ytd');
-      if (trendScore !== null && ytdScore !== null) {
-        return { score: 0.5 * trendScore + 0.5 * ytdScore, trendScore, ytdScore, components };
-      }
-      return { score: trendScore ?? ytdScore, trendScore, ytdScore, components };
-    },
-  };
-});
 
 /* ── Replaying ──────────────────────────────────────────────────────────── */
 
@@ -155,7 +125,6 @@ async function prepare(backup: string, clock: DateKey, update: DateKey, variant:
   const result = await importBackup(backup);
   if (!result.ok) throw new Error(result.details.join('; '));
   if (variant === 'old') await withoutGymMetricEra();
-  candidate.decade = null;
   if (clock < update) return;
   await ensureSessionWindowEra(update);
   await ensureFoodRetired(update);
@@ -192,15 +161,16 @@ async function replays(backup: string, clock: DateKey, update: DateKey): Promise
   await prepare(backup, clock, update, 'old');
   out.set('old', pointsOf(await loadBossProgression(clock)));
   await prepare(backup, clock, update, 'new');
-  const asItStands = pointsOf(await loadBossProgression(clock));
+  // The era as Stage 5b built it: the marker without a value.
+  await withoutGymCurveValue();
+  const asItStood = pointsOf(await loadBossProgression(clock));
   for (const decade of CANDIDATES) {
-    candidate.decade = decade;
+    await setCandidate(decade);
     out.set(decade, pointsOf(await loadBossProgression(clock)));
   }
-  candidate.decade = null;
-  // The candidate "10" is the replay as it stands, and every candidate leaves the days before the update alone.
-  expect(out.get(10)).toEqual(asItStands);
-  const boundary = asItStands.findIndex((point) => point.date >= update);
+  // The candidate "10" is the curve as it was, and every candidate leaves the days before the update alone.
+  expect(out.get(10)).toEqual(asItStood);
+  const boundary = asItStood.findIndex((point) => point.date >= update);
   for (const decade of CANDIDATES) {
     expect(out.get(decade)!.slice(0, boundary), `candidate ${decade}: the days before ${update}`).toEqual(out.get('old')!.slice(0, boundary));
   }
@@ -384,10 +354,9 @@ async function underCandidates(backup: string, clock: DateKey, first: DateKey): 
   out.set('old', pointsOf(await loadBossProgression(clock)));
   await prepare(backup, clock, first, 'new');
   for (const decade of CANDIDATES) {
-    candidate.decade = decade;
+    await setCandidate(decade);
     out.set(decade, pointsOf(await loadBossProgression(clock)));
   }
-  candidate.decade = null;
   return out;
 }
 
@@ -577,7 +546,6 @@ async function bandCounts(title: string, backup: string, clock: DateKey, update:
 describe.runIf(Boolean(OUT))('the number report of the block "Kurve"', () => {
   afterEach(async () => {
     setClock(null);
-    candidate.decade = null;
     await closeDatabase();
   });
 

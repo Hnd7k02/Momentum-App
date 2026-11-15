@@ -14,7 +14,7 @@ import {
   type AbstinenceEpisode,
 } from '../../core/scoring/abstinence';
 import { enduranceState, type EnduranceState, type EnduranceWeek } from '../../core/scoring/endurance';
-import { gymMetricKey, gymMetricOf, type GymMetric } from '../../core/gym/metric';
+import { gymCurveOf, gymMetricOf, gymScoringKey, type GymMetric } from '../../core/gym/metric';
 import {
   gymPerformanceInWindow,
   percentChange,
@@ -64,6 +64,16 @@ import type { History } from './historyService';
  * left without a baseline (D150). The fold itself does not change at the
  * boundary: the day the update lands takes one ordinary step towards the
  * target its windows give.
+ *
+ * ## And the curve at the value of the day
+ *
+ * How a window's change becomes a level is the shared curve
+ * (`core/scoring/performanceCurve.ts`), and in the era of Stage 5b its one
+ * value is Gym's own and travels in the snapshot beside the metric it was
+ * fitted to (block "Kurve", D177). A day's windows are mapped with the
+ * value **its own snapshot** names; a snapshot that names none — every day
+ * before the boundary, and the days a Stage 5b preview scored — is the
+ * curve of the constants. Nothing here knows a value of its own.
  */
 
 export interface GymRatingState {
@@ -148,22 +158,26 @@ export interface WindowPerformance {
 /**
  * `days` must be the exercise-days as `metric` values them: the windows are
  * computed in one metric, the one the day `on` was lived under (D150).
+ *
+ * `curveDecadePercent` is the curve's value that day's snapshot names
+ * (`gymCurveOf()`), or `null` where it names none: the curve of the
+ * constants (D177).
  */
 export function performanceOn(
   days: readonly ExerciseDay[],
   on: DateKey,
   metric: GymMetric | null = null,
+  curveDecadePercent: number | null = null,
 ): WindowPerformance {
   const trendFrom = addDays(on, -(TRAINING_RATING.TREND_WINDOW_DAYS - 1));
   const trend = gymPerformanceInWindow(days, trendFrom, on, metric);
   const ytd = gymPerformanceInWindow(days, `${on.slice(0, 4)}-01-01`, on, metric);
+  const changes = { trendChange: percentChange(trend.ratio), ytdChange: percentChange(ytd.ratio) };
   return {
     trend,
     ytd,
-    score: performanceScore({
-      trendChange: percentChange(trend.ratio),
-      ytdChange: percentChange(ytd.ratio),
-    }),
+    // No value: the function is called as it always was, with one argument.
+    score: curveDecadePercent === null ? performanceScore(changes) : performanceScore(changes, curveDecadePercent),
   };
 }
 
@@ -247,18 +261,22 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
    * the history is the quadratic that was already found and removed once
    * here (D73), and it would have come straight back.
    *
-   * **One set of pointers and one cache per metric** (D150). A day reads
-   * the exercise-days as its own metric values them, so each metric that
-   * occurs in the history has a track of its own: its list in date order,
-   * its three pointers, its cache. A history has one track before the
-   * Stage 5b update and two after it — never one per day — and a day
-   * advances only its own. The pointers only move forward with the dates,
-   * so a track that has not been read for a while catches up when it is,
-   * and nothing computed under one metric can be handed to a day of the
-   * other.
+   * **One set of pointers and one cache per way of scoring** (D150, D177).
+   * A day reads the exercise-days as its own metric values them and maps
+   * their changes with its own snapshot's curve, so each pair of metric
+   * and curve that occurs in the history has a track of its own: its list
+   * in date order, its three pointers, its cache. A history has one track
+   * before the Stage 5b update and two after it — three on a device a
+   * Stage 5b preview left, never one per day — and a day advances only its
+   * own. The pointers only move forward with the dates, so a track that
+   * has not been read for a while catches up when it is, and nothing
+   * computed under one metric or one curve can be handed to a day of
+   * another.
    */
   interface Track {
     metric: GymMetric | null;
+    /** The curve's value of the track's days, or `null` for the constants'. */
+    curve: number | null;
     ordered: ExerciseDay[];
     trendLow: number;
     yearLow: number;
@@ -266,12 +284,15 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
     cache: Map<string, WindowPerformance>;
   }
   const tracks = new Map<string, Track>();
-  const trackOf = (metric: GymMetric | null): Track => {
-    const key = gymMetricKey(metric);
+  const trackOf = (config: AppConfigSnapshot | null): Track => {
+    const metric = gymMetricOf(config);
+    const curve = gymCurveOf(config);
+    const key = gymScoringKey(metric, curve);
     let track = tracks.get(key);
     if (!track) {
       track = {
         metric,
+        curve,
         ordered: [...input.exerciseDays.under(metric).days].sort((a, b) => a.date.localeCompare(b.date)),
         trendLow: 0,
         yearLow: 0,
@@ -284,7 +305,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
   };
   const performanceByDate = new Map<DateKey, WindowPerformance>();
   dates.forEach((date, index) => {
-    const track = trackOf(gymMetricOf(configs[index]));
+    const track = trackOf(configs[index] ?? null);
     const { ordered } = track;
     const trendFrom = addDays(date, -(TRAINING_RATING.TREND_WINDOW_DAYS - 1));
     const yearFrom = `${date.slice(0, 4)}-01-01`;
@@ -302,6 +323,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
         ordered.slice(Math.min(track.trendLow, track.yearLow), track.high),
         date,
         track.metric,
+        track.curve,
       );
       track.cache.set(key, value);
     }
@@ -310,9 +332,9 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
   const performanceFor = (date: DateKey): WindowPerformance => {
     const known = performanceByDate.get(date);
     if (known) return known;
-    // A day outside the history: computed in that day's own metric.
-    const track = trackOf(gymMetricOf(resolveSnapshot(snapshots, date)));
-    return performanceOn(track.ordered, date, track.metric);
+    // A day outside the history: computed in that day's own metric, with its own curve.
+    const track = trackOf(resolveSnapshot(snapshots, date));
+    return performanceOn(track.ordered, date, track.metric, track.curve);
   };
 
   /* ── The abstinence run, walked once ─────────────────────────────────── */

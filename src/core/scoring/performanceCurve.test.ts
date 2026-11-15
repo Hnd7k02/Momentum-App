@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TRAINING_RATING, RATING } from '../config/constants';
+import { GYM_METRIC, TRAINING_RATING, RATING } from '../config/constants';
 import {
   attendanceScore,
   isCurveDecade,
@@ -335,6 +335,42 @@ describe('the five fixed properties hold for every candidate (D101)', () => {
       });
     });
   }
+});
+
+describe('the value Gym carries in the Stage 5b era', () => {
+  const built = GYM_METRIC.curveDecadePercent;
+  const at = (change: number) => map(change, built);
+
+  it('is three: +3 % is the 800 that +10 % was', () => {
+    expect(built).toBe(3);
+    expect(at(3)).toBeCloseTo(800, 9);
+    expect(at(-3)).toBeCloseTo(200, 9);
+    expect(at(3)).toBeCloseTo(map(10), 9);
+  });
+
+  it('has these anchors', () => {
+    expect(at(0)).toBe(500);
+    expect(at(2.5)).toBeCloseTo(760.468, 3);
+    expect(at(-2.5)).toBeCloseTo(239.532, 3);
+    expect(at(5)).toBeCloseTo(909.742, 3);
+    expect(at(-5)).toBeCloseTo(90.258, 3);
+    expect(at(10)).toBeCloseTo(990.253, 3);
+    expect(at(-10)).toBeCloseTo(9.747, 3);
+    expect(at(20)).toBeCloseTo(999.903, 3);
+    expect(at(-20)).toBeCloseTo(0.097, 3);
+  });
+
+  it('gives one rep more at the same weight a little less than it had before the update', () => {
+    // Under `reps × load` and the curve at ten, 10 → 11 reps multiplied the
+    // odds by four; under the strength score it is +2.5 %, and at three the
+    // odds move by about 3.2.
+    const odds = (score: number) => score / (RATING.MAX - score);
+    const before = odds(map((11 / 10 - 1) * 100));
+    const after = odds(at((41 / 40 - 1) * 100));
+    expect(before).toBeCloseTo(4, 9);
+    expect(after).toBeCloseTo(3.175, 3);
+    expect(after).toBeLessThan(before);
+  });
 });
 
 describe('what can be a curve\'s value', () => {

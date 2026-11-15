@@ -20,7 +20,7 @@ import { saveAnswer } from './checkInService';
 import { addQuestion, applyOnboarding, loadConfiguration } from './configurationService';
 import { performanceOn } from './gymRatingService';
 import { loadExerciseDaySource, loadGymHistory } from './gymService';
-import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
+import { withoutGymCurveValue, withoutGymMetricEra } from './fixtures/legacyGymMetric';
 import { START, at, currentProfile } from './fixtures/profiles';
 import {
   RANDOM_GYM_DAYS,
@@ -29,6 +29,7 @@ import {
   RANDOM_GYM_START,
   randomGymProfile,
 } from './fixtures/randomGym';
+import { dayOutputs } from './fixtures/replayOutputs';
 
 /**
  * The exercise-day metric of WP3 Stage 5b as an era (D150).
@@ -407,20 +408,6 @@ describe("the owner's device: three activations in one load", () => {
 
 /* ── No day before the boundary moves ───────────────────────────────────── */
 
-/** Everything the replay holds for one day: the row, every domain, the Boss, Gym in full. */
-function dayOutputs(boss: BossProgression, index: number) {
-  const row = boss.history.days[index]!;
-  return {
-    row,
-    domains: boss.domains.map((entry) => [entry.domain, entry.series[index], entry.points[index]]),
-    boss: boss.points[index],
-    gymPoint: boss.gym.points[index],
-    gymDetail: boss.gym.detail.find((point) => point.date === row.date) ?? null,
-    gymUnlocked: boss.gym.promotionUnlocked[index],
-    running: boss.running.points[index],
-  };
-}
-
 describe('the update day replays every earlier day bit for bit (D150)', () => {
   afterEach(async () => {
     setClock(null);
@@ -475,13 +462,19 @@ describe('the update day replays every earlier day bit for bit (D150)', () => {
     await ensureGymMetricEra(update);
     const boss = await loadBossProgression(update);
 
-    // The whole history, valued once by the metric of the day…
+    // The whole history, valued once by the metric of the day and mapped by
+    // the curve its snapshot names (D177)…
     const metric: GymMetric = { repsDivisor: GYM_METRIC.repsDivisor, comparison: GYM_METRIC.comparison };
     const source = await loadExerciseDaySource(RANDOM_GYM_START, update);
-    const expected = performanceOn(source.under(metric).days, update, metric);
+    const expected = performanceOn(source.under(metric).days, update, metric, GYM_METRIC.curveDecadePercent);
     expect(boss.gym.trendChange).toBe(percentChange(expected.trend.ratio));
     expect(boss.gym.ytdChange).toBe(percentChange(expected.ytd.ratio));
     expect(boss.gym.performance).toEqual(expected.score);
+    // …which is not the curve as it was: the same windows, another level.
+    const atTen = performanceOn(source.under(metric).days, update, metric);
+    expect(atTen.trend).toEqual(expected.trend);
+    expect(atTen.ytd).toEqual(expected.ytd);
+    expect(atTen.score.score).not.toBe(expected.score.score);
     // …a baseline from before the boundary, so no window is left empty by it…
     expect(boss.gym.trend?.measured.length).toBeGreaterThan(0);
     // …and not the old metric's answer.
@@ -491,6 +484,15 @@ describe('the update day replays every earlier day bit for bit (D150)', () => {
     const yesterday = addDays(update, -1);
     const point = boss.gym.detail.find((entry) => entry.date === yesterday)!;
     expect(point.performance).toBe(performanceOn(source.under(null).days, yesterday, null).score.score);
+
+    // A device a Stage 5b preview left carries the marker without the
+    // curve's value: the same windows, mapped by the curve as it was —
+    // what this test held before the block "Kurve".
+    await withoutGymCurveValue();
+    const preview = await loadBossProgression(update);
+    expect(preview.gym.trendChange).toBe(boss.gym.trendChange);
+    expect(preview.gym.ytdChange).toBe(boss.gym.ytdChange);
+    expect(preview.gym.performance).toEqual(atTen.score);
   });
 
   it('shows the screens the metric of the day the range ends on', async () => {
@@ -650,7 +652,8 @@ describe('the comparison a snapshot names is the comparison the rating runs (D15
       // Each replay is the pure windows of its own switch, and nothing else.
       for (const [replay, comparison] of [[median, 'median'], [firstLast, 'firstLast']] as const) {
         const metric: GymMetric = { repsDivisor: 30, comparison };
-        const expected = performanceOn(replay.source.under(metric).days, row.date, metric).score.score;
+        // The era as the step writes it carries the curve's value too (D177).
+        const expected = performanceOn(replay.source.under(metric).days, row.date, metric, GYM_METRIC.curveDecadePercent).score.score;
         const actual = replay.boss.gym.detail.find((point) => point.date === row.date)?.performance ?? null;
         expect(actual, `${row.date} under ${comparison}`).toBe(expected);
       }

@@ -286,12 +286,39 @@ export const GYM_SCORING_MODEL = 'attendancePerformance' as const;
  *   **confirmed by the owner at STOP 5b** with the numbers before him
  *   (D175, `GYM_COMPARISON_CONFIRMED`). `firstLast` is the rule before it,
  *   and what a snapshot naming it still computes.
+ * - `curveDecadePercent` is the performance curve's one value for Gym in
+ *   this era (block "Kurve", D177): every three points of improvement
+ *   multiply the odds by four, where `TRAINING_RATING.CURVE_DECADE_PERCENT`
+ *   says ten. Under the strength score one rep more is +2 to +3 %; at
+ *   three, +3 % is the 800 that +10 % was, and whoever adds a rep a week
+ *   and then weight stands lower on no day after the update than before it
+ *   (`docs/design/wp3/kurve.md`). A snapshot of the era without it — a
+ *   Stage 5b preview wrote such — is the curve at ten.
  */
 export const GYM_METRIC = {
   id: 'bestWorkingSet',
   repsDivisor: 30,
   comparison: 'median',
+  curveDecadePercent: 3,
 } as const;
+
+/**
+ * Whether the owner has confirmed the curve's value `GYM_METRIC` names.
+ *
+ * **`false` until STOP Kurve.** The value is built and on: it is the flattest
+ * of the candidates of `docs/design/wp3/kurve.md` under which the person of
+ * the import file stands lower on no day, with 4 and 2.5 laid beside it for
+ * him to choose from. The flag gates nothing at run time — what governs the
+ * calculation is the value in each day's snapshot, read by `gymCurveOf()`
+ * — and exists so that the open decision is a line of code a search finds;
+ * the test beside it holds that the constant, the snapshot and the
+ * calculation cannot part (`core/gym/metric.test.ts`). If he chooses
+ * another value the constant changes, the golden files of the Stage 5b
+ * profiles are frozen again, and a device that has already loaded this
+ * preview needs a freshly imported backup, because its snapshot carries the
+ * value it was written with.
+ */
+export const GYM_CURVE_CONFIRMED = false;
 
 /**
  * Whether the owner has confirmed the window comparison `GYM_METRIC` names.
@@ -347,6 +374,12 @@ export const TRAINING_RATING = {
    * so every ten points of improvement multiplies the odds by four: 0 % is
    * evens and scores 500, +10 % is 4:1 and scores 800, −10 % is 1:4 and
    * scores 200. See `core/scoring/performanceCurve.ts` for the derivation and the fit.
+   *
+   * **These two are read when that module loads, not from a day's snapshot:
+   * changing either would revalue every day ever scored.** They are the
+   * curve of Running on every day and of Gym on every day before the era of
+   * WP3 Stage 5b, and they stay what they are. Gym's value in that era is
+   * `GYM_METRIC.curveDecadePercent`, carried in the snapshot (D177).
    */
   CURVE_ODDS_PER_DECADE: 4,
   CURVE_DECADE_PERCENT: 10,

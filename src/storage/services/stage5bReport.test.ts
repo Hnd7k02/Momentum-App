@@ -16,7 +16,7 @@ import { configSnapshotsRepository, gymSetsRepository } from '../repositories';
 import { importBackup } from './backupService';
 import { loadBossProgression, type BossProgression } from './bossService';
 import { loadGymHistory, type GymHistory } from './gymService';
-import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
+import { withoutGymCurveValue, withoutGymMetricEra } from './fixtures/legacyGymMetric';
 import {
   LIGHT_DAY,
   METRIC_FROM,
@@ -44,6 +44,14 @@ import {
  *   last day against its first, on every day;
  * - **new** — the marker from the update day, with the medians;
  * - **new, last against first** — the marker with the switch the other way.
+ *
+ * **"New" is the era as Stage 5b built it: the marker without the curve's
+ * value**, and so the curve as it was (ten). The block "Kurve" gave the
+ * marker that value afterwards (D177); this report takes it off again, so
+ * that it writes the tables Stage 5b committed, byte for byte — the record
+ * of that stage, and the proof that a marker without the value replays as
+ * the Stage 5b preview did. What the curve's value does to these histories
+ * is `kurveReport.test.ts`.
  *
  * For a backup handed in, only what the prompt allows leaves the file:
  * figures for exercises and muscle groups, the Gym rating and the Boss. No
@@ -102,6 +110,8 @@ async function replay(backup: string, clock: DateKey, update: DateKey, variant: 
       ),
     );
   }
+  // The era as Stage 5b built it: the metric, and the curve as it was.
+  await withoutGymCurveValue();
 }
 
 /* ── Formatting ─────────────────────────────────────────────────────────── */

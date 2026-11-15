@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { GYM_COMPARISON_CONFIRMED, GYM_METRIC } from '../config/constants';
+import { GYM_COMPARISON_CONFIRMED, GYM_CURVE_CONFIRMED, GYM_METRIC, TRAINING_RATING } from '../config/constants';
 import { buildConfigSnapshot } from '../config/snapshot';
 import type { AppConfigSnapshot } from '../model';
-import { gymMetricKey, gymMetricOf, type GymMetric } from './metric';
+import { mapPerformanceChangeToScore, performanceScore } from '../scoring/performanceCurve';
+import { gymCurveOf, gymMetricKey, gymMetricOf, gymScoringKey, type GymMetric } from './metric';
 import {
   comparedDays,
   exerciseDays,
@@ -39,10 +40,14 @@ const without = (): AppConfigSnapshot => {
 };
 
 describe('the metric a snapshot carries', () => {
-  it('is written into every snapshot this build makes, with the one constant', () => {
-    expect(base().scoring.gymMetric).toEqual({ id: 'bestWorkingSet', repsDivisor: 30, comparison: 'median' });
+  it('is written into every snapshot this build makes, with the one constant and the curve that goes with it', () => {
+    // Until the block "Kurve" the marker held three fields; the curve's
+    // value travels in it since (D177).
+    expect(base().scoring.gymMetric).toEqual({ id: 'bestWorkingSet', repsDivisor: 30, comparison: 'median', curveDecadePercent: 3 });
     expect(GYM_METRIC.repsDivisor).toBe(30);
+    // What the pipeline takes is the metric, as before: the curve is not its business.
     expect(gymMetricOf(base())).toEqual({ repsDivisor: 30, comparison: 'median' });
+    expect(gymCurveOf(base())).toBe(3);
   });
 
   it('never shares an object with the constant, so no snapshot can be edited through another', () => {
@@ -169,5 +174,88 @@ describe('the comparison switch (confirmed at STOP 5b, D175)', () => {
       const expected = comparison === 'median' ? 78 / 70 : 100 / 60;
       expect(gymPerformanceOverSpan(days, metric).ratio).toBeCloseTo(expected, 12);
     }
+  });
+});
+
+/* ── The curve's value, and the calculation it governs ──────────────────── */
+
+describe('the value of the performance curve a snapshot carries (block "Kurve", D177)', () => {
+  const marker = (extra: Record<string, unknown> = {}) => ({ id: 'bestWorkingSet', repsDivisor: 30, comparison: 'median', ...extra });
+
+  it('is read from the snapshot, not from the constant', () => {
+    for (const value of [10, 8, 6, 5, 4, 3.5, 3, 2.5, 2]) {
+      expect(gymCurveOf(withMetric(marker({ curveDecadePercent: value })))).toBe(value);
+    }
+  });
+
+  it('is absent before the Stage 5b era and on the marker a Stage 5b preview wrote: the curve as it was, never today\'s', () => {
+    expect(gymCurveOf(without())).toBeNull();
+    expect(gymCurveOf(null)).toBeNull();
+    expect(gymCurveOf(undefined)).toBeNull();
+    // The marker as Stage 5b wrote it: the metric, and no value.
+    const preview = withMetric(marker());
+    expect(gymMetricOf(preview)).toEqual({ repsDivisor: 30, comparison: 'median' });
+    expect(gymCurveOf(preview)).toBeNull();
+  });
+
+  it('cannot be carried without the metric: it lives inside the marker', () => {
+    const config = without();
+    const beside = { ...config, scoring: { ...config.scoring, curveDecadePercent: 3 } } as unknown as AppConfigSnapshot;
+    expect(gymCurveOf(beside)).toBeNull();
+    for (const junk of [null, true, 3, 'bestWorkingSet']) expect(gymCurveOf(withMetric(junk))).toBeNull();
+  });
+
+  it('takes a value it cannot read as no value, and never throws', () => {
+    for (const junk of [0, -3, Number.NaN, Number.POSITIVE_INFINITY, '3', null, {}, [], true, Number.MIN_VALUE]) {
+      expect(gymCurveOf(withMetric(marker({ curveDecadePercent: junk }))), String(junk)).toBeNull();
+    }
+    // The metric of such a marker is read all the same.
+    expect(gymMetricOf(withMetric(marker({ curveDecadePercent: 'steep' })))).toEqual({ repsDivisor: 30, comparison: 'median' });
+  });
+
+  it('gives every distinct way of scoring a day its own key, so no cache can mix two curves', () => {
+    const median: GymMetric = { repsDivisor: 30, comparison: 'median' };
+    const keys = [
+      gymScoringKey(null, null),
+      gymScoringKey(median, null),
+      gymScoringKey(median, 10),
+      gymScoringKey(median, 3),
+      gymScoringKey(median, 4),
+      gymScoringKey({ repsDivisor: 30, comparison: 'firstLast' }, 3),
+    ];
+    expect(new Set(keys).size).toBe(keys.length);
+    // The metric's own key is what it was: the exercise-days do not depend on the curve.
+    expect(gymMetricKey(median)).toBe('strength:30:median');
+  });
+
+  it('is three in the snapshots this build writes, and waits for the owner at STOP Kurve', () => {
+    // The flag, the constant and the snapshot cannot disagree: what is laid
+    // before the owner is the value every new snapshot carries, and a build
+    // that confirmed it without him would say so here.
+    expect(GYM_CURVE_CONFIRMED).toBe(false);
+    expect(GYM_METRIC.curveDecadePercent).toBe(3);
+    expect(gymCurveOf(base())).toBe(GYM_METRIC.curveDecadePercent);
+    // The constants of the shared curve are what they were: Running's curve, and Gym's before the era.
+    expect([TRAINING_RATING.CURVE_ODDS_PER_DECADE, TRAINING_RATING.CURVE_DECADE_PERCENT]).toEqual([4, 10]);
+  });
+
+  it('from a snapshot to the level, with nothing in between that could choose', () => {
+    // The same two window changes under three snapshots: three levels, each
+    // the curve at that snapshot's value and at no other.
+    const changes = { trendChange: 3, ytdChange: 6 };
+    const levelOf = (config: AppConfigSnapshot): number => {
+      const value = gymCurveOf(config);
+      return (value === null ? performanceScore(changes) : performanceScore(changes, value)).score!;
+    };
+    const before = levelOf(without());
+    const preview = levelOf(withMetric(marker()));
+    const built = levelOf(base());
+    const other = levelOf(withMetric(marker({ curveDecadePercent: 5 })));
+    expect(before).toBe((mapPerformanceChangeToScore(3) + mapPerformanceChangeToScore(6)) / 2);
+    expect(preview).toBe(before);
+    expect(built).toBe(0.5 * mapPerformanceChangeToScore(3, 3) + 0.5 * mapPerformanceChangeToScore(6, 3));
+    expect(built).toBeCloseTo((800 + 941.176) / 2, 2);
+    expect(other).toBeCloseTo((696.83 + 840.71) / 2, 1);
+    expect(new Set([before, built, other]).size).toBe(3);
   });
 });

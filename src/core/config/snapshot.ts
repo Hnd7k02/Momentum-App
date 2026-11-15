@@ -120,8 +120,10 @@ export function buildConfigSnapshot(
       /*
        * Stage 5b: the exercise-day metric (D150) — the best working set by
        * the strength score, with its one constant and the window comparison
-       * in force. Absent on every snapshot before it, and that absence keeps
-       * those days on the best set by `reps × load` (D84). A copy, so no
+       * in force — and with it the value of the performance curve that
+       * turns its changes into a level (block "Kurve", D177). Absent on
+       * every snapshot before it, and that absence keeps those days on the
+       * best set by `reps × load` (D84) and the curve at ten. A copy, so no
        * snapshot shares an object with the constant.
        */
       gymMetric: { ...GYM_METRIC },

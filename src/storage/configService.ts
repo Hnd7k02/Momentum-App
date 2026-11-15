@@ -4,7 +4,7 @@ import { EDIT_WINDOW_DAYS, GYM_METRIC, SESSION_WINDOW_DAYS } from '../core/confi
 import { buildConfigSnapshot, configSnapshotsEqual } from '../core/config/snapshot';
 import type { DateKey } from '../core/dates';
 import { enabledDomainsIn } from '../core/domains';
-import { gymMetricOf } from '../core/gym/metric';
+import { gymCurveOf, gymMetricOf } from '../core/gym/metric';
 import type { AppConfigSnapshot, ConfigSnapshotRecord, DomainConfigSnapshot, DomainRecord, QuestionRecord } from '../core/model';
 import {
   configSnapshotsRepository,
@@ -90,28 +90,46 @@ function withWindowOf(config: AppConfigSnapshot, era: AppConfigSnapshot['scoring
   return { ...config, scoring: scoring as AppConfigSnapshot['scoring'] };
 }
 
-/** Whether a snapshot belongs to the era of the Stage 5b metric — asked where the replay asks (D150). */
-const metricMarked = (snapshot: { config: AppConfigSnapshot }): boolean => gymMetricOf(snapshot.config) !== null;
+/**
+ * How far a snapshot is into the era of the Stage 5b metric — asked where
+ * the replay asks (D150, D177): `0` before it, no marker; `1` the marker
+ * without the curve's value, which only a Stage 5b preview wrote; `2` the
+ * whole marker, the metric and the curve that goes with it.
+ */
+const metricEraOf = (snapshot: { config: AppConfigSnapshot }): 0 | 1 | 2 =>
+  gymMetricOf(snapshot.config) === null ? 0 : gymCurveOf(snapshot.config) === null ? 1 : 2;
 
 /**
- * The boundary of the Stage 5b metric dated after `date` that stays where it
- * is (D150): the first later snapshot carrying the marker, while the day in
- * force does not — the local date has moved back across it. One written on
- * a clock that was ahead is not kept: it moves to the day it reached. The
- * rule of the P8 boundary above, for the same reason.
+ * The marker of the Stage 5b era the day `date` was lived under, where a
+ * boundary of that era dated after it stays where it is (D150, D177) — or
+ * `undefined` where there is none, and the live configuration applies.
+ *
+ * A boundary is the first later snapshot that is further into the era than
+ * the one in force on the day: the marker, for a day before it; the curve's
+ * value, for a day lived under the marker a Stage 5b preview wrote. It
+ * stays while the local date has merely moved back across it. One written
+ * on a clock that was ahead is not kept: it moves to the day it reached.
+ * The rule of the P8 boundary above, for the same reason.
+ *
+ * What is handed back is the field as the stored snapshot in force on that
+ * day has it — absent, or without the value — never rebuilt.
  */
-function keptGymMetricEra(all: readonly ConfigSnapshotRecord[], date: DateKey): ConfigSnapshotRecord | undefined {
+function livedGymMetric(all: readonly ConfigSnapshotRecord[], date: DateKey): { field: unknown } | undefined {
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= date);
-  if (inForce === undefined || metricMarked(inForce)) return undefined;
-  const boundary = all.find((snapshot) => snapshot.effectiveFrom > date && metricMarked(snapshot));
+  if (inForce === undefined) return undefined;
+  const era = metricEraOf(inForce);
+  if (era === 2) return undefined;
+  const boundary = all.find((snapshot) => snapshot.effectiveFrom > date && metricEraOf(snapshot) > era);
   if (boundary === undefined) return undefined;
-  return now().getTime() < Date.parse(boundary.createdAt) ? undefined : boundary;
+  if (now().getTime() < Date.parse(boundary.createdAt)) return undefined;
+  return { field: (inForce.config as { scoring?: { gymMetric?: unknown } } | null)?.scoring?.gymMetric };
 }
 
-/** `config` as the era before the Stage 5b metric had it: without the field. */
-function withoutGymMetric(config: AppConfigSnapshot): AppConfigSnapshot {
+/** `config` with the Stage 5b marker as a day before a kept boundary had it: absent, or as stored. */
+function withGymMetricAs(config: AppConfigSnapshot, field: unknown): AppConfigSnapshot {
   const scoring: Partial<AppConfigSnapshot['scoring']> = { ...config.scoring };
-  delete scoring.gymMetric;
+  if (field === undefined) delete scoring.gymMetric;
+  else scoring.gymMetric = field as AppConfigSnapshot['scoring']['gymMetric'];
   return { ...config, scoring: scoring as AppConfigSnapshot['scoring'] };
 }
 
@@ -126,15 +144,18 @@ function withoutGymMetric(config: AppConfigSnapshot): AppConfigSnapshot {
  * so it takes the current configuration too, or a change made today would be
  * undone on its date.
  *
- * **Except the eras a kept boundary has not reached** (D132, D139, D150).
- * Once the local date has moved back across a boundary written before now,
- * the day it lands on was lived under the earlier era: without the one-day
- * window, with Food, or under the exercise-day metric before Stage 5b. What
- * is compared and written for a day before such a boundary carries that era
- * as it was — the window fields of the snapshot in force; Food on, with the
- * Boss weights over the domains that were on; no `gymMetric` — and from the
- * boundary on, the live configuration. An answer on that day therefore
- * moves nothing, and a change made on it reaches both sides.
+ * **Except the eras a kept boundary has not reached** (D132, D139, D150,
+ * D177). Once the local date has moved back across a boundary written
+ * before now, the day it lands on was lived under the earlier era: without
+ * the one-day window, with Food, or under the exercise-day metric before
+ * Stage 5b — or under that metric with the curve as it was, on a device a
+ * Stage 5b preview left. What is compared and written for a day before
+ * such a boundary carries that era as it was — the window fields of the
+ * snapshot in force; Food on, with the Boss weights over the domains that
+ * were on; `gymMetric` as the stored snapshot in force on that day has it,
+ * absent or without the curve's value — and from the boundary on, the live
+ * configuration. An answer on that day therefore moves nothing, and a
+ * change made on it reaches both sides.
  */
 export async function ensureCurrentSnapshot(
   effectiveFrom: DateKey = today(),
@@ -154,16 +175,18 @@ export async function ensureCurrentSnapshot(
     : config;
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom);
   const keptWindow = keptSessionWindowEra(all, effectiveFrom);
-  const keptMetric = keptGymMetricEra(all, effectiveFrom);
   const configOn = (date: DateKey) => {
     const withFood = kept !== undefined && date < kept.effectiveFrom ? lived : config;
     const withWindow =
       keptWindow !== undefined && inForce !== undefined && date < keptWindow.effectiveFrom
         ? withWindowOf(withFood, inForce.config.scoring)
         : withFood;
-    // A day before a kept boundary of the Stage 5b metric was lived under
-    // the metric before it, which is the absence of the field (D150).
-    return keptMetric !== undefined && date < keptMetric.effectiveFrom ? withoutGymMetric(withWindow) : withWindow;
+    // A day before a kept boundary of the Stage 5b era was lived under the
+    // marker it had then: none, or the one without the curve's value (D150,
+    // D177). Asked per day, so a snapshot dated between two kept boundaries
+    // keeps what it carries.
+    const metricThen = livedGymMetric(all, date);
+    return metricThen === undefined ? withWindow : withGymMetricAs(withWindow, metricThen.field);
   };
   for (const later of all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom)) {
     const target = configOn(later.effectiveFrom);
@@ -329,27 +352,38 @@ export async function ensureFoodRetired(
 
 /**
  * The exercise-day metric of WP3 Stage 5b begins on the first load after the
- * update (D150), as an era built the way the P8 step above is.
+ * update (D150), as an era built the way the P8 step above is — and with it
+ * the value of the performance curve that fits it (block "Kurve", D177).
  *
- * Keyed on the snapshot in force today: when it carries no `gymMetric`, the
- * same configuration is appended effective today with the field and nothing
- * else new — it starts this era and no other. On a day that already has a
- * snapshot — the P8 and Food steps of the same load may just have written
- * one — that one is carried over with the field added. A snapshot dated
- * after today takes the field too, so the era cannot flip back on its date.
+ * Keyed on the snapshot in force today: when it does not carry the whole
+ * marker, the same configuration is appended effective today with it and
+ * nothing else new — it starts this era and no other. On a day that already
+ * has a snapshot — the P8 and Food steps of the same load may just have
+ * written one — that one is carried over with the field added. A snapshot
+ * dated after today is completed too, so the era cannot flip back on its
+ * date.
  *
- * From that day the Gym rating reads each day's two windows by the best
- * working set and the strength score, the windows reaching back over the
- * sets before the boundary in the same unit; every day before the boundary
- * has no marker in its snapshot and replays by the best set of
- * `reps × load`, byte for byte.
+ * - **A device as the live build left it** has no marker: metric and curve
+ *   arrive in one snapshot, and it has one boundary.
+ * - **A device a Stage 5b preview left** carries the marker without the
+ *   curve's value: the value is added to the marker it has — its divisor
+ *   and its comparison carried as they were — effective today. Its days
+ *   between the two boundaries were scored with the curve at ten and replay
+ *   so; the value is never written into a snapshot dated in the past.
+ *
+ * From the boundary on the Gym rating reads each day's two windows by the
+ * best working set and the strength score, the windows reaching back over
+ * the sets before the boundary in the same unit, and turns their changes
+ * into a level by the curve at the value its snapshot names; every day
+ * before the boundary has no marker in its snapshot and replays by the best
+ * set of `reps × load` and the curve at ten, byte for byte.
  *
  * **A boundary already written stays where it is, unless the clock was
  * ahead when it was written** — the boundary rule of the P8 step, for the
  * same reason: a local date can move back across it (a journey west), and
- * the day it lands on was lived under the old metric and must replay as it
- * was. A write on that day keeps it there too: `ensureCurrentSnapshot`
- * writes such a day without the field.
+ * the day it lands on was lived under the earlier state and must replay as
+ * it was. A write on that day keeps it there too: `ensureCurrentSnapshot`
+ * writes such a day with the field as that day had it.
  *
  * A profile with no snapshot in force today is left alone for today, and
  * one with no snapshot at all is left alone: its first snapshot is written
@@ -366,25 +400,38 @@ export async function ensureGymMetricEra(
     snapshot.config !== null &&
     typeof snapshot.config.scoring === 'object' &&
     snapshot.config.scoring !== null;
-  const withMarker = (config: AppConfigSnapshot): AppConfigSnapshot => ({
-    ...config,
-    scoring: { ...config.scoring, gymMetric: { ...GYM_METRIC } },
-  });
+  /*
+   * The whole marker. Where the snapshot has one already, its own fields
+   * are kept and the curve's value is added; where it has none, the marker
+   * is this build's. Either way the keys stand in the order
+   * `buildConfigSnapshot()` writes them, so the next write finds nothing to
+   * append.
+   */
+  const complete = (config: AppConfigSnapshot): AppConfigSnapshot => {
+    const marker = gymMetricOf(config) === null ? {} : (config.scoring.gymMetric as object);
+    return {
+      ...config,
+      scoring: {
+        ...config.scoring,
+        gymMetric: { ...GYM_METRIC, ...marker, curveDecadePercent: GYM_METRIC.curveDecadePercent },
+      },
+    };
+  };
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
   const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
   let appended = false;
   if (
     inForce !== null &&
     readable(inForce) &&
-    !metricMarked(inForce) &&
-    keptGymMetricEra(all, effectiveFrom) === undefined
+    metricEraOf(inForce) < 2 &&
+    livedGymMetric(all, effectiveFrom) === undefined
   ) {
-    await configSnapshotsRepository.append(withMarker(inForce.config), effectiveFrom);
+    await configSnapshotsRepository.append(complete(inForce.config), effectiveFrom);
     appended = true;
   }
   for (const snapshot of later) {
-    if (readable(snapshot) && !metricMarked(snapshot)) {
-      await configSnapshotsRepository.append(withMarker(snapshot.config), snapshot.effectiveFrom);
+    if (readable(snapshot) && metricEraOf(snapshot) < 2) {
+      await configSnapshotsRepository.append(complete(snapshot.config), snapshot.effectiveFrom);
       appended = true;
     }
   }

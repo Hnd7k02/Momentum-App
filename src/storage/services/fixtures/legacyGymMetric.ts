@@ -32,3 +32,35 @@ function withoutMetric(snapshot: ConfigSnapshotRecord): ConfigSnapshotRecord {
   delete scoring.gymMetric;
   return { ...snapshot, config: { ...snapshot.config, scoring: scoring as AppConfigSnapshot['scoring'] } };
 }
+
+/**
+ * A device as a Stage 5b **preview** build left it (block "Kurve"): its
+ * snapshots of the era carry the metric and not the curve's value — the
+ * marker as that preview wrote it, `{ id, repsDivisor, comparison }`.
+ *
+ * Such a marker exists in one place, a database a 5b preview has loaded.
+ * Its days were scored with the best working set and the curve at ten, and
+ * they replay so: a missing value is the earlier state, never today's. A
+ * test that is about that device, or about the curve of the era as Stage 5b
+ * built it, writes its history and then calls this.
+ *
+ * Call it after the last write, for the reason given above: a service write
+ * compares the live configuration, which carries the value, with the
+ * snapshot in force. Nothing here starts anything; a test that wants the
+ * update runs `ensureGymMetricEra` itself.
+ */
+export async function withoutGymCurveValue(): Promise<void> {
+  const all = await configSnapshotsRepository.list();
+  await configSnapshotsRepository.replaceAll(all.map(withoutCurveValue));
+}
+
+function withoutCurveValue(snapshot: ConfigSnapshotRecord): ConfigSnapshotRecord {
+  const marker: unknown = snapshot.config.scoring.gymMetric;
+  if (marker === null || marker === undefined || typeof marker !== 'object') return snapshot;
+  const { curveDecadePercent: _value, ...rest } = marker as Record<string, unknown>;
+  void _value;
+  return {
+    ...snapshot,
+    config: { ...snapshot.config, scoring: { ...snapshot.config.scoring, gymMetric: rest as never } },
+  };
+}

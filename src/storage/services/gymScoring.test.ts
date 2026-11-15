@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
-import { TRAINING_RATING, RATING } from '../../core/config/constants';
+import { GYM_METRIC, TRAINING_RATING, RATING } from '../../core/config/constants';
 import { addDays, weekKeyOf } from '../../core/dates';
 import { mapPerformanceChangeToScore } from '../../core/scoring/performanceCurve';
 import { closeDatabase, deleteDatabase } from '../db';
@@ -13,7 +13,7 @@ import {
 import { loadBossProgression } from './bossService';
 import { applyOnboarding } from './configurationService';
 import { gymModelOf } from './gymRatingService';
-import { withoutGymMetricEra } from './fixtures/legacyGymMetric';
+import { withoutGymCurveValue, withoutGymMetricEra } from './fixtures/legacyGymMetric';
 import {
   addSet,
   BuiltInExerciseError,
@@ -539,14 +539,34 @@ describe('what the new Gym rating does to everything else', () => {
 /* ── The curve, where it lands in practice ──────────────────────────────── */
 
 describe('a real improvement, priced', () => {
-  it('prices a 10 % improvement in both windows at 800', async () => {
+  it('prices a 10 % improvement in both windows by the curve its snapshot names: 800 before the Stage 5b era, 990 in it', async () => {
+    // Five reps at 100 kg, then at 110 kg: +10 % by `reps × load` and by the strength score alike.
     await trainWeek(START, 100);
     await trainWeek(addDays(START, 7), 110);
+
+    // A device set up under this version: the Stage 5b era, with Gym's own
+    // value of the curve in its snapshot (D177) — every three points
+    // multiply the odds by four.
     const { state } = await gymOf(addDays(START, 13));
     expect(state.trendChange).toBeCloseTo(10, 6);
     expect(state.ytdChange).toBeCloseTo(10, 6);
-    expect(state.performance.score).toBeCloseTo(mapPerformanceChangeToScore(10), 6);
-    expect(state.performance.score).toBeCloseTo(800, 6);
+    expect(state.performance.score).toBeCloseTo(mapPerformanceChangeToScore(10, GYM_METRIC.curveDecadePercent), 6);
+    expect(state.performance.score).toBeCloseTo(990.25, 2);
+
+    // The same history as a Stage 5b preview left it — the metric without
+    // the curve's value: the curve as it was.
+    await withoutGymCurveValue();
+    const preview = (await gymOf(addDays(START, 13))).state;
+    expect(preview.trendChange).toBeCloseTo(10, 6);
+    expect(preview.performance.score).toBeCloseTo(800, 6);
+
+    // And as a device before the update holds it: 800, as this test always held.
+    await withoutGymMetricEra();
+    const before = (await gymOf(addDays(START, 13))).state;
+    expect(before.trendChange).toBeCloseTo(10, 6);
+    expect(before.ytdChange).toBeCloseTo(10, 6);
+    expect(before.performance.score).toBeCloseTo(mapPerformanceChangeToScore(10), 6);
+    expect(before.performance.score).toBeCloseTo(800, 6);
   });
 
   it('keeps the week key arithmetic the endurance gate depends on', () => {
