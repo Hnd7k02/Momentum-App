@@ -71,33 +71,72 @@ const lift = (group, days, kgs, tag = '') => ({ group, id: `fx_${group}${tag}`, 
 
 /**
  * Mixed: every state, and both edges of the band. Ten reps a set, so a
- * change is the change of the weight.
+ * change is the change of the weight — under the strength score of Stage 5b
+ * too, where ten reps multiply every weight by the same 40 (D150).
  *
  * The groups at the edges make their whole change on the last day, because
  * the two figures on screen compare different things: a group's row
- * compares the last day of the range with the first, the exercise list and
+ * compares the end of the range with its beginning, the exercise list and
  * the detail the last day with the one before. With the change on the last
- * day both read the same number, and the band can be held on both.
+ * day of three both read the same number, and the band can be held on both.
+ *
+ * **How a row compares its range is the device's rule** (`BY_RULE` below).
+ * With three exercise days the two rules are one comparison; the chest with
+ * five days and the quadriceps with four are where they part.
  */
 const MIXED = [
-  lift('chest', [26, 20, 14, 8, 2], [100, 102, 105, 107, 109]),      // +9 %  improved
+  lift('chest', [26, 20, 14, 8, 2], [100, 102, 105, 107, 109]),      // +7 %  improved (median; +9 % last against first)
   lift('back', [19, 12, 5], [55, 55, 55]),                            //  0 %  held
   lift('shoulders', [22, 13, 4], [100, 100, 103]),                    // +3 %  improved, at the edge
   lift('biceps', [21, 11, 3], [50, 50, 51]),                          // +2 %  held, at the edge
   lift('triceps', [23, 12, 6], [50, 50, 49]),                         // −2 %  held, at the edge
   lift('core', [24, 15, 7], [100, 100, 97]),                          // −3 %  declined, at the edge
-  lift('quadriceps', [25, 18, 10, 1], [100, 98, 95, 92]),             // −8 %  declined
+  lift('quadriceps', [25, 18, 10, 1], [100, 98, 95, 92]),             // −6 %  declined (median; −8 % last against first)
   lift('hamstringsGlutes', [16, 9], [100, 120]),                      // two exercise days: too little
   lift('calves', [75, 60, 45], [100, 105, 110]),                      // outside 30 days; +10 % at 90
   lift('forearms', [17], [20], 'A'), lift('forearms', [10], [22], 'B'), lift('forearms', [3], [24], 'C'), // three days, none twice
 ];
+/**
+ * The two rules a window can be compared by (D150), each worked out by hand
+ * for the chest and the quadriceps:
+ *
+ * - `median` — the median of the last k exercise days against the median of
+ *   the first k, k = min(3, ⌊days ÷ 2⌋). The chest's five days: 107 and 109
+ *   against 100 and 102, 108 ÷ 101, +7 %. The quadriceps' four: 95 and 92
+ *   against 100 and 98, 93.5 ÷ 99, −6 %.
+ * - `firstLast` — the last day against the first, the rule before Stage 5b
+ *   and the one the switch returns to if the owner declines the median at
+ *   STOP 5b: 109 ÷ 100, +9 %, and 92 ÷ 100, −8 %.
+ *
+ * Until Stage 5b this suite stated +9 % and −8 %. Which rule runs is read
+ * off the device — the snapshot its onboarding wrote — so the suite holds
+ * the figures of the rule the build ships, and a build without the field is
+ * the old rule.
+ */
+const BY_RULE = {
+  median: { chest: 7, quadriceps: -6, chestRatio: 108 / 101, quadricepsRatio: 93.5 / 99 },
+  firstLast: { chest: 9, quadriceps: -8, chestRatio: 1.09, quadricepsRatio: 0.92 },
+};
+const RULE = await (async () => {
+  const { ctx, page } = await boot(393, null, { sessions: false });
+  const comparison = await page.evaluate(async () => {
+    const db = await new Promise((res, rej) => { const r = indexedDB.open('momentum'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const rows = await new Promise((res, rej) => { const r = db.transaction(['configSnapshots'], 'readonly').objectStore('configSnapshots').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    db.close();
+    const latest = rows.sort((a, b) => (a.effectiveFrom < b.effectiveFrom ? -1 : 1)).at(-1);
+    return latest?.config?.scoring?.gymMetric?.comparison ?? null;
+  });
+  await ctx.close();
+  return comparison === 'median' ? 'median' : 'firstLast';
+})();
+console.log(`a window is compared by: ${RULE}`);
 const EXPECT_30 = {
-  chest: [9, 'improved'], back: [0, 'unchanged'], shoulders: [3, 'improved'], biceps: [2, 'unchanged'],
-  triceps: [-2, 'unchanged'], core: [-3, 'declined'], quadriceps: [-8, 'declined'],
+  chest: [BY_RULE[RULE].chest, 'improved'], back: [0, 'unchanged'], shoulders: [3, 'improved'], biceps: [2, 'unchanged'],
+  triceps: [-2, 'unchanged'], core: [-3, 'declined'], quadriceps: [BY_RULE[RULE].quadriceps, 'declined'],
   hamstringsGlutes: [null, 'awaitingBaseline'], calves: [null, 'noData'], forearms: [null, 'awaitingBaseline'],
 };
 /** The mean of the seven rated ratios at 30 days, as the screen prints it. */
-const MEAN_30 = ((1.09 + 1 + 1.03 + 1.02 + 0.98 + 0.97 + 0.92) / 7 - 1) * 100;
+const MEAN_30 = ((BY_RULE[RULE].chestRatio + 1 + 1.03 + 1.02 + 0.98 + 0.97 + BY_RULE[RULE].quadricepsRatio) / 7 - 1) * 100;
 
 /** Every group trained three times and unchanged within the band. */
 const HELD = GROUPS.map((group, i) => lift(group, [24 - i, 14 - (i % 5), 4 + (i % 3)], [100, 100, 100 + ((i % 5) - 2)]));
@@ -457,7 +496,7 @@ for (const width of WIDTHS) {
   const upperNamed = measured(upperRuns, [
     ['muscle-legend__item', 'Verbessert'], ['muscle-legend__item', 'Gehalten'], ['muscle-legend__item', 'Zurückgegangen'],
     ['muscle-legend__item', 'Zu wenig Vergleichsdaten'], ['muscle-legend__item', 'Noch nicht trainiert'],
-    ['muscle-row__name', 'Brust'], ['muscle-row__delta', `+9${NBSP}%`], ['muscle-row__state', 'Verbessert'],
+    ['muscle-row__name', 'Brust'], ['muscle-row__delta', `+${BY_RULE[RULE].chest}${NBSP}%`], ['muscle-row__state', 'Verbessert'],
     ['muscle-row__delta', `0${NBSP}%`], ['muscle-row__state', 'Gehalten'], ['muscle-row__sub', 'Vor 2 Tagen'],
   ]);
   check(`${W}: the five items of the legend row and the first rows were measured (${upperRuns.length} runs, lowest ${lowest(upperRuns)})`,
@@ -470,7 +509,7 @@ for (const width of WIDTHS) {
   const lowerRuns = await textContrast(page);
   const lowerNamed = measured(lowerRuns, [
     ['muscle-row__badge', 'Zu wenig Vergleichsdaten'], ['muscle-row__badge', 'Noch nicht trainiert'],
-    ['muscle-row__delta', `${MINUS}3${NBSP}%`], ['muscle-row__delta', `${MINUS}8${NBSP}%`], ['muscle-row__state', 'Zurückgegangen'],
+    ['muscle-row__delta', `${MINUS}3${NBSP}%`], ['muscle-row__delta', `${MINUS}${-BY_RULE[RULE].quadriceps}${NBSP}%`], ['muscle-row__state', 'Zurückgegangen'],
     ['muscle-row__name', 'Waden'], ['muscle-row__sub', 'Vor 9 Tagen'], ['muscle-row__sub muscle-row__days', `2${NBSP}Übungstage`],
   ]);
   check(`${W}: both kinds of chip, the red figures and the count of exercise days were measured (${lowerRuns.length} runs, lowest ${lowest(lowerRuns)})`,
@@ -879,12 +918,13 @@ if (process.env.NO_BODY) {
         && edgeBack.thigh.pixels >= 300 && edgeBack.thigh.dA >= 3 && edgeBack.thigh.dE >= 5 && edgeBack.calf.pixels >= 100 && edgeBack.calf.moved <= 0.1,
       short({ upper: edgeBack.upper, thigh: edgeBack.thigh, calf: edgeBack.calf }, 400));
 
-    // MIXED against HELD. From the front: the chest at +9 %, the quadriceps
-    // at −8 %, the calves untrained. From the back: the back held, the
-    // hamstrings with too little to compare, the calves untrained.
+    // MIXED against HELD. From the front: the chest at +7 % (+9 % last
+    // against first), the quadriceps at −6 % (−8 %), the calves untrained.
+    // From the back: the back held, the hamstrings with too little to
+    // compare, the calves untrained.
     check('body, mixed: the untrained calves are dimmed — clearly darker than the same calves held, and no colour',
       same(mixed) && mixed.calf.pixels >= 100 && mixed.calf.moved >= 0.8 && mixed.calf.dL <= -8 && Math.abs(mixed.calf.dA) <= 3, short(mixed.calf));
-    check('body, mixed: +9 % is greener than +3 %, and −8 % redder than −3 % — the strength grows with the change',
+    check(`body, mixed: +${BY_RULE[RULE].chest} % is greener than +3 %, and −${-BY_RULE[RULE].quadriceps} % redder than −3 % — the strength grows with the change`,
       mixed.upper.dA < edge.upper.dA - 1 && mixed.thigh.dA > edge.thigh.dA + 1, `chest ${mixed.upper.dA} vs ${edge.upper.dA} · thigh ${mixed.thigh.dA} vs ${edge.thigh.dA}`);
     check('body, mixed from the back: the held back is the same white as in the held figure',
       same(mixedBack) && mixedBack.upper.pixels >= 300 && mixedBack.upper.moved <= 0.1, short(mixedBack.upper));

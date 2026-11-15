@@ -391,7 +391,8 @@ for (const [width, height] of SIZES) {
     const shown = await exerciseCard(page, 'Bankdrücken').locator('.gym-set:not(.gym-set--pending) input').nth(1).inputValue();
     check(`${W}: P4 and reads back as 135`, shown === '135', shown);
     const best = await textOf(exerciseCard(page, 'Bankdrücken').locator('.gym-exercise__best'));
-    check(`${W}: P4 the best set reads in lb`, best === 'Bester Satz · 5 × 135 lb', String(best));
+    // "Bester Arbeitssatz" since Stage 5b (D151): a warm-up set is never the one named.
+    check(`${W}: P4 the best working set reads in lb`, best === 'Bester Arbeitssatz · 5 × 135 lb', String(best));
 
     await pick(page, 'Klimmzüge');
     const bodyweight = page.getByLabel('Körpergewicht in Pfund');

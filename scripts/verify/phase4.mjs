@@ -84,7 +84,13 @@ async function fillSet(page, index, reps, weight) {
   await fillSet(page, 2, 6, 20);
 
   const best = await page.locator('.gym-exercise__best').first().textContent();
-  check('the best set is the decision’s answer, 8 × 15', /8 × 15/.test(best ?? ''), best?.trim());
+  // Stage 5b (D150): the best working set is the one with the highest
+  // strength score, load × (30 + reps) — 10 × 10 is 400, 8 × 15 is 570 and
+  // 6 × 20 is 720. Under D84's reps × load, 8 × 15 and 6 × 20 tied at 120
+  // and the earlier of the two was named; that rule still holds for every
+  // day before the update, and `gym.test.ts` keeps it.
+  check('the best working set is the strongest of the three, 6 × 20',
+    /^Bester Arbeitssatz · 6 × 20 kg$/.test((best ?? '').trim()), best?.trim());
 
   await fillSet(page, 2, 6, 22.5);
   const decimal = await page.locator('.gym-set').nth(2).locator('input').nth(1).inputValue();
@@ -174,7 +180,7 @@ async function fillSet(page, index, reps, weight) {
   check('it says how many groups were counted', /von 10 Gruppen/.test(counted ?? ''), counted?.trim());
   const overallSheet = await inSheet(page, 'gym-overall', async (sheet) => ({
     weighting: await sheet.getByText(/Jede Muskelgruppe zählt gleich viel/).isVisible(),
-    metric: await sheet.getByText(/bester Satz des Tages/).isVisible(),
+    metric: await sheet.getByText(/bester Arbeitssatz des Tages/).isVisible(),
     text: await sheet.locator('.sheet__body').textContent(),
   }));
   check('it explains the equal weighting', overallSheet.weighting);

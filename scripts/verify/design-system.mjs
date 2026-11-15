@@ -549,11 +549,14 @@ for (const width of WIDTHS) {
       };
       const fill = (el) => getComputedStyle(el).backgroundColor;
       const latest = all[all.length - 1];
-      // The table beside the chart names every day's best set, newest
-      // first: "8 × 60 kg" is 480 kg-reps, the value its bar stands for.
+      // The table beside the chart names every day's best working set,
+      // newest first, and its bar stands for that set's strength score
+      // (Stage 5b, D150): "8 × 60 kg" is 60 × (30 + 8) = 2280. Before the
+      // stage the value was reps × load, 480, and a device still on that
+      // metric draws its bars by it; this suite onboards on the new build.
       const scores = [...document.querySelectorAll('.gym-detail .visually-hidden tbody td')]
         .map((el) => el.textContent.match(/([\d.]+)\s*×\s*([\d.]+)/))
-        .map((m) => (m ? Number(m[1]) * Number(m[2]) : null))
+        .map((m) => (m ? Number(m[2]) * (30 + Number(m[1])) : null))
         .reverse();
       return {
         count: all.length,
