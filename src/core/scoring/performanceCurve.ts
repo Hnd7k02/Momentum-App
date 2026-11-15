@@ -31,7 +31,7 @@ import { TRAINING_RATING, RATING } from '../config/constants';
  * | Required | Why it holds |
  * |---|---|
  * | `score(0) = 500` | `ODDS^0 = 1`, so the denominator is exactly 2. Exact, not fitted. |
- * | symmetric about 500 | `1000 − score(x) = score(−x)` is an identity of the logistic, exact in algebra and exact to the last bit in the stable form used below. |
+ * | symmetric about 500 | `1000 − score(x) = score(−x)` is an identity of the logistic, exact in algebra; in the stable form used below the two sides agree to within one unit in the last place of a double. |
  * | monotonic | the exponent is strictly decreasing in `x`, so the denominator is too. |
  * | diminishing returns | the logistic's slope is maximal at `x = 0` and falls monotonically as `|x|` grows, which is the definition of diminishing marginal reward. |
  * | continuous at 0 | one expression over the whole line; there is no branch on sign that changes the value, only one that keeps the exponential in range. |
@@ -62,11 +62,54 @@ import { TRAINING_RATING, RATING } from '../config/constants';
  * puts `score(0) = 500`, monotonicity, symmetry and diminishing returns above
  * closeness to the table, so the two ±20 % anchors are the ones that give.
  * Every other anchor is met exactly or within 3.4 points.
+ *
+ * ## One function, and the one value a domain may bring of its own
+ *
+ * The properties above are the curve's, for every domain, and none of them
+ * depends on `DECADE` (D101). `DECADE` is the one value D99 allows to be
+ * tuned: how many percentage points of change multiply the odds by `ODDS`.
+ * It is ten in the constants, and ten is what this module computes with
+ * **when no value is handed in** — every Running day, and every Gym day
+ * before the era of WP3 Stage 5b.
+ *
+ * From that era on Gym brings its own (D177): the Stage 5b metric reads a
+ * week's progress as two or three percent where `reps × load` read ten and
+ * more, so the same curve needs fewer points per decade to say the same
+ * thing. The value travels in the day's snapshot
+ * (`scoring.gymMetric.curveDecadePercent`, read by `gymCurveOf()`), and the
+ * caller hands it in. It is an argument, not a second curve: one expression,
+ * one set of properties, no table and no branch.
  */
 
-/** `ln(ODDS) / DECADE` — the logistic rate, per percentage point. */
+/** `ln(ODDS) / DECADE` — the logistic rate, per percentage point, of the constants. */
 const K =
   Math.log(TRAINING_RATING.CURVE_ODDS_PER_DECADE) / TRAINING_RATING.CURVE_DECADE_PERCENT;
+
+/**
+ * The logistic rate for a curve whose odds multiply by `ODDS` every
+ * `decadePercent` points. Without a value it is `K` itself — the same
+ * double, so a caller that hands nothing in computes bit for bit what this
+ * module always computed. With ten it is the same quotient of the same two
+ * numbers, and so the same double again.
+ */
+function rateOf(decadePercent: number | undefined): number {
+  return decadePercent === undefined
+    ? K
+    : Math.log(TRAINING_RATING.CURVE_ODDS_PER_DECADE) / decadePercent;
+}
+
+/**
+ * Whether a value can be a curve's `DECADE`: a positive finite number of
+ * percentage points whose rate is finite and above zero. A stored value is
+ * asked this before it is used (`gymCurveOf()`); anything else — a string
+ * from a restored file, zero, a number so small that its rate overflows —
+ * is no value, and the curve of the constants applies.
+ */
+export function isCurveDecade(value: unknown): value is number {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return false;
+  const rate = Math.log(TRAINING_RATING.CURVE_ODDS_PER_DECADE) / value;
+  return Number.isFinite(rate) && rate > 0;
+}
 
 /**
  * A performance change in **percent** (+10 means ten per cent better) as a
@@ -79,25 +122,30 @@ const K =
  * at +10000 it underflows cleanly. Mirroring the algebra means a collapse of
  * −99.9 % and a gain of +100000 % both land on a real number, and the two
  * branches agree exactly at their shared boundary, x = 0, where each is 500.
+ *
+ * `decadePercent` is the curve's one value, where the day's snapshot carries
+ * one (see above): how many percentage points multiply the odds by four.
+ * Left out, it is the constants' ten.
  */
-export function mapPerformanceChangeToScore(changePercent: number): number {
+export function mapPerformanceChangeToScore(changePercent: number, decadePercent?: number): number {
   if (!Number.isFinite(changePercent)) {
     // Not a rate anything produced: ±Infinity cannot come out of a ratio of
     // two positive finite best sets, and NaN is a bug. Neither is a result.
     return changePercent > 0 ? RATING.MAX : RATING.MIN;
   }
+  const rate = rateOf(decadePercent);
   if (changePercent >= 0) {
-    return RATING.MAX / (1 + Math.exp(-K * changePercent));
+    return RATING.MAX / (1 + Math.exp(-rate * changePercent));
   }
-  const odds = Math.exp(K * changePercent);
+  const odds = Math.exp(rate * changePercent);
   return (RATING.MAX * odds) / (1 + odds);
 }
 
 /** The same curve read backwards, for a screen that wants to state a target. */
-export function performanceChangeForScore(score: number): number {
+export function performanceChangeForScore(score: number, decadePercent?: number): number {
   if (score <= RATING.MIN) return -Infinity;
   if (score >= RATING.MAX) return Infinity;
-  return Math.log(score / (RATING.MAX - score)) / K;
+  return Math.log(score / (RATING.MAX - score)) / rateOf(decadePercent);
 }
 
 /**
@@ -106,9 +154,9 @@ export function performanceChangeForScore(score: number): number {
  * `null` in, `null` out: no comparison is not a change of zero, and the one
  * thing this app never does is score an absence.
  */
-export function scoreForRatio(ratio: number | null): number | null {
+export function scoreForRatio(ratio: number | null, decadePercent?: number): number | null {
   if (ratio === null) return null;
-  return mapPerformanceChangeToScore((ratio - 1) * 100);
+  return mapPerformanceChangeToScore((ratio - 1) * 100, decadePercent);
 }
 
 /**
@@ -159,11 +207,15 @@ export interface PerformanceScore {
  * missing one is not a zero and not a neutral 500 — it is missing, and
  * inventing a value for it would be the one mistake this app is built not to
  * make.
+ *
+ * `decadePercent` is the curve's value for both windows of the day, handed
+ * through as it came from that day's snapshot; left out, the constants'.
  */
-export function performanceScore(input: PerformanceComponents): PerformanceScore {
+export function performanceScore(input: PerformanceComponents, decadePercent?: number): PerformanceScore {
   const trendScore =
-    input.trendChange === null ? null : mapPerformanceChangeToScore(input.trendChange);
-  const ytdScore = input.ytdChange === null ? null : mapPerformanceChangeToScore(input.ytdChange);
+    input.trendChange === null ? null : mapPerformanceChangeToScore(input.trendChange, decadePercent);
+  const ytdScore =
+    input.ytdChange === null ? null : mapPerformanceChangeToScore(input.ytdChange, decadePercent);
 
   const components: ('trend' | 'ytd')[] = [];
   if (trendScore !== null) components.push('trend');
