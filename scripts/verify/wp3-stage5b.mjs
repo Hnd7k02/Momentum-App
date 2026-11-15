@@ -515,8 +515,15 @@ for (const [width, height] of SIZES) {
   check('E: it carries the one-day window (D132)', update.config.scoring.editWindowDays === 1 && update.config.scoring.sessionWindowDays === 1, short(update.config.scoring));
   check('E: Food off, the Boss shared over what remains (D139)',
     update.config.domains.some((domain) => domain.type === 'food' && domain.enabled === false) && !('food' in update.config.boss.weights), short(update.config.boss));
+  // The marker of the era: the metric as Stage 5b wrote it, field for field,
+  // and — since the block "Kurve" (D177) — the value of the curve fitted to
+  // it, as the marker's fourth field in the same snapshot.
+  const { curveDecadePercent, ...metricFields } = update.config.scoring.gymMetric ?? {};
   check('E: and the exercise-day metric (D150)',
-    JSON.stringify(update.config.scoring.gymMetric) === JSON.stringify({ id: 'bestWorkingSet', repsDivisor: 30, comparison: 'median' }), short(update.config.scoring.gymMetric));
+    JSON.stringify(metricFields) === JSON.stringify({ id: 'bestWorkingSet', repsDivisor: 30, comparison: 'median' }), short(update.config.scoring.gymMetric));
+  check('E: and with it, in the same marker, the value of the curve: three (D177)',
+    JSON.stringify(update.config.scoring.gymMetric) === JSON.stringify({ id: 'bestWorkingSet', repsDivisor: 30, comparison: 'median', curveDecadePercent: 3 }) && curveDecadePercent === 3,
+    short(update.config.scoring.gymMetric));
 
   // A second load, and one the next day, write nothing.
   await page.reload({ waitUntil: 'networkidle' });
