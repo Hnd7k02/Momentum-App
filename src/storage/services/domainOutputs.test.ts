@@ -21,6 +21,12 @@ import {
   foodOffProfile,
   p8CrossingProfile,
 } from './fixtures/profiles';
+import {
+  METRIC_CROSSING_CLOCKS,
+  STRENGTH_CLOCKS,
+  metricCrossingProfile,
+  strengthProfile,
+} from './fixtures/trainingProfile';
 
 /**
  * The regression boundary for presentation work.
@@ -296,6 +302,67 @@ describe('the P8 golden profiles (re-frozen at STOP 3b under the P8 rules)', () 
         checkGolden(`${profile.name} ${clock}`, 'boss', value);
         const json = JSON.stringify(value);
         console.log(`p8 golden: ${profile.name} at ${clock}: ${createHash('md5').update(json).digest('hex')}`);
+      });
+    }
+  }
+});
+
+/*
+ * WP3 Stage 5b (D150, D151): the exercise-day metric as an era. Two
+ * profiles with several sets per exercise and day (`trainingProfile.ts`),
+ * frozen once the stage computed them — new files beside the old ones, none
+ * of which moved.
+ *
+ * - **Crossing the metric**: a device as the live build left it, loading the
+ *   update on a Monday — the one-day window, Food off and the Stage 5b
+ *   metric in one snapshot. Its clocks are the day before, the day itself,
+ *   the day after, a week and a month on. The file of the day before is the
+ *   old metric throughout; in every later file each day before the boundary
+ *   has the values it has there.
+ * - **Under the metric from day one**: double progression, a pyramid, drop
+ *   sets, marked and unmarked warm-up sets, a day of warm-up sets only, a
+ *   single light day after six and after four exercise-days, a whole light
+ *   week, a bodyweight exercise over a changing bodyweight.
+ *
+ * Each clock freezes the Boss replay with the whole Gym rating state and the
+ * Gym history the screens read at 7, 30 and 90 days.
+ */
+const STAGE5B_PROFILES: { name: string; load(): string; clocks: readonly string[] }[] = [
+  { name: 'stage5b crossing the metric', load: metricCrossingProfile, clocks: METRIC_CROSSING_CLOCKS },
+  { name: 'stage5b under the metric from day one', load: strengthProfile, clocks: STRENGTH_CLOCKS },
+];
+
+describe('the Stage 5b golden profiles (frozen at STOP 5b)', () => {
+  afterEach(async () => {
+    setClock(null);
+    await closeDatabase();
+  });
+
+  for (const profile of STAGE5B_PROFILES) {
+    for (const clock of profile.clocks) {
+      it(`${profile.name} at ${clock}`, async () => {
+        await deleteDatabase();
+        setClock({ now: () => at(clock) });
+        const result = await importBackup(profile.load());
+        if (!result.ok) throw new Error(result.details.join('; '));
+        const boss = await loadBossProgression();
+        const value = roundAll({
+          outputs: outputsOf(boss),
+          pending: boss.pending,
+          confirmation: boss.confirmation,
+          gym: boss.gym,
+        });
+        checkGolden(`${profile.name} ${clock}`, 'boss', value);
+
+        const histories: Record<number, unknown> = {};
+        for (const range of GYM_RANGES) {
+          const history = await loadGymHistory(addDays(clock as DateKey, -(range - 1)), clock as DateKey);
+          histories[range] = { ...gymOutputsOf(history), metric: history.metric, warmUpOnly: history.warmUpOnly };
+        }
+        checkGolden(`${profile.name} ${clock}`, 'gym', histories);
+        console.log(
+          `stage5b golden: ${profile.name} at ${clock}: ${createHash('md5').update(JSON.stringify(value)).digest('hex')} / ${createHash('md5').update(JSON.stringify(histories)).digest('hex')}`,
+        );
       });
     }
   }
