@@ -4810,3 +4810,53 @@ tuned — an amendment to D101 the block records. Running may not move on
 any day. The weakest tint stays 0.3 (D167) and the band stays where it is
 (D153). The scale of the rows and of the exercise detail is shown and
 asked about, not changed.
+
+## D176 — The exercise detail states two changes under one word; block 7C makes it one figure, or two that are each named, the same in the sheet
+
+**Finding and commission (owner, 2026-11-15, at the start of block "Kurve";
+built in block 7C).** The exercise detail shows two changes: at the top the
+last day against the one before, at the line the last day against the first
+of the range — for the import file's bench press "+3 %" and "+4 %". Either
+a single figure, or two that are unambiguously named, and the same in the
+muscle sheet and in the exercise detail.
+
+*Read in the code:* that is what it is, and D175 had said it to him rather
+than decided it ("Two things about the line").
+
+- `ExerciseDetail.tsx` prints `comparison` — `history.comparisons`, the
+  latest day against the previous day of the same exercise — under
+  `gym.detail.change`, "Veränderung", beside "Zuletzt" and "Davor". The
+  exercise list under the muscle rows prints the same figure.
+- `ExerciseLineChart.tsx` draws each day as its change since the first day
+  shown and prints the last of them beside the end point, with no name of
+  its own; only the table a screen reader gets names its column,
+  "Veränderung seit dem ersten Tag".
+- Bench press in the import file, the 30 days to 15 November: 9 × 60,
+  10 × 60, 8 × 62.5 and 9 × 62.5 kg. Against the day before that is +2.6 %,
+  shown "+3 %"; against the first day of the range +4.2 %, shown "+4 %".
+  Both are true statements about named days, and nothing on the screen says
+  which is which. They can differ in sign: a day that fell back from a peak
+  still stands above its first day.
+- **A third figure is on its way to the screen.** The muscle sheet lists a
+  group's exercises with "their change", which the 7C prompt defines as the
+  change in the chosen range that enters the group's figure — the median of
+  the exercise's last days against the median of its first (`exerciseSpans`).
+  For the same bench press and range that is +1.5 %, shown "+2 %", and
+  therefore "Gehalten". Left alone, one exercise would read +3 %, +4 % and
+  "Gehalten" in three places.
+
+**What is to hold.** Wherever the change of one exercise is printed — the
+head of the exercise detail and the end of its line, the exercises of a
+group in the muscle sheet, the exercise list under the rows while it exists
+— either **one** figure, the same in each place and resting on the same
+comparison, or **two that each say what they compare** (the day before; the
+range), under the same two names in the sheet and in the detail. No figure
+stands under the bare word "Veränderung" beside another that means
+something else, and state and colour follow the figure they stand with.
+
+Block 7C decides which of the three figures remain, draws both forms with
+real data, builds the one it recommends in the sheet and the detail
+together, and puts the choice to the owner at STOP 7C; contract §6 and §9
+follow. Until then the exercise detail stays as built.
+`docs/wp3/prompts/prompt-7c-muskel-sheet.md` carries it: section 5, "Ein
+vierter Befund", and step 6, point 4.

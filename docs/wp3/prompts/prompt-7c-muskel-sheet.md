@@ -4,6 +4,7 @@ Für eine frische Session mit dem Modell, das D159 festlegt. Die Session braucht
 Start: «Lies `docs/wp3/prompts/prompt-7c-muskel-sheet.md` und führe ihn aus.»
 Geschrieben am 11.11.2026, vor den Blöcken «Farbregeln», 5b, 7A und 7B. Zeilennummern beziehen sich auf den Commit `af89fd9`; die vier Blöcke davor haben fast alle hier genannten Dateien verändert. Nimm die Zeilen als Wegweiser zum Symbol, nicht als Adresse, und lies zuerst die Blöcke der Vorgänger in `HANDOVER.md`.
 Ergänzt am 15.11.2026 um drei Punkte, die Dario auf dem iPhone gefunden hat (D168–D170): Abschnitt 5, «Drei Befunde vom iPhone», und Abschnitt 6, Schritt 6. Die Zeilen dazu beziehen sich auf den Commit `16c520c`.
+Ergänzt am 15.11.2026, am Start des Blocks «Kurve», um einen vierten Punkt von Dario (D176): Das Übungsdetail nennt zwei Veränderungen, ohne zu sagen, welche welche ist. Abschnitt 5, «Ein vierter Befund», Abschnitt 6, Schritt 6, Punkt 4, und die Abschnitte 8 und 9.
 
 ## 1. Worum es geht
 
@@ -23,6 +24,10 @@ Dazu kommen drei Punkte, die Dario am 15.11.2026 auf dem iPhone gefunden und die
 - Die Karte springt beim Laden, und ihr Titel steht dabei manchmal kurz doppelt da.
 - Die Verlaufslinien der Zeilen stehen nicht in einer Spalte.
 - Ein einzelner Messwert als Punkt auf einer Linie wirkt wie ein Fehler. Du schlägst eine bessere Darstellung vor.
+
+Und ein vierter, den Dario am Start des Blocks «Kurve» nachgereicht hat (D176). Er betrifft das Übungsdetail und das Sheet zusammen:
+
+- Das Übungsdetail zeigt zwei Veränderungen derselben Übung, oben «+3 %» und an der Linie «+4 %». Es gibt künftig entweder eine einzige Zahl oder zwei eindeutig beschriftete, und zwar gleich im Sheet und im Übungsdetail.
 
 ## 2. Arbeitsweise in dieser Session
 
@@ -51,7 +56,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 
 1. `docs/wp3/vertrag.md`: §9 ganz, §6 (Linie, Diagramm im Sheet, Balken), §7 («uneinheitlich», die fünf Zustände), §3, §11, §12, §13 und §14 (die Zeilen für 7C).
 2. Mockup 2: `docs/wp3/mockups/muskel-sheet.html` mit den Bildern `2-muskel-sheet-*.png` und `2-muskel-sheet-wenig-*.png`. Sieh sie dir an; sie zeigen Reihenfolge und Falz.
-3. `docs/decisions.md`: D152, D155, D161, D163 (Balken ab null, die drei Textregeln) und die Einträge der Blöcke «Farbregeln», 5b, 7A und 7B; dazu D168, D169 und D170 (die drei Befunde vom iPhone).
+3. `docs/decisions.md`: D152, D155, D161, D163 (Balken ab null, die drei Textregeln) und die Einträge der Blöcke «Farbregeln», 5b, 7A und 7B; dazu D168, D169 und D170 (die drei Befunde vom iPhone) und D176 (die zwei Veränderungen im Übungsdetail).
 4. `HANDOVER.md`: die Blöcke der Vorgänger in WP3.
 5. `docs/wp3/review-2026-11.md`: Abschnitt C («Signaturmomente») und Abschnitt E («Empfohlene Messdefinition», die zweite Zahl).
 6. `scripts/verify/README.md`: `gym-muscles.mjs`, `wp3-sheets.mjs`, `design-system.mjs`.
@@ -91,6 +96,13 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 - **Die Karte.** `src/features/gym/MuscleEntryCard.tsx` ist die Karte «Muskelgruppen» in der Gym-Übersicht. Solange die Historie lädt, hält ihre Textspalte den Titel und zwei geschützte Leerzeichen als Platzhalter: `summary` und die Zeile für den Zeitraum. Geladen stehen dort bis zu vier Zeilen: die Zusammenfassung, die Zeile «Leistungstrend …» (`gymHub.muscles.overall`), für die es keinen Platzhalter gibt, und der Zeitraum. «Kein Training in den letzten 30 Tagen» (`gymHub.muscles.outside`) bricht in der Spalte neben dem Standbild auf zwei Zeilen um. Die Karte ist eine Flex-Zeile mit `align-items: center` (`.gym-hub__muscles` in `gymHub.css`); die Textspalte steht also mittig zum 128 px hohen Standbild. Ändert sich ihre Höhe, wandert der Titel um die Hälfte davon. Die Karte ist Glas (`backdrop-filter`).
 - **Die Spalte.** In `src/features/gym/muscleModule.css` ist `.muscle-row__right` (Zeile 162) `flex: none` mit `min-width: 62px` und `max-width: 172px` und damit so breit wie ihr Inhalt, die Zahl über dem Wort des Zustands. Das Diagramm (`.muscle-row__chart`, 80 px, bei 320 px Breite 64 px) steht links davon. Seine Lage hängt deshalb an der Breite des Worts, und «Zurückgegangen», «Verbessert» und «Gehalten» sind drei Breiten.
 - **Der einzelne Messwert.** `src/features/gym/Sparkline.tsx` zeichnet bei genau einem Messwert die Nulllinie und in ihrer Mitte den Endpunkt, ohne Linie (`sparkPoints`, `values.length === 1`). So verlangen es heute der Vertrag §6 («Ein einzelner Messwert ist ein Punkt») und `CLAUDE.md`. Der Fall ist häufiger, als er klingt: Eine Gruppe nennt einen Trend ab drei Übungstagen mit einer Übung an zwei Tagen (D153), und ihre Reihe hat einen Punkt je Trainingstag, an dem es schon etwas zu vergleichen gab (`muscleTrend` in `muscleAnalytics.ts`). Bankdrücken am ersten und am dritten Tag und Schrägbank am zweiten ergeben drei Übungstage und einen einzigen Punkt. `MuscleDataState` kennt den Fall als `single-observation`. Block 5b hat `muscleTrend` auf die neue Kennzahl umgestellt; lies die Funktion, wie sie dann steht.
+
+**Ein vierter Befund: zwei Veränderungen im Übungsdetail (D176)**
+
+- **Oben** steht in `src/features/gym/ExerciseDetail.tsx` neben «Zuletzt» und «Davor» die «Veränderung» (`gym.detail.change`). Sie ist `history.comparisons.get(id)`: der letzte Tag gegen den vorigen Tag derselben Übung. Dieselbe Zahl steht in der Übungsliste unter den zehn Zeilen.
+- **An der Linie** steht rechts neben dem Endpunkt der Endwert (`src/features/gym/ExerciseLineChart.tsx`, `lineValues`): der letzte Tag gegen den ersten Tag im gewählten Zeitraum. Er trägt keine Beschriftung; nur die Tabelle für Vorlesehilfen nennt ihre Spalte «Veränderung seit dem ersten Tag».
+- **Beide stimmen und meinen Verschiedenes.** Bankdrücken in den Prüfdaten, 30 Tage bis zum 15.11.: 9 × 60, 10 × 60, 8 × 62,5 und 9 × 62,5 kg. Zum Vortag sind das +2,6 %, gezeigt «+3 %»; seit dem ersten Tag im Zeitraum +4,2 %, gezeigt «+4 %». Die zwei können sogar das Vorzeichen wechseln: Ein Tag, der von einer Spitze zurückfällt, steht noch über seinem ersten Tag (D175).
+- **Es gibt eine dritte Zahl,** und dieser Block bringt sie auf den Bildschirm: die Veränderung der Übung im Zeitraum, wie sie in die Zahl der Gruppe eingeht (Median der letzten gegen den Median der ersten Übungstage, `exerciseSpans` in `src/core/gym/performance.ts`). Schritt 4 verlangt sie für die Übungen im Sheet. Für dasselbe Bankdrücken sind es +1,5 %, gezeigt «+2 %» und damit «Gehalten». Ohne eine Regel stünden für eine Übung also drei Zahlen an drei Stellen.
 
 **Tokens**
 
@@ -155,7 +167,7 @@ Dazu:
 
 - **Über der Falz** stehen auf der unteren Stufe Name, Veränderung, Zeitraum und Diagramm, bei 393 × 852 und bei 320 px Breite. Übungen und Volumen dürfen darunter beginnen.
 - **Dieselbe Quelle.** Zahl und Zustand im Sheet kommen aus derselben Funktion wie die der Zeile und des Körpers. Das Sheet rechnet nichts selbst.
-- **Die Veränderung einer Übung** im Sheet ist die der Übung im gewählten Zeitraum, also die, die in die Zahl der Gruppe eingeht, nicht der Vergleich mit dem vorigen Tag. Braucht es dafür eine reine Funktion unter `src/core/gym/`, die nach aussen gibt, was die Rechnung der Gruppe ohnehin bildet, ist das erlaubt. Kein Wert, der in ein Rating eingeht, ändert sich dadurch, und jede Golden-Datei bleibt, wie sie ist.
+- **Die Veränderung einer Übung** im Sheet ist die der Übung im gewählten Zeitraum, also die, die in die Zahl der Gruppe eingeht, nicht der Vergleich mit dem vorigen Tag. Wie sie heisst und was daneben stehen darf, regelt Schritt 6, Punkt 4 (D176): Sheet und Übungsdetail nennen dieselbe Zahl oder dieselben zwei, mit denselben Namen. Braucht es dafür eine reine Funktion unter `src/core/gym/`, die nach aussen gibt, was die Rechnung der Gruppe ohnehin bildet, ist das erlaubt. Kein Wert, der in ein Rating eingeht, ändert sich dadurch, und jede Golden-Datei bleibt, wie sie ist.
 - **«uneinheitlich»** (Vertrag §7): Liegen die Veränderungen der Übungen einer Gruppe mehr als zehn Prozentpunkte auseinander, steht im Sheet das Wort «uneinheitlich», und die Übungen sind einzeln sichtbar. Die Regel wohnt in `muscleState.ts`, mit Tests an der Kante (genau zehn Punkte, eine einzige Übung).
 - **Zu wenig Vergleichsdaten:** kein Diagramm. Ein Satz sagt, wie viele Übungstage es im Zeitraum gibt und ab wann ein Trend erscheint. Darunter steht unter «Erfasst», was erfasst ist: Übung, Tag, bester Arbeitssatz. Das Volumen folgt.
 - **Noch nicht trainiert:** ein Satz, was fehlt, mit dem Datum der letzten Session der Gruppe, wenn es eine vor dem Zeitraum gibt, und die eine Aktion «Training erfassen» (Vertrag §11).
@@ -171,9 +183,9 @@ Dazu:
 - Eine Woche ohne Arbeitssatz der Gruppe ist eine Lücke, kein Balken der Höhe null mit einer Zahl darüber.
 - Die Balken haben eine Entsprechung in Worten für Vorlesehilfen.
 
-### Schritt 6 – Drei Befunde vom iPhone (D168–D170)
+### Schritt 6 – Drei Befunde vom iPhone (D168–D170) und ein vierter (D176)
 
-Drei Punkte aus Darios Prüfung vom 15.11.2026. Was der Code dazu zeigt, steht in Abschnitt 5; prüf es, bevor du baust, denn zwei Blöcke liegen dazwischen.
+Drei Punkte aus Darios Prüfung vom 15.11.2026 und einer vom Start des Blocks «Kurve». Was der Code dazu zeigt, steht in Abschnitt 5; prüf es, bevor du baust, denn zwei Blöcke liegen dazwischen.
 
 **1. Die Karte «Muskelgruppen» hält ihre Höhe (D168)**
 
@@ -202,6 +214,19 @@ Drei Punkte aus Darios Prüfung vom 15.11.2026. Was der Code dazu zeigt, steht i
 - Zeile und Sheet zeigen denselben Fall auf dieselbe Art. Seit STOP 5b gibt es eine dritte Stelle: Das Übungsdetail zeichnet eine Linie (`src/features/gym/ExerciseLineChart.tsx`, D175), und ein einzelner Tag ist dort ein Punkt ohne Wert. Dein Vorschlag gilt für alle drei, und die Kandidaten zeigst du auch dort.
 - **Im Build bleibt bis zu Darios Wahl der Punkt.** Die Frage geht mit deiner Empfehlung an den STOP. Wählt er, baust du es in derselben Session, ziehst Vertrag §6 und den Satz in `CLAUDE.md` («one value draws a dot») nach und passt die Prüfungen an, die den Punkt festhalten (`gym-muscles.mjs`, `release-proof.mjs`, `Sparkline.test.ts`), jede mit alter und neuer Regel im Bericht.
 
+**4. Eine Zahl, oder zwei mit Namen (D176)**
+
+- **Darios Befund:** Das Übungsdetail zeigt zwei Veränderungen: oben den letzten Tag gegen den davor, an der Linie den letzten gegen den ersten im Zeitraum. Beim Bankdrücken der Prüfdaten stehen «+3 %» und «+4 %» untereinander, und nur die obere heisst «Veränderung».
+- **Seine Vorgabe:** entweder eine einzige Zahl oder zwei eindeutig beschriftete, und zwar gleich im Sheet und im Übungsdetail.
+- **Was das heisst.** Überall, wo die Veränderung einer einzelnen Übung steht (im Übungsdetail oben und an der Linie, bei den Übungen im Sheet, in der Übungsliste unter den Zeilen, solange es sie gibt), gilt dieselbe Regel:
+  - **Entweder eine Zahl.** Dann ist es an jeder Stelle dieselbe, mit demselben Vergleich dahinter. Nach Schritt 4 ist das im Sheet die Veränderung im Zeitraum, die in die Zahl der Gruppe eingeht. Der Endwert an der Linie ist dann diese Zahl oder trägt keinen Wert mehr, und «Zuletzt» und «Davor» bleiben zwei Sätze ohne Prozentzahl dazwischen.
+  - **Oder zwei Zahlen, jede mit ihrem Namen.** Der Name sagt, womit verglichen wird, etwa «zum Vortag» und «im Zeitraum» (oder «seit dem 21.10.»). Die zwei Namen sind im Sheet und im Übungsdetail dieselben, in derselben Reihenfolge, auf Deutsch und Englisch. Keine Zahl steht unter dem blossen Wort «Veränderung» neben einer, die etwas anderes meint.
+- **Die dritte Zahl zählt mit.** Der Endwert der Linie (letzter gegen ersten Tag) und die Veränderung im Zeitraum (Median, Schritt 4) sind nicht dasselbe. Entscheide, welche der drei Zahlen aus Abschnitt 5 bleiben, und sag, was mit der Linie geschieht: Sie darf weiter jeden Tag an seiner Veränderung seit dem ersten Tag zeichnen, aber ihr Endwert darf nicht als zweite, unbenannte Aussage neben einer anderen stehen.
+- **Zustand und Farbe** folgen an jeder Stelle der Zahl, bei der sie stehen (`muscleState.ts`); eine Übung darf nicht an einer Stelle grün und an der anderen «Gehalten» heissen, ohne dass die zwei Namen es erklären.
+- **Zeichne beide Formen mit echten Daten,** für das Bankdrücken der Prüfdaten bei 30 und 90 Tagen und für eine Übung, bei der die Zahlen im Vorzeichen auseinanderfallen: Übungsdetail und Sheet nebeneinander, bei 393 und 320 px. Sag zu jeder, was jemand liest, der die App nicht kennt.
+- **Bau die Form, die du empfiehlst,** in Sheet und Übungsdetail zugleich, und stell die andere als Bild daneben. Die Frage geht an den STOP; wählt Dario anders, baust du in derselben Session um. Vertrag §6 (Diagramm im Übungsdetail) und §9 bekommen den Satz dazu, und `docs/decisions.md` hält fest, was gilt.
+- **Prüfungen.** Eine Browser-Prüfung hält für jede Übung der Prüfdaten fest: Die Zahl oder die zwei Zahlen im Sheet und im Übungsdetail sind dieselben und tragen dieselben Namen. Such die Prüfungen, die heute die «Veränderung» im Kopf oder den Endwert der Linie festhalten (darunter `design-system.mjs`, `exerciseDetailChart.test.tsx`, `wp3-stage1.mjs`, `farbregeln.mjs` und `phase4.mjs`), und zieh sie nach, jede mit alter und neuer Regel im Bericht.
+
 ### Schritt 7 – Prüfungen
 
 - **Dieselbe Zahl** (Vertrag §14), in einer Browser-Suite: Für ein Profil, das alle fünf Zustände enthält, stimmen für jede der zehn Gruppen überein: Zahl und Wort der Zeile, Zahl und Chip im Sheet, und der Zustand, den der Körper zeichnet. Dafür gibt der Viewer seinen Zustand je Gruppe nach aussen, unsichtbar und aus denselben Werten, die er zeichnet.
@@ -212,10 +237,11 @@ Drei Punkte aus Darios Prüfung vom 15.11.2026. Was der Code dazu zeigt, steht i
 - `design-system.mjs` nimmt das Sheet in beiden Stufen und in den Zuständen aus Schritt 4 auf: jeder Text bei 4,5:1 an den gerenderten Pixeln, keiner unter 11 px, nichts scrollt seitwärts.
 - Unit-Tests für das Volumen, für «uneinheitlich» und für die Veränderung einer Übung im Zeitraum.
 - **Die drei Befunde:** die Lage des Titels der Karte vor und nach dem Laden (D168), die gemeinsame Spalte der Linien (D169) und, sobald Dario gewählt hat, die Darstellung eines einzelnen Messwerts in Zeile und Sheet (D170).
+- **Der vierte Befund:** Die Veränderung einer Übung steht im Sheet und im Übungsdetail als dieselbe Zahl oder als dieselben zwei mit denselben Namen (D176).
 
 ### Schritt 8 – Durchsicht
 
-Screenshots unter `docs/design/wp3/stage7c/` bei 320, 360, 393 und 430 px: das Sheet einer Gruppe mit Messwerten auf beiden Stufen, «uneinheitlich», zu wenig Vergleichsdaten, noch nicht trainiert, 90 Tage, einmal auf Englisch. Dazu die Karte «Muskelgruppen» beim Laden und geladen in jedem ihrer Zustände, die zehn Zeilen mit allen drei Wörtern, und die Kandidaten für den einzelnen Messwert. Sieh dir jeden an und vergleich ihn mit Mockup 2. Führ eine Liste: behoben, oder bewusst anders mit Grund.
+Screenshots unter `docs/design/wp3/stage7c/` bei 320, 360, 393 und 430 px: das Sheet einer Gruppe mit Messwerten auf beiden Stufen, «uneinheitlich», zu wenig Vergleichsdaten, noch nicht trainiert, 90 Tage, einmal auf Englisch. Dazu die Karte «Muskelgruppen» beim Laden und geladen in jedem ihrer Zustände, die zehn Zeilen mit allen drei Wörtern, die Kandidaten für den einzelnen Messwert, und das Übungsdetail neben dem Sheet in beiden Formen aus Schritt 6, Punkt 4. Sieh dir jeden an und vergleich ihn mit Mockup 2. Führ eine Liste: behoben, oder bewusst anders mit Grund.
 
 ### Schritt 9 – Schlussprüfung und Vorschau
 
@@ -233,7 +259,8 @@ Screenshots unter `docs/design/wp3/stage7c/` bei 320, 360, 393 und 430 px: das S
 - die Körperbühne, die Bedienung des Körpers, das Modell;
 - das Verhalten der bestehenden Sheets beim Tippen und mit Tastatur;
 - der Weg für Vorlesehilfen: Er führt über die Zeilen, und das Sheet ist von dort ohne den Körper erreichbar;
-- die Karte «Muskelgruppen» und die zehn Zeilen, ausser in dem, was Schritt 6 nennt.
+- die Karte «Muskelgruppen» und die zehn Zeilen, ausser in dem, was Schritt 6 nennt;
+- das Übungsdetail, ausser in den Zahlen und Namen, die Schritt 6, Punkt 4 nennt.
 
 Kein Test wird gelöscht oder abgeschwächt. Im STOP-Bericht steht jede umgeschriebene Prüfung mit alter und neuer Regel.
 
@@ -255,6 +282,7 @@ Kein Test wird gelöscht oder abgeschwächt. Im STOP-Bericht steht jede umgeschr
 - Die Karte «Muskelgruppen» hat vor und nach dem Laden dieselbe Höhe, und ihr Titel steht an derselben Stelle, in jedem Zustand und bei vier Breiten (D168).
 - In allen Zeilen mit Linie steht die Linie in derselben Spalte, in beiden Sprachen und bei vier Breiten (D169).
 - Für den einzelnen Messwert liegen die Kandidaten als Bilder vor, mit deiner Empfehlung (D170).
+- Die Veränderung einer Übung steht im Sheet und im Übungsdetail gleich da: eine einzige Zahl, oder zwei, die beide sagen, womit sie vergleichen; die Prüfung dafür besteht (D176).
 - `wp3-sheets.mjs` ist unverändert grün; `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, jede Suite aus Schritt 0 besteht.
 - Der Vorschau-Build ist erreichbar.
 
@@ -264,13 +292,13 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 
 1. In drei Sätzen: was sich geändert hat.
 2. Fünf Bilder: das Sheet mit Messwerten auf beiden Stufen, «uneinheitlich», zu wenig Vergleichsdaten, noch nicht trainiert; daneben Mockup 2.
-3. Die drei Befunde vom iPhone: die Karte «Muskelgruppen» vor und nach dem Laden, die Zeilen vorher und nachher, und die Kandidaten für den einzelnen Messwert nebeneinander, in Zeile und Sheet.
+3. Die drei Befunde vom iPhone: die Karte «Muskelgruppen» vor und nach dem Laden, die Zeilen vorher und nachher, und die Kandidaten für den einzelnen Messwert nebeneinander, in Zeile und Sheet. Dazu der vierte (D176): das Übungsdetail und das Sheet vorher und nachher, in der gebauten Form und in der anderen.
 4. Die Zahlen: Tests, Suites gegen die Ausgangsmessung, der tiefste Kontrast im Sheet.
 5. Eigene kleine Entscheidungen und Abweichungen vom Vertrag, jede mit Grund; darunter die Regel für das Volumen je Gruppe, das Wegziehen bei den anderen Sheets und was unter den Zeilen geblieben ist.
 6. Jede umgeschriebene Prüfung mit alter und neuer Regel.
 7. Was du gesehen und für Block 7D, Block 9 oder das Aufräumen liegen gelassen hast.
 8. Die Adresse der Vorschau und die Prüfliste fürs iPhone.
-9. Höchstens fünf Fragen, jede mit Optionen und deiner Empfehlung. Eine steht fest: Welche Darstellung bekommt ein einzelner Messwert (D170)?
+9. Höchstens fünf Fragen, jede mit Optionen und deiner Empfehlung. Zwei stehen fest: Welche Darstellung bekommt ein einzelner Messwert (D170)? Und: eine Zahl für die Veränderung einer Übung, oder zwei mit Namen (D176)?
 10. Der Stand in git für beide Repos.
 
 **Prüfliste fürs iPhone** (übernimm sie und pass sie an; höchstens zehn Punkte):
@@ -280,7 +308,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 3. Drei Gruppen mit verschiedener Datenlage öffnen: eine mit Messwerten, eine mit zu wenig Vergleichsdaten, eine nicht trainierte. Verstehst du jede Zahl ohne Erklärung?
 4. Zahl und Wort im Sheet sind dieselben wie in der Zeile, und die Farbe am Körper passt dazu.
 5. Das Diagramm hat eine Nulllinie, ein Anfangs- und ein Enddatum und den Wert am Endpunkt. Bei zu wenig Daten steht ein Satz, kein Diagramm.
-6. Unter «Übungen» steht jede Übung mit ihrem besten Arbeitssatz und ihrer Veränderung. Wo zwei Übungen weit auseinanderliegen, steht «uneinheitlich». Ein Tipp auf eine Übung führt ins Übungsdetail, Zurück wieder ins Sheet.
+6. Unter «Übungen» steht jede Übung mit ihrem besten Arbeitssatz und ihrer Veränderung. Wo zwei Übungen weit auseinanderliegen, steht «uneinheitlich». Ein Tipp auf eine Übung führt ins Übungsdetail, Zurück wieder ins Sheet. Dort steht dieselbe Zahl wie im Sheet, oder dieselben zwei mit denselben Namen; keine Zahl bleibt ohne Namen neben einer anderen stehen (D176).
 7. «Arbeitsvolumen pro Woche» trägt den Vermerk «nicht gewertet». Stimmt die Zahl einer Woche, die du gut kennst, ungefähr?
 8. Das Sheet nach oben ziehen (fast ganz gross), nach unten ziehen (zu), das Kreuz, ein Tipp auf den Körper, vom linken Rand zurückwischen: Jedes schliesst das Sheet, keines verlässt den Screen.
 9. Im Sheet auf 90 Tage wechseln: Zahl, Diagramm und Körper passen wieder zusammen. Beim Scrollen im Sheet bewegt sich die Seite dahinter nicht.

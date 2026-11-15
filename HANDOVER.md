@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D175). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D176). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -622,9 +622,9 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   accepted before them: the contract (STOP 0), Stage 6b, the colour rules
   of the muscle status, block 7A with the owner's addendum, which he had
   pulled before 5b in the night of 2026-11-11, and Stage 5b.
-- **Four points from the owner's iPhone, 2026-11-15** (D168–D171), each
-  recorded with what he saw, what he suspects and what the code shows.
-  None of them is built yet:
+- **Five points from the owner, 2026-11-15** (D168–D171 from his iPhone,
+  D176 at the start of block "Kurve"), each recorded with what he saw, what
+  he suspects and what the code shows. None of them is built yet:
   - *D168, for 7C:* on the Gym hub the title "Muskelgruppen" now and then
     stands twice, offset, the upper copy half cut off, until a moment
     later. The card's text column changes its height with the load — two
@@ -639,6 +639,15 @@ not merged; the choice between the variants is the owner's at STOP 6a)
     as an error. 7C proposes a better form at its STOP, for the row and
     the sheet's chart together; contract §6 and `CLAUDE.md` follow his
     choice.
+  - *D176, for 7C* (owner, 2026-11-15, at the start of block "Kurve"): the
+    exercise detail states two changes — at the top the last day against
+    the one before, at the line the last day against the first of the
+    range; bench press in the import file reads "+3 %" and "+4 %" — and
+    only the upper one has a name. Either one figure or two that are each
+    named, the same in the muscle sheet and in the exercise detail. The
+    sheet would add a third (the change in the range that enters the
+    group's figure, +2 % and "Gehalten" for the same bench press); 7C
+    decides which remain and asks at its STOP.
   - *D171, block 7D:* the catalogue grows from 49 exercises (five by
     bodyweight; quadriceps 3, core 3, calves 2, forearms 2 by primary
     group) to at least ten per group, existing ids untouched, with a
