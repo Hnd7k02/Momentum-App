@@ -3,14 +3,18 @@
  * The golden files of the Stage 5b profiles, frozen again for the block
  * "Kurve" — the proof beside the re-freeze (D177).
  *
- *   node scripts/verify/kurve-golden-diff.mjs [<commit before the block>]
+ *   node scripts/verify/kurve-golden-diff.mjs [<commit before the block>] [<commit of the re-freeze>]
  *
  * The two Stage 5b profiles (`fixtures/trainingProfile.ts`) carry the marker
  * of the era, and from this block on the marker names the curve's value.
  * Their golden files hold days of the era and were never published, so they
- * are frozen once more. This script compares `.github/fixtures` as it
- * stands with the commit given (default: the last one before the block) and
- * holds what the re-freeze may and may not have done:
+ * are frozen once more. This script compares `.github/fixtures` at two
+ * commits — by default the last one before the block and the one that froze
+ * the files again — and holds what the re-freeze may and may not have done.
+ * (It compared with the working tree until the held band became one-sided
+ * at STOP Kurve, which moved the state column of seven `*.gym.json`:
+ * `band-golden-diff.mjs` is the proof of that step, and this one stays the
+ * proof of its own.)
  *
  * 1. Under `.github/fixtures` nothing differs but `stage5b-*` golden files,
  *    and of those not the two of 2026-05-17, which hold no day of the era.
@@ -30,9 +34,10 @@
  * `docs/design/wp3/kurve-golden.md`.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
 
 const BASE = process.argv[2] ?? '78a22ef';
+/** The commit that froze the seven files again under the curve. */
+const TO = process.argv[3] ?? '6f37680';
 const FIXTURES = '.github/fixtures';
 const GOLDEN = `${FIXTURES}/wp3-golden`;
 /** The Monday the crossing profile loads the update on (`METRIC_FROM`). */
@@ -50,8 +55,8 @@ const fail = (message) => {
 
 /* ── 1. What differs under .github/fixtures at all ──────────────────────── */
 
-const changed = git('diff', '--name-only', BASE, '--', FIXTURES).split('\n').filter(Boolean);
-const untracked = git('ls-files', '--others', '--exclude-standard', '--', FIXTURES).split('\n').filter(Boolean);
+const changed = git('diff', '--name-only', BASE, TO, '--', FIXTURES).split('\n').filter(Boolean);
+const untracked = [];
 for (const file of [...changed, ...untracked]) {
   const name = file.slice(GOLDEN.length + 1);
   if (!file.startsWith(`${GOLDEN}/stage5b-`)) fail(`${file} differs from ${BASE} and is not a Stage 5b golden file`);
@@ -106,14 +111,14 @@ const DEPENDS_ON_THE_LEVEL = new Map([
   ['outputs.changes.[].[]', (file, path) => file.outputs.changes[path[2]][0]],
 ]);
 
-const files = readdirSync(GOLDEN).filter((name) => name.startsWith('stage5b-')).sort();
+const files = git('ls-tree', '--name-only', `${TO}:${GOLDEN}`).split('\n').filter((name) => name.startsWith('stage5b-')).sort();
 if (files.length !== 16) fail(`expected the sixteen Stage 5b golden files, found ${files.length}`);
 
 const rows = [];
 let identicalGym = 0;
 for (const name of files) {
   const before = git('show', `${BASE}:${GOLDEN}/${name}`);
-  const after = readFileSync(`${GOLDEN}/${name}`, 'utf8');
+  const after = git('show', `${TO}:${GOLDEN}/${name}`);
 
   if (name.endsWith('.gym.json')) {
     if (before === after) identicalGym += 1;
@@ -193,7 +198,7 @@ const title = (name) =>
     .replace('crossing-the-metric-', 'crossing ')
     .replace('under-the-metric-from-day-one-', 'from day one ');
 
-console.log(`Compared with ${git('rev-parse', '--short', BASE).trim()}.`);
+console.log(`Compared ${git('rev-parse', '--short', BASE).trim()} with ${git('rev-parse', '--short', TO).trim()}.`);
 console.log('');
 console.log(`Files under ${FIXTURES} that differ: ${changed.length + untracked.length}.`);
 for (const file of [...changed, ...untracked]) console.log(`  ${file}`);

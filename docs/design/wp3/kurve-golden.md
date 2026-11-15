@@ -12,7 +12,7 @@ baselines under `stage2/`, `stage4/` and `stage5b/`, and every
 The proof is a script, and it fails on any violation:
 
 ```
-node scripts/verify/kurve-golden-diff.mjs          # against 78a22ef, the commit before the block
+node scripts/verify/kurve-golden-diff.mjs          # 78a22ef, the commit before the block, against 6f37680, the re-freeze
 ```
 
 It holds four things.
@@ -71,3 +71,62 @@ clocks. The curve of the constants called that 624 to 815 (a window's
 score, as the files hold it); the curve at three calls it 843 to 993. That
 is the block's purpose, and `docs/design/wp3/kurve.md` weighs it against
 what the same value does to someone who is not improving.
+
+## After STOP Kurve — the state column, once
+
+At STOP Kurve the owner made the held band one-sided (D180): a rise counts
+from a shown +2 % where it counted from +3 %. The band decides one thing
+in a golden file — the **shown state** of a muscle group, the seventh
+element of its tuple in a `*.gym.json`, which the golden test takes from
+the same function the screen does (`gymOutputsOf()`; D164 had foreseen
+that a change to the colour rules may move this column and no other). The
+files were frozen once more, in a commit of their own, and a second script
+holds what moved:
+
+```
+node scripts/verify/band-golden-diff.mjs           # 1752245, the commit before the band, against 1a769ed, the re-freeze
+```
+
+1. **Under `.github/fixtures` only `*.gym.json` golden files differ.**
+   Every `*.boss.json` — every rating, every Boss point — is byte for byte
+   what it was: the band is presentation and reaches no score. The six
+   fingerprints of `domainOutputs.test.ts` are unchanged.
+2. **Every value that moved is the state of a muscle group**, it went from
+   "unchanged" to "improved", and the figure that group prints is +2 %.
+3. **Nothing was left behind**: in all eleven golden Gym files, moved or
+   not, each rated group's state is the one-sided band's reading of the
+   figure it prints — 358 groups, 24 of them at +2 %.
+
+Seven files moved, the seven Stage 5b files with days of the era; the
+three older profiles and the file of the day before the boundary hold no
+rated group at +2 %.
+
+| File (clock) | Range | Window | Group | Change | Shown | State |
+|---|---|---|---|---|---|---|
+| crossing 2026-05-18 | 30 days | overall | chest | +1.70 % | +2 % | unchanged → improved |
+| crossing 2026-05-18 | 30 days | overall | back | +1.59 % | +2 % | unchanged → improved |
+| crossing 2026-05-19 | 30 days | overall | chest | +1.70 % | +2 % | unchanged → improved |
+| crossing 2026-05-19 | 30 days | overall | back | +2.05 % | +2 % | unchanged → improved |
+| crossing 2026-05-25 | 30 days | recent | core | +2.39 % | +2 % | unchanged → improved |
+| crossing 2026-05-25 | 30 days | overall | chest | +1.71 % | +2 % | unchanged → improved |
+| crossing 2026-05-25 | 90 days | recent | core | +2.39 % | +2 % | unchanged → improved |
+| crossing 2026-05-25 | 90 days | overall | hamstringsGlutes | +2.22 % | +2 % | unchanged → improved |
+| crossing 2026-06-17 | 30 days | recent | core | +2.23 % | +2 % | unchanged → improved |
+| crossing 2026-06-17 | 30 days | recent | quadriceps | +2.26 % | +2 % | unchanged → improved |
+| crossing 2026-06-17 | 90 days | recent | core | +2.23 % | +2 % | unchanged → improved |
+| crossing 2026-06-17 | 90 days | recent | quadriceps | +2.26 % | +2 % | unchanged → improved |
+| from day one 2026-05-10 | 30 days | overall | back | +1.74 % | +2 % | unchanged → improved |
+| from day one 2026-05-10 | 30 days | overall | triceps | +1.76 % | +2 % | unchanged → improved |
+| from day one 2026-05-10 | 90 days | overall | hamstringsGlutes | +1.81 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 30 days | recent | core | +2.23 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 30 days | recent | quadriceps | +2.26 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 30 days | overall | chest | +2.47 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 30 days | overall | triceps | +1.72 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 90 days | recent | core | +2.23 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 90 days | recent | quadriceps | +2.26 % | +2 % | unchanged → improved |
+| from day one 2026-06-13 | 90 days | overall | hamstringsGlutes | +2.26 % | +2 % | unchanged → improved |
+| from day one 2026-06-21 | 90 days | overall | shoulders | +1.53 % | +2 % | unchanged → improved |
+| from day one 2026-06-21 | 90 days | overall | hamstringsGlutes | +2.11 % | +2 % | unchanged → improved |
+
+"Recent" and "overall" are the two windows a golden Gym file freezes for
+each of its ranges of 7, 30 and 90 days.
