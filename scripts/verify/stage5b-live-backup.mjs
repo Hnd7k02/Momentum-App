@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { chromium } from 'playwright-core';
 import { CHROMIUM } from './lib.mjs';
+import { BODY_WEIGHT_ON_DAY, EXERCISES, FIRST_DAY, STAGE5B_LAST_DAY, answersOn, dayOffset, trainingBetween } from './pruefdaten-plan.mjs';
 
 /**
  * WP3, Stage 5b — a backup with Gym sets, made by the live build itself.
@@ -9,11 +10,11 @@ import { CHROMIUM } from './lib.mjs';
  * No backup with a single Gym set exists in either repository, and the owner
  * attached none. So this script does what he would do: it opens the live
  * build (the default branch, `e30becd`, built in a worktree of its own and
- * served on its own port), walks its onboarding, and logs five weeks of
- * training through its own workout screen — one day at a time on a clock that
- * moves from 12 October to 15 November 2026 — and then taps "Backup
- * exportieren". Nothing is written to its database from outside: every
- * answer, session, set and weight entry is one the interface saved.
+ * served on its own port), walks its onboarding, and logs weeks of training
+ * through its own workout screen — one day at a time on a clock that moves
+ * from `FIRST` to `LAST` — and then taps "Backup exportieren". Nothing is
+ * written to its database from outside: every answer, session, set and
+ * weight entry is one the interface saved.
  *
  *   git worktree add <dir> e30becd && (cd <dir> && npm ci && npm run build)
  *   (cd <dir> && npx vite preview --port 4273 --strictPort) &
@@ -21,27 +22,23 @@ import { CHROMIUM } from './lib.mjs';
  *     OUT=docs/wp3/stage5b/momentum-pruefdaten-5b.json \
  *     node scripts/verify/stage5b-live-backup.mjs
  *
- * The file serves twice. It is the trial run of step 8 — the number report
- * reads it (`STAGE5B_BACKUP`) — and it is the import file of the owner's
- * iPhone check: loaded into the live app and into the preview it shows the
- * same five weeks under the old metric and under the new one.
+ * **`FIRST`, `LAST` and `OUT` are its parameters.** Without them it makes the
+ * file of Stage 5b: 12 October to 15 November 2026, five weeks, 194 sets.
+ * With a later `LAST` it makes the same diary carried on by its own rule to
+ * that day — the import file of a later STOP (block "Kurve":
+ * `LAST=<the day of the STOP> OUT=docs/wp3/kurve/momentum-pruefdaten-kurve.json`).
+ * `FIRST` is a Monday.
  *
- * The plan is a push / pull / legs week — Wednesday, Friday, Sunday, in the
- * morning, the last session on the day the file was made, so that the
- * owner's check does not run into a training break — written so that the
- * cases the metric was changed for are each on screen once:
+ * The file serves twice. It is the trial run of a number report — the report
+ * of Stage 5b reads it (`STAGE5B_BACKUP`) — and it is the import file of the
+ * owner's iPhone check: loaded into the live app and into the preview it
+ * shows the same weeks under the old rules and under the new ones.
  *
- * - Bankdrücken     the reps rise at 60 kg (8, 9, 10), then the weight goes
- *                   to 62.5 kg and the reps fall back to 8 — the day the old
- *                   metric reads as a fall of a sixth
- * - Kniebeuge       a light day in the third week (8 × 80 kg between fives
- *                   at 102.5 and 105 kg) — the old metric's best day
- * - Latzug          a pyramid, 12 / 10 / 8 with the weight rising — the old
- *                   metric names the lightest set
- * - Pushdown Seil   a drop set after the work — the old metric names it
- * - Klimmzüge       body weight, with a second weight entry three weeks in
- * - a light first set before the bench and the squat, unmarked — the live
- *   build has no mark; the preview can set one
+ * The plan is `pruefdaten-plan.mjs`: a push / pull / legs week — Wednesday,
+ * Friday, Sunday, in the morning, **the last session on the day the file was
+ * made**, so that the owner's check does not open on a training break —
+ * whose first five weeks hold each case the Stage 5b metric was changed
+ * for, and which goes on from the sixth by double progression.
  *
  * Every figure is invented. It is a training diary nobody kept.
  */
@@ -51,69 +48,19 @@ const TZ = 'Europe/Zurich';
 
 /* ── The plan ───────────────────────────────────────────────────────────── */
 
-/** `[reps, kg]`; a bodyweight exercise's kg is what was added. */
-const set = (reps, kg) => ({ reps, kg });
-const sets = (kg, ...reps) => reps.map((count) => set(count, kg));
-
-const EXERCISES = {
-  bench: { id: 'ex_bench_press', search: 'Bench Press', name: 'Bankdrücken' },
-  press: { id: 'ex_overhead_press', search: 'Overhead Press', name: 'Overhead Press' },
-  incline: { id: 'ex_incline_press', search: 'Incline Dumbbell Press', name: 'Schrägbank Kurzhantel' },
-  pushdown: { id: 'ex_triceps_pushdown', search: 'Triceps Pushdown', name: 'Pushdown Seil' },
-  pullUp: { id: 'ex_pull_up', search: 'Pull-Up', name: 'Klimmzüge', bodyweight: true },
-  row: { id: 'ex_barbell_row', search: 'Barbell Row', name: 'Langhantelrudern' },
-  pulldown: { id: 'ex_lat_pulldown', search: 'Lat Pulldown', name: 'Latzug' },
-  curl: { id: 'ex_biceps_curl', search: 'Biceps Curl', name: 'Bizeps-Curls' },
-  squat: { id: 'ex_squat', search: 'Back Squat', name: 'Kniebeuge' },
-  rdl: { id: 'ex_romanian_deadlift', search: 'Romanian Deadlift', name: 'Rumänisches Kreuzheben' },
-  legPress: { id: 'ex_leg_press', search: 'Leg Press', name: 'Beinpresse' },
-  calf: { id: 'ex_calf_raise', search: 'Calf Raise', name: 'Wadenheben' },
-};
-
-const PUSH = [
-  { bench: [set(10, 40), ...sets(60, 8, 8, 7)], press: sets(40, 6, 6, 5), incline: sets(22, 10, 9, 8), pushdown: [...sets(25, 10, 9, 9), set(13, 20)] },
-  { bench: [set(10, 40), ...sets(60, 9, 9, 8)], press: sets(40, 7, 6, 6), incline: sets(22, 11, 10, 9), pushdown: [...sets(25, 11, 10, 9), set(13, 20)] },
-  { bench: [set(10, 40), ...sets(60, 10, 10, 9)], press: sets(40, 8, 7, 7), incline: sets(22, 12, 11, 10), pushdown: [...sets(25, 12, 11, 10), set(14, 20)] },
-  { bench: [set(10, 40), ...sets(62.5, 8, 7, 7)], press: sets(42.5, 6, 6, 5), incline: sets(24, 9, 8, 8), pushdown: [...sets(27.5, 9, 9, 8), set(15, 20)] },
-  { bench: [set(10, 40), ...sets(62.5, 9, 8, 8)], press: sets(42.5, 7, 6, 6), incline: sets(24, 10, 9, 8), pushdown: [...sets(27.5, 10, 9, 9), set(15, 20)] },
-];
-const PULL = [
-  { pullUp: sets(0, 6, 5, 5), row: sets(60, 8, 8, 8), pulldown: [set(12, 50), set(10, 57.5), set(8, 65)], curl: sets(12, 12, 11, 10) },
-  { pullUp: sets(0, 7, 6, 5), row: sets(60, 9, 9, 8), pulldown: [set(12, 50), set(10, 57.5), set(9, 65)], curl: sets(12, 12, 12, 11) },
-  { pullUp: sets(0, 8, 6, 6), row: sets(60, 10, 10, 9), pulldown: [set(12, 52.5), set(10, 60), set(8, 67.5)], curl: sets(14, 10, 9, 8) },
-  { pullUp: sets(0, 8, 7, 6), row: sets(65, 8, 7, 7), pulldown: [set(12, 52.5), set(10, 60), set(9, 67.5)], curl: sets(14, 11, 10, 9) },
-  { pullUp: sets(0, 9, 7, 7), row: sets(65, 8, 8, 8), pulldown: [set(12, 55), set(10, 62.5), set(8, 70)], curl: sets(14, 12, 10, 10) },
-];
-const LEGS = [
-  { squat: [set(8, 60), ...sets(100, 5, 5, 5)], rdl: sets(80, 8, 8, 8), legPress: sets(140, 10, 10, 9), calf: sets(60, 15, 14, 12) },
-  { squat: [set(8, 60), ...sets(102.5, 5, 5, 5)], rdl: sets(80, 9, 9, 8), legPress: sets(140, 11, 10, 10), calf: sets(60, 15, 15, 13) },
-  { squat: sets(80, 8, 8, 8), rdl: sets(80, 10, 9, 9), legPress: sets(140, 12, 11, 10), calf: sets(65, 13, 12, 12) },
-  { squat: [set(8, 60), ...sets(105, 5, 5, 4)], rdl: sets(85, 8, 8, 7), legPress: sets(150, 9, 9, 8), calf: sets(65, 14, 13, 12) },
-  { squat: [set(8, 60), ...sets(107.5, 5, 5, 5)], rdl: sets(85, 9, 8, 8), legPress: sets(150, 10, 9, 9), calf: sets(65, 15, 14, 13) },
-];
-
-const FIRST = '2026-10-12'; // a Monday: the week has its target from its first day
-const LAST = '2026-11-15'; // the Sunday of the fifth week, and its last session
+const FIRST = process.env.FIRST ?? FIRST_DAY; // a Monday: the week has its target from its first day
+const LAST = process.env.LAST ?? STAGE5B_LAST_DAY; // the day the file is made, and its last session
+/** Day → workout, in `pruefdaten-plan.mjs`: the five weeks written by hand, then their rule. */
+const TRAINING = trainingBetween(FIRST, LAST);
 /** A body weight is entered on the day of a pull session; the later one replaces nothing. */
-const BODY_WEIGHT = { '2026-10-16': 78.4, '2026-11-06': 77.6 };
-
-const dayOffset = (day, days) => {
-  const d = new Date(`${day}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-const TRAINING = new Map();
-for (let week = 0; week < 5; week += 1) {
-  TRAINING.set(dayOffset(FIRST, week * 7 + 2), PUSH[week]);
-  TRAINING.set(dayOffset(FIRST, week * 7 + 4), PULL[week]);
-  TRAINING.set(dayOffset(FIRST, week * 7 + 6), LEGS[week]);
-}
-
-/** Two daily answers, invented: sleep and mood, each between 5 and 9. */
-function answersOn(index) {
-  const sleep = 6 + ((index * 5 + 2) % 4) - (index % 9 === 4 ? 1 : 0);
-  const mood = 6 + ((index * 3 + 1) % 4) - (index % 11 === 7 ? 1 : 0);
-  return [sleep, mood];
+const BODY_WEIGHT = Object.fromEntries(
+  Object.entries(BODY_WEIGHT_ON_DAY)
+    .map(([offset, kg]) => [dayOffset(FIRST, Number(offset)), kg])
+    .filter(([day]) => day <= LAST),
+);
+if (new Date(`${FIRST}T12:00:00Z`).getUTCDay() !== 1) throw new Error(`FIRST must be a Monday: ${FIRST}`);
+for (const day of Object.keys(BODY_WEIGHT)) {
+  if (!Object.values(TRAINING.get(day) ?? {}).length || !('pullUp' in TRAINING.get(day))) throw new Error(`no pull session on ${day} to enter a body weight on`);
 }
 
 /* ── The clock ──────────────────────────────────────────────────────────── */
