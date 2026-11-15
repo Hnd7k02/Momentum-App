@@ -63,13 +63,14 @@ describe('regionTargets', () => {
     expect(chosen.color).not.toBe(BODY_HELD_COLOR);
   });
 
-  it('a tint is mixed from white, and the weakest is three eighths of the way', () => {
+  it('a tint is mixed from white, and the weakest goes 22.5 % of the way (D167)', () => {
     const hex = (value: string) => [1, 3, 5].map((at) => parseInt(value.slice(at, at + 2), 16));
     const weakest = regionTargets(visual('improved', 2.5), false);
     const white = hex(BODY_HELD_COLOR);
     const green = hex(STATE_COLOR.improved.model);
     const mix = REGION_MATERIAL.resting.mix * stateIntensity('improved', 2.5);
-    expect(mix).toBeCloseTo(0.375, 6);
+    // Three quarters at full strength, and three tenths of that at the weakest.
+    expect(mix).toBeCloseTo(0.225, 6);
     expect(hex(weakest.color)).toEqual(white.map((from, i) => Math.round(from + (green[i]! - from) * mix)));
     // +3 % is a different colour from a held group beside it.
     expect(weakest.color).not.toBe(regionTargets(held, false).color);

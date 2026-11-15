@@ -100,7 +100,7 @@ records (answers, sessions, sets, snapshots)
 | `src/features/areas/DomainSwitch.tsx`, `GymTerminal.tsx`, `RunningTerminal.tsx`, `CreditsSection.tsx` | **Bereiche is the terminal**: Mind · Gym (D143), one area at a time. Gym carries its board, the muscle module, and Laufen as a separate section; Einstellungen names the body model's source (MakeHuman, CC0 1.0 — no credit is owed, D165) |
 | `src/features/body/` | **The 3D body.** `BodyViewer` (R3F canvas, camera rig, tap-vs-drag, the approved material treatment with the neutral selection cue), `useGLTF`, `BodyBoundary`, `bodyVisuals.ts` (the adapter from `MusclePerformance` to tint and intensity), `muscleMeshMap.ts` (the id ↔ GLB contract), `tokens.ts` (identity and state colours, the single colour source). `index.ts` is the **lazy boundary**: three.js and the renderer live in their own chunk and are fetched only when the Gym module renders |
 | `src/features/gym/MuscleModule.tsx`, `MuscleRows.tsx`, `Sparkline.tsx`, `muscleAnalytics.ts` | **Muskelgruppen.** The body above, the ten rows below, one selected group held by `GymProgress`. `toMuscleAnalytics()` derives each row read-only from the loaded history: state, delta, last trained day, and the trend — the group's over-span change since the range began, as of each training day, via `gymPerformanceOverSpan()` on the history prefix, so the last point *is* the row's delta. The chart is the handoff's `spark80`: per-row min/max, flat when equal, a dot for one observation, nothing for none |
-| `public/models/momentum-body.glb`, `tools/validate-body-glb.mjs` | The model (built by `tools/body/` from MakeHuman's base mesh, CC0 1.0; 49 964 triangles, one primitive per muscle id plus `none`; D165) and the contract validator that runs first in `npm run build`: structure, envelopes, the inert zone's five straight cuts, the check points of the regions, eleven measures, the licence notice |
+| `public/models/momentum-body.glb`, `tools/validate-body-glb.mjs` | The model (built by `tools/body/` from MakeHuman's base mesh, CC0 1.0; 50 152 triangles, one primitive per muscle id plus `none`; D165, D167) and the contract validator that runs first in `npm run build`: structure, envelopes, the straight cuts of the inert zone and of the knee, the check points of the regions, eleven measures, the licence notice |
 | `tools/body/` | **The body's pipeline.** One command builds the model byte for byte (`build.py momentum-body --install`); `README.md` has the commands, the data's source and licence, `MEASURES.md` the measures. `measure-body.mjs` and `checkpoints.mjs` are what the validator reads the surface with |
 | `src/components/BodyRenderer/index.tsx` | Muscle diagram; presentation only |
 | `src/features/gym/*` | Session logging, picker, bodyweight, overview, exercise detail, progress |
@@ -935,9 +935,24 @@ the body of the second sheet stands**)
     validator: the chest's envelope (it must end between 69 and 73 % of the
     height; it ended at 66.1), the two cuts of each lower leg on their
     planes, 59 check points for 33. `tsc -b` 0; `npm run test` exit 0, 113
-    files, 1891 tests.
-  - [ ] the tint: `TINT_STRENGTH.min` 0.3, measured anew on the new body,
-    +3 % and +9 % at 0.5 and at 0.3 side by side.
+    files, 1891 tests (`44d52a9`).
+  - [x] read by five read-only readers with a refuter each (Sonnet): two
+    lenses — the cuts, the rules and the build — found nothing; eight
+    findings stood, all of them small, and all are fixed: the test of the
+    wall did not fail without the wall (there is one now that does: a
+    vertex whose every neighbour lies on the line), a figure in a comment
+    of the validator, and five passages in four documents that still gave
+    the old file's numbers or called the removed candidates kept. Checking
+    the claim that no vertex moved found four that had, by a tenth of a
+    millimetre: the guard on the relief's curvature ran after the new cuts.
+    The cuts between muscles now come after it, and the body is vertex for
+    vertex the one he accepted (sha256 `b47c392b…0a274de1`).
+  - [x] the tint: `TINT_STRENGTH.min` is 0.3. Measured on the new body at
+    393 px, as the median difference from the same zone held: at 0.5 the
+    chest at +3 % stood 34.2 ΔE away and at +9 % 51.4 (a* −30 and −45, one
+    and a half times); at 0.3 it stands 22.2 and 48.1 (a* −20 and −42,
+    twice). The quadriceps at −3 % and −8 %: 30.2 and 44.6 before, 19.3
+    and 40.2 now. `farbregeln.mjs` keeps its limit of 5 ΔE and passes.
   - [ ] the closing run: the validator, the four 3D suites, all suites.
   - [ ] the preview, the STOP page, D167 and this file.
 - **The owner's word on the second sheet (2026-11-13, 00:45 Zurich).** After
@@ -1044,20 +1059,24 @@ the body of the second sheet stands**)
 - **What the app ships now.** `public/models/momentum-body.glb` is a new
   body: `athletisch-a` of the gate with the owner's three corrections at
   the gate and the two of its second sheet, built by one command from
-  MakeHuman's base mesh (CC0 1.0) — 49 964 triangles, 703 760 bytes
-  (687 KB; 479 KB compressed, for 345 KB of the model of D156), closed,
-  1.75 m tall like the body it replaces, sha256 `202c8045…bcabf286e2`
+  MakeHuman's base mesh (CC0 1.0) — 50 152 triangles, 706 392 bytes
+  (690 KB; 480 KB compressed, for 345 KB of the model of D156), closed,
+  1.75 m tall like the body it replaces, sha256 `b47c392b…0a274de1`
   (`tools/body/digests.json`). Head with neck, hands and feet are an inert
   zone with straight cuts and a tone of its own (D166); the light is tokens
-  and has no tone mapping (D165). Since the second sheet the surface has
+  and has no tone mapping (D165). Since the owner's addendum the borders
+  at the knee and round the chest are lines the build cuts (D167); until
+  then the file had 49 964 triangles and 703 760 bytes
+  (`202c8045…bcabf286e2`). Since the second sheet the surface has
   no folds — the relief is softened and bounded at 4 mm, the nipples are
   smoothed away, the navel is a soft hollow — and the arms are shorter,
   stronger and held closer (forearm 14.6 % of the height, upper arm 17°
   from the trunk). Nothing computed moved: `src/core`, `src/storage`,
   `muscleState.ts`, every golden file and fingerprint are as they were, and
   so are the body's interaction, the stage's size and frame and the flat
-  fallback figure. (The body the app shipped at STOP 7A is `stop-7a` in
-  `candidates.json`: 49 988 triangles, relief at 9 mm, upper arm 21°.)
+  fallback figure. (The body the app shipped at STOP 7A was `stop-7a` in
+  `candidates.json` until D167, and is in commit `8537f79`: 49 988
+  triangles, relief at 9 mm, upper arm 21°.)
 - **How this block is run.** Started by the owner on 2026-11-11, late, in
   the session of the colour rules, from
   `docs/wp3/prompts/prompt-7a-koerpermodell.md`. His points on the first

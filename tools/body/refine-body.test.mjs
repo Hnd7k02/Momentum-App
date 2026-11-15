@@ -583,7 +583,7 @@ describe('refine-body.mjs — a border the builder has drawn', () => {
     expect(moved(seam, free, 2 * result.step)).toBeGreaterThan(seam.length / 2);
   });
 
-  it('is a wall: nothing crosses it, though the borders that end on it still move', () => {
+  it('holds an outline to the edge while the borders that end on it still move', () => {
     // Both side caps, outlined: chest and back end on that outline, and
     // their own seam, free to move, ends on it at four places where three
     // regions meet.
@@ -602,6 +602,100 @@ describe('refine-body.mjs — a border the builder has drawn', () => {
     // The seam between chest and back did move: it was not marked.
     const seam = borderOf(before, 1, 2);
     expect(moved(seam, borderOf(result, 1, 2), 2 * result.step)).toBeGreaterThan(seam.length / 2);
+  });
+
+  /**
+   * The ball cut along a plane, the way build.py cuts a joint: every
+   * triangle the plane crosses is split, the quad that is left along its
+   * shorter diagonal, and the new vertices are marked. Before the plane
+   * the chest lies in front and the back behind; beyond it everything
+   * under the cap is the region `beyond`.
+   */
+  function cutAlong(normal, offset, beyond) {
+    const points = body.points.map((p) => [...p]);
+    const side = points.map((p) => dot(p, normal) - offset);
+    const marked = points.map(() => 0);
+    const made = new Map();
+    const onEdge = (a, b) => {
+      const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+      if (!made.has(key)) {
+        const [lo, hi] = a < b ? [a, b] : [b, a];
+        const t = side[lo] / (side[lo] - side[hi]);
+        made.set(key, points.length);
+        points.push([0, 1, 2].map((c) => points[lo][c] + t * (points[hi][c] - points[lo][c])));
+        side.push(0);
+        marked.push(1);
+      }
+      return made.get(key);
+    };
+    const tris = [];
+    const of = [];
+    const emit = (a, b, c, before, was) => { tris.push([a, b, c]); of.push(was === 0 ? 0 : before ? was : beyond); };
+    body.tris.forEach((tri) => {
+      const [, y, z] = centroid(body.points, tri);
+      const was = y > 0.8 * RADIUS ? 0 : z >= 0 ? 1 : 2;
+      const before = tri.map((i) => side[i] > 0);
+      if (before[0] === before[1] && before[1] === before[2]) { emit(...tri, before[0], was); return; }
+      // Turned, winding kept, so that the corner that stands alone on its side comes first.
+      const first = before[0] !== before[1] && before[0] !== before[2] ? 0 : before[1] !== before[0] && before[1] !== before[2] ? 1 : 2;
+      const [i, j, k] = [tri[first], tri[(first + 1) % 3], tri[(first + 2) % 3]];
+      const mij = onEdge(i, j), mki = onEdge(k, i);
+      emit(i, mij, mki, before[first], was);
+      if (Math.hypot(...sub(points[mij], points[k])) <= Math.hypot(...sub(points[j], points[mki]))) {
+        emit(mij, j, k, !before[first], was);
+        emit(mij, k, mki, !before[first], was);
+      } else {
+        emit(mij, j, mki, !before[first], was);
+        emit(j, k, mki, !before[first], was);
+      }
+    });
+    return { cut: { points, tris }, of, marked };
+  }
+
+  it('is a wall where every neighbour of a vertex lies on the line: the region across does not take it', () => {
+    // A vertex of the seam between chest and back, and a plane a fraction of
+    // a millimetre under it: all its edges are cut, so every neighbour it
+    // has left is a marked vertex with half a share of the region beyond,
+    // while chest and back split the other half. Without the wall the
+    // region beyond is the largest of the three and takes the vertex, and
+    // with it every triangle before the plane — as the calf took a piece of
+    // the thigh at the outside of the knee, where front and back part.
+    const around = body.points.map(() => new Set());
+    const beside = body.points.map(() => new Set());
+    body.tris.forEach((tri) => {
+      const [, y, z] = centroid(body.points, tri);
+      tri.forEach((i) => {
+        around[i].add(y > 0.8 * RADIUS ? 0 : z >= 0 ? 1 : 2);
+        tri.forEach((j) => { if (j !== i) beside[i].add(j); });
+      });
+    });
+    const outward = (i) => body.points[i].map((v) => v / Math.hypot(...body.points[i]));
+    // How far the nearest neighbour lies under the plane that touches the ball at the vertex.
+    const clearance = (i) => Math.min(...[...beside[i]].map((j) => dot(sub(body.points[i], body.points[j]), outward(i))));
+    const onSeam = body.points.map((_, i) => i)
+      .filter((i) => around[i].has(1) && around[i].has(2) && !around[i].has(0) && Math.abs(body.points[i][1]) < 0.5 * RADIUS);
+    const top = onSeam.reduce((best, i) => (clearance(i) > clearance(best) ? i : best));
+    expect(clearance(top)).toBeGreaterThan(0.0002);
+    const normal = outward(top);
+    const offset = dot(body.points[top], normal) - clearance(top) / 2;
+
+    const { cut, of, marked } = cutAlong(normal, offset, 3);
+    const before = (mesh, t) => dot(centroid(mesh.points, mesh.tris[t]), normal) > offset;
+    const kept = (mesh) => mesh.tris.filter((_, t) => before(mesh, t) && (mesh.labels[t] === 1 || mesh.labels[t] === 2)).length;
+    const crossed = (mesh) => mesh.tris.filter((_, t) => before(mesh, t) !== (mesh.labels[t] === 1 || mesh.labels[t] === 2) && mesh.labels[t] !== 0).length;
+    const placed = { ...cut, labels: of };
+    // The piece before the plane: the vertex and the triangles round it, half chest and half back.
+    expect(kept(placed)).toBe(beside[top].size);
+    expect(crossed(placed)).toBe(0);
+    expect([...beside[top]].length).toBeGreaterThanOrEqual(5);
+
+    const { result } = refine('exact-pocket', cut, of, ['--stray', '0'], COPYRIGHT, marked);
+    expect(crossed(result)).toBe(0);
+    // Chest and back are both still there; their seam between them is cut anew, into more triangles.
+    expect(kept(result)).toBeGreaterThanOrEqual(kept(placed));
+    for (const region of [1, 2]) {
+      expect(result.tris.filter((_, t) => before(result, t) && result.labels[t] === region).length, REGIONS[region]).toBeGreaterThan(0);
+    }
   });
 
   it('keeps the body closed and the surface where it was', () => {

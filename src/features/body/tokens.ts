@@ -191,18 +191,22 @@ export const BODY_LOOK: BodyLook = {
  *
  * The ground is white for every trained group, so the mix is what makes a
  * tint: three quarters of the way to the status colour at full strength,
- * three eighths at the weakest. The mock-ups' tool had a quarter there; the
- * block "Farbregeln" raised it under the light and the tone mapping of its
- * day, which let green arrive much weaker than red: the chest at +3 % stood
- * 6.5 ΔE from the same chest held, the quadriceps at −3 % 14.7.
+ * and `TINT_STRENGTH.min` of that at the weakest. The mock-ups' tool had a
+ * quarter for the mix; the block "Farbregeln" raised it under the light and
+ * the tone mapping of its day, which let green arrive much weaker than red
+ * — the chest at +3 % stood 6.5 ΔE from the same chest held, the quadriceps
+ * at −3 % 14.7 — and set the weakest strength to a half to make up for it.
  *
- * Block 7A left these numbers as they are (D165). Without a tone mapping
- * the colour of the material is the colour on the screen, and both
- * directions arrive alike: measured on the rendered body at 393px, as the
- * median difference from the same zone held, the chest at +3 % stands
- * 34.1 ΔE away and the quadriceps at −3 % 30.2; +9 % is half as green
- * again as +3 % (a* −45 against −30). `farbregeln.mjs` holds ±3 % at 5 or
- * more and the order of the strengths.
+ * Block 7A took the tone mapping away (D165): the colour of the material is
+ * the colour on the screen, and both directions arrive alike. With the half
+ * still in place a small change then stood too close to a large one: the
+ * chest at +3 % 34.2 ΔE from the same chest held and at +9 % 51.4, only
+ * half as green again (a* −45 against −30). The owner set the weakest
+ * strength to 0.3 (D167). Measured on the rendered body at 393px, as the
+ * median difference from the same zone held: the chest at +3 % stands
+ * 22.2 ΔE away and the quadriceps at −3 % 19.3, at +9 % and −8 % 48.1 and
+ * 40.2 — +9 % is twice as green as +3 % (a* −42 against −20).
+ * `farbregeln.mjs` holds ±3 % at 5 or more and the order of the strengths.
  */
 export const REGION_MATERIAL = {
   roughness: BODY_LOOK.surface.roughness,
@@ -216,14 +220,15 @@ export const REGION_MATERIAL = {
 /**
  * The strength of a tint (contract §7): it grows evenly from 2.5 % to 12 %
  * and stays there. 2.5 % is where the band ends — the smallest change that
- * is shown as ±3 % — and it starts at `TINT_STRENGTH.min`, the least at
- * which +3 % reads as green beside a held, white group on a phone, with a
- * margin (see `REGION_MATERIAL`).
+ * is shown as ±3 % — and it starts at `TINT_STRENGTH.min`: 0.3, the owner's
+ * value (D167). At that a change of 3 % stands about four times as far
+ * from a held, white group as the 5 ΔE `farbregeln.mjs` asks for, and a
+ * change of 9 % twice as far again (see `REGION_MATERIAL`).
  */
 export const TINT_STRENGTH = {
   fromPercent: 2.5,
   toPercent: 12,
-  min: 0.5,
+  min: 0.3,
   /** "Zu wenig Vergleichsdaten": lightly blue, whatever its ratio. */
   awaitingBaseline: 0.5,
 } as const;

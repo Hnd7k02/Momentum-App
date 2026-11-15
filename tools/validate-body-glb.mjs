@@ -57,8 +57,8 @@ const EXPECT = {
  * same pipeline, too little for a region that crossed a joint.
  */
 const ENVELOPE = {
-  // The lower leg, from the ankle's cut [6.0] to the knee's [30.2; the joint
-  // is at 29.9]. Must not reach the foot, must not climb into the thigh.
+  // The lower leg, from the ankle's cut [6.0] to the knee's [29.9, where the
+  // joint is]. Must not reach the foot, must not climb into the thigh.
   calves: { low: 0.04, high: 0.33, from: 0.09, to: 0.28 },
   // The thigh, front and inside, from the knee's cut [29.6] to the groin [56.8].
   quadriceps: { low: 0.27, high: 0.59, from: 0.33, to: 0.53 },

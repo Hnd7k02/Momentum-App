@@ -97,7 +97,7 @@ result, and two builds in a row were compared byte for byte.
 
 | body | bytes | sha256 |
 |---|---|---|
-| `momentum-body` | 706,392 | `0416b4ea0a1ece20c74ff0121f29498da58e206461577d84ac8d06d11a26e7d2` |
+| `momentum-body` | 706,392 | `b47c392b9aefa9438efe6760a6a9befac731b704d402e8643192705f0a274de1` |
 
 `digests.json` holds the same figures for the build to check, and
 `public/models/momentum-body.glb` has the sha256 of `momentum-body`. The digests hold for the
@@ -195,7 +195,11 @@ field over the posed body, zero on the line (`regionrules.Lines`):
 
 `bodylib.cut_field` splits every triangle a line crosses — no vertex moves —
 and `Lines.paint` then gives each triangle near a line to the side its
-middle lies on. The rules label the base mesh by the same fields, so
+middle lies on. These cuts, and the knee's, come after the last step of the
+build that moves a vertex (`relief.sharpest`): a cut leaves short edges
+beside it, and that step, run after them, moved four vertices at the
+armpit by a tenth of a millimetre. As it is, every vertex of the body the
+owner accepted is where it was, to the last digit of the file. The rules label the base mesh by the same fields, so
 `regions.json` and the cuts cannot part. Each line is cut on its own: a
 corner made of two fields in one (`min`) is interpolated wrongly on the
 edges beside it, and came out with three teeth.

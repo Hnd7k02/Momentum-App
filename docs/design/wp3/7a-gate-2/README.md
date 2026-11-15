@@ -6,8 +6,10 @@ and `gate-2` beside its alternative `gate-2-b`. "Vorher" is what the app
 ships since STOP 7A; "Nachher" is the candidate. Nothing in the app was
 changed for these pictures.
 
-How they were taken, so that they can be taken again after a change to
-`tools/body/candidates.json`:
+How they were taken. The candidates are no longer in
+`tools/body/candidates.json`: `gate-2` became `momentum-body`, and
+`gate-2-b` left it once the owner had accepted the body (D167; commit
+`2215a51` has the file with both).
 
 ```sh
 npx vite --port 5173 &

@@ -208,30 +208,16 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         P, tris, part, kept = B.decimate(P, tris, part, B.NONE, spec['inert_share'])
         tri_labels = np.where(part == HEAD, B.NONE, part)
         say(f'inert zone: {before} → {int((tri_labels == B.NONE).sum())} triangles')
-    # The straight cuts: level at the neck, across the limb at wrist, ankle
-    # and knee. Each becomes a loop of edges exactly on its plane. Then the
-    # lines of the rules on the front of the trunk — the pectoral's lower
-    # edge, the deltoid's front edge, the collarbone, the pit of the throat:
-    # the mesh is cut along each, and every triangle near one is given to the
-    # side it lies on. Every vertex on a cut is marked, and refine-body.mjs
-    # leaves a border through marked vertices where it is.
+    # The straight cuts of the inert zone: level at the neck, across the limb
+    # at wrist and ankle. Each becomes a loop of edges exactly on its plane.
+    # Every vertex on a cut is marked, and refine-body.mjs leaves a border
+    # through marked vertices where it is.
     line = np.zeros(len(P), dtype=bool)
     for cut_name in sorted(cuts):
+        if B.cut_into(cut_name) != 'none':
+            continue
         point, normal, radius = cuts[cut_name]
-        P, tris, tri_labels, line = B.cut(P, tris, tri_labels, point, normal, radius,
-                                          B.R[B.cut_into(cut_name)], line=line)
-    seg = regionrules.segments(body.P, body.joints, dominant[body.origin], bones, tall, cuts)
-    lines = regionrules.Lines(body.P, seg, body.joints, tall)
-    for along in lines.cuts():
-        d, zone = along(P, tris, tri_labels)
-        P, tris, tri_labels, line = B.cut_field(P, tris, tri_labels, d, zone, line=line)
-    tri_labels = lines.paint(P[tris].mean(axis=1), tri_labels)
-    # A cut splits triangles and their neighbours alike. An edge left with
-    # one triangle would be a hole in the body.
-    edges = np.sort(np.concatenate([tris[:, [0, 1]], tris[:, [1, 2]], tris[:, [2, 0]]]), axis=1)
-    _, uses = np.unique(edges, axis=0, return_counts=True)
-    if (uses != 2).any():
-        raise SystemExit(f'{name}: the cuts left {int((uses != 2).sum())} edges that are not shared by two triangles')
+        P, tris, tri_labels, line = B.cut(P, tris, tri_labels, point, normal, radius, B.NONE, line=line)
     inert_pieces = B.pieces(tris, tri_labels, B.NONE)
     if len(inert_pieces) != 5:
         sizes = ', '.join(str(len(piece)) for piece in inert_pieces)
@@ -254,6 +240,33 @@ def build(name, spec, data, out_dir, relabel=False, keep=False, quiet=False):
         # mesh is smoothed away without shrinking the forms (Taubin). The
         # seam to the inert zone keeps its place, and with it the five cuts.
         P = B.taubin(P, B.adjacency(len(P), tris), relief['fair'], free)
+
+    # The borders between the muscles that the rules mean as lines, cut into
+    # the surface as it now stands — after the last step that moves a
+    # vertex, so that these cuts change no form: the knee, a plane like the
+    # five above, and on the trunk the pectoral's lower edge, the deltoid's
+    # edge, the collarbone and the pit of the throat. The mesh is cut along
+    # each, and every triangle near a line is given to the side it lies on.
+    for cut_name in sorted(cuts):
+        if B.cut_into(cut_name) == 'none':
+            continue
+        point, normal, radius = cuts[cut_name]
+        P, tris, tri_labels, line = B.cut(P, tris, tri_labels, point, normal, radius,
+                                          B.R[B.cut_into(cut_name)], line=line)
+    seg = regionrules.segments(body.P, body.joints, dominant[body.origin], bones, tall, cuts)
+    lines = regionrules.Lines(body.P, seg, body.joints, tall)
+    for along in lines.cuts():
+        d, zone = along(P, tris, tri_labels)
+        P, tris, tri_labels, line = B.cut_field(P, tris, tri_labels, d, zone, line=line)
+    tri_labels = lines.paint(P[tris].mean(axis=1), tri_labels)
+    # A cut splits triangles and their neighbours alike. An edge left with
+    # one triangle would be a hole in the body.
+    edges = np.sort(np.concatenate([tris[:, [0, 1]], tris[:, [1, 2]], tris[:, [2, 0]]]), axis=1)
+    _, uses = np.unique(edges, axis=0, return_counts=True)
+    if (uses != 2).any():
+        raise SystemExit(f'{name}: the cuts left {int((uses != 2).sum())} edges that are not shared by two triangles')
+    if len(B.pieces(tris, tri_labels, B.NONE)) != 5:
+        raise SystemExit(f'{name}: a cut between two muscles has changed the inert zone')
 
     out_dir.mkdir(parents=True, exist_ok=True)
     raw = out_dir / f'{name}.regions.glb'

@@ -4152,7 +4152,8 @@ not held by the validator and its window is not checked at its source.
   +3 % is a clear colour rather than a hint is put to the owner at STOP 7A.
 - *The validator* (`tools/validate-body-glb.mjs`, first in `npm run build`)
   holds the structure, an envelope per group from the measured body, the
-  five straight cuts, 33 check points of the regions (contract §14: hand,
+  five straight cuts, 33 check points of the regions — 59, and the knee's
+  cuts, since D167 — (contract §14: hand,
   foot, head and neck inert; the outside of the thigh the leg's; the upper
   trapezius the back's; each group met at a fixed place), eleven of the
   fourteen measures, the ceiling of 700 KB and the licence notice. Knee
@@ -4235,9 +4236,10 @@ nipples smoothed away and the navel a soft hollow, the arms as shown.
 `gate-2` became `momentum-body` — 49,964 triangles, 703,760 bytes; the
 validator passes as it stood. It is a reading of his words, not his answer
 to the questions, so nothing was burnt: the alternative (`gate-2-b`, the
-relief at 6 mm) and the body of STOP 7A (`stop-7a`) are kept in
-`candidates.json`, build to recorded bytes and are installed with one
-command each, and the commit before production is `2215a51`. His
+relief at 6 mm) and the body of STOP 7A (`stop-7a`) were kept in
+`candidates.json` until he had accepted the body, built to recorded bytes
+and could be installed with one command each (they left with D167; commit
+`8537f79` has them), and the commit before production is `2215a51`. His
 acceptance on the iPhone at STOP 7A decides whether it stands.
 
 **Accepted (owner, 2026-11-13).** He checked block 7A on his iPhone, on the
