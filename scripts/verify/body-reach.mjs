@@ -53,6 +53,8 @@ for (const [width, height] of [[393, 852], [430, 932], [320, 693]].filter(([w]) 
   await page.waitForTimeout(1200);
   let box = await page.locator('.body-viewer canvas').boundingBox();
   const tally = new Map();
+  /** The same hits, by the view they were tapped in (block 7B, step 0). */
+  const byView = { Vorne: new Map(), Hinten: new Map() };
   /** A view pill pressed in place — `locator.click()` would scroll the module first. */
   const press = (view) => page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).evaluate((el) => el.click());
   const current = () => page.evaluate(() => document.querySelector('.muscle-row__button[aria-pressed="true"] .muscle-row__name')?.textContent ?? null);
@@ -80,6 +82,7 @@ for (const [width, height] of [[393, 852], [430, 932], [320, 693]].filter(([w]) 
         if (cur !== prev) {
           const hit = cur ?? prev;
           tally.set(hit, (tally.get(hit) ?? 0) + 1);
+          byView[view].set(hit, (byView[view].get(hit) ?? 0) + 1);
           if (cur !== null && FACES_BACK.has(cur) !== (facing === 180)) await reface(view, facing);
         }
         prev = cur;
@@ -89,6 +92,9 @@ for (const [width, height] of [[393, 852], [430, 932], [320, 693]].filter(([w]) 
   const line = [...tally.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' · ');
   results[width] = { reachable: tally.size, canvas: `${Math.round(box.width)}×${Math.round(box.height)}`, cells: line };
   console.log(`--- ${width}px, canvas ${results[width].canvas}, ${STEP}px grid: ${tally.size}/10 · ${line}`);
+  for (const [view, hits] of Object.entries(byView)) {
+    console.log(`    ${view}: ${hits.size} · ${[...hits.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' · ')}`);
+  }
   await ctx.close();
 }
 await browser.close();
