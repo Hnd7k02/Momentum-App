@@ -108,7 +108,8 @@ Fehlt das, bau nichts. Sag Dario, was fehlt, und halte an.
 
 - `docs/wp3/stage5b/momentum-pruefdaten-5b.json`: fünf Wochen, 194 Sätze, doppelte Progression in 6–12 Wiederholungen. Von der Live-Version selbst erzeugt (`scripts/verify/stage5b-live-backup.mjs`). `stage5bImportFile.test.ts` hält die Zahlen der Muskelgruppen fest; sie hängen nicht an der Kurve.
 - `src/storage/services/fixtures/trainingProfile.ts`: `metricCrossingProfile()` und `strengthProfile()`, 16 Wochen, mit Pyramide, Drop-Sets, leichten Tagen und einer leichten Woche.
-- Sechzehn Golden-Dateien `stage5b-*` in `.github/fixtures/wp3-golden/` gehören zur Era von 5b. Jede andere Golden-Datei, die Baselines unter `.github/fixtures/stage2/`, `stage4/` und `stage5b/` und jeder Fingerabdruck in `domainOutputs.test.ts` liegen vor ihr.
+- Sechzehn Golden-Dateien `stage5b-*` in `.github/fixtures/wp3-golden/` stammen aus 5b: zehn vom Profil «über die Grenze» an fünf Stichtagen (17.05., 18.05., 19.05., 25.05. und 17.06.2026; die Grenze ist der 18.05.) und sechs vom Profil «ab Tag 1» an drei Stichtagen. Die zwei Dateien vom 17.05. liegen ganz vor der Grenze. Jede andere Golden-Datei, die Baselines unter `.github/fixtures/stage2/`, `stage4/` und `stage5b/` und jeder Fingerabdruck in `domainOutputs.test.ts` liegen ebenfalls vor ihr.
+- Die Prüfdatei endet am 15.11.2026. Wer sie später lädt, sieht eine Trainingspause, und ab dem siebten Tag ohne Training greift der Abbau.
 
 **Prüfung**
 
@@ -162,8 +163,8 @@ Lies den Entwurf danach einmal als Gegner: Wo könnte sich ein Tag vor der Grenz
 
 ### Schritt 4 – Golden-Dateien
 
-- **Unverändert bleiben:** jede Golden-Datei ausser den sechzehn `stage5b-*`, die Baselines unter `.github/fixtures/stage2/`, `stage4/` und `stage5b/`, und jeder Fingerabdruck in `domainOutputs.test.ts`.
-- **Die sechzehn `stage5b-*`-Dateien** gehören zur Era von 5b und sind nie veröffentlicht worden. Sie werden einmal neu eingefroren, als eigener Commit. Ein Skript oder Test belegt daneben: Im Profil «über die Grenze» ist jeder Wert jedes Tages vor der Grenze derselbe wie vorher, und in beiden Profilen ändern sich nur Felder, die vom Leistungswert abhängen. Die prozentualen Veränderungen, die Übungstage und die Zustände der Muskelgruppen ändern sich nicht.
+- **Unverändert bleiben:** jede Golden-Datei ausser den `stage5b-*`, die Baselines unter `.github/fixtures/stage2/`, `stage4/` und `stage5b/`, und jeder Fingerabdruck in `domainOutputs.test.ts`. Von den `stage5b-*` bleiben die zwei vom 17.05.2026 Byte für Byte gleich: Sie enthalten keinen Tag der neuen Era.
+- **Die vierzehn übrigen `stage5b-*`-Dateien** enthalten Tage der Era von 5b und sind nie veröffentlicht worden. Sie werden einmal neu eingefroren, als eigener Commit. Ein Skript oder Test belegt daneben: Im Profil «über die Grenze» ist jeder Wert jedes Tages vor der Grenze derselbe wie vorher, und in beiden Profilen ändern sich nur Felder, die vom Leistungswert abhängen. Die prozentualen Veränderungen, die Übungstage und die Zustände der Muskelgruppen ändern sich nicht.
 - `stage5bImportFile.test.ts` bleibt grün, ohne dass du es anfasst.
 
 ### Schritt 5 – Die Farbstärke am Körper
@@ -175,7 +176,11 @@ Lies den Entwurf danach einmal als Gegner: Wo könnte sich ein Tag vor der Grenz
 - Das Standbild auf der Gym-Karte, die neutralen Töne, das Licht und das Modell bleiben, wie sie sind.
 - Vertrag §7 und der Satz in `CLAUDE.md` bekommen die neue Zahl.
 
-### Schritt 6 – Der Zahlenbericht
+### Schritt 6 – Eine Prüfdatei für Darios iPhone, und der Zahlenbericht
+
+**Die Prüfdatei.** Dario vergleicht am STOP wieder Live-App und Vorschau mit derselben Datei. Die bestehende endet am 15.11.2026 und liefe an seinem Prüftag in eine Trainingspause. Leg deshalb eine zweite daneben, `docs/wp3/kurve/momentum-pruefdaten-kurve.json`, auf dieselbe Art erzeugt: mit dem Live-Build `e30becd` in einem getrennten Arbeitsverzeichnis, über dessen eigene Oberfläche (`scripts/verify/stage5b-live-backup.mjs` sagt im Kopf, wie; gib dem Skript Anfang, Ende und Ausgabedatei als Parameter, statt es zu kopieren). Dieselbe Progression, verlängert bis zum Tag des STOP, die letzte Session an diesem Tag. Die bestehende Datei und `stage5bImportFile.test.ts` bleiben, wie sie sind; ein eigener Test hält fest, was Dario mit der neuen Datei liest. Lade sie zur Kontrolle in Live-Build und neuen Build (`scripts/verify/stage5b-import-check.mjs`) und nimm die erwarteten Zahlen für seinen Prüftag und die Tage danach von dort.
+
+**Der Zahlenbericht.**
 
 Er steht im STOP-Bericht und in `docs/design/wp3/kurve.md`.
 
@@ -188,7 +193,7 @@ Er steht im STOP-Bericht und in `docs/design/wp3/kurve.md`.
 ### Schritt 7 – Schlussprüfung, Dokumente, Vorschau
 
 1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Browser-Suites, die 3D-Suites einzeln. Vergleich mit Schritt 0.
-2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt genau die sechzehn `stage5b-*`-Dateien als geändert und sonst nichts; die Fingerabdrücke sind unverändert.
+2. `git diff <Commit vor diesem Block> -- .github/fixtures` zeigt höchstens die vierzehn `stage5b-*`-Dateien aus Schritt 4 als geändert und sonst nichts; die Fingerabdrücke sind unverändert.
 3. Dokumente: ein Block in `HANDOVER.md`; «Gym rating» unter den Wertungsregeln; das Risiko zur Kurve unter den Risiken als erledigt. In `CLAUDE.md` der Satz zur einen Kurve und der Satz zur Farbstärke. In `docs/decisions.md` neue Einträge für das, was du entschieden hast, darunter die Ergänzung zu D101.
 4. Veröffentlich den Build in `Momentum-preview` nach dessen `README.md`; die Statusleiste bleibt `default`. Warte auf den Workflow.
 
@@ -196,7 +201,7 @@ Er steht im STOP-Bericht und in `docs/design/wp3/kurve.md`.
 
 **Unverändert bleiben:**
 
-- jeder Wert jedes Tages vor der Grenze von 5b, jede Golden-Datei und jeder Fingerabdruck ausser den sechzehn aus Schritt 4;
+- jeder Wert jedes Tages vor der Grenze von 5b, jede Golden-Datei und jeder Fingerabdruck ausser den vierzehn aus Schritt 4;
 - Laufen, an jedem Tag;
 - die fünf festen Eigenschaften der Kurve (D101), die Mittelung der zwei Fenster, ihre Längen und Gewichte, 40/60, die Bewegung zum Ziel, Endurance, Abbau und Pause;
 - die Kennzahl von 5b: Stärke-Score, bester Arbeitssatz, Median, feste Reihenfolge, Aufwärmsatz;
@@ -218,7 +223,7 @@ Es gibt keine zweite Kurve, keine Tabelle, keine Verzweigung nach Vorzeichen, ke
 
 - Der Entwurf liegt vor, mit den Zahlen aller Kandidaten, und stimmt mit dem Gebauten überein.
 - Das Ziel ist in der Lesart des Entwurfs erfüllt und als Test festgehalten.
-- Kein Tag vor der Grenze und kein Tag von Laufen hat sich bewegt; unter `.github/fixtures/` sind genau die sechzehn `stage5b-*`-Dateien geändert.
+- Kein Tag vor der Grenze und kein Tag von Laufen hat sich bewegt; unter `.github/fixtures/` sind höchstens die vierzehn `stage5b-*`-Dateien aus Schritt 4 geändert.
 - Die fünf festen Eigenschaften der Kurve gelten für den gebauten Wert.
 - Die Aktivierung ist idempotent, auch auf einem Gerät mit einem Marker ohne Kurvenwert.
 - `replayPerformance.test.ts` besteht mit unveränderten Grenzen.
@@ -244,7 +249,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 **Prüfliste fürs iPhone** (übernimm sie und pass sie an; höchstens acht Punkte):
 
 1. Die Vorschau nur als eigene App vom Home-Bildschirm öffnen, nie als Tab.
-2. Die Prüfdatei in der Vorschau neu importieren. Der Stand der Vorschau trägt sonst den Marker von 5b ohne die neue Kurve.
+2. Die neue Prüfdatei in der Live-App und in der Vorschau importieren, wie am STOP 5b; vorher in der Live-App das eigene Backup exportieren und am Schluss wieder importieren. In der Vorschau ist der neue Import auch nötig, weil ihr Stand sonst den Marker von 5b ohne die neue Kurve trägt.
 3. Gym-Rating in der Vorschau und in der Live-App mit derselben Prüfdatei: Die Vorschau steht nicht tiefer; die erwarteten Zahlen stehen im Bericht.
 4. Auf dem Gym-Screen passen Leistungswert und Ziel zu dem, was der Bericht nennt.
 5. Muskelgruppen, 30 Tage: Der Körper ist klar gefärbt; eine Gruppe bei +7 % ist sichtbar kräftiger als eine bei +3 %.
@@ -252,4 +257,4 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 7. Die Zahlen der Muskelgruppen sind dieselben wie vor diesem Block; nur die Farbstärke hat sich geändert.
 8. Laufen zeigt dieselben Zahlen wie vorher.
 
-Dann wartest du auf Darios Abnahme. Wählt er einen anderen Wert, stellst du ihn um, frierst die sechzehn Golden-Dateien neu ein, veröffentlichst die Vorschau neu und sagst ihm, dass ein Gerät, das den Vorschau-Build schon geladen hat, den alten Wert in seinem Stand trägt und die Prüfdatei neu importieren muss. Was er auf dem iPhone findet, behebst du in derselben Session. Der nächste Block startet in einer neuen Session mit `docs/wp3/prompts/prompt-7b-interaktion.md`.
+Dann wartest du auf Darios Abnahme. Wählt er einen anderen Wert, stellst du ihn um, frierst die Golden-Dateien aus Schritt 4 neu ein, veröffentlichst die Vorschau neu und sagst ihm, dass ein Gerät, das den Vorschau-Build schon geladen hat, den alten Wert in seinem Stand trägt und die Prüfdatei neu importieren muss. Was er auf dem iPhone findet, behebst du in derselben Session. Der nächste Block startet in einer neuen Session mit `docs/wp3/prompts/prompt-7b-interaktion.md`.
