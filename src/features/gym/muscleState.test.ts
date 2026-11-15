@@ -7,7 +7,8 @@ import {
   type MusclePerformance,
 } from '../../core/gym/performance';
 import {
-  HELD_BAND_PERCENT,
+  HELD_DOWN_TO_PERCENT,
+  HELD_UP_TO_PERCENT,
   MIN_EXERCISE_DAYS,
   exerciseDayCounts,
   exerciseGroups,
@@ -25,9 +26,9 @@ import {
  *
  * Three rules are held here at their edges: the rounding (half away from
  * zero, both ways), the band (the state follows the shown whole percent:
- * −2 … +2 is held), and how much there must be to compare (three exercise
- * days in the range and an exercise on two days). Presentation only — the
- * ratio itself is untouched.
+ * −2 … +1 is held — one-sided since STOP Kurve, D180), and how much there
+ * must be to compare (three exercise days in the range and an exercise on
+ * two days). Presentation only — the ratio itself is untouched.
  */
 
 const measured = (ratio: number): MusclePerformance =>
@@ -88,8 +89,9 @@ describe('the rounding: half away from zero, in both directions', () => {
 });
 
 describe('the band: the state follows the shown figure', () => {
-  it('is two whole percent wide on either side', () => {
-    expect(HELD_BAND_PERCENT).toBe(2);
+  it('is one-sided: a rise counts from +2 %, a fall from −3 % (D180)', () => {
+    // Until STOP Kurve it was two whole percent wide on either side (D153).
+    expect([HELD_DOWN_TO_PERCENT, HELD_UP_TO_PERCENT]).toEqual([2, 1]);
   });
 
   it.each([
@@ -98,13 +100,16 @@ describe('the band: the state follows the shown figure', () => {
     [-2.5, `${MINUS}3${NBSP}%`, 'declined'],
     [-2.4, `${MINUS}2${NBSP}%`, 'unchanged'],
     [-2, `${MINUS}2${NBSP}%`, 'unchanged'],
+    [-1.5, `${MINUS}2${NBSP}%`, 'unchanged'],
     [-1, `${MINUS}1${NBSP}%`, 'unchanged'],
     [-0.3, `0${NBSP}%`, 'unchanged'],
     [0, `0${NBSP}%`, 'unchanged'],
     [0.4, `0${NBSP}%`, 'unchanged'],
     [1, `+1${NBSP}%`, 'unchanged'],
-    [2, `+2${NBSP}%`, 'unchanged'],
-    [2.4, `+2${NBSP}%`, 'unchanged'],
+    [1.4, `+1${NBSP}%`, 'unchanged'],
+    [1.5, `+2${NBSP}%`, 'improved'],
+    [2, `+2${NBSP}%`, 'improved'],
+    [2.4, `+2${NBSP}%`, 'improved'],
     [2.5, `+3${NBSP}%`, 'improved'],
     [3, `+3${NBSP}%`, 'improved'],
     [26, `+26${NBSP}%`, 'improved'],
@@ -117,17 +122,36 @@ describe('the band: the state follows the shown figure', () => {
     for (let basis = -2000; basis <= 2000; basis += 1) {
       const change = basis / 100;
       const shown = roundShown(change)!;
-      const expected = shown >= 3 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged';
+      const expected = shown >= 2 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged';
       expect(shownTrendOfChange(change), `${change} %`).toBe(expected);
     }
   });
 
   it('reads a ratio by the same band', () => {
     expect(shownTrend(1.004)).toBe('unchanged');
-    expect(shownTrend(1.02)).toBe('unchanged');
+    expect(shownTrend(1.014)).toBe('unchanged');
+    expect(shownTrend(1.02)).toBe('improved');
     expect(shownTrend(0.98)).toBe('unchanged');
     expect(shownTrend(1.03)).toBe('improved');
     expect(shownTrend(0.97)).toBe('declined');
+  });
+
+  it('one rep more at the same weight is progress at every rep count, and one rep less a decline only up to ten reps', () => {
+    // The strength score of Stage 5b: load × (1 + reps ÷ 30). The owner's aim
+    // at STOP Kurve was the left column, up to twelve reps; the right column
+    // is what the old band did too.
+    const step = (from: number, to: number): number => ((30 + to) / (30 + from) - 1) * 100;
+    for (let reps = 1; reps <= 20; reps += 1) {
+      expect(shownTrendOfChange(step(reps, reps + 1)), `${reps} → ${reps + 1}`).toBe('improved');
+    }
+    for (let reps = 2; reps <= 10; reps += 1) {
+      expect(shownTrendOfChange(step(reps, reps - 1)), `${reps} → ${reps - 1}`).toBe('declined');
+    }
+    for (let reps = 11; reps <= 20; reps += 1) {
+      expect(shownTrendOfChange(step(reps, reps - 1)), `${reps} → ${reps - 1}`).toBe('unchanged');
+    }
+    // The two steps the old band told apart: ten to eleven read "+3 %", eleven to twelve "Gehalten".
+    expect([shownChangeText(step(10, 11)), shownChangeText(step(11, 12))]).toEqual([`+3${NBSP}%`, `+2${NBSP}%`]);
   });
 });
 
@@ -146,7 +170,9 @@ describe('enough to compare: three exercise days and an exercise on two days', (
   it('with three it states the direction of its figure', () => {
     expect(muscleStateOf(measured(1.2), 3)).toBe('improved');
     expect(muscleStateOf(measured(0.8), 3)).toBe('declined');
-    expect(muscleStateOf(measured(1.02), 3)).toBe('unchanged');
+    // The band is one-sided (D180): +1 % and −2 % are held, +2 % is a rise, −3 % a fall.
+    expect(muscleStateOf(measured(1.01), 3)).toBe('unchanged');
+    expect(muscleStateOf(measured(1.02), 3)).toBe('improved');
     expect(muscleStateOf(measured(0.98), 3)).toBe('unchanged');
     expect(muscleStateOf(measured(1.03), 3)).toBe('improved');
     expect(muscleStateOf(measured(0.97), 3)).toBe('declined');

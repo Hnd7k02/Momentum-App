@@ -147,10 +147,24 @@ describe('the muscle entry card before the first workout', () => {
   });
 
   it('reads a trend inside the band as held, in the text colour', () => {
-    const html = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-05', 100000), squat('2026-03-09', 102000)]));
+    // +1 %: the band is −2 to +1 since STOP Kurve (D180).
+    const html = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-05', 100000), squat('2026-03-09', 101000)]));
     expect(html).toContain('Leistungstrend Gehalten');
     expect(html).not.toContain('gym-hub__musclesOverall--');
     expect(html.match(/gym-hub__previewState--unchanged/g)?.length ?? 0).toBe(1);
+  });
+
+  it('reads +2 % as a rise, and −2 % still as held: the band is one-sided (D180)', () => {
+    // What this test held as "held" until STOP Kurve.
+    const up = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-05', 100000), squat('2026-03-09', 102000)]));
+    expect(up).toContain('Leistungstrend +2\u00A0%');
+    expect(up).toContain('gym-hub__musclesOverall--improved');
+    expect(up.match(/gym-hub__previewState--improved/g)?.length ?? 0).toBe(1);
+
+    const down = render(historyOf([squat('2026-03-02', 100000), squat('2026-03-05', 100000), squat('2026-03-09', 98000)]));
+    expect(down).toContain('Leistungstrend Gehalten');
+    expect(down).not.toContain('gym-hub__musclesOverall--');
+    expect(down.match(/gym-hub__previewState--unchanged/g)?.length ?? 0).toBe(1);
   });
 });
 

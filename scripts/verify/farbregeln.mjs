@@ -75,6 +75,11 @@ const lift = (group, days, kgs, tag = '') => ({ group, id: `fx_${group}${tag}`, 
  * change is the change of the weight — under the strength score of Stage 5b
  * too, where ten reps multiply every weight by the same 40 (D150).
  *
+ * **The band is one-sided since STOP Kurve (D180)**: −2 to +1 is held, a
+ * rise counts from +2 % and a fall from −3 %. Until then it was −2 to +2,
+ * and this fixture had its rising edge at +3 % (improved) and +2 % (held);
+ * the falling edge is where it was.
+ *
  * The groups at the edges make their whole change on the last day, because
  * the two figures on screen compare different things: a group's row
  * compares the end of the range with its beginning, the exercise list and
@@ -88,8 +93,8 @@ const lift = (group, days, kgs, tag = '') => ({ group, id: `fx_${group}${tag}`, 
 const MIXED = [
   lift('chest', [26, 20, 14, 8, 2], [100, 102, 105, 107, 109]),      // +7 %  improved (median; +9 % last against first)
   lift('back', [19, 12, 5], [55, 55, 55]),                            //  0 %  held
-  lift('shoulders', [22, 13, 4], [100, 100, 103]),                    // +3 %  improved, at the edge
-  lift('biceps', [21, 11, 3], [50, 50, 51]),                          // +2 %  held, at the edge
+  lift('shoulders', [22, 13, 4], [100, 100, 102]),                    // +2 %  improved, at the edge
+  lift('biceps', [21, 11, 3], [50, 50, 50.5]),                        // +1 %  held, at the edge
   lift('triceps', [23, 12, 6], [50, 50, 49]),                         // −2 %  held, at the edge
   lift('core', [24, 15, 7], [100, 100, 97]),                          // −3 %  declined, at the edge
   lift('quadriceps', [25, 18, 10, 1], [100, 98, 95, 92]),             // −6 %  declined (median; −8 % last against first)
@@ -132,19 +137,19 @@ const RULE = await (async () => {
 })();
 console.log(`a window is compared by: ${RULE}`);
 const EXPECT_30 = {
-  chest: [BY_RULE[RULE].chest, 'improved'], back: [0, 'unchanged'], shoulders: [3, 'improved'], biceps: [2, 'unchanged'],
+  chest: [BY_RULE[RULE].chest, 'improved'], back: [0, 'unchanged'], shoulders: [2, 'improved'], biceps: [1, 'unchanged'],
   triceps: [-2, 'unchanged'], core: [-3, 'declined'], quadriceps: [BY_RULE[RULE].quadriceps, 'declined'],
   hamstringsGlutes: [null, 'awaitingBaseline'], calves: [null, 'noData'], forearms: [null, 'awaitingBaseline'],
 };
 /** The mean of the seven rated ratios at 30 days, as the screen prints it. */
-const MEAN_30 = ((BY_RULE[RULE].chestRatio + 1 + 1.03 + 1.02 + 0.98 + 0.97 + BY_RULE[RULE].quadricepsRatio) / 7 - 1) * 100;
+const MEAN_30 = ((BY_RULE[RULE].chestRatio + 1 + 1.02 + 1.01 + 0.98 + 0.97 + BY_RULE[RULE].quadricepsRatio) / 7 - 1) * 100;
 
-/** Every group trained three times and unchanged within the band. */
-const HELD = GROUPS.map((group, i) => lift(group, [24 - i, 14 - (i % 5), 4 + (i % 3)], [100, 100, 100 + ((i % 5) - 2)]));
+/** Every group trained three times and unchanged within the band: −2 % to +1 %. */
+const HELD = GROUPS.map((group, i) => lift(group, [24 - i, 14 - (i % 5), 4 + (i % 3)], [100, 100, 100 + ((i % 4) - 2)]));
 
-/** Held everywhere, and the smallest improvement and decline beside it. */
+/** Held everywhere, and the smallest improvement and decline beside it: +2 % and −3 %. */
 const EDGE = GROUPS.map((group, i) => {
-  const last = { chest: 103, back: 103, quadriceps: 97, hamstringsGlutes: 97 }[group] ?? 100;
+  const last = { chest: 102, back: 102, quadriceps: 97, hamstringsGlutes: 97 }[group] ?? 100;
   return lift(group, [24 - i, 14 - (i % 5), 4 + (i % 3)], [100, 100, last]);
 });
 
@@ -243,7 +248,7 @@ const parseShown = (text) => {
   if (!m) return Number.NaN;
   return m[1] === MINUS ? -Number(m[2]) : Number(m[2]);
 };
-const stateOfShown = (shown) => (shown >= 3 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged');
+const stateOfShown = (shown) => (shown >= 2 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged');
 const WORD = {
   improved: 'Verbessert', unchanged: 'Gehalten', declined: 'Zurückgegangen',
   awaitingBaseline: 'Zu wenig Vergleichsdaten', noData: 'Noch nicht trainiert',
@@ -403,7 +408,7 @@ for (const width of WIDTHS) {
       if (!ok) { ruleHolds = false; ruleDetail.push(short(row, 120)); }
     }
   }
-  check(`${W}: in every row the state fits the printed figure (−2 … +2 held, from ±3 the direction)`, ruleHolds, ruleDetail.join(' ‖ '));
+  check(`${W}: in every row the state fits the printed figure (−2 … +1 held, a rise from +2, a fall from −3)`, ruleHolds, ruleDetail.join(' ‖ '));
   for (const group of GROUPS) {
     const row = rows.find((r) => r.name === NAME[group]);
     const [figure, state] = EXPECT_30[group];
@@ -546,17 +551,41 @@ for (const width of WIDTHS) {
     sheet.lead === 'Die Farbe zeigt, wie sich dein bester Arbeitssatz je Muskelgruppe im gewählten Zeitraum verändert hat. Sie misst Trainingsleistung, nicht Muskelmasse.', sheet.lead);
   check(`${W}: and the five states, each with its rule in words`,
     JSON.stringify(sheet.states) === JSON.stringify([
-      ['Verbessert', `Ab +3${NBSP}%`],
-      ['Gehalten', `${MINUS}2${NBSP}% bis +2${NBSP}%`],
-      ['Zurückgegangen', `Ab ${MINUS}3${NBSP}%`],
+      // The band is one-sided (D180), and the legend says why at the two figures that differ.
+      ['Verbessert', `Ab +2${NBSP}%. Schon eine Wiederholung mehr zählt als Fortschritt.`],
+      ['Gehalten', `${MINUS}2${NBSP}% bis +1${NBSP}%`],
+      ['Zurückgegangen', `Ab ${MINUS}3${NBSP}%. Eine kleine Schwankung nach unten zählt noch nicht als Rückgang.`],
       ['Zu wenig Vergleichsdaten', 'Weniger als drei Übungstage im Zeitraum, oder keine Übung an zwei Tagen'],
       ['Noch nicht trainiert', 'Kein Satz im Zeitraum'],
     ]), short(sheet.states, 400));
+  check(`${W}: and under them what an exercise day is`, sheet.note === 'Ein Übungstag ist eine Übung an einem Tag.', short(sheet.note));
   check(`${W}: the sheet is not wider than the screen`, sheet.overflow !== null && sheet.overflow <= 0 && (await sideways(page)) <= 0, String(sheet.overflow));
-  const sheetRuns = await textContrast(page);
+  // The words at the two figures (D180) make the sheet two lines longer:
+  // on a 320-pixel phone its last line stands below the fold, and the sheet
+  // scrolls. What the fold hides is measured after scrolling to the end, so
+  // every line of the legend is read on its own pixels at every width.
+  const sheetTop = await textContrast(page);
+  const scrolled = await page.evaluate(() => {
+    const body = document.querySelector('[role="dialog"] .sheet__body');
+    const before = body.scrollTop;
+    body.scrollTop = body.scrollHeight;
+    return { by: body.scrollTop - before, atEnd: body.scrollHeight - body.clientHeight - body.scrollTop <= 1 };
+  });
+  await page.waitForTimeout(300);
+  const sheetEnd = scrolled.by > 0 ? await textContrast(page) : [];
+  const noteInView = await page.locator('[role="dialog"] .muscle-legend-sheet__note').evaluate((el) => {
+    const note = el.getBoundingClientRect();
+    const body = el.closest('.sheet__body').getBoundingClientRect();
+    return note.top >= body.top - 0.5 && note.bottom <= body.bottom + 0.5;
+  });
+  check(`${W}: the sheet's last line can be reached — in view at once, or after scrolling the sheet to its end`,
+    scrolled.atEnd && noteInView, short({ scrolledBy: scrolled.by, atEnd: scrolled.atEnd, noteInView }));
+  await page.evaluate(() => { document.querySelector('[role="dialog"] .sheet__body').scrollTop = 0; });
+  await page.waitForTimeout(300);
+  const sheetRuns = [...sheetTop, ...sheetEnd];
   const sheetNamed = measured(sheetRuns, [
     ['muscle-legend-sheet__lead', 'Die Farbe zeigt'],
-    ['DT', 'Verbessert'], ['DD', 'Ab +3'], ['DT', 'Gehalten'], ['DD', `${MINUS}2`], ['DT', 'Zurückgegangen'], ['DD', `Ab ${MINUS}3`],
+    ['DT', 'Verbessert'], ['DD', 'Ab +2'], ['DT', 'Gehalten'], ['DD', `${MINUS}2`], ['DT', 'Zurückgegangen'], ['DD', `Ab ${MINUS}3`],
     ['DT', 'Zu wenig Vergleichsdaten'], ['DD', 'Weniger als drei'], ['DT', 'Noch nicht trainiert'], ['DD', 'Kein Satz im Zeitraum'],
     ['muscle-legend-sheet__note', 'Ein Übungstag ist'],
   ]);
@@ -597,16 +626,16 @@ for (const width of WIDTHS) {
     };
   }));
   const ex = (group) => listed.find((e) => e.name === `${NAME[group]}-Übung`);
-  check(`${W}: an exercise at +2 % reads "Gehalten", in the text colour`, ex('biceps')?.text === 'Gehalten' && ex('biceps')?.kind === 'unchanged' && ex('biceps')?.color === T['--text-primary'], short(ex('biceps')));
+  check(`${W}: an exercise at +1 % reads "Gehalten", in the text colour`, ex('biceps')?.text === 'Gehalten' && ex('biceps')?.kind === 'unchanged' && ex('biceps')?.color === T['--text-primary'], short(ex('biceps')));
   check(`${W}: one at ${MINUS}2 % too`, ex('triceps')?.text === 'Gehalten' && ex('triceps')?.kind === 'unchanged', short(ex('triceps')));
-  check(`${W}: one at +3 % is "+3 %", green`, ex('shoulders')?.text === signed(3) && ex('shoulders')?.kind === 'improved' && ex('shoulders')?.color === T['--status-strong-ink'], short(ex('shoulders')));
+  check(`${W}: one at +2 % is "+2 %", green`, ex('shoulders')?.text === signed(2) && ex('shoulders')?.kind === 'improved' && ex('shoulders')?.color === T['--status-strong-ink'], short(ex('shoulders')));
   check(`${W}: one at ${MINUS}3 % is "${MINUS}3 %", red`, ex('core')?.text === signed(-3) && ex('core')?.kind === 'declined' && ex('core')?.color === T['--status-weak-ink'], short(ex('core')));
   check(`${W}: one recorded once has too little to compare`, listed.find((e) => e.name === 'Unterarme-Übung A')?.text === 'Zu wenig Vergleichsdaten', short(listed.find((e) => e.name === 'Unterarme-Übung A')));
 
   await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Bizeps-Übung$/ }) }).click();
   await page.waitForTimeout(900);
   const detail = await page.locator('.gym-detail__figure').nth(2).locator('.gym-detail__value').evaluate((el) => ({ text: el.textContent.trim(), cls: el.className, color: getComputedStyle(el).color }));
-  check(`${W}: the exercise detail reads +2 % as "Gehalten", in the text colour`, detail.text === 'Gehalten' && /--unchanged/.test(detail.cls) && detail.color === T['--text-primary'], short(detail));
+  check(`${W}: the exercise detail reads +1 % as "Gehalten", in the text colour`, detail.text === 'Gehalten' && /--unchanged/.test(detail.cls) && detail.color === T['--text-primary'], short(detail));
   const detailDrawn = await coloursOnScreen(page);
   check(`${W}: nothing on the exercise detail is drawn in the warning yellow`,
     detailDrawn.elements > 40 && carrying(detailDrawn, yellows).length === 0, `${detailDrawn.elements} elements · ${carrying(detailDrawn, yellows).join(' | ')}`);
@@ -616,7 +645,7 @@ for (const width of WIDTHS) {
   await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Schultern-Übung$/ }) }).click();
   await page.waitForTimeout(900);
   const detailUp = await page.locator('.gym-detail__figure').nth(2).locator('.gym-detail__value').evaluate((el) => ({ text: el.textContent.trim(), cls: el.className }));
-  check(`${W}: and +3 % as "+3 %", improved`, detailUp.text === signed(3) && /--improved/.test(detailUp.cls), short(detailUp));
+  check(`${W}: and +2 % as "+2 %", improved`, detailUp.text === signed(2) && /--improved/.test(detailUp.cls), short(detailUp));
   await shot(page, width, 'uebungsdetail-verbessert');
   await page.locator('.gym-detail .gym-session__back').click();
   await page.waitForTimeout(900);
@@ -801,18 +830,19 @@ if (process.env.NO_BODY) {
       neutral(empty.foot) && neutral(held.foot) && empty.calf.lit >= 100 && empty.foot.L - empty.calf.L >= 15,
       `feet L ${empty.foot.L}, untrained calves L ${empty.calf.L}, held calves L ${held.calf.L}`);
 
-    // EDGE against HELD, same angle. The chest and the back are at +3 %,
+    // EDGE against HELD, same angle. The chest and the back are at +2 % —
+    // the smallest rise the band shows since STOP Kurve (D180), +3 % before —
     // the quadriceps and the hamstrings at −3 %, everything else is held in
     // both — the calves stand for "everything else".
     // The zone also holds the strip under the chest that belongs to no group,
     // so not every pixel of it moves; the median over all of them still must.
-    check('body, +3 % beside held: the chest has turned green — the median of every lit pixel of the zone, by a difference the eye can see (ΔE ≥ 5)',
+    check('body, +2 % beside held: the chest has turned green — the median of every lit pixel of the zone, by a difference the eye can see (ΔE ≥ 5)',
       same(edge) && edge.upper.pixels >= 300 && edge.upper.moved >= 0.5 && edge.upper.dA <= -3 && edge.upper.dE >= 5, short(edge.upper));
     check('body, −3 % beside held: the quadriceps have turned red (ΔE ≥ 5)',
       same(edge) && edge.thigh.pixels >= 300 && edge.thigh.moved >= 0.6 && edge.thigh.dA >= 3 && edge.thigh.dE >= 5, short(edge.thigh));
-    check('body, ±3 % beside held: the calves, held in both, are the same white',
+    check('body, +2 % and −3 % beside held: the calves, held in both, are the same white',
       same(edge) && edge.calf.pixels >= 100 && edge.calf.moved <= 0.1 && edge.calf.dE <= 1.5, short(edge.calf));
-    check('body, from the back: the back at +3 % has turned green, the hamstrings at −3 % red, the calves not at all',
+    check('body, from the back: the back at +2 % has turned green, the hamstrings at −3 % red, the calves not at all',
       same(edgeBack) && edgeBack.upper.pixels >= 300 && edgeBack.upper.dA <= -3 && edgeBack.upper.dE >= 5
         && edgeBack.thigh.pixels >= 300 && edgeBack.thigh.dA >= 3 && edgeBack.thigh.dE >= 5 && edgeBack.calf.pixels >= 100 && edgeBack.calf.moved <= 0.1,
       short({ upper: edgeBack.upper, thigh: edgeBack.thigh, calf: edgeBack.calf }, 400));
@@ -823,7 +853,7 @@ if (process.env.NO_BODY) {
     // compare, the calves untrained.
     check('body, mixed: the untrained calves are dimmed — clearly darker than the same calves held, and no colour',
       same(mixed) && mixed.calf.pixels >= 100 && mixed.calf.moved >= 0.8 && mixed.calf.dL <= -8 && Math.abs(mixed.calf.dA) <= 3, short(mixed.calf));
-    check(`body, mixed: +${BY_RULE[RULE].chest} % is greener than +3 %, and −${-BY_RULE[RULE].quadriceps} % redder than −3 % — the strength grows with the change`,
+    check(`body, mixed: +${BY_RULE[RULE].chest} % is greener than +2 %, and −${-BY_RULE[RULE].quadriceps} % redder than −3 % — the strength grows with the change`,
       mixed.upper.dA < edge.upper.dA - 1 && mixed.thigh.dA > edge.thigh.dA + 1, `chest ${mixed.upper.dA} vs ${edge.upper.dA} · thigh ${mixed.thigh.dA} vs ${edge.thigh.dA}`);
     check('body, mixed from the back: the held back is the same white as in the held figure',
       same(mixedBack) && mixedBack.upper.pixels >= 300 && mixedBack.upper.moved <= 0.1, short(mixedBack.upper));

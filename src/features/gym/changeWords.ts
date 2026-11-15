@@ -7,7 +7,7 @@ import { roundShown, shownTrendOfChange, type ShownTrend } from './muscleState';
  *
  * Rounding and band are `muscleState.ts`'s — this only chooses the words.
  * Where a figure stands alone on a line, a held change is the word and not
- * "+2 %": a bare "+2 %" in the text colour would read as a rise, and the
+ * "+1 %": a bare "+1 %" in the text colour would read as a rise, and the
  * word is the statement the band makes. The muscle rows and the figure
  * above them have room for both and print both.
  */

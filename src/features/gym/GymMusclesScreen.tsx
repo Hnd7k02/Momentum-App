@@ -101,7 +101,9 @@ export function GymMusclesScreen({ onBack }: { onBack(): void }) {
       {launcher.overlay}
 
       {/* The legend (contract §7): the sentence word for word, then the five
-          states, each with its mark, its name and its rule in words. */}
+          states, each with its mark, its name and its rule in words — which
+          for a rise and a fall also say why the one counts sooner than the
+          other (D180). */}
       <Sheet open={legendOpen} title={t('muscle.legend.title')} onClose={() => setLegendOpen(false)}>
         <div className="muscle-legend-sheet">
           <p className="muscle-legend-sheet__lead">{t('muscle.legend.lead')}</p>

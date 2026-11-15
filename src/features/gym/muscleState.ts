@@ -19,8 +19,9 @@ import { signedPercentText } from '../../i18n/typography';
  *
  * 1. **Rounding.** A change is shown as a whole percent, rounded half away
  *    from zero in both directions: +2.5 is +3 and −2.5 is −3.
- * 2. **The band.** The state follows the figure as shown: −2 to +2 is held,
- *    from +3 improved, from −3 declined. Figure and colour cannot part.
+ * 2. **The band.** The state follows the figure as shown, and it is
+ *    one-sided (the owner's choice at STOP Kurve, D180): −2 to +1 is held,
+ *    from +2 improved, from −3 declined. Figure and colour cannot part.
  * 3. **Enough to compare.** A group states a trend only with three exercise
  *    days in the range *and* an exercise recorded on two days; with less it
  *    is "Zu wenig Vergleichsdaten", whatever its ratio says.
@@ -29,8 +30,23 @@ import { signedPercentText } from '../../i18n/typography';
  * score stay exactly as `core/gym` computed them; nothing here is stored.
  */
 
-/** The widest shown figure that still reads as held: −2 … +2. */
-export const HELD_BAND_PERCENT = 2;
+/**
+ * The band, as the two shown figures at its edges: −2 … +1 is held.
+ *
+ * It was −2 … +2 until STOP Kurve (D153). Under the strength score of
+ * Stage 5b one rep more at the same weight is `1 ÷ (30 + reps)` — +2.5 % at
+ * ten reps, +2.4 % at eleven — so the old band called the step from ten to
+ * eleven reps "+3 %" and the step from eleven to twelve "Gehalten". The
+ * owner's aim is that one rep more reads as progress, and he chose to meet
+ * it on the rising side alone (D180): **a rise counts from a shown +2 %, a
+ * fall from a shown −3 % as before.** A symmetric band of ±1 would have
+ * made every missed rep a decline, which is the twitchiness the band was
+ * introduced against. The legend says that the two sides differ.
+ */
+/** The largest shown rise that still reads as held. */
+export const HELD_UP_TO_PERCENT = 1;
+/** The largest shown fall that still reads as held, as a size. */
+export const HELD_DOWN_TO_PERCENT = 2;
 
 /** The exercise days a group needs in the range before it states a trend. */
 export const MIN_EXERCISE_DAYS = 3;
@@ -69,12 +85,12 @@ export type ShownTrend = 'improved' | 'unchanged' | 'declined';
 
 /** The band, on a figure that is already the shown whole percent. */
 export function trendOfShown(percent: number): ShownTrend {
-  if (percent > HELD_BAND_PERCENT) return 'improved';
-  if (percent < -HELD_BAND_PERCENT) return 'declined';
+  if (percent > HELD_UP_TO_PERCENT) return 'improved';
+  if (percent < -HELD_DOWN_TO_PERCENT) return 'declined';
   return 'unchanged';
 }
 
-/** Which way a ratio reads once rounded: −2 % to +2 % is held, "Gehalten". */
+/** Which way a ratio reads once rounded: −2 % to +1 % is held, "Gehalten". */
 export function shownTrend(ratio: number | null): ShownTrend | null {
   const percent = shownPercent(ratio);
   return percent === null ? null : trendOfShown(percent);

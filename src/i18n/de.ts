@@ -392,9 +392,12 @@ export const de = {
   'muscle.legend.title': 'Legende',
   'muscle.legend.lead':
     'Die Farbe zeigt, wie sich dein bester Arbeitssatz je Muskelgruppe im gewählten Zeitraum verändert hat. Sie misst Trainingsleistung, nicht Muskelmasse.',
-  'muscle.legend.improved': 'Ab +3\u00A0%',
-  'muscle.legend.unchanged': '\u22122\u00A0% bis +2\u00A0%',
-  'muscle.legend.declined': 'Ab \u22123\u00A0%',
+  // The band is one-sided since STOP Kurve (D180), and the legend says why,
+  // at the two figures that differ.
+  'muscle.legend.improved': 'Ab +2\u00A0%. Schon eine Wiederholung mehr zählt als Fortschritt.',
+  'muscle.legend.unchanged': '\u22122\u00A0% bis +1\u00A0%',
+  'muscle.legend.declined':
+    'Ab \u22123\u00A0%. Eine kleine Schwankung nach unten zählt noch nicht als Rückgang.',
   'muscle.legend.awaitingBaseline':
     'Weniger als drei Übungstage im Zeitraum, oder keine Übung an zwei Tagen',
   'muscle.legend.noData': 'Kein Satz im Zeitraum',
@@ -451,7 +454,7 @@ export const de = {
   'gym.progress.noBaselineHint':
     'Ein Leistungstrend braucht dieselbe Übung an zwei Tagen in den letzten {days} Tagen.',
   'gym.progress.explainTrend':
-    'Der Leistungstrend ist das Mittel der gewerteten Muskelgruppen. Von \u22122\u00A0% bis +2\u00A0% gilt er als gehalten.',
+    'Der Leistungstrend ist das Mittel der gewerteten Muskelgruppen. Von \u22122\u00A0% bis +1\u00A0% gilt er als gehalten.',
   'gym.progress.groupsCounted': '{count} von {total} Gruppen gewertet',
   'gym.progress.explainGroups':
     'Jede Muskelgruppe zählt gleich viel, unabhängig davon, wie viele Übungen sie enthält.',

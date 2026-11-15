@@ -219,10 +219,18 @@ export const REGION_MATERIAL = {
 
 /**
  * The strength of a tint (contract §7): it grows evenly from 2.5 % to 8 %
- * and stays there. 2.5 % is where the band ends — the smallest change that
- * is shown as ±3 % — and it starts at `TINT_STRENGTH.min`: 0.3, the owner's
- * value (D167). At that a change of 3 % stands about four times as far
- * from a held, white group as the 5 ΔE `farbregeln.mjs` asks for.
+ * and stays there. 2.5 % is the smallest change that is shown as ±3 %, and
+ * the strength there is `TINT_STRENGTH.min`: 0.3, the owner's value (D167).
+ * At that a change of 3 % stands about four times as far from a held, white
+ * group as the 5 ΔE `farbregeln.mjs` asks for.
+ *
+ * **Since STOP Kurve a rise is shown from +2 %** (the band is one-sided,
+ * D180, `muscleState.ts`): a group between +1.5 % and +2.5 % is improved and
+ * takes the weakest strength, 0.3, like one at +2.5 %. The scale the owner
+ * accepted is not moved for it — the strength of +3 %, +5 % and +7 % is
+ * what he saw — and a fall still begins at −2.5 %, with the same 0.3. The
+ * strength is a matter of the size of a change alone; which side counts
+ * from where is the band's.
  *
  * **The upper end was 12 % until the block "Kurve" (D179).** Under the
  * metric of Stage 5b a month of training reads +3 to +7 % in a group,

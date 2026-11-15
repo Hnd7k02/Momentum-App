@@ -384,9 +384,9 @@ export const en: Translations = {
   'muscle.legend.title': 'Legend',
   'muscle.legend.lead':
     'The colour shows how your best working set per muscle group has changed over the selected range. It measures training performance, not muscle mass.',
-  'muscle.legend.improved': 'From +3\u00A0%',
-  'muscle.legend.unchanged': '\u22122\u00A0% to +2\u00A0%',
-  'muscle.legend.declined': 'From \u22123\u00A0%',
+  'muscle.legend.improved': 'From +2\u00A0%. One more rep already counts as progress.',
+  'muscle.legend.unchanged': '\u22122\u00A0% to +1\u00A0%',
+  'muscle.legend.declined': 'From \u22123\u00A0%. A small dip does not yet count as a decline.',
   'muscle.legend.awaitingBaseline':
     'Fewer than three exercise days in the range, or no exercise on two days',
   'muscle.legend.noData': 'No set in the range',
@@ -442,7 +442,7 @@ export const en: Translations = {
   'gym.progress.noBaselineHint':
     'A performance trend needs the same exercise on two days in the last {days} days.',
   'gym.progress.explainTrend':
-    'The performance trend is the mean of the rated muscle groups. From \u22122\u00A0% to +2\u00A0% it counts as held.',
+    'The performance trend is the mean of the rated muscle groups. From \u22122\u00A0% to +1\u00A0% it counts as held.',
   'gym.progress.groupsCounted': '{count} of {total} groups counted',
   'gym.progress.explainGroups':
     'Every muscle group counts the same, however many exercises it contains.',

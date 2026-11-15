@@ -115,6 +115,19 @@ describe('the strength of a tint (contract §7)', () => {
     expect(stateIntensity('awaitingBaseline', 9, 6)).toBe(TINT_STRENGTH.awaitingBaseline);
   });
 
+  it('gives a rise shown as +2 % the weakest strength: the band is one-sided, the scale is not (D180)', () => {
+    const { min } = TINT_STRENGTH;
+    // Improved from +1.5 % since STOP Kurve: the weakest tint up to +2.5 %, growing from there.
+    for (const pct of [1.5, 1.8, 2, 2.49, 2.5]) expect(stateIntensity('improved', pct)).toBe(min);
+    expect(stateIntensity('improved', 2.6)).toBeGreaterThan(min);
+    // From the group as the screen states it to the viewer's strength.
+    const [chest, back] = toBodyVisuals([shown('chest', 'improved', 1.8), shown('back', 'unchanged', 1.4)]);
+    expect(chest).toMatchObject({ state: 'improved', intensity: min, tint: STATE_COLOR.improved.model });
+    expect(back).toMatchObject({ state: 'unchanged', intensity: 0 });
+    // The scale the owner accepted stays where it was.
+    expect([3, 5, 7, 8].map((pct) => Math.round(stateIntensity('improved', pct) * 100) / 100)).toEqual([0.36, 0.62, 0.87, 1]);
+  });
+
   it('is the same for a fall as for a rise of the same size', () => {
     for (const pct of [2.5, 3, 6, 12, 30]) {
       expect(stateIntensity('declined', -pct)).toBe(stateIntensity('improved', pct));

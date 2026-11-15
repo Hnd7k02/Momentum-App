@@ -612,7 +612,8 @@ for (const width of WIDTHS) {
       short({ zero: zeroLabel, zeroY: line.zeroY, bounds: line.bounds, labels: line.labels }));
     const endChange = changes[changes.length - 1];
     const endShown = Math.sign(endChange) * Math.round(Math.abs(endChange));
-    const endState = endShown >= 3 ? 'improved' : endShown <= -3 ? 'declined' : 'unchanged';
+    // The one-sided band (D180): a rise from +2 %, a fall from −3 %.
+    const endState = endShown >= 2 ? 'improved' : endShown <= -3 ? 'declined' : 'unchanged';
     const endFill = { improved: line.strong, declined: line.weak, unchanged: line.ink }[endState];
     const endText = `${endShown > 0 ? '+' : endShown < 0 ? '−' : ''}${Math.abs(endShown)}\u00A0%`;
     const lastPoint = line.points[line.points.length - 1] ?? [0, 0];

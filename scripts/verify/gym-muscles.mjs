@@ -169,10 +169,11 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   const offRule = shownRows.filter((row) => {
     if (row.delta === null) return !((row.state === 'awaitingBaseline' || row.state === 'noData') && row.badge === wordOf[row.state] && row.marks === 0);
     const shown = shownOf(row.delta);
-    const want = shown >= 3 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged';
+    // The band is one-sided since STOP Kurve (D180): a rise from +2 %, a fall from −3 %.
+    const want = shown >= 2 ? 'improved' : shown <= -3 ? 'declined' : 'unchanged';
     return !(Number.isInteger(shown) && row.state === want && row.word === wordOf[want] && row.badge === null);
   });
-  check('in each of the ten rows the state fits the printed figure: −2 to +2 held, otherwise the direction', shownRows.length === 10 && offRule.length === 0, JSON.stringify(offRule));
+  check('in each of the ten rows the state fits the printed figure: −2 to +1 held, otherwise the direction', shownRows.length === 10 && offRule.length === 0, JSON.stringify(offRule));
   // seedMuscles: the biceps have two exercise days (hammer curls), the calves one.
   const fewDays = shownRows.filter((row) => row.name === 'Bizeps' || row.name === 'Waden');
   check('a group with fewer than three exercise days shows the chip and no line, and says how many it has',
