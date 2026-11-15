@@ -6,7 +6,8 @@ import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { BodyViewer, type BodyView, type MuscleVisual } from './index';
 // The size of the stage in Muskelgruppen, for `?world=`: the body is judged in the box the app gives it.
 import '../gym/muscleModule.css';
-import { BODY_LOOK, IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, STATE_COLOR, mutedIdentity, stateIntensity, type BodyLook, type MuscleState } from './tokens';
+import { shownTrendOfChange } from '../gym/muscleState';
+import { BODY_LOOK, IDENTITY_COLOR, IDENTITY_UNTRAINED_ALPHA, STATE_COLOR, TINT_STRENGTH, mutedIdentity, stateIntensity, type BodyLook, type MuscleState } from './tokens';
 
 /**
  * The isolation harness for the 3D body — development only.
@@ -81,8 +82,26 @@ function visualsOf(fixture: Record<MuscleGroup, Fixture>): Partial<Record<Muscle
     out[id] = {
       tint: STATE_COLOR[state].model,
       ground: STATE_COLOR[state].ground,
-      intensity: stateIntensity(state, delta),
+      intensity: intensityOf(state, delta),
     };
+  }
+  return out;
+}
+
+/**
+ * `?deltas=chest:2.7,back:-3.1,…` is a fixture written in the address: each
+ * named group at that change, in the state the app gives the change
+ * (`shownTrendOfChange`, the band of contract §7), every other group held.
+ * It is how the pictures of the block "Kurve" show a real history's groups
+ * (`scripts/verify/kurve-tint-shots.mjs`).
+ */
+function fixtureOf(deltas: string): Record<MuscleGroup, Fixture> {
+  const out = all({ state: 'unchanged', delta: 0 });
+  for (const part of deltas.split(',')) {
+    const [id, value] = part.split(':');
+    const delta = Number(value);
+    if (!MUSCLE_GROUPS.includes(id as MuscleGroup) || !Number.isFinite(delta)) continue;
+    out[id as MuscleGroup] = { state: shownTrendOfChange(delta) ?? 'unchanged', delta };
   }
   return out;
 }
@@ -96,7 +115,21 @@ function visualsOf(fixture: Record<MuscleGroup, Fixture>): Partial<Record<Muscle
  * `?key=<number>` tries another strength of the key light on the app's look.
  */
 const params = new URLSearchParams(window.location.search);
-const FIXTURE = FIXTURES[params.get('fixture') ?? 'mixed'] ?? MIXED;
+const DELTAS = params.get('deltas');
+const FIXTURE = DELTAS !== null ? fixtureOf(DELTAS) : FIXTURES[params.get('fixture') ?? 'mixed'] ?? MIXED;
+/**
+ * `?tintTo=<percent>` tries another upper end of the tint's strength on the
+ * harness (block "Kurve"): the strength still starts where the held band
+ * ends, at the app's weakest strength, and grows evenly to full at this
+ * change. Without it the harness draws the app's own scale.
+ */
+const TINT_TO = Number(params.get('tintTo'));
+const intensityOf = (state: MuscleState, delta: number): number => {
+  if (params.get('tintTo') === null || !Number.isFinite(TINT_TO) || TINT_TO <= TINT_STRENGTH.fromPercent) return stateIntensity(state, delta);
+  if (state !== 'improved' && state !== 'declined') return stateIntensity(state, delta);
+  const along = (Math.abs(delta) - TINT_STRENGTH.fromPercent) / (TINT_TO - TINT_STRENGTH.fromPercent);
+  return TINT_STRENGTH.min + Math.max(0, Math.min(1, along)) * (1 - TINT_STRENGTH.min);
+};
 const LANG: Language = params.get('lang') === 'en' ? 'en' : 'de';
 const MODEL = params.get('model');
 const MODEL_URL =

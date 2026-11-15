@@ -1,0 +1,368 @@
+{
+ "candidates": [
+  12,
+  10,
+  8,
+  7,
+  6
+ ],
+ "histories": {
+  "pruefdaten-30": {
+   "title": "Prüfdaten, 30 Tage (15.11.)",
+   "groups": {
+    "chest": 2.68,
+    "back": 3.59,
+    "shoulders": 3.2,
+    "biceps": 6.55,
+    "triceps": 4.15,
+    "core": 4.18,
+    "quadriceps": 4.72,
+    "hamstringsGlutes": 5.62,
+    "calves": 7.13,
+    "forearms": 4.22
+   }
+  },
+  "pruefdaten-90": {
+   "title": "Prüfdaten, 90 Tage (15.11.)",
+   "groups": {
+    "chest": 5.28,
+    "back": 5.76,
+    "shoulders": 5.96,
+    "biceps": 11.06,
+    "triceps": 6.76,
+    "core": 5.59,
+    "quadriceps": 4.72,
+    "hamstringsGlutes": 5.62,
+    "calves": 7.13,
+    "forearms": 6.93
+   }
+  },
+  "profil-16-wochen-30": {
+   "title": "Profil «über die Grenze», 30 Tage (17.06.)",
+   "groups": {
+    "chest": 1.01,
+    "back": 0.78,
+    "shoulders": -1.02,
+    "biceps": 0.95,
+    "triceps": 0.91,
+    "core": 4.61,
+    "quadriceps": 3.28,
+    "hamstringsGlutes": 0.95,
+    "calves": 0,
+    "forearms": 2.82
+   }
+  }
+ },
+ "steps": {
+  "6": {
+   "3": {
+    "strength": 0.4,
+    "chest": {
+     "dE": 25.5,
+     "dA": -22.6
+    },
+    "quadriceps": {
+     "dE": 22.8,
+     "dA": 20.5
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "5": {
+    "strength": 0.8,
+    "chest": {
+     "dE": 49.1,
+     "dA": -42.7
+    },
+    "quadriceps": {
+     "dE": 45.1,
+     "dA": 40.7
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "7": {
+    "strength": 1,
+    "chest": {
+     "dE": 58.5,
+     "dA": -49.9
+    },
+    "quadriceps": {
+     "dE": 55.3,
+     "dA": 49.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "10": {
+    "strength": 1,
+    "chest": {
+     "dE": 58.5,
+     "dA": -49.9
+    },
+    "quadriceps": {
+     "dE": 55.3,
+     "dA": 49.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   }
+  },
+  "7": {
+   "3": {
+    "strength": 0.378,
+    "chest": {
+     "dE": 24.3,
+     "dA": -21.5
+    },
+    "quadriceps": {
+     "dE": 21.3,
+     "dA": 19.2
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "5": {
+    "strength": 0.689,
+    "chest": {
+     "dE": 43.1,
+     "dA": -37.7
+    },
+    "quadriceps": {
+     "dE": 39.1,
+     "dA": 35.4
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "7": {
+    "strength": 1,
+    "chest": {
+     "dE": 58.5,
+     "dA": -49.9
+    },
+    "quadriceps": {
+     "dE": 55.3,
+     "dA": 49.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "10": {
+    "strength": 1,
+    "chest": {
+     "dE": 58.5,
+     "dA": -49.9
+    },
+    "quadriceps": {
+     "dE": 55.3,
+     "dA": 49.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   }
+  },
+  "8": {
+   "3": {
+    "strength": 0.364,
+    "chest": {
+     "dE": 23.6,
+     "dA": -21
+    },
+    "quadriceps": {
+     "dE": 20.5,
+     "dA": 18.4
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "5": {
+    "strength": 0.618,
+    "chest": {
+     "dE": 38.7,
+     "dA": -34.1
+    },
+    "quadriceps": {
+     "dE": 35.3,
+     "dA": 31.9
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "7": {
+    "strength": 0.873,
+    "chest": {
+     "dE": 52.8,
+     "dA": -45.6
+    },
+    "quadriceps": {
+     "dE": 49.1,
+     "dA": 44.2
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "10": {
+    "strength": 1,
+    "chest": {
+     "dE": 58.5,
+     "dA": -49.9
+    },
+    "quadriceps": {
+     "dE": 55.3,
+     "dA": 49.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   }
+  },
+  "10": {
+   "3": {
+    "strength": 0.347,
+    "chest": {
+     "dE": 22.2,
+     "dA": -19.7
+    },
+    "quadriceps": {
+     "dE": 19.7,
+     "dA": 17.7
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "5": {
+    "strength": 0.533,
+    "chest": {
+     "dE": 33.7,
+     "dA": -29.7
+    },
+    "quadriceps": {
+     "dE": 30.6,
+     "dA": 27.7
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "7": {
+    "strength": 0.72,
+    "chest": {
+     "dE": 45,
+     "dA": -39.3
+    },
+    "quadriceps": {
+     "dE": 41,
+     "dA": 37
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "10": {
+    "strength": 1,
+    "chest": {
+     "dE": 58.5,
+     "dA": -49.9
+    },
+    "quadriceps": {
+     "dE": 55.3,
+     "dA": 49.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   }
+  },
+  "12": {
+   "3": {
+    "strength": 0.337,
+    "chest": {
+     "dE": 21.8,
+     "dA": -19.4
+    },
+    "quadriceps": {
+     "dE": 19.3,
+     "dA": 17.3
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "5": {
+    "strength": 0.484,
+    "chest": {
+     "dE": 30.7,
+     "dA": -27.2
+    },
+    "quadriceps": {
+     "dE": 27.6,
+     "dA": 24.8
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "7": {
+    "strength": 0.632,
+    "chest": {
+     "dE": 39.9,
+     "dA": -35
+    },
+    "quadriceps": {
+     "dE": 35.8,
+     "dA": 32.3
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   },
+   "10": {
+    "strength": 0.853,
+    "chest": {
+     "dE": 51.9,
+     "dA": -44.9
+    },
+    "quadriceps": {
+     "dE": 47.9,
+     "dA": 43.3
+    },
+    "calvesHeld": {
+     "dE": 0
+    },
+    "sameFrame": true
+   }
+  }
+ }
+}
