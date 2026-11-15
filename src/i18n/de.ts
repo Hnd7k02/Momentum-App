@@ -427,6 +427,7 @@ export const de = {
   'gym.noWorkingSets': 'Noch kein Arbeitssatz.',
   'gym.warmUp': 'Aufwärmsatz',
   'gym.warmUp.for': 'Aufwärmsatz: Satz {number} von {exercise}',
+  'gym.warmUp.hint': 'Tippe auf die Satznummer, um einen Satz als Aufwärmsatz zu markieren.',
   'gym.bestSetValue': '{reps} × {weight} {unit}',
   'gym.noSets': 'Noch keine Sätze.',
   'gym.emptyTitle': 'Noch keine Übung',

@@ -418,6 +418,7 @@ export const en: Translations = {
   'gym.noWorkingSets': 'No working set yet.',
   'gym.warmUp': 'Warm-up set',
   'gym.warmUp.for': 'Warm-up set: set {number} of {exercise}',
+  'gym.warmUp.hint': 'Tap a set’s number to mark it as a warm-up set.',
   'gym.bestSetValue': '{reps} × {weight} {unit}',
   'gym.noSets': 'No sets yet.',
   'gym.emptyTitle': 'No exercise yet',

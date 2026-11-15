@@ -409,6 +409,16 @@ export interface SettingsRecord {
    * Absent means kilograms, which is what every record before it meant.
    */
   weightUnit?: WeightUnit;
+  /**
+   * The user has marked a set as a warm-up at least once (WP3 Stage 5b,
+   * D175). It records that this happened and nothing else: the hint under
+   * the sets of a workout, which says where the mark is, stands there
+   * until it has and never again after — taking the mark off again does not
+   * bring the hint back. Like the weight unit it is no config snapshot and
+   * nothing scored reads it. Absent means it has not happened on this
+   * record.
+   */
+  warmUpMarkUsed?: true;
   onboardingCompletedAt: string | null;
   /**
    * The highest rank the user has already been shown.

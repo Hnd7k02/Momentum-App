@@ -9,7 +9,7 @@ import { ToastOutlet, ToastProvider } from '../../components/Toast';
 import { WeightUnitProvider } from '../../app/useWeights';
 import type { WeightUnit } from '../../core/gym/weight';
 import { closeDatabase, deleteDatabase } from '../../storage/db';
-import { gymSessionsRepository, gymSetsRepository, weightEntriesRepository } from '../../storage/repositories';
+import { gymSessionsRepository, gymSetsRepository, settingsRepository, weightEntriesRepository } from '../../storage/repositories';
 import { applyOnboarding } from '../../storage/services/configurationService';
 import {
   addSet,
@@ -657,5 +657,76 @@ describe('the warm-up mark (D151)', () => {
     expect(mark(1).getAttribute('aria-pressed')).toBe('true');
     expect(rows()[0]!.querySelector('.gym-set__tag')?.textContent).toBe('Aufwärmsatz');
     expect(bestLine()).toBe('Bester Arbeitssatz · 8 × 60 kg');
+  });
+});
+
+describe('the hint that says where the warm-up mark is (D175)', () => {
+  const HINT = 'Tippe auf die Satznummer, um einen Satz als Aufwärmsatz zu markieren.';
+  const hints = () => [...document.querySelectorAll<HTMLElement>('.gym-session .gym-exercise__hint')];
+  const mark = (number: number, exercise = 'Bankdrücken') => button(`Aufwärmsatz: Satz ${number} von ${exercise}`);
+
+  /** A planned workout of two exercises, the first with the sets given. */
+  async function session(benchSets: [reps: number, kg: number][], squatSets: [reps: number, kg: number][] = []): Promise<string> {
+    const started = await startSessionFromDraft(await planDraft(['ex_bench_press', 'ex_squat']), WEDNESDAY);
+    for (const [reps, kg] of benchSets) {
+      await addSet({ sessionId: started.id, exerciseId: 'ex_bench_press', reps, weightGrams: kg * 1000 });
+    }
+    for (const [reps, kg] of squatSets) {
+      await addSet({ sessionId: started.id, exerciseId: 'ex_squat', reps, weightGrams: kg * 1000 });
+    }
+    return started.id;
+  }
+
+  it('stands once, under the sets of the first exercise that has one', async () => {
+    await open({ sessionId: await session([[10, 40], [8, 60]], [[5, 100]]) });
+    expect(hints().map((hint) => hint.textContent)).toEqual([HINT]);
+    // In the first card, after its last set and before the line that names the best one.
+    const inCard = card('Bankdrücken');
+    expect(inCard.contains(hints()[0]!)).toBe(true);
+    const children = [...inCard.querySelectorAll('.gym-set, .gym-exercise__hint, .gym-exercise__best')].map((element) => element.className.split(' ')[0]);
+    expect(children).toEqual(['gym-set', 'gym-set', 'gym-exercise__hint', 'gym-exercise__best']);
+    expect(card('Kniebeuge').querySelector('.gym-exercise__hint')).toBeNull();
+  });
+
+  it('waits for a set: a workout with nothing saved yet has nothing to mark', async () => {
+    await open({ draft: await planDraft(['ex_bench_press', 'ex_squat']) });
+    expect(hints()).toHaveLength(0);
+
+    // The first exercise untouched, the second with a set: the hint is where the set is.
+    await mounted!.unmount();
+    mounted = null;
+    await open({ sessionId: await session([], [[5, 100]]) });
+    expect(hints()).toHaveLength(1);
+    expect(card('Kniebeuge').contains(hints()[0]!)).toBe(true);
+  });
+
+  it('goes with the first mark and does not come back when the mark is taken off', async () => {
+    const id = await session([[10, 40], [8, 60]]);
+    await open({ sessionId: id });
+    expect(hints()).toHaveLength(1);
+
+    await act(async () => mark(1).click());
+    await until(() => hints().length === 0);
+    expect(hints()).toHaveLength(0);
+    expect((await settingsRepository.get())?.warmUpMarkUsed).toBe(true);
+
+    await act(async () => mark(1).click());
+    await until(() => mark(1).getAttribute('aria-pressed') === 'false');
+    await quiet();
+    expect(hints()).toHaveLength(0);
+
+    // Nor in the same workout opened again.
+    await mounted!.unmount();
+    mounted = null;
+    await open({ sessionId: id });
+    expect(hints()).toHaveLength(0);
+  });
+
+  it('is not shown where nothing can be marked: a closed day', async () => {
+    const id = await session([[10, 40], [8, 60]]);
+    setClock({ now: () => new Date(2026, 9, 16, 9, 0, 0) });
+    await open({ sessionId: id });
+    expect(mark(1).disabled).toBe(true);
+    expect(hints()).toHaveLength(0);
   });
 });

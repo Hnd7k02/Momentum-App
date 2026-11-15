@@ -168,6 +168,36 @@ async function openWorkout(page) {
   await page.locator('.gym-session__bar').waitFor({ timeout: 5000 });
 }
 
+const HINT = 'Tippe auf die Satznummer, um einen Satz als Aufwärmsatz zu markieren.';
+
+/** The hint on the warm-up mark as it stands on screen: how many, where, how large. */
+async function hintGeometry(page) {
+  return page.evaluate(() => {
+    const hints = [...document.querySelectorAll('.gym-session .gym-exercise__hint')];
+    if (hints.length === 0) return { count: 0 };
+    const hint = hints[0];
+    const card = hint.closest('.card');
+    const box = hint.getBoundingClientRect();
+    const cardBox = card.getBoundingClientRect();
+    const style = getComputedStyle(hint);
+    const rows = [...card.querySelectorAll('.gym-set')];
+    const best = card.querySelector('.gym-exercise__best');
+    return {
+      count: hints.length,
+      text: hint.textContent,
+      inCard: card.querySelector('.gym-exercise__name')?.firstChild?.textContent?.trim() ?? null,
+      afterSets: rows.length > 0 && rows.every((row) => row.getBoundingClientRect().bottom <= box.top + 0.5),
+      beforeBest: best !== null && box.bottom <= best.getBoundingClientRect().top + 0.5,
+      fontSize: Number.parseFloat(style.fontSize),
+      lines: Math.round(box.height / Number.parseFloat(style.lineHeight)),
+      left: box.left,
+      right: box.right,
+      cardLeft: cardBox.left,
+      cardRight: cardBox.right,
+    };
+  });
+}
+
 const finish = async (page) => {
   await page.locator('.gym-session').getByRole('button', { name: 'Fertig', exact: true }).click();
   await page.waitForTimeout(1200);
@@ -257,6 +287,19 @@ for (const [width, height] of SIZES) {
       check(`${W}: A set ${number} has a named toggle, off`, (await mark(page, 'Bankdrücken', number).getAttribute('aria-pressed')) === 'false');
     }
     checkRow(`${W}: A an unmarked row`, await rowGeometry(page, 'Bankdrücken', 0), { marked: false });
+
+    // The hint that says where the mark is (D175): once, under the sets.
+    const hint = await hintGeometry(page);
+    check(`${W}: A before the first mark a hint under the sets says where the mark is`,
+      hint.count === 1 && hint.text === HINT && hint.inCard === 'Bankdrücken' && hint.afterSets && hint.beforeBest, short(hint));
+    check(`${W}: A the hint is a caption of 11px or more that stays inside its card`,
+      hint.fontSize >= 11 && hint.left >= hint.cardLeft - 0.5 && hint.right <= hint.cardRight + 0.5 && hint.lines <= 3, short(hint));
+    const hintContrast = (await textContrast(page)).filter((run) => run.text.startsWith('Tippe auf die Satznummer'));
+    check(`${W}: A the hint reads at 4.5:1 on its pixels`, hintContrast.length >= 1 && hintContrast.every((run) => run.ratio >= 4.5), short(hintContrast.map((run) => run.ratio)));
+    await layoutChecks(page, `${W}: A the workout with the hint`);
+    await exerciseCard(page, 'Bankdrücken').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `${OUT}/stage5b-${width}-hinweis.png` });
+
     check(`${W}: A the line names the best working set`, /^Bester Arbeitssatz · 8 × 82[.,]5 kg$/.test((await bestLine(page, 'Bankdrücken')) ?? ''), String(await bestLine(page, 'Bankdrücken')));
 
     // Mark the first set.
@@ -264,6 +307,9 @@ for (const [width, height] of SIZES) {
     await until(() => mark(page, 'Bankdrücken', 1).getAttribute('aria-pressed'), (value) => value === 'true');
     await page.waitForTimeout(500);
     const marked = await benchSets(page);
+    check(`${W}: A the first mark ends the hint, and the settings record says a set has been marked`,
+      (await hintGeometry(page)).count === 0 && (await idb(page, 'settings'))[0]?.warmUpMarkUsed === true,
+      short({ hints: (await hintGeometry(page)).count, used: (await idb(page, 'settings'))[0]?.warmUpMarkUsed }));
     check(`${W}: A the mark is stored on that set, and on no other`, marked[0]?.warmUp === true && !('warmUp' in marked[1]) && !('warmUp' in marked[2]), short(marked.map((set) => set.warmUp)));
     checkRow(`${W}: A the marked row`, await rowGeometry(page, 'Bankdrücken', 0), { marked: true });
     checkRow(`${W}: A the row beneath it`, await rowGeometry(page, 'Bankdrücken', 1), { marked: false });
@@ -288,6 +334,7 @@ for (const [width, height] of SIZES) {
     await page.waitForTimeout(600);
     check(`${W}: A after a reload the set is still marked, and says so`,
       (await mark(page, 'Bankdrücken', 1).getAttribute('aria-pressed')) === 'true' && (await textOf(rows(page, 'Bankdrücken').nth(0).locator('.gym-set__tag'))) === 'Aufwärmsatz');
+    check(`${W}: A and the hint has not come back`, (await hintGeometry(page)).count === 0);
 
     // Remove the marked set, and undo.
     await page.getByRole('button', { name: 'Satz 1 von Bankdrücken entfernen', exact: true }).click();
@@ -313,6 +360,18 @@ for (const [width, height] of SIZES) {
     await until(() => mark(page, 'Bankdrücken', 3).getAttribute('aria-pressed'), (value) => value === 'false');
     await page.waitForTimeout(400);
     check(`${W}: A taking the mark off leaves the set without the field`, !('warmUp' in (await benchSets(page))[2]));
+
+    // No set marked at all: the hint still stays away — it records that the
+    // mark has been found, not that a set carries one (D175).
+    await mark(page, 'Bankdrücken', 1).click();
+    await until(() => mark(page, 'Bankdrücken', 1).getAttribute('aria-pressed'), (value) => value === 'false');
+    await page.waitForTimeout(500);
+    check(`${W}: A with every mark taken off again the hint stays away`,
+      (await benchSets(page)).every((set) => !('warmUp' in set)) && (await hintGeometry(page)).count === 0,
+      short({ marks: (await benchSets(page)).map((set) => set.warmUp ?? null), hints: (await hintGeometry(page)).count }));
+    await mark(page, 'Bankdrücken', 1).click();
+    await until(() => mark(page, 'Bankdrücken', 1).getAttribute('aria-pressed'), (value) => value === 'true');
+    await page.waitForTimeout(500);
 
     await finish(page);
     const week = await textOf(page.locator('section[aria-label="Gym"] .week__value'));

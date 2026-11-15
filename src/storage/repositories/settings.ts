@@ -58,6 +58,15 @@ export const settingsRepository = {
     return settingsRepository.update({ weightUnit });
   },
 
+  /**
+   * Records that a set has been marked as a warm-up, once (D175). Written
+   * the first time only: every later mark finds it there and writes nothing.
+   */
+  async noteWarmUpMarkUsed(): Promise<void> {
+    const current = await settingsRepository.getOrCreate();
+    if (current.warmUpMarkUsed !== true) await settingsRepository.update({ warmUpMarkUsed: true });
+  },
+
   /** Records that a promotion reveal has been played. */
   async acknowledgeRank(rankId: RankId): Promise<SettingsRecord> {
     return settingsRepository.update({ acknowledgedRankId: rankId });

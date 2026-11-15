@@ -377,6 +377,14 @@
   padding-top: var(--space-2);
 }
 
+/* Where the warm-up mark is, said once under the sets until a set has
+   been marked (D175): a caption, quieter than the line beneath it. */
+.gym-exercise__hint {
+  font-size: var(--type-caption);
+  color: var(--text-secondary);
+  padding-top: var(--space-2);
+}
+
 .gym-exercise__add {
   display: flex;
   align-items: center;

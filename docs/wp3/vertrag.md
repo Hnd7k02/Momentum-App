@@ -189,6 +189,8 @@ Eine Rangfolge, auf jedem Screen dieselbe (festgelegt, D160):
 - **Chip:** 11 px halbfett, Fläche und Text aus der Statusfamilie; der neutrale Chip in `--surface-secondary`.
 - **Tab-Leiste:** Beschriftung 11 px in `--text-tertiary`, der aktive Reiter in `--accent-ink`.
 - **Satzzeile:** Die Eingabefelder benutzen `--surface-input` und die Zahlregeln aus §3.
+- **Aufwärmsatz in der Satzzeile** (Block 5b, D173, D175): Die Satznummer ist der Schalter, mit 44 px Trefferfläche und einem Namen für Vorlesehilfen («Aufwärmsatz: Satz 1 von Bankdrücken»). Markiert trägt die Nummer die Fläche einer gewählten Option (`--accent-tint`, `--accent-ink`), und über der Zeile steht das Wort «Aufwärmsatz»; die Zeile bleibt bei jeder Breite einzeilig, auch in Pfund. Unter 360 px ist die Nummernzelle 20 px breit, und die Trefferfläche wächst nach links.
+- **Hinweis unter den Sätzen** (festgelegt am STOP 5b, D175): «Tippe auf die Satznummer, um einen Satz als Aufwärmsatz zu markieren.» Er steht einmal im Workout, unter den Sätzen der ersten Übung, die einen Satz hat, in 11 px und `--text-secondary`, und nur solange, bis einmal ein Satz markiert wurde. Danach kommt er nicht wieder, auch wenn die Markierung wieder entfernt wird.
 
 ## §6 Diagramme
 
@@ -305,7 +307,8 @@ Zielbild für Block 7C.
 |---|---|
 | 6b Designsystem | §2 ohne den Körper, §3, §4, §5, §6 für die bestehenden Diagramme, §10 und §11 für die Oberfläche, §12, §14 |
 | Farbregeln | §7, die Wörter aus §13, die sie braucht |
-| 5b Kennzahl | «Bester Arbeitssatz» und «Aufwärmsatz» aus §13; sonst kein Aussehen |
+| 5b Kennzahl | «Bester Arbeitssatz» und «Aufwärmsatz» aus §13; §5 für die Satzzeile mit dem Aufwärmsatz und seinen Hinweis; §6 für die Linie im Übungsdetail (am STOP 5b gewählt) |
+| Kurve | §7 für die Farbstärke am Körper; §6 für die Skala von Zeile und Übungsdetail, soweit der Block sie mitnimmt |
 | 7A Körpermodell | §8 Material, Farbe, Licht, neutrale Zone |
 | 7B Interaktion | §8 Grösse, Bedienung, Bewegung, Treffen, der Weg von Heute; §10 für den Körper; die Messanzeige für Bildrate und Ladezeit |
 | 7C Muskel-Sheet | §9, §6 für das Diagramm im Sheet |

@@ -4,7 +4,7 @@ import { BACKUP_FORMAT_VERSION } from '../../core/backup/format';
 import { setClock } from '../../core/clock';
 import { SCHEMA_VERSION } from '../../core/model';
 import { closeDatabase, deleteDatabase } from '../db';
-import { gymSessionsRepository, gymSetsRepository } from '../repositories';
+import { gymSessionsRepository, gymSetsRepository, settingsRepository } from '../repositories';
 import { exportBackup, importBackup } from './backupService';
 import { loadBossProgression } from './bossService';
 import { EditWindowError } from './checkInService';
@@ -342,5 +342,73 @@ describe('the backup', () => {
     // And it computes the same after the round trip.
     const history = await loadGymHistory(MONDAY, WEDNESDAY);
     expect(history.days[0]?.best.set.id).toBe(work.id);
+  });
+});
+
+describe('the hint that says where the mark is (D175)', () => {
+  it('stands until a set has been marked once, and never again after', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const warm = await benchSet(session.id, 10, 40);
+    await benchSet(session.id, 8, 60);
+    expect((await settingsRepository.get())?.warmUpMarkUsed).toBeUndefined();
+    expect((await loadSession(session.id))?.warmUpHint).toBe(true);
+
+    // The first mark ends it…
+    await toggleWarmUp(warm.id);
+    expect((await settingsRepository.get())?.warmUpMarkUsed).toBe(true);
+    expect((await loadSession(session.id))?.warmUpHint).toBe(false);
+
+    // …and taking the mark off again does not bring it back: it records
+    // that the user has found the mark, not that a set carries one.
+    await toggleWarmUp(warm.id);
+    expect('warmUp' in (await gymSetsRepository.get(warm.id))!).toBe(false);
+    expect((await loadSession(session.id))?.warmUpHint).toBe(false);
+
+    // Nor does another workout on another day.
+    freezeAt(THURSDAY);
+    const next = await openSessionForDay(THURSDAY);
+    await benchSet(next.id, 8, 60);
+    expect((await loadSession(next.id))?.warmUpHint).toBe(false);
+  });
+
+  it('is written the first time only: a later mark leaves the settings record as it is', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const first = await benchSet(session.id, 10, 40);
+    const second = await benchSet(session.id, 10, 50);
+    await toggleWarmUp(first.id);
+    const after = await settingsRepository.get();
+    freezeAt(WEDNESDAY, 18);
+    await toggleWarmUp(second.id);
+    expect(await settingsRepository.get()).toEqual(after);
+  });
+
+  it('is not ended by a correction of reps or weight, nor by taking a mark off', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const set = await benchSet(session.id, 10, 40);
+    await updateSet(set.id, { reps: 11 });
+    await updateSet(set.id, { warmUp: false });
+    expect((await settingsRepository.get())?.warmUpMarkUsed).toBeUndefined();
+    expect((await loadSession(session.id))?.warmUpHint).toBe(true);
+  });
+
+  it('travels with a backup, and a backup from before it shows the hint again', async () => {
+    const session = await openSessionForDay(WEDNESDAY);
+    const set = await benchSet(session.id, 10, 40);
+    const before = JSON.stringify(await exportBackup());
+    await toggleWarmUp(set.id);
+    const after = JSON.stringify(await exportBackup());
+
+    await closeDatabase();
+    await deleteDatabase();
+    expect((await importBackup(after)).ok).toBe(true);
+    expect((await loadSession(session.id))?.warmUpHint).toBe(false);
+
+    await closeDatabase();
+    await deleteDatabase();
+    expect((await importBackup(before)).ok).toBe(true);
+    expect((await loadSession(session.id))?.warmUpHint).toBe(true);
+    // Neither version moved for it.
+    expect(BACKUP_FORMAT_VERSION).toBe(3);
+    expect(SCHEMA_VERSION).toBe(5);
   });
 });

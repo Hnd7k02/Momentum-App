@@ -36,6 +36,7 @@ import {
   exercisesRepository,
   gymSessionsRepository,
   gymSetsRepository,
+  settingsRepository,
   weightEntriesRepository,
 } from '../repositories';
 import { assertSessionWritable, sessionWritableOn } from './checkInService';
@@ -229,6 +230,11 @@ export interface GymSessionView {
   exercises: SessionExercise[];
   /** Whether the session may still be changed, by the app's existing rule. */
   editable: boolean;
+  /**
+   * Whether the hint that says where the warm-up mark is still stands under
+   * the sets: until the user has marked a set once (D175).
+   */
+  warmUpHint: boolean;
 }
 
 /**
@@ -246,13 +252,14 @@ export async function loadSession(
 ): Promise<GymSessionView | null> {
   const session = await gymSessionsRepository.get(sessionId);
   if (!session) return null;
-  const [sets, exercises, bodyweight, snapshots] = await Promise.all([
+  const [sets, exercises, bodyweight, snapshots, settings] = await Promise.all([
     gymSetsRepository.listBySession(sessionId),
     listExercises(),
     // The weight in force on the session's own day, never today's: a session
     // opened in the edit window still reads the body it was performed with.
     weightEntriesRepository.latestOnOrBefore(session.date),
     configSnapshotsRepository.list(),
+    settingsRepository.get(),
   ]);
   // The best set is named by the metric the screens read today (D150), the
   // one the exercise detail and Muskelgruppen name the same day by.
@@ -262,6 +269,7 @@ export async function loadSession(
     session,
     exercises: await withLastRecorded(grouped, session.id, session.date),
     editable: await sessionWritableOn(session.date, reference),
+    warmUpHint: settings?.warmUpMarkUsed !== true,
   };
 }
 
@@ -310,6 +318,8 @@ export async function loadDraftView(
     // A draft keeps the day it was opened for; once that day can no longer
     // be written, neither can its first set (D133).
     editable: await sessionWritableOn(date, reference),
+    // A draft has no stored set, so there is nothing to mark yet (D175).
+    warmUpHint: false,
   };
 }
 
@@ -648,6 +658,8 @@ export async function updateSet(
   if (patch.warmUp === true) next.warmUp = true;
   else if (patch.warmUp === false) delete next.warmUp;
   await gymSetsRepository.put(next);
+  // The first mark ever ends the hint that says where the mark is (D175).
+  if (patch.warmUp === true) await settingsRepository.noteWarmUpMarkUsed();
   return next;
 }
 

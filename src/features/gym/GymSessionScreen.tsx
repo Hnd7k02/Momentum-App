@@ -506,6 +506,8 @@ interface ScreenView {
   session: GymSessionRecord | null;
   exercises: SessionExercise[];
   editable: boolean;
+  /** The hint on the warm-up mark still stands (D175). A draft has no set to mark yet. */
+  warmUpHint?: boolean;
 }
 
 export function GymSessionScreen({
@@ -815,6 +817,16 @@ export function GymSessionScreen({
 
   const view = state.value;
   const editable = view.editable;
+  /*
+   * The hint that says where the warm-up mark is (D175): once in a workout,
+   * under the sets of the first exercise that has one — never beneath every
+   * exercise — and only where a set can be marked. The service says whether
+   * it is still due; it is not once a set has been marked.
+   */
+  const warmUpHintAt =
+    view.warmUpHint === true && editable
+      ? (view.exercises.find((entry) => entry.sets.length > 0)?.exercise.id ?? null)
+      : null;
   /** A free workout: the free draft, a session that renders from its sets, or one emptied. */
   const freeMode = view.session
     ? view.session.exercises === undefined
@@ -1032,6 +1044,9 @@ export function GymSessionScreen({
           view.exercises.map((entry) => {
             const name = namer.name(entry.exercise.id, entry.exercise.name);
             const loadType = entry.exercise.loadType ?? 'external';
+            // Where the mark is, said once: under the sets of the first
+            // exercise that has one, until a set has been marked (D175).
+            const hinted = warmUpHintAt === entry.exercise.id;
             // An exercise without a stored set is typed into once, then saved
             // — in a plan, a draft and a free workout alike (P6).
             const pending = entry.sets.length === 0;
@@ -1089,6 +1104,8 @@ export function GymSessionScreen({
                       onRemove={() => removeOneSet(set.id, index, name)}
                     />
                   ))}
+
+                  {hinted ? <p className="gym-exercise__hint">{t('gym.warmUp.hint')}</p> : null}
 
                   {pending ? (
                     <PendingSetRow
