@@ -4284,3 +4284,111 @@ another skin colour, not as "neutral".
 `tokens.test.ts` holds the tone halfway between the two and at a distance
 from both. The flat fallback figure draws no head, hands or feet of its own
 and is unchanged.
+
+## D167 — The owner's addendum to block 7A: the weakest tint is 0.3, and the body's borders are lines
+
+**Decision (owner, 2026-11-13, right after he had accepted the colour rules
+and block 7A; built 2026-11-13 to 2026-11-15). Completes D164 and D165.**
+
+Three things were to go in before Stage 5b starts.
+
+**The weakest tint is 0.3.** `TINT_STRENGTH.min` was 0.5 since the block of
+the colour rules, where it made up for the tone mapping: under it +3 % stood
+6.5 ΔE from the same muscle held. Block 7A took the tone mapping away and
+left the number (D165), and a small change then stood too close to a large
+one. Measured on the rendered body at 393 px, as the median difference from
+the same zone held:
+
+| | at 0.5 | at 0.3 |
+|---|---|---|
+| chest at +3 % | 34.2 ΔE, a* −30 | 22.2 ΔE, a* −20 |
+| chest at +9 % | 51.4 ΔE, a* −45 | 48.1 ΔE, a* −42 |
+| quadriceps at −3 % | 30.2 ΔE, a* +27 | 19.3 ΔE, a* +17 |
+| quadriceps at −8 % | 44.6 ΔE, a* +40 | 40.2 ΔE, a* +36 |
+
++9 % was one and a half times as green as +3 %; it is twice as green now.
+The limit in `farbregeln.mjs` — ±3 % at least 5 ΔE from held — stays as it
+is and is met about four times over. "Zu wenig Vergleichsdaten" keeps its own
+0.5. This was his fourth question at STOP 7A, which D165 had recorded as
+answered "as built"; he meant this.
+
+**The pectoral's lower edge is level.** The rule drew it flat only as far
+as 6.5 cm beside the middle and let it rise from there, so that it ran to a
+point at the lower end of the breastbone, at 66.1 % of the height. It is
+lowest now where the muscle's fold lies on the body, under the nipple, at
+71.1 %; from there to the middle it runs level, 6 mm higher over the
+breastbone (71.5 %); to the side it rises in an arc to the fold of the
+armpit.
+
+**The borders at the knee and at the outer end of the collarbone are
+smooth.** The app never turns its colours off (D166): as soon as two
+neighbours stand in different states, their border is a line on the screen.
+A region belonged to a vertex of MakeHuman's base mesh, so a border ran
+along the edges of its quads, two centimetres each, and `refine-body.mjs`
+could smooth that staircase but not straighten it — pulled hard to its
+place it kept the teeth, pulled loosely it wandered and, at the collarbone,
+ate the trapezius. The build therefore draws these borders itself, on the
+fine mesh, the way it already drew the inert zone's:
+
+- **the knee** is a plane through the joint, like neck, wrist and ankle;
+- **the pectoral's lower edge, the collarbone, the pit of the throat and
+  the deltoid's edge against the trunk** are lines, each a field over the
+  posed body (`regionrules.Lines`); `bodylib.cut_field` splits every
+  triangle a line crosses, and each triangle near a line is given to the
+  side it lies on;
+- every vertex on a cut is **marked** (`_EXACT` in the raw file), and
+  `refine-body.mjs` leaves a border through marked vertices on its edges.
+  A line of marked vertices is a wall: no region is handed a vertex across
+  it. The first build had the calf take five millimetres of the thigh at
+  the outside of the right knee, where front and back of the thigh part —
+  the validator's new check found it.
+
+No vertex of the body moved. The cuts between muscles come after the last
+step of the build that moves one, and the file is vertex for vertex the body
+he accepted; what differs is where the regions end.
+
+**What was decided on the way, and is put to him at the STOP:**
+
+- *The deltoid's edge is one plane, all round the shoulder.* He named the
+  outer end of the collarbone. The corner there is where the deltoid's edge
+  meets the collarbone, and an edge drawn clean only in front would have
+  left its other half, down the back, in steps. In front it lies within a
+  centimetre and a half of where the accepted body had it, where that
+  border wandered between 15.5 and 18 cm from the middle.
+- *Above the collarbone the trapezius reaches out to the deltoid's edge.*
+  The accepted body had a tongue of the shoulder there, three centimetres
+  inward along the collarbone; it was a quad of the base mesh, not anatomy.
+- *The other borders are `refine-body.mjs`'s as before*: along the arm, at
+  the elbow, the deltoid's lower edge, the waistband, the groin, the sides
+  of trunk and thigh. Measured by the same rule they are as smooth as a
+  loop cut on a plane (0.2 to 0.4 mm from themselves smoothed over 14 mm;
+  the knee was 0.5, the chest's edges 0.4 to 0.5, with steps of up to
+  2.7 mm). The elbow and the deltoid's lower edge are lines of the rules
+  too and could be cut the same way; it was not asked for and is left.
+- *`gate-2-b` and `stop-7a` are gone* from `candidates.json`, as the
+  handover had it for the next change to the pipeline. Commit `8537f79`
+  has both.
+
+**What holds it.** The validator: the chest must end between 69 and 73 %
+of the height; each lower leg ends in two straight cuts, within a
+millimetre of their planes (0.2 mm); 59 check points for 33 — the
+pectoral's edge at the breastbone and under the nipple, both sides of the
+knee's cut and of the deltoid's edge, front, top and back. The build: it
+stops if a cut has left an edge that is not shared by two triangles, or if
+after `refine-body.mjs` an edge of a cut line no longer parts two regions
+(with the script as it was, 509 of 1,064 did not). `refine-body.test.mjs`
+holds a marked border to the vertex, and the wall with a vertex whose every
+neighbour lies on the line.
+
+**Untouched:** `src/core`, `src/storage`, `muscleState.ts`, every golden
+file and fingerprint; the contract between the file and the app; the body's
+interaction, the stage's size and frame, the flat fallback figure. The
+measures of the body read as before; the knee's height, which is read from
+the border of calf and thigh, reads 29.8 % for 30.0 %.
+
+**Reviewed** by five read-only readers with a refuter each. The two that
+read the cuts and the rules found nothing; eight findings stood, all small
+— a test that passed without the rule it was named for, a figure in a
+comment, passages in four documents that still gave the old file's numbers
+— and all are fixed. Checking the sentence "no vertex moved" found four
+that had, by a tenth of a millimetre, which is why the cuts come last.

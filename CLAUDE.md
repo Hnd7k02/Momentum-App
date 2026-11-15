@@ -337,7 +337,9 @@ Never conflate them.
   (head with neck, hands, feet — a tone of its own, halfway between the
   two, D166). The inert zone is no state: it takes no tint, is never
   chosen, and nothing refers to it. A tint is mixed from white and grows
-  evenly from 2.5 % to 12 %. Which state takes which tone never changes.
+  evenly from 2.5 % to 12 %, from three tenths of its full strength (the
+  owner's value, D167 — not a number to tune). Which state takes which
+  tone never changes.
   The muscle trend reads 30 or 90 days, Verlauf 7 or 30 — two constants,
   never one again.
 - **The body's light is tokens, and it has no tone mapping** (D165,
@@ -356,8 +358,15 @@ Never conflate them.
   the still on the Gym card follow it. Head with neck, hands and feet are
   the inert zone and end in straight cuts; the validator's check points
   (`tools/body/checkpoints.mjs`) hold where every region lies, and it runs
-  first in `npm run build`. No data enters `tools/body/` whose licence was
-  not read in its own wording, and no Blender by hand.
+  first in `npm run build`. **A border that is to be a line is cut by the
+  build** (D167): the knee, the pectoral's lower edge, the collarbone and
+  the deltoid's edge are planes and fields of `regionrules.py`, cut into
+  the fine mesh and marked, and `refine-body.mjs` leaves a marked border
+  where it is. The app never turns its colours off, so every border is
+  seen; do not try to straighten one by smoothing — a region belongs to a
+  vertex of the base mesh, and its staircase survives. No data enters
+  `tools/body/` whose licence was not read in its own wording, and no
+  Blender by hand.
 - **Type and numbers.** The scale is 34, 22, 17, 15, 13, 11 and no text is
   under 11px. A number takes a figure step — `--type-figure-xl` for the one
   main number of a screen, `-l` on a tile and in a sheet's head, `-m` in a

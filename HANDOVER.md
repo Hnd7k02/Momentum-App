@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D163). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D167). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). **The colour rules of the muscle status** (contract §7, D164) and **block 7A** — the body is a new model, built by script from MakeHuman's base mesh, with straight cuts round an inert zone that has a tone of its own, and a light that is tokens without a tone mapping (D165, D166) — are built and **accepted by the owner on his iPhone on 2026-11-13**, from the `Momentum-preview` build `0414126`; Stage 5b, 7B, 7C, 9 and the tidy-up follow, in that order (D159). **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). **The colour rules of the muscle status** (contract §7, D164) and **block 7A** — the body is a new model, built by script from MakeHuman's base mesh, with straight cuts round an inert zone that has a tone of its own, and a light that is tokens without a tone mapping (D165, D166) — are built and **accepted by the owner on his iPhone on 2026-11-13**, from the `Momentum-preview` build `0414126`. **His addendum to that acceptance** (D167) — the weakest tint 0.3, the chest's lower edge level, the borders at the knee, the collarbone and the shoulder as lines the build cuts — is built and published as `Momentum-preview` `c80b61d` on 2026-11-15 and **waits for his short confirmation**; Stage 5b, 7B, 7C, 9 and the tidy-up follow, in that order (D159). **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -953,8 +953,31 @@ the body of the second sheet stands**)
     and a half times); at 0.3 it stands 22.2 and 48.1 (a* −20 and −42,
     twice). The quadriceps at −3 % and −8 %: 30.2 and 44.6 before, 19.3
     and 40.2 now. `farbregeln.mjs` keeps its limit of 5 ΔE and passes.
-  - [ ] the closing run: the validator, the four 3D suites, all suites.
-  - [ ] the preview, the STOP page, D167 and this file.
+  - [x] the closing run, on `9eccdae`: `tsc -b` 0; `npm run test` exit 0,
+    **113 files, 1892 tests**; `npm run build` with the validator (59 check
+    points, the knee's cuts 0.2 mm off their planes), `index.css` 90.57 kB,
+    `index.js` 509.36 kB as before, the model 706 392 bytes; **all 37
+    browser suites, 36 green, 4080 of 4081 checks** — the one red is the
+    offline check of `release-proof.mjs`, as in the baseline;
+    `gym-muscles` 74/74, `farbregeln` 322/322, `body` 40/40, `body-reach`
+    3/3 with 10 of 10 groups at 320, 393 and 430 px, the four of them one
+    at a time. No suite had to be changed. `git diff fec6d5c --
+    .github/fixtures src/core src/storage` and the diff of `muscleState.ts`
+    are empty.
+  - [x] the preview: `Momentum-preview` `c80b61d`, built from `9eccdae`;
+    its files are the build's byte for byte, and from a local server it
+    starts empty in its own database, walks through the first start and
+    draws the body on the muscle screen.
+  - [x] D167, and the STOP page: «Körper STOP 7A»
+    (https://claude.ai/artifact/V6EXnbcNemqc63rpxCxpQG) carries the
+    addendum first — the tint at 0.5 and at 0.3 side by side, the chest's
+    edge, the knee, the collarbone and the shoulder before and after.
+  - **Waiting for:** his short confirmation of chest, knee and tint on the
+    preview. Put to him there: the deltoid's edge is one straight line all
+    round the shoulder (he named only the outer collarbone; where it lies
+    and how it leans are two numbers in `regionrules.py`), and the elbow
+    and the deltoid's lower edge could be cut the same way and were not.
+    Then Stage 5b, 7B, 7C, 9 and the tidy-up, in that order.
 - **The owner's word on the second sheet (2026-11-13, 00:45 Zurich).** After
   the sheet was reported he wrote that he is going to sleep and that the
   session is **not to stop until the task is done**, restarting itself at
@@ -998,13 +1021,10 @@ the body of the second sheet stands**)
     inert zone on a wholly untrained body, the tone of the still, the
     strength of a small change, his findings on the colour rules — are
     answered by that: everything as built, no findings.
-  - *Left for later, now that the body is accepted:* `gate-2-b` and
-    `stop-7a` were kept in `candidates.json` only until this acceptance.
-    They are not needed any more; drop them, their two lines in
-    `digests.json` and their mentions in `tools/body/README.md` and
-    `MEASURES.md` with the next change to the pipeline or in the tidy-up
-    block (git keeps them at `995a62d`). `momentum-body` must build to its
-    recorded bytes afterwards.
+  - *Done with the owner's addendum (D167):* `gate-2-b` and `stop-7a`,
+    kept in `candidates.json` only until this acceptance, are removed with
+    their lines in `digests.json`; `tools/body/README.md` and `MEASURES.md`
+    name them as past (git keeps them at `8537f79`).
 - **Where it stands now (2026-11-12, after STOP 7A).** The owner added two
   corrections to the gate and stopped production until he has seen them
   (D165, "After the gate"): *2b* the surface — no folds at collarbone,

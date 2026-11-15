@@ -219,7 +219,7 @@ How smooth a border is, measured as its distance from itself smoothed over
 | border | before | after |
 |---|---|---|
 | chest and core | 0.36 / 2.7 | 0.10 / 0.3 |
-| chest and shoulders | 0.53 / 1.6 | 0.29 / 0.9 |
+| chest and shoulders | 0.53 / 1.6 | 0.29 / 1.0 |
 | back and shoulders | 0.51 / 2.3 | 0.22 / 0.8 |
 | calves and quadriceps | 0.49 / 1.5 | 0.27 / 0.8 |
 | calves and hamstrings | 0.46 / 1.8 | 0.20 / 0.5 |
