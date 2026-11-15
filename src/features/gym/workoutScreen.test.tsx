@@ -529,3 +529,133 @@ describe('the bodyweight card', () => {
     expect(text()).toContain('Zuletzt gewogen am 23. September');
   });
 });
+
+describe('the warm-up mark (D151)', () => {
+  const mark = (number: number) => button(`Aufwärmsatz: Satz ${number} von Bankdrücken`);
+  const rows = () => [...card('Bankdrücken').querySelectorAll<HTMLElement>('.gym-set:not(.gym-set--pending)')];
+  const bestLine = () => card('Bankdrücken').querySelector('.gym-exercise__best')?.textContent ?? '';
+
+  async function benchSession(sets: [reps: number, kg: number][]): Promise<string> {
+    const session = await startSessionFromDraft(await planDraft(['ex_bench_press']), WEDNESDAY);
+    for (const [reps, kg] of sets) {
+      await addSet({ sessionId: session.id, exerciseId: 'ex_bench_press', reps, weightGrams: kg * 1000 });
+    }
+    return session.id;
+  }
+
+  it('is a named toggle on every saved set, off at first, and not on a row that is not a set yet', async () => {
+    await open({ sessionId: await benchSession([[10, 40], [8, 60]]) });
+    for (const number of [1, 2]) {
+      expect(mark(number).getAttribute('aria-pressed')).toBe('false');
+      expect(mark(number).textContent).toBe(String(number));
+    }
+    expect(card('Bankdrücken').querySelector('.gym-set__tag')).toBeNull();
+    expect(bestLine()).toBe('Bester Arbeitssatz · 8 × 60 kg');
+
+    await mounted!.unmount();
+    mounted = null;
+    await open({ draft: await planDraft(['ex_squat']) });
+    expect(card('Kniebeuge').querySelector('.gym-set--pending button')).toBeNull();
+  });
+
+  it('marks the set, says so in a word, and stores it', async () => {
+    await open({ sessionId: await benchSession([[10, 40], [8, 60]]) });
+    await act(async () => mark(1).click());
+    await until(() => mark(1).getAttribute('aria-pressed') === 'true');
+
+    expect(rows()[0]!.querySelector('.gym-set__tag')?.textContent).toBe('Aufwärmsatz');
+    expect(rows()[1]!.querySelector('.gym-set__tag')).toBeNull();
+    const stored = await setsOf('ex_bench_press');
+    expect(stored.map((set) => set.warmUp)).toEqual([true, undefined]);
+
+    // And off again: the set is the record it was.
+    await act(async () => mark(1).click());
+    await until(() => mark(1).getAttribute('aria-pressed') === 'false');
+    expect(card('Bankdrücken').querySelector('.gym-set__tag')).toBeNull();
+    expect('warmUp' in (await setsOf('ex_bench_press'))[0]!).toBe(false);
+  });
+
+  it('never names the warm-up set as the best working set', async () => {
+    // The warm-up is the heavier set here, to make the point.
+    await open({ sessionId: await benchSession([[5, 100], [8, 60]]) });
+    expect(bestLine()).toBe('Bester Arbeitssatz · 5 × 100 kg');
+    await act(async () => mark(1).click());
+    await until(() => bestLine() === 'Bester Arbeitssatz · 8 × 60 kg');
+    expect(bestLine()).toBe('Bester Arbeitssatz · 8 × 60 kg');
+  });
+
+  it('says there is no working set yet when every set is a warm-up', async () => {
+    await open({ sessionId: await benchSession([[10, 40]]) });
+    await act(async () => mark(1).click());
+    await until(() => bestLine() === 'Noch kein Arbeitssatz.');
+    expect(bestLine()).toBe('Noch kein Arbeitssatz.');
+    // The workout is still there, and still counts: its session is stored.
+    expect(await gymSessionsRepository.getAll()).toHaveLength(1);
+  });
+
+  it('comes back with the set when its removal is undone', async () => {
+    await open({ sessionId: await benchSession([[10, 40], [8, 60]]) });
+    await act(async () => mark(1).click());
+    await until(() => mark(1).getAttribute('aria-pressed') === 'true');
+
+    await act(async () => button('Satz 1 von Bankdrücken entfernen').click());
+    await until(() => undoButton() !== null && rows().length === 1);
+    expect((await setsOf('ex_bench_press')).map((set) => set.warmUp)).toEqual([undefined]);
+
+    await act(async () => undoButton()!.click());
+    await until(() => rows().length === 2);
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => [set.reps, set.warmUp])).toEqual([[10, true], [8, undefined]]);
+    expect(mark(1).getAttribute('aria-pressed')).toBe('true');
+    expect(rows()[0]!.querySelector('.gym-set__tag')?.textContent).toBe('Aufwärmsatz');
+  });
+
+  it('"Satz hinzufügen" after a warm-up set adds a working set', async () => {
+    await open({ sessionId: await benchSession([[10, 40]]) });
+    await act(async () => mark(1).click());
+    await until(() => mark(1).getAttribute('aria-pressed') === 'true');
+
+    await act(async () => button('Satz zu Bankdrücken hinzufügen').click());
+    await until(() => rows().length === 2);
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => [set.reps, set.weightGrams, set.warmUp])).toEqual([
+      [10, 40000, true],
+      [10, 40000, undefined],
+    ]);
+    expect(mark(2).getAttribute('aria-pressed')).toBe('false');
+    expect(bestLine()).toBe('Bester Arbeitssatz · 10 × 40 kg');
+  });
+
+  it('keeps the value the same tap saved: reps typed, then the mark tapped', async () => {
+    await open({ sessionId: await benchSession([[10, 40]]) });
+    const [reps] = setInputs('Bankdrücken', 0);
+    await act(async () => type(reps!, '12'));
+    await tapAway(reps!, mark(1));
+    await until(() => mark(1).getAttribute('aria-pressed') === 'true');
+    await quiet();
+    expect((await setsOf('ex_bench_press')).map((set) => [set.reps, set.warmUp])).toEqual([[12, true]]);
+  });
+
+  it('a double tap is one tap', async () => {
+    await open({ sessionId: await benchSession([[10, 40]]) });
+    await act(async () => {
+      mark(1).click();
+      mark(1).click();
+    });
+    await quiet();
+    expect((await setsOf('ex_bench_press'))[0]!.warmUp).toBe(true);
+  });
+
+  it('cannot be changed on a closed day, and still says what the set was', async () => {
+    const id = await benchSession([[10, 40], [8, 60]]);
+    const [first] = await setsOf('ex_bench_press');
+    await gymSetsRepository.put({ ...first!, warmUp: true });
+    // Two days on: Wednesday's workout is closed.
+    setClock({ now: () => new Date(2026, 9, 16, 9, 0, 0) });
+    await open({ sessionId: id });
+    expect(mark(1).disabled).toBe(true);
+    expect(mark(1).getAttribute('aria-pressed')).toBe('true');
+    expect(rows()[0]!.querySelector('.gym-set__tag')?.textContent).toBe('Aufwärmsatz');
+    expect(bestLine()).toBe('Bester Arbeitssatz · 8 × 60 kg');
+  });
+});

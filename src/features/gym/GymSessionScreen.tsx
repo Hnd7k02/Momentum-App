@@ -35,6 +35,7 @@ import {
   restoreExercise,
   restoreSet,
   startSessionFromDraft,
+  toggleWarmUp,
   updateSet,
   workoutWritable,
   type LastRecorded,
@@ -126,6 +127,7 @@ function SetRow({
   loadType,
   editable,
   onChange,
+  onToggleWarmUp,
   onRemove,
 }: {
   set: GymSetRecord;
@@ -134,6 +136,8 @@ function SetRow({
   loadType: ExerciseLoadType;
   editable: boolean;
   onChange(patch: { reps?: number; weightGrams?: number }): void;
+  /** Sets or takes off the warm-up mark (D151). */
+  onToggleWarmUp(): void;
   onRemove(): void;
 }) {
   const t = useT();
@@ -168,11 +172,31 @@ function SetRow({
     if (!editingWeight.current) setWeight(weights.format(set.weightGrams));
   }, [set.id, set.weightGrams, weights]);
 
+  const warmUp = set.warmUp === true;
+
   return (
-    <div className="gym-set">
-      <span className="gym-set__number" aria-hidden="true">
+    <div className={`gym-set ${warmUp ? 'gym-set--warmUp' : ''}`.trim()}>
+      {/*
+        The warm-up mark (D151). The set's number is the control: a toggle
+        with a 44px target and a name that says what it marks. A marked set
+        says so in a word above its row — never by colour alone — and the
+        row itself stays on one line at every width, in kg and in lb.
+      */}
+      {warmUp ? (
+        <span className="gym-set__tag" aria-hidden="true">
+          {t('gym.warmUp')}
+        </span>
+      ) : null}
+      <button
+        type="button"
+        className="gym-set__number gym-set__mark"
+        aria-pressed={warmUp}
+        aria-label={t('gym.warmUp.for', { exercise: exerciseName, number: index + 1 })}
+        disabled={!editable}
+        onClick={onToggleWarmUp}
+      >
         {index + 1}
-      </span>
+      </button>
 
       <label className="gym-set__field">
         <span className="visually-hidden">
@@ -1011,6 +1035,9 @@ export function GymSessionScreen({
             // An exercise without a stored set is typed into once, then saved
             // — in a plan, a draft and a free workout alike (P6).
             const pending = entry.sets.length === 0;
+            // The set the day's value comes from, named by the service —
+            // the screen works out no best set of its own (D150).
+            const best = entry.sets.find((set) => set.id === entry.bestSetId) ?? null;
             return (
               <Section key={entry.exercise.id}>
                 <Card>
@@ -1056,6 +1083,9 @@ export function GymSessionScreen({
                       loadType={loadType}
                       editable={editable}
                       onChange={(patch) => void run(() => updateSet(set.id, patch))}
+                      // Decided from the set as stored when the tap's turn
+                      // comes, like every action of this screen (D131).
+                      onToggleWarmUp={() => void tap(() => toggleWarmUp(set.id))}
                       onRemove={() => removeOneSet(set.id, index, name)}
                     />
                   ))}
@@ -1079,17 +1109,21 @@ export function GymSessionScreen({
                   {/* A pending row is its own instruction — the numbered row,
                       "Wdh." and "kg" say what goes where — so no sentence
                       repeats it beneath every exercise. */}
-                  {pending ? null : entry.bestScore !== null ? (
+                  {pending ? null : best ? (
                     <p className="gym-exercise__best">
                       {t('gym.bestSet')} ·{' '}
                       {t('gym.bestSetValue', {
-                        reps: bestOf(entry.sets).reps,
-                        weight: weights.format(bestOf(entry.sets).weightGrams),
+                        reps: best.reps,
+                        weight: weights.format(best.weightGrams),
                         unit: weights.unitLabel,
                       })}
                     </p>
                   ) : (
-                    <p className="gym-exercise__best">{t('gym.noSets')}</p>
+                    // Sets, but none that provides the day's value: only
+                    // warm-up sets (D151), or none that can be scored yet.
+                    <p className="gym-exercise__best">
+                      {t(entry.sets.every((set) => set.warmUp === true) ? 'gym.noWorkingSets' : 'gym.noSets')}
+                    </p>
                   )}
 
                   {pending ? null : (
@@ -1135,13 +1169,4 @@ export function GymSessionScreen({
       />
     </div>
   );
-}
-
-/** The set a screen names when it shows "best set". Never used for scoring. */
-function bestOf(sets: GymSetRecord[]): GymSetRecord {
-  let best = sets[0]!;
-  for (const set of sets) {
-    if (set.reps * set.weightGrams > best.reps * best.weightGrams) best = set;
-  }
-  return best;
 }

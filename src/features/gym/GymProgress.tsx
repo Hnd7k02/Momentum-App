@@ -19,7 +19,6 @@ import { exerciseDaysText, muscleGap, muscleGapText } from './muscleGap';
 import { exerciseGroups, shownChangeText, shownPerformance } from './muscleState';
 import { percentChange } from '../../core/gym/performance';
 import './gym.css';
-import { useWeights } from '../../app/useWeights';
 
 /**
  * Gym's detail, below the overview.
@@ -55,7 +54,6 @@ export function GymProgress({
   const t = useT();
   const { language } = useI18n();
   const today = useToday();
-  const weights = useWeights();
   const namer = useExerciseNamer();
   const [selected, setSelected] = useState<MuscleGroup | null>(null);
   const [openExercise, setOpenExercise] = useState<string | null>(null);
@@ -217,7 +215,7 @@ export function GymProgress({
       >
         <p>{t('gym.progress.explainTrend')}</p>
         <p>{t('gym.progress.explainGroups')}</p>
-        <p>{t('gym.progress.explainMetric', { unit: weights.unitLabel })}</p>
+        <p>{t('gym.progress.explainMetric')}</p>
         <p>{t('gym.progress.ratingNote')}</p>
         <p className="metric-sheet__note">{t('gym.tombstone.boundary')}</p>
       </MetricDetailSheet>

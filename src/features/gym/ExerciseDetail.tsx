@@ -143,7 +143,7 @@ export function ExerciseDetail({
                   </span>
                 </div>
               </div>
-              <p className="gym-detail__note">{t('gym.progress.explainMetric', { unit: weights.unitLabel })}</p>
+              <p className="gym-detail__note">{t('gym.progress.explainMetric')}</p>
             </Card>
 
             <Section label={t('gym.detail.history')}>

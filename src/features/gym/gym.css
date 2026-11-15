@@ -239,11 +239,62 @@
 }
 
 .gym-set__number {
-  width: 20px;
+  width: 28px;
   flex: none;
+  text-align: center;
   font-size: var(--type-footnote);
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The set's number is the warm-up mark (D151): a toggle the size of the
+ * minus at the other end of the row, so the row reads as two controls round
+ * two fields. Its box is 28px wide so that both fields keep their room at
+ * 320px; the target reaches 44px each way with an inset — 8px to the left
+ * into the card's own inset and 8px to the right over the row's gap, never
+ * onto a field. Marked, it is the chosen option and takes the accent
+ * (contract §2.1); what the mark means is said in a word above the row.
+ */
+.gym-set__mark {
+  height: 40px;
+  border-radius: var(--radius-control);
+  background: var(--surface-input);
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+  position: relative;
+}
+
+.gym-set__mark::before {
+  content: '';
+  position: absolute;
+  inset: -2px -8px;
+}
+
+.gym-set__mark[aria-pressed='true'] {
+  background: var(--accent-tint);
+  color: var(--accent-ink);
+}
+
+.gym-set__mark:disabled {
+  opacity: 0.35;
+}
+
+/* A marked set: the word stands above its row, and the row keeps one line. */
+.gym-set--warmUp {
+  position: relative;
+  padding-top: calc(var(--space-2) + 16px);
+}
+
+.gym-set__tag {
+  position: absolute;
+  top: var(--space-2);
+  left: 0;
+  font-size: var(--type-caption);
+  font-weight: var(--weight-semibold);
+  line-height: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .gym-set__field {
