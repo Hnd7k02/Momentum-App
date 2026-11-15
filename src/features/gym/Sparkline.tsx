@@ -5,12 +5,20 @@ import type { MuscleTrendPoint } from './muscleAnalytics';
  * The row's mini chart: 80 × 24 (64 × 24 on a narrow phone), a fine zero
  * line, the trend as a neutral line and a dot on the latest point.
  *
- * **Every row of a list shares one scale** (contract §6, D160): −12 % to
- * +12 %, with the zero line in the middle. The rows used to scale each to
+ * **Every row of a list shares one scale** (contract §6, D160): −8 % to
+ * +8 %, with the zero line in the middle. The rows used to scale each to
  * its own minimum and maximum, so +1 % climbed as steeply as +60 % and the
  * ten charts could not be read against each other. Now a small change looks
- * small. What goes beyond 12 % stands at the edge; the number beside the
+ * small. What goes beyond 8 % stands at the edge; the number beside the
  * chart says how far it went.
+ *
+ * The scale was ±12 % until STOP Kurve (D180). Under the metric of Stage 5b
+ * a month of training reads +3 to +7 % in a group, which on a scale to 12 %
+ * used a quarter to somewhat over half of the nine pixels above the zero
+ * line — 2¼ to 5¼: right, and too quiet to tell the rows apart. The owner
+ * took the scale to 8 %, the change at which a tint on the body is full
+ * (D179), so the body and the rows speak on one scale; +3 % and +7 % now
+ * stand 3.4 and 7.9 pixels above the line.
  *
  * Three consequences worth stating:
  *
@@ -35,7 +43,7 @@ export const SPARK_WIDTH = 80;
 export const SPARK_WIDTH_NARROW = 64;
 export const SPARK_HEIGHT = 24;
 /** The change, in percent, that reaches the edge of the chart either way. */
-export const SPARK_SCALE = 12;
+export const SPARK_SCALE = 8;
 /** The end point's radius; the line stays this far inside the box. */
 const INSET = 3;
 

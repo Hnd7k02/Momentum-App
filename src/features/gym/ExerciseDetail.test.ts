@@ -11,8 +11,8 @@ import { lineRange, lineValues, lineY } from './ExerciseLineChart';
  * drawn as a bar a third as high. The owner chose the line at STOP 5b
  * (D175), and the same four statements are held for it: a day stands where
  * its change since the first day shown puts it on a scale that reaches
- * 12 % at the least, never on a scale from the smallest day to the
- * largest.
+ * 8 % at the least (12 % until STOP Kurve, D180), never on a scale from
+ * the smallest day to the largest.
  */
 const day = (date: string, score: number): ExerciseDay =>
   ({ date, exerciseId: 'ex', muscles: [], best: { score, set: { reps: 1, weightGrams: score, order: 0 } } }) as unknown as ExerciseDay;
@@ -23,12 +23,16 @@ const series = (...scores: number[]): ExerciseDay[] =>
 
 describe('a day stands at its change since the first day shown', () => {
   it('draws the first day on the zero line, the scale’s reach at the edge and half of it halfway', () => {
-    const range = lineRange(lineValues(series(1000, 1060, 1120)));
-    expect(range).toEqual({ low: 0, high: 12 });
+    const range = lineRange(lineValues(series(1000, 1040, 1080)));
+    expect(range).toEqual({ low: 0, high: 8 });
     // From the top: the zero line is the lower edge of a series that only rises.
     expect(lineY(0, range)).toBe(1);
-    expect(lineY(12, range)).toBe(0);
-    expect(lineY(6, range)).toBeCloseTo(0.5, 10);
+    expect(lineY(8, range)).toBe(0);
+    expect(lineY(4, range)).toBeCloseTo(0.5, 10);
+    // A series that reaches twelve percent is drawn to twelve, as it was before the scale went to eight.
+    const further = lineRange(lineValues(series(1000, 1060, 1120)));
+    expect(further).toEqual({ low: 0, high: 12 });
+    expect(lineY(6, further)).toBeCloseTo(0.5, 10);
   });
 
   it('draws a fall of a tenth as a fall of a tenth', () => {

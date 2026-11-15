@@ -69,10 +69,11 @@ describe('the exercise detail draws its days as a line', () => {
     expect(html).not.toContain('gym-detail__axisMax');
   });
 
-  it('names the scale on the left: twelve percent at the least, and zero', () => {
+  it('names the scale on the left: eight percent at the least, and zero', () => {
+    // Twelve until STOP Kurve (D180). The series ends at +6.9 %, inside eight.
     const html = render(progression);
     const labels = [...html.matchAll(/class="exercise-line__label"[^>]*>([^<]+)</g)].map((match) => match[1]);
-    expect(labels).toEqual([`+12${NBSP}%`, `0${NBSP}%`]);
+    expect(labels).toEqual([`+8${NBSP}%`, `0${NBSP}%`]);
   });
 
   it('ends in the state of its end value, with the value beside it', () => {
@@ -87,8 +88,8 @@ describe('the exercise detail draws its days as a line', () => {
   it('widens the scale where a series goes further, both ways when it does both', () => {
     const wide = render(bench(['2026-10-14', 8, 60], ['2026-10-21', 8, 55], ['2026-10-28', 8, 75]));
     const labels = [...wide.matchAll(/class="exercise-line__label"[^>]*>([^<]+)</g)].map((match) => match[1]);
-    // −8.3 % and +25 %: the reach is 30, above and below the zero line.
-    expect(labels).toEqual([`+30${NBSP}%`, `0${NBSP}%`, `−30${NBSP}%`]);
+    // −8.3 % and +25 %: the reach is 28 — the next step of four — above and below the zero line.
+    expect(labels).toEqual([`+28${NBSP}%`, `0${NBSP}%`, `−28${NBSP}%`]);
   });
 
   it('draws one day as a dot and prints no change for it', () => {

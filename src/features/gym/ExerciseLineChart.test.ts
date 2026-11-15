@@ -18,25 +18,28 @@ describe('the line of the exercise detail', () => {
     expect(values.map((value) => Math.round(value * 10) / 10)).toEqual([0, -2, 12]);
   });
 
-  it('reaches twelve percent at the least, so that a small change looks small', () => {
-    expect(LINE_SCALE).toBe(12);
-    expect(lineReach([0, 1.5, 3])).toBe(12);
-    expect(lineReach([0, -11.9])).toBe(12);
-    expect(lineReach([0, 12])).toBe(12);
+  it('reaches eight percent at the least, so that a small change looks small', () => {
+    // Twelve until STOP Kurve (D180): the scale of the muscle rows, which went to eight with it.
+    expect(LINE_SCALE).toBe(8);
+    expect(lineReach([0, 1.5, 3])).toBe(8);
+    expect(lineReach([0, -7.9])).toBe(8);
+    expect(lineReach([0, 8])).toBe(8);
   });
 
-  it('widens in steps of six where a series goes further, and never cuts it off', () => {
-    expect(lineReach([0, 12.1])).toBe(18);
+  it('widens in steps of four where a series goes further, and never cuts it off', () => {
+    expect(lineReach([0, 8.1])).toBe(12);
+    expect(lineReach([0, 12])).toBe(12);
     expect(lineReach([0, 24])).toBe(24);
-    expect(lineReach([0, -20])).toBe(24);
-    expect(lineReach([0, 31])).toBe(36);
+    expect(lineReach([0, -20])).toBe(20);
+    expect(lineReach([0, 31])).toBe(32);
   });
 
   it('draws a series that only rises above its zero line, one that only falls below it, and both round it', () => {
+    expect(lineRange([0, 4, 7])).toEqual({ low: 0, high: 8 });
     expect(lineRange([0, 4, 9])).toEqual({ low: 0, high: 12 });
-    expect(lineRange([0, -3, -20])).toEqual({ low: -24, high: 0 });
+    expect(lineRange([0, -3, -20])).toEqual({ low: -20, high: 0 });
     expect(lineRange([0, 5, -2, 12])).toEqual({ low: -12, high: 12 });
     // One day, or days that never move: the zero line and the room above it.
-    expect(lineRange([0])).toEqual({ low: 0, high: 12 });
+    expect(lineRange([0])).toEqual({ low: 0, high: 8 });
   });
 });

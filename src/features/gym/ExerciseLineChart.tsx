@@ -16,11 +16,11 @@ import './exerciseLineChart.css';
  * first day shown**, and the zero line is that first day.
  *
  * - **A small change still looks small** (D160, D163). The scale is the one
- *   the muscle rows share — 12 % reaches the edge — and never a scale from
- *   the smallest day to the largest, which made a fall of a tenth look like
- *   a collapse. A series that goes beyond 12 % widens the scale in steps of
- *   six, so nothing is cut off and nothing stands at the edge unless it is
- *   there.
+ *   the muscle rows share — 8 % reaches the edge, 12 % until STOP Kurve
+ *   (D180) — and never a scale from the smallest day to the largest, which
+ *   made a fall of a tenth look like a collapse. A series that goes beyond
+ *   8 % widens the scale in steps of four, so nothing is cut off and
+ *   nothing stands at the edge unless it is there.
  * - A series that only rises is drawn above its zero line and one that only
  *   falls below it; one that does both has the zero line in the middle.
  * - The line is the neutral data ink at 1.5px with round ends. Only the end
@@ -40,10 +40,10 @@ import './exerciseLineChart.css';
  */
 
 /** The change, in percent, that reaches the edge of the plot at the least. */
-export const LINE_SCALE = 12;
+export const LINE_SCALE = 8;
 
 /** What the reach grows by when a change goes beyond it. */
-const LINE_STEP = 6;
+const LINE_STEP = 4;
 
 /** Each day's change against the first day of the list, in percent, oldest first. */
 export function lineValues(days: readonly ExerciseDay[]): number[] {

@@ -533,7 +533,8 @@ for (const width of WIDTHS) {
     await look(page, width, 'uebungsdetail', 'gym');
     // The line (contract §6; the owner's choice at STOP 5b, D175): each day
     // stands at its change since the first day shown, on a scale that
-    // reaches 12 % at the least and is never cut off; the zero line is
+    // reaches 8 % at the least — 12 % until STOP Kurve (D180) — and is
+    // never cut off; the zero line is
     // there and named; the line is neutral and only its end point carries
     // a colour — the state of the end value, which stands beside it; the
     // first and the last date stand beneath.
@@ -600,8 +601,8 @@ for (const width of WIDTHS) {
       short({ points: line.points.slice(0, 4), changes: changes.slice(0, 4).map((v) => Math.round(v * 10) / 10), off: Math.max(...offLine), bars: line.bars }));
     const furthest = Math.max(...changes.map(Math.abs));
     const reach = Math.max(high, -low);
-    check(`${width}: a small change looks small — the scale reaches 12 % at the least, widens in steps of six and cuts no day off`,
-      reach >= 12 && reach % 6 === 0 && reach === Math.max(12, Math.ceil(furthest / 6 - 1e-9) * 6) &&
+    check(`${width}: a small change looks small — the scale reaches 8 % at the least, widens in steps of four and cuts no day off`,
+      reach >= 8 && reach % 4 === 0 && reach === Math.max(8, Math.ceil(furthest / 4 - 1e-9) * 4) &&
         line.points.every(([, y]) => y >= -0.01 && y <= 100.01),
       short({ reach, furthest: Math.round(furthest * 10) / 10, labels: line.labels.map((label) => label.text) }));
     const zeroLabel = line.labels.find((label) => percent(label.text) === 0);
