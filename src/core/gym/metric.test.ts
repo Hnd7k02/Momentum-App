@@ -228,11 +228,11 @@ describe('the value of the performance curve a snapshot carries (block "Kurve", 
     expect(gymMetricKey(median)).toBe('strength:30:median');
   });
 
-  it('is three in the snapshots this build writes, and waits for the owner at STOP Kurve', () => {
-    // The flag, the constant and the snapshot cannot disagree: what is laid
-    // before the owner is the value every new snapshot carries, and a build
-    // that confirmed it without him would say so here.
-    expect(GYM_CURVE_CONFIRMED).toBe(false);
+  it('is three in the snapshots this build writes, as the owner confirmed at STOP Kurve (D180)', () => {
+    // The flag, the constant and the snapshot cannot disagree: what he
+    // confirmed is three, the value every new snapshot carries, and a build
+    // that wrote anything else would say so here.
+    expect(GYM_CURVE_CONFIRMED).toBe(true);
     expect(GYM_METRIC.curveDecadePercent).toBe(3);
     expect(gymCurveOf(base())).toBe(GYM_METRIC.curveDecadePercent);
     // The constants of the shared curve are what they were: Running's curve, and Gym's before the era.

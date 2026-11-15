@@ -129,10 +129,11 @@ afterEach(async () => {
 
 describe('the value the aim was measured with', () => {
   it('is the one this build writes: every three points of improvement multiply the odds by four', () => {
-    // The numbers below are the numbers of this value. Another value is
-    // another set of numbers — and the owner's to confirm (STOP Kurve).
+    // The numbers below are the numbers of this value, which the owner
+    // confirmed with them before him (STOP Kurve, D180). Another value is
+    // another set of numbers.
     expect(GYM_METRIC.curveDecadePercent).toBe(3);
-    expect(typeof GYM_CURVE_CONFIRMED).toBe('boolean');
+    expect(GYM_CURVE_CONFIRMED).toBe(true);
   });
 });
 

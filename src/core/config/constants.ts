@@ -305,20 +305,19 @@ export const GYM_METRIC = {
 /**
  * Whether the owner has confirmed the curve's value `GYM_METRIC` names.
  *
- * **`false` until STOP Kurve.** The value is built and on: it is the flattest
- * of the candidates of `docs/design/wp3/kurve.md` under which the person of
- * the import file stands lower on no day, with 4 and 2.5 laid beside it for
- * him to choose from. The flag gates nothing at run time — what governs the
- * calculation is the value in each day's snapshot, read by `gymCurveOf()`
- * — and exists so that the open decision is a line of code a search finds;
- * the test beside it holds that the constant, the snapshot and the
- * calculation cannot part (`core/gym/metric.test.ts`). If he chooses
- * another value the constant changes, the golden files of the Stage 5b
- * profiles are frozen again, and a device that has already loaded this
- * preview needs a freshly imported backup, because its snapshot carries the
- * value it was written with.
+ * **`true` since STOP Kurve** (D180): three stands. It is the flattest of
+ * the candidates of `docs/design/wp3/kurve.md` under which the person of
+ * the import file stands lower on no day; 4 and 2.5 were laid beside it,
+ * and he chose it with the numbers before him. The flag gates nothing at
+ * run time — what governs the calculation is the value in each day's
+ * snapshot, read by `gymCurveOf()` — and existed so that the open decision
+ * was a line of code a search finds. It stays, with the test beside it
+ * holding that the flag, the constant and the snapshot cannot part
+ * (`core/gym/metric.test.ts`): changing the value again is a decision of
+ * its own and an era of its own — a snapshot written with three keeps
+ * three for the days it covers.
  */
-export const GYM_CURVE_CONFIRMED = false;
+export const GYM_CURVE_CONFIRMED = true;
 
 /**
  * Whether the owner has confirmed the window comparison `GYM_METRIC` names.
