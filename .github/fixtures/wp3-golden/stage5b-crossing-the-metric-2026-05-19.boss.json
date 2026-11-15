@@ -4,7 +4,7 @@
   "origin": "2026-03-02",
   "rank": "master",
   "peakRank": "master",
-  "progress": 5.553221687,
+  "progress": 5.603206585,
   "lifetimeXp": 4380,
   "points": [
    [
@@ -393,14 +393,14 @@
     0
    ],
    [
-    5.542819743,
-    770.566566621,
-    -0.004667117
+    5.56876795,
+    773.939833494,
+    0.02128109
    ],
    [
-    5.553221687,
-    771.918819355,
-    0.010401944
+    5.603206585,
+    778.416856023,
+    0.034438635
    ]
   ],
   "changes": [
@@ -602,9 +602,9 @@
    },
    {
     "domain": "gym",
-    "momentum": 835.893844965,
+    "momentum": 847.890220353,
     "peakMomentum": 857.667271925,
-    "progress": 6.049115375,
+    "progress": 6.14908517,
     "started": true,
     "series": [
      2.433333333,
@@ -684,8 +684,8 @@
      6.139748174,
      6.092383133,
      6.092383133,
-     6.069610629,
-     6.049115375
+     6.121507042,
+     6.14908517
     ],
     "active": [
      true,
@@ -1109,7 +1109,7 @@
    }
   ],
   "gym": {
-   "rating": 835.893844965,
+   "rating": 847.890220353,
    "sessionsThisWeek": 4,
    "weeklyTarget": 4,
    "endurance": {
@@ -1118,7 +1118,7 @@
    },
    "ytdChange": 7.676547939,
    "performance": {
-    "score": 689.59828448,
+    "score": 918.411631007,
     "components": [
      "trend",
      "ytd"
@@ -3726,7 +3726,7 @@
    },
    {
     "date": "2026-05-18",
-    "rating": 838.35327544,
+    "rating": 844.580845051,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3736,7 +3736,7 @@
    },
    {
     "date": "2026-05-19",
-    "rating": 835.893844965,
+    "rating": 847.890220353,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -4672,11 +4672,11 @@
    },
    {
     "date": "2026-05-18",
-    "rating": 838.35327544,
-    "target": 813.758970688,
+    "rating": 844.580845051,
+    "target": 951.046978604,
     "attendance": 1000,
-    "performance": 689.59828448,
-    "movement": 0.1,
+    "performance": 918.411631007,
+    "movement": 0.031782805,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -4684,18 +4684,18 @@
    },
    {
     "date": "2026-05-19",
-    "rating": 835.893844965,
-    "target": 813.758970688,
+    "rating": 847.890220353,
+    "target": 951.046978604,
     "attendance": 1000,
-    "performance": 689.59828448,
-    "movement": 0.1,
+    "performance": 918.411631007,
+    "movement": 0.031083831,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
     "skipped": false
    }
   ],
-  "rating": 835.893844965,
+  "rating": 847.890220353,
   "peak": 857.667271925,
   "model": "attendancePerformance",
   "origin": "2026-03-02",
@@ -4857,9 +4857,9 @@
    true
   ],
   "performance": {
-   "score": 689.59828448,
-   "trendScore": 635.705072559,
-   "ytdScore": 743.491496402,
+   "score": 918.411631007,
+   "trendScore": 864.818715142,
+   "ytdScore": 972.004546873,
    "components": [
     "trend",
     "ytd"

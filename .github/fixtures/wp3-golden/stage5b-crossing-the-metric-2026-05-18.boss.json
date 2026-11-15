@@ -4,7 +4,7 @@
   "origin": "2026-03-02",
   "rank": "master",
   "peakRank": "master",
-  "progress": 5.542819743,
+  "progress": 5.56876795,
   "lifetimeXp": 4345,
   "points": [
    [
@@ -393,9 +393,9 @@
     0
    ],
    [
-    5.542819743,
-    770.566566621,
-    -0.004667117
+    5.56876795,
+    773.939833494,
+    0.02128109
    ]
   ],
   "changes": [
@@ -595,9 +595,9 @@
    },
    {
     "domain": "gym",
-    "momentum": 838.35327544,
+    "momentum": 844.580845051,
     "peakMomentum": 857.667271925,
-    "progress": 6.069610629,
+    "progress": 6.121507042,
     "started": true,
     "series": [
      2.433333333,
@@ -677,7 +677,7 @@
      6.139748174,
      6.092383133,
      6.092383133,
-     6.069610629
+     6.121507042
     ],
     "active": [
      true,
@@ -1096,7 +1096,7 @@
    }
   ],
   "gym": {
-   "rating": 838.35327544,
+   "rating": 844.580845051,
    "sessionsThisWeek": 4,
    "weeklyTarget": 4,
    "endurance": {
@@ -1105,7 +1105,7 @@
    },
    "ytdChange": 7.676547939,
    "performance": {
-    "score": 689.59828448,
+    "score": 918.411631007,
     "components": [
      "trend",
      "ytd"
@@ -3693,7 +3693,7 @@
    },
    {
     "date": "2026-05-18",
-    "rating": 838.35327544,
+    "rating": 844.580845051,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -4629,18 +4629,18 @@
    },
    {
     "date": "2026-05-18",
-    "rating": 838.35327544,
-    "target": 813.758970688,
+    "rating": 844.580845051,
+    "target": 951.046978604,
     "attendance": 1000,
-    "performance": 689.59828448,
-    "movement": 0.1,
+    "performance": 918.411631007,
+    "movement": 0.031782805,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
     "skipped": false
    }
   ],
-  "rating": 838.35327544,
+  "rating": 844.580845051,
   "peak": 857.667271925,
   "model": "attendancePerformance",
   "origin": "2026-03-02",
@@ -4801,9 +4801,9 @@
    true
   ],
   "performance": {
-   "score": 689.59828448,
-   "trendScore": 635.705072559,
-   "ytdScore": 743.491496402,
+   "score": 918.411631007,
+   "trendScore": 864.818715142,
+   "ytdScore": 972.004546873,
    "components": [
     "trend",
     "ytd"

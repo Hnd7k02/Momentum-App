@@ -4,7 +4,7 @@
   "origin": "2026-03-02",
   "rank": "master",
   "peakRank": "master",
-  "progress": 5.521005254,
+  "progress": 5.663859651,
   "lifetimeXp": 4690,
   "points": [
    [
@@ -393,44 +393,44 @@
     -0.014209512
    ],
    [
-    5.525626258,
-    768.331413504,
-    -0.00765109
+    5.550611019,
+    771.579432443,
+    0.017333671
    ],
    [
-    5.533471475,
-    769.35129178,
-    0.007845218
+    5.581649328,
+    775.614412643,
+    0.031038309
    ],
    [
-    5.555977337,
-    772.277053769,
-    0.022505861
+    5.625703048,
+    781.341396268,
+    0.04405372
    ],
    [
-    5.52800742,
-    768.640964593,
-    -0.027969917
+    5.614058948,
+    779.827663259,
+    -0.0116441
    ],
    [
-    5.516433772,
-    767.136390353,
-    -0.011573648
+    5.617602451,
+    780.288318634,
+    0.003543503
    ],
    [
-    5.519505697,
-    767.535740662,
-    0.003071925
+    5.635258716,
+    782.583633132,
+    0.017656265
    ],
    [
-    5.536898603,
-    769.796818392,
-    0.017392906
+    5.666442048,
+    786.637466181,
+    0.031183331
    ],
    [
-    5.521005254,
-    767.73068303,
-    -0.015893349
+    5.663859651,
+    786.301754581,
+    -0.002582397
    ]
   ],
   "changes": [
@@ -644,9 +644,9 @@
    },
    {
     "domain": "gym",
-    "momentum": 828.512285126,
-    "peakMomentum": 857.667271925,
-    "progress": 5.988556039,
+    "momentum": 862.911779904,
+    "peakMomentum": 862.911779904,
+    "progress": 6.274264833,
     "started": true,
     "series": [
      2.433333333,
@@ -726,14 +726,14 @@
      6.139748174,
      6.092383133,
      6.049754596,
-     6.031244945,
-     6.01458626,
-     5.999624716,
-     5.996864133,
-     5.995335468,
-     5.993148249,
-     5.991179752,
-     5.988556039
+     6.081214467,
+     6.110941965,
+     6.139076139,
+     6.16896719,
+     6.197672826,
+     6.224654287,
+     6.250266641,
+     6.274264833
     ],
     "active": [
      true,
@@ -1187,7 +1187,7 @@
    }
   ],
   "gym": {
-   "rating": 828.512285126,
+   "rating": 862.911779904,
    "sessionsThisWeek": 4,
    "weeklyTarget": 4,
    "endurance": {
@@ -1196,7 +1196,7 @@
    },
    "ytdChange": 8.371298382,
    "performance": {
-    "score": 709.070902194,
+    "score": 938.174833515,
     "components": [
      "trend",
      "ytd"
@@ -3938,7 +3938,7 @@
    },
    {
     "date": "2026-05-18",
-    "rating": 833.749393442,
+    "rating": 839.745736099,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3948,7 +3948,7 @@
    },
    {
     "date": "2026-05-19",
-    "rating": 831.750351167,
+    "rating": 843.313035837,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3958,7 +3958,7 @@
    },
    {
     "date": "2026-05-20",
-    "rating": 829.951213119,
+    "rating": 846.689136723,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3968,7 +3968,7 @@
    },
    {
     "date": "2026-05-21",
-    "rating": 829.592337326,
+    "rating": 850.276062763,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3978,7 +3978,7 @@
    },
    {
     "date": "2026-05-22",
-    "rating": 829.393610842,
+    "rating": 853.720739143,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3988,7 +3988,7 @@
    },
    {
     "date": "2026-05-23",
-    "rating": 829.109272384,
+    "rating": 856.958514453,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -3998,7 +3998,7 @@
    },
    {
     "date": "2026-05-24",
-    "rating": 828.853367772,
+    "rating": 860.031996938,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -4008,7 +4008,7 @@
    },
    {
     "date": "2026-05-25",
-    "rating": 828.512285126,
+    "rating": 862.911779904,
     "streak": 0,
     "streakBonus": 0,
     "weight": 1,
@@ -4944,11 +4944,11 @@
    },
    {
     "date": "2026-05-18",
-    "rating": 833.749393442,
-    "target": 813.758970688,
+    "rating": 839.745736099,
+    "target": 951.046978604,
     "attendance": 1000,
-    "performance": 689.59828448,
-    "movement": 0.1,
+    "performance": 918.411631007,
+    "movement": 0.03280589,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -4956,11 +4956,11 @@
    },
    {
     "date": "2026-05-19",
-    "rating": 831.750351167,
-    "target": 813.758970688,
+    "rating": 843.313035837,
+    "target": 951.046978604,
     "attendance": 1000,
-    "performance": 689.59828448,
-    "movement": 0.1,
+    "performance": 918.411631007,
+    "movement": 0.032050853,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -4968,11 +4968,11 @@
    },
    {
     "date": "2026-05-20",
-    "rating": 829.951213119,
-    "target": 813.758970688,
+    "rating": 846.689136723,
+    "target": 951.046978604,
     "attendance": 1000,
-    "performance": 689.59828448,
-    "movement": 0.1,
+    "performance": 918.411631007,
+    "movement": 0.031337393,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -4980,11 +4980,11 @@
    },
    {
     "date": "2026-05-21",
-    "rating": 829.592337326,
-    "target": 826.362455195,
+    "rating": 850.276062763,
+    "target": 963.671259287,
     "attendance": 1000,
-    "performance": 710.604091991,
-    "movement": 0.1,
+    "performance": 939.452098812,
+    "movement": 0.030662173,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -4992,11 +4992,11 @@
    },
    {
     "date": "2026-05-22",
-    "rating": 829.393610842,
-    "target": 827.605072482,
+    "rating": 853.720739143,
+    "target": 965.310319952,
     "attendance": 1000,
-    "performance": 712.675120804,
-    "movement": 0.1,
+    "performance": 942.183866586,
+    "movement": 0.029944787,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -5004,11 +5004,11 @@
    },
    {
     "date": "2026-05-23",
-    "rating": 829.109272384,
-    "target": 826.550226262,
+    "rating": 856.958514453,
+    "target": 964.391769701,
     "attendance": 1000,
-    "performance": 710.91704377,
-    "movement": 0.1,
+    "performance": 940.652949501,
+    "movement": 0.029255852,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -5016,11 +5016,11 @@
    },
    {
     "date": "2026-05-24",
-    "rating": 828.853367772,
-    "target": 826.550226262,
+    "rating": 860.031996938,
+    "target": 964.391769701,
     "attendance": 1000,
-    "performance": 710.91704377,
-    "movement": 0.1,
+    "performance": 940.652949501,
+    "movement": 0.028608297,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
@@ -5028,19 +5028,19 @@
    },
    {
     "date": "2026-05-25",
-    "rating": 828.512285126,
-    "target": 825.442541316,
+    "rating": 862.911779904,
+    "target": 962.904900109,
     "attendance": 1000,
-    "performance": 709.070902194,
-    "movement": 0.1,
+    "performance": 938.174833515,
+    "movement": 0.027993601,
     "decayFraction": 0,
     "decaying": false,
     "maintenance": false,
     "skipped": false
    }
   ],
-  "rating": 828.512285126,
-  "peak": 857.667271925,
+  "rating": 862.911779904,
+  "peak": 862.911779904,
   "model": "attendancePerformance",
   "origin": "2026-03-02",
   "ageMonths": 2,
@@ -5207,9 +5207,9 @@
    true
   ],
   "performance": {
-   "score": 709.070902194,
-   "trendScore": 656.716727562,
-   "ytdScore": 761.425076826,
+   "score": 938.174833515,
+   "trendScore": 896.814679294,
+   "ytdScore": 979.534987737,
    "components": [
     "trend",
     "ytd"
