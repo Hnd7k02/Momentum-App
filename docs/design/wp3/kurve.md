@@ -686,3 +686,244 @@ with these numbers, and what he chooses is built after it.
 - Everything else is the replay. The candidates reached it through a
   wrapper (above), which the built mechanism has to reproduce.
 - **Not measured at all: the owner's own data.** There is none.
+
+## What was built, against this design
+
+Built as designed: the value 3, carried in the marker of Stage 5b and read
+from each day's snapshot (D177, D178); the tint full from 8 % (D179); the
+two scales and the band as they were. `GYM_CURVE_CONFIRMED` is `false`
+until the owner confirms the value at STOP Kurve. Where the build differs
+from what this design expected:
+
+- **Seven golden files moved, not fourteen.** Step 4 allowed the fourteen
+  `stage5b-*` files with days of the era to be frozen again. The seven
+  `*.gym.json` among them came out byte for byte what they were — the
+  exercise-days, the percentage changes and the muscle states do not know
+  the curve — so only the seven `*.boss.json` changed
+  ([`kurve-golden.md`](kurve-golden.md)).
+- **`stateIntensity()` takes the scale's upper end as an argument** that
+  no screen hands in; the dev harness uses it to try other upper ends on
+  the one formula instead of the copy it had.
+- **The STOP fell on the last day of the Stage 5b file**, 15 November 2026,
+  so the block's import file holds that file's diary, made afresh by the
+  live build; two more were made for a check on the 16th and the 17th
+  (below).
+- **The symmetry is held to one unit in the last place**, not "to the last
+  bit": that is what the stable form of the logistic gives, before this
+  block as after it (D177).
+- **The Gym screen prints neither the level nor the target.** The step list
+  speaks of "the level and the target on the Gym screen"; what the screen
+  prints is the rating, attendance and the year's change in percent. Level
+  and target are stated in this report and held by tests; on the screen
+  they show as the rating they produce.
+
+### 1. The aim
+
+**Met, in the reading of section 1** — on every day from the update, for a
+history of five weeks or more — and held by `gymCurveGoal.test.ts`.
+
+| | Before | Stage 5b (curve at 10) | **Built (3)** |
+|---|---|---|---|
+| The import file, loaded once on its last day: level | 884 | 711 | **952** |
+| — target | 930 | 826 | **971** |
+| — Gym rating | 831.7 | 828.0 | **833.1** |
+| — Boss | 758.8 | 756.8 | **759.5** |
+| The long profile, the update on each of 155 days: lowest new − old on any of the 90 days after | | −54.2 | **0.0** (+0.0002, on the update day of 21 November) |
+| — update days with a day half a point or more lower | | 155 | **0** |
+| — on average over the first 30 / 60 / 90 days, worst update day | | −37.4 / −43.1 / −43.2 | **+3.6 / +9.0 / +19.2** |
+| — where the Gym rating settles (mean of the last eight weeks) | 930.7 | 915.1 | **973.7** |
+| — where the Boss settles | 861.8 | 854.0 | **900.0** |
+
+Where the reading ends, also a test: with the update inside the first five
+weeks the rating can stand lower for a while — by 14.4 points at most
+(update on 26 October, ten days on), for at most seventeen days.
+
+### 2. The rating round the update
+
+Each column is a replay of its own with the clock on that day; in brackets
+new − old. "Before" is the history had Stage 5b never been, with the
+one-day window as the same update brings it — on the days after the update
+that is not the live app's number, which has the three-day window; what
+the two apps show side by side is under 6 below. All nine candidates, and
+four more update days of the long profile:
+[`kurve/zahlen-update.md`](kurve/zahlen-update.md).
+
+**The import file, update on 2 November (three weeks of history)**
+
+| Curve | Level | Target | Gym rating on the day (02.11) | +1 (03.11) | +7 (09.11) | +14 (16.11) | +30 (02.12) | Boss on the day | +7 | +30 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| before | 939 | 964 | 796.1 | 802.9 | 817.9 | 831.7 | 700.0 | 699.3 | 736.4 | 676.5 |
+| Stage 5b (10) | 611 | 767 | 786.5 (−9.6) | 784.6 (−18.4) | 776.2 (−41.8) | 781.1 (−50.6) | 560.0 (−140.0) | 694.1 (−5.2) | 715.5 (−20.9) | 606.5 (−70.0) |
+| 4 | 756 | 854 | 791.5 (−4.6) | 794.1 (−8.9) | 806.6 (−11.3) | 826.1 (−5.6) | 700.0 (0.0) | 696.8 (−2.5) | 730.7 (−5.7) | 676.5 (0.0) |
+| **3** | 819 | 892 | 793.0 (−3.0) | 797.1 (−5.8) | 816.5 (−1.4) | 839.9 (+8.1) | 700.0 (0.0) | 697.6 (−1.6) | 735.7 (−0.7) | 676.5 (0.0) |
+| 2.5 | 860 | 916 | 794.1 (−2.0) | 799.1 (−3.8) | 822.7 (+4.8) | 847.6 (+15.9) | 700.0 (0.0) | 698.2 (−1.1) | 738.8 (+2.4) | 676.5 (0.0) |
+
+**The import file, update on 15 November (its last day)**
+
+| Curve | Level | Target | Gym rating on the day (15.11) | +1 (16.11) | +7 (22.11) | +14 (29.11) | +30 (15.12) | Boss on the day | +7 | +30 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| before | 884 | 930 | 831.7 | 831.7 | 831.7 | 700.0 | 700.0 | 758.8 | 756.7 | 662.3 |
+| Stage 5b (10) | 711 | 826 | 828.0 (−3.7) | 828.0 (−3.7) | 828.0 (−3.7) | 599.9 (−100.1) | 560.0 (−140.0) | 756.8 (−1.9) | 754.7 (−1.9) | 592.3 (−70.0) |
+| 4 | 904 | 943 | 832.1 (+0.4) | 832.1 (+0.4) | 832.1 (+0.4) | 700.0 (0.0) | 700.0 (0.0) | 759.0 (+0.2) | 756.9 (+0.2) | 662.3 (0.0) |
+| **3** | 952 | 971 | 833.1 (+1.4) | 833.1 (+1.4) | 833.1 (+1.4) | 705.3 (+5.3) | 700.0 (0.0) | 759.5 (+0.8) | 757.4 (+0.8) | 662.3 (0.0) |
+| 2.5 | 973 | 984 | 833.6 (+1.8) | 833.6 (+1.8) | 833.6 (+1.8) | 708.3 (+8.3) | 700.0 (0.0) | 759.8 (+1.0) | 757.7 (+1.0) | 662.3 (0.0) |
+
+**The long profile, update on 16 November**
+
+| Curve | Level | Target | Gym rating on the day (16.11) | +1 (17.11) | +7 (23.11) | +14 (30.11) | +30 (16.12) | Boss on the day | +7 | +30 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| before | 884 | 930 | 835.0 | 838.2 | 860.1 | 878.7 | 907.8 | 763.1 | 789.9 | 839.8 |
+| Stage 5b (10) | 711 | 826 | 831.2 (−3.8) | 830.7 (−7.5) | 828.9 (−31.2) | 835.3 (−43.4) | 862.6 (−45.1) | 761.0 (−2.1) | 773.0 (−16.9) | 816.2 (−23.6) |
+| 4 | 904 | 943 | 835.4 (+0.4) | 839.0 (+0.8) | 856.8 (−3.4) | 876.2 (−2.6) | 909.4 (+1.7) | 763.3 (+0.2) | 788.1 (−1.8) | 840.6 (+0.8) |
+| **3** | 952 | 971 | 836.4 (+1.4) | 840.8 (+2.7) | 862.7 (+2.5) | 883.3 (+4.6) | 914.9 (+7.1) | 763.8 (+0.8) | 791.3 (+1.4) | 843.3 (+3.6) |
+| 2.5 | 973 | 984 | 836.8 (+1.8) | 841.6 (+3.5) | 865.2 (+5.0) | 886.1 (+7.4) | 916.7 (+9.0) | 764.1 (+1.0) | 792.6 (+2.7) | 844.3 (+4.5) |
+
+**The sixteen-week profile, update on 18 May (Monday of week 11)**
+
+| Curve | Level | Target | Gym rating on the day (18.05) | +1 (19.05) | +7 (25.05) | +14 (01.06) | +30 (17.06) | Boss on the day | +7 | +30 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| before | 667 | 800 | 837.0 | 834.7 | 819.3 | 796.1 | 835.5 | 769.8 | 763.1 | 772.8 |
+| Stage 5b (10) | 690 | 814 | 838.4 (+1.3) | 835.9 (+1.2) | 828.5 (+9.2) | 824.6 (+28.5) | 827.4 (−8.1) | 770.6 (+0.7) | 767.7 (+4.6) | 768.5 (−4.3) |
+| 4 | 868 | 921 | 843.6 (+6.6) | 846.0 (+11.3) | 857.0 (+37.7) | 869.8 (+73.7) | 890.5 (+55.0) | 773.4 (+3.6) | 783.1 (+20.0) | 802.6 (+29.8) |
+| **3** | 918 | 951 | 844.6 (+7.6) | 847.9 (+13.2) | 862.9 (+43.6) | 878.9 (+82.8) | 902.9 (+67.3) | 773.9 (+4.1) | 786.3 (+23.2) | 809.3 (+36.5) |
+| 2.5 | 944 | 967 | 845.1 (+8.1) | 848.8 (+14.1) | 865.7 (+46.4) | 883.1 (+87.0) | 908.6 (+73.1) | 774.2 (+4.4) | 787.8 (+24.7) | 812.4 (+39.6) |
+
+**The same profile, update on 6 April (Monday of week 6)**
+
+| Curve | Level | Target | Gym rating on the day (06.04) | +1 (07.04) | +7 (13.04) | +14 (20.04) | +30 (06.05) | Boss on the day | +7 | +30 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| before | 823 | 894 | 800.9 | 808.8 | 814.3 | 823.2 | 855.9 | 711.2 | 722.0 | 758.3 |
+| Stage 5b (10) | 619 | 772 | 794.4 (−6.5) | 796.1 (−12.7) | 784.5 (−29.8) | 776.7 (−46.4) | 787.9 (−67.9) | 707.9 (−3.2) | 707.1 (−14.9) | 723.3 (−35.0) |
+| 4 | 772 | 863 | 799.6 (−1.3) | 806.5 (−2.3) | 818.1 (+3.9) | 827.2 (+4.0) | 858.0 (+2.2) | 710.5 (−0.6) | 723.9 (+1.9) | 759.5 (+1.2) |
+| **3** | 835 | 901 | 801.2 (+0.3) | 809.4 (+0.7) | 827.7 (+13.5) | 842.2 (+19.0) | 877.4 (+21.6) | 711.3 (+0.1) | 728.7 (+6.7) | 770.0 (+11.7) |
+| 2.5 | 875 | 925 | 802.1 (+1.3) | 811.2 (+2.5) | 833.6 (+19.3) | 851.2 (+28.0) | 887.6 (+31.7) | 711.8 (+0.6) | 731.8 (+9.8) | 775.5 (+17.2) |
+
+In the sixteen-week profile the old rating itself falls in the fortnight
+after the update of 18 May, 837.0 to 796.1, while under the new metric it
+holds: the row of Stage 5b — the new metric, the curve as it was — already
+stands 28.5 above the old rules there, and the curve adds the rest.
+
+### 3. The other side
+
+The person of the import file without progress, forty weeks, under the old
+rules and under the built value from the first day
+([`kurve/zahlen-andere-seite.md`](kurve/zahlen-andere-seite.md) has every
+candidate):
+
+| Case | Before | **Built (3)** |
+|---|---|---|
+| The same sets every week: level / Gym rating | 500 / 700.0 | 500 / 700.0 |
+| An ordinary up and down of one rep, weeks 13 to 40: mean (lowest – highest) | 687.6 (675 – 716) | 708.3 (682 – 734) |
+| A single light day, every working set at 80 %: rating the day before → lowest of the 14 days after | 700.0 → 636.6 | 700.0 → 700.0 |
+| A whole light week: rating before → lowest of the 21 days after | 700.0 → 581.9 | 700.0 → 700.0 |
+| One rep less everywhere, for good (−2.4 to −2.9 % per exercise): before → lowest → twelve weeks on | 700.0 → 526.0 → 604.9 | 700.0 → 543.5 → 616.0 |
+
+As a pure curve, with attendance full and both windows reading the same
+change, the rating heads for 700 at 0 %, 632 at −1 %, 570 at −2 % (which the
+screen calls "Gehalten") and 520 at −3 %; the curve at ten had 700, 679, 659
+and 639. A small fall costs more than it did under Stage 5b's curve; set
+against the rules before Stage 5b, on the diary above, a lasting loss of a
+rep costs a tenth less (157 points for 174). A light day and a light week
+cost nothing under any candidate, which is the median's doing, not the
+curve's.
+
+**A training break after the import file** (existing behaviour, D174, not
+changed): with no session after 15 November the rating stands at 710.5 on
+the 21st and ends at 700.0 on the fourteenth day — the tier it held when
+the break began — as under the old rules (690.5, then 700.0). Under Stage
+5b's curve it ended at 560.0, a tier lower.
+
+### 4. The body
+
+| | +3 % | +5 % | +7 % | +10 % |
+|---|---|---|---|---|
+| Strength, to 12 % (before) | 0.34 | 0.48 | 0.63 | 0.85 |
+| Strength, to 8 % (**built**) | **0.36** | **0.62** | **0.87** | **1** |
+| Chest against the same chest held, ΔE — before | 21.8 | 30.7 | 39.9 | 51.9 |
+| — **built** | **23.6** | **38.7** | **52.8** | **58.5** |
+| Quadriceps at the same fall — before | 19.3 | 27.6 | 35.8 | 47.9 |
+| — **built** | **20.5** | **35.3** | **49.1** | **55.3** |
+
+On the screen itself — the production build, the import file at 30 days,
+each zone against the same zone with nothing changing:
+
+| Zone (its figure) | Before, ΔE | **Built** |
+|---|---|---|
+| Chest (+3 %) | 20.7 | **21.3** |
+| Back (+4 %) | 23.1 | **26.6** |
+| Quadriceps (+5 %) | 26.5 | **33.2** |
+| Hamstrings and glutes (+6 %) | 30.9 | **39.6** |
+| Calves (+7 %) | 36.9 | **49.1** |
+
++3 % stays clearly apart from a held group — more than four times the
+5 ΔE `farbregeln.mjs` asks for — and +7 % stands 2.3 times as far from it
+as +3 % does, where it stood 1.8 times. Before and after, side by side:
+[`kurve/vergleich-koerper-30-vorne.png`](kurve/vergleich-koerper-30-vorne.png),
+[`-30-hinten`](kurve/vergleich-koerper-30-hinten.png),
+[`-90-vorne`](kurve/vergleich-koerper-90-vorne.png),
+[`-90-hinten`](kurve/vergleich-koerper-90-hinten.png).
+`farbregeln.mjs` passes with its rules and its examples unchanged (322 of
+322): the chest at +3 % 23.9 ΔE from held, the quadriceps at −3 % 20.4, and
++7 % greener than +3 % (a* −45.2 against −21.3).
+
+The rows and the exercise detail are drawn as before
+([`kurve/vergleich-zeilen-30.png`](kurve/vergleich-zeilen-30.png),
+[`kurve/vergleich-uebungsdetail.png`](kurve/vergleich-uebungsdetail.png)):
+their scales were not touched, and the question of section 10 stands.
+
+### 5. What moved on days already lived
+
+**Nothing**, and two proofs hold it.
+
+- `gymCurveEra.test.ts`: four seeded histories, five update days, three
+  clocks, replayed by the build before Stage 5b, by Stage 5b and by this
+  build — every output of every day before the update is the same in all
+  three; and where the value arrives after the metric, as on the owner's
+  preview, no day before either boundary moves. The same file holds that
+  Running is the same in every field of its rating state and its ledger
+  under the era, the marker without the value and four values of the
+  curve, while Gym differs.
+- `scripts/verify/kurve-golden-diff.mjs`, against the commit before the
+  block: under `.github/fixtures` only seven `stage5b-*.boss.json`
+  differ; in the profile crossing the metric the earliest day with another
+  value is the boundary itself; and every value that moved is the level or
+  follows from it. Every other golden file, the baselines under
+  `stage2/`, `stage4/` and `stage5b/`, and every fingerprint of
+  `domainOutputs.test.ts` are what they were.
+
+One thing did move that is not a day already lived, and is said here so
+that it is not found later: in the golden profile under the metric from
+day one — a device set up under this version — the promotion to master is
+confirmed on 8 April instead of 16 April.
+
+### 6. The import files, and what the two apps show
+
+The update is the first load, and no day before it moves. Loaded on a later
+day than its last session, a file therefore shows the same Gym rating in
+both apps until a day is scored again — read off both builds, the file of
+the STOP day: 832 and 832 on each day from the 16th to the 19th, 802 and
+802 on the 20th, 774 and 774 on the 21st, 725 in the live app and 750 here
+on the 22nd. A check needs the file whose last session is on its day, so
+three were made by the live build (`docs/wp3/kurve/README.md`), and each
+was loaded into the live build and into this one on its own day
+(`scripts/verify/stage5b-import-check.mjs`; held by
+`kurveImportFile.test.ts`):
+
+| Check on | File | Live app | This build |
+|---|---|---|---|
+| 15 November | `momentum-pruefdaten-kurve.json` | 832 (831.7) | 833 (833.1) |
+| 16 November | `…-2026-11-16.json` | 818 (817.8) | 836 (836.4) |
+| 17 November | `…-2026-11-17.json` | 803 (802.6) | 821 (820.7) |
+
+On the 16th and 17th the gap is wider than the curve alone makes it: the
+live app counts the week in progress as one session of three — its target
+that day is 692, at a level of 931 — where the one-day window counts a
+week with a session as met until it is over (D134): target 971, at a level
+of 952.
+
+The ten muscle figures are what they were before the block (30 days: +3,
++4, +3, +7, +4, +4, +5, +6, +7, +4; overall +5 %), and "Leistung seit
+Jahresbeginn" reads +6 % here and +15 % in the live app.
+
+**Not measured: the owner's own data.** There is none in either
+repository; every number above is from invented diaries.
