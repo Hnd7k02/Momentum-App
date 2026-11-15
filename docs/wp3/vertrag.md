@@ -217,7 +217,7 @@ Fünf Zustände (festgelegt, D153). Eine einzige Stelle im Code macht aus einer 
 | noch nicht trainiert | kein Satz im Zeitraum | Noch nicht trainiert | Not trained yet | gedimmt | neutraler Chip, Punkt blass |
 
 - **Das Band.** Der Zustand folgt der angezeigten ganzen Zahl, damit Zahl und Farbe nie auseinanderfallen. −2 bis +2 % ist gehalten; das entspricht dem Band von ±2,5 % bei kaufmännischer Rundung in beide Richtungen.
-- **Die Farbstärke** am Körper wächst gleichmässig von 2,5 % bis 12 % und bleibt darüber gleich.
+- **Die Farbstärke** am Körper wächst gleichmässig von 2,5 % bis 8 % und bleibt darüber gleich (Block «Kurve», D179; bis dahin 12 %). Sie beginnt bei drei Zehnteln der vollen Stärke (D167). Unter der Kennzahl von 5b liest ein Monat Training +3 bis +7 % in einer Gruppe; bis 12 % stand das alles im blassen unteren Teil der Skala. Bei 8 % füllen diese Werte die Skala: +3 % hat die Stärke 0,36, +5 % 0,62, +7 % 0,87, ab +8 % die volle. Am gerenderten Körper liegt die Brust bei +3 % 23,6 ΔE von derselben Brust «gehalten», bei +7 % 52,8.
 - **Zeiträume:** 30 und 90 Tage für den Muskeltrend. Der Verlauf behält 7 und 30 Tage; die beiden teilen sich heute die Konstante `TREND_RANGES` und brauchen künftig je eine.
 - **Wörter:** «Leistungstrend», nie «Entwicklung» und nie «gewachsen». «Zu wenig Vergleichsdaten» ersetzt «Noch kein Vergleich».
 - **Legendensatz** (hinter dem Knopf ⓘ): «Die Farbe zeigt, wie sich dein bester Arbeitssatz je Muskelgruppe im gewählten Zeitraum verändert hat. Sie misst Trainingsleistung, nicht Muskelmasse.»

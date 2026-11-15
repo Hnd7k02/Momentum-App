@@ -40,7 +40,7 @@ describe('toBodyVisuals', () => {
       expect(visual.intensity).toBe(stateIntensity(visual.state, visual.delta ?? 0));
     }
     const chest = toBodyVisuals(SAMPLE).find((v) => v.id === 'chest')!;
-    expect(chest.intensity).toBeCloseTo(1, 6); // +12 % saturates the curve
+    expect(chest.intensity).toBeCloseTo(1, 6); // +12 % is past the scale's upper end: full strength
     expect(toBodyVisuals(SAMPLE).find((v) => v.id === 'calves')!.intensity).toBe(0);
   });
 
@@ -79,17 +79,40 @@ describe('toBodyVisuals', () => {
 });
 
 describe('the strength of a tint (contract §7)', () => {
-  it('grows evenly from 2.5 % to 12 % and stays there', () => {
+  it('grows evenly from 2.5 % to 8 % and stays there (D179)', () => {
     const { min } = TINT_STRENGTH;
+    expect(TINT_STRENGTH).toMatchObject({ fromPercent: 2.5, toPercent: 8, min: 0.3 });
     expect(stateIntensity('improved', 2.5)).toBe(min);
+    expect(stateIntensity('improved', 8)).toBe(1);
     expect(stateIntensity('improved', 12)).toBe(1);
     expect(stateIntensity('improved', 40)).toBe(1);
     // Evenly: the midpoint of the range is the midpoint of the strength.
-    expect(stateIntensity('improved', 7.25)).toBeCloseTo((min + 1) / 2, 12);
-    const steps = [2.5, 4.4, 6.3, 8.2, 10.1, 12].map((pct) => stateIntensity('improved', pct));
+    expect(stateIntensity('improved', 5.25)).toBeCloseTo((min + 1) / 2, 12);
+    const steps = [2.5, 3.6, 4.7, 5.8, 6.9, 8].map((pct) => stateIntensity('improved', pct));
     for (let i = 1; i < steps.length; i += 1) {
       expect(steps[i]! - steps[i - 1]!).toBeCloseTo((1 - min) / 5, 12);
     }
+  });
+
+  it('in numbers: 0.36 at 3 %, 0.62 at 5 %, 0.87 at 7 %, full from 8 %', () => {
+    // What the metric of Stage 5b reads in a month of training, +3 to +7 %,
+    // spans the scale; to 12 % the same steps stood at 0.34, 0.48, 0.63, 0.85.
+    const at = (pct: number) => Math.round(stateIntensity('improved', pct) * 100) / 100;
+    expect([3, 5, 7, 8, 10].map(at)).toEqual([0.36, 0.62, 0.87, 1, 1]);
+    // A group at +7 % is tinted more than twice as strongly as one at +3 %.
+    expect(stateIntensity('improved', 7) / stateIntensity('improved', 3)).toBeGreaterThan(2);
+  });
+
+  it('takes another upper end only where one is handed in: the dev harness', () => {
+    for (const pct of [2.5, 3, 5, 7, 10, 12]) {
+      expect(stateIntensity('improved', pct, TINT_STRENGTH.toPercent)).toBe(stateIntensity('improved', pct));
+    }
+    // The scale as it was until the block "Kurve".
+    expect([3, 5, 7, 10].map((pct) => Math.round(stateIntensity('improved', pct, 12) * 100) / 100)).toEqual([0.34, 0.48, 0.63, 0.85]);
+    // Held, untrained and too little to compare do not know the scale.
+    expect(stateIntensity('unchanged', 2, 6)).toBe(0);
+    expect(stateIntensity('noData', 0, 6)).toBe(0);
+    expect(stateIntensity('awaitingBaseline', 9, 6)).toBe(TINT_STRENGTH.awaitingBaseline);
   });
 
   it('is the same for a fall as for a rise of the same size', () => {

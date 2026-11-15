@@ -367,9 +367,11 @@ Never conflate them.
   (head with neck, hands, feet — a tone of its own, halfway between the
   two, D166). The inert zone is no state: it takes no tint, is never
   chosen, and nothing refers to it. A tint is mixed from white and grows
-  evenly from 2.5 % to 12 %, from three tenths of its full strength (the
-  owner's value, D167 — not a number to tune). Which state takes which
-  tone never changes.
+  evenly from 2.5 % to 8 % (D179: the changes the Stage 5b metric reads
+  in a month span the scale), from three tenths of its full strength (the
+  owner's value, D167 — not a number to tune), and `stateIntensity()` is
+  the one place a strength comes from. Which state takes which tone never
+  changes.
   The muscle trend reads 30 or 90 days, Verlauf 7 or 30 — two constants,
   never one again.
 - **The body's light is tokens, and it has no tone mapping** (D165,

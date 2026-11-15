@@ -218,27 +218,60 @@ export const REGION_MATERIAL = {
 } as const;
 
 /**
- * The strength of a tint (contract §7): it grows evenly from 2.5 % to 12 %
+ * The strength of a tint (contract §7): it grows evenly from 2.5 % to 8 %
  * and stays there. 2.5 % is where the band ends — the smallest change that
  * is shown as ±3 % — and it starts at `TINT_STRENGTH.min`: 0.3, the owner's
  * value (D167). At that a change of 3 % stands about four times as far
- * from a held, white group as the 5 ΔE `farbregeln.mjs` asks for, and a
- * change of 9 % twice as far again (see `REGION_MATERIAL`).
+ * from a held, white group as the 5 ΔE `farbregeln.mjs` asks for.
+ *
+ * **The upper end was 12 % until the block "Kurve" (D179).** Under the
+ * metric of Stage 5b a month of training reads +3 to +7 % in a group,
+ * where the best set by `reps × load` read +10 % and more: on a scale to
+ * 12 % every trained group stood in the pale lower half, and a group at
+ * +7 % was not twice as far from a held one as a group at +3 %. At 8 % the
+ * changes the metric produces fill the scale — measured on the rendered
+ * body at 393px, as the median difference from the same zone held:
+ *
+ * | change | strength | chest, ΔE | quadriceps, ΔE |
+ * |---|---|---|---|
+ * | ±3 % | 0.36 | 23.6 | 20.5 |
+ * | ±5 % | 0.62 | 38.7 | 35.3 |
+ * | ±7 % | 0.87 | 52.8 | 49.1 |
+ * | ±10 % | 1 | 58.5 | 55.3 |
+ *
+ * (To 12 % the same steps stood at 21.8, 30.7, 39.9 and 51.9 on the chest.)
+ * And on the screen itself, the import file of the block at 30 days: the
+ * chest at +3 % stands 21.3 ΔE from the same chest held and the calves at
+ * +7 % 49.1, where the scale to 12 % had them at 20.7 and 36.9.
+ * `docs/design/wp3/kurve.md`, section 9, has the five upper ends that were
+ * weighed, with their pictures.
  */
 export const TINT_STRENGTH = {
   fromPercent: 2.5,
-  toPercent: 12,
+  toPercent: 8,
   min: 0.3,
   /** "Zu wenig Vergleichsdaten": lightly blue, whatever its ratio. */
   awaitingBaseline: 0.5,
 } as const;
 
-/** The strength of a state's tint, from the unrounded change. */
-export function stateIntensity(state: MuscleState, deltaPercent: number): number {
+/**
+ * The strength of a state's tint, from the unrounded change.
+ *
+ * The one place a strength comes from: the body, the flat figure and
+ * whatever else tints a group read it here. `toPercent` is the scale's
+ * upper end and no screen hands one in — the argument exists for the dev
+ * harness, which tries other upper ends on this same formula
+ * (`#/dev/body?tintTo=`).
+ */
+export function stateIntensity(
+  state: MuscleState,
+  deltaPercent: number,
+  toPercent: number = TINT_STRENGTH.toPercent,
+): number {
   // Held is white and untrained is dimmed: neither carries a tint.
   if (state === 'noData' || state === 'unchanged') return 0;
   if (state === 'awaitingBaseline') return TINT_STRENGTH.awaitingBaseline;
-  const { fromPercent, toPercent, min } = TINT_STRENGTH;
+  const { fromPercent, min } = TINT_STRENGTH;
   const along = (Math.abs(deltaPercent) - fromPercent) / (toPercent - fromPercent);
   return min + Math.max(0, Math.min(1, along)) * (1 - min);
 }

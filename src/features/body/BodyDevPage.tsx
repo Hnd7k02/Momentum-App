@@ -124,12 +124,10 @@ const FIXTURE = DELTAS !== null ? fixtureOf(DELTAS) : FIXTURES[params.get('fixtu
  * change. Without it the harness draws the app's own scale.
  */
 const TINT_TO = Number(params.get('tintTo'));
-const intensityOf = (state: MuscleState, delta: number): number => {
-  if (params.get('tintTo') === null || !Number.isFinite(TINT_TO) || TINT_TO <= TINT_STRENGTH.fromPercent) return stateIntensity(state, delta);
-  if (state !== 'improved' && state !== 'declined') return stateIntensity(state, delta);
-  const along = (Math.abs(delta) - TINT_STRENGTH.fromPercent) / (TINT_TO - TINT_STRENGTH.fromPercent);
-  return TINT_STRENGTH.min + Math.max(0, Math.min(1, along)) * (1 - TINT_STRENGTH.min);
-};
+const intensityOf = (state: MuscleState, delta: number): number =>
+  params.get('tintTo') === null || !Number.isFinite(TINT_TO) || TINT_TO <= TINT_STRENGTH.fromPercent
+    ? stateIntensity(state, delta)
+    : stateIntensity(state, delta, TINT_TO);
 const LANG: Language = params.get('lang') === 'en' ? 'en' : 'de';
 const MODEL = params.get('model');
 const MODEL_URL =

@@ -1,0 +1,171 @@
+{
+ "file": "docs/wp3/stage5b/momentum-pruefdaten-5b.json",
+ "day": "2026-11-15",
+ "label": "nachher",
+ "rating": "Gym-Rating833 von 100040 % Anwesenheit · 60 % Leistung",
+ "ranges": {
+  "30": {
+   "rows": {
+    "Brust": "+3 %Verbessert",
+    "Rücken": "+4 %Verbessert",
+    "Schultern": "+3 %Verbessert",
+    "Bizeps": "+7 %Verbessert",
+    "Trizeps": "+4 %Verbessert",
+    "Rumpf": "+4 %Verbessert",
+    "Quadrizeps": "+5 %Verbessert",
+    "Beinbeuger und Gesäss": "+6 %Verbessert",
+    "Waden": "+7 %Verbessert",
+    "Unterarme": "+4 %Verbessert"
+   },
+   "againstHeld": {
+    "sameFrame": true,
+    "front": {
+     "chest": {
+      "dE": 21.3,
+      "dA": -18.8,
+      "dL": -6.7,
+      "pixels": 1778
+     },
+     "quadriceps": {
+      "dE": 33.2,
+      "dA": -29.5,
+      "dL": -7.8,
+      "pixels": 2620
+     },
+     "calves": {
+      "dE": 49.1,
+      "dA": -42.8,
+      "dL": -11.7,
+      "pixels": 847
+     },
+     "feet": {
+      "dE": 0,
+      "dA": 0,
+      "dL": 0,
+      "pixels": 274
+     }
+    },
+    "back": {
+     "back": {
+      "dE": 26.6,
+      "dA": -23.7,
+      "dL": -7.6,
+      "pixels": 1774
+     },
+     "hamstringsGlutes": {
+      "dE": 39.6,
+      "dA": -35,
+      "dL": -10.1,
+      "pixels": 2569
+     },
+     "calves": {
+      "dE": 48.2,
+      "dA": -41.9,
+      "dL": -11.6,
+      "pixels": 846
+     }
+    }
+   },
+   "heldRows": {
+    "Brust": "0 %Gehalten",
+    "Rücken": "0 %Gehalten",
+    "Schultern": "0 %Gehalten",
+    "Bizeps": "0 %Gehalten",
+    "Trizeps": "0 %Gehalten",
+    "Rumpf": "0 %Gehalten",
+    "Quadrizeps": "0 %Gehalten",
+    "Beinbeuger und Gesäss": "0 %Gehalten",
+    "Waden": "0 %Gehalten",
+    "Unterarme": "0 %Gehalten"
+   }
+  },
+  "90": {
+   "rows": {
+    "Brust": "+5 %Verbessert",
+    "Rücken": "+6 %Verbessert",
+    "Schultern": "+6 %Verbessert",
+    "Bizeps": "+11 %Verbessert",
+    "Trizeps": "+7 %Verbessert",
+    "Rumpf": "+6 %Verbessert",
+    "Quadrizeps": "+5 %Verbessert",
+    "Beinbeuger und Gesäss": "+6 %Verbessert",
+    "Waden": "+7 %Verbessert",
+    "Unterarme": "+7 %Verbessert"
+   },
+   "againstHeld": {
+    "sameFrame": true,
+    "front": {
+     "chest": {
+      "dE": 41.8,
+      "dA": -36.7,
+      "dL": -12.4,
+      "pixels": 1778
+     },
+     "quadriceps": {
+      "dE": 33.4,
+      "dA": -29.8,
+      "dL": -8,
+      "pixels": 2620
+     },
+     "calves": {
+      "dE": 49.1,
+      "dA": -42.8,
+      "dL": -11.7,
+      "pixels": 847
+     },
+     "feet": {
+      "dE": 0,
+      "dA": 0,
+      "dL": 0,
+      "pixels": 274
+     }
+    },
+    "back": {
+     "back": {
+      "dE": 42.5,
+      "dA": -37.3,
+      "dL": -11.5,
+      "pixels": 1774
+     },
+     "hamstringsGlutes": {
+      "dE": 39.6,
+      "dA": -35,
+      "dL": -10.1,
+      "pixels": 2569
+     },
+     "calves": {
+      "dE": 48.2,
+      "dA": -41.9,
+      "dL": -11.6,
+      "pixels": 846
+     }
+    }
+   },
+   "heldRows": {
+    "Brust": "0 %Gehalten",
+    "Rücken": "0 %Gehalten",
+    "Schultern": "0 %Gehalten",
+    "Bizeps": "0 %Gehalten",
+    "Trizeps": "0 %Gehalten",
+    "Rumpf": "0 %Gehalten",
+    "Quadrizeps": "0 %Gehalten",
+    "Beinbeuger und Gesäss": "0 %Gehalten",
+    "Waden": "0 %Gehalten",
+    "Unterarme": "0 %Gehalten"
+   }
+  }
+ },
+ "detail": {
+  "exercise": "Bankdrücken",
+  "head": [
+   "Zuletzt9 × 62.5 kg",
+   "Davor8 × 62.5 kg",
+   "Veränderung+3 %"
+  ],
+  "axis": [
+   "+12 %",
+   "0 %"
+  ],
+  "endValue": "+4 %"
+ }
+}
