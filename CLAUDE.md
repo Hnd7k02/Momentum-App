@@ -211,7 +211,8 @@ Never conflate them.
   change multiply the odds by four, is ten in the constants and may be a
   domain's own **in an era of its own, carried in that domain's snapshot**:
   Gym's is `scoring.gymMetric.curveDecadePercent` from the Stage 5b era on
-  — three — handed to the function as an argument and read per day by
+  — three, confirmed by the owner at STOP Kurve (D180) — handed to the
+  function as an argument and read per day by
   `gymCurveOf()`, the field's one reader beside `gymMetricOf()` (D178).
   Running hands in nothing and computes with the constants on every day,
   as does a Gym day before the era or under a marker without the value.
@@ -367,8 +368,13 @@ Never conflate them.
 - **One place makes a number a state** (D153, D164, contract §7):
   `features/gym/muscleState.ts`. A change is shown as a whole percent,
   rounded half away from zero both ways; the state follows the shown
-  figure — −2 % to +2 % is held, from ±3 % the direction — so figure and
-  colour can never part; and a group states a trend only with three
+  figure, so figure and colour can never part, and **the band is
+  one-sided** (the owner's choice at STOP Kurve, D180): −2 % to +1 % is
+  held, a rise counts from +2 % and a fall from −3 %. One rep more at the
+  same weight then always reads as progress, and a fall counts where it
+  always did — a symmetric ±1 would have made every missed rep a decline.
+  The legend says that the two sides differ. A group states a trend only
+  with three
   exercise days in the range and an exercise on two days, otherwise it is
   "Zu wenig Vergleichsdaten". The body, the flat figure, the rows, the
   hub's card, the trend above the rows, the exercise list and detail and
@@ -389,8 +395,9 @@ Never conflate them.
   evenly from 2.5 % to 8 % (D179: the changes the Stage 5b metric reads
   in a month span the scale), from three tenths of its full strength (the
   owner's value, D167 — not a number to tune), and `stateIntensity()` is
-  the one place a strength comes from. Which state takes which tone never
-  changes.
+  the one place a strength comes from. A rise shown as +2 % takes that
+  weakest strength; the scale does not move for the band (D180). Which
+  state takes which tone never changes.
   The muscle trend reads 30 or 90 days, Verlauf 7 or 30 — two constants,
   never one again.
 - **The body's light is tokens, and it has no tone mapping** (D165,
@@ -430,13 +437,15 @@ Never conflate them.
   of a destructive act — only its confirmation carries `--status-weak-ink`.
 - **A chart** is a neutral 1.5px line or neutral bars with a fine zero
   line and no wash beneath; the end point or the last bar carries the
-  state. The rows of a list share one scale, −12 % to +12 %, and bars start
-  at zero (D163): a small change must look small. No data draws nothing
-  and one value draws a dot. **The exercise detail draws a line** (D175):
-  each day as its change since the first day shown, on that scale —
-  widened in steps of six where a series goes further, never cut off and
-  never from the smallest day to the largest — with the end value beside
-  the plot, and one day as a dot without a value.
+  state. The rows of a list share one scale, −8 % to +8 % — the change at
+  which a tint on the body is full, so body and rows speak on one scale
+  (D180; ±12 % before) — and bars start at zero (D163): a small change
+  must look small. No data draws nothing and one value draws a dot. **The
+  exercise detail draws a line** (D175): each day as its change since the
+  first day shown, on that scale — widened in steps of four where a series
+  goes further, never cut off and never from the smallest day to the
+  largest — with the end value beside the plot, and one day as a dot
+  without a value.
 - **A screen that loads holds its layout** with calm surfaces
   (`LoadingBlocks`), no shimmer — and never for a load that failed, which
   says so and can be retried (`LoadFailure`).

@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D179). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D180). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). **The colour rules of the muscle status** (contract §7, D164) and **block 7A** — the body is a new model, built by script from MakeHuman's base mesh, with straight cuts round an inert zone that has a tone of its own, and a light that is tokens without a tone mapping (D165, D166) — are built and **accepted by the owner on his iPhone on 2026-11-13**, from the `Momentum-preview` build `0414126`. **His addendum to that acceptance** (D167) — the weakest tint 0.3, the chest's lower edge level, the borders at the knee, the collarbone and the shoulder as lines the build cuts — is built, published as `Momentum-preview` `c80b61d` and **accepted by the owner on his iPhone on 2026-11-15**, the straight edge of the shoulder included; the elbow and the deltoid's lower edge stay as they are. **Stage 5b** (D150, D151, D172–D174): from the first load a Gym exercise-day is worth its best working set by a strength score, as an era marked by `scoring.gymMetric`; a window compares the median of an exercise's last days with the median of its first, behind a switch the owner confirms; a set can be marked as a warm-up by hand; every day before the boundary replays byte-identically, no golden file frozen again, sixteen new ones for two new profiles — **accepted by the owner on his iPhone on 2026-11-15** from the `Momentum-preview` build `7e0572f` (D175): the median stands, the exercise detail draws a line where it drew bars, and a hint under the sets says where the warm-up mark is until a set has been marked once. **Block "Kurve"** (D177–D179): in the Stage 5b era the performance curve's one value is Gym's own — every three points of improvement multiply the odds by four, where the constants say ten — carried in `scoring.gymMetric.curveDecadePercent` beside the metric and read from each day's snapshot; a marker without it, which only a Stage 5b preview wrote, is the curve as it was; no day before the boundary and no day of Running moved; and a tint on the body is full from 8 % where it was 12 %. Built and published as `Momentum-preview` `28e8ca0`, **waiting for the owner's acceptance at STOP Kurve** — `GYM_CURVE_CONFIRMED` is `false` until he confirms the value. 7B, 7C, 7D, 9 and the tidy-up follow, in that order (D159, D171, D175). **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). **The colour rules of the muscle status** (contract §7, D164) and **block 7A** — the body is a new model, built by script from MakeHuman's base mesh, with straight cuts round an inert zone that has a tone of its own, and a light that is tokens without a tone mapping (D165, D166) — are built and **accepted by the owner on his iPhone on 2026-11-13**, from the `Momentum-preview` build `0414126`. **His addendum to that acceptance** (D167) — the weakest tint 0.3, the chest's lower edge level, the borders at the knee, the collarbone and the shoulder as lines the build cuts — is built, published as `Momentum-preview` `c80b61d` and **accepted by the owner on his iPhone on 2026-11-15**, the straight edge of the shoulder included; the elbow and the deltoid's lower edge stay as they are. **Stage 5b** (D150, D151, D172–D174): from the first load a Gym exercise-day is worth its best working set by a strength score, as an era marked by `scoring.gymMetric`; a window compares the median of an exercise's last days with the median of its first, behind a switch the owner confirms; a set can be marked as a warm-up by hand; every day before the boundary replays byte-identically, no golden file frozen again, sixteen new ones for two new profiles — **accepted by the owner on his iPhone on 2026-11-15** from the `Momentum-preview` build `7e0572f` (D175): the median stands, the exercise detail draws a line where it drew bars, and a hint under the sets says where the warm-up mark is until a set has been marked once. **Block "Kurve"** (D177–D179): in the Stage 5b era the performance curve's one value is Gym's own — every three points of improvement multiply the odds by four, where the constants say ten — carried in `scoring.gymMetric.curveDecadePercent` beside the metric and read from each day's snapshot; a marker without it, which only a Stage 5b preview wrote, is the curve as it was; no day before the boundary and no day of Running moved; and a tint on the body is full from 8 % where it was 12 %. **Accepted by the owner on his iPhone on 2026-11-15** from the `Momentum-preview` build `28e8ca0` (D180), with his four answers built in the same session: the value three stands (`GYM_CURVE_CONFIRMED` is `true`), the tint stays full from 8 %, the rows and the exercise detail are drawn on a scale of 8 % where it was 12 %, and the held band is one-sided — −2 to +1 % held, a rise from +2 %, a fall from −3 % — with the legend saying why; published as `Momentum-preview` `ae10d3d`. 7B, 7C, 7D, 9 and the tidy-up follow, in that order (D159, D171, D175). **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -621,10 +621,8 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   day (D175); until then the order was 5b, 7B, 7C, 9, tidy-up. Done and
   accepted before them: the contract (STOP 0), Stage 6b, the colour rules
   of the muscle status, block 7A with the owner's addendum, which he had
-  pulled before 5b in the night of 2026-11-11, and Stage 5b. **Block
-  "Kurve" is built and waits for his acceptance** (STOP Kurve, with four
-  questions: the curve's value, the tint's upper end, the two scales, the
-  held band).
+  pulled before 5b in the night of 2026-11-11, Stage 5b, and block "Kurve"
+  with his four answers at its STOP (D180). **Next is 7B.**
 - **Five points from the owner, 2026-11-15** (D168–D171 from his iPhone,
   D176 at the start of block "Kurve"), each recorded with what he saw, what
   he suspects and what the code shows. None of them is built yet:
@@ -1584,8 +1582,10 @@ his four answers at STOP 5b built in the same session — D175)
   yet:** the line and the hint.
 
 **WP3 block "Kurve" — the curve's value for the new metric, and the tint's
-strength** (branch `claude/momentum-wp3`, not merged; **built, waiting for
-the owner's acceptance at STOP Kurve** — D177, D178, D179)
+strength** (branch `claude/momentum-wp3`, not merged; **built and accepted
+by the owner on his iPhone on 2026-11-15**, from the `Momentum-preview`
+build `28e8ca0`, with his four answers at STOP Kurve built in the same
+session — D177, D178, D179, D180)
 - **What changed.** From the Stage 5b era on, a Gym day's two windows
   become a level by the same curve at a value of its own: **every three
   points of improvement multiply the odds by four**, where the constants
@@ -1629,12 +1629,10 @@ the owner's acceptance at STOP Kurve** — D177, D178, D179)
   and `ensureCurrentSnapshot()` carries the field of a day before a kept
   boundary as the stored snapshot has it. `SCHEMA_VERSION` and
   `BACKUP_FORMAT_VERSION` are unchanged.
-- **`GYM_CURVE_CONFIRMED` is `false`.** The value is built and on; the
-  owner confirms it, or chooses 4 (flatter) or 2.5 (steeper), at the STOP.
-  If he chooses another: change `GYM_METRIC.curveDecadePercent`, freeze the
-  seven golden files again, publish, and tell him to import the file
-  afresh — a device that loaded this preview carries three in its snapshot
-  ("Risks and known debt").
+- **`GYM_CURVE_CONFIRMED` is `true`** since STOP Kurve (D180): the owner
+  chose three, with 4 (flatter) and 2.5 (steeper) laid beside it. Changing
+  the value again would be a decision and an era of its own — a snapshot
+  written with three keeps three for the days it covers.
 - **No day before the boundary moved, and no day of Running.**
   `gymCurveEra.test.ts`: four seeded histories, five update days, three
   clocks, the build before Stage 5b, Stage 5b and this build side by side;
@@ -1678,10 +1676,76 @@ the owner's acceptance at STOP Kurve** — D177, D178, D179)
   (`stage5b-import-check.mjs`) and held by `kurveImportFile.test.ts`:
   832 and 833 on the 15th, 818 and 836 on the 16th, 803 and 821 on the
   17th.
-- **Asked at the STOP, not changed**: the scale of the rows and the
-  exercise detail (12 %), and the held band beside the owner's aim that one
-  rep more reads as progress up to twelve reps ("Risks and known debt";
-  design sections 10 and 11).
+- **Decided at STOP Kurve** (owner, 2026-11-15, D180). He checked the
+  preview on his iPhone and found nothing, and answered the four questions.
+  What follows is the state now, and it supersedes the 12 % and the ±2 %
+  named in the records of Stage 6b, the colour rules and Stage 5b above.
+  - *Three stands*, and *a tint is full from 8 %*: as built.
+  - *The rows and the exercise detail go to 8 %.* `SPARK_SCALE` and
+    `LINE_SCALE` are 8, and the exercise detail widens in steps of four.
+    A row's line stands 3.4 pixels above its zero line at +3 % and 7.9 at
+    +7 %, where it stood 2¼ and 5¼ (its half height is nine pixels; the
+    design and the STOP report had counted with twelve — the shares they
+    named were right). At 90 days more rows stand at the edge. Contract §6
+    says so, and the sheet's chart of 7C takes the same scale.
+  - *The held band is one-sided.* −2 to +1 % is held, a rise counts from a
+    shown +2 %, a fall from a shown −3 % as before — so one rep more at the
+    same weight reads as progress at every rep count, and one rep less is a
+    decline up to ten reps and held from eleven, as it was. One function,
+    `trendOfShown()` in `muscleState.ts`; contract §7 says so. The legend
+    explains it at the two figures that differ: "Ab +2 %. Schon eine
+    Wiederholung mehr zählt als Fortschritt." and "Ab −3 %. Eine kleine
+    Schwankung nach unten zählt noch nicht als Rückgang." A sentence of its
+    own under the states slid below the visible part of the sheet on a
+    320-pixel phone; on that phone the sheet's last line, what an exercise
+    day is, is reached by scrolling the sheet.
+  - *The tint's scale did not move for the band.* A rise shown as "+2 %"
+    takes the weakest strength, 0.3, and the scale from 2.5 % to 8 % is the
+    one he accepted. The design had expected the start to move to 1.5 %,
+    which would have made +3 % a strength of 0.46 where he had just
+    accepted 0.36.
+  - *What moved:* no rating and no fingerprint. In the golden files 24
+    states in seven `stage5b-*.gym.json` went from held to improved, each
+    at a shown +2 % (`scripts/verify/band-golden-diff.mjs`). On the import
+    file the ten group figures are what they were; in the exercise list
+    Kniebeuge, Wadenheben and Bizeps-Curls read "+2 %" in green where they
+    read "Gehalten".
+  - *Tests restated, none removed or weakened:* the band's table and its
+    constants, the hub card's held example, the four chart tests on the
+    scale of 8 and the step of four, the tint at +2 %, the flag; and three
+    browser suites — `farbregeln.mjs` (the fixture's rising edge at +2 %
+    and +1 %, the smallest rise on the body at +2 %, the legend's words,
+    and the legend's last line measured after scrolling where a narrow
+    phone hides it), `gym-muscles.mjs` and `design-system.mjs` (the band,
+    the line's scale and step). D180 lists each.
+- **Verification after STOP Kurve** — the value confirmed, the scale and
+  the band built: `tsc -b` 0; `npm run test` exit 0, 126 files and 2205
+  tests (2199 before the STOP); build clean, `index.js` 518.19 kB and
+  `index.css` 91.72 kB. Every browser suite again, the 3D suites one at a
+  time: 39 suites, 38 exit 0, 4445 of 4446 checks, each suite as in the
+  run before the STOP except `farbregeln.mjs`, now 330/330 where it had
+  322 — two more checks a width, for the legend's note and for its last
+  line being reachable; the one red check is the same,
+  `release-proof.mjs`, "offline, Gym still shows the 3D body".
+  `gym-muscles` 74/74, `body-reach` 3/3, `body` 40/40. Measured by
+  `farbregeln.mjs` on the rendered body: the chest at +2 % — the smallest
+  rise the band now shows, at the weakest strength — stands 19.5 ΔE from
+  the same chest held, the quadriceps at −3 % 20.4, and +7 % is greener
+  than +2 % (a* −45.2 against −17.3). The six fingerprints are unchanged;
+  of the golden files only the state column of seven `stage5b-*.gym.json`
+  moved (`band-golden-diff.mjs`), and `kurve-golden-diff.mjs` still passes
+  on its own two commits. No scoring code changed after the STOP, so the
+  replay timings were not taken again. **Not checked on the iPhone yet:**
+  the lines on the scale of 8 %, "+2 %" in green, and the legend's two
+  sentences.
+- **Preview after STOP Kurve.** `Momentum-preview` `ae10d3d`, built from
+  `d43414b` as before; served from a local server under
+  `/Momentum-preview/` before the push, the published tree imports the
+  file of the STOP day, shows the Gym rating 833 and names the exercise
+  detail's scale "+8 %". Pictures of the rows and of the exercise detail
+  on the old scale and the new: `docs/design/wp3/kurve/nach-stop-*.png`
+  (in the comparisons "nachher" is the scale to 12 % as the block was
+  accepted, "nach-stop" the scale to 8 %).
 - **Seen and left**: abstinence decay can still cost a whole tier (D174) —
   with the built value a break after the import file ends at 700.0, as
   under the old rules; the edge of the three load steps with a date that
@@ -1882,8 +1946,8 @@ rating           ← rating + (target − rating) × movementFactor(rating, targ
   keyed by metric and curve. A day before the era, a day under a marker
   without the value (a Stage 5b preview wrote such), and every day of
   Running compute with the constants, bit for bit. The five properties of
-  D101 hold for every value; the two constants are untouched.
-  `GYM_CURVE_CONFIRMED` is `false` until the owner confirms the three.
+  D101 hold for every value; the two constants are untouched. The owner
+  confirmed the three at STOP Kurve (D180, `GYM_CURVE_CONFIRMED`).
 - **Map then average**, never average then map: the two windows exist to be
   able to disagree.
 - **One component missing** ⇒ use the other. **Both missing** ⇒ the target is
@@ -2087,8 +2151,8 @@ own history; no population norms, ever.
   fitted, and Stage 5b deliberately left it untouched. The block carries
   Gym's value in the snapshot of the Stage 5b era — three, where the
   constants say ten — because the two constants are read when the module
-  loads and changing them in place would revalue every past day. What
-  remains of it is the owner's confirmation of the value (STOP Kurve).
+  loads and changing them in place would revalue every past day. The
+  owner confirmed the value at STOP Kurve (D180).
 - **A device that loaded a preview carries that preview's value in its
   snapshot** (D178). A marker without the curve's value (a Stage 5b
   preview) gets the value added from the first load of this build, and the
@@ -2099,18 +2163,15 @@ own history; no population norms, ever.
   lived, and a check that wants one boundary imports the block's file
   afresh. No released device is in either state: the live app has never
   written a marker.
-- **The scale of the rows and of the exercise detail is still 12 %**
-  (`SPARK_SCALE`, `LINE_SCALE`), while a tint is full from 8 % (D179) and a
-  month under the Stage 5b metric reads +3 to +7 %: the rows are right and
-  quiet, and harder to tell apart than the body. Asked at STOP Kurve, not
-  changed.
-- **The held band sits where a single step lands** (D153, seen at STOP
-  5b): one rep more at the same weight is `1 ÷ (30 + reps)`, so 10 to 11
-  reps reads "+3 %" and 11 to 12 reads "+2 %", "Gehalten". The owner's aim
-  is that one rep more reads as progress up to twelve reps; the design of
-  block "Kurve" lays out two ways to meet it and what each does to small
-  falls (`docs/design/wp3/kurve.md`, section 11). Asked at STOP Kurve, not
-  changed.
+- ~~**The scale of the rows and of the exercise detail is still 12 %**~~
+  — **done at STOP Kurve** (D180): both are 8 %, the change at which a tint
+  is full, and the exercise detail widens in steps of four.
+- ~~**The held band sits where a single step lands**~~ (D153, seen at STOP
+  5b) — **done at STOP Kurve** (D180): the band is one-sided, a rise counts
+  from a shown +2 %, and one rep more reads as progress at every rep
+  count. What stays as it was, and is the price of not making every missed
+  rep a decline: "+2 %" is green and "−2 %" is neutral. The legend says
+  why.
 - **A snapshot dated between today and a kept era boundary takes the era's
   marker** (found in the closing review of Stage 5b; the same in all three
   load steps — `ensureSessionWindowEra`, `ensureFoodRetired`,
@@ -2222,21 +2283,15 @@ Re-run browser suites with `scripts/verify/*.mjs` (see that README; needs
 
 ## Next work
 
-**WP3: block "Kurve" is built and waits for the owner's acceptance** (STOP
-Kurve; D177–D179). He checks the preview on his iPhone with the import
-file of his check day (`docs/wp3/kurve/README.md`) and answers four
-questions: the curve's value (three is built; four and 2.5 are laid beside
-it), the tint's upper end (8 %), whether the scale of the rows and the
-exercise detail goes with it, and whether the held band stays at ±2 % —
-his aim is that one rep more at the same weight reads as progress up to
-twelve reps. What he chooses is built in the same session as the STOP:
-another value means changing `GYM_METRIC.curveDecadePercent`, freezing the
-seven Stage 5b golden files again and republishing; once he confirms,
-`GYM_CURVE_CONFIRMED` becomes `true`.
-
-**After it: 7B**, in a fresh session started with "Lies
-`docs/wp3/prompts/prompt-7b-interaktion.md` und führe ihn aus." Then 7C,
-7D, 9, and the tidy-up.
+**WP3: the next block is 7B**, in a fresh session started with "Lies
+`docs/wp3/prompts/prompt-7b-interaktion.md` und führe ihn aus." Block
+"Kurve" is accepted (D180), with the owner's four answers built: the
+curve's value three, the tint full from 8 %, the rows and the exercise
+detail on a scale of 8 %, and the held band one-sided. What he has not yet
+seen on his iPhone is what those answers changed after his check: the
+lines of the rows and of the exercise detail on the new scale, "+2 %" in
+green, and the legend's two sentences — the report of the session names
+them. After 7B: 7C, 7D, 9, and the tidy-up.
 
 **Food has left the product (WP3 Stage 4, D139).** Gate 2 is moot. Food-era
 days replay as they were, and the data stays (D140); nothing in the build

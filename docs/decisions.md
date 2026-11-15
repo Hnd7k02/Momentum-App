@@ -5106,3 +5106,107 @@ exercise detail (`SPARK_SCALE`, `LINE_SCALE`, 12 %) and the held band
 (−2 to +2 %), with the owner's aim that one rep more at the same weight
 reads as progress up to twelve reps and what either way of meeting it does
 to small falls (`docs/design/wp3/kurve.md`, sections 10 and 11).
+
+## D180 — STOP Kurve: accepted on the iPhone; three stands, the tint is full from 8 %, the rows and the exercise detail go to 8 %, and the held band becomes one-sided
+
+**Decision (owner, 2026-11-15, at STOP Kurve).** He accepted the block
+("STOP Kurve: abgenommen") and answered its four questions. His line on the
+check reads "iPhone (Vorschau, Datei vom [16./17.]11.): [alles ok" — the
+brackets as he sent them; it is read as nothing found, and he was told so.
+
+**1. The curve's value is three.** `GYM_CURVE_CONFIRMED` is `true` (D177).
+Nothing computed changes: the value was built and on. A snapshot written
+with three keeps three for the days it covers; changing it again would be a
+decision and an era of its own.
+
+**2. A tint on the body is full from 8 %.** As built (D179).
+
+**3. The scale of the rows and of the exercise detail goes to 8 % with it.**
+`SPARK_SCALE` and `LINE_SCALE` are 8 where they were 12, and the exercise
+detail widens in steps of four where it widened in steps of six. 8 % is the
+change at which a tint is full, so the body and the rows speak on one
+scale. A row's line stands 3.4 pixels above its zero line at +3 % and 7.9
+at +7 %, where it stood 2¼ and 5¼ — its half height is nine pixels, not
+the twelve the design and the STOP report had counted with; the shares
+they named, a quarter to somewhat over a half, were right. What it costs:
+at 90 days more rows stand at the edge, where the number beside the line
+says how far they went. The sheet's chart of block 7C takes the same scale
+(contract §6).
+
+**4. The held band is one-sided, and the legend says so.** His aim at the
+start of the block: one rep more at the same weight reads as progress,
+always, up to twelve reps. Under the strength score one rep more is
+`1 ÷ (30 + reps)`: +2.50 % from ten to eleven, shown "+3 %", and +2.44 %
+from eleven to twelve, shown "+2 %" — which the band of D153 called
+"Gehalten". Of the two ways the design laid out (section 11) he chose the
+one-sided one:
+
+| | Held | A rise counts from | A fall counts from |
+|---|---|---|---|
+| D153, until now | −2 % … +2 % | +3 % | −3 % |
+| **D180** | **−2 % … +1 %** | **+2 %** | **−3 %**, as before |
+
+- One rep more is then progress at every rep count (+1.5 % or more up to
+  thirty-six reps). One rep less is a decline up to ten reps and held from
+  eleven, exactly as before. A symmetric ±1 would have made every missed
+  rep a decline, which is the twitchiness the band exists against.
+- It is still the one place: `trendOfShown()` in
+  `features/gym/muscleState.ts`, read by the body, the flat figure, the
+  rows, the hub's card, the trend above the rows, the exercise list and
+  detail and the golden test. The state still follows the shown whole
+  percent, so figure and colour cannot part.
+- **The legend explains it at the two figures that differ**: "Ab +2 %.
+  Schon eine Wiederholung mehr zählt als Fortschritt." and "Ab −3 %. Eine
+  kleine Schwankung nach unten zählt noch nicht als Rückgang." A sentence
+  of its own under the five states was tried first and slid below the
+  visible part of the sheet on a 320-pixel phone; at the rule it is read
+  where the question arises. On that phone the sheet's last line — what an
+  exercise day is — now stands below the fold and is reached by scrolling
+  the sheet; `farbregeln.mjs` measures it there.
+- **The tint's scale does not move for it** — a reading of mine, and a
+  departure from what the design expected. The design said the start of
+  the scale would move from 2.5 % to 1.5 %. That would have made +3 % a
+  strength of 0.46 where the owner had just accepted 0.36, and every small
+  rise greener. Instead a rise shown as "+2 %" takes the weakest strength,
+  0.3 (D167), as +2.5 % does, and the scale from 2.5 % to 8 % is the one he
+  saw. The strength stays a matter of the size of a change alone; which
+  side counts from where is the band's. A fall still begins at −2.5 %.
+
+**What moved.** No rating, no Boss point, no fingerprint: the band is
+presentation and `src/core` knows none of it. In the golden files the one
+column a change to the colour rules may move did move (D164 had foreseen
+it): 24 states in seven `stage5b-*.gym.json` went from "unchanged" to
+"improved", each at a shown +2 %, and nothing else — held by
+`scripts/verify/band-golden-diff.mjs`, which also holds that in all eleven
+golden Gym files every rated group's state is the one-sided band's reading
+of its figure (358 groups). `kurve-golden-diff.mjs` compares its own two
+commits from now on, so it stays the proof of the curve's re-freeze.
+
+**On the import file of the check** the ten group figures and their states
+are what they were — every group stands at +3 % or more. In the exercise
+list three exercises that read "Gehalten" read "+2 %" in green: Kniebeuge,
+Wadenheben and Bizeps-Curls. Langhantelrudern (0 %) and Latzug (+1 %) stay
+"Gehalten". In the profiles counted for the design three of twelve
+exercises change in the long profile too, and two groups of the
+sixteen-week profile under the metric from day one at 30 days.
+
+**Tests restated, none removed or weakened.** `metric.test.ts` and
+`gymCurveGoal.test.ts` (the flag is true); `muscleState.test.ts` (the
+band's table with both of its edges, the two constants, and one rep more
+and less at every rep count from 1 to 20); `gymHub.test.tsx` (held at
++1 %, a rise at +2 %, held at −2 %); `Sparkline.test.ts`,
+`ExerciseLineChart.test.ts`, `ExerciseDetail.test.ts` and
+`exerciseDetailChart.test.tsx` (every statement held on the scale of 8 and
+the step of four); `bodyVisuals.test.ts` (a rise shown as +2 % takes the
+weakest strength, and the accepted scale is where it was). Three browser
+suites state the new rule where they stated the old one, none with a check
+fewer: `farbregeln.mjs` (the fixture's rising edge at +2 % and +1 %, the
+held figure within −2 to +1, the smallest rise on the body at +2 %, the
+legend's words), `gym-muscles.mjs` and `design-system.mjs` (the band, and
+the line's scale and step).
+
+**For 7C** (D176): the third figure of the bench press in the import file,
+the change in the range that enters the group's figure, is +1.5 %, shown
+"+2 %" — "Gehalten" when D176 was written, "Verbessert" now. The finding
+stands: one exercise would still read +3 %, +4 % and +2 % in three places.
+`prompt-7c-muskel-sheet.md` carries the scale and the band as decided.

@@ -550,6 +550,14 @@ give +3 % four and a half pixels and +7 % ten and a half; at 90 days more
 rows would stand at the edge than do today. The question goes to the STOP;
 nothing is built for it here.
 
+*Corrected after the STOP:* the pixels in this section were counted on a
+half height of twelve. A row's line keeps three pixels from its box, so
+its half height is nine: at 30 days the import file's rows stood 2¼ to 5¼
+pixels above the zero line on the scale to 12 %, not three to seven, and
+the scale to 8 % puts +3 % at 3.4 and +7 % at 7.9, not at four and a half
+and ten and a half. The shares — a quarter to somewhat over a half — were
+right. The owner took both scales to 8 % (D180).
+
 ## 11. The band beside the new metric
 
 "Gehalten" is −2 to +2 % of the shown whole number (D153): a change under
@@ -927,3 +935,28 @@ Jahresbeginn" reads +6 % here and +15 % in the live app.
 
 **Not measured: the owner's own data.** There is none in either
 repository; every number above is from invented diaries.
+
+## After STOP Kurve
+
+The owner accepted the block on 2026-11-15 and answered its four questions
+(D180). Sections 1 to 9 and the report above stand as written; this is
+what his answers changed.
+
+- **The value three is confirmed.** `GYM_CURVE_CONFIRMED` is `true`.
+- **A tint is full from 8 %**, as built.
+- **The two scales of section 10 went to 8 %**: `SPARK_SCALE` and
+  `LINE_SCALE` are 8, and the exercise detail widens in steps of four. The
+  correction under that section has the pixels.
+- **The band of section 11 is B, the one-sided one**: −2 to +1 % held, a
+  rise from a shown +2 %, a fall from a shown −3 %. The legend says why at
+  the two figures that differ. One thing was built otherwise than section
+  11 expected: the start of the tint's scale did **not** move to 1.5 %. A
+  rise shown as "+2 %" takes the weakest strength, 0.3, and the scale from
+  2.5 % to 8 % is the one he had accepted on the screen — moving its start
+  would have made +3 % a strength of 0.46 where it is 0.36.
+- **In the golden files** 24 states went from held to improved, each at a
+  shown +2 %, in seven `stage5b-*.gym.json`; no rating and no fingerprint
+  moved ([`kurve-golden.md`](kurve-golden.md), second part).
+- **On the import file** the ten group figures and states are what they
+  were; three exercises of the list read "+2 %" in green where they read
+  "Gehalten": Kniebeuge, Wadenheben and Bizeps-Curls.

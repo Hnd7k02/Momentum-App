@@ -45,7 +45,7 @@ Abgenommen sind, laut `HANDOVER.md` oder Darios Startnachricht:
 
 - **Farbregeln:** `muscleState.ts` trägt Band und Mindestdaten; 30 und 90 Tage; die Legende.
 - **5b:** die Kennzahl ist der beste Arbeitssatz; Sätze können als Aufwärmsatz markiert sein; das Übungsdetail zeichnet eine Linie (D175).
-- **Kurve:** die Leistungskurve und die Farbstärke am Körper sind neu eingestellt (D175). Was Dario an ihrem STOP zur Skala der Zeilen und des Übungsdetails entschieden hat, steht in `HANDOVER.md` und geht den 12 % in diesem Prompt vor.
+- **Kurve:** die Leistungskurve und die Farbstärke am Körper sind neu eingestellt (D175, D177–D179). Am STOP Kurve hat Dario entschieden (D180): Die Skala der Zeilen und des Übungsdetails reicht bis 8 % statt 12 % (im Übungsdetail in Schritten von 4 %), und das Band ist einseitig: −2 bis +1 % ist gehalten, ein Anstieg zählt ab «+2 %», ein Rückgang ab «−3 %»; die Legende erklärt es. Die Zahlen in diesem Prompt sind darauf nachgeführt.
 - **7B:** die Körperbühne steht; ein Tipp dreht nie; der Viewer lässt sich anhalten.
 
 Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
@@ -82,7 +82,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 **Die Zahlen**
 
 - `src/features/gym/muscleAnalytics.ts`: `toMuscleAnalytics(history)` (121) liefert je Gruppe Zustand, Veränderung und Verlauf; `muscleTrend(days, muscle)` (110) liefert einen Punkt je Trainingstag der Gruppe, die Zeile zeigt davon die letzten zwölf (`SPARKLINE_POINTS`, 89).
-- `src/features/gym/Sparkline.tsx`: feste Skala von −12 % bis +12 %, 80 × 24 px, für Vorlesehilfen unsichtbar.
+- `src/features/gym/Sparkline.tsx`: feste Skala von −8 % bis +8 % (D180), 80 × 24 px, für Vorlesehilfen unsichtbar.
 - Die Veränderung einer einzelnen Übung im Zeitraum gibt die Rechnung nicht nach aussen: `gymPerformanceOverSpan` (`src/core/gym/performance.ts`) bildet sie und reicht nur das Mittel der Gruppe weiter.
 - Ein Arbeitsvolumen rechnet nirgends etwas. Texte für «Arbeitsvolumen», den Vermerk «nicht gewertet», «uneinheitlich» und die Überschrift «Erfasst» gibt es in `src/i18n/` nicht. Die Wortfolge «nicht gewertet» steht dort nur in einem Hinweis zum Körpergewicht (`de.ts:502`), der damit nichts zu tun hat.
 
@@ -102,7 +102,7 @@ Fehlt eines davon, bau nichts. Sag Dario, was fehlt, und halte an.
 - **Oben** steht in `src/features/gym/ExerciseDetail.tsx` neben «Zuletzt» und «Davor» die «Veränderung» (`gym.detail.change`). Sie ist `history.comparisons.get(id)`: der letzte Tag gegen den vorigen Tag derselben Übung. Dieselbe Zahl steht in der Übungsliste unter den zehn Zeilen.
 - **An der Linie** steht rechts neben dem Endpunkt der Endwert (`src/features/gym/ExerciseLineChart.tsx`, `lineValues`): der letzte Tag gegen den ersten Tag im gewählten Zeitraum. Er trägt keine Beschriftung; nur die Tabelle für Vorlesehilfen nennt ihre Spalte «Veränderung seit dem ersten Tag».
 - **Beide stimmen und meinen Verschiedenes.** Bankdrücken in den Prüfdaten, 30 Tage bis zum 15.11.: 9 × 60, 10 × 60, 8 × 62,5 und 9 × 62,5 kg. Zum Vortag sind das +2,6 %, gezeigt «+3 %»; seit dem ersten Tag im Zeitraum +4,2 %, gezeigt «+4 %». Die zwei können sogar das Vorzeichen wechseln: Ein Tag, der von einer Spitze zurückfällt, steht noch über seinem ersten Tag (D175).
-- **Es gibt eine dritte Zahl,** und dieser Block bringt sie auf den Bildschirm: die Veränderung der Übung im Zeitraum, wie sie in die Zahl der Gruppe eingeht (Median der letzten gegen den Median der ersten Übungstage, `exerciseSpans` in `src/core/gym/performance.ts`). Schritt 4 verlangt sie für die Übungen im Sheet. Für dasselbe Bankdrücken sind es +1,5 %, gezeigt «+2 %» und damit «Gehalten». Ohne eine Regel stünden für eine Übung also drei Zahlen an drei Stellen.
+- **Es gibt eine dritte Zahl,** und dieser Block bringt sie auf den Bildschirm: die Veränderung der Übung im Zeitraum, wie sie in die Zahl der Gruppe eingeht (Median der letzten gegen den Median der ersten Übungstage, `exerciseSpans` in `src/core/gym/performance.ts`). Schritt 4 verlangt sie für die Übungen im Sheet. Für dasselbe Bankdrücken sind es +1,5 %, gezeigt «+2 %»; bis zum STOP Kurve hiess das «Gehalten», seit dem einseitigen Band (D180) «Verbessert». Ohne eine Regel stünden für eine Übung also drei Zahlen an drei Stellen.
 
 **Tokens**
 
@@ -159,7 +159,7 @@ In dieser Reihenfolge (Vertrag §9, Mockup 2):
 2. **Die Veränderung** in `--type-figure-l` mit Vorzeichen, daneben der Chip mit dem Zustand.
 3. **«Bester Arbeitssatz · letzte 30 Tage»**, mit dem gewählten Zeitraum.
 4. **Die Zeitraumwahl** 30 und 90 Tage. Es ist dieselbe wie auf dem Screen: Wer sie im Sheet ändert, ändert sie überall.
-5. **Das Diagramm** (Vertrag §6): eine Linie in `--data-ink`, 1,5 px, runde Enden, kein Verlauf darunter; die Nulllinie fein und immer sichtbar; links zwei Beschriftungen («0 %» und «+12 %» oder «−12 %»); unten das erste und das letzte Datum; am Endpunkt ein Punkt mit 3 px Radius in der Statusfarbe (bei «Gehalten» in `--data-ink`) und der Wert. Die Skala ist dieselbe wie in den Zeilen; was über 12 % hinausgeht, bleibt am Rand stehen. Ein einzelner Messwert bekommt die Darstellung aus Schritt 6 (D170); bis Dario gewählt hat, bleibt er ein Punkt. Das Diagramm trägt eine Beschreibung für Vorlesehilfen.
+5. **Das Diagramm** (Vertrag §6): eine Linie in `--data-ink`, 1,5 px, runde Enden, kein Verlauf darunter; die Nulllinie fein und immer sichtbar; links zwei Beschriftungen («0 %» und «+8 %» oder «−8 %»); unten das erste und das letzte Datum; am Endpunkt ein Punkt mit 3 px Radius in der Statusfarbe (bei «Gehalten» in `--data-ink`) und der Wert. Die Skala ist dieselbe wie in den Zeilen; was über 8 % hinausgeht, bleibt am Rand stehen. Ein einzelner Messwert bekommt die Darstellung aus Schritt 6 (D170); bis Dario gewählt hat, bleibt er ein Punkt. Das Diagramm trägt eine Beschreibung für Vorlesehilfen.
 6. **Die Übungen der Gruppe**, jede mit ihrem besten Arbeitssatz im Zeitraum («8 × 82,5 kg», in der gewählten Einheit) und ihrer Veränderung.
 7. **Arbeitsvolumen pro Woche**, mit dem Vermerk «nicht gewertet», als Balken.
 
@@ -210,7 +210,7 @@ Drei Punkte aus Darios Prüfung vom 15.11.2026 und einer vom Start des Blocks «
   - **A – Linie ab dem Ausgangswert.** Die Zahl der Zeile ist die Veränderung seit dem ersten Tag der Übung im Zeitraum, und dieser erste Tag ist per Definition 0 %. Die Linie beginnt deshalb am ersten Tag auf der Nulllinie und endet am Messwert: Aus einem Punkt wird eine kurze Linie mit Richtung. Kläre, ob dann jede Linie so beginnt, auch die mit vielen Punkten, und was das für die zwölf Punkte der Zeile heisst.
   - **B – Kein Diagramm, ein Wort.** Wie bei «Zu wenig Vergleichsdaten» gibt die Zeile den Platz der Linie den Wörtern: die Zahl, der Zustand und ein kurzer Vermerk, dass es der erste Vergleich ist.
   - **C – Wert gegen null.** Ein kurzer senkrechter Strich von der Nulllinie zum Punkt: ein Wert, keine Richtung.
-- Zu jedem Kandidaten sagst du: Was liest jemand, der die App nicht kennt? Stimmt die Aussage, dass ein Vergleich aus zwei Tagen ein Wert ist und noch kein Verlauf? Passt er zur gemeinsamen Skala von −12 % bis +12 %? Bleibt die Zeile ruhig neben neun anderen?
+- Zu jedem Kandidaten sagst du: Was liest jemand, der die App nicht kennt? Stimmt die Aussage, dass ein Vergleich aus zwei Tagen ein Wert ist und noch kein Verlauf? Passt er zur gemeinsamen Skala von −8 % bis +8 %? Bleibt die Zeile ruhig neben neun anderen?
 - Zeile und Sheet zeigen denselben Fall auf dieselbe Art. Seit STOP 5b gibt es eine dritte Stelle: Das Übungsdetail zeichnet eine Linie (`src/features/gym/ExerciseLineChart.tsx`, D175), und ein einzelner Tag ist dort ein Punkt ohne Wert. Dein Vorschlag gilt für alle drei, und die Kandidaten zeigst du auch dort.
 - **Im Build bleibt bis zu Darios Wahl der Punkt.** Die Frage geht mit deiner Empfehlung an den STOP. Wählt er, baust du es in derselben Session, ziehst Vertrag §6 und den Satz in `CLAUDE.md` («one value draws a dot») nach und passt die Prüfungen an, die den Punkt festhalten (`gym-muscles.mjs`, `release-proof.mjs`, `Sparkline.test.ts`), jede mit alter und neuer Regel im Bericht.
 
