@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { Card, EmptyState, Figure, Section } from '../../components';
 import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
@@ -46,12 +47,19 @@ export function ExerciseDetail({
   days,
   comparison,
   onClose,
+  Chart,
 }: {
   name: string;
   /** Newest first. */
   days: ExerciseDay[];
   comparison: ExerciseComparison | undefined;
   onClose(): void;
+  /**
+   * Another drawing of the same days in place of the bars. The build passes
+   * none: the bars are the chart (D163). It exists for the line the contract
+   * left to Stage 5b to judge, which is shown on the dev server only.
+   */
+  Chart?: ComponentType<{ days: ExerciseDay[] }>;
 }) {
   const t = useT();
   // The exercise detail is a Gym screen (WP3 Stage 6).
@@ -153,6 +161,7 @@ export function ExerciseDetail({
                   numbers with their dates, exactly as the Wellbeing history
                   does. One picture, one semantic alternative.
                 */}
+                {Chart ? <Chart days={days} /> : (
                 <div className="gym-detail__chart" aria-hidden="true">
                   <div className="gym-detail__axis">
                     <span className="gym-detail__axisMax">{largest ? score(largest) : null}</span>
@@ -186,6 +195,7 @@ export function ExerciseDetail({
                     ) : null}
                   </div>
                 </div>
+                )}
 
                 <div className="visually-hidden">
                   <table>

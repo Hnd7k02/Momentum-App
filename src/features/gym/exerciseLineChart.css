@@ -1,0 +1,107 @@
+/*
+ * The exercise detail's days as a line — the proposal for STOP 5b
+ * (`ExerciseLineChart.tsx`), loaded on the dev server only. The rules are
+ * the contract's (§6): a neutral 1.5px line with round ends, a fine zero
+ * line that is always there, the end point in the state's colour and the
+ * data ink when it is held, the value beside it.
+ */
+.exercise-line__axis {
+  flex: none;
+  position: relative;
+  height: 110px;
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* Each label centred on the line it names. */
+.exercise-line__label {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.exercise-line__sizer {
+  visibility: hidden;
+}
+
+.exercise-line__plot {
+  position: relative;
+  height: 110px;
+}
+
+.exercise-line__zero,
+.exercise-line__bound {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+}
+
+.exercise-line__zero {
+  border-top: 1px solid var(--separator-strong);
+}
+
+.exercise-line__bound {
+  border-top: 1px dashed var(--separator-strong);
+}
+
+.exercise-line__svg {
+  position: absolute;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  overflow: visible;
+}
+
+.exercise-line__line {
+  stroke: var(--data-ink);
+  stroke-width: 1.5;
+}
+
+.exercise-line__end {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--data-ink);
+}
+
+.exercise-line__end--improved {
+  background: var(--status-strong);
+}
+
+.exercise-line__end--declined {
+  background: var(--status-weak);
+}
+
+/* The end value's column, right of the plot and as high as it. */
+.exercise-line__endColumn {
+  flex: none;
+  position: relative;
+  height: 110px;
+  font-size: var(--type-caption);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The value, centred on the height of the end point it belongs to. */
+.exercise-line__value {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  color: var(--text-primary);
+}
+
+.exercise-line__value--improved {
+  color: var(--status-strong-ink);
+}
+
+.exercise-line__value--declined {
+  color: var(--status-weak-ink);
+}

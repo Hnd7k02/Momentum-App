@@ -48,6 +48,10 @@ import {
  * For a backup handed in, only what the prompt allows leaves the file:
  * figures for exercises and muscle groups, the Gym rating and the Boss. No
  * answer, no question text and no note is read.
+ *
+ * `STAGE5B_PROFILE=<file.json>` writes the strength profile as a backup
+ * file, so that a browser can import it for the pictures of the exercise
+ * detail (`scripts/verify/stage5b-chart-shots.mjs`).
  */
 
 const OUT = process.env.STAGE5B_REPORT;
@@ -383,4 +387,12 @@ describe.runIf(Boolean(OUT))('the Stage 5b number report', () => {
     mkdirSync(dirname(OUT!), { recursive: true });
     writeFileSync(OUT!, `${parts.join('\n')}\n`);
   }, 600_000);
+});
+
+describe.runIf(Boolean(process.env.STAGE5B_PROFILE))('the strength profile as a file', () => {
+  it('writes the backup a browser can import', () => {
+    const file = process.env.STAGE5B_PROFILE!;
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, strengthProfile());
+  });
 });

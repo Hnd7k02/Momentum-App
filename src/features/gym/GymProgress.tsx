@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Suspense, lazy, useMemo, useState } from 'react';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { Button, Card, EmptyState, Section } from '../../components';
 import './gymHub.css';
@@ -19,6 +19,17 @@ import { exerciseDaysText, muscleGap, muscleGapText } from './muscleGap';
 import { exerciseGroups, shownChangeText, shownPerformance } from './muscleState';
 import { percentChange } from '../../core/gym/performance';
 import './gym.css';
+
+/**
+ * The exercise detail's line, the proposal for STOP 5b — on the dev server
+ * only, with `?chart=line`. The condition is a build-time constant, so a
+ * production bundle carries neither the branch nor the chart: the build
+ * draws bars (D163). `wp3-stage5b.mjs` holds that it is not in the bundle.
+ */
+const ProposedLineChart =
+  import.meta.env.DEV && new URLSearchParams(window.location.search).get('chart') === 'line'
+    ? lazy(() => import('./ExerciseLineChart').then((module) => ({ default: module.ExerciseLineChart })))
+    : null;
 
 /**
  * Gym's detail, below the overview.
@@ -104,12 +115,15 @@ export function GymProgress({
 
   if (openExercise) {
     return (
-      <ExerciseDetail
-        name={namer.name(openExercise, history.names.get(openExercise) ?? openExercise)}
-        days={exerciseHistory(history, openExercise)}
-        comparison={history.comparisons.get(openExercise)}
-        onClose={() => setOpenExercise(null)}
-      />
+      <Suspense fallback={null}>
+        <ExerciseDetail
+          name={namer.name(openExercise, history.names.get(openExercise) ?? openExercise)}
+          days={exerciseHistory(history, openExercise)}
+          comparison={history.comparisons.get(openExercise)}
+          onClose={() => setOpenExercise(null)}
+          {...(ProposedLineChart ? { Chart: ProposedLineChart } : {})}
+        />
+      </Suspense>
     );
   }
 
