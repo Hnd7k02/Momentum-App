@@ -326,13 +326,21 @@ describe('the P8 golden profiles (re-frozen at STOP 3b under the P8 rules)', () 
  *
  * Each clock freezes the Boss replay with the whole Gym rating state and the
  * Gym history the screens read at 7, 30 and 90 days.
+ *
+ * **Frozen again in the block "Kurve" (D177).** The profiles write the
+ * marker of the era, and from that block on the marker names the curve's
+ * value. The seven `*.boss.json` with days of the era moved — the level and
+ * what follows from it, nothing else, and no day before the boundary; the
+ * file of the day before the boundary and all eight `*.gym.json` did not.
+ * `scripts/verify/kurve-golden-diff.mjs` holds that against the commit
+ * before the block, and `docs/design/wp3/kurve-golden.md` is the record.
  */
 const STAGE5B_PROFILES: { name: string; load(): string; clocks: readonly string[] }[] = [
   { name: 'stage5b crossing the metric', load: metricCrossingProfile, clocks: METRIC_CROSSING_CLOCKS },
   { name: 'stage5b under the metric from day one', load: strengthProfile, clocks: STRENGTH_CLOCKS },
 ];
 
-describe('the Stage 5b golden profiles (frozen at STOP 5b)', () => {
+describe('the Stage 5b golden profiles (frozen at STOP 5b, and again under the curve of the block Kurve)', () => {
   afterEach(async () => {
     setClock(null);
     await closeDatabase();
