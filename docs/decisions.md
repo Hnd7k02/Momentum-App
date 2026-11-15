@@ -3488,6 +3488,7 @@ by this.
   it: one Gym golden file changes its row order and no value.
 - **To be confirmed with numbers at the STOP of Stage 5b:** the window
   comparison by the median of the last and the first exercise-days.
+  *Confirmed by the owner at STOP 5b, 2026-11-15 (D175).*
 
 Why not the mean, with the worked cases: `docs/wp3/review-2026-11.md`,
 section E. Built in Stage 5b.
@@ -3612,6 +3613,11 @@ The remaining work runs as blocks — the contract, 6b, the colour rules, 5b,
 done and accepted — 7A was pulled before 5b. A block 7D, the exercise
 catalogue and its search, is added. The order from here: 5b, 7B, 7C, 7D, 9,
 and the tidy-up of D157 last.
+
+*Status (2026-11-15, D175):* 5b is accepted. A block "Kurve" — the
+performance curve and the colour strength on the body, fitted to the new
+metric — is added between 5b and 7B. The order from here: Kurve, 7B, 7C,
+7D, 9, and the tidy-up last.
 
 ## D160 — The visual contract is approved; areas carry no colour, and a met weekly target is the one coloured bar
 
@@ -3783,6 +3789,11 @@ belongs to the colour-rules block, which rewrites these words anyway. The
 `scripts/verify/design-system.mjs`.
 
 ## D163 — STOP 6b: accepted on the iPhone; bars from zero, an empty range that says why, three text rules
+
+> **Status note (D175).** The exercise detail, whose bars this entry set
+> on zero, draws a line since STOP 5b. What the bars from zero were for — a
+> small change must look small — is kept by the line's scale, which reaches
+> 12 % at the least. The rule for bars stands for any bar chart to come.
 
 **Decided by the owner on 2026-11-11**, after going through the published
 preview on his iPhone. Nine of the ten points of the checklist were in
@@ -4493,6 +4504,9 @@ weigh; none is decided here.
 
 ## D171 — The exercise catalogue grows to at least ten per group, with a keyword search: block 7D
 
+> **Status note (D175).** The order named below gains a block "Kurve"
+> between 5b and 7B.
+
 **Decision (owner, 2026-11-15). Amends the order of D159.**
 
 The catalogue has 49 exercises, five of them loaded by bodyweight and two
@@ -4598,6 +4612,9 @@ metric" applied to today, and it is neither stored nor scored. The rating's
 days before the boundary never read it.
 
 ## D173 — Stage 5b: the warm-up mark in the set row, and what a marked set is left out of
+
+> **Status note (D175).** The set's number stays the control. Since STOP 5b
+> a hint under the sets says where it is, until a set has been marked once.
 
 **Decisions of the block (2026-11-15), within D151.**
 
@@ -4720,3 +4737,76 @@ days before the boundary never read it.
   `docs/design/wp3/stage5b/linie-oder-balken-*.png`. The recommendation at
   the STOP is the line: under the new metric a week's change is two or
   three percent, and bars from zero stand almost level.
+
+## D175 — STOP 5b: accepted on the iPhone; the median stands, the exercise detail draws a line, a hint says where the mark is, and the curve gets a block of its own
+
+**Decision (owner, STOP 5b, 2026-11-15).** He checked the preview
+(`Momentum-preview` `7e0572f`) on his iPhone with the import file — points
+3 to 9 of the checklist, the preview only — and found nothing: "alles ok".
+His four answers, and what each became:
+
+1. **The median stands.** `GYM_COMPARISON_CONFIRMED` is `true`. The switch
+   stays wired, and changing the comparison again is a decision and an era
+   of its own (D150, D172).
+2. **The exercise detail draws a line, not bars** (contract §6). Built in
+   the same session: each day as its change since the first day shown, the
+   zero line that day; the scale of the muscle rows, 12 % to the edge,
+   widened in steps of six where a series goes further and never cut off;
+   the end point in the state of the end value, the value right of the
+   plot; one day a dot and no value. The table a screen reader gets gains
+   the change since the first day. It replaces D163's bars for this chart
+   and keeps their reason — a small change must look small.
+3. **The curve is set anew in a block of its own, "Kurve", directly after
+   5b and before 7B** — if possible inside the era of 5b, because nothing
+   of that era is released yet. There is no backup with real data to
+   measure on. The aim, in his words: whoever manages one rep more every
+   week and then more weight, as in the import file, does not stand lower
+   after the update than before. **The colour scale on the body belongs to
+   the same block**: full strength comes at 12 % today, and under the new
+   metric the import file's groups all lie between +3 and +7 %. A design
+   with the numbers old against new comes first, then the code:
+   `docs/wp3/prompts/prompt-kurve.md`. The order from here: **5b, Kurve,
+   7B, 7C, 7D, 9, and the tidy-up last** (amends D159 and D171).
+4. **The set's number stays the control, and a hint says where it is**
+   until a set has been marked once: "Tippe auf die Satznummer, um einen
+   Satz als Aufwärmsatz zu markieren." Whether he would have found the mark
+   unaided he could no longer judge, having read the report.
+
+**How the hint is built.**
+
+- It stands once in a workout, under the sets of the first exercise that
+  has one — not beneath every exercise — as an 11px caption, and only where
+  a set can be marked: not on a draft, not on a closed day.
+- "Until I have marked a set once" is an event, not a state: a mark taken
+  off again must not bring the hint back. So the first mark is recorded,
+  `settings.warmUpMarkUsed`, the way `acknowledgedRankId` records that a
+  promotion was seen — a fact about what happened, read by nothing that is
+  scored, and no config snapshot. Deriving it from "some set carries the
+  mark" would have shown the hint again to someone who tried the mark and
+  took it off.
+- It travels with a backup like the rest of the settings record; an older
+  build keeps the field and never reads it. `SCHEMA_VERSION` 5 and
+  `BACKUP_FORMAT_VERSION` 3 are unchanged.
+- A device that marked a set before this build — the owner's preview —
+  shows the hint until its next mark.
+
+**Two things about the line, said to him rather than decided for him.**
+
+- The figures above the chart compare the last day with the one before;
+  the chart's end value compares the last day with the first day shown. So
+  the two can differ, even in sign: a day that fell back from a peak still
+  stands above its first day. Both are true statements about named days.
+- One day is a dot. D170 asks block 7C for a better form of a single
+  observation in the row and the sheet; the exercise detail is now a third
+  place it applies to.
+
+**What the prompt for "Kurve" fixes, so that the block cannot drift.** The
+two constants of the curve are read when the module loads, not from the
+day's snapshot, so changing them would revalue every past day: the block
+may not touch them and has to carry Gym's value in the snapshot, in the era
+of 5b. The five properties of D101 stay as they are, for every domain;
+what becomes Gym's own, in its era, is the one value D99 allows to be
+tuned — an amendment to D101 the block records. Running may not move on
+any day. The weakest tint stays 0.3 (D167) and the band stays where it is
+(D153). The scale of the rows and of the exercise detail is shown and
+asked about, not changed.

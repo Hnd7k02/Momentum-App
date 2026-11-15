@@ -208,7 +208,7 @@ Never conflate them.
   decay, Maintenance — is the shared code in `core/scoring/`. Add a domain by
   adding its evidence, never by copying the model.
 - **A Gym exercise-day is worth its best working set, as an era** (D150,
-  D151, D172, D173). From the snapshot that carries `scoring.gymMetric` on,
+  D151, D172, D173; the median confirmed at STOP 5b, D175). From the snapshot that carries `scoring.gymMetric` on,
   the day's value is the highest `effective load × (1 + reps ÷ 30)` among
   the sets not marked as a warm-up, and a window compares the median of an
   exercise's last days with the median of its first
@@ -225,7 +225,10 @@ Never conflate them.
   (`warmUp: true` or absent), set by hand, never detected and never
   backfilled: it opens the session and counts for the week like any set,
   and never for the metric. There is no rule for pyramids, drop sets or
-  light weeks.
+  light weeks. The set's number is the mark's control; a hint under the
+  sets says so until a set has been marked once, and that it has is a
+  recorded fact (`settings.warmUpMarkUsed`), not a thing derived from the
+  sets (D175).
 - **An identity a comparison is grouped by must depend only on the record's
   own facts.** Running's distance bands are a pure function of the run's own
   distance, so adding, editing, deleting or expiring any other run cannot
@@ -408,7 +411,11 @@ Never conflate them.
   line and no wash beneath; the end point or the last bar carries the
   state. The rows of a list share one scale, −12 % to +12 %, and bars start
   at zero (D163): a small change must look small. No data draws nothing
-  and one value draws a dot.
+  and one value draws a dot. **The exercise detail draws a line** (D175):
+  each day as its change since the first day shown, on that scale —
+  widened in steps of six where a series goes further, never cut off and
+  never from the smallest day to the largest — with the end value beside
+  the plot, and one day as a dot without a value.
 - **A screen that loads holds its layout** with calm surfaces
   (`LoadingBlocks`), no shimmer — and never for a load that failed, which
   says so and can be retried (`LoadFailure`).

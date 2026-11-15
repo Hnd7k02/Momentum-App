@@ -482,3 +482,20 @@ as long as the break lasts.
   end it softens a dip, at the beginning it lowers the baseline and makes a
   rise look larger. Only from six exercise-days on (k = 3) does one light
   day leave the comparison untouched.
+
+## After STOP 5b
+
+The owner accepted the stage on his iPhone on 2026-11-15 and answered its
+four questions (D175). What that changed in this document's subject:
+
+- **The median is confirmed.** Section 1's "until then it is built and on"
+  is over: `GYM_COMPARISON_CONFIRMED` is `true`, and the switch stays wired.
+- **The exercise detail draws a line.** The proposal of the stage,
+  `ExerciseLineChart.tsx`, is the chart of `ExerciseDetail`; the bars are
+  gone. It draws the days this document's metric values and computes
+  nothing that is scored.
+- **A hint says where the warm-up mark is** until a set has been marked
+  once. That it has is recorded on the settings record
+  (`warmUpMarkUsed`), not derived from the sets.
+- **The curve gets a block of its own, "Kurve"**, before 7B and inside this
+  era — the numbers above are why. `docs/wp3/prompts/prompt-kurve.md`.
