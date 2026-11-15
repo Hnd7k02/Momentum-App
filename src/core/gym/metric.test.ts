@@ -18,9 +18,10 @@ import {
  *
  * Two things are held here. That a snapshot is read as the era it was
  * written in — absence is the metric before, never today's. And that the
- * comparison a snapshot names is the comparison that runs: the switch is
- * confirmed by the owner at STOP 5b, and until then a reserved decision is
- * only reserved if flipping it changes what is computed (`CLAUDE.md`).
+ * comparison a snapshot names is the comparison that runs: the owner
+ * confirmed the median at STOP 5b (D175), and the switch stays wired —
+ * flipping it in a snapshot still changes what is computed (`CLAUDE.md`,
+ * "wire the shape to the thing it governs").
  */
 
 const base = (): AppConfigSnapshot => buildConfigSnapshot([], []);
@@ -111,15 +112,16 @@ const inputs: ExerciseDayInput[] = SERIES.map(([date, reps, kg]) => ({
   sets: [set(reps, kg)],
 }));
 
-describe('the comparison switch (reserved until STOP 5b)', () => {
+describe('the comparison switch (confirmed at STOP 5b, D175)', () => {
   const median: GymMetric = { repsDivisor: 30, comparison: 'median' };
   const firstLast: GymMetric = { repsDivisor: 30, comparison: 'firstLast' };
 
-  it('is built and on in the snapshots this build writes, and not yet confirmed', () => {
+  it('is the median in the snapshots this build writes, as the owner confirmed', () => {
+    // The flag and the switch cannot disagree: what was confirmed is the
+    // median, and a build that wrote anything else would say so here. A
+    // snapshot's own switch is what computes either way.
+    expect(GYM_COMPARISON_CONFIRMED).toBe(true);
     expect(GYM_METRIC.comparison).toBe('median');
-    // Flipped to `true` in the commit that records the owner's confirmation;
-    // a snapshot's own switch is what computes either way.
-    expect(GYM_COMPARISON_CONFIRMED).toBe(false);
   });
 
   it('decides what a window computes: the two values of the switch give two results', () => {

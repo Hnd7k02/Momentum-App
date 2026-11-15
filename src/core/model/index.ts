@@ -298,7 +298,8 @@ export type GymWindowComparison = 'median' | 'firstLast';
  * them with nobody — the documented exception to "no population norms".
  *
  * `comparison` is a switch inside this era and not an era of its own: the
- * owner confirms the median with numbers at STOP 5b.
+ * owner confirmed the median, with the numbers before him, at STOP 5b
+ * (D175).
  */
 export interface GymMetricSnapshot {
   /** Names the metric. */

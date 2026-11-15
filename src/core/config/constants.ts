@@ -282,9 +282,10 @@ export const GYM_SCORING_MODEL = 'attendancePerformance' as const;
  *   documented exception to "no population norms": it only converts the
  *   user's own sets into one another (D150). One constant, never a table.
  * - `comparison` is the window rule, and a **switch**: the median of an
- *   exercise's last and first days was recommended by the review and is
- *   built and on; the owner confirms it with numbers at STOP 5b
- *   (`GYM_COMPARISON_CONFIRMED`). `firstLast` is the rule before it.
+ *   exercise's last and first days, recommended by the review and
+ *   **confirmed by the owner at STOP 5b** with the numbers before him
+ *   (D175, `GYM_COMPARISON_CONFIRMED`). `firstLast` is the rule before it,
+ *   and what a snapshot naming it still computes.
  */
 export const GYM_METRIC = {
   id: 'bestWorkingSet',
@@ -295,13 +296,15 @@ export const GYM_METRIC = {
 /**
  * Whether the owner has confirmed the window comparison `GYM_METRIC` names.
  *
- * `false` until STOP 5b. It gates nothing at run time — the switch that
- * governs the calculation is `GYM_METRIC.comparison`, read from each day's
- * snapshot — and exists so the open decision is a line of code a search
- * finds, with a test beside it holding that the switch and the calculation
- * cannot part (`core/gym/metric.test.ts`).
+ * **`true` since STOP 5b** (D175): the median stands. The flag gates
+ * nothing at run time — the switch that governs the calculation is
+ * `GYM_METRIC.comparison`, read from each day's snapshot — and existed so
+ * that the open decision was a line of code a search finds. It stays, with
+ * the test beside it holding that the flag, the switch and the calculation
+ * cannot part (`core/gym/metric.test.ts`): changing the comparison again is
+ * a decision of its own and an era of its own.
  */
-export const GYM_COMPARISON_CONFIRMED = false;
+export const GYM_COMPARISON_CONFIRMED = true;
 
 /**
  * The Running scoring model this build writes into new config snapshots.
