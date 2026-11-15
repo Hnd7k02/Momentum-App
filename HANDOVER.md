@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D171). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D174). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -11,7 +11,7 @@ either — it says where things stand.
 |---|---|
 | Branch | `claude/momentum-pwa-spec-j82dhm` — the default branch, which is the only one Pages deploys from. Pass 2, the domain terminal and the muscle map were developed on `claude/momentum-pass-2-geometry-r2qzkd`; the muscle-map release candidate `bc57ec6` was merged here with a merge commit (`90bf328`) because the default branch carried a later upload. The release is tagged **`muscle-map-v1`** |
 | Overall-rank update | On `claude/momentum-overall-rank-update-v2`. **Stage 1** (D123): one `--status-*` palette in `tokens.css`, both scales on four bands, muscle-map states on the same colours. **Stage 2** (D124, D125): the Boss is the only rank — domain ranks, badges, promotion messages, peak ranks and per-domain XP are gone from the engine and the screens; abstinence decay measures in an internal held tier; the rating engine's outputs are frozen in `.github/fixtures/stage2/` and replay byte-identical. **Stage 3**: Tombstones verified dormant and pinned by `tombstones.test.ts`; no production change. **Stage 4** (D126): a Boss promotion is confirmed over seven eligible past days; the era boundary is `settings.promotionConfirmation.from` — set at settings creation for a new install (today, Rookie opening) and by the ensure step for a legacy record (the day after activation), never moved; the pending dates are persisted and reconciled from every replay; the activation continuity fixture is `.github/fixtures/stage4/activation.json`. **Stage 5**: verification pass; the distance caption reads "Schwelle erreicht" while a rank waits to be confirmed; indicator states pinned on the real screens by `scripts/verify/stage4-shots.mjs` with screenshots under `docs/design/overall-rank/`. Release audit in the Stage 5 report. **Not merged, not deployed** |
-| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). **The colour rules of the muscle status** (contract §7, D164) and **block 7A** — the body is a new model, built by script from MakeHuman's base mesh, with straight cuts round an inert zone that has a tone of its own, and a light that is tokens without a tone mapping (D165, D166) — are built and **accepted by the owner on his iPhone on 2026-11-13**, from the `Momentum-preview` build `0414126`. **His addendum to that acceptance** (D167) — the weakest tint 0.3, the chest's lower edge level, the borders at the knee, the collarbone and the shoulder as lines the build cuts — is built, published as `Momentum-preview` `c80b61d` and **accepted by the owner on his iPhone on 2026-11-15**, the straight edge of the shoulder included; the elbow and the deltoid's lower edge stay as they are. Stage 5b, 7B, 7C, 7D, 9 and the tidy-up follow, in that order (D159, D171). **Not merged, not deployed** |
+| WP3 (Mind & Gym) | On `claude/momentum-wp3`, branched from `e30becd`, staged. **Stage 0**: the golden replay baseline `.github/fixtures/wp3-golden/` (six files, compared exactly by `domainOutputs.test.ts`). **Stage 1**: bug fixes B1–B6 and B9–B12 with no scoring change — every fingerprint and golden file byte-identical to Stage 0; D127 recorded. **Stage 2**: the workout flow — free workouts as drafts (B7, D128), removal with undo (B8, D131), the running workout on Heute and `finishedAt` (D129), kg \| lb (D130); no scoring change, every fingerprint and golden file byte-identical. **Stage 3a**: the edit-window gate (`docs/design/wp3/stage3a-window.md`). **Stage 3b**: one day back (P8) as an era — one write rule for today and yesterday, a week judged when it is over, abstinence carried while it can be written, D126 on settled days, Heute \| Gestern (D132–D138); every pre-P8 value byte-identical, the P8 golden files re-frozen deliberately. **Stage 4**: Mind and Gym — Food off as an era from the first load (D139), its data kept and nothing creating it (D140), the update day's yesterday (D141), the check-in delete refusing a Gym session (D142), one name, Mind, and the terminal Mind \| Gym (D143), Gestern's wording for the standard questions (D144); every value before the switch-off byte-identical, the Food-off golden files unchanged. **Stage 6a**: the visual system (P11) as two design variants — two token sets, Mind light and Gym dark, declared by the screen and carried on `<html>` (D145); glass cards and sheets with solid fallbacks, nothing blurred over the 3D canvas (D146); text over glass measured on the rendered pixels (D147); the owner chose variant B at STOP 6a (D148). **Stage 6b**: B is the one design system and the visual contract `docs/wp3/vertrag.md` (D160) is applied to every existing screen — colour with three jobs, the type and figure steps, one 16px margin, one order of buttons, the chart rules, layers and motion as tokens, calm loading surfaces — with its rules held by tests (`designRules.test.ts`, `contrast.test.ts`, `design-system.mjs`); nothing computed moved, `src/core/`, `src/storage/`, every fingerprint and golden file untouched (D162). **The colour rules of the muscle status** (contract §7, D164) and **block 7A** — the body is a new model, built by script from MakeHuman's base mesh, with straight cuts round an inert zone that has a tone of its own, and a light that is tokens without a tone mapping (D165, D166) — are built and **accepted by the owner on his iPhone on 2026-11-13**, from the `Momentum-preview` build `0414126`. **His addendum to that acceptance** (D167) — the weakest tint 0.3, the chest's lower edge level, the borders at the knee, the collarbone and the shoulder as lines the build cuts — is built, published as `Momentum-preview` `c80b61d` and **accepted by the owner on his iPhone on 2026-11-15**, the straight edge of the shoulder included; the elbow and the deltoid's lower edge stay as they are. **Stage 5b** (D150, D151, D172–D174): from the first load a Gym exercise-day is worth its best working set by a strength score, as an era marked by `scoring.gymMetric`; a window compares the median of an exercise's last days with the median of its first, behind a switch the owner confirms; a set can be marked as a warm-up by hand; every day before the boundary replays byte-identically, no golden file frozen again, sixteen new ones for two new profiles — **built and published, waiting for the owner at STOP 5b** (the median, line or bars, the curve). 7B, 7C, 7D, 9 and the tidy-up follow, in that order (D159, D171). **Not merged, not deployed** |
 | Muscle map | **Released.** The 3D body in Bereiche → Gym, the ten analytics rows with their mini sparklines, Laufen inside the Gym workspace, the credits entry. App source `5e554aa`; QA record `docs/design/muscle-map/INTEGRATION-QA.md`; handoff deviations `docs/design/muscle-map/HANDOFF-DEVIATIONS.md` |
 | Working tree | clean at the commit this file was committed in |
 | `SCHEMA_VERSION` | **5** (`src/core/model/index.ts`) — v5 adds the `foodDays` store |
@@ -605,10 +605,12 @@ not merged; the choice between the variants is the owner's at STOP 6a)
   the inert tone, and the strength of a small change (±3 %) unchanged.
   **No merge** — the branch stays as it is; the default branch publishes
   the live app with every push.
-- **Still open from the owner:** his backup (it comes with block 5b).
-  Nothing else: the old address is answered (it does not load), the
-  colour rules have no findings, and his points on the proof of the body
-  were none.
+- **Still open from the owner:** his backup. It did not come with block 5b
+  (owner, 2026-11-15: "Ich hänge kein Backup an"), so the stage's run with
+  his own data is missing and its trial run uses a backup the live build
+  made itself (D174). Nothing else: the old address is answered (it does
+  not load), the colour rules have no findings, and his points on the proof
+  of the body were none.
 - **Order from here (owner, 2026-11-15): Stage 5b, 7B, 7C, 7D, 9, and the
   tidy-up of D157 last.** Each block starts in a fresh session from its
   prompt under `docs/wp3/prompts/` — `prompt-5b-kennzahl.md`,
@@ -1412,6 +1414,132 @@ the body of the second sheet stands — and his addendum to it on
   `release-proof.mjs`; `gym-muscles` 73/73, `body-reach` 3/3, `body`
   39/39, `farbregeln` 319/319, each alone.
 
+**WP3 Stage 5b — the exercise-day metric as an era** (branch
+`claude/momentum-wp3`, not merged; **built and published, waiting for the
+owner at STOP 5b**)
+- **What changed.** From the first load of this build a Gym exercise-day is
+  worth its best *working* set by the strength score
+  `effective load × (1 + reps ÷ 30)` (D150); a set can be marked as a
+  warm-up by hand (D151); and a window compares the median of an exercise's
+  last days with the median of its first. Everything from the percentage
+  change on — 70/30, the curve, 40/60, movement, Endurance, decay — is
+  untouched: `git diff 16c520c -- src/core/scoring` is empty. The design,
+  every case and the numbers are `docs/design/wp3/stage5b-kennzahl.md`; the
+  block's own decisions are D172 (the era), D173 (the warm-up mark) and
+  D174 (the trial run and what the numbers showed).
+- **An era.** `scoring.gymMetric` in the snapshot marks it and
+  `gymMetricOf()` is its one reader. `ensureGymMetricEra()` appends it on
+  the first load, after the three existing steps and into the snapshot they
+  wrote for that day: a device as the live build left it (Food on, the
+  three-day window) takes all three eras in **one** snapshot on one load
+  and writes nothing on the second. A new device carries the field from its
+  first snapshot. Each scored day computes its whole window in its own
+  day's metric; the screens read the metric of the day their range ends on.
+- **The two proofs that no earlier day moved.** (1) Every existing golden
+  file, the Stage 2 and Stage 4 baselines and every fingerprint of
+  `domainOutputs.test.ts` are untouched and green:
+  `git diff 16c520c -- .github/fixtures` shows 25 added files and nothing
+  else — the fixture profiles write their snapshots by hand and were pinned
+  to the old metric all along. (2) Four seeded histories with several sets
+  a day were frozen from the engine *before* the stage
+  (`.github/fixtures/stage5b/`, commit `9dfb658`) and still replay to the
+  last bit (`stage5bLegacy.test.ts`); and over seeded histories every day
+  before the boundary has the same value in every output field once the
+  marker is appended as before it (`gymMetricEra.test.ts`, five update
+  days, five clocks).
+- **New profiles and golden files.** `metricCrossingProfile()` — sixteen
+  weeks lived under the old metric, crossing on a Monday, frozen at five
+  clocks round the boundary — and `strengthProfile()` — the new metric from
+  day one, with double progression in 8–12 reps, a pyramid, drop sets,
+  marked and unmarked warm-ups, a day of warm-ups only, a single light day
+  with six and with four exercise-days, a light week and a bodyweight
+  exercise over a changing weight: sixteen files `stage5b-*.json` in
+  `.github/fixtures/wp3-golden/`, committed on their own (`a33a025`).
+- **The fixed order** is bound to the era (D172): the same sets under other
+  record ids replay to the same bits from the boundary on, and no existing
+  golden file changed its row order — the exception D150 allowed was not
+  needed.
+- **The warm-up mark** (D173). The set's number is the control: a named
+  44px toggle, and the word "Aufwärmsatz" above a marked row, which keeps
+  one line down to 320px in pounds. `warmUp: true` or absent on the record;
+  editable today and yesterday by the one write rule; an undo brings the
+  set back marked; "Satz hinzufügen" does not copy the mark; it counts for
+  the week and never for the metric. The backup carries it;
+  `SCHEMA_VERSION` 5 and `BACKUP_FORMAT_VERSION` 3 are unchanged.
+- **What names earlier sets, and what each shows now.** The "Zuletzt am …"
+  line of a planned workout and the placeholder of a row not yet stored:
+  working sets only, passing over a day on which the exercise had warm-up
+  sets only. "Bester Arbeitssatz" in the workout: the service's answer in
+  the metric the screens read today, never a marked set, "Noch kein
+  Arbeitssatz." when there is none. The exercise list and the exercise
+  detail: exercise-days, so a day of warm-ups only is not among them.
+  Muskelgruppen: says when a range holds warm-up sets only. The week's
+  count, the share of a plan that is done and a session's set count still
+  count every set.
+- **The numbers** — the design's last section, and
+  `docs/design/wp3/stage5b/zahlen-*.md` as generated by
+  `stage5bReport.test.ts`. The step at the update is larger than the review
+  estimated (about 50 points in the target, about −26 after a week): −197
+  in the target and −42 in the Gym rating after a week for a history of
+  strict double progression, −123 to +14 and −37 to +9 over seven update
+  days of the sixteen-week profile. The cause is the untouched curve
+  ("Risks and known debt", below).
+- **The run with the owner's own data is missing.** He attached no backup,
+  and neither repository holds one with a Gym set. The trial run uses a
+  backup the live build made itself through its own interface
+  (`scripts/verify/stage5b-live-backup.mjs`): five weeks, 194 sets,
+  `docs/wp3/stage5b/momentum-pruefdaten-5b.json`. It is also the file the
+  owner loads into the live app and the preview at his check;
+  `stage5bImportFile.test.ts` and `stage5b-import-check.mjs` hold what he
+  reads there. The live build offers 7 and 30 days where this build offers
+  30 and 90, so the two are compared at 30 days.
+- **Open at STOP 5b.**
+  - *The median, yes or no.* Built and on; `GYM_COMPARISON_CONFIRMED` is
+    `false` until he says. If no: `GYM_METRIC.comparison` becomes
+    `firstLast`, the sixteen new golden files are frozen again
+    (`WP3_GOLDEN_DIR`), `farbregeln.mjs` and `stage5bImportFile.test.ts`
+    follow (the first states both rules already), the preview is published
+    again, and a device that has already loaded the preview needs a freshly
+    imported backup, because its snapshot carries the switch it was written
+    with.
+  - *Line or bars in the exercise detail.* The build draws bars. The line
+    is `ExerciseLineChart.tsx`, on the dev server only (`?chart=line`),
+    with pictures of three series at 393 and 320 in
+    `docs/design/wp3/stage5b/linie-oder-balken-*.png`. If he chooses it, it
+    moves into `ExerciseDetail`, `design-system.mjs` follows and contract
+    §6 is brought up to date, in the same session.
+  - *The curve* (review risk 10): whether it is set anew for the quieter
+    metric, in a block of its own.
+  - *His own backup*, for the run with real data.
+- **Seen in the closing review of the era's mechanics, and left**: see
+  "Risks and known debt" — a snapshot dated between today and a kept
+  boundary.
+- **Verification** — against step 0 of the block, taken on `16c520c`:
+  `tsc -b` 0. `npm run test` **exit 0**, 121 files and 2052 tests (113 and
+  1892 before), two more skipped — the report and the profile writer, which
+  run only when asked. `npm run build` clean: `index.js` 514.90 kB
+  (509.36), `index.css` 91.32 kB (90.57); the proposed line chart is not in
+  the bundle. **Every browser suite of step 0 ends as it did**, suite by
+  suite, with the same number of checks: 39 suites, 38 exit 0, 4400 of
+  4401 checks (38 suites, 37, 4080 of 4081 before); the one more is
+  `wp3-stage5b.mjs`, 320/320 at four widths; the one red check is the one
+  that was red before the block — `release-proof.mjs`, "offline, Gym still
+  shows the 3D body" — and is block 9's. The four 3D suites ran one at a
+  time: `gym-muscles` 74/74, `body-reach` 3/3, `farbregeln` 322/322,
+  `body` 40/40. Five suites state the new rule where they stated the old
+  one — `phase4`, `wp3-stage2`, `design-system`, `farbregeln` (D174 and
+  the README name each) — none with a check fewer. The six fingerprints of
+  `domainOutputs.test.ts` are the ones of step 0; `git diff 16c520c --
+  .github/fixtures` is additions only. Replay over 730 days, three runs
+  each, before and after: rating 38–46 and 41–58 ms, Boss 54–81 and
+  55–105 ms, the answers read alone 17–25 and 16–21 ms, the full Boss
+  replay 52–70 and 52–68 ms — inside the noise of the machine, with the
+  four bounds of `replayPerformance.test.ts` unchanged and held. The
+  import file was loaded into the live build and into this one through
+  their own interfaces on each day from 15 to 21 November
+  (`stage5b-import-check.mjs`, 77/77). **Not checked:** the owner's own
+  data, and a real iPhone — the checklist of STOP 5b is his.
+
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
   repositories exist, no logic and no UI. **Weight entries are now reachable**
@@ -1488,10 +1616,19 @@ Movement, not level — an upgrade must neither create nor destroy progress. The
 anchor is the RC2 era's final value exactly. Only domains that are enabled,
 weighted **and started** contribute. Weights come from each day's snapshot.
 
-### Gym performance (`core/gym/performance.ts`, `load.ts`, `muscles.ts`)
-- **Exercise-day:** `max(reps × effectiveLoad)` over that day's scorable sets.
-  Not volume, not the sum, not an average, not 1RM, not the heaviest weight.
-  Ties never change the number.
+### Gym performance (`core/gym/performance.ts`, `metric.ts`, `load.ts`, `muscles.ts`)
+- **Two eras** (D150, WP3 Stage 5b), told apart by `scoring.gymMetric` in
+  the snapshot in force on the scored day; `gymMetricOf()` is the field's
+  one reader. A day computes its whole window in its own day's metric.
+- **Exercise-day, from the snapshot with the field on:** the best *working*
+  set by the strength score `effectiveLoad × (1 + reps ÷ 30)`, computed as
+  the integer `load × (30 + reps)`. A set marked as a warm-up
+  (`GymSetRecord.warmUp`, D151) never provides it; an exercise with warm-up
+  sets only is no exercise-day. Still a maximum — not volume, not the sum,
+  not an average.
+- **Exercise-day, before it** (D84): `max(reps × effectiveLoad)` over that
+  day's scorable sets, a warm-up mark not read. Ties never change the
+  number.
 - **Effective load** (D91): `external` = the bar; `bodyweight` = bodyweight +
   added; `assisted` = bodyweight − assistance. The bodyweight is the latest
   entry **on or before** the set's date, replayed rather than stored on the
@@ -1508,11 +1645,20 @@ weighted **and started** contribute. Weights come from each day's snapshot.
   groups share it equally, which is how it was actually scored.
 - **Gym aggregate:** the **equal-weighted mean over measured groups**. Groups
   with no data or no baseline are excluded from the denominator.
-- **Windows** (D100): `gymPerformanceInWindow` takes each exercise's first and
-  last recorded day *inside the window* and needs two observations there. One
-  comparison per exercise, so frequency adds evidence not weight.
+- **Windows** (D100): `gymPerformanceInWindow` compares each exercise once
+  *inside the window* and needs two observations there, so frequency adds
+  evidence not weight. In the new era the comparison is the **median of the
+  last k exercise-days against the median of the first k**,
+  `k = min(3, ⌊days ÷ 2⌋)` — with two or three days that is the last against
+  the first; before it, always the last day against the first.
+  `exerciseSpans()` is the one place that reads which
+  (`gymMetric.comparison`, the switch the owner confirms at STOP 5b).
   `gymPerformanceOverSpan` (lifetime) still anchors at the first-ever day and
   is used only by the Progress "overall" figure.
+- **Order** (D172): in the new era the exercise-days enter the sums by date
+  and exercise id, a day's sets by set order, creation time and id — the
+  same sets replay to the same bits whatever their record ids. Before it,
+  the order of the `by_date` index, as it always was.
 - A set is scorable only with positive, finite reps and an integer positive
   effective load.
 
@@ -1696,8 +1842,13 @@ own history; no population norms, ever.
 
 ## Risks and known debt
 
-- **Gym replay is not bit-deterministic across record ids** (found in WP2-1,
-  deliberately not fixed there). `gymService.buildExerciseDays` reads sets
+- **Gym replay is not bit-deterministic across record ids — for days before
+  the Stage 5b era only.** From the snapshot that carries `scoring.gymMetric`
+  on, the order is fixed (D172) and `planEquivalence.test.ts` holds a planned
+  and a free workout with the same sets to identical bits. Days before it
+  keep the behaviour described here, because fixing their order would have
+  moved a pinned fingerprint. As found in WP2-1 and
+  deliberately not fixed there: `gymService.buildExerciseDays` reads sets
   through the `by_date` index, whose order within a day is the record id —
   random — and `core/gym/performance.ts musclePerformance()` sums each
   group's weighted ratios in that order. Floating-point addition is not
@@ -1716,6 +1867,32 @@ own history; no population norms, ever.
   **but changes the pinned `domainOutputs` Gym-history fingerprint**, which
   hashes `days` in index order. That makes it a scoring-engine work package
   with its own deliberate re-pin, not a WP2 side effect.
+- **There is no way back from the Stage 5b update except a backup taken
+  before it** (review risk 9). After the first load the configuration
+  carries `scoring.gymMetric` from that day on. A build from before the
+  stage would not read the field and would score the new days by the old
+  metric — and it would not read `warmUp` either. Going back therefore means
+  importing a backup exported before the update; the iPhone checklist of
+  STOP 5b begins with that export, and block 9 rehearses the way back.
+- **The curve was not retuned for the quieter metric** (review risk 10).
+  Under the strength score typical changes are smaller, and the median
+  makes them smaller again; whether the steepness of
+  `performanceCurve.ts` (+10 % is 800 of 1000) still fits is a later
+  question of its own, deliberately untouched in Stage 5b.
+- **A snapshot dated between today and a kept era boundary takes the era's
+  marker** (found in the closing review of Stage 5b; the same in all three
+  load steps — `ensureSessionWindowEra`, `ensureFoodRetired`,
+  `ensureGymMetricEra`). Each step leaves today alone when the local date
+  has moved back across a boundary written before now, and then gives
+  *every* later snapshot the marker — one dated before the kept boundary
+  included, although its days were lived under the earlier era. It has no
+  realistic path: the local date must move back two days through time
+  zones alone (a clock set back reads as "the clock was ahead" and moves
+  the era to today, by design), with a snapshot dated on the day in
+  between. `ensureCurrentSnapshot` already writes such a day without the
+  markers. The guard is one line per step — skip a later snapshot dated
+  before the kept boundary — and belongs in block 9 with a test for all
+  three, not in one step alone.
 - **Legacy Sport is unreachable** (above). Real RC2 users are affected.
 - ~~**`gymPerformanceOverSpan` anchors to an exercise's first recorded day, for
   ever.**~~ **Addressed for the rating in Phase 4.1** (D100): the trend and
