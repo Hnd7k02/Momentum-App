@@ -4860,3 +4860,245 @@ together, and puts the choice to the owner at STOP 7C; contract §6 and §9
 follow. Until then the exercise detail stays as built.
 `docs/wp3/prompts/prompt-7c-muskel-sheet.md` carries it: section 5, "Ein
 vierter Befund", and step 6, point 4.
+
+## D177 — Block "Kurve": in the Stage 5b era the curve's one value is Gym's own — every three points multiply the odds by four — and "not lower than before" is read on every day
+
+**The aim (owner, STOP 5b, D175).** Whoever trains as in the import file — a
+rep more every week and then more weight — does not stand lower after the
+update than before. Stage 5b had left him lower: the metric reads a week's
+progress as two or three percent where `reps × load` read ten and more, and
+the curve of the constants calls +2.5 % a level of 586. The block re-tunes
+the one value D99 allows — how many percentage points of change multiply
+the odds by four — for Gym, inside the era of Stage 5b, and nothing else.
+Design and every number: `docs/design/wp3/kurve.md`.
+
+**How "not lower than before" is read.** *Before* is the same history had
+Stage 5b never been: the best set by `reps × load`, the last day against
+the first, the curve at ten. *After* is the Stage 5b metric and the
+candidate, from the same update day. Three readings were weighed — on every
+day from the update, on average over the days after it, and where the
+rating settles — and **the first is the one held**: on no day of the ninety
+after the update may the Gym rating stand lower. It is the strictest of the
+three and the only one a person can check on a phone: he looks at a number
+on a day, not at a mean. The old metric is a saw-tooth with a peak on the
+day before a weight goes up; the reading takes those peaks as they are.
+
+It is held for **a history of five weeks or more**, which is what the
+import file is. With the update inside the first five weeks both windows
+are two to five weeks old and the "before" is the old metric's first peak;
+no candidate meets the aim there (the steepest weighed, 2, stands up to
+2.4 points lower; 3 up to 14.4, for at most seventeen days). The number is
+a test, so that the reading is not taken for more than it is.
+
+**What it is measured on.** The import file
+(`docs/wp3/stage5b/momentum-pruefdaten-5b.json`, five weeks) and the same
+diary continued by its own rule for forty weeks
+(`fixtures/progressionProfile.ts`, typed from
+`scripts/verify/pruefdaten-plan.mjs`), with the update on each of the 155
+days from the sixth week to the twenty-seventh. Lowest difference new − old
+on any day, update days with a day half a point or more lower, and where
+the rating settles (old: 930.7):
+
+| Value | Lowest on any day | Updates with a lower day | Settles at |
+|---|---|---|---|
+| 10 (Stage 5b) | −54.2 | 155 of 155 | 915.1 |
+| 8 | −32.8 | 155 | 931.1 |
+| 6 | −18.2 | 105 | 949.3 |
+| 5 | −10.9 | 64 | 958.5 |
+| 4 | −4.5 | 14 | 966.9 |
+| 3.5 | −1.9 | 8 | 970.6 |
+| **3** | **0.0** (+0.0002) | **0** | **973.7** |
+| 2.5 | +0.1 | 0 | 976.3 |
+| 2 | +0.1 | 0 | 978.2 |
+
+**The value: 3.** The flattest of the candidates that meets the aim in that
+reading. +3 % is the 800 that +10 % was. On the import file's own day,
+imported and loaded once: level 952 for 884, target 971 for 930, Gym rating
+833.1 for 831.7, Boss 759.5 for 758.8 — where Stage 5b's curve gave 711,
+826 and 828.0. One rep more at ten reps multiplies the odds by 3.2, where
+the old metric and curve made 4.0 of it: a rep is worth a little less than
+it was, and the rating is nevertheless never lower because the day a weight
+goes up no longer reads as a fall of a sixth.
+
+**What comes with it, said plainly.**
+
+- In the long run he stands higher than before, not level: 974 where the
+  old rules settled at 931. Level would be 8, which leaves him up to 33
+  points lower for three months first.
+- Weight is worth what reps are worth: 2.5 kg more at 100 kg is +2.5 %
+  under either metric, odds × 1.4 on the old curve and × 3.2 at three.
+- The other side, on the same diary without progress: the same sets every
+  week stay at level 500 and rating 700.0; an ordinary up and down of one
+  rep moves the rating between 682 and 734 (old: 675 to 716); a single
+  light day and a whole light week move nothing, where the old rules fell
+  to 636.6 and 581.9; one rep less for good goes down to 543.5 (old:
+  526.0).
+- The scale has little room at the top: strict double progression reads
+  +9 to +13 % in its windows and scores about 990.
+
+**Amendment to D101.** The five properties stay shared and are not
+negotiable per domain. **The one value D99 allows to be tuned may be a
+domain's own, in an era of its own, carried in that domain's snapshot.**
+Gym's is `scoring.gymMetric.curveDecadePercent` from the Stage 5b era on
+(D178). Running's is the constant, ten, on every day, and would need a
+decision and an era of its own to become anything else. The curve is still
+one function: `mapPerformanceChangeToScore(change, decadePercent?)`, one
+expression, no table, no branch, no cap; without the argument it computes
+with the constant's rate, bit for bit as before.
+`TRAINING_RATING.CURVE_ODDS_PER_DECADE` and `CURVE_DECADE_PERCENT` are not
+touched: they are read when the module loads, and changing them would
+revalue every day ever scored.
+
+*One wording of D101 put right:* it calls the symmetry exact. In algebra it
+is; in the stable floating-point form the two sides agree to within one
+unit in the last place of a double (2⁻⁴³ at 1000). That was so before this
+block, and the tests now hold exactly that for every candidate.
+
+**Not confirmed yet.** `GYM_CURVE_CONFIRMED` is `false` until the owner
+confirms the value at STOP Kurve; 4 and 2.5 are laid beside it with their
+numbers. If he chooses another, the constant changes, the seven golden
+files below are frozen again, and a device that has loaded this preview
+needs the import file again (D178).
+
+**What moved.** No day before the boundary of the era, on any device, and
+no day of Running — held by `gymCurveEra.test.ts` over four seeded
+histories, five update days and three builds side by side. The aim itself
+is `gymCurveGoal.test.ts`. Under `.github/fixtures` seven `stage5b-*.boss.json`
+were frozen again; `scripts/verify/kurve-golden-diff.mjs` holds that only
+the level and what follows from it moved, and
+`docs/design/wp3/kurve-golden.md` is the record. In the profile under the
+metric from day one the promotion to master is confirmed eight days
+earlier; no rank is gained or lost.
+
+**Seen and left as it is** (D174): a break after the import file still ends
+at 700.0 on its fourteenth day, as under the old rules, because the rating
+at three holds the same tier when the break begins. Under Stage 5b's curve
+it had ended at 560.0, a tier lower. That abstinence decay can cost a whole
+tier is existing behaviour and not this block's.
+
+## D178 — Block "Kurve": the value travels in the marker of Stage 5b; a marker without it is the curve as it was, and nothing backfills it
+
+**Where the value stands.** `scoring.gymMetric.curveDecadePercent`, a field
+of the marker of Stage 5b beside `repsDivisor` and `comparison`. Not a field
+of its own beside the marker: the curve is set anew *because* the metric
+reads progress smaller, the two are released together, and inside one
+object no snapshot can carry the new curve without the new metric. One
+field means one boundary on every device the live build left, written by
+the step that already exists. Everything a Gym day of the era was scored
+with — what a set is worth, how a window compares, how a change becomes a
+level — travels in one object with that day (D172 argued the same).
+
+**Two readers, one module** (`core/gym/metric.ts`). `gymMetricOf()` stays
+what it was, `{ repsDivisor, comparison }`: the screens read it, and no
+screen has any business with the curve. `gymCurveOf()` beside it returns
+the value or `null`. A value that is not a positive finite number — a
+restored file is not validated — is no value. Nothing throws.
+
+**Where it is read.** `buildGymRating()` asks `gymCurveOf()` of each day's
+own snapshot and hands the value to `performanceScore()`. The track of the
+replay — the exercise-days, the three pointers, the cache — is keyed by the
+metric **and** the curve (`gymScoringKey()`), so a window computed under
+one curve is never handed to a day of another. The reference day and a day
+outside the history take the track of that day's snapshot, so the level and
+the target on the Gym screen come out of the same calculation. The value in
+the snapshot is what runs: a test writes values this build does not ship
+into a snapshot and the replay follows them day for day; the constant
+beside `GYM_METRIC` is only what the step writes.
+
+**A snapshot is in one of three states**: *before* (no marker), *metric
+only* (the marker without the value), *complete*. **A missing value is the
+earlier state — the curve at ten — never today's.** A marker without the
+value exists in one place, a database a Stage 5b preview has loaded: the
+owner's preview. Its days were scored with the new metric and the curve at
+ten, and replay so.
+
+**The activation step** is the one of Stage 5b, `ensureGymMetricEra()`,
+keyed on the data as before — now on whether the snapshot in force carries
+the whole marker:
+
+- a device the live build left gets metric and curve in **one** snapshot,
+  the same one the P8 and Food steps of that load wrote; one boundary;
+- a device a preview left gets the value **added to the marker it has**,
+  effective today, its divisor and comparison carried as they were; the
+  days between its two boundaries keep the curve at ten;
+- a second load writes nothing, on either;
+- a snapshot dated later is completed at its own date; a boundary written
+  on a clock that was ahead moves to today; one the local date has merely
+  moved back across is kept, and `ensureCurrentSnapshot()` writes such a
+  day with the field **as the stored snapshot in force on that day has
+  it** — absent, or without the value — where before it only knew "absent".
+
+**Why the value is not written into the preview's snapshots**, although
+that would leave every device with one boundary: a snapshot says what its
+days were scored with, and those days were scored with the curve at ten —
+on a preview, but scored. "Never backfill" has no exception for a database
+only the owner holds. Importing the block's file gives him a device with
+one boundary, which is what his check compares anyway.
+
+**A snapshot that names another value than this build's is complete.** The
+step leaves it alone. The next configuration write compares the live
+configuration with the snapshot in force, as it does for every field, and
+carries this build's value from that day on. That is the forward-only rule
+with nothing added — and it is why, if the owner chooses another value at
+the STOP, a device that has already loaded this preview keeps the first
+value for the days it was written for and should import the file afresh.
+
+**What did not change.** `SCHEMA_VERSION` and `BACKUP_FORMAT_VERSION`: the
+field is optional inside an object that already travels. The three reports
+of Stage 5b regenerate byte for byte from a device with the marker without
+the value (`stage5bReport.test.ts` is pinned to it), and the four tables of
+the Kurve report came out byte for byte the same with the candidate written
+into the snapshot as they had with it handed in from outside, before the
+mechanism existed.
+
+**Tests restated, none removed or weakened.** `metric.test.ts` (the
+snapshot's marker has four fields), `gymScoring.test.ts` (+10 % in both
+windows is 800 before the era and for a marker without the value, 990
+under the complete marker), `gymMetricEra.test.ts` (the update day's level
+and each day of the era are the pure windows mapped by the value the
+snapshot names; the preview device keeps the curve as it was).
+
+## D179 — Block "Kurve": a tint on the body is full from 8 %
+
+**Why it moves.** A tint starts at three tenths of its full strength where
+the held band ends, at 2.5 % (D153, D167 — neither is touched), grew evenly
+and was full at 12 %. Under the metric of Stage 5b a month of training
+reads +3 to +7 % in a group, where the best set by `reps × load` read
++10 % and more. On the scale to 12 % all of that stood in the pale lower
+half: with the import file at 30 days the chest at +3 % stood 20.7 ΔE from
+the same chest held and the calves at +7 % 36.9 — less than twice as far,
+and to the eye one shade of pale green over the whole body.
+
+**The value: full strength from 8 %.** Five upper ends were measured on the
+dev harness (`#/dev/body?tintTo=`, `scripts/verify/kurve-tint-shots.mjs`),
+the chest against the same chest held, in ΔE:
+
+| Upper end | +3 % | +5 % | +7 % | +10 % |
+|---|---|---|---|---|
+| 12 % (until now) | 21.8 | 30.7 | 39.9 | 51.9 |
+| 10 % | 22.2 | 33.7 | 45.0 | 58.5 |
+| **8 %** | **23.6** | **38.7** | **52.8** | **58.5** |
+| 7 % | 24.3 | 43.1 | 58.5 | 58.5 |
+| 6 % | 25.5 | 49.1 | 58.5 | 58.5 |
+
+At 8 % the changes the metric produces span the scale and +7 % is still
+below full, so +7 % and +10 % can be told apart; at 7 % and 6 % they
+cannot. The strengths are 0.36 at 3 %, 0.62 at 5 %, 0.87 at 7 % and 1 from
+8 %. On the screen itself, the import file at 30 days: the chest at +3 %
+stands 21.3 ΔE from held and the calves at +7 % 49.1.
+
+**What stays.** `TINT_STRENGTH.min` 0.3 and `fromPercent` 2.5; the three
+neutral tones, the light, the model, the still on the Gym card. A strength
+still comes from one place: `stateIntensity()` takes the scale's upper end
+as an argument, which no screen hands in — the dev harness does, to try
+other upper ends on the same formula instead of a copy of it.
+`farbregeln.mjs` passes with its rules and its examples as they were
+(322 of 322): the chest at +3 % stands 23.9 ΔE from held, the quadriceps at
+−3 % 20.4, and +7 % is greener than +3 % (a* −45.2 against −21.3).
+Contract §7 and `CLAUDE.md` carry the new number.
+
+**Asked at the STOP, not changed.** The scale of the rows and of the
+exercise detail (`SPARK_SCALE`, `LINE_SCALE`, 12 %) and the held band
+(−2 to +2 %), with the owner's aim that one rep more at the same weight
+reads as progress up to twelve reps and what either way of meeting it does
+to small falls (`docs/design/wp3/kurve.md`, sections 10 and 11).
