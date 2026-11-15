@@ -1522,7 +1522,12 @@ his four answers at STOP 5b built in the same session — D175)
     the import file and the profiles.
   - *Said to him, not decided:* the figures above the chart compare the
     last day with the one before, the chart's end value the last day with
-    the first shown, so the two can differ, even in sign.
+    the first shown, so the two can differ, even in sign. And the held
+    band (−2 % to +2 % shown, D153) now sits where a single step lands:
+    one rep more at the same weight is `1 ÷ (30 + reps)`, so 8 to 9 reps
+    reads "+3 %" and 11 to 12 reads "Gehalten" in those figures. Nothing
+    was changed for it; "Kurve" shows the numbers and asks (its design,
+    point 11).
 - **Seen in the closing review of the era's mechanics, and left**: see
   "Risks and known debt" — a snapshot dated between today and a kept
   boundary.

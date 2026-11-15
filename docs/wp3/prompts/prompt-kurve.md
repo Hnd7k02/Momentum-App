@@ -95,7 +95,7 @@ Fehlt das, bau nichts. Sag Dario, was fehlt, und halte an.
 **Die Farbstärke am Körper** (`src/features/body/tokens.ts`)
 
 - `TINT_STRENGTH` (Zeile 228): `fromPercent: 2.5`, `toPercent: 12`, `min: 0.3`. `stateIntensity()` (237) wächst gleichmässig von 0,3 bei 2,5 % auf 1 bei 12 % und bleibt darüber gleich. Eine Gruppe bei +3 % steht heute bei 0,34, bei +7 % bei 0,63.
-- `min: 0.3` ist Darios Wert (D167) und steht nicht zur Wahl. 2,5 % ist das Ende des Bandes (D153) und steht ebenfalls nicht zur Wahl.
+- `min: 0.3` ist Darios Wert (D167) und steht nicht zur Wahl. 2,5 % ist das Ende des Bandes (D153); dieser Block ändert es nicht, legt Dario aber die Zahlen dazu vor (Schritt 1, Punkt 11).
 - Gehalten: `bodyVisuals.test.ts`, und auf dem echten Bild `scripts/verify/farbregeln.mjs`: ±3 % steht mindestens 5 ΔE von derselben Zone «gehalten», und die grössere Veränderung ist stärker gefärbt als die kleinere.
 - Der Satz dazu steht in `docs/wp3/vertrag.md` §7 und in `CLAUDE.md` («grows evenly from 2.5 % to 12 %»).
 
@@ -136,6 +136,7 @@ Schreib `docs/design/wp3/kurve.md` (englisch). Er beantwortet:
 8. **Laufen.** Laufen ruft dieselbe Funktion auf und darf sich an keinem Tag bewegen. Zeig, wie Gym seinen Wert bekommt, ohne dass die Kurve zwei Funktionen wird. D101 nennt die Kurve einen gemeinsamen Vertrag; die fünf festen Eigenschaften bleiben gemeinsam, eingestellt wird für Gym in seiner Era. Das ist eine Ergänzung zu D101 und gehört als Entscheid in `docs/decisions.md`.
 9. **Die Farbstärke am Körper.** Mindestens drei Kandidaten für das obere Ende (heute 12 %), mit dem Bild des Körpers für die Prüfdaten bei 30 Tagen und für ein 16-Wochen-Profil, je neben dem heutigen Stand. Für jeden: die Stärke bei +3, +5, +7 und +10 %, und der Abstand in ΔE, den `farbregeln.mjs` misst. Eine Empfehlung.
 10. **Die zwei Skalen.** Zeig die Zeilen der Prüfdaten und ein Übungsdetail auf der heutigen Skala von 12 %. Sag, ob sie neben der neuen Farbstärke noch passen. Du änderst sie nicht; die Frage geht an den STOP.
+11. **Das Band neben der neuen Kennzahl.** «Gehalten» reicht von −2 bis +2 % der gezeigten Zahl (D153); eine Veränderung unter 2,5 % ist also gehalten. Unter der neuen Kennzahl ist eine Wiederholung mehr bei gleichem Gewicht 1 ÷ (30 + Wiederholungen): von 8 auf 9 sind es +2,6 %, von 11 auf 12 +2,4 %. Der Kopf des Übungsdetails vergleicht den letzten Tag mit dem davor und nennt denselben Schritt deshalb einmal «+3 %» und einmal «Gehalten» (gesehen nach dem STOP 5b, `HANDOVER.md`). Zeig in einer Tabelle, was ein einzelner Schritt liest: eine Wiederholung mehr bei 5 bis 15 Wiederholungen, und 2,5 kg mehr bei 40 bis 140 kg und gleichen Wiederholungen. Zähl dazu aus, wie viele Übungen und Gruppen der Prüfdaten und der zwei 16-Wochen-Profile bei 30 und 90 Tagen im Band liegen, alt gegen neu. Du änderst das Band nicht; die Frage geht an den STOP.
 
 Lies den Entwurf danach einmal als Gegner: Wo könnte sich ein Tag vor der Grenze trotzdem bewegen? Wo könnte sich Laufen bewegen? Wo steht eine Zahl, die du nicht aus dem echten Replay hast? Schreib die Antworten in den Entwurf. Erst dann baust du.
 
@@ -205,7 +206,7 @@ Er steht im STOP-Bericht und in `docs/design/wp3/kurve.md`.
 - Laufen, an jedem Tag;
 - die fünf festen Eigenschaften der Kurve (D101), die Mittelung der zwei Fenster, ihre Längen und Gewichte, 40/60, die Bewegung zum Ziel, Endurance, Abbau und Pause;
 - die Kennzahl von 5b: Stärke-Score, bester Arbeitssatz, Median, feste Reihenfolge, Aufwärmsatz;
-- `muscleState.ts`: welcher Zustand aus welcher Zahl folgt, das Band, die Mindestdaten;
+- `muscleState.ts`: welcher Zustand aus welcher Zahl folgt, die Mindestdaten, und das Band, bis Dario am STOP etwas anderes sagt;
 - die schwächste Farbstärke 0,3 (D167), die drei neutralen Töne, das Licht, das Körpermodell;
 - `SPARK_SCALE` und `LINE_SCALE`, bis Dario am STOP etwas anderes sagt;
 - `SCHEMA_VERSION` und `BACKUP_FORMAT_VERSION`.
@@ -243,7 +244,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 6. Eigene kleine Entscheidungen, jede mit Grund; darunter die Lesart von «nicht tiefer als vorher» und der Ort des Werts im Stand.
 7. Was du gesehen und für spätere Blöcke liegen gelassen hast.
 8. Die Adresse der Vorschau und die Prüfliste fürs iPhone.
-9. Höchstens fünf Fragen, jede mit Optionen und deiner Empfehlung. Drei stehen fest: den Wert der Kurve bestätigen (empfohlen, flacher oder steiler); das obere Ende der Farbstärke bestätigen; ob die Skala der Zeilen und des Übungsdetails mitgehen soll.
+9. Höchstens fünf Fragen, jede mit Optionen und deiner Empfehlung. Vier stehen fest: den Wert der Kurve bestätigen (empfohlen, flacher oder steiler); das obere Ende der Farbstärke bestätigen; ob die Skala der Zeilen und des Übungsdetails mitgehen soll; ob das Band bei ±2 % bleibt.
 10. Der Stand in git für beide Repos.
 
 **Prüfliste fürs iPhone** (übernimm sie und pass sie an; höchstens acht Punkte):
