@@ -1,8 +1,8 @@
 import { chromium } from 'playwright-core';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import {
   CHROMIUM, URL_APP, onboard, openGymHub, openMuscles, seed, seedSheetProfile, setLanguage,
-  openGroupSheet, closeGroupSheet, openSheetExercise, closeExercise, bodyAtRest, sheetGone,
+  openGroupSheet, closeGroupSheet, openSheetExercise, closeExercise, bodyAtRest, sheetGone, sheetExercises,
 } from './lib.mjs';
 
 /**
@@ -22,13 +22,32 @@ import {
  * - `zeilen-vorher-*` is the screen with the one rule of D169 taken out
  *   again, as it stood before the block.
  *
+ * - `vorher-*` is the build of the commit before the block (`BEFORE_URL`),
+ *   on the same diary: the list of every exercise under the rows, and the
+ *   exercise detail with its two changes.
+ *
+ * The pictures named `*-tagebuch-*` are made on the diary of the earlier
+ * STOPs (`DIARY`, read on `DIARY_DAY`), imported through the interface:
+ * D176 was recorded on its bench press.
+ *
  * The card of D168 is photographed by `muscle-card.mjs` (`SHOTS=<dir>`).
  * Run against the production preview (`vite preview --port 4173`).
+ *
+ *   BEFORE_URL=http://127.0.0.1:4473/Momentum-App/ node scripts/verify/stage7c-shots.mjs
+ *   ONLY=diary … (the diary's pictures alone) · ONLY=device … (everything else) · WIDTHS=393 OUT=<dir>
  */
 
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage7c';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
 const HEIGHT = { 320: 693, 360: 780, 393: 852, 430: 932 };
+/** `ONLY=diary` makes the pictures of the diary's bench press alone (D176), `ONLY=device` everything else. */
+const ONLY = process.env.ONLY ?? '';
+/** The diary of the earlier STOPs, and the day it is read on: its bench press is the one D176 was recorded on. */
+const DIARY = process.env.DIARY ?? 'docs/wp3/stage7b/momentum-pruefdaten-7b-2026-11-16.json';
+const DIARY_DAY = process.env.DIARY_DAY ?? '2026-11-16';
+/** The build before the block, served somewhere, for the pictures named `vorher-*`; without it they are not made. */
+const BEFORE_URL = process.env.BEFORE_URL ?? '';
+const TZ = 'Europe/Zurich';
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 const written = [];
@@ -69,7 +88,71 @@ const boxOf = async (locator, pad = 8) => {
   return { x: Math.max(0, box.x - pad), y: Math.max(0, box.y - pad), width: box.width + pad * 2, height: box.height + pad * 2 };
 };
 
-for (const width of WIDTHS) {
+/*
+ * ── D176: the form that was not built, drawn into the real screen ────────
+ *
+ * "Zum letzten Mal" is the last day against the one before, by the Stage 5b
+ * metric, read off the table that reads the detail's line out. It is kept
+ * by the exercise's name: a sheet lists more than the exercise that was
+ * opened.
+ */
+const rememberSinceLast = (page) =>
+  page.evaluate(() => {
+    const detail = document.querySelector('.gym-detail');
+    const rows = [...detail.querySelectorAll('.visually-hidden tbody tr')].map((tr) => tr.querySelector('td').textContent.match(/([\d.]+)\s*×\s*([\d.]+)/));
+    const score = (m) => Number(m[2]) * (30 + Number(m[1]));
+    const sinceLast = rows.length > 1 ? (score(rows[0]) / score(rows[1]) - 1) * 100 : null;
+    const shown = sinceLast === null ? null : Math.sign(sinceLast) * Math.round(Math.abs(sinceLast) + 1e-9);
+    const text = (value) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)} %`;
+    const state = (value) => (value >= 2 ? 'improved' : value <= -3 ? 'declined' : 'unchanged');
+    const word = { improved: 'Verbessert', unchanged: 'Gehalten', declined: 'Zurückgegangen' };
+    const name = detail.getAttribute('aria-label') ?? '';
+    (window.__sinceLast ??= {})[name] = shown === null ? null : { text: text(shown), kind: state(shown), word: word[state(shown)] };
+    return window.__sinceLast[name];
+  });
+
+/** The exercise detail's head as two named changes. */
+async function drawTwoNamedDetail(page) {
+  await rememberSinceLast(page);
+  await page.evaluate(() => {
+    const detail = document.querySelector('.gym-detail');
+    const second = window.__sinceLast[detail.getAttribute('aria-label') ?? ''];
+    const head = detail.querySelector('.gym-detail__head');
+    const caption = detail.querySelector('.gym-detail__caption');
+    const first = head.querySelector('.gym-detail__change');
+    const pair = document.createElement('div');
+    pair.style.cssText = 'display:flex;gap:28px;flex-wrap:wrap;padding-bottom:16px';
+    const cell = (label, figure, kind, word) => {
+      const box = document.createElement('div');
+      box.style.cssText = 'display:flex;flex-direction:column;gap:2px';
+      box.innerHTML = `<span class="gym-detail__label">${label}</span><span style="display:flex;align-items:center;gap:8px"><span class="gym-detail__change gym-detail__change--${kind}" style="margin:0">${figure}</span><span class="state-chip state-chip--${kind}">${word}</span></span>`;
+      return box;
+    };
+    const inRangeKind = [...first.classList].find((c) => c.startsWith('gym-detail__change--')).split('--')[1];
+    const inRangeWord = head.querySelector('.state-chip')?.textContent ?? '';
+    pair.appendChild(cell(caption.textContent.replace('Bester Arbeitssatz · ', 'im Zeitraum · '), first.textContent, inRangeKind, inRangeWord));
+    if (second) pair.appendChild(cell('zum letzten Mal', second.text, second.kind, second.word));
+    head.replaceWith(pair);
+    caption.remove();
+  });
+}
+
+/** The same two figures in the sheet's rows, under the same names — in every row whose exercise has been opened. */
+async function drawTwoNamedRows(page) {
+  await page.evaluate(() => {
+    for (const row of document.querySelectorAll('.sheet--detents .muscle-sheet__exercise')) {
+      const second = (window.__sinceLast ?? {})[row.querySelector('.muscle-sheet__exerciseName').textContent];
+      const right = row.querySelector('.muscle-sheet__exerciseRight');
+      if (second === undefined || !right) continue;
+      const kind = [...right.classList].find((c) => c.startsWith('muscle-sheet__exerciseRight--')).split('--')[1];
+      const colour = { improved: 'var(--status-strong-ink)', declined: 'var(--status-weak-ink)', unchanged: 'var(--text-primary)' };
+      const line = (figure, label, k) => `<span style="display:flex;align-items:baseline;gap:6px;justify-content:flex-end"><span class="muscle-sheet__exerciseChange" style="color:${colour[k]}">${figure}</span><span class="muscle-sheet__exerciseState">${label}</span></span>`;
+      right.innerHTML = line(right.querySelector('.muscle-sheet__exerciseChange').textContent, 'im Zeitraum', kind) + (second ? line(second.text, 'zum letzten Mal', second.kind) : '');
+    }
+  });
+}
+
+for (const width of ONLY === 'diary' ? [] : WIDTHS) {
   const { ctx, page } = await open(width);
 
   /* ── The rows: after, and before (D169) ───────────────────────────────── */
@@ -111,7 +194,8 @@ for (const width of WIDTHS) {
   await shot(page, `sheet-zurueckgegangen-${width}`);
   await closeGroupSheet(page);
 
-  {
+  // The candidates and the two forms at the two widths the block names for them: the iPhone's and the narrowest.
+  if (width === 393 || width === 320) {
     /* ── D170: a single observation, as it is and as it could be ─────────── */
     // The row. (The focus went back to the row of the sheet closed last; its ring is not the subject.)
     await page.evaluate(() => document.activeElement?.blur?.());
@@ -279,36 +363,7 @@ for (const width of WIDTHS) {
       // The exercise detail: what was built…
       await shot(page, `eine-zahl-uebung-${slug}-${days}-${width}`);
       // …and the other form, drawn into it from its own days.
-      await page.evaluate(() => {
-        const detail = document.querySelector('.gym-detail');
-        const rows = [...detail.querySelectorAll('.visually-hidden tbody tr')].map((tr) => tr.querySelector('td').textContent.match(/([\d.]+)\s*×\s*([\d.]+)/));
-        const score = (m) => Number(m[2]) * (30 + Number(m[1]));
-        const sinceLast = rows.length > 1 ? (score(rows[0]) / score(rows[1]) - 1) * 100 : null;
-        const shown = sinceLast === null ? null : Math.sign(sinceLast) * Math.round(Math.abs(sinceLast) + 1e-9);
-        const text = (value) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)} %`;
-        const state = (value) => (value >= 2 ? 'improved' : value <= -3 ? 'declined' : 'unchanged');
-        const word = { improved: 'Verbessert', unchanged: 'Gehalten', declined: 'Zurückgegangen' };
-        const head = detail.querySelector('.gym-detail__head');
-        const caption = detail.querySelector('.gym-detail__caption');
-        const first = head.querySelector('.gym-detail__change');
-        const pair = document.createElement('div');
-        pair.style.cssText = 'display:flex;gap:28px;flex-wrap:wrap;padding-bottom:16px';
-        const cell = (label, figure, kind) => {
-          const box = document.createElement('div');
-          box.style.cssText = 'display:flex;flex-direction:column;gap:2px';
-          box.innerHTML = `<span class="gym-detail__label">${label}</span><span style="display:flex;align-items:center;gap:8px"><span class="gym-detail__change gym-detail__change--${kind}" style="margin:0">${figure}</span><span class="state-chip state-chip--${kind}">${word[kind]}</span></span>`;
-          return box;
-        };
-        const inRange = first.textContent;
-        const inRangeKind = [...first.classList].find((c) => c.startsWith('gym-detail__change--')).split('--')[1];
-        pair.appendChild(cell(caption.textContent.replace('Bester Arbeitssatz · ', 'im Zeitraum · '), inRange, inRangeKind));
-        if (shown !== null) pair.appendChild(cell('zum letzten Mal', text(shown), state(shown)));
-        head.replaceWith(pair);
-        caption.remove();
-        // Kept by the exercise's name: a sheet lists more than the exercise that was opened.
-        const name = detail.getAttribute('aria-label') ?? detail.querySelector('h1, h2')?.textContent ?? '';
-        (window.__sinceLast ??= {})[name] = shown === null ? null : { text: text(shown), kind: state(shown), word: word[state(shown)] };
-      });
+      await drawTwoNamedDetail(page);
       await shot(page, `zwei-zahlen-uebung-${slug}-${days}-${width}`);
     };
     let slug = '';
@@ -326,19 +381,7 @@ for (const width of WIDTHS) {
         await openSheetExercise(page, name);
         await twoNamed(days);
         await closeExercise(page);
-        // The same two figures in the sheet's rows, under the same names —
-        // in every row whose exercise has been opened, not only this one's.
-        await page.evaluate(() => {
-          for (const row of document.querySelectorAll('.sheet--detents .muscle-sheet__exercise')) {
-            const second = (window.__sinceLast ?? {})[row.querySelector('.muscle-sheet__exerciseName').textContent];
-            const right = row.querySelector('.muscle-sheet__exerciseRight');
-            if (second === undefined || !right) continue;
-            const kind = [...right.classList].find((c) => c.startsWith('muscle-sheet__exerciseRight--')).split('--')[1];
-            const colour = { improved: 'var(--status-strong-ink)', declined: 'var(--status-weak-ink)', unchanged: 'var(--text-primary)' };
-            const line = (figure, label, k) => `<span style="display:flex;align-items:baseline;gap:6px;justify-content:flex-end"><span class="muscle-sheet__exerciseChange" style="color:${colour[k]}">${figure}</span><span class="muscle-sheet__exerciseState">${label}</span></span>`;
-            right.innerHTML = line(right.querySelector('.muscle-sheet__exerciseChange').textContent, 'im Zeitraum', kind) + (second ? line(second.text, 'zum letzten Mal', second.kind) : '');
-          }
-        });
+        await drawTwoNamedRows(page);
         await page.waitForTimeout(200);
         await shot(page, `zwei-zahlen-sheet-${tag}-${days}-${width}`, await boxOf(list, 6));
         await closeGroupSheet(page);
@@ -353,7 +396,7 @@ for (const width of WIDTHS) {
 }
 
 /* ── Once in English ───────────────────────────────────────────────────── */
-{
+if (ONLY !== 'diary') {
   const { ctx, page } = await open(393, { language: 'en' });
   await page.locator('.muscle-row__button[data-muscle="back"]').click();
   await page.locator('.sheet--detents').waitFor({ state: 'visible' });
@@ -365,6 +408,101 @@ for (const width of WIDTHS) {
   await page.keyboard.press('Escape');
   await sheetGone(page);
   await ctx.close();
+}
+
+/*
+ * ── D176 on the diary: the bench press of the check data ─────────────────
+ *
+ * D176 was recorded on the bench press of the import file: "+3 %" at the
+ * head, "+4 %" at the line, and in the sheet a third. So both forms are
+ * drawn on that exercise too, at 30 and 90 days and at 393 and 320 — the
+ * diary of the earlier STOPs, imported through the interface on its day —
+ * and beside them the same exercise as it stood before the block, from the
+ * build of the commit before it (`BEFORE_URL`).
+ */
+function localInstant(day, hour) {
+  const hh = String(hour).padStart(2, '0');
+  for (const offset of ['+02:00', '+01:00']) {
+    const instant = new Date(`${day}T${hh}:00:00${offset}`);
+    if (Number(new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', hourCycle: 'h23' }).format(instant)) === hour) return instant;
+  }
+  throw new Error(`no ${hh}:00 on ${day} in ${TZ}`);
+}
+async function diaryDevice(url, width) {
+  const ctx = await browser.newContext({ viewport: { width, height: HEIGHT[width] ?? 852 }, deviceScaleFactor: 2, hasTouch: true, timezoneId: TZ, locale: 'de-CH' });
+  await ctx.clock.setSystemTime(localInstant(DIARY_DAY, 10));
+  const page = await ctx.newPage();
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await onboard(page, { gym: 3, running: 0 });
+  await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();
+  await page.waitForTimeout(700);
+  await page.locator('input[type="file"]').setInputFiles(DIARY);
+  const confirm = page.getByRole('button', { name: 'Ersetzen' });
+  await confirm.waitFor();
+  await confirm.click();
+  await page.locator('.backup__status--ok').waitFor();
+  await page.waitForTimeout(1200);
+  await openGymHub(page);
+  await openMuscles(page, { wait: 4000 });
+  return { ctx, page };
+}
+const screenRange = async (page, days) => {
+  await page.locator('.progress__ranges .segmented__option', { hasText: String(days) }).click();
+  await page.waitForTimeout(2000);
+};
+
+if (ONLY !== 'device' && existsSync(DIARY)) {
+  for (const width of [393, 320]) {
+    /* As built, and the other form. */
+    {
+      const { ctx, page } = await diaryDevice(URL_APP, width);
+      for (const days of [30, 90]) {
+        if (days === 90) await screenRange(page, 90);
+        await openGroupSheet(page, 'chest');
+        await upper(page);
+        const list = page.locator('.sheet--detents .muscle-sheet__section').first();
+        await shot(page, `eine-zahl-sheet-tagebuch-${days}-${width}`, await boxOf(list, 6));
+        // Every exercise of the sheet is opened once, so that each row can carry its second figure.
+        for (const name of (await sheetExercises(page)).map((entry) => entry.name)) {
+          await openSheetExercise(page, name);
+          if (name === 'Bankdrücken') {
+            await shot(page, `eine-zahl-uebung-tagebuch-bank-${days}-${width}`);
+            await drawTwoNamedDetail(page);
+            await shot(page, `zwei-zahlen-uebung-tagebuch-bank-${days}-${width}`);
+          } else {
+            await rememberSinceLast(page);
+          }
+          await closeExercise(page);
+        }
+        await drawTwoNamedRows(page);
+        await page.waitForTimeout(200);
+        await shot(page, `zwei-zahlen-sheet-tagebuch-${days}-${width}`, await boxOf(list, 6));
+        await closeGroupSheet(page);
+        if (days === 90) await screenRange(page, 30);
+      }
+      await ctx.close();
+    }
+    /* Before the block: the list of every exercise under the rows, and the detail with its two changes. */
+    if (BEFORE_URL) {
+      const { ctx, page } = await diaryDevice(BEFORE_URL, width);
+      for (const days of [30, 90]) {
+        if (days === 90) await screenRange(page, 90);
+        const row = page.locator('.gym-progress__row', { hasText: 'Bankdrücken' }).first();
+        await row.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+        await page.waitForTimeout(500);
+        await shot(page, `vorher-liste-tagebuch-${days}-${width}`);
+        await row.click();
+        await page.locator('.gym-detail').waitFor({ state: 'visible' });
+        await page.waitForTimeout(900);
+        await shot(page, `vorher-uebung-tagebuch-bank-${days}-${width}`);
+        await page.locator('.gym-detail .gym-session__back').click();
+        await page.waitForTimeout(900);
+        if (days === 90) await screenRange(page, 30);
+      }
+      await ctx.close();
+    }
+  }
 }
 
 await browser.close();
