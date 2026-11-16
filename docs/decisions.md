@@ -5210,3 +5210,295 @@ the change in the range that enters the group's figure, is +1.5 %, shown
 "+2 %" — "Gehalten" when D176 was written, "Verbessert" now. The finding
 stands: one exercise would still read +3 %, +4 % and +2 % in three places.
 `prompt-7c-muskel-sheet.md` carries the scale and the band as decided.
+
+## D181 — Block 7B: the measuring display — a tool in the app, switched on in the settings, outside the app's data
+
+**Decision (2026-11-16, block 7B; whether it stays in the release is the
+owner's, asked at STOP 7B).** Every statement about "smooth" and "fast" is
+to be measured on the owner's phone (D155, D161). He has no Mac, so there
+is no remote inspector: the only way to those numbers is a display in the
+app itself. It was built before anything else in the block, and every later
+change was measured with it.
+
+**What it shows.** The load from opening Muskelgruppen to the first picture
+with the model, as one figure and in three legs that add up to it — the
+viewer's code, the model, the first picture — and for code and model where
+the browser says the file came from (the network, a cache, the app's own
+offline store, or "already loaded" when this visit fetched nothing) with
+its size and the request's own time. While turning: the mean frame rate,
+the share of frames under 25 ms, the longest frame, the number measured.
+The frames of the last idle second. From the renderer: draw calls,
+triangles, textures with their sizes, the pixel ratio used beside the one
+the screen reports, the drawing buffer, the graphics chip. The display's
+rate as the frames show it. Device, system and whether the app runs from
+the home screen, from the user agent. The screen, the visible area and the
+stage with its share of the height. The build, by the name of its entry
+file. One button copies all of it as plain text.
+
+**It falsifies nothing.** It asks for no frame and keeps no loop awake. The
+viewer tells a recorder about frames that happen anyway; the recorder tells
+the panel that something changed at three moments — the first picture, the
+end of a motion, and once a second later, for the idle count. That last one
+is a timer of the display's own and my reading of "after the end of a
+gesture": it draws nothing on the canvas, and without it the idle line
+could only be read by copying. While the body turns the recorder writes
+numbers into arrays it already owns and the panel is not touched. The
+panel stands under the stage, beside the canvas, never over it, on a solid
+surface. Switched off — every device's state until its user switches it on
+— nothing runs but one boolean test per frame, and the probe that reports
+frames still tells the viewer when the body rests, which the pause needs.
+
+**It is not data.** The switch lives in the browser's local storage, under
+one key that names the place the app is served from
+(`momentum.bodyMeasure:<base>`), so that the preview build, which shares
+its origin with the live app, does not switch the live app's display on.
+**This is the first and only use of local storage in the app.** No field in
+the schema, nothing in a backup, nothing in IndexedDB. Where the browser
+will not store the key the switch falls back and says so: a display that
+would be gone after the reload it exists for is not switched on.
+
+**The one named exception to "no technical word in the interface".** The
+switch — "Messanzeige beim Körper" — and its hint — "Zeigt bei den
+Muskelgruppen, wie schnell der Körper lädt und wie flüssig er sich dreht."
+— are everyday language. The display itself is a tool its user asked for
+and may carry technical words (frames per second, draw calls, texture),
+every number with its unit. Its strings stand in both catalogues like all
+others.
+
+**What counts.**
+
+- *A frame of a rotation* is an interval between two consecutive frames
+  drawn while the camera was being turned — by a finger, a coast, a travel
+  or a zoom — where the second was asked for promptly: by the frame before
+  it, or by a finger within 50 ms of it. A finger resting on the body asks
+  for nothing, and the gap until it moves again is a pause, not a slow
+  frame. Frames that only ease a colour show the display's rate and are no
+  rotation.
+- *The display's rate* is read off the lower quartile of the intervals:
+  frames arrive a whole number of refreshes apart, so the shortest regular
+  interval is one refresh, whatever was dropped.
+- *A source* is the browser's own record of the request (Resource Timing):
+  bytes over the wire are the network, none are a cache, and a browser that
+  does not report the field leaves the source unknown. It is never guessed
+  from how long a request took.
+- *Device and system* are what the user agent says: "iPhone", never which
+  one, and a system number that Apple's browsers may keep fixed. The copy
+  ends with the whole string. The owner names his device and iOS at the
+  STOP; the display's line is the browser's word, and says so.
+
+**Where it lives.** `src/features/measure/` — recorder, lines, panel,
+switch — a feature of its own beside the body, knowing nothing of
+three.js, so that the screen that opens the measurement and the settings
+that show the switch never reach behind the body's lazy boundary
+(`gymHub.test.tsx` holds that boundary and was not touched). The viewer
+reports to it: the lazy boundary when the code arrived, the model when it
+was there and after its first render, the camera and the materials what
+each frame is for.
+
+**What it costs.** 17 kB in the main bundle, 5 kB compressed: the two
+catalogues' strings, the recorder, the lines and the panel.
+
+**What it found before any other step** — on the build as it stood, in the
+headless browser, which draws with a software renderer and says nothing
+about an iPhone:
+
+- 1.8 s from opening to the first picture, of which 1.4 s start the canvas
+  and generate the studio's environment in software; the files themselves
+  come out of the app's offline store in a few milliseconds.
+- Eleven frames a second while turning — and two seconds after letting go
+  the body was still coasting: the old inertia counted frames, and at
+  eleven a second it ran five times as long as at sixty.
+- **Every drawn frame cost two display refreshes.** The camera and the
+  materials asked for the next frame through
+  `requestAnimationFrame(() => invalidate())` — a workaround for a
+  renderer that swallowed a request made inside a frame. The renderer in
+  use (R3F 8.18) keeps the loop alive when asked from inside a frame, and
+  the detour put every request one refresh late. On a canvas small enough
+  for the software renderer to keep up, the live build draws a frame every
+  33.4 ms on a 60 Hz display and block 7B every 16.7 ms. On a phone that
+  is the difference between 30 and 60 frames a second while turning. Fixed
+  with the motion (D182).
+
+## D182 — Block 7B: the body's stage and how it is operated
+
+**Decision (2026-11-16, block 7B; contract §8 and §10, mock-up 1, D155,
+D161).** What the contract fixed is built as written; what it left open is
+decided here, small, and named at STOP 7B.
+
+**1. The stage.** The body stands on the ground of the screen, without a
+card, in a box as wide as the screen and as tall as 55 % of the *dynamic
+viewport* (`55dvh`, `55vh` where a browser does not know it): 55 % of what
+the device really shows — the whole screen for the app from the home
+screen, the area between the bars in the browser. Above it stand the header
+in 17px with back, title and the legend's button, the range, and the
+metrics strip; beneath it the five states and the ten rows, on the ground
+as well. *My reading:* "the body takes at least 55 % of the screen's
+height" is the stage, as mock-up 1 has it (`.stage { height: 55vh }`); the
+body itself fills 84 % of the stage, 46 % of the screen on an iPhone 15
+Pro (394 of 852 points). A body of 55 % would need a stage of 65 % and
+push the strip or the rows off the first screen.
+
+**2. One framing for every stage.** The camera's angle of view is fixed
+(29.6°) where it followed the height of a card (27° at 400px). The body
+then takes the same share of every stage, and its still can stand in the
+same place while it loads. The room above the head is the row of buttons —
+44px, a ninth of the stage on a 320px phone, where the crown stands two
+pixels under them (twelve on an iPhone 15 Pro) — and the room under the
+feet is the ground.
+
+**3. The metrics strip** (contract §4): three cells, 1.35 : 1 : 1 — the
+trend with its state, "Gewertet" n / 10 Gruppen, "Stärkster". It counts
+nothing: trend, state and rated groups are `shownPerformance()`'s. Two
+things are mine:
+
+- *The third cell prints the change as its figure and the group beneath
+  it* — the mock-up has the group as the figure. Of the ten names only
+  "Brust" fits the cell at the figure's size on a phone; the mock-up
+  itself cuts the cell's label at 320px, and nothing in this app may be
+  cut. A number in the figure's place also makes the three cells alike.
+- *With no improved group the cell says "–" over "keine Verbesserung".*
+  "Stärkster" is the improved group with the largest change; the least
+  decline is not called the strongest. The alternative — always the
+  highest change, whatever its state — is one line to switch.
+
+With nothing rated the strip is not shown at all (contract §11): a sentence
+says what is missing, with the one action where a session is what is
+missing. The strip takes the place of the tile that carried the trend; its
+first cell is a button and opens the sheet that tile opened.
+
+**4. It is there before its history.** The viewer mounts with the screen's
+first render, so its code and the model load beside the history and not
+after it. Until the first picture the body's still stands where the body
+will stand: a second still, rendered in the stage's own frame by
+`tools/render-body-preview.mjs` (26 kB), the whole height of the frame, so
+head and feet are where the canvas draws them on every phone —
+`gym-muscles.mjs` holds the two to within two pixels. The region materials
+are compiled before the body is shown; until now they were made after the
+compile and their program was compiled inside the first visible frame. The
+body starts in the tone of its still and the states ease in from there.
+While the still stands in — before the first picture, and while a lost
+context is away — a finger moves nothing: a drag would turn a body nobody
+sees turning, and a tap has nothing to meet. The three views stay live;
+the body then arrives in the view that was asked for.
+
+**5. The motion counts time** (contract §10, `motion.ts`). A coast is a
+speed that decays exponentially — it falls to 1/e in 0.28 s (the old rule,
+on a 60 Hz display, 0.23 s) — and ends at the exact moment it reaches 3°
+a second, so the angle it ends on does not depend on the frames it was
+drawn in. A travel — to a view, to a group chosen in the list, back to the
+start — is a critically damped spring (15 per second) that takes over the
+speed the body has: it starts gently, never overshoots and runs out
+softly. A frame that comes late counts for a tenth of a second and no
+more: the body carries on after a pause instead of jumping. The speed a
+finger lets go with is read from the events' own times over its last 90
+ms; a finger that rested before lifting throws nothing. The values stand
+in one place, by name (`MOTION`). And the next frame is asked for from
+inside the frame, which doubles the frame rate of every motion (D181).
+
+**6. A tap never turns the body.** The viewer knows which selection is its
+own: a group it reported from a tap leaves the angle alone; one the host
+made — a row — turns the body to the group when it faces more than 70°
+away, as before.
+
+**7. What a tap means** (`picking.ts`). The surface that is seen where it
+landed, and failing that the nearest group whose visible surface lies
+within twelve CSS pixels, probed in rings of four, eight and twelve. *The
+neutral zone is never chosen and is no longer see-through* — the prompt
+asked what a tap on a hand in front of a thigh does. Until now it selected
+the thigh, because a neutral hit was skipped. What you see is what you
+tap: the hand is a surface, and selects nothing by itself. The tolerance
+holds at its edge like anywhere else: a tap on the hand a few pixels below
+the wrist means the forearm, and where a narrow hand stands in front of a
+thigh the thigh seen beside it is within reach. One consequence, said
+plainly: the same holds for a foot — a tap on the instep within twelve
+pixels of the calf selects the calf; the toes select nothing.
+
+**8. A drag that begins up or down is the page's.** The canvas lets the
+browser scroll it (`touch-action: pan-y`), so the rows under a body that
+fills half the screen are reached with one thumb. Sideways turns; a drag
+that began sideways also tilts. To be checked on the device.
+
+**9. Zoom** (`framing.ts`). Two fingers, 1.0 to 1.8, on the body only; the
+page's own zoom is never locked. A zoom is a window on the picture — the
+camera does not come closer, its perspective does not change — placed by
+three rules in this order: it never leaves the picture; **a chosen group
+stays inside it**, which is the answer to "which part of the body stays in
+the window"; otherwise what was under the fingers stays under them. Every
+group fits the window at 1.8 from the front and the back. Two fingers are
+never a tap and never a turn, not even after one has lifted. A double tap
+(two taps within 320 ms and 28 pixels, by the events' own times) and the
+button reset — front, zoom 1.0, the first tilt — and leave the selection;
+the first tap of the pair selects like any tap, without waiting. Under
+reduced motion every travel and the reset jump.
+
+**10. The pause.** A host can hold the viewer: a coast ends at once, a
+travel in flight is finished first, then no frame arises by itself and the
+last one stays. Held, the viewer draws exactly one frame when what it shows
+changes — a colour, the selection, the model arriving, the stage's size,
+the screen coming back — and that frame is the whole change, not the start
+of an easing, and advances no travel: one asked for meanwhile starts when
+the pause ends. A finger moves nothing on a held body; a tap is still a
+tap. Block 7C needs exactly these properties.
+
+**11. A sheet stands over a still body** (D146, `app/stillness.ts`). Every
+sheet asks whatever can draw by itself to stop and stands once it has; the
+viewer joins as the one mover. A gate rather than a prop on two sheets, so
+the rule also holds for the plan chooser that opens from the empty state
+and for whatever opens later. On every other screen nothing can move and a
+sheet stands in the render that opened it, as before.
+
+**12. A lost graphics context** is not a blank canvas. The viewer waits
+1.5 s for the browser to give it back — and rebuilds its environment,
+which went with it — replaces the canvas when it does not, twice at most,
+and then stands the flat figure in. While the canvas has nothing to show
+the body's still stands in the stage. The still shows the body from the
+front, and a canvas that replaces a lost one starts there in any case: so
+a context lost while the body was turned or zoomed sets the view back to
+the start at once, and the body returns where its still stood, whichever
+way it returns. The flat figure stands in the stage at the body's size,
+front and back side by side — it was 132px wide in a card.
+
+**13. The ground.** A contact shadow and a faint glow under the feet, as
+one disc in the scene whose colour fades to nothing: a gradient the
+graphics chip interpolates, never a blur (D146) and never a texture, so it
+turns, tilts and zooms with the body. Twelve draw calls, 50,488 triangles.
+It is smaller than the mock-up's wide, flat halo: the camera looks down on
+the floor at twenty degrees, where a disc is a rounder ellipse, and a
+wider one would be cut by the stage's edge.
+
+**14. From Heute** (D161). The Gym label on Heute opens Muskelgruppen
+directly and is named for it. It pushes, so back — the button and the
+browser's own — returns to Heute; from the hub's card back returns to the
+hub, and after a link straight to the address it leads to the hub. The hub
+is one tap from Muskelgruppen whichever way the user came — a row at the
+foot of the screen — and "Pläne verwalten" in the plan chooser leads to
+the hub even when back would lead to Heute. Heute loads neither the viewer
+nor the model.
+
+**Not changed:** `src/core`, `src/storage`, the schema, the backup format,
+every golden file and fingerprint, `muscleState.ts`, the body's colours,
+the model, its light and its material, the content of the ten rows.
+
+## D183 — For the rest of WP3: check data is generated, a STOP report opens with one line, nothing is merged
+
+**Decision (owner, 2026-11-15, with the order to continue WP3 after STOP
+Kurve).** His words: "Ein Backup mit echten Daten gibt es nicht. Erzeug die
+Prüfdaten selbst und leg sie am STOP für den Tag bei, an dem ich prüfe, und
+für den Tag danach." — "Beginn jeden STOP-Bericht mit einer Zeile: was ich
+entscheiden und was ich auf dem iPhone prüfen muss." — "Kein Merge."
+
+- **There is no backup with real data.** A block that asks for one is
+  checked on generated data, and its STOP report says that the run with
+  real data is missing. The check files are made by the live build's own
+  generator (`scripts/verify/stage5b-live-backup.mjs`), one for the day of
+  the check and one for the day after: a file loaded on a later day than
+  its last session shows a different week (D174, block "Kurve").
+- **Every STOP report begins with one line**: what he has to decide and
+  what he has to check on the iPhone.
+- **Nothing is merged.** Work is pushed to `claude/momentum-wp3` and the
+  preview is published; no pull request, no merge, no push to the default
+  branch.
+- **Block 7B ran in the session of the block before it**, at his
+  instruction ("Mach mit WP3 weiter … Nach dem run direkt ohne meine neue
+  Anweisung"), where D159 has each block start in a fresh session. The
+  model was the one D159 names.

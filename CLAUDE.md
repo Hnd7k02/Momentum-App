@@ -2,7 +2,9 @@
 
 A mobile-first PWA. German (de-CH) first, English second, **local-only**: no
 backend, no account, no cloud sync, no telemetry. Everything lives in
-IndexedDB on the device.
+IndexedDB on the device — with one named exception that is not data: the
+switch of the body's measuring display, in the browser's local storage
+(D181).
 
 These are the rules that stay true across phases. Current state, status and
 next work are in [`HANDOVER.md`](HANDOVER.md); the reasoning behind individual
@@ -138,6 +140,11 @@ Never conflate them.
   nobody; it is one constant carried in the snapshot, never a table, and
   nothing of its kind follows it without a decision.
 - **The product is Mind and Gym, with Laufen inside Gym** (D139, D143).
+- **Heute's Gym label leads straight to Muskelgruppen** (D161, D182), and
+  back leads to where the user came from — Heute, or the hub; after a link
+  straight to the address, the hub. The hub stays the place for training,
+  plans and running and is one tap from Muskelgruppen. Heute loads neither
+  the viewer nor the model.
 - Mind's questions are asked **daily**. There is no rhythm engine, no
   per-question schedule, and there never will be.
 - Gym and Running are independent weekly quotas, never a combined one.
@@ -347,9 +354,13 @@ Never conflate them.
 - **Glass is one blur per card** (D146): `backdrop-filter` with the
   `-webkit-` prefix, a 1.5px gradient edge (`--glass-edge`), the solid
   `--glass-solid` where blur is unsupported or less transparency was asked
-  for. Nothing blurs over or under the 3D canvas while it can move; the
-  body's card and its pills are solid, and a sheet over the body stands
-  over a still one. The ground is one layer, painted by the shell and by a
+  for. Nothing blurs over or under the 3D canvas while it can move: the
+  body's stage has no surface of its own, the buttons that stand in it are
+  solid, and **a sheet stands over a still body** (D182). Every sheet asks
+  whatever can draw by itself to stop and stands once it has
+  (`app/stillness.ts`); under it no frame arises unless one is asked for.
+  Do not open a sheet over the body by another way, and do not give the
+  stage a card. The ground is one layer, painted by the shell and by a
   full-screen overlay; a header never paints it again.
 - **Text on glass is measured, not assumed** (D147, D149).
   `design-system.mjs` reads the rendered pixels under every visible run of
@@ -408,6 +419,41 @@ Never conflate them.
   body is the colour of its material; a tone mapping makes a pastel of it.
   The key light is as strong as white bears on the shoulders without
   burning out — measure before raising it.
+- **The body stands on a stage, not in a card** (D182, contract §8): as
+  wide as the screen and as tall as 55 % of the dynamic viewport, with only
+  the header in 17px, the range and the metrics strip above it. One framing
+  for every stage — the camera's angle of view is fixed (`framing.ts`) —
+  so the body's still (`assets/body-stage.webp`, made by
+  `tools/render-body-preview.mjs … stage`) stands exactly where the canvas
+  draws the body, until the first picture and whenever a lost graphics
+  context is being replaced: the stage is never an empty field. A change to
+  the framing means a new still. The strip counts nothing: its trend and
+  its count are `shownPerformance()`'s. Under the feet lies one disc whose
+  colour fades to nothing (`--body-ground-*`) — a gradient, never a blur
+  and never a texture; the scene stays at twelve draw calls.
+- **How the body is operated is settled** (D182). The motion counts time,
+  never frames: every value is in `MOTION` (`motion.ts`), a coast and a
+  travel are the exact solution of their equation, and the next frame is
+  asked for from inside the frame — never through a deferred
+  `requestAnimationFrame`, which halves the frame rate. **A tap never turns
+  the body**; a selection made in the list turns it when the group faces
+  away. A tap means the surface that is seen, with twelve CSS pixels of
+  tolerance (`picking.ts`); head, hands and feet are never chosen and are
+  not see-through. Two fingers zoom between 1.0 and 1.8 and are never a tap
+  and never a turn; a zoom is a window on the picture and a chosen group
+  stays inside it. A double tap and the reset button set the view back and
+  leave the selection. A drag that begins up or down is the page's. The
+  page's own zoom is never locked. A host can hold the viewer; held, it
+  draws exactly one frame when what it shows changes, and advances nothing.
+  While the still stands in, a finger moves nothing, and a lost context
+  sets the view back to the start: the body returns where its still stood.
+- **The measuring display is a tool, not interface** (D181):
+  `features/measure/`, off until its user switches it on in the settings.
+  It asks for no frame and stands beside the canvas, never over it. Its
+  switch speaks everyday language and lives in local storage — the first
+  and only use of it, nothing in the schema or a backup. The display itself
+  is **the one place that may carry technical words**, each number with its
+  unit. It knows nothing of three.js: the viewer reports to it.
 - **The body model is built, never edited** (D165).
   `public/models/momentum-body.glb` comes out of `python3
   tools/body/build.py momentum-body --install`, byte for byte, from the
@@ -448,7 +494,10 @@ Never conflate them.
   without a value.
 - **A screen that loads holds its layout** with calm surfaces
   (`LoadingBlocks`), no shimmer — and never for a load that failed, which
-  says so and can be retried (`LoadFailure`).
+  says so and can be retried (`LoadFailure`). The body is there before its
+  history: the stage stands from the first render with the body's still in
+  it, and the viewer's code and the model load beside the history, not
+  after it (D182).
 - **An empty state says why it is empty and what is missing** (contract
   §11, D163), and offers the one action that supplies it. An empty *range*
   is not "never": Muskelgruppen reads 30 or 90 days while the hub's figures
@@ -463,13 +512,16 @@ Never conflate them.
   inset `::before` — but never one computed from a border width: a browser
   snaps a border to whole device pixels, differently per device. Where it
   can, make the control's own box the target and draw the shape inside it
-  (`.bubble`). The one exception to 44px is the row of seven target
-  bubbles, which never wraps (D163): under 375px a bubble's target is 44px
-  high and its share of the row wide.
+  (`.bubble`, the body's reset button). The one exception to 44px is the
+  row of seven target bubbles, which never wraps (D163): under 375px a
+  bubble's target is 44px high and its share of the row wide. On the body
+  itself a group is reached from twelve pixels beside it (D182).
 - No horizontal clipping at 320/360/393/430px.
 - Reduced motion and reduced transparency respected.
 - Avoid technical vocabulary in user-facing copy — no "IndexedDB", "JSON",
-  "service worker", "snapshot".
+  "service worker", "snapshot". The one named exception is the measuring
+  display (D181), which is a tool: its switch and hint are everyday
+  language, its numbers may be called what they are.
 - German is the source of truth for strings; English is typed against it and
   placeholder parity is enforced by `src/i18n/catalogue.test.ts`.
 
