@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, CloseIcon } from './Icons';
+import { stillness } from '../app/stillness';
 import { useT } from '../i18n/I18nProvider';
 import { useDismissToast } from './Toast';
 import './ui.css';
@@ -402,8 +403,8 @@ export const SHEET_INITIAL_FOCUS = { 'data-sheet-initial-focus': '' } as const;
  * Bottom sheet. Focus moves into it on open and Escape closes it, so it
  * behaves like a modal for a keyboard and a screen reader too.
  *
- * Focus moves in, and back to where it came from, only when `open` changes
- * (WP3, B1). The effect used to depend on `onClose` as well, and every caller
+ * Focus moves in, and back to where it came from, only when the sheet
+ * comes to stand or goes (WP3, B1). The effect used to depend on `onClose` as well, and every caller
  * passes an inline one, so each keystroke that re-rendered the caller re-ran
  * it: its cleanup put focus back behind the sheet and the next run moved it
  * to the close button — after one letter, typing went nowhere. `onClose` is
@@ -438,8 +439,24 @@ export function Sheet({
   const t = useT();
   const dismissToast = useDismissToast();
 
+  /*
+   * No glass over a moving body (D146, block 7B). A sheet blurs and dims
+   * what lies under it, so it stands over a body that is still: it asks
+   * whatever can draw by itself to stop (`app/stillness.ts`) and stands
+   * once that has happened — and from then on until it is closed, whatever
+   * happens beneath it. On every screen without the 3D body nothing can
+   * move, and the sheet stands in the render that opened it, as it always
+   * did.
+   */
+  const still = useSyncExternalStore(stillness.subscribe, stillness.isStill, () => true);
+  const stood = useRef(false);
+  useEffect(() => (open ? stillness.ask() : undefined), [open]);
+  if (!open) stood.current = false;
+  else if (still) stood.current = true;
+  const standing = open && stood.current;
+
   useEffect(() => {
-    if (!open) return undefined;
+    if (!standing) return undefined;
     // A sheet is a new task: an undo left floating beside it could change
     // the very record the sheet is editing (WP3, B9).
     dismissToast();
@@ -456,9 +473,9 @@ export function Sheet({
       const target = previous?.isConnected ? previous : (returnFocusRef.current?.() ?? null);
       target?.focus({ preventScroll: true });
     };
-  }, [open, dismissToast]);
+  }, [standing, dismissToast]);
 
-  if (!open) return null;
+  if (!standing) return null;
 
   /*
    * Rendered into <body>, not in place: a sheet opened inside the workout or
