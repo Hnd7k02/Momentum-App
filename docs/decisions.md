@@ -5301,7 +5301,11 @@ others.
 - *A source* is the browser's own record of the request (Resource Timing):
   bytes over the wire are the network, none are a cache, and a browser that
   does not report the field leaves the source unknown. It is never guessed
-  from how long a request took.
+  from how long a request took. One case reads less plainly than it could:
+  a file the browser only checked over the network and then took from its
+  own cache crossed the wire with its headers alone, and the display calls
+  it "aus dem Netz" with those few bytes beside it — recognisable, not yet
+  named. Left for the next touch of the display.
 - *Device and system* are what the user agent says: "iPhone", never which
   one, and a system number that Apple's browsers may keep fixed. The copy
   ends with the whole string. The owner names his device and iOS at the
