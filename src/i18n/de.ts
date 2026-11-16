@@ -312,6 +312,7 @@ export const de = {
   'areas.category.countOne': 'Eine Frage',
 
   'today.gym.title': 'Gym',
+  'today.gym.openMuscles': 'Gym: Muskelgruppen öffnen',
   'today.running.title': 'Laufen',
   'today.gym.log': 'Session eintragen',
   'today.running.log': 'Lauf eintragen',

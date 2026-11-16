@@ -307,6 +307,7 @@ export const en: Translations = {
   'areas.category.countOne': 'One question',
 
   'today.gym.title': 'Gym',
+  'today.gym.openMuscles': 'Gym: open muscle groups',
   'today.running.title': 'Running',
   'today.gym.log': 'Log a session',
   'today.running.log': 'Log a run',

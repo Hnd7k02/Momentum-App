@@ -450,11 +450,13 @@ export function TodayScreen({
           return (
             <Section key={training.domain} label={t(copy.title)} labelHidden={training.domain === 'gym' && Boolean(onOpenMuscles)}>
               {/* Gym's label is the door to the body (block 7B, D161):
-                  Muskelgruppen, directly. Its name says where it leads.
-                  Logging stays the button below, and the hub — training,
-                  plans, running — is one tap from there. */}
+                  Muskelgruppen, directly. Its name says where it leads and
+                  begins with the word that is seen, so that someone who
+                  speaks to the phone can say "Gym". Logging stays the
+                  button below, and the hub — training, plans, running — is
+                  one tap from there. */}
               {training.domain === 'gym' && onOpenMuscles ? (
-                <button type="button" className="today__areaLink" onClick={onOpenMuscles} aria-label={t('gymHub.muscles.open')}>
+                <button type="button" className="today__areaLink" onClick={onOpenMuscles} aria-label={t('today.gym.openMuscles')}>
                   <span className="section__label today__areaLabel">{t(copy.title)}</span>
                   <ChevronRightIcon size={16} />
                 </button>
