@@ -1,0 +1,3596 @@
+{
+ "format": "momentum-backup",
+ "formatVersion": 3,
+ "schemaVersion": 5,
+ "exportedAt": "2026-11-17T07:00:05.289Z",
+ "app": {
+  "name": "Momentum",
+  "version": "0.1.0"
+ },
+ "data": {
+  "settings": {
+   "id": "settings",
+   "language": "de",
+   "firstUseDate": "2026-08-18",
+   "onboardingCompletedAt": "2026-11-17T07:00:01.793Z",
+   "acknowledgedRankId": null,
+   "promotionConfirmation": {
+    "from": "2026-11-17",
+    "targetRankId": "master",
+    "eligibleDates": []
+   },
+   "createdAt": "2026-11-17T07:00:00.235Z",
+   "updatedAt": "2026-11-17T07:00:02.877Z"
+  },
+  "domains": [
+   {
+    "id": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "type": "mental",
+    "enabled": true,
+    "order": 0,
+    "settings": {},
+    "createdAt": "2026-11-17T07:00:01.767Z",
+    "updatedAt": "2026-11-17T07:00:01.767Z"
+   },
+   {
+    "id": "dom_b449dd1b-fbbd-4a48-b548-1c33e6b39271",
+    "type": "running",
+    "enabled": true,
+    "order": 2,
+    "settings": {
+     "targetPerWeek": 2
+    },
+    "createdAt": "2026-11-17T07:00:01.789Z",
+    "updatedAt": "2026-11-17T07:00:01.789Z"
+   },
+   {
+    "id": "dom_e7877ee4-537f-45a7-9a67-e0b71b099fc6",
+    "type": "gym",
+    "enabled": true,
+    "order": 1,
+    "settings": {
+     "targetPerWeek": 3
+    },
+    "createdAt": "2026-11-17T07:00:01.777Z",
+    "updatedAt": "2026-11-17T07:00:01.777Z"
+   }
+  ],
+  "questions": [
+   {
+    "id": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "text": "Wie war deine Stimmung heute?",
+    "type": "scale",
+    "category": "mental",
+    "inverted": false,
+    "status": "active",
+    "order": 1,
+    "createdAt": "2026-11-17T07:00:01.774Z",
+    "updatedAt": "2026-11-17T07:00:01.774Z",
+    "archivedAt": null
+   },
+   {
+    "id": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "text": "Wie gut hast du geschlafen?",
+    "type": "scale",
+    "category": "gesundheit",
+    "inverted": false,
+    "status": "active",
+    "order": 0,
+    "createdAt": "2026-11-17T07:00:01.772Z",
+    "updatedAt": "2026-11-17T07:00:01.772Z",
+    "archivedAt": null
+   }
+  ],
+  "answers": [
+   {
+    "id": "2026-08-19#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-19",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.669Z",
+    "updatedAt": "2026-11-17T07:00:02.669Z"
+   },
+   {
+    "id": "2026-08-19#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-19",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.669Z",
+    "updatedAt": "2026-11-17T07:00:02.669Z"
+   },
+   {
+    "id": "2026-08-20#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-20",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-20#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-20",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-21#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-21",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-21#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-21",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-22#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-22",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-22#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-22",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-23#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-23",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-23#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-23",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-24#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-24",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-24#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-24",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-25#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-25",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-25#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-25",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-26#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-26",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-26#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-26",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-27#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-27",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-27#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-27",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 4,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-28#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-28",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-28#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-28",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-29#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-29",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-29#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-29",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-30#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-30",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-30#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-30",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-31#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-08-31",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-08-31#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-08-31",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-01#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-01",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-01#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-01",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-02#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-02",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-02#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-02",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-03#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-03",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-03#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-03",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-04#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-04",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-04#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-04",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-05#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-05",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-05#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-05",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-06#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-06",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-06#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-06",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-07#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-07",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-07#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-07",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-08#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-08",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-08#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-08",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-09#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-09",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-09#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-09",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-10#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-10",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-10#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-10",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-11#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-11",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-11#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-11",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-12#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-12",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-12#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-12",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-13#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-13",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-13#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-13",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-14#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-14",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-14#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-14",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 5,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-15#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-15",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-15#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-15",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-16#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-16",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-16#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-16",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-17#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-17",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-17#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-17",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-18#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-18",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-18#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-18",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-19#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-19",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-19#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-19",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-20#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-20",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-20#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-20",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-21#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-21",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-21#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-21",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-22#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-22",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-22#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-22",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-23#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-23",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-23#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-23",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-24#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-24",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-24#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-24",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-25#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-25",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-25#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-25",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-26#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-26",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-26#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-26",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-27#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-27",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-27#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-27",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-28#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-28",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-28#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-28",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-29#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-29",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-29#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-29",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-30#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-09-30",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-09-30#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-09-30",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-01#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-01",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-01#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-01",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-02#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-02",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-02#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-02",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 6,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-03#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-03",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-03#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-03",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-04#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-04",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-04#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-04",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-05#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-05",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-05#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-05",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-06#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-06",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-06#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-06",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-07#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-07",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-07#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-07",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-08#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-08",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-08#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-08",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-09#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-09",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-09#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-09",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-10#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-10",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-10#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-10",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-11#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-11",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-11#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-11",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-12#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-12",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-12#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-12",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-13#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-13",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-13#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-13",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-14#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-14",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-14#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-14",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-15#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-15",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-15#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-15",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-16#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-16",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-16#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-16",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-17#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-17",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-17#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-17",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-18#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-18",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-18#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-18",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-19#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-19",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-19#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-19",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-20#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-20",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-20#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-20",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 7,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-21#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-21",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-21#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-21",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-22#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-22",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-22#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-22",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-23#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-23",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-23#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-23",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-24#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-24",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-24#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-24",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-25#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-25",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-25#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-25",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-26#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-26",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-26#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-26",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-27#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-27",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-27#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-27",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-28#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-28",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-28#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-28",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-29#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-29",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-29#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-29",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-30#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-30",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-30#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-30",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-31#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-10-31",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-10-31#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-10-31",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-01#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-01",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-01#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-01",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-02#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-02",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-02#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-02",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-03#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-03",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-03#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-03",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-04#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-04",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-04#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-04",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-05#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-05",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-05#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-05",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-06#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-06",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-06#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-06",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-07#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-07",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-07#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-07",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 8,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-08#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-08",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-08#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-08",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-09#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-09",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-09#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-09",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-10#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-10",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-10#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-10",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-11#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-11",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-11#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-11",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-12#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-12",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-12#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-12",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-13#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-13",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-13#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-13",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-14#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-14",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-14#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-14",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-15#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-15",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-15#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-15",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-16#q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "date": "2026-11-16",
+    "questionId": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   },
+   {
+    "id": "2026-11-16#q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "date": "2026-11-16",
+    "questionId": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+    "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+    "value": 9,
+    "valueType": "scale",
+    "sensitivity": "private",
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.670Z",
+    "updatedAt": "2026-11-17T07:00:02.670Z"
+   }
+  ],
+  "sportsSessions": [],
+  "configSnapshots": [
+   {
+    "id": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "effectiveFrom": "2026-08-18",
+    "createdAt": "2026-11-17T07:00:01.771Z",
+    "config": {
+     "boss": {
+      "weights": {
+       "mental": 0.3333333333333333,
+       "gym": 0.3333333333333333,
+       "running": 0.3333333333333333
+      }
+     },
+     "domains": [
+      {
+       "id": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+       "type": "mental",
+       "enabled": true,
+       "settings": {}
+      },
+      {
+       "id": "dom_b449dd1b-fbbd-4a48-b548-1c33e6b39271",
+       "type": "running",
+       "enabled": true,
+       "settings": {
+        "targetPerWeek": 2
+       }
+      },
+      {
+       "id": "dom_e7877ee4-537f-45a7-9a67-e0b71b099fc6",
+       "type": "gym",
+       "enabled": true,
+       "settings": {
+        "targetPerWeek": 3
+       }
+      }
+     ],
+     "questions": [
+      {
+       "id": "q_1f46e238-e416-4fc4-b230-97e8e61f6091",
+       "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+       "text": "Wie war deine Stimmung heute?",
+       "type": "scale",
+       "status": "active",
+       "category": "mental"
+      },
+      {
+       "id": "q_5a3674d9-a58e-4e6d-97db-c268a6f677d2",
+       "domainId": "dom_5c1da703-6c66-4181-bc23-99d276960124",
+       "text": "Wie gut hast du geschlafen?",
+       "type": "scale",
+       "status": "active",
+       "category": "gesundheit"
+      }
+     ],
+     "scoring": {
+      "editWindowDays": 1,
+      "scaleMin": 1,
+      "scaleMax": 10,
+      "model": "categoryMean",
+      "gymModel": "attendancePerformance",
+      "runningModel": "attendancePerformance",
+      "sessionWindowDays": 1,
+      "gymMetric": {
+       "id": "bestWorkingSet",
+       "repsDivisor": 30,
+       "comparison": "median",
+       "curveDecadePercent": 3
+      }
+     }
+    }
+   }
+  ],
+  "rankEvents": [],
+  "profile": null,
+  "exercises": [
+   {
+    "id": "sx_bench",
+    "name": "Bankdrücken",
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_calf",
+    "name": "Wadenheben",
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_carry",
+    "name": "Farmer’s Walk",
+    "muscles": [
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "forearms"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_crunch",
+    "name": "Crunch am Kabel",
+    "muscles": [
+     "core"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_curl",
+    "name": "Hammercurls",
+    "muscles": [
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_dbrow",
+    "name": "Kurzhantelrudern",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_dips",
+    "name": "Dips",
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_face",
+    "name": "Face Pulls",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_legcurl",
+    "name": "Beinbeuger",
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_machine",
+    "name": "Rudermaschine",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_press",
+    "name": "Überkopfdrücken",
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_pulldown",
+    "name": "Latzug",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_pullover",
+    "name": "Überzug am Kabel",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_row",
+    "name": "Rudern am Kabel",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_squat",
+    "name": "Kniebeuge",
+    "muscles": [
+     "quadriceps"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sx_tbar",
+    "name": "T-Bar-Rudern",
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "builtIn": false,
+    "loadType": "external",
+    "durationSeconds": null,
+    "attributes": {},
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   }
+  ],
+  "gymPlans": [],
+  "gymSessions": [
+   {
+    "id": "sheet-gym-2026-08-29",
+    "date": "2026-08-29",
+    "weekKey": "2026-W35",
+    "performedAt": "2026-08-29T16:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-09-16",
+    "date": "2026-09-16",
+    "weekKey": "2026-W38",
+    "performedAt": "2026-09-16T16:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-04",
+    "date": "2026-10-04",
+    "weekKey": "2026-W40",
+    "performedAt": "2026-10-04T16:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-22",
+    "date": "2026-10-22",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-22T16:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-23",
+    "date": "2026-10-23",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-23T16:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-24",
+    "date": "2026-10-24",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-24T16:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-25",
+    "date": "2026-10-25",
+    "weekKey": "2026-W43",
+    "performedAt": "2026-10-25T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-26",
+    "date": "2026-10-26",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-10-26T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-29",
+    "date": "2026-10-29",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-10-29T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-30",
+    "date": "2026-10-30",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-10-30T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-10-31",
+    "date": "2026-10-31",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-10-31T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-01",
+    "date": "2026-11-01",
+    "weekKey": "2026-W44",
+    "performedAt": "2026-11-01T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-02",
+    "date": "2026-11-02",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-02T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-04",
+    "date": "2026-11-04",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-04T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-05",
+    "date": "2026-11-05",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-05T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-06",
+    "date": "2026-11-06",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-06T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-07",
+    "date": "2026-11-07",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-07T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-08",
+    "date": "2026-11-08",
+    "weekKey": "2026-W45",
+    "performedAt": "2026-11-08T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-09",
+    "date": "2026-11-09",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-09T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-11",
+    "date": "2026-11-11",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-11T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-12",
+    "date": "2026-11-12",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-12T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-13",
+    "date": "2026-11-13",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-13T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-gym-2026-11-14",
+    "date": "2026-11-14",
+    "weekKey": "2026-W46",
+    "performedAt": "2026-11-14T17:00:00.000Z",
+    "planId": null,
+    "note": null,
+    "legacyCarryOver": false,
+    "configSnapshotId": "cfg_1a30d431-567c-418c-9159-7187061f918e",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "updatedAt": "2026-11-17T07:00:02.689Z"
+   }
+  ],
+  "gymSets": [
+   {
+    "id": "sheet-set-1",
+    "sessionId": "sheet-gym-2026-10-22",
+    "exerciseId": "sx_bench",
+    "date": "2026-10-22",
+    "weightGrams": 40000,
+    "reps": 12,
+    "order": 1,
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z",
+    "warmUp": true
+   },
+   {
+    "id": "sheet-set-10",
+    "sessionId": "sheet-gym-2026-10-24",
+    "exerciseId": "sx_row",
+    "date": "2026-10-24",
+    "weightGrams": 40000,
+    "reps": 8,
+    "order": 10,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-11",
+    "sessionId": "sheet-gym-2026-10-31",
+    "exerciseId": "sx_row",
+    "date": "2026-10-31",
+    "weightGrams": 44000,
+    "reps": 8,
+    "order": 11,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-12",
+    "sessionId": "sheet-gym-2026-11-07",
+    "exerciseId": "sx_row",
+    "date": "2026-11-07",
+    "weightGrams": 48000,
+    "reps": 8,
+    "order": 12,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-13",
+    "sessionId": "sheet-gym-2026-11-04",
+    "exerciseId": "sx_tbar",
+    "date": "2026-11-04",
+    "weightGrams": 50000,
+    "reps": 10,
+    "order": 13,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-14",
+    "sessionId": "sheet-gym-2026-11-14",
+    "exerciseId": "sx_tbar",
+    "date": "2026-11-14",
+    "weightGrams": 50000,
+    "reps": 10,
+    "order": 14,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-15",
+    "sessionId": "sheet-gym-2026-11-04",
+    "exerciseId": "sx_dbrow",
+    "date": "2026-11-04",
+    "weightGrams": 26000,
+    "reps": 10,
+    "order": 15,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-16",
+    "sessionId": "sheet-gym-2026-11-14",
+    "exerciseId": "sx_dbrow",
+    "date": "2026-11-14",
+    "weightGrams": 26000,
+    "reps": 10,
+    "order": 16,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-17",
+    "sessionId": "sheet-gym-2026-11-04",
+    "exerciseId": "sx_machine",
+    "date": "2026-11-04",
+    "weightGrams": 45000,
+    "reps": 10,
+    "order": 17,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-18",
+    "sessionId": "sheet-gym-2026-11-14",
+    "exerciseId": "sx_machine",
+    "date": "2026-11-14",
+    "weightGrams": 45000,
+    "reps": 10,
+    "order": 18,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-19",
+    "sessionId": "sheet-gym-2026-11-04",
+    "exerciseId": "sx_pullover",
+    "date": "2026-11-04",
+    "weightGrams": 25000,
+    "reps": 10,
+    "order": 19,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-2",
+    "sessionId": "sheet-gym-2026-10-22",
+    "exerciseId": "sx_bench",
+    "date": "2026-10-22",
+    "weightGrams": 60000,
+    "reps": 9,
+    "order": 2,
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-20",
+    "sessionId": "sheet-gym-2026-11-14",
+    "exerciseId": "sx_pullover",
+    "date": "2026-11-14",
+    "weightGrams": 25000,
+    "reps": 10,
+    "order": 20,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-21",
+    "sessionId": "sheet-gym-2026-11-04",
+    "exerciseId": "sx_face",
+    "date": "2026-11-04",
+    "weightGrams": 20000,
+    "reps": 10,
+    "order": 21,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-22",
+    "sessionId": "sheet-gym-2026-11-14",
+    "exerciseId": "sx_face",
+    "date": "2026-11-14",
+    "weightGrams": 20000,
+    "reps": 10,
+    "order": 22,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-23",
+    "sessionId": "sheet-gym-2026-08-29",
+    "exerciseId": "sx_press",
+    "date": "2026-08-29",
+    "weightGrams": 40000,
+    "reps": 8,
+    "order": 23,
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-24",
+    "sessionId": "sheet-gym-2026-09-16",
+    "exerciseId": "sx_press",
+    "date": "2026-09-16",
+    "weightGrams": 42000,
+    "reps": 8,
+    "order": 24,
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-25",
+    "sessionId": "sheet-gym-2026-10-04",
+    "exerciseId": "sx_press",
+    "date": "2026-10-04",
+    "weightGrams": 44000,
+    "reps": 8,
+    "order": 25,
+    "muscles": [
+     "shoulders"
+    ],
+    "primaryMuscles": [
+     "shoulders"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-26",
+    "sessionId": "sheet-gym-2026-11-02",
+    "exerciseId": "sx_curl",
+    "date": "2026-11-02",
+    "weightGrams": 16000,
+    "reps": 10,
+    "order": 26,
+    "muscles": [
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-27",
+    "sessionId": "sheet-gym-2026-11-11",
+    "exerciseId": "sx_curl",
+    "date": "2026-11-11",
+    "weightGrams": 17000,
+    "reps": 10,
+    "order": 27,
+    "muscles": [
+     "biceps",
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "biceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-28",
+    "sessionId": "sheet-gym-2026-11-07",
+    "exerciseId": "sx_carry",
+    "date": "2026-11-07",
+    "weightGrams": 30000,
+    "reps": 12,
+    "order": 28,
+    "muscles": [
+     "forearms"
+    ],
+    "primaryMuscles": [
+     "forearms"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-29",
+    "sessionId": "sheet-gym-2026-10-26",
+    "exerciseId": "sx_crunch",
+    "date": "2026-10-26",
+    "weightGrams": 40000,
+    "reps": 10,
+    "order": 29,
+    "muscles": [
+     "core"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-3",
+    "sessionId": "sheet-gym-2026-10-22",
+    "exerciseId": "sx_bench",
+    "date": "2026-10-22",
+    "weightGrams": 60000,
+    "reps": 8,
+    "order": 3,
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-30",
+    "sessionId": "sheet-gym-2026-11-02",
+    "exerciseId": "sx_crunch",
+    "date": "2026-11-02",
+    "weightGrams": 38000,
+    "reps": 10,
+    "order": 30,
+    "muscles": [
+     "core"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-31",
+    "sessionId": "sheet-gym-2026-11-09",
+    "exerciseId": "sx_crunch",
+    "date": "2026-11-09",
+    "weightGrams": 36000,
+    "reps": 10,
+    "order": 31,
+    "muscles": [
+     "core"
+    ],
+    "primaryMuscles": [
+     "core"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-32",
+    "sessionId": "sheet-gym-2026-10-25",
+    "exerciseId": "sx_squat",
+    "date": "2026-10-25",
+    "weightGrams": 50000,
+    "reps": 5,
+    "order": 32,
+    "muscles": [
+     "quadriceps"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-33",
+    "sessionId": "sheet-gym-2026-11-01",
+    "exerciseId": "sx_squat",
+    "date": "2026-11-01",
+    "weightGrams": 75000,
+    "reps": 5,
+    "order": 33,
+    "muscles": [
+     "quadriceps"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-34",
+    "sessionId": "sheet-gym-2026-11-08",
+    "exerciseId": "sx_squat",
+    "date": "2026-11-08",
+    "weightGrams": 100000,
+    "reps": 5,
+    "order": 34,
+    "muscles": [
+     "quadriceps"
+    ],
+    "primaryMuscles": [
+     "quadriceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-35",
+    "sessionId": "sheet-gym-2026-10-25",
+    "exerciseId": "sx_legcurl",
+    "date": "2026-10-25",
+    "weightGrams": 45000,
+    "reps": 10,
+    "order": 35,
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-36",
+    "sessionId": "sheet-gym-2026-11-01",
+    "exerciseId": "sx_legcurl",
+    "date": "2026-11-01",
+    "weightGrams": 45000,
+    "reps": 10,
+    "order": 36,
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-37",
+    "sessionId": "sheet-gym-2026-11-08",
+    "exerciseId": "sx_legcurl",
+    "date": "2026-11-08",
+    "weightGrams": 45000,
+    "reps": 10,
+    "order": 37,
+    "muscles": [
+     "hamstringsGlutes"
+    ],
+    "primaryMuscles": [
+     "hamstringsGlutes"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-38",
+    "sessionId": "sheet-gym-2026-11-09",
+    "exerciseId": "sx_calf",
+    "date": "2026-11-09",
+    "weightGrams": 40000,
+    "reps": 12,
+    "order": 38,
+    "muscles": [
+     "calves"
+    ],
+    "primaryMuscles": [
+     "calves"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-39",
+    "sessionId": "sheet-gym-2026-10-23",
+    "exerciseId": "sx_dips",
+    "date": "2026-10-23",
+    "weightGrams": 100000,
+    "reps": 5,
+    "order": 39,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-4",
+    "sessionId": "sheet-gym-2026-10-29",
+    "exerciseId": "sx_bench",
+    "date": "2026-10-29",
+    "weightGrams": 60000,
+    "reps": 10,
+    "order": 4,
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-40",
+    "sessionId": "sheet-gym-2026-10-30",
+    "exerciseId": "sx_dips",
+    "date": "2026-10-30",
+    "weightGrams": 90000,
+    "reps": 5,
+    "order": 40,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-41",
+    "sessionId": "sheet-gym-2026-11-06",
+    "exerciseId": "sx_dips",
+    "date": "2026-11-06",
+    "weightGrams": 104000,
+    "reps": 5,
+    "order": 41,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-42",
+    "sessionId": "sheet-gym-2026-11-13",
+    "exerciseId": "sx_dips",
+    "date": "2026-11-13",
+    "weightGrams": 96000,
+    "reps": 5,
+    "order": 42,
+    "muscles": [
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "triceps"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-5",
+    "sessionId": "sheet-gym-2026-11-05",
+    "exerciseId": "sx_bench",
+    "date": "2026-11-05",
+    "weightGrams": 62500,
+    "reps": 8,
+    "order": 5,
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-6",
+    "sessionId": "sheet-gym-2026-11-12",
+    "exerciseId": "sx_bench",
+    "date": "2026-11-12",
+    "weightGrams": 62500,
+    "reps": 9,
+    "order": 6,
+    "muscles": [
+     "chest",
+     "triceps"
+    ],
+    "primaryMuscles": [
+     "chest"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-7",
+    "sessionId": "sheet-gym-2026-10-24",
+    "exerciseId": "sx_pulldown",
+    "date": "2026-10-24",
+    "weightGrams": 55000,
+    "reps": 8,
+    "order": 7,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-8",
+    "sessionId": "sheet-gym-2026-10-31",
+    "exerciseId": "sx_pulldown",
+    "date": "2026-10-31",
+    "weightGrams": 55000,
+    "reps": 8,
+    "order": 8,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   },
+   {
+    "id": "sheet-set-9",
+    "sessionId": "sheet-gym-2026-11-07",
+    "exerciseId": "sx_pulldown",
+    "date": "2026-11-07",
+    "weightGrams": 55000,
+    "reps": 8,
+    "order": 9,
+    "muscles": [
+     "back"
+    ],
+    "primaryMuscles": [
+     "back"
+    ],
+    "loadType": "external",
+    "createdAt": "2026-11-17T07:00:02.689Z"
+   }
+  ],
+  "runs": [],
+  "foodEntries": [],
+  "foodDays": [],
+  "weightEntries": [],
+  "restDays": [],
+  "pausePeriods": [],
+  "tombstones": []
+ }
+}

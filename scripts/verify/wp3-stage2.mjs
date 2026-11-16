@@ -417,7 +417,8 @@ for (const [width, height] of SIZES) {
     // which reads in the unit as well: the best working set and the volume.
     await openGroupSheet(page, 'Brust');
     const inLb = await page.locator('.sheet--detents').evaluate((sheet) => ({
-      sets: [...sheet.querySelectorAll('.muscle-sheet__exerciseSet, .muscle-sheet__recordSet')].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
+      // A recorded day's row carries its date where an exercise's row carries its best set.
+      sets: [...sheet.querySelectorAll('.muscle-sheet__exercise:not(.muscle-sheet__exercise--record) .muscle-sheet__exerciseSet, .muscle-sheet__recordSet')].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
       volume: [...sheet.querySelectorAll('.muscle-volume__value, .muscle-volume__axisLabel--top')].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
     }));
     check(`${W}: P4 the muscle sheet reads in lb — the sets and the work volume`,

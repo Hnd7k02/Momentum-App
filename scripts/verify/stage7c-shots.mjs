@@ -111,11 +111,12 @@ for (const width of WIDTHS) {
   await shot(page, `sheet-zurueckgegangen-${width}`);
   await closeGroupSheet(page);
 
-  if (width === 393 || width === 320) {
+  {
     /* ── D170: a single observation, as it is and as it could be ─────────── */
-    // The row.
+    // The row. (The focus went back to the row of the sheet closed last; its ring is not the subject.)
+    await page.evaluate(() => document.activeElement?.blur?.());
     const row = page.locator('.muscle-row').filter({ has: page.locator('.muscle-row__button[data-muscle="forearms"]') });
-    await row.evaluate((el) => el.scrollIntoView({ block: 'end' }));
+    await row.evaluate((el) => el.scrollIntoView({ block: 'center' }));
     await page.waitForTimeout(400);
     const stripOf = async () => {
       const copy = page.locator('.muscle-row[data-candidate]');
@@ -304,7 +305,9 @@ for (const width of WIDTHS) {
         if (shown !== null) pair.appendChild(cell('zum letzten Mal', text(shown), state(shown)));
         head.replaceWith(pair);
         caption.remove();
-        window.__sinceLast = shown === null ? null : { text: text(shown), kind: state(shown), word: word[state(shown)] };
+        // Kept by the exercise's name: a sheet lists more than the exercise that was opened.
+        const name = detail.getAttribute('aria-label') ?? detail.querySelector('h1, h2')?.textContent ?? '';
+        (window.__sinceLast ??= {})[name] = shown === null ? null : { text: text(shown), kind: state(shown), word: word[state(shown)] };
       });
       await shot(page, `zwei-zahlen-uebung-${slug}-${days}-${width}`);
     };
@@ -323,16 +326,19 @@ for (const width of WIDTHS) {
         await openSheetExercise(page, name);
         await twoNamed(days);
         await closeExercise(page);
-        // The same two figures in the sheet's row, under the same names.
-        await page.evaluate((name) => {
-          const row = [...document.querySelectorAll('.sheet--detents .muscle-sheet__exercise')].find((el) => el.querySelector('.muscle-sheet__exerciseName').textContent === name);
-          const right = row.querySelector('.muscle-sheet__exerciseRight');
-          const second = window.__sinceLast;
-          const kind = [...right.classList].find((c) => c.startsWith('muscle-sheet__exerciseRight--')).split('--')[1];
-          const colour = { improved: 'var(--status-strong-ink)', declined: 'var(--status-weak-ink)', unchanged: 'var(--text-primary)' };
-          const line = (figure, label, k) => `<span style="display:flex;align-items:baseline;gap:6px;justify-content:flex-end"><span class="muscle-sheet__exerciseChange" style="color:${colour[k]}">${figure}</span><span class="muscle-sheet__exerciseState">${label}</span></span>`;
-          right.innerHTML = line(right.querySelector('.muscle-sheet__exerciseChange').textContent, 'im Zeitraum', kind) + (second ? line(second.text, 'zum letzten Mal', second.kind) : '');
-        }, name);
+        // The same two figures in the sheet's rows, under the same names —
+        // in every row whose exercise has been opened, not only this one's.
+        await page.evaluate(() => {
+          for (const row of document.querySelectorAll('.sheet--detents .muscle-sheet__exercise')) {
+            const second = (window.__sinceLast ?? {})[row.querySelector('.muscle-sheet__exerciseName').textContent];
+            const right = row.querySelector('.muscle-sheet__exerciseRight');
+            if (second === undefined || !right) continue;
+            const kind = [...right.classList].find((c) => c.startsWith('muscle-sheet__exerciseRight--')).split('--')[1];
+            const colour = { improved: 'var(--status-strong-ink)', declined: 'var(--status-weak-ink)', unchanged: 'var(--text-primary)' };
+            const line = (figure, label, k) => `<span style="display:flex;align-items:baseline;gap:6px;justify-content:flex-end"><span class="muscle-sheet__exerciseChange" style="color:${colour[k]}">${figure}</span><span class="muscle-sheet__exerciseState">${label}</span></span>`;
+            right.innerHTML = line(right.querySelector('.muscle-sheet__exerciseChange').textContent, 'im Zeitraum', kind) + (second ? line(second.text, 'zum letzten Mal', second.kind) : '');
+          }
+        });
         await page.waitForTimeout(200);
         await shot(page, `zwei-zahlen-sheet-${tag}-${days}-${width}`, await boxOf(list, 6));
         await closeGroupSheet(page);

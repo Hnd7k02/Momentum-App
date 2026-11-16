@@ -422,14 +422,6 @@
   color: var(--status-weak-ink);
 }
 
-/* What a group with too little to compare is missing, above its exercises. */
-.gym-progress__tooFew {
-  padding-bottom: var(--space-3);
-  font-size: var(--type-footnote);
-  line-height: 1.4;
-  color: var(--text-secondary);
-}
-
 /* The header of Muskelgruppen (block 7B, contract §8): back, the title in
    17px, ⓘ — one line of 44px, so the body below gets the screen. The title
    stands in the middle between two controls of the same width; should a
@@ -476,69 +468,6 @@
   color: var(--text-secondary);
 }
 
-
-
-
-
-
-.gym-progress__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  text-align: left;
-  min-height: var(--row-height);
-  border-bottom: 1px solid var(--separator);
-}
-
-.gym-progress__row:last-child {
-  border-bottom: none;
-}
-
-.gym-progress__rowBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.gym-progress__rowName {
-  font-size: var(--type-subhead);
-  color: var(--text-primary);
-  overflow-wrap: anywhere;
-}
-
-.gym-progress__rowMuscles {
-  font-size: var(--type-caption);
-  color: var(--text-secondary);
-}
-
-/* In a row the number is the body size, semibold (contract §3). */
-.gym-progress__change {
-  font-size: var(--type-body);
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
-  flex: none;
-}
-
-.gym-progress__change--improved {
-  color: var(--status-strong-ink);
-}
-.gym-progress__change--declined {
-  color: var(--status-weak-ink);
-}
-/* "Gehalten" is a word standing where a number would: one step smaller, so
-   it does not outweigh the figures above and below it — and in the text
-   colour, never the warning yellow (contract §7). */
-.gym-progress__change--unchanged {
-  color: var(--text-primary);
-  font-size: var(--type-subhead);
-}
-.gym-progress__change--noBaseline {
-  color: var(--text-secondary);
-  font-weight: var(--weight-regular);
-  font-size: var(--type-caption);
-}
 
 /*
  * The chip of a state (contract §5): 11px semibold, surface and text from
@@ -748,21 +677,10 @@
    not-started card is styled here ──────────────────────────────────────── */
 
 
-
-
-
 .gym-overview__empty {
   font-size: var(--type-subhead);
   color: var(--text-secondary);
 }
-
-
-
-
-
-
-
-
 
 
 /* ── Bodyweight ─────────────────────────────────────────────────────────── */

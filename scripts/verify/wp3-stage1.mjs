@@ -786,7 +786,7 @@ for (const [width, height] of SIZES) {
       check(`${W}: B6 ${name} detail opens`, title === name, String(title));
       check(`${W}: B6 ${name} detail's change reads "0 %" and "Gehalten", neutral — the sheet's own figure`,
         value?.text === '0\u00a0%' && value?.unchanged === true && value?.chip === 'Gehalten' && value?.text === row.change, short(value));
-      check(`${W}: B6 ${name} detail stands no second change beside it`, JSON.stringify(value?.figures ?? []) === JSON.stringify(['Zuletzt', 'Davor']) && (await page.locator('.exercise-line__value').count()) === 0, short(value?.figures));
+      check(`${W}: B6 ${name} detail stands no second change beside it`, JSON.stringify(value?.figures ?? []) === JSON.stringify(['Zuletzt', 'Davor']) && (await page.locator('.gym-detail .exercise-line__value').count()) === 0, short(value?.figures));
       if (shoot) {
         await page.screenshot({ path: shotPath(width, 'exercise-detail') });
         await layoutChecks(page, `${W} exercise detail`);
