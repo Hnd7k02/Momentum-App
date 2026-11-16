@@ -24,6 +24,7 @@ import type { MuscleGroup } from '../../core/model';
 import type { MuscleMeshes } from './muscleMeshMap';
 import type { FrameActivity } from '../measure/measure';
 import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_INERT_COLOR, BODY_LOOK, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, type BodyLook } from './tokens';
+import { MOTION } from './motion';
 
 export type MuscleVisual = {
   /** 0–1, already normalised by the Gym domain. Drives tint strength. */
@@ -50,6 +51,11 @@ export type HighlightOptions = {
   surface?: BodyLook['surface'];
   /** What each frame is drawn for, for the measuring display. */
   activity?: MutableRefObject<FrameActivity>;
+  /**
+   * The viewer is held (block 7B): no frame follows the one being drawn, so
+   * a colour does not ease — it is at its goal in that one frame.
+   */
+  still?: MutableRefObject<boolean>;
 };
 
 /** The two uniforms the rim patch adds; shared by reference with the shader. */
@@ -189,8 +195,11 @@ export function useMuscleHighlight({
   invalidate,
   surface = BODY_LOOK.surface,
   activity,
+  still,
 }: HighlightOptions): void {
   const slots = useRef<Map<MuscleGroup, Slot>>(new Map());
+  /** The goals changed since the last frame: the next one starts a change. */
+  const fresh = useRef(false);
 
   /** See CameraRig: an invalidate() inside useFrame is swallowed by that frame. */
   const pending = useRef(false);
@@ -210,6 +219,10 @@ export function useMuscleHighlight({
     for (const [id, mesh] of meshes) {
       const { material, rim } = regionMaterial();
       material.name = id;
+      // The first picture is the body before it says anything — the tone of
+      // the still that stood in its place while it loaded — and the states
+      // ease in from there: nothing jumps when the canvas takes over.
+      material.color.set(BODY_INERT_COLOR);
       material.roughness = surface.roughness;
       material.envMapIntensity = surface.environment;
       // A baked shade, where the model brings one (see BodyModel).
@@ -218,7 +231,7 @@ export function useMuscleHighlight({
       created.set(id, {
         material,
         rim,
-        target: new Color(BODY_DIMMED_COLOR),
+        target: new Color(BODY_INERT_COLOR),
         targetEmissive: new Color(BLACK),
         targetEmissiveIntensity: 0,
         targetRim: 0,
@@ -244,13 +257,18 @@ export function useMuscleHighlight({
       slot.targetRimColor.set(next.rimColor);
       slot.targetRim = next.rim;
     }
+    fresh.current = true;
     invalidate();
   }, [visuals, selected, tinted, meshes, invalidate]);
 
   useFrame((_, delta) => {
-    // Frame-rate independent easing, so a 120 Hz iPad and a throttled
-    // background tab settle in the same wall-clock time.
-    const k = 1 - Math.exp(-delta * REGION_MATERIAL.easeRate);
+    // Frame-rate independent easing, and independent of how long the demand
+    // loop slept before it: the first frame of a change is one ordinary
+    // step, not the whole pause, and no later frame counts for more than a
+    // tenth of a second (`MOTION.maxStepMs`).
+    const seconds = fresh.current ? 1 / 60 : Math.min(delta, MOTION.maxStepMs / 1000);
+    fresh.current = false;
+    const k = still?.current ? 1 : 1 - Math.exp(-seconds * REGION_MATERIAL.easeRate);
     let moving = false;
     for (const slot of slots.current.values()) {
       const m = slot.material;
@@ -290,6 +308,8 @@ export function useMuscleHighlight({
         rc.copy(slot.targetRimColor);
       }
     }
+    // Held, the frame is the whole change: every value is at its goal.
+    if (still?.current) moving = false;
     if (moving) keepAlive();
     if (activity) activity.current.easing = moving;
   });

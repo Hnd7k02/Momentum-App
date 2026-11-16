@@ -4,21 +4,34 @@ import type { Material, Mesh, Texture } from 'three';
 import { bodyMeasure, isMeasuring, type FrameActivity } from '../measure/measure';
 
 /**
- * The measuring display's eye inside the canvas (block 7B, D181).
+ * The last word on each frame (block 7B).
  *
  * Mounted last, so it runs after the camera and the materials have said
- * what this frame is for. It tells the recorder that a frame was drawn and
- * why, notices when the body comes to rest, and reads what the renderer
- * says about the picture — after the render, which is when the renderer
- * knows. It asks for no frame: both callbacks run only in frames that
- * something else asked for. With the display switched off it is not
- * mounted at all.
+ * what this frame is for. Two readers depend on that:
+ *
+ * - **the pause**: a frame that ends with nothing moving — no travel, no
+ *   coast, no colour on its way — tells the viewer the body rests, which is
+ *   the moment a requested pause takes hold;
+ * - **the measuring display** (D181), where it is switched on: that a frame
+ *   was drawn and why, when the body came to rest, and what the renderer
+ *   says about the picture — read after the render, which is when the
+ *   renderer knows.
+ *
+ * It asks for no frame: both callbacks run only in frames that something
+ * else asked for.
  */
 
 /** The texture slots of a standard material; the body uses none of them today. */
 const TEXTURE_SLOTS = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap', 'alphaMap', 'envMap'] as const;
 
-export function FrameProbe({ activity }: { activity: MutableRefObject<FrameActivity> }) {
+export function FrameProbe({
+  activity,
+  onRest,
+}: {
+  activity: MutableRefObject<FrameActivity>;
+  /** A frame ended with nothing moving. */
+  onRest?: () => void;
+}) {
   const { gl, scene, size } = useThree();
   const drawn = useRef(false);
   const wasActive = useRef(false);
@@ -26,8 +39,9 @@ export function FrameProbe({ activity }: { activity: MutableRefObject<FrameActiv
   const gpu = useRef<string | null | undefined>(undefined);
 
   useFrame(() => {
-    if (!isMeasuring()) return;
     const { rotating, coasting, easing } = activity.current;
+    if (!coasting && !easing) onRest?.();
+    if (!isMeasuring()) return;
     const now = performance.now();
     bodyMeasure.rendered(now, { rotating, selfDriven: coasting || easing });
     drawn.current = true;

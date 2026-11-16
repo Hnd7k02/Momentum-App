@@ -1,93 +1,146 @@
 /**
- * Camera rig: finger-drag orbit with inertia, plus front/side/back presets.
+ * Camera rig: the one place a finger meets the body.
  *
- * Hand-rolled rather than OrbitControls, for three reasons specific to this
- * feature: the body must rotate through a full unwrapped 360° (OrbitControls
- * wraps azimuth and fights preset animation), panning must not exist at all,
- * and the same gesture has to feed tap-vs-drag. It is ~80 lines and removes a
- * dependency we would otherwise be configuring against its own defaults.
+ * Hand-rolled rather than OrbitControls, for reasons specific to this
+ * feature: the body turns through a full unwrapped 360°, panning as a
+ * gesture does not exist, and the same touch has to feed tap-versus-drag,
+ * the pinch and the double tap.
  *
- * Two things the approved spec asks of the rig beyond the gesture
- * (docs/design/muscle-map/momentum-muscle-map-handoff/HANDOFF.txt §11):
- * the field of view adapts to the viewer's real height, so the body keeps
- * its framing in a shorter card, and under `prefers-reduced-motion` there is
- * no inertia coast and a preset settles at once — drag, tap and the
- * shortcuts keep working.
+ * What it does (block 7B, contract §8 and §10):
+ *
+ * - **One finger turns.** Sideways it turns the body, up and down it tilts
+ *   it. On release the body runs on at the finger's speed and runs out
+ *   softly. A drag that *begins* up or down is the page's: the canvas lets
+ *   the browser scroll it (`touch-action: pan-y`), so the rows under the
+ *   body are reached with one thumb.
+ * - **A tap selects and never turns.** It is reported with the place it
+ *   landed on; the angle is left as it is.
+ * - **Two fingers zoom**, between 1.0 and 1.8, and are never a tap and
+ *   never a turn — not even after one of them has lifted. The zoom is a
+ *   window on the picture (`framing.ts`); a chosen group stays inside it.
+ * - **A double tap resets**: front, zoom 1.0, the tilt of the start. Its
+ *   first tap selects like any tap, without waiting to see a second.
+ * - **Every motion counts time, not frames** (`motion.ts`).
+ * - **It can be held.** A host pauses the viewer; a coast then ends at
+ *   once, a travel in flight is finished first, and nothing here asks for
+ *   another frame until the pause is lifted.
+ *
+ * Under `prefers-reduced-motion` there is no coast and every travel is a
+ * jump — drag, tap, pinch and the shortcuts keep working.
  */
 import { useCallback, useEffect, useImperativeHandle, useRef, forwardRef, type MutableRefObject } from 'react';
-import { Vector3, type PerspectiveCamera } from 'three';
+import { Vector3, type Box3, type PerspectiveCamera } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { TapVsDrag } from './useTapVsDrag';
 import { bodyMeasure, isMeasuring, type FrameActivity } from '../measure/measure';
+import { STAGE, clampWindow, pictureAt, pictureBox, pinchWindow, windowRect, type Box, type Point } from './framing';
+import {
+  MOTION,
+  coast,
+  normalizeAngle,
+  releaseVelocity,
+  shortestDelta,
+  stepMs,
+  travel,
+  zoomTo as zoomTowards,
+  type FingerSample,
+  type Moving,
+} from './motion';
 
 export type BodyView = 'front' | 'side' | 'back';
 
 export const VIEW_AZIMUTH: Record<BodyView, number> = { front: 0, side: 90, back: 180 };
 
-const TARGET = new Vector3(0, 0.92, 0);
-const DISTANCE = 4.05;
-const PITCH_MIN = -22;
-const PITCH_MAX = 30;
-const YAW_PER_PX = 0.55;
-const PITCH_PER_PX = 0.22;
-const FRICTION = 0.93;
+const TARGET = new Vector3(...STAGE.target);
 const D2R = Math.PI / 180;
-/** fov 27 at 400 px of height, adapted per height and clamped. */
-const FOV_AT_400 = 27;
-const FOV_MIN = 22;
-const FOV_MAX = 40;
-
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 
-/** The fov for a viewer of this height, per HANDOFF.txt §11. */
-export function fovForHeight(heightPx: number): number {
-  return clamp(FOV_AT_400 * (400 / Math.max(1, heightPx)), FOV_MIN, FOV_MAX);
-}
+/** Two taps are a double tap when the second lands this soon and this near. */
+const DOUBLE_TAP_MS = 320;
+const DOUBLE_TAP_PX = 28;
+/** The finger samples kept for the release speed: more than its window ever holds. */
+const SAMPLES = 24;
 
-/** Shortest signed way from one angle to another, so we never spin the long way. */
-export function shortestDelta(from: number, to: number): number {
-  let d = (to - from) % 360;
-  if (d > 180) d -= 360;
-  if (d < -180) d += 360;
-  return d;
+/** Where a tap landed: in the canvas's own CSS pixels, with the canvas's size. */
+export interface BodyTap {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export type CameraRigHandle = {
-  /** Animate to a named view. */
+  /** Travel to a named view. */
   goTo: (view: BodyView) => void;
-  /** Rotate to an absolute azimuth by the shortest path (for list selections). */
+  /** Turn to an absolute azimuth by the shortest path (for a selection made in the list). */
   faceAzimuth: (deg: number) => void;
   /** Current azimuth, normalised to 0–360. */
   azimuth: () => number;
+  /** The current zoom, 1.0–1.8. */
+  zoom: () => number;
+  /** Back to the start: front, zoom 1.0, the first tilt. The selection is the host's and stays. */
+  reset: () => void;
+  /**
+   * The host asks for stillness. A coast ends now; a travel in flight is
+   * finished first — or, with `now`, jumps to its goal, for a viewer that
+   * cannot draw its way there. Returns whether the camera already rests.
+   */
+  hold: (now?: boolean) => boolean;
 };
 
 export type CameraRigProps = {
-  /** Called on a gesture the rig judged to be a tap, with canvas-space NDC. */
-  onTap?: (ndc: { x: number; y: number }) => void;
+  /** A gesture the rig judged to be a tap, and where it landed. */
+  onTap?: (tap: BodyTap) => void;
   onAzimuthChange?: (deg: number) => void;
+  /** The zoom as it changes, throttled like the azimuth and always once at rest. */
+  onZoomChange?: (zoom: number) => void;
   enabled?: boolean;
-  /** What each frame is drawn for, for the measuring display. */
+  /** What each frame is drawn for, for the measuring display and for the pause. */
   activity?: MutableRefObject<FrameActivity>;
+  /** The chosen group's box in the world, which a zoom keeps in its window; `null` with nothing chosen. */
+  keepInView?: MutableRefObject<Box3 | null>;
+  /**
+   * The viewer is held and draws nothing: a finger then moves nothing
+   * either — it would turn a body nobody sees turning. A tap is still a tap.
+   */
+  frozen?: MutableRefObject<boolean>;
 };
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function CameraRig(
-  { onTap, onAzimuthChange, enabled = true, activity },
+  { onTap, onAzimuthChange, onZoomChange, enabled = true, activity, keepInView, frozen },
   ref,
 ) {
-  const { camera, gl, size, invalidate } = useThree();
-  const yaw = useRef(0);
-  const pitch = useRef(8);
-  const velocity = useRef(0);
+  const { camera, gl, invalidate } = useThree();
+  const yaw = useRef<Moving>({ value: 0, velocity: 0 });
+  const pitch = useRef<Moving>({ value: MOTION.pitchStart, velocity: 0 });
+  const zoom = useRef<Moving>({ value: 1, velocity: 0 });
+  /** The window's centre in the picture; only read while the zoom is above 1. */
+  const centre = useRef<Point>({ x: 0.5, y: 0.5 });
   const yawTo = useRef<number | null>(null);
+  const pitchTo = useRef<number | null>(null);
+  const zoomTo = useRef<number | null>(null);
+  const coasting = useRef(false);
+  /** When the motion was last advanced; `null` while nothing moves. */
+  const steppedAt = useRef<number | null>(null);
+
   const gestures = useRef(new TapVsDrag());
-  const lastEmitted = useRef<number>(-1);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  /** A gesture a second finger joined stays a pinch until every finger has lifted. */
+  const pinching = useRef(false);
+  const pinch = useRef<{ held: Point; zoom: number; distance: number } | null>(null);
+  const samples = useRef<FingerSample[]>([]);
+  const lastTap = useRef<{ at: number; x: number; y: number } | null>(null);
+  /** A finger moved the camera since the last frame. */
+  const dragged = useRef(false);
+
+  const lastAzimuth = useRef(-1);
+  const lastZoom = useRef(-1);
   const lastEmitAt = useRef(0);
   const wakePending = useRef(false);
   const reduced = useRef(false);
-  /** A finger moved the camera since the last frame. */
-  const dragged = useRef(false);
+  const applied = useRef({ zoom: 0, x: 0, y: 0 });
 
   // Read the preference once and follow it; the rig checks the ref, never
   // the media query, on the hot path.
@@ -102,27 +155,23 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
     return () => query.removeEventListener('change', apply);
   }, []);
 
-  // The framing rule: fov follows the real height of the viewer, so a
-  // shorter card widens the view instead of cropping the body. R3F already
-  // keeps the aspect current on resize; this adds the fov on top of it.
+  // One framing for every stage: the angle of view is fixed (`framing.ts`).
+  // R3F keeps the aspect current on resize; nothing else depends on the size.
   useEffect(() => {
     const perspective = camera as PerspectiveCamera;
     if (!perspective.isPerspectiveCamera) return;
-    perspective.fov = fovForHeight(size.height);
+    perspective.fov = STAGE.fov;
     perspective.updateProjectionMatrix();
     invalidate();
-  }, [camera, size.height, invalidate]);
+  }, [camera, invalidate]);
 
   /**
-   * Requests the NEXT frame from outside the current one.
-   *
-   * Calling invalidate() synchronously inside useFrame is swallowed by the
-   * frame already in flight, so a demand loop stops after one step and the
-   * body freezes mid-coast. Deferring by one rAF is what keeps inertia and
-   * preset animation alive without falling back to frameloop="always".
+   * Asks for the NEXT frame from inside the current one. Deferred by one
+   * animation frame and coalesced, so a motion keeps the demand loop alive
+   * without ever stacking callbacks — and stops asking the moment it rests.
    */
   const keepAlive = useCallback(() => {
-    if (wakePending.current) return;   // coalesce; never stack rAF callbacks
+    if (wakePending.current) return;
     wakePending.current = true;
     requestAnimationFrame(() => {
       wakePending.current = false;
@@ -130,87 +179,225 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
     });
   }, [invalidate]);
 
-  useImperativeHandle(ref, () => ({
-    goTo(view) {
-      // Land on the nearest multiple of 360 plus the preset, so "front" from
-      // 350° turns 10° forward instead of 350° backward.
-      const want = VIEW_AZIMUTH[view];
-      yawTo.current = Math.round((yaw.current - want) / 360) * 360 + want;
-      velocity.current = 0;
-      invalidate();
+  /** Starts a motion from outside a frame: it counts time from now. */
+  const begin = useCallback(() => {
+    if (steppedAt.current === null) steppedAt.current = performance.now();
+    invalidate();
+  }, [invalidate]);
+
+  const travelTo = useCallback(
+    (target: number) => {
+      coasting.current = false;
+      if (reduced.current) {
+        yaw.current = { value: target, velocity: 0 };
+        yawTo.current = null;
+        invalidate();
+        return;
+      }
+      // The speed the body has is kept: the travel takes it over (`motion.ts`).
+      yawTo.current = target;
+      begin();
     },
-    faceAzimuth(deg) {
-      yawTo.current = yaw.current + shortestDelta(((yaw.current % 360) + 360) % 360, deg);
-      velocity.current = 0;
+    [begin, invalidate],
+  );
+
+  const reset = useCallback(() => {
+    coasting.current = false;
+    const front = Math.round(yaw.current.value / 360) * 360;
+    if (reduced.current) {
+      yaw.current = { value: front, velocity: 0 };
+      pitch.current = { value: MOTION.pitchStart, velocity: 0 };
+      zoom.current = { value: 1, velocity: 0 };
+      yawTo.current = pitchTo.current = zoomTo.current = null;
       invalidate();
-    },
-    azimuth: () => ((yaw.current % 360) + 360) % 360,
-  }));
+      return;
+    }
+    yawTo.current = front;
+    pitchTo.current = MOTION.pitchStart;
+    zoomTo.current = 1;
+    begin();
+  }, [begin, invalidate]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      goTo(view) {
+        // Land on the nearest multiple of 360 plus the preset, so "front" from
+        // 350° turns 10° forward instead of 350° backward.
+        const want = VIEW_AZIMUTH[view];
+        travelTo(Math.round((yaw.current.value - want) / 360) * 360 + want);
+      },
+      faceAzimuth(deg) {
+        travelTo(yaw.current.value + shortestDelta(normalizeAngle(yaw.current.value), deg));
+      },
+      azimuth: () => normalizeAngle(yaw.current.value),
+      zoom: () => zoom.current.value,
+      reset,
+      hold(now = false) {
+        coasting.current = false;
+        if (yawTo.current === null) yaw.current.velocity = 0;
+        if (now) {
+          if (yawTo.current !== null) yaw.current = { value: yawTo.current, velocity: 0 };
+          if (pitchTo.current !== null) pitch.current = { value: pitchTo.current, velocity: 0 };
+          if (zoomTo.current !== null) zoom.current = { value: zoomTo.current, velocity: 0 };
+          yawTo.current = pitchTo.current = zoomTo.current = null;
+        }
+        // One frame shows where the body stopped, and ends the loop.
+        invalidate();
+        return yawTo.current === null && pitchTo.current === null && zoomTo.current === null;
+      },
+    }),
+    [travelTo, reset, invalidate],
+  );
 
   const element = gl.domElement;
 
   useEffect(() => {
     if (!enabled) return;
     const tap = gestures.current;
+    const held = pointers.current;
+
+    /** A point of the page, as a point of the stage: 0–1, y down. */
+    const onStage = (x: number, y: number, rect: DOMRect): Point => ({
+      x: (x - rect.left) / rect.width,
+      y: (y - rect.top) / rect.height,
+    });
+    const twoFingers = () => {
+      const [a, b] = [...held.values()];
+      if (!a || !b) return null;
+      return { distance: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    };
 
     const onDown = (e: PointerEvent) => {
+      held.set(e.pointerId, { x: e.clientX, y: e.clientY });
       tap.down(e);
-      velocity.current = 0;
-      yawTo.current = null;
+      // A finger on the body takes it over: whatever was moving stops here.
+      coasting.current = false;
+      yaw.current.velocity = 0;
+      yawTo.current = pitchTo.current = zoomTo.current = null;
+      if (held.size === 1) {
+        samples.current = [{ at: e.timeStamp, x: e.clientX }];
+      } else {
+        // A second finger: from here on this is a pinch, never a tap and
+        // never a turn (`TapVsDrag` has already dropped the tap).
+        pinching.current = true;
+        const fingers = twoFingers();
+        if (fingers && fingers.distance > 0) {
+          const rect = element.getBoundingClientRect();
+          pinch.current = {
+            held: pictureAt(onStage(fingers.x, fingers.y, rect), centre.current, zoom.current.value),
+            zoom: zoom.current.value,
+            distance: fingers.distance,
+          };
+        }
+      }
       try {
         element.setPointerCapture(e.pointerId);
       } catch {
         /* Safari can refuse capture mid-gesture; dragging still works. */
       }
       element.style.cursor = 'grabbing';
+      invalidate();
     };
 
     const onMove = (e: PointerEvent) => {
+      const known = held.get(e.pointerId);
+      if (known) {
+        known.x = e.clientX;
+        known.y = e.clientY;
+      }
+      if (pinching.current) {
+        const fingers = twoFingers();
+        const start = pinch.current;
+        // One finger left of a pinch moves nothing.
+        if (!fingers || !start || frozen?.current) return;
+        e.preventDefault();
+        const rect = element.getBoundingClientRect();
+        const next = pinchWindow(start.held, onStage(fingers.x, fingers.y, rect), start.zoom, fingers.distance / start.distance);
+        zoom.current = { value: next.zoom, velocity: 0 };
+        centre.current = next.centre;
+        dragged.current = true;
+        if (isMeasuring()) bodyMeasure.requested(performance.now());
+        invalidate();
+        return;
+      }
       const d = tap.move(e);
-      if (!d) return;
-      // Only claim the gesture once it is clearly a drag, so a tap still
-      // scrolls the page if the user meant to scroll.
-      if (!tap.isDown || Math.abs(d.dx) + Math.abs(d.dy) > 0) e.preventDefault();
-      yaw.current += d.dx * YAW_PER_PX;
-      velocity.current = d.dx * YAW_PER_PX;
-      pitch.current = clamp(pitch.current - d.dy * PITCH_PER_PX, PITCH_MIN, PITCH_MAX);
+      if (!d || frozen?.current) return;
+      e.preventDefault();
+      yaw.current.value += d.dx * MOTION.yawPerPx;
+      pitch.current.value = clamp(pitch.current.value - d.dy * MOTION.pitchPerPx, MOTION.pitchMin, MOTION.pitchMax);
+      const list = samples.current;
+      list.push({ at: e.timeStamp, x: e.clientX });
+      if (list.length > SAMPLES) list.shift();
       dragged.current = true;
       if (isMeasuring()) bodyMeasure.requested(performance.now());
       invalidate();
     };
 
     const onUp = (e: PointerEvent) => {
+      held.delete(e.pointerId);
       const wasTap = tap.up(e);
       try {
         element.releasePointerCapture(e.pointerId);
       } catch {
         /* already released */
       }
-      element.style.cursor = 'grab';
-      // Inertia is a motion effect: with reduced motion the body stops where
-      // the finger lifted.
-      if (reduced.current) velocity.current = 0;
-      // Request a frame on release. While the finger was down the coast branch
-      // was skipped (isDown), so the demand loop is idle right now — without
-      // this, inertia never starts and the body stops dead on lift.
+      if (held.size === 0) element.style.cursor = 'grab';
+      if (pinching.current) {
+        // The pinch is over when the last finger has lifted; until then the
+        // one that is left neither turns nor zooms.
+        pinch.current = null;
+        if (held.size === 0) {
+          pinching.current = false;
+          tap.cancel();
+        }
+        invalidate();
+        return;
+      }
+      if (!wasTap) {
+        // The body runs on at the finger's speed — a motion effect, so not
+        // under reduced motion, where it stops where the finger lifted.
+        const velocity = reduced.current || frozen?.current ? 0 : releaseVelocity(samples.current, e.timeStamp);
+        if (velocity !== 0) {
+          yaw.current.velocity = velocity;
+          coasting.current = true;
+          steppedAt.current = performance.now();
+        }
+        invalidate();
+        return;
+      }
       invalidate();
-      if (!wasTap || !onTap) return;
-      velocity.current = 0;
-      const r = element.getBoundingClientRect();
-      onTap({
-        x: ((e.clientX - r.left) / r.width) * 2 - 1,
-        y: -((e.clientY - r.top) / r.height) * 2 + 1,
-      });
+      const now = performance.now();
+      const before = lastTap.current;
+      const near = before !== null && Math.hypot(e.clientX - before.x, e.clientY - before.y) <= DOUBLE_TAP_PX;
+      if (before && near && now - before.at <= DOUBLE_TAP_MS && !frozen?.current) {
+        // The second tap of a double tap resets and selects nothing: the
+        // first has already selected, at once, like any tap.
+        lastTap.current = null;
+        reset();
+        return;
+      }
+      lastTap.current = { at: now, x: e.clientX, y: e.clientY };
+      const rect = element.getBoundingClientRect();
+      onTap?.({ x: e.clientX - rect.left, y: e.clientY - rect.top, width: rect.width, height: rect.height });
     };
 
-    const onCancel = () => {
-      tap.cancel();
-      element.style.cursor = 'grab';
+    const onCancel = (e: PointerEvent) => {
+      // The browser took the gesture — a drag that began up or down scrolls
+      // the page — or the system did. Nothing was thrown and nothing tapped.
+      held.delete(e.pointerId);
+      if (held.size === 0) {
+        tap.cancel();
+        pinching.current = false;
+        pinch.current = null;
+        element.style.cursor = 'grab';
+      }
       invalidate();
     };
 
     element.style.cursor = 'grab';
-    element.style.touchAction = 'none';
+    // Sideways and two fingers are the body's; up and down is the page's.
+    element.style.touchAction = 'pan-y';
     element.addEventListener('pointerdown', onDown);
     element.addEventListener('pointermove', onMove, { passive: false });
     element.addEventListener('pointerup', onUp);
@@ -220,40 +407,98 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       element.removeEventListener('pointermove', onMove);
       element.removeEventListener('pointerup', onUp);
       element.removeEventListener('pointercancel', onCancel);
+      held.clear();
+      tap.cancel();
+      pinching.current = false;
+      pinch.current = null;
     };
-  }, [element, enabled, onTap, invalidate]);
+  }, [element, enabled, onTap, invalidate, reset, frozen]);
+
+  const corners = useRef(Array.from({ length: 8 }, () => new Vector3()));
+
+  /** The chosen group's box in the picture, as the camera stands now. */
+  const keepBox = useCallback((): Box | null => {
+    const box = keepInView?.current;
+    if (!box || box.isEmpty()) return null;
+    const { min, max } = box;
+    const points: [number, number, number][] = [];
+    let index = 0;
+    for (const x of [min.x, max.x]) {
+      for (const y of [min.y, max.y]) {
+        for (const z of [min.z, max.z]) {
+          const corner = corners.current[index]!.set(x, y, z).applyMatrix4(camera.matrixWorldInverse);
+          points.push([corner.x, corner.y, corner.z]);
+          index += 1;
+        }
+      }
+    }
+    return pictureBox(points, (camera as PerspectiveCamera).aspect);
+  }, [camera, keepInView]);
 
   const applyCamera = useCallback(() => {
-    const y = yaw.current * D2R;
-    const p = pitch.current * D2R;
-    const radius = DISTANCE * Math.cos(p);
+    const y = yaw.current.value * D2R;
+    const p = pitch.current.value * D2R;
+    const radius = STAGE.distance * Math.cos(p);
     camera.position.set(
       TARGET.x + radius * Math.sin(y),
-      TARGET.y + DISTANCE * Math.sin(p),
+      TARGET.y + STAGE.distance * Math.sin(p),
       TARGET.z + radius * Math.cos(y),
     );
     camera.lookAt(TARGET);
-  }, [camera]);
+    camera.updateMatrixWorld();
+
+    const perspective = camera as PerspectiveCamera;
+    if (!perspective.isPerspectiveCamera) return;
+    const z = zoom.current.value;
+    if (z <= 1 + 1e-4) {
+      centre.current = { x: 0.5, y: 0.5 };
+      if (applied.current.zoom !== 1) {
+        perspective.clearViewOffset();
+        applied.current = { zoom: 1, x: 0.5, y: 0.5 };
+      }
+      return;
+    }
+    const next = clampWindow(centre.current, z, keepBox());
+    centre.current = next;
+    if (applied.current.zoom === z && applied.current.x === next.x && applied.current.y === next.y) return;
+    const rect = windowRect(next, z);
+    // Shares of the picture, not pixels: a resize needs no new numbers.
+    perspective.setViewOffset(1, 1, rect.x, rect.y, rect.width, rect.height);
+    applied.current = { zoom: z, x: next.x, y: next.y };
+  }, [camera, keepBox]);
 
   useFrame(() => {
+    const now = performance.now();
+    const dt = steppedAt.current === null ? 0 : stepMs(now - steppedAt.current);
+    const down = gestures.current.isDown || pointers.current.size > 0;
     let moving = false;
+
     if (yawTo.current !== null) {
-      const d = yawTo.current - yaw.current;
-      if (reduced.current || Math.abs(d) < 0.4) {
-        // A preset settles at once under reduced motion; otherwise it snaps
-        // only inside the last fraction of a degree.
-        yaw.current = yawTo.current;
-        yawTo.current = null;
-      } else {
-        yaw.current += d * 0.18;
-      }
-      moving = true;
-    } else if (!gestures.current.isDown && Math.abs(velocity.current) > 0.02) {
-      yaw.current += velocity.current;
-      velocity.current *= FRICTION;
-      moving = true;
+      const next = travel(yaw.current, yawTo.current, dt);
+      yaw.current = { value: next.value, velocity: next.velocity };
+      if (next.done) yawTo.current = null;
+      else moving = true;
+    } else if (coasting.current && !down) {
+      const next = coast(yaw.current, dt);
+      yaw.current = { value: next.value, velocity: next.velocity };
+      if (next.done) coasting.current = false;
+      else moving = true;
     }
+    if (pitchTo.current !== null) {
+      const next = travel(pitch.current, pitchTo.current, dt);
+      pitch.current = { value: next.value, velocity: next.velocity };
+      if (next.done) pitchTo.current = null;
+      else moving = true;
+    }
+    if (zoomTo.current !== null) {
+      const next = zoomTowards(zoom.current, zoomTo.current, dt);
+      zoom.current = { value: next.value, velocity: next.velocity };
+      if (next.done) zoomTo.current = null;
+      else moving = true;
+    }
+
     applyCamera();
+    steppedAt.current = moving ? now : null;
     if (moving) keepAlive();
     if (activity) {
       // A frame drawn for a finger that moved, or for the camera's own motion.
@@ -262,18 +507,23 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       dragged.current = false;
     }
 
-    // Report the angle sparingly: it drives host state, and emitting every
-    // frame re-renders the surrounding screen while the body is still spinning.
-    // The `settled` case is what guarantees the final resting angle is always
-    // published, even though the throttle suppressed everything before it.
-    if (!onAzimuthChange) return;
-    const deg = Math.round(((yaw.current % 360) + 360) % 360);
-    const settled = !moving && !gestures.current.isDown;
-    const now = performance.now();
-    if (deg !== lastEmitted.current && (settled || now - lastEmitAt.current > 200)) {
-      lastEmitted.current = deg;
+    // Report the angle and the zoom sparingly: they drive host state, and
+    // emitting every frame would re-render the screen while the body turns.
+    // The settled frame is always reported, whatever the throttle held back.
+    const settled = !moving && !down;
+    const due = settled || now - lastEmitAt.current > 200;
+    if (!due) return;
+    const deg = Math.round(normalizeAngle(yaw.current.value)) % 360;
+    const scale = Math.round(zoom.current.value * 100) / 100;
+    if (onAzimuthChange && deg !== lastAzimuth.current) {
+      lastAzimuth.current = deg;
       lastEmitAt.current = now;
       onAzimuthChange(deg);
+    }
+    if (onZoomChange && scale !== lastZoom.current) {
+      lastZoom.current = scale;
+      lastEmitAt.current = now;
+      onZoomChange(scale);
     }
   });
 

@@ -74,6 +74,16 @@ export function ChevronLeftIcon({ size = 20, className }: IconProps) {
   );
 }
 
+/** A turn back to the start: the body's "reset view" (block 7B). */
+export function ResetIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5" />
+      <path d="M4.5 4.5v4h4" />
+    </svg>
+  );
+}
+
 export function InfoIcon({ size = 20, className }: IconProps) {
   return (
     <svg {...base(size, className)}>

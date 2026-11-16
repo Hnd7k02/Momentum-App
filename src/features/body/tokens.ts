@@ -182,6 +182,20 @@ export const BODY_LOOK: BodyLook = {
 };
 
 /**
+ * The ground the body stands on (block 7B, contract §8): a contact shadow
+ * and a faint glow, as tokens — two colours, their strength at the middle
+ * and how far each reaches, in metres.
+ */
+export const BODY_GROUND = {
+  shadow: cssToken('--body-ground-shadow'),
+  glow: cssToken('--body-ground-glow'),
+  shadowStrength: cssNumber('--body-ground-shadow-strength'),
+  glowStrength: cssNumber('--body-ground-glow-strength'),
+  shadowRadius: cssNumber('--body-ground-shadow-radius'),
+  glowRadius: cssNumber('--body-ground-glow-radius'),
+} as const;
+
+/**
  * Region material mix. `intensity` (0…1) comes from the host and carries the
  * MAGNITUDE of the change, so +12 % burns brighter than +3 %.
  *

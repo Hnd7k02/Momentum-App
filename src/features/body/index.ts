@@ -21,7 +21,7 @@ export const BodyViewer = lazy(() =>
   }),
 );
 export { BodyBoundary } from './BodyBoundary';
-export type { BodyView, BodyViewerProps, MuscleVisual } from './BodyViewer';
+export type { BodyStageState, BodyView, BodyViewerProps, MuscleVisual } from './BodyViewer';
 export { BODY_REGIONS, REGION_FACING } from './muscleMeshMap';
 export { toBodyVisuals, visualsByMuscle, type BodyMuscleVisual } from './bodyVisuals';
 export * from './tokens';

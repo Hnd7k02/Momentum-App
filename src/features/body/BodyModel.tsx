@@ -1,12 +1,14 @@
 /**
- * The body mesh: loads the GLB, resolves the muscle contract, raycasts taps.
+ * The body mesh: loads the GLB, resolves the muscle contract, answers taps.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
-import { Group, Mesh, MeshStandardMaterial, Raycaster, Vector2 } from 'three';
+import { Box3, Group, Mesh, MeshStandardMaterial, Raycaster, Vector2 } from 'three';
 import { addAfterEffect, useThree } from '@react-three/fiber';
 import { isLoaded, useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
+import type { BodyTap } from './CameraRig';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
+import { groupAtTap } from './picking';
 import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
 import { BODY_INERT_COLOR, BODY_LOOK, type BodyLook } from './tokens';
 import { FROM_MEMORY, bodyMeasure, isMeasuring, resourceFacts, resourceSince, type FrameActivity } from '../measure/measure';
@@ -18,20 +20,26 @@ import { FROM_MEMORY, bodyMeasure, isMeasuring, resourceFacts, resourceSince, ty
  */
 export const BODY_MODEL_URL = `${import.meta.env.BASE_URL}models/momentum-body.glb`;
 
+/** Each group's box in the world: what a zoom keeps in its window. */
+export type RegionBoxes = Map<MuscleGroup, Box3>;
+
 export type BodyModelProps = {
   /** Defaults to BODY_MODEL_URL. Override for a versioned or injected asset. */
   modelUrl?: string;
   visuals?: Partial<Record<MuscleGroup, MuscleVisual>>;
   selected?: MuscleGroup | null;
   tinted?: boolean;
-  onReady?: (meshes: MuscleMeshes) => void;
+  /** The model is in the scene, compiled and about to be drawn for the first time. */
+  onReady?: (meshes: MuscleMeshes, boxes: RegionBoxes) => void;
   onError?: (error: Error) => void;
   /** Registers the tap handler with the parent so CameraRig can drive it. */
-  registerPick?: (pick: (ndc: { x: number; y: number }) => MuscleGroup | null) => void;
+  registerPick?: (pick: (tap: BodyTap) => MuscleGroup | null) => void;
   /** A look's surface values; absent is the app's own (`BODY_LOOK`). */
   surface?: BodyLook['surface'];
   /** What each frame is drawn for, for the measuring display. */
   activity?: MutableRefObject<FrameActivity>;
+  /** The viewer is held: a change of colour is shown at once, in the one frame it gets. */
+  still?: MutableRefObject<boolean>;
 };
 
 export function BodyModel({
@@ -44,10 +52,13 @@ export function BodyModel({
   registerPick,
   surface = BODY_LOOK.surface,
   activity,
+  still,
 }: BodyModelProps) {
   const { camera, invalidate, gl, scene } = useThree();
   const root = useRef<Group>(null);
   const [meshes, setMeshes] = useState<MuscleMeshes | null>(null);
+  /** The materials are compiled: the body may be drawn. */
+  const [ready, setReady] = useState(false);
   // Whether the model had been asked for before this viewer did: then
   // nothing is fetched, and the measuring display says so.
   const wasLoaded = useRef(isLoaded(modelUrl));
@@ -61,7 +72,6 @@ export function BodyModel({
 
   useEffect(() => {
     if (!gltf) return;
-    let cancelled = false;
     // The inert primitive (head, hands, feet) keeps a material of its own so
     // it can never be tinted, as in body-viewer.js — and a tone of its own
     // (D166). Created here, with the scene, and disposed with it.
@@ -84,24 +94,45 @@ export function BodyModel({
         mesh.material = material;
         inert.push(material);
       });
-      // Compile before the model enters the scene: without this the first
-      // frame stalls on shader compilation, which is very visible on iOS.
-      gl.compileAsync(gltf.scene, camera, scene).then(() => {
-        if (cancelled) return;
-        setMeshes(resolved);
-        onReady?.(resolved);
-        invalidate();
-      });
+      setReady(false);
+      setMeshes(resolved);
     } catch (e) {
       onError?.(e as Error);
     }
     return () => {
-      cancelled = true;
       for (const material of inert) material.dispose();
     };
-  }, [gltf, gl, camera, scene, onReady, onError, invalidate, surface]);
+  }, [gltf, onError, surface]);
 
-  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface, activity });
+  // The region materials are made here, in the commit that set `meshes`.
+  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface, activity, still });
+
+  /*
+   * Compile before the body is shown, and compile what will be drawn: the
+   * region materials exist by now (the hook above made them), so this is
+   * every program the first picture needs. Until block 7B the model was
+   * compiled with the materials the file brought, the regions got theirs
+   * afterwards, and their program was compiled inside the first visible
+   * frame — the stall this was written to avoid. The body stays hidden
+   * until the compile is done, so no frame can draw it half-dressed.
+   */
+  useEffect(() => {
+    if (!gltf || !meshes) return undefined;
+    let cancelled = false;
+    const show = () => {
+      if (cancelled) return;
+      gltf.scene.updateMatrixWorld(true);
+      const boxes: RegionBoxes = new Map();
+      for (const [id, mesh] of meshes) boxes.set(id, new Box3().setFromObject(mesh));
+      setReady(true);
+      onReady?.(meshes, boxes);
+      invalidate();
+    };
+    gl.compileAsync(gltf.scene, camera, scene).then(show, show);
+    return () => {
+      cancelled = true;
+    };
+  }, [gltf, meshes, gl, camera, scene, onReady, invalidate]);
 
   // The measuring display (block 7B): when the model was there, and where
   // the browser says it came from — or that it was not fetched at all,
@@ -115,29 +146,34 @@ export function BodyModel({
     bodyMeasure.modelReady(performance.now(), request || !wasLoaded.current ? resourceFacts(request) : FROM_MEMORY);
   }, [gltf, modelUrl]);
   useEffect(() => {
-    if (!meshes || !isMeasuring()) return undefined;
+    if (!ready || !isMeasuring()) return undefined;
     const stop = addAfterEffect(() => {
       bodyMeasure.firstFrame(performance.now());
       stop();
     });
     return stop;
-  }, [meshes]);
+  }, [ready]);
 
+  /**
+   * The group a tap means (`picking.ts`): the surface seen where it landed,
+   * and failing that the nearest group within twelve pixels. A neutral
+   * surface is a surface — it hides what is behind it.
+   */
   const pick = useCallback(
-    (ndc: { x: number; y: number }): MuscleGroup | null => {
-      if (!root.current || !meshes) return null;
-      raycaster.setFromCamera(new Vector2(ndc.x, ndc.y), camera);
-      // Sorted near → far, so the first hit carrying a muscle is the visible
-      // one. This is what stops a tap on the quad selecting the hamstring
-      // behind it.
-      const hits = raycaster.intersectObject(root.current, true);
-      for (const hit of hits) {
-        const id = hit.object.userData.muscle as MuscleGroup | null | undefined;
-        if (id) return id;
-      }
-      return null;
+    (tap: BodyTap): MuscleGroup | null => {
+      const body = root.current;
+      if (!body || !meshes || !ready) return null;
+      const point = new Vector2();
+      const look = (dx: number, dy: number): MuscleGroup | null => {
+        point.set(((tap.x + dx) / tap.width) * 2 - 1, -((tap.y + dy) / tap.height) * 2 + 1);
+        raycaster.setFromCamera(point, camera);
+        // Sorted near → far: the first hit is the surface the eye sees.
+        const first = raycaster.intersectObject(body, true)[0];
+        return (first?.object.userData.muscle as MuscleGroup | null | undefined) ?? null;
+      };
+      return groupAtTap(look);
     },
-    [camera, meshes, raycaster],
+    [camera, meshes, raycaster, ready],
   );
 
   useEffect(() => {
@@ -146,7 +182,7 @@ export function BodyModel({
 
   if (!gltf) return null;
   return (
-    <group ref={root}>
+    <group ref={root} visible={ready}>
       <primitive object={gltf.scene} />
     </group>
   );

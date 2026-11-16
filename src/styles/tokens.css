@@ -391,6 +391,19 @@
   --body-roughness-inert: 0.7;
   --body-environment: 0.3;
 
+  /* The ground the body stands on (block 7B, contract §8): a small contact
+     shadow under the feet and a faint glow around it, drawn in the scene as
+     one disc whose colour fades to nothing — a gradient, never a blur
+     (D146) — so it turns, tilts and zooms with the body. Two colours, how
+     strong each is at its middle, and how far each reaches, in metres. The
+     stage is Gym's and so is the glow: the world's accent. */
+  --body-ground-shadow: #000000;
+  --body-ground-glow: #a39dff;
+  --body-ground-shadow-strength: 0.5;
+  --body-ground-glow-strength: 0.13;
+  --body-ground-shadow-radius: 0.2;
+  --body-ground-glow-radius: 0.32;
+
   /* Touch targets never go below this. */
   --touch-min: 44px;
 
