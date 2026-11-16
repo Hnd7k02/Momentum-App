@@ -117,11 +117,25 @@
   background: var(--status-weak);
 }
 
+/*
+ * The card's text holds its place while the history loads (D168).
+ *
+ * It used to stand in the middle of the picture beside it. Loading, it held
+ * two lines under the title; loaded, up to four — and "Kein Training in den
+ * letzten 30 Tagen" breaks into two beside the picture — so the title moved
+ * by half of whatever the text grew: 10 to 30px, under glass, which an
+ * iPhone now and then showed as the title standing there twice. The text
+ * now begins at a fixed place, the picture's top, and grows downwards only:
+ * the title stands where it stood, whatever follows it. The card is as tall
+ * as its picture in every state — the longest text, the sentence of a load
+ * that failed at 320px, ends inside it with three pixels to spare.
+ */
 .gym-hub__musclesBody {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  align-self: flex-start;
   gap: 3px;
 }
 

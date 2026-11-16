@@ -283,6 +283,30 @@
   color: var(--text-secondary);
 }
 
+/*
+ * All lines in one column (D169).
+ *
+ * The figure's column used to be as wide as its content — the number over
+ * the word of its state — and the chart stood left of it: so its place
+ * hung on the word, and "Zurückgegangen", "Verbessert" and "Gehalten" are
+ * three widths. On the owner's iPhone the line of the one declining group
+ * sat further left than the nine others.
+ *
+ * Beside a chart the column now has one width in every row — room for the
+ * longest word and for a three-digit figure — so every chart has the same
+ * left and the same right edge. A row without a chart keeps the room its
+ * chip needs, as before; and the name is still what gives way.
+ */
+.muscle-rows {
+  --row-figure-width: 92px;
+}
+
+.muscle-row__chart:not(:empty) + .muscle-row__right {
+  width: var(--row-figure-width);
+  min-width: 0;
+  max-width: none;
+}
+
 /* In a row the number is the body size, semibold, with tabular digits so
    ten of them stand in a column (contract §3). */
 .muscle-row__delta {
@@ -374,9 +398,13 @@
   }
 
   /* Beneath the name there is room beside the chart, so the state and its
-     number share a line instead of making the row a third line taller. */
-  .muscle-row__right {
+     number share a line instead of making the row a third line taller. The
+     chart begins under the name in every row, so here the column is the
+     same without a fixed width for the figure. */
+  .muscle-row__right,
+  .muscle-row__chart:not(:empty) + .muscle-row__right {
     flex: 1;
+    width: auto;
     max-width: none;
     flex-direction: row-reverse;
     align-items: baseline;
