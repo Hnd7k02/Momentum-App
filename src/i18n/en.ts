@@ -395,6 +395,7 @@ export const en: Translations = {
   'body.view.front': 'Front',
   'body.view.side': 'Side',
   'body.view.back': 'Back',
+  'body.reset': 'Reset view',
 
   // The measuring display of the 3D body (block 7B, D181): a tool, and the
   // one place that may carry technical words.
@@ -506,6 +507,14 @@ export const en: Translations = {
   'gym.progress.explainTrend':
     'The performance trend is the mean of the rated muscle groups. From \u22122\u00A0% to +1\u00A0% it counts as held.',
   'gym.progress.groupsCounted': '{count} of {total} groups counted',
+  // The metrics strip above the body (block 7B, contract §4).
+  'gym.strip.rated': 'Rated',
+  'gym.strip.ratedValue': '{count}\u00A0/\u00A0{total}',
+  'gym.strip.ratedUnit': 'groups',
+  'gym.strip.strongest': 'Strongest',
+  'gym.strip.noneImproved': 'no improvement',
+  'gymHub.muscles.toHub': 'To the Gym overview',
+  'gymHub.muscles.toHubHint': 'Training, plans and running',
   'gym.progress.explainGroups':
     'Every muscle group counts the same, however many exercises it contains.',
   'gym.progress.explainMetric':
@@ -823,6 +832,5 @@ export const en: Translations = {
   'gymHub.muscles.warmUpOnlyHint':
     'Only warm-up sets were logged in the last {days} days. What counts is the best working set.',
   'gymHub.muscles.range': 'Last {days} days',
-  'gymHub.open': 'Open Gym',
 
 };

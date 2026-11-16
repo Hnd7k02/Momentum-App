@@ -145,6 +145,14 @@ const WORLDS = {
   light: { page: '#f4f4f8', stage: '#f1f1f5', ink: '#16161d' },
 } as const;
 const WORLD = WORLDS[params.get('world') as keyof typeof WORLDS] ?? null;
+/**
+ * `?stage=430x513` gives the viewer the stage of Muskelgruppen at exactly
+ * that size (block 7B) — the box the body's still is rendered in
+ * (`tools/render-body-preview.mjs`). `?world=` alone gives it the stage as
+ * the app sizes it: 55 % of the window's height.
+ */
+const STAGE_SIZE = /^(\d+)x(\d+)$/.exec(params.get('stage') ?? '');
+const STAGE_BOX = STAGE_SIZE ? { width: Number(STAGE_SIZE[1]), height: Number(STAGE_SIZE[2]) } : null;
 if (params.get('world') === 'gym') document.documentElement.dataset.world = 'gym';
 // The measuring display counts from the moment its screen opens; here that
 // is the harness itself.
@@ -188,8 +196,15 @@ export function BodyDevPage() {
 
         <div
           data-host
-          className={WORLD ? 'muscle-module' : undefined}
-          style={{ background: WORLD?.stage ?? '#fff', borderRadius: WORLD ? 14 : 20, overflow: 'hidden' }}
+          className={WORLD || STAGE_BOX ? 'body-stage' : undefined}
+          style={{
+            background: WORLD?.stage ?? '#fff',
+            borderRadius: WORLD || STAGE_BOX ? 0 : 20,
+            overflow: 'hidden',
+            // The stage bleeds to the screen's edge in the app; here it is a box.
+            ...(WORLD || STAGE_BOX ? { marginLeft: 0, marginRight: 0 } : {}),
+            ...(STAGE_BOX ?? {}),
+          }}
         >
           {mounted ? (
             <Suspense fallback={<div data-loading style={{ aspectRatio: '1 / 0.97' }} />}>

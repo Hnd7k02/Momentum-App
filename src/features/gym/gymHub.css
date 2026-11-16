@@ -173,8 +173,13 @@
 
 /* ── The muscle destination before the first workout ───────────────────── */
 
-/* The card carries the inset; the paragraph adds none of its own (it stood
-   a second inset in from the body beneath it). */
+/* What is missing, on the ground between the body and the rows (block 7B,
+   mock-up 1): the state, the sentence, and the one action that supplies it. */
+.gym-progress__gap {
+  padding: var(--space-3) 0 var(--space-1);
+  border-bottom: 1px solid var(--separator);
+}
+
 .gym-progress__noData {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
@@ -182,7 +187,7 @@
   padding: 0 0 var(--space-3);
 }
 
-/* The empty state's one action, between what is missing and the body. */
+/* The empty state's one action, under what is missing. */
 .gym-progress__noDataAction {
   padding-bottom: var(--space-4);
 }

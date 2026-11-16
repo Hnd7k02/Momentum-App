@@ -430,26 +430,38 @@
   color: var(--text-secondary);
 }
 
-/* The header of Muskelgruppen carries a control on either side of its
-   title. "Muskelgruppen" at the large title's size is 253px, and beside the
-   two 44px controls it has that much room only from 366px upwards — so on
-   narrower phones the title takes the next step down instead of pushing ⓘ
-   off the screen. Should a system font set it wider than measured here, it
-   is shortened rather than laid over the button. */
+/* The header of Muskelgruppen (block 7B, contract §8): back, the title in
+   17px, ⓘ — one line of 44px, so the body below gets the screen. The title
+   stands in the middle between two controls of the same width; should a
+   system font set it wider than the room, it is shortened rather than laid
+   over a button. */
+.gym-muscles__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: calc(var(--safe-top) + var(--space-1));
+  padding-bottom: var(--space-1);
+}
+
 .gym-muscles__title {
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  font-size: var(--type-headline);
+  font-weight: var(--weight-semibold);
+  line-height: var(--touch-min);
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-@media (max-width: 369px) {
-  .gym-muscles__title {
-    font-size: var(--type-title);
-    line-height: 44px;
-    letter-spacing: -0.3px;
-  }
+.gym-muscles__back {
+  flex: none;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  margin-left: -12px;
+  padding-left: 11px;
+  padding-right: 11px;
 }
 
 /* ⓘ in the header of Muskelgruppen: 44px, at the trailing edge. */
@@ -874,4 +886,44 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* The range under the header of Muskelgruppen: close to it, so the body
+   below gets the room (block 7B). */
+.gym-muscles__ranges {
+  margin-bottom: var(--space-3);
+}
+
+/* The way to the hub, at the foot of Muskelgruppen (D161): a text row in
+   the accent's ink, 54px high, its own box the target. */
+.gym-muscles__toHub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--row-height);
+  margin-top: var(--space-5);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--separator);
+  background: none;
+  text-align: left;
+  color: var(--accent-ink);
+}
+
+.gym-muscles__toHubText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.gym-muscles__toHubName {
+  font-size: var(--type-body);
+  font-weight: var(--weight-semibold);
+}
+
+.gym-muscles__toHubHint {
+  font-size: var(--type-caption);
+  color: var(--text-tertiary);
 }

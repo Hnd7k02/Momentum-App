@@ -1,47 +1,134 @@
 /*
- * The body and its rows, inside an ordinary card.
- *
- * The body is sized by the card it sits in — never by the viewport — and is
- * bounded at both ends: tall enough that the smaller regions stay tappable
- * on a narrow phone, short enough that the Gym screen around it stays in
- * view.
+ * Muskelgruppen: the body on its stage, the metrics strip above it and the
+ * ten rows beneath (block 7B, contract §8, mock-up 1).
  */
 .muscle-module {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
 }
 
-/* Nothing blurs under or over the 3D canvas (D146): the card that holds the
-   body is the solid, not the glass, and its view pills stay solid. The
-   cost was measured before deciding (`stage6-blur-cost.mjs`). */
-.card:has(> .muscle-module) {
-  background: var(--glass-solid);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+/* ── The stage ──────────────────────────────────────────────────────────
+
+   The body stands on the ground of the screen, without a card: as wide as
+   the screen and as tall as 55 % of what the device shows of it — the
+   dynamic viewport, so the app from the home screen and the browser with
+   its bars each get 55 % of their own height (`vh` for a browser that does
+   not know `dvh`). Never so short that the body could not be read.
+
+   Nothing blurs under or over the canvas (D146): the stage has no surface
+   of its own at all, and the buttons that stand in it are solid. */
+.body-stage {
+  position: relative;
+  height: 55vh;
+  height: 55dvh;
+  min-height: 300px;
+  margin-left: calc(var(--gutter-left) * -1);
+  margin-right: calc(var(--gutter-right) * -1);
+  overflow: hidden;
 }
 
-.muscle-module .body-viewer,
-.muscle-module__placeholder {
-  width: 100%;
-  aspect-ratio: 1 / 1.02;
-  min-height: 280px;
-  max-height: 360px;
-  border-radius: var(--radius-control);
-  background: var(--surface-secondary);
+/* The viewer fills the stage. */
+.body-stage .body-viewer {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  max-height: none;
+  aspect-ratio: auto;
 }
 
-.muscle-module__placeholder {
-  aspect-ratio: 1 / 1.02;
+/* The body's still, exactly where the canvas draws the body: the whole
+   height of the stage, on its middle axis (contract §11). It is a picture
+   of the full frame at the camera's own framing, so its height is the
+   stage's height on every phone and nothing moves when the canvas takes
+   over. */
+.body-stage__still {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: auto;
+  max-width: none;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-/* The SVG figure stands in for the canvas in the same box. */
+/* The SVG figure stands in for the canvas on the same stage, clear of the
+   buttons' row at its top. */
 .muscle-module__figure {
+  position: absolute;
+  inset: var(--touch-min) 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 280px;
-  padding: var(--space-3) 0;
+}
+
+/* ── The metrics strip (contract §4) ────────────────────────────────────
+
+   Three cells parted by a fine line, the first wider so "Leistungstrend"
+   fits at 320px: 1.35 : 1 : 1. A label in 11px, a value in the strip's
+   figure step, a line beneath. */
+.muscle-strip {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  margin-bottom: var(--space-1);
+}
+
+.muscle-strip--pending {
+  display: block;
+}
+
+.muscle-strip__cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px var(--space-2) 6px 10px;
+  border-left: 1px solid var(--separator-strong);
+  text-align: left;
+}
+
+.muscle-strip__cell:first-child {
+  padding-left: 2px;
+  border-left: none;
+}
+
+/* The first cell opens what the trend is and is not. A button, drawn like
+   its neighbours: its box is the target, 58px high. */
+.muscle-strip__cell--open {
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.muscle-strip__label {
+  font-size: var(--type-caption);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+.muscle-strip__value {
+  font-size: var(--type-figure-m);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+/* A rise and a fall carry their status colour, a held figure the text
+   colour (contract §7) — `.gym-progress__trend--*` in gym.css. */
+
+.muscle-strip__sub {
+  min-height: 1.3em;
+  font-size: var(--type-caption);
+  line-height: 1.3;
+  color: var(--text-tertiary);
 }
 
 /* ── The ten groups, as one list ───────────────────────────────────────── */
@@ -289,7 +376,7 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
   margin: 0;
-  padding: var(--space-2) 0 var(--space-3);
+  padding: var(--space-3) 0;
   list-style: none;
   border-bottom: 1px solid var(--separator);
 }

@@ -407,6 +407,7 @@ export const de = {
   'body.view.front': 'Vorne',
   'body.view.side': 'Seite',
   'body.view.back': 'Hinten',
+  'body.reset': 'Ansicht zurücksetzen',
 
   // The measuring display of the 3D body (block 7B, D181). The switch and
   // its hint are everyday language. The display itself is a tool and may
@@ -521,6 +522,14 @@ export const de = {
   'gym.progress.explainTrend':
     'Der Leistungstrend ist das Mittel der gewerteten Muskelgruppen. Von \u22122\u00A0% bis +1\u00A0% gilt er als gehalten.',
   'gym.progress.groupsCounted': '{count} von {total} Gruppen gewertet',
+  // The metrics strip above the body (block 7B, contract §4).
+  'gym.strip.rated': 'Gewertet',
+  'gym.strip.ratedValue': '{count}\u00A0/\u00A0{total}',
+  'gym.strip.ratedUnit': 'Gruppen',
+  'gym.strip.strongest': 'Stärkster',
+  'gym.strip.noneImproved': 'keine Verbesserung',
+  'gymHub.muscles.toHub': 'Zur Gym-Übersicht',
+  'gymHub.muscles.toHubHint': 'Training, Pläne und Laufen',
   'gym.progress.explainGroups':
     'Jede Muskelgruppe zählt gleich viel, unabhängig davon, wie viele Übungen sie enthält.',
   'gym.progress.explainMetric':
@@ -837,7 +846,6 @@ export const de = {
   'gymHub.muscles.warmUpOnlyHint':
     'In den letzten {days} Tagen sind nur Aufwärmsätze eingetragen. Gewertet wird der beste Arbeitssatz.',
   'gymHub.muscles.range': 'Letzte {days} Tage',
-  'gymHub.open': 'Gym öffnen',
 
 } as const;
 
