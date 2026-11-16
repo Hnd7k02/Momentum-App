@@ -5633,6 +5633,59 @@ What they do not show, said plainly:
   reading after three seconds without a touch is part of the same copy.
 - **The hits of ten taps** ("Treffer [x]/10") were left open.
 
+**The third copy** (owner, the same day, after "10 s seitlich gezogen,
+ohne Absetzen"; iOS 26.3.1 by his word, which the browser's string does
+not say; "Sieht alles gut aus"):
+
+| | third copy | target |
+|---|---|---|
+| to the first picture | 864 ms | 2.5 s over the network, 1 s from the cache |
+| code | 211 ms — "aus dem Netz, 0 kB", request 181 ms | |
+| model | 598 ms — "aus dem Netz, 0 kB", request 467 ms | |
+| first picture | 55 ms | |
+| turning: frames a second | 60.2 on average | 55 |
+| turning: frames under 25 ms | 100 % | 95 % |
+| turning: longest frame | 19 ms | |
+| turning: frames measured | 154 | |
+| idle: frames in the last second | 1 | 0 |
+
+- **The display counts the turn of a real finger on iOS**, which the first
+  two copies had left open, and **the turning meets its targets on the
+  device**: sixty frames a second — the rate at which the browser hands
+  out animation frames on this phone, 63 by the display's own reading —
+  every measured frame under 25 ms, the longest 19 ms.
+- **What the 154 are, said plainly.** At sixty a second they are 2.6
+  seconds of counted motion, where ten seconds of unbroken motion would be
+  about six hundred. The display counts a frame of a finger's turn only
+  if the finger made an event within 50 ms before it; while a finger
+  rests, nothing is drawn and nothing is counted. No counted interval was
+  longer than 19 ms, so none of the 154 followed a dropped frame. How much
+  of his ten seconds was motion the copy cannot say, and so it cannot say
+  either whether a frame was left out that should have counted (the limit
+  named in D181, under "What counts"). The remedy is for the display to
+  print beside the measured frames how many it drew in all since the
+  screen was opened — **a point for block 9**, whose measurement protocol
+  is release evidence and which runs WebKit.
+- **The load of this copy is the case D181 named**: both files read "aus
+  dem Netz, 0 kB". The browser checked each over the network — 181 and 467
+  ms for the round trips — and took it from its cache. 864 ms to the first
+  picture, inside both targets; the preview has no offline store, and the
+  live app's answers such a request without the network (the second copy,
+  193 ms, is what that looks like). The display should say "checked, from
+  the cache" where it says "aus dem Netz, 0 kB" — **the same point for
+  block 9**.
+- **Idle read 1**, as the first copy read 2: one touch on the body before
+  the copy is enough for either — the point for 7C below. A reading of
+  nought on the device is still owed and will come with that point built.
+- **A thing ruled out here, in the headless browser**: that a finger
+  making more than one event a frame leaves frames behind which the
+  renderer goes on drawing after it has stopped. With two and with four
+  events dispatched in every animation frame for two seconds, nothing was
+  drawn once the finger rested.
+- **The hits of ten taps** were left open a second time ("Treffer: [?
+  ]/10"). Not asked again: `body-reach.mjs` holds 10 of 10 at four widths
+  and no tap turning the body, and he found nothing.
+
 **Seen in his copy and left, with what the code shows:** a touch on the
 body draws two frames even when nothing changes — `onDown` and `onUp` in
 `CameraRig.tsx` each ask for one, the first so that a coast stops where
