@@ -5552,3 +5552,92 @@ entscheiden und was ich auf dem iPhone prüfen muss." — "Kein Merge."
   instruction ("Mach mit WP3 weiter … Nach dem run direkt ohne meine neue
   Anweisung"), where D159 has each block start in a fresh session. The
   model was the one D159 names.
+
+## D184 — STOP 7B: accepted, five answers, and the first measurements from a phone
+
+**Decision (owner, 2026-11-16, at STOP 7B).** His words: "STOP 7B:
+abgenommen. 1 A, 2 A, 3 A, 4 A, 5 A. iPhone: alles ok, keine Befunde." He
+checked the `Momentum-preview` build `275cfbc`, built from `c24c8d4` — the
+measuring display names its build, `index-DQBEJ-V9`, and that is the file
+of that publish. Block 7B is accepted as built; nothing was changed after
+his check.
+
+**His five answers — each the first option, which is what was built.**
+
+1. **The measuring display stays in the release**: a switch in the
+   settings, off until its user switches it on (D181). It costs 5 kB
+   compressed and nothing while off, and it is the only way to numbers
+   from a phone without a Mac.
+2. **The strip's third cell prints the change as its figure and the group
+   beneath it.** Mock-up 1 has the group as the figure; at that size only
+   "Brust" of the ten names fits the cell.
+3. **With no improved group "Stärkster" says "–" over "keine
+   Verbesserung".** The least decline is not called the strongest.
+4. **A drag that begins up or down on the body scrolls the page.**
+   Sideways it turns the body.
+5. **The 55 % are the stage.** The body fills 84 % of it, 46 % of the
+   screen. The contract's sentence "the body takes at least 55 % of the
+   screen's height" (§8) is read as the stage, as mock-up 1 draws it, and
+   now says so.
+
+The contract carries all five (§4, §8, §13).
+
+**The first measured values from an iPhone in this project** — two copies
+of the measuring display, pasted by the owner. Device: iPhone, the app
+from the home screen; he named an iPhone 15 Pro on 2026-11-11. The browser
+is Safari 26.3 by its own string, which reports "iPhone OS 18_7" — a
+number Apple's browsers keep fixed (D181), so the exact iOS version is not
+in the copy and is asked of him. Visible area 393 × 793 points; the stage
+393 × 436, 55 % of it; pixel ratio 2 of 3; drawing buffer 786 × 872;
+"Apple GPU"; the display's rate as the frames show it, 63 a second.
+
+| | first copy | second copy | target |
+|---|---|---|---|
+| to the first picture | 142 ms | 193 ms | 1 s from the cache |
+| code | 2 ms, already loaded | 44 ms, from the cache | |
+| model | 108 ms, already loaded | 107 ms, from the cache | |
+| first picture | 32 ms | 42 ms | |
+| draw calls | 12 | 12 | 12 |
+| triangles | 50,488 | 50,488 | 80,000 |
+| textures | 1 · 768 × 1024 | 1 · 768 × 1024 | one of 1024² |
+| turning: frames measured | 1 (14 ms) | none | 55 a second, 95 % under 25 ms |
+| idle: frames in the last second | 2 | not yet at rest for a second | 0 |
+
+What they show:
+
+- **Loading meets its target by a factor of five.** The second copy is a
+  fresh start of the app with code and model out of the browser's cache:
+  193 ms from opening Muskelgruppen to the first picture, where the
+  headless browser's software renderer needed 1.5 s. The first copy is a
+  visit in a page that had both in memory. The first load over the network
+  (target 2.5 s) is in neither.
+- **What is drawn meets its targets on the device**: twelve draw calls,
+  50,488 triangles, one texture.
+
+What they do not show, said plainly:
+
+- **The turning is not measured.** The first copy counted one frame, the
+  second none ("noch nicht gedreht"). Read by their own lines, the copies
+  were not taken after ten seconds of turning: the second was taken within
+  a second of the body appearing ("wartet auf eine Sekunde Ruhe"), the
+  first in a visit without a restart ("schon geladen"). But that is a
+  reading. Whether the display counts the turn of a real finger on iOS is
+  **not shown by these copies either**, and no WebKit run exists (block
+  9). One more copy, taken after ten seconds of turning without lifting
+  the finger and three seconds of rest, decides both: hundreds of frames
+  are the measurement; a handful or none is a fault of the display on iOS.
+  Asked of the owner; it does not hold up block 7C.
+- **The idle reading is not clean.** Two frames in the last second is
+  what one touch on the body that changes nothing draws — the rig asks
+  for a frame when a finger lands and when it lifts — and not a loop. A
+  reading after three seconds without a touch is part of the same copy.
+- **The hits of ten taps** ("Treffer [x]/10") were left open.
+
+**Seen in his copy and left, with what the code shows:** a touch on the
+body draws two frames even when nothing changes — `onDown` and `onUp` in
+`CameraRig.tsx` each ask for one, the first so that a coast stops where
+the finger landed, the second so that the body shows where it was let go.
+Both are needed only when something was moving or was moved. Two frames a
+touch cost nothing, but they are frames nobody needed and they make the
+display's idle line read "2" after a tap. A point for block 7C, which
+rebuilds what a touch on the body does while a sheet is open.

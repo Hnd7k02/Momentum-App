@@ -421,14 +421,18 @@ Never conflate them.
   burning out — measure before raising it.
 - **The body stands on a stage, not in a card** (D182, contract §8): as
   wide as the screen and as tall as 55 % of the dynamic viewport, with only
-  the header in 17px, the range and the metrics strip above it. One framing
+  the header in 17px, the range and the metrics strip above it. The 55 %
+  are the stage's, not the body's, which fills 84 % of it (the owner's
+  answer at STOP 7B, D184). One framing
   for every stage — the camera's angle of view is fixed (`framing.ts`) —
   so the body's still (`assets/body-stage.webp`, made by
   `tools/render-body-preview.mjs … stage`) stands exactly where the canvas
   draws the body, until the first picture and whenever a lost graphics
   context is being replaced: the stage is never an empty field. A change to
   the framing means a new still. The strip counts nothing: its trend and
-  its count are `shownPerformance()`'s. Under the feet lies one disc whose
+  its count are `shownPerformance()`'s; its third cell prints the change
+  of the improved group that rose most, with the group beneath, and "–"
+  over "keine Verbesserung" where none improved (D184). Under the feet lies one disc whose
   colour fades to nothing (`--body-ground-*`) — a gradient, never a blur
   and never a texture; the scene stays at twelve draw calls.
 - **How the body is operated is settled** (D182). The motion counts time,
@@ -453,7 +457,8 @@ Never conflate them.
   it for a changed prop and draws a frame for every render of the screen.
   A render with nothing changed draws nothing, and so does a scroll of the
   page (`body.mjs`, `gym-muscles.mjs`).
-- **The measuring display is a tool, not interface** (D181):
+- **The measuring display is a tool, not interface** (D181), and it stays
+  in the release (the owner's answer at STOP 7B, D184):
   `features/measure/`, off until its user switches it on in the settings.
   It asks for no frame and stands beside the canvas, never over it. Its
   switch speaks everyday language and lives in local storage — the first

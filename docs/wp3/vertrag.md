@@ -170,7 +170,7 @@ Auf Hell liegen die zweite und die dritte Textstufe damit fast gleich (`#5e5e68`
 - **Ein Seitenrand** von 16 px auf jedem Screen (festgelegt, D160). Heute weicht der Session-Screen ab.
 - **Karte:** Innenabstand 16 px (heute 18), Radius 22 px, eine Karte pro Thema. Keine Karte in einer Karte.
 - **Zeile:** mindestens 54 px hoch (heute rund 61), bei zweizeiligem Namen mehr. Die Trefferfläche bleibt 44 px.
-- **Kennzahlenleiste:** drei Zellen, getrennt durch eine feine Linie. Jede Zelle hat eine Beschriftung in 11 px, einen Wert in `--type-figure-m` und eine Zeile darunter für Zeitraum oder Zusatz. Die erste Zelle ist breiter (1,35 : 1 : 1), damit «Leistungstrend» bei 320 px passt.
+- **Kennzahlenleiste:** drei Zellen, getrennt durch eine feine Linie. Jede Zelle hat eine Beschriftung in 11 px, einen Wert in `--type-figure-m` und eine Zeile darunter für Zeitraum oder Zusatz. Die erste Zelle ist breiter (1,35 : 1 : 1), damit «Leistungstrend» bei 320 px passt. Über dem Körper zeigt die dritte Zelle, «Stärkster», die Veränderung als Zahl und die Gruppe in der Zeile darunter; ist keine Gruppe verbessert, steht «–» über «keine Verbesserung» (festgelegt am STOP 7B, D184; im Mockup 1 steht die Gruppe als Zahl, in dieser Grösse passt von zehn Namen nur «Brust»).
 - **Trennlinien** sind fein (`--separator`), nie eine zweite Fläche.
 
 ## §5 Bedienelemente
@@ -231,15 +231,16 @@ Diese Regeln baut der Block «Farbregeln», nicht 6b. Er muss wissen: Die Gym-Go
 
 Zielbild für die Blöcke 7A und 7B.
 
-- **Grösse und Rahmen** (festgelegt, D161): Der Körper nimmt mindestens 55 % der Bildschirmhöhe ein und steht ohne Kartenrahmen auf dem Grund. Darüber liegen nur die Kopfzeile in 17 px, die Zeitraumwahl und die Kennzahlenleiste. Unter den Füssen liegen ein kleiner Kontaktschatten und ein schwacher Schein.
+- **Grösse und Rahmen** (festgelegt, D161; die Lesart festgelegt am STOP 7B, D184): Die Bühne des Körpers nimmt 55 % der sichtbaren Höhe ein, und der Körper steht darin ohne Kartenrahmen auf dem Grund. Er füllt 84 % der Bühne, das sind 46 % des Bildschirms. Zuerst stand hier «Der Körper nimmt mindestens 55 % der Bildschirmhöhe ein»; gemeint ist die Bühne, wie in Mockup 1: Ein Körper von 55 % bräuchte eine Bühne von 65 % und schöbe die Legende und die erste Zeile unter den Rand. Darüber liegen nur die Kopfzeile in 17 px, die Zeitraumwahl und die Kennzahlenleiste. Unter den Füssen liegen ein kleiner Kontaktschatten und ein schwacher Schein.
 - **Material** (festgelegt, D155): einfarbig, ohne Anatomiefarben. Ein trainierter Muskel ohne Veränderung ist weiss, ein Muskel ohne Training gedimmt (festgelegt, D161). Die neutrale Zone – Kopf mit Hals, Hände und Füsse – hat einen eigenen Ton, etwa in der Mitte zwischen gedimmt und Weiss (festgelegt, D166; weicht von D161 ab): Neben einem weissen Körper las sich ein gedimmter Kopf als andere Hautfarbe statt als neutral. Training macht den Körper hell.
 - **Farbe am Körper** muss der Legende entsprechen. Der Körper wird ohne Tone Mapping gezeichnet (festgelegt am Gate von 7A, D165): Eine Statusfarbe am Körper ist die Farbe ihres Materials, nicht ein Pastell davon.
 - **Licht:** wenig Grundlicht, ein Hauptlicht von schräg oben, ein Kantenlicht von hinten. Das Hauptlicht ist so stark, wie Weiss es an den Schultern verträgt, ohne auszufressen. Jeder Wert ist ein Token (`--body-light-*`, `--body-roughness*`, `--body-environment`).
-- **Bedienung:** Ansichtstasten Vorne, Seite, Hinten und Zurücksetzen stehen oben in der Bühne, als feste Flächen. Zoomen mit zwei Fingern zwischen 1,0 und 1,8; Doppeltipp setzt zurück.
+- **Bedienung:** Ansichtstasten Vorne, Seite, Hinten und Zurücksetzen stehen oben in der Bühne, als feste Flächen. Zoomen mit zwei Fingern zwischen 1,0 und 1,8; Doppeltipp und die Taste setzen zurück, die Auswahl bleibt. Ein Zug, der nach oben oder unten beginnt, scrollt die Seite; seitlich dreht er den Körper (festgelegt am STOP 7B, D184).
 - **Bewegung** (festgelegt, D155): Drehen mit Schwung und weichem Auslaufen. Ein Tipp dreht den Körper nie; eine Auswahl in der Liste dreht ihn, wenn die Gruppe abgewandt ist.
 - **Der Weg dorthin** (festgelegt, D161): Die Gym-Kachel auf Heute führt direkt zum Muskelgruppen-Screen. Die Gym-Übersicht bleibt der Ort für Training, Pläne und Laufen.
 - **Treffen:** Hände gehören zur neutralen Zone (festgelegt, D155). Ein Tipp bis 12 px neben einer Gruppe wählt die nächstliegende; das gleicht die schmalen Unterarme aus.
 - **Ohne 3D** bleibt die flache Figur der Ersatz, und die Zeilen sind der Weg für Vorlesehilfen.
+- **Die Messanzeige** bleibt im Release: ein Schalter in den Einstellungen, standardmässig aus (festgelegt am STOP 7B, D181, D184). Sie ist ein Werkzeug und die eine Stelle, an der technische Wörter stehen dürfen (§13).
 
 ## §9 Muskel-Sheet
 
@@ -284,7 +285,7 @@ Zielbild für Block 7C.
 | Aufwärmsatz | Warm-up set | neu (Block 5b) |
 | uneinheitlich | mixed | neu |
 
-«Verbessert», «Gehalten», «Zurückgegangen» und «Noch nicht trainiert» bleiben. In der Oberfläche steht kein technisches Wort.
+«Verbessert», «Gehalten», «Zurückgegangen» und «Noch nicht trainiert» bleiben. In der Oberfläche steht kein technisches Wort – mit einer benannten Ausnahme, der Messanzeige (D181): Ihr Schalter und sein Hinweis sind Alltagssprache, ihre Zahlen dürfen heissen, was sie sind.
 
 ## §14 Was Tests durchsetzen
 
