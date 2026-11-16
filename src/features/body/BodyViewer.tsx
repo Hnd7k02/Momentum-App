@@ -14,7 +14,7 @@
  * square-ish aspect (see bodyViewer.css), and the rig adapts the field of
  * view to whatever height that produces.
  */
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping, AgXToneMapping, NoToneMapping, PMREMGenerator, SRGBColorSpace, type Texture } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -22,6 +22,8 @@ import type { MuscleGroup } from '../../core/model';
 import { useT } from '../../i18n/I18nProvider';
 import { BodyModel } from './BodyModel';
 import { CameraRig, VIEW_AZIMUTH, type BodyView, type CameraRigHandle } from './CameraRig';
+import { FrameProbe } from './FrameProbe';
+import { FROM_MEMORY, bodyMeasure, idleActivity, isMeasuring, subscribeMeasuring, type FrameActivity } from '../measure/measure';
 import { REGION_FACING } from './muscleMeshMap';
 import type { MuscleVisual } from './useMuscleHighlight';
 import { BODY_LIGHT, BODY_LOOK, type BodyLook } from './tokens';
@@ -118,6 +120,17 @@ export default function BodyViewer({
   // away — by stopping the loop outright rather than letting it burn frames.
   const [live, setLive] = useState(true);
   const invalidate = useRef<(() => void) | null>(null);
+  // The measuring display (block 7B): what each frame is drawn for, written
+  // by the camera and the materials and read by the probe. With the display
+  // off the probe is not mounted and nothing reads it.
+  const activity = useRef<FrameActivity>(idleActivity());
+  const measuring = useSyncExternalStore(subscribeMeasuring, isMeasuring, () => false);
+  useState(() => {
+    // On a second visit the code is not fetched again: the lazy boundary
+    // reported the first, and this is the moment it was there once more.
+    if (isMeasuring()) bodyMeasure.codeReady(performance.now(), FROM_MEMORY);
+    return null;
+  });
 
   const registerPick = useCallback((fn: (ndc: { x: number; y: number }) => MuscleGroup | null) => {
     pick.current = fn;
@@ -206,6 +219,12 @@ export default function BodyViewer({
     if (Math.abs(d) > 70) rig.current.faceAzimuth(want);
   }, [selectedMuscle]);
 
+  useEffect(() => {
+    if (!isMeasuring()) return;
+    if (!supported) bodyMeasure.failed('unsupported');
+    else if (failed) bodyMeasure.failed('loadFailed');
+  }, [supported, failed]);
+
   if (!supported || failed) return <>{fallback}</>;
 
   return (
@@ -237,7 +256,7 @@ export default function BodyViewer({
         <directionalLight position={[...look.key.position]} intensity={look.key.intensity} />
         <directionalLight position={[...look.fill.position]} intensity={look.fill.intensity} color={BODY_LIGHT.fill} />
         <directionalLight position={[...look.back.position]} intensity={look.back.intensity} />
-        <CameraRig ref={rig} onTap={onTap} onAzimuthChange={onAzimuthChange} />
+        <CameraRig ref={rig} onTap={onTap} onAzimuthChange={onAzimuthChange} activity={activity} />
         <Suspense fallback={null}>
           <BodyModel
             modelUrl={modelUrl}
@@ -247,8 +266,11 @@ export default function BodyViewer({
             registerPick={registerPick}
             onError={onError}
             surface={look.surface}
+            activity={activity}
           />
         </Suspense>
+        {/* Last, so it reads what the camera and the materials said of this frame. */}
+        {measuring ? <FrameProbe activity={activity} /> : null}
       </Canvas>
 
       <div className="body-viewer__views" role="group" aria-label={t('body.view')}>

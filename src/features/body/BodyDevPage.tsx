@@ -4,6 +4,7 @@ import { signedPercentText } from '../../i18n/typography';
 import type { Language } from '../../i18n';
 import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import { BodyViewer, type BodyView, type MuscleVisual } from './index';
+import { BodyReadout, bodyMeasure, isMeasuring } from '../measure';
 // The size of the stage in Muskelgruppen, for `?world=`: the body is judged in the box the app gives it.
 import '../gym/muscleModule.css';
 import { shownTrendOfChange } from '../gym/muscleState';
@@ -145,6 +146,9 @@ const WORLDS = {
 } as const;
 const WORLD = WORLDS[params.get('world') as keyof typeof WORLDS] ?? null;
 if (params.get('world') === 'gym') document.documentElement.dataset.world = 'gym';
+// The measuring display counts from the moment its screen opens; here that
+// is the harness itself.
+if (isMeasuring()) bodyMeasure.opened(performance.now());
 
 export function BodyDevPage() {
   const [selected, setSelected] = useState<MuscleGroup | null>(null);
@@ -204,6 +208,8 @@ export function BodyDevPage() {
             </Suspense>
           ) : null}
         </div>
+
+        <BodyReadout />
 
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0' }}>
           {MUSCLE_GROUPS.map((id) => {

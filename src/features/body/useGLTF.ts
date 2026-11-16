@@ -25,6 +25,11 @@ export function loadGLTF(url: string): Promise<GLTF> {
   return hit;
 }
 
+/** Whether the model was asked for before: a later viewer fetches nothing. */
+export function isLoaded(url: string): boolean {
+  return cache.has(url);
+}
+
 /** Frees the cached model. Call when leaving the Gym section for good. */
 export function clearGLTF(url: string): void {
   cache.delete(url);

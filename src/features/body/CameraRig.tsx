@@ -14,10 +14,11 @@
  * no inertia coast and a preset settles at once — drag, tap and the
  * shortcuts keep working.
  */
-import { useCallback, useEffect, useImperativeHandle, useRef, forwardRef } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useRef, forwardRef, type MutableRefObject } from 'react';
 import { Vector3, type PerspectiveCamera } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { TapVsDrag } from './useTapVsDrag';
+import { bodyMeasure, isMeasuring, type FrameActivity } from '../measure/measure';
 
 export type BodyView = 'front' | 'side' | 'back';
 
@@ -65,12 +66,14 @@ export type CameraRigProps = {
   onTap?: (ndc: { x: number; y: number }) => void;
   onAzimuthChange?: (deg: number) => void;
   enabled?: boolean;
+  /** What each frame is drawn for, for the measuring display. */
+  activity?: MutableRefObject<FrameActivity>;
 };
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function CameraRig(
-  { onTap, onAzimuthChange, enabled = true },
+  { onTap, onAzimuthChange, enabled = true, activity },
   ref,
 ) {
   const { camera, gl, size, invalidate } = useThree();
@@ -83,6 +86,8 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
   const lastEmitAt = useRef(0);
   const wakePending = useRef(false);
   const reduced = useRef(false);
+  /** A finger moved the camera since the last frame. */
+  const dragged = useRef(false);
 
   // Read the preference once and follow it; the rig checks the ref, never
   // the media query, on the hot path.
@@ -169,6 +174,8 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       yaw.current += d.dx * YAW_PER_PX;
       velocity.current = d.dx * YAW_PER_PX;
       pitch.current = clamp(pitch.current - d.dy * PITCH_PER_PX, PITCH_MIN, PITCH_MAX);
+      dragged.current = true;
+      if (isMeasuring()) bodyMeasure.requested(performance.now());
       invalidate();
     };
 
@@ -248,6 +255,12 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
     }
     applyCamera();
     if (moving) keepAlive();
+    if (activity) {
+      // A frame drawn for a finger that moved, or for the camera's own motion.
+      activity.current.rotating = moving || dragged.current;
+      activity.current.coasting = moving;
+      dragged.current = false;
+    }
 
     // Report the angle sparingly: it drives host state, and emitting every
     // frame re-renders the surrounding screen while the body is still spinning.

@@ -13,6 +13,7 @@ import '../areas/areas.css';
 import '../progress/progress.css';
 import './gymHub.css';
 import { useWorld } from '../../app/world';
+import { bodyMeasure, isMeasuring } from '../measure';
 
 /**
  * Muskelgruppen — the Gym area's second destination (`#/areas/gym/muscles`).
@@ -33,6 +34,12 @@ export function GymMusclesScreen({ onBack }: { onBack(): void }) {
   const t = useT();
   // Muskelgruppen is a Gym screen (WP3 Stage 6).
   useWorld('gym');
+  // The measuring display counts from here (block 7B, D181): the screen is
+  // open. During the first render, before the body below is asked for.
+  useState(() => {
+    if (isMeasuring()) bodyMeasure.opened(performance.now());
+    return null;
+  });
   const [range, setRange] = useState<number>(MUSCLE_TREND_RANGES[0]);
   const [legendOpen, setLegendOpen] = useState(false);
   const { history: gym, latestSession, loading, failed, reload } = useGymHistoryState(range);

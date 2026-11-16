@@ -1,14 +1,15 @@
 /**
  * The body mesh: loads the GLB, resolves the muscle contract, raycasts taps.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { Group, Mesh, MeshStandardMaterial, Raycaster, Vector2 } from 'three';
-import { useThree } from '@react-three/fiber';
-import { useGLTF } from './useGLTF';
+import { addAfterEffect, useThree } from '@react-three/fiber';
+import { isLoaded, useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
 import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
 import { BODY_INERT_COLOR, BODY_LOOK, type BodyLook } from './tokens';
+import { FROM_MEMORY, bodyMeasure, isMeasuring, resourceFacts, resourceSince, type FrameActivity } from '../measure/measure';
 
 /**
  * Where the shipped model lives, under whatever base the app is served from
@@ -29,6 +30,8 @@ export type BodyModelProps = {
   registerPick?: (pick: (ndc: { x: number; y: number }) => MuscleGroup | null) => void;
   /** A look's surface values; absent is the app's own (`BODY_LOOK`). */
   surface?: BodyLook['surface'];
+  /** What each frame is drawn for, for the measuring display. */
+  activity?: MutableRefObject<FrameActivity>;
 };
 
 export function BodyModel({
@@ -40,10 +43,14 @@ export function BodyModel({
   onError,
   registerPick,
   surface = BODY_LOOK.surface,
+  activity,
 }: BodyModelProps) {
   const { camera, invalidate, gl, scene } = useThree();
   const root = useRef<Group>(null);
   const [meshes, setMeshes] = useState<MuscleMeshes | null>(null);
+  // Whether the model had been asked for before this viewer did: then
+  // nothing is fetched, and the measuring display says so.
+  const wasLoaded = useRef(isLoaded(modelUrl));
   const { gltf, error } = useGLTF(modelUrl);
   const raycaster = useMemo(() => new Raycaster(), []);
 
@@ -94,7 +101,27 @@ export function BodyModel({
     };
   }, [gltf, gl, camera, scene, onReady, onError, invalidate, surface]);
 
-  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface });
+  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface, activity });
+
+  // The measuring display (block 7B): when the model was there, and where
+  // the browser says it came from — or that it was not fetched at all,
+  // because an earlier viewer had asked for it — and when the first picture
+  // with it had been drawn. Neither asks for a frame.
+  useEffect(() => {
+    if (!gltf || !isMeasuring()) return;
+    const file = modelUrl.split('/').pop()?.split('?')[0] ?? modelUrl;
+    const escaped = file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const request = resourceSince(new RegExp(`${escaped}(?:\\?|$)`), bodyMeasure.since ?? 0);
+    bodyMeasure.modelReady(performance.now(), request || !wasLoaded.current ? resourceFacts(request) : FROM_MEMORY);
+  }, [gltf, modelUrl]);
+  useEffect(() => {
+    if (!meshes || !isMeasuring()) return undefined;
+    const stop = addAfterEffect(() => {
+      bodyMeasure.firstFrame(performance.now());
+      stop();
+    });
+    return stop;
+  }, [meshes]);
 
   const pick = useCallback(
     (ndc: { x: number; y: number }): MuscleGroup | null => {

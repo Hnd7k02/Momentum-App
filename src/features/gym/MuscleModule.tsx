@@ -5,6 +5,7 @@ import { BodyRenderer, MUSCLE_STATE_KEYS, type MuscleState, type MuscleView } fr
 import { useT } from '../../i18n/I18nProvider';
 import type { ShownMuscle } from './muscleState';
 import { BodyBoundary, BodyViewer, toBodyVisuals, visualsByMuscle } from '../body';
+import { BodyReadout } from '../measure';
 import type { MuscleAnalyticsView } from './muscleAnalytics';
 import { MuscleRows } from './MuscleRows';
 import './muscleModule.css';
@@ -95,6 +96,10 @@ export function MuscleModule({
           />
         </Suspense>
       </BodyBoundary>
+
+      {/* The measuring display, where its user switched it on (D181):
+          beside the canvas, never over it. */}
+      <BodyReadout />
 
       {legend ? (
         <ul className="muscle-legend" aria-hidden="true">

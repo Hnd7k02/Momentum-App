@@ -17,11 +17,12 @@
  * onBeforeCompile patch with its own varyings. Every constant comes from
  * tokens.ts.
  */
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, type MutableRefObject } from 'react';
 import { Color, MeshStandardMaterial } from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { MuscleGroup } from '../../core/model';
 import type { MuscleMeshes } from './muscleMeshMap';
+import type { FrameActivity } from '../measure/measure';
 import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, BODY_INERT_COLOR, BODY_LOOK, BODY_UNLIT, NEUTRAL_HIGHLIGHT, REGION_MATERIAL, type BodyLook } from './tokens';
 
 export type MuscleVisual = {
@@ -47,6 +48,8 @@ export type HighlightOptions = {
   invalidate: () => void;
   /** A look's surface values; absent is the app's own (`BODY_LOOK`). */
   surface?: BodyLook['surface'];
+  /** What each frame is drawn for, for the measuring display. */
+  activity?: MutableRefObject<FrameActivity>;
 };
 
 /** The two uniforms the rim patch adds; shared by reference with the shader. */
@@ -185,6 +188,7 @@ export function useMuscleHighlight({
   tinted = true,
   invalidate,
   surface = BODY_LOOK.surface,
+  activity,
 }: HighlightOptions): void {
   const slots = useRef<Map<MuscleGroup, Slot>>(new Map());
 
@@ -287,5 +291,6 @@ export function useMuscleHighlight({
       }
     }
     if (moving) keepAlive();
+    if (activity) activity.current.easing = moving;
   });
 }
