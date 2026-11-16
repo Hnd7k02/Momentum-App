@@ -5238,10 +5238,17 @@ file. One button copies all of it as plain text.
 **It falsifies nothing.** It asks for no frame and keeps no loop awake. The
 viewer tells a recorder about frames that happen anyway; the recorder tells
 the panel that something changed at three moments — the first picture, the
-end of a motion, and once a second later, for the idle count. That last one
-is a timer of the display's own and my reading of "after the end of a
+end of a motion, and a second later, for the idle count. That last one is
+a timer of the display's own and my reading of "after the end of a
 gesture": it draws nothing on the canvas, and without it the idle line
-could only be read by copying. While the body turns the recorder writes
+could only be read by copying. The timer looks a second on and decides
+from what happened meanwhile: something still moved — it says nothing and
+looks again, which is also how a motion is told that no frame follows (a
+finger that lifts without throwing the body draws nothing afterwards);
+nothing moved — the panel is told, and if a frame was drawn meanwhile it
+looks once more, so that the line ends on a nought and a body that keeps
+drawing while nothing moves keeps being shown. With nothing moving and
+nothing drawn it holds no timer. While the body turns the recorder writes
 numbers into arrays it already owns and the panel is not touched. The
 panel stands under the stage, beside the canvas, never over it, on a solid
 surface. Switched off — every device's state until its user switches it on
@@ -5332,6 +5339,31 @@ about an iPhone:
   33.4 ms on a 60 Hz display and block 7B every 16.7 ms. On a phone that
   is the difference between 30 and 60 frames a second while turning. Fixed
   with the motion (D182).
+
+**What it found at the end of the block**, when its idle line read "1"
+where it should read nought — three causes, each one frame nobody asked
+for, none of them visible without it:
+
+- *A render of the viewer drew a frame.* The ground under the feet, new in
+  this block, was given a new function on every render. To the renderer a
+  new value is a changed prop, and a changed prop on anything in the scene
+  draws a frame. It has one function now, and `body.mjs` renders the dev
+  page again with nothing changed and holds the viewer to no frame.
+- *So did every render of the canvas element.* The renderer's root (R3F
+  8.18) writes "pointer missed" into its store on every render as long as
+  there is none, and any change to that store draws a frame. The canvas is
+  given a handler that does nothing.
+- *And every scroll of the page.* The renderer measured the canvas again
+  after each scroll, for an event system this viewer does not use — the
+  rig reads the canvas's place when a finger lands — and a new place is a
+  new size to it. It measures size only; `gym-muscles.mjs` scrolls the
+  page with the body in view and holds it to no frame.
+
+The display itself was wrong in two places and is right now: it took a
+slow frame for a pausing finger (above, "What counts"), and it called a
+body that drew while nothing moved "waiting for a second of rest" for as
+long as the frames kept coming — at rest counts from the last motion, not
+from the last frame.
 
 ## D182 — Block 7B: the body's stage and how it is operated
 

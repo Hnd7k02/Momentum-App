@@ -56,7 +56,7 @@ const browser = await chromium.launch({
  */
 const INSTRUMENT = () => {
   const w = window;
-  w.__probe = { contexts: 0, lost: 0, listeners: 0, raf: 0, draws: 0 };
+  w.__probe = { contexts: 0, lost: 0, listeners: 0, raf: 0, draws: 0, lastRafAt: null, maxGap: 0, over: 0 };
   w.__rafSkip = 0;
   const getContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
@@ -89,6 +89,16 @@ const INSTRUMENT = () => {
     const fire = (t) => {
       if (wait > 0) { wait -= 1; return raf(fire); }
       w.__probe.raf += 1;
+      // When this frame fired, the longest gap between two frames since
+      // the last mark, and the time the motion's cap took away: a step
+      // counts for a tenth of a second and no more (`MOTION.maxStepMs`).
+      const now = performance.now();
+      if (w.__probe.lastRafAt !== null) {
+        const gap = now - w.__probe.lastRafAt;
+        if (gap > w.__probe.maxGap) w.__probe.maxGap = gap;
+        if (gap > 100) w.__probe.over += gap - 100;
+      }
+      w.__probe.lastRafAt = now;
       return cb(t);
     };
     return raf(fire);
@@ -364,15 +374,50 @@ async function shot(page, name) {
   await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: false });
 }
 
-/** Records when the reported angle changes, so a motion's duration can be read off. */
-const watchAngle = (page) => page.evaluate(() => {
-  window.__turns = [];
-  window.__frames = [];
-  const viewer = document.querySelector('.body-viewer');
-  window.__watch?.disconnect();
-  window.__watch = new MutationObserver(() => window.__turns.push([performance.now(), Number(viewer.getAttribute('data-azimuth'))]));
-  window.__watch.observe(viewer, { attributes: true, attributeFilter: ['data-azimuth'] });
+/**
+ * Marks the moment a motion is asked for, in the page's own time: the press
+ * of a view, or the finger lifting off the body. From that moment the
+ * frames are counted afresh, and the motion has ended with the last frame
+ * that fires — a body at rest draws none.
+ *
+ * Until the end of block 7B a motion's time was read from before the
+ * gesture to the last change of the *reported* angle. The gesture's own
+ * time on the wire depends on how fast frames are drawn, and the reported
+ * angle is a whole degree told five times a second: both were noise of
+ * the size of what was to be measured.
+ */
+const markMotions = (page) => page.evaluate(() => {
+  window.__began = null;
+  if (window.__marking) return;
+  window.__marking = true;
+  const mark = () => {
+    window.__began = performance.now();
+    Object.assign(window.__probe, { raf: 0, lastRafAt: window.__began, maxGap: 0, over: 0 });
+  };
+  document.addEventListener('click', (event) => { if (event.target.closest?.('.body-viewer__views')) mark(); }, true);
+  document.addEventListener('pointerup', (event) => { if (event.target.tagName === 'CANVAS') mark(); }, true);
 });
+/** The motion since the last mark: how long it took, in how many frames, and where it ended. */
+const motion = (page) => page.evaluate(() => ({
+  ms: window.__probe.lastRafAt - window.__began,
+  over: window.__probe.over,
+  maxGap: window.__probe.maxGap,
+  frames: window.__probe.raf,
+  end: Number(document.querySelector('.body-viewer').getAttribute('data-azimuth')),
+}));
+
+/** The named values of the motion (`MOTION` in `features/body/motion.ts`), for what a motion must take. */
+const MOTION = { yawPerPx: 0.55, coastTimeMs: 280, coastStopDegPerS: 3, travelRate: 15, travelStopDeg: 0.05, travelStopDegPerS: 1.5 };
+/** A coast from `degPerS` runs until its speed has decayed to the stop speed. */
+const coastMs = (degPerS) => MOTION.coastTimeMs * Math.log(degPerS / MOTION.coastStopDegPerS);
+/** A travel over `deg` from rest: the critically damped spring, until it is near enough and slow enough. */
+const travelMs = (deg) => {
+  for (let t = 0; t < 5000; t += 1) {
+    const x = (MOTION.travelRate * t) / 1000;
+    if (deg * (1 + x) * Math.exp(-x) <= MOTION.travelStopDeg && deg * MOTION.travelRate * x * Math.exp(-x) <= MOTION.travelStopDegPerS) return t;
+  }
+  return Number.NaN;
+};
 
 /* ── 393: mount, shortcuts, rotation, selection, lifecycle ─────────────── */
 {
@@ -811,19 +856,19 @@ const watchAngle = (page) => page.evaluate(() => {
     await settle(page, 900);
     await page.evaluate((n) => { window.__rafSkip = n; }, skip);
     // A travel: Vorne → Hinten.
-    await watchAngle(page);
-    const t0 = await page.evaluate(() => { window.__probe.raf = 0; return performance.now(); });
+    await markMotions(page);
     await pills(page).getByRole('button', { name: 'Hinten' }).click();
     await settle(page, 900);
-    const travel = await page.evaluate((start) => ({ ms: window.__turns[window.__turns.length - 1][0] - start, end: window.__turns[window.__turns.length - 1][1], frames: window.__probe.raf }), t0);
+    const travel = await motion(page);
     // A flick with a known speed: 30px in 60 ms, 275° a second, 16.5° + 76.2°.
+    await page.evaluate(() => { window.__rafSkip = 0; });
     await pills(page).getByRole('button', { name: 'Vorne' }).click();
     await settle(page, 900);
-    await watchAngle(page);
-    const f0 = await page.evaluate(() => { window.__probe.raf = 0; return performance.now(); });
+    await page.evaluate((n) => { window.__rafSkip = n; }, skip);
+    await markMotions(page);
     await flick(page, client, 30, { ms: 60, steps: 6 });
     await settle(page, 900);
-    const coast = await page.evaluate((start) => ({ ms: window.__turns[window.__turns.length - 1][0] - start, end: window.__turns[window.__turns.length - 1][1], frames: window.__probe.raf }), f0);
+    const coast = await motion(page);
     runs.push({ skip, travel, coast });
     await page.evaluate(() => { window.__rafSkip = 0; });
   }
@@ -831,16 +876,37 @@ const watchAngle = (page) => page.evaluate(() => {
   const [full, half, third] = runs;
   // The software renderer needs two or three refreshes for a frame even of
   // this small canvas, so one withheld frame is less than half the rate —
-  // but each step down draws clearly fewer frames in the same time.
-  check('withholding animation frames really lowers the frame rate', half.travel.frames <= full.travel.frames * 0.85 && third.travel.frames <= full.travel.frames * 0.7 && third.travel.frames < half.travel.frames, text);
-  check('and no frame of any run was longer than the tenth of a second a step may count for', runs.every((r) => r.travel.ms / r.travel.frames < 100 && r.coast.ms / r.coast.frames < 100), text);
-  // The end of a motion is noticed in the frame after it, so two runs may
-  // differ by a frame or two of the slower one; 120 ms covers that. The old
-  // rule would have differed by the whole duration again.
-  check('a travel ends on the same angle and takes the same time at a half and a third of the frame rate',
-    runs.every((r) => r.travel.end === 180) && Math.abs(half.travel.ms - full.travel.ms) < 120 && Math.abs(third.travel.ms - full.travel.ms) < 160, text);
-  check('a coast ends on the same angle — the 93° its speed gives — and takes the same time',
-    runs.every((r) => Math.abs(r.coast.end - 93) <= 1) && Math.abs(half.coast.ms - full.coast.ms) < 120 && Math.abs(third.coast.ms - full.coast.ms) < 160, text);
+  // but each step down draws fewer frames in the same time, and the third
+  // run at most four fifths of the first. (0.85 and 0.7 of the first until
+  // the end of block 7B: numbers of the machine they were written on. On a
+  // slower one the renderer, not the withheld frame, sets the pace.)
+  check('withholding animation frames really lowers the frame rate',
+    half.travel.frames < full.travel.frames && third.travel.frames < half.travel.frames && third.travel.frames <= full.travel.frames * 0.8
+      && half.coast.frames < full.coast.frames && third.coast.frames < half.coast.frames && third.coast.frames <= full.coast.frames * 0.8, text);
+  // What a motion must take is its equation's to say, and the same at any
+  // frame rate: a travel over 180° runs until the spring is near enough
+  // and slow enough, a coast from 275° a second until its speed has
+  // decayed to the stop speed. The motion ends in the first frame after
+  // that moment — so it may take up to a frame longer, here two and a
+  // little are allowed, and never less. A frame that came more than a
+  // tenth of a second after the one before it counted for a tenth
+  // (`MOTION.maxStepMs`): the time that took away is known, and taken off.
+  const TRAVEL = travelMs(180);
+  const COAST = coastMs((30 / 60) * 1000 * MOTION.yawPerPx);
+  const inTime = (m, due) => m.ms - m.over >= due - 8 && m.ms - m.over <= due + 2 * (m.ms / m.frames) + 40;
+  const times = runs.map((r) => `every ${r.skip + 1}.: travel ${Math.round(r.travel.ms - r.travel.over)} ms of ${Math.round(TRAVEL)}, coast ${Math.round(r.coast.ms - r.coast.over)} ms of ${Math.round(COAST)}, longest gap ${Math.round(Math.max(r.travel.maxGap, r.coast.maxGap))} ms`).join(' | ');
+  check('a travel ends on the same angle and takes the time its equation gives, whatever the frame rate',
+    runs.every((r) => r.travel.end === 180 && inTime(r.travel, TRAVEL)), times);
+  check('a coast ends on the same angle — the 93° its speed gives — and takes the time its equation gives',
+    runs.every((r) => Math.abs(r.coast.end - 93) <= 1 && inTime(r.coast, COAST)), times);
+  // And against one another: the three runs of each motion end within two
+  // frames of the slowest. The old rule, which counted frames, would have
+  // differed by a third of the whole duration.
+  const spread = (key) => Math.max(...runs.map((r) => r[key].ms - r[key].over)) - Math.min(...runs.map((r) => r[key].ms - r[key].over));
+  const slowest = (key) => Math.max(...runs.map((r) => r[key].ms / r[key].frames));
+  check('and the three runs of each motion end within two frames of one another',
+    spread('travel') <= 2 * slowest('travel') + 40 && spread('coast') <= 2 * slowest('coast') + 40,
+    `travel ${Math.round(spread('travel'))} ms apart, coast ${Math.round(spread('coast'))} ms apart; a frame of the slowest run ${Math.round(slowest('coast'))} ms`);
   await ctx.close();
 }
 

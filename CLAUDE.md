@@ -447,6 +447,12 @@ Never conflate them.
   draws exactly one frame when what it shows changes, and advances nothing.
   While the still stands in, a finger moves nothing, and a lost context
   sets the view back to the start: the body returns where its still stood.
+  **Nothing in the body's scene is given a value that is new on every
+  render** — a function written in the element, or an object (an array of
+  numbers is compared by its entries; nothing else is): the renderer takes
+  it for a changed prop and draws a frame for every render of the screen.
+  A render with nothing changed draws nothing, and so does a scroll of the
+  page (`body.mjs`, `gym-muscles.mjs`).
 - **The measuring display is a tool, not interface** (D181):
   `features/measure/`, off until its user switches it on in the settings.
   It asks for no frame and stands beside the canvas, never over it. Its
