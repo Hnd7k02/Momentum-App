@@ -345,6 +345,125 @@ describe('idle', () => {
   });
 });
 
+describe('the idle line ends on what is true', () => {
+  it('a frame drawn after the body came to rest is shown, and the display looks again until a second passed without one', () => {
+    vi.useFakeTimers();
+    try {
+      const measure = opened(0);
+      measure.firstFrame(0);
+      const seen = vi.fn();
+      measure.subscribe(seen);
+      measure.rendered(1000, { rotating: true, selfDriven: false });
+      measure.rendered(1016, { rotating: false, selfDriven: false });
+      measure.settled(1016);
+      expect(seen).toHaveBeenCalledTimes(1);
+      // One more frame, a third of a second after the body came to rest.
+      measure.rendered(1316, { rotating: false, selfDriven: false });
+      vi.advanceTimersByTime(IDLE_AFTER_MS + 100);
+      // The display is told, and the line shows that frame …
+      expect(seen).toHaveBeenCalledTimes(2);
+      expect(measure.snapshot(1016 + IDLE_AFTER_MS + 100).idleFrames).toBe(1);
+      // … and a second on it is told again: nothing was drawn since.
+      vi.advanceTimersByTime(IDLE_AFTER_MS + 100);
+      expect(seen).toHaveBeenCalledTimes(3);
+      expect(measure.snapshot(1016 + 2 * (IDLE_AFTER_MS + 100)).idleFrames).toBe(0);
+      // Then it holds no timer.
+      vi.advanceTimersByTime(60_000);
+      expect(seen).toHaveBeenCalledTimes(3);
+      measure.dispose();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a motion whose last frame was a frame of the motion is told all the same', () => {
+    vi.useFakeTimers();
+    try {
+      const measure = opened(0);
+      measure.firstFrame(0);
+      const seen = vi.fn();
+      measure.subscribe(seen);
+      // A finger turns the body and lifts without throwing it: the last
+      // frame shows the last move, and nothing is drawn after it — so no
+      // frame can say that the motion ended.
+      let now = 1000;
+      for (let frame = 0; frame < 30; frame += 1) {
+        measure.requested(now - 2);
+        measure.rendered(now, { rotating: true, selfDriven: false });
+        now += 16;
+      }
+      // While it turned, the panel was not touched.
+      expect(seen).not.toHaveBeenCalled();
+      // The timer looks: something moved since it was set. Not yet.
+      vi.advanceTimersByTime(IDLE_AFTER_MS + 100);
+      expect(seen).not.toHaveBeenCalled();
+      // It looks again: nothing moved. The display is told, and the idle line is a nought.
+      vi.advanceTimersByTime(IDLE_AFTER_MS + 100);
+      expect(seen).toHaveBeenCalledTimes(1);
+      expect(measure.snapshot(now + 2 * (IDLE_AFTER_MS + 100)).idleFrames).toBe(0);
+      expect(measure.snapshot(now).rotation.frames).toBe(29);
+      vi.advanceTimersByTime(60_000);
+      expect(seen).toHaveBeenCalledTimes(1);
+      measure.dispose();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a body that keeps drawing while nothing moves keeps being shown, with no motion to end first', () => {
+    vi.useFakeTimers();
+    try {
+      const measure = opened(0);
+      measure.firstFrame(0);
+      const seen = vi.fn();
+      measure.subscribe(seen);
+      let now = 1000;
+      for (let second = 1; second <= 4; second += 1) {
+        // Frames nobody asked for, sixty a second.
+        for (let frame = 0; frame < 66; frame += 1) {
+          measure.rendered(now, { rotating: false, selfDriven: false });
+          now += 1000 / 60;
+        }
+        vi.advanceTimersByTime(IDLE_AFTER_MS + 100);
+        expect(seen).toHaveBeenCalledTimes(second);
+        // Read a millisecond before the next frame would be due: sixty in the second.
+        expect(measure.snapshot(now - 1).idleFrames).toBe(60);
+      }
+      // It stops: one more look shows the nought, and then nothing.
+      vi.advanceTimersByTime(IDLE_AFTER_MS + 100);
+      expect(seen).toHaveBeenCalledTimes(5);
+      vi.advanceTimersByTime(60_000);
+      expect(seen).toHaveBeenCalledTimes(5);
+      measure.dispose();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('holds no timer before the first picture, and none over a new visit', () => {
+    vi.useFakeTimers();
+    try {
+      const measure = opened(0);
+      const seen = vi.fn();
+      measure.subscribe(seen);
+      // Frames while the body loads are no idle frames.
+      measure.rendered(100, { rotating: false, selfDriven: false });
+      vi.advanceTimersByTime(60_000);
+      expect(seen).not.toHaveBeenCalled();
+      measure.firstFrame(200);
+      measure.rendered(300, { rotating: false, selfDriven: false });
+      // A new visit begins before the second is up: the old timer is gone.
+      measure.opened(400);
+      seen.mockClear();
+      vi.advanceTimersByTime(60_000);
+      expect(seen).not.toHaveBeenCalled();
+      measure.dispose();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe('who is asking', () => {
   it('reads an iPhone and the system number its browser reports', () => {
     const safari = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Mobile/15E148 Safari/604.1';

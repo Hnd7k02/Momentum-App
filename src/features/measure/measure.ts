@@ -273,6 +273,10 @@ export class BodyMeasure {
   private readonly listeners = new Set<() => void>();
   private version = 0;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Frames drawn since the idle timer was set: the display looks again as long as there were any. */
+  private drawnSinceArmed = 0;
+  /** Something moved since the idle timer was set: the body is not at rest yet. */
+  private activeSinceArmed = false;
 
   /** Muskelgruppen was opened: a new visit, and everything counts from here. */
   opened(now: number): void {
@@ -285,6 +289,7 @@ export class BodyMeasure {
     this.rotationFrames = this.rotationSum = this.rotationFast = this.rotationLongest = 0;
     this.renderer = null;
     this.failure = null;
+    this.dispose();
     this.emit();
   }
 
@@ -338,6 +343,13 @@ export class BodyMeasure {
     if (!followsFinger && !followsFrame) this.fingerPaused = true;
     this.fingerMoved = true;
     this.lastFingerAt = before === null ? finger.last : Math.max(before, finger.last);
+    this.moved();
+  }
+
+  /** Something moved: the display will want telling once it has stopped. */
+  private moved(): void {
+    this.activeSinceArmed = true;
+    if (this.idleTimer === null) this.arm();
   }
 
   /** The frame that `rendered` announced has been drawn. */
@@ -371,7 +383,15 @@ export class BodyMeasure {
     this.lastRotating = rotating;
     this.nextSelfDriven = selfDriven;
     this.fingerMoved = this.fingerPaused = false;
-    if (rotating || selfDriven) this.lastActiveAt = now;
+    this.drawnSinceArmed += 1;
+    if (rotating || selfDriven) {
+      this.lastActiveAt = now;
+      this.moved();
+    } else if (this.firstFrameAt !== null && this.idleTimer === null) {
+      // A frame while nothing moves: the idle line has something to say, so
+      // the display is told a second on — also where no motion ended first.
+      this.arm();
+    }
   }
 
   rendererFacts(facts: RendererFacts): void {
@@ -391,11 +411,38 @@ export class BodyMeasure {
   settled(now: number): void {
     this.lastActiveAt = now;
     this.emit();
+    this.arm();
+  }
+
+  /**
+   * Looks again a second from now — the one timer of the display's own.
+   *
+   * - Something moved meanwhile: the body is not at rest. Nothing is told —
+   *   the panel is not touched while the body turns — and it looks again.
+   *   This is also how a motion is told whose last frame was a frame of the
+   *   motion: a finger that lifts without throwing the body draws nothing
+   *   after it, so no frame can say that it ended.
+   * - Nothing moved: the display is told. If a frame was drawn meanwhile
+   *   the idle line shows it, and it looks once more, until a second has
+   *   passed without one: the line ends on what is true, a nought, and a
+   *   body that keeps drawing while nothing moves keeps being shown.
+   *
+   * With nothing moving and nothing drawn it tells once and holds no timer.
+   */
+  private arm(): void {
     if (typeof setTimeout !== 'function') return;
     if (this.idleTimer !== null) clearTimeout(this.idleTimer);
+    this.drawnSinceArmed = 0;
+    this.activeSinceArmed = false;
     this.idleTimer = setTimeout(() => {
       this.idleTimer = null;
+      if (this.activeSinceArmed) {
+        this.arm();
+        return;
+      }
+      const drew = this.drawnSinceArmed > 0;
       this.emit();
+      if (drew) this.arm();
     }, IDLE_AFTER_MS + 100);
   }
 
@@ -420,7 +467,11 @@ export class BodyMeasure {
 
   snapshot(now: number): MeasureSnapshot {
     const since = (at: number | null) => (at === null || this.openedAt === null ? null : Math.max(0, at - this.openedAt));
-    const rested = this.lastActiveAt === null ? (this.lastFrameAt === null ? null : now - this.lastFrameAt) : now - this.lastActiveAt;
+    // At rest since the last motion — or, where nothing has moved yet, since
+    // the first picture. Not since the last frame: a body that draws while
+    // nothing moves is at rest, and its frames are what the line is for.
+    const calmSince = this.lastActiveAt ?? this.firstFrameAt;
+    const rested = calmSince === null ? null : now - calmSince;
     let idleFrames: number | null = null;
     if (this.firstFrameAt !== null && rested !== null && rested >= IDLE_AFTER_MS) {
       idleFrames = 0;
