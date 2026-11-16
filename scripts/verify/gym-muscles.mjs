@@ -492,6 +492,17 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   await page.evaluate(() => { window.__probe.raf = 0; });
   await page.waitForTimeout(1000);
   check('an idle body runs no frames at all', (await probe(page)).raf === 0, String((await probe(page)).raf));
+  // Scrolling the page is not the body's business. Until the end of block
+  // 7B the renderer measured the canvas again after every scroll, for an
+  // event system the viewer does not use, and drew a frame for its new
+  // place: one frame every time the page came to rest.
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
+  for (const top of [40, 90, 0]) {
+    await page.evaluate((y) => { document.querySelector('.areas__scroll').scrollTop = y; }, top);
+    await page.waitForTimeout(400);
+  }
+  const scrolled = await probe(page);
+  check('scrolling the page with the body in view draws no frame of it', scrolled.raf === 0 && scrolled.draws === 0, `${scrolled.raf} frames, ${scrolled.draws} draw calls`);
 
   // What a rotation costs while it is being watched, for comparison.
   await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Seite' }).click();
@@ -859,6 +870,12 @@ for (const [width, height] of [[320, 693], [360, 780], [393, 852], [430, 932]]) 
     /^[\d.]+ im Mittel$/.test(line('Bilder pro Sekunde') ?? '') && /^[\d.]+ %$/.test(line('Bilder unter 25 ms') ?? '') && /^[\d']+ ms$/.test(line('Längstes Bild') ?? '') && Number(line('Gemessene Bilder')) > 5,
     [line('Bilder pro Sekunde'), line('Bilder unter 25 ms'), line('Längstes Bild'), line('Gemessene Bilder')].join(' | '));
   check('the idle second: no frame in it', line('Bilder in der letzten Sekunde') === '0', String(line('Bilder in der letzten Sekunde')));
+  // The panel is told when a motion has ended and looks again until a
+  // second has passed without a frame: what stands on the screen is the
+  // nought as well, not only what a copy reads afresh.
+  const shownIdle = () => page.evaluate(() => [...document.querySelectorAll('[data-readout] dt')].find((dt) => /letzten Sekunde/.test(dt.textContent))?.nextElementSibling?.textContent ?? null);
+  for (let waited = 0; waited < 4000 && (await shownIdle()) !== '0'; waited += 200) await page.waitForTimeout(200);
+  check('and the panel on the screen says the same', (await shownIdle()) === '0', String(await shownIdle()));
   check('what is drawn: twelve draw calls, the triangles, the one texture and its size',
     line('Zeichenaufrufe') === '12' && line('Dreiecke') === "50'488" && line('Texturen') === '1 · 768 × 1024', [line('Zeichenaufrufe'), line('Dreiecke'), line('Texturen')].join(' | '));
   check('the pixel ratio used, the display\'s observed rate, device, system and the visible area',

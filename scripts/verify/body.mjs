@@ -503,6 +503,19 @@ const watchAngle = (page) => page.evaluate(() => {
   await page.waitForTimeout(1000);
   p = await probe(page);
   check('the idle viewer runs zero animation frames in a second, and draws nothing', p.raf === 0 && p.draws === 0, `${p.raf} frames, ${p.draws} draw calls`);
+  // A render of the host with nothing changed is nothing to draw. Found
+  // with the measuring display at the end of block 7B: a prop that is a new
+  // value on every render — a function written in the element — is a
+  // changed prop to the renderer, and a changed prop on anything in the
+  // scene draws a frame; and the renderer's root wrote to its store on
+  // every render of the canvas. One frame for every render of the screen.
+  await resetRaf(page);
+  for (let i = 0; i < 3; i += 1) {
+    await page.getByRole('button', { name: 'render again', exact: true }).click();
+    await page.waitForTimeout(250);
+  }
+  p = await probe(page);
+  check('a render of its host with nothing changed draws no frame', p.raf === 0 && p.draws === 0, `${p.raf} frames, ${p.draws} draw calls after three renders`);
 
   /* ── What a tap means: twelve pixels, and the neutral zone ──────────── */
   {
