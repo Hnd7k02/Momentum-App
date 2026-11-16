@@ -1,0 +1,138 @@
+/*
+ * The measuring display under the body (block 7B, D181).
+ *
+ * A solid surface beside the canvas — never over it, and never glass: a
+ * display that blurred or covered the body would change the numbers it
+ * shows. Its text can be marked by hand, for the one browser that will not
+ * copy on a tap.
+ */
+.body-readout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--surface-secondary);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.body-readout__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.body-readout__title {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+/* A text button with its own 44px target; it carries the accent's ink like
+   every operable word (contract §5). */
+.body-readout__copy {
+  flex: none;
+  min-height: var(--touch-min);
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-3)) calc(-1 * var(--space-2)) 0;
+  padding: 0 var(--space-3);
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  color: var(--accent-ink);
+}
+
+.body-readout__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.body-readout__groupTitle {
+  font-size: var(--type-caption);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.body-readout__rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+/* The label and its value on one line where they fit, the value beneath
+   where they do not: nothing is cut on a 320px phone. */
+.body-readout__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding: 3px 0;
+  border-top: 1px solid var(--separator);
+}
+
+.body-readout__row dt {
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+}
+
+.body-readout__row dd {
+  margin: 0 0 0 auto;
+  font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.body-readout__note {
+  font-size: var(--type-footnote);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+/* The field the fallback copy selects from: on the page, and not seen. */
+.body-readout__clipboard {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+}
+
+/* ── The switch, in the settings ──────────────────────────────────────── */
+
+.measure-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.measure-setting__text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* The same label as the fields above it (`.field-label`). */
+.measure-setting__name {
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+.measure-setting__hint {
+  font-size: var(--type-footnote);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}

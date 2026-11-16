@@ -42,6 +42,7 @@ import { PauseSection } from '../pause/PauseSection';
 import { MetricBoard } from '../../components/metrics';
 import { TERMINALS, type DomainTerminal, type GymSection } from '../../app/route';
 import { GymMusclesScreen } from '../gym/GymMusclesScreen';
+import { MeasureSetting } from '../measure';
 import { DomainStandingTile } from './DomainStandingTile';
 import { DomainSwitch } from './DomainSwitch';
 import { GymTerminal } from './GymTerminal';
@@ -510,6 +511,9 @@ export function AreasScreen({
                 onChange={actions.setWeightUnit}
                 options={WEIGHT_UNITS.map((option) => ({ value: option, label: t(`unit.${option}`) }))}
               />
+              {/* The measuring display of the 3D body (block 7B, D181): a
+                  tool its user switches on, kept outside the app's data. */}
+              <MeasureSetting />
             </Card>
           </Section>
         </div>
