@@ -31,6 +31,19 @@
  * - **A lost context is not a blank canvas.** It waits a moment for the
  *   browser to give the context back, draws again if it does, replaces the
  *   canvas if it does not, and stands the flat figure in when that fails.
+ *
+ * What block 7C added (contract §9, §14):
+ *
+ * - **It shows the chosen group above its sheet.** A host names the strip
+ *   of the stage its sheet leaves free (`focus`); the camera travels there
+ *   with the group — zoom and place, never the angle — and, held by the
+ *   same host, stands once it has arrived. With the strip gone it travels
+ *   back to the whole picture at zoom 1.0. While a group is shown the
+ *   stage's own buttons are out of sight: nobody can reach them there.
+ * - **It says what it draws**: the state each region is drawn in, on its
+ *   element and read back from the colours the materials are given
+ *   (`drawnState`). Invisible, and for one reader — the check that the
+ *   body, the row and the sheet show one state.
  */
 import { Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Canvas, addAfterEffect, useThree } from '@react-three/fiber';
@@ -54,11 +67,13 @@ import { BodyGround } from './BodyGround';
 import { BodyModel, type RegionBoxes } from './BodyModel';
 import { CameraRig, VIEW_AZIMUTH, type BodyTap, type BodyView, type CameraRigHandle } from './CameraRig';
 import { FrameProbe } from './FrameProbe';
-import { STAGE } from './framing';
+import { STAGE, type FocusStrip } from './framing';
 import { shortestDelta } from './motion';
 import { FROM_MEMORY, bodyMeasure, idleActivity, isMeasuring, type FrameActivity } from '../measure/measure';
 import { REGION_FACING, type MuscleMeshes } from './muscleMeshMap';
 import type { MuscleVisual } from './useMuscleHighlight';
+import { drawnState } from './bodyVisuals';
+import { BODY_REGIONS } from './muscleMeshMap';
 import { BODY_LIGHT, BODY_LOOK, type BodyLook } from './tokens';
 import './bodyViewer.css';
 
@@ -103,6 +118,12 @@ export type BodyViewerProps = {
   paused?: boolean;
   /** The pause holds (`true`) or was lifted (`false`). */
   onHeld?: (held: boolean) => void;
+  /**
+   * The strip of the stage a sheet leaves free above it, as shares of the
+   * stage's height: the chosen group is shown there (contract §9). `null`,
+   * the stage shows the whole picture.
+   */
+  focus?: FocusStrip | null;
   /** What stands in the stage, whenever it changes. */
   onStateChange?: (state: BodyStageState) => void;
 };
@@ -179,14 +200,14 @@ function HeldFrame({
 }: {
   holding: boolean;
   /** Everything the picture depends on from outside; a change is a reason for a frame. */
-  show: readonly [unknown, unknown, unknown, unknown, unknown, unknown];
+  show: readonly [unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown];
 }) {
   const advance = useThree((state) => state.advance);
   const size = useThree((state) => state.size);
-  const [visuals, selected, tinted, ready, live, context] = show;
+  const [visuals, selected, tinted, ready, live, context, stripTop, stripBottom] = show;
   useEffect(() => {
     if (holding) advance(performance.now() / 1000);
-  }, [holding, advance, size.width, size.height, visuals, selected, tinted, ready, live, context]);
+  }, [holding, advance, size.width, size.height, visuals, selected, tinted, ready, live, context, stripTop, stripBottom]);
   return null;
 }
 
@@ -203,6 +224,7 @@ export default function BodyViewer({
   paused = false,
   onHeld,
   onStateChange,
+  focus = null,
 }: BodyViewerProps) {
   const t = useT();
   const [supported] = useState(hasWebGL);
@@ -319,6 +341,18 @@ export default function BodyViewer({
     const want = REGION_FACING[selectedMuscle];
     if (Math.abs(shortestDelta(rig.current.azimuth(), want)) > TURN_TO_SELECTION_BEYOND) rig.current.faceAzimuth(want);
   }, [selectedMuscle, ready]);
+
+  /* ── The chosen group above its sheet ───────────────────────────────── */
+
+  const stripTop = focus?.top ?? null;
+  const stripBottom = focus?.bottom ?? null;
+  useEffect(() => {
+    // After the selection's own effect, which has put the group's box where
+    // the camera reads it. A model that arrives, or arrives again after a
+    // lost context, is shown the same way.
+    const strip = selectedMuscle !== null && stripTop !== null && stripBottom !== null ? { top: stripTop, bottom: stripBottom } : null;
+    rig.current?.focus(strip && keepInView.current ? strip : null);
+  }, [selectedMuscle, stripTop, stripBottom, ready, generation, restored]);
 
   const onAzimuthChange = useCallback((deg: number) => {
     // Imperative, not state: the angle changes every frame while spinning and
@@ -510,6 +544,10 @@ export default function BodyViewer({
       data-view={view}
       data-state={state}
       data-held={holding ? '' : undefined}
+      data-focus={focus && selectedMuscle ? selectedMuscle : undefined}
+      // What each region is drawn as, read back from its colours (contract
+      // §14): for the check that body, row and sheet show one state.
+      data-drawn={BODY_REGIONS.map((id) => `${id}:${drawnState(visuals?.[id], tinted) ?? 'none'}`).join(' ')}
     >
       <Canvas
         key={generation}
@@ -576,7 +614,7 @@ export default function BodyViewer({
           />
         </Suspense>
         <BodyGround visible={ready} />
-        <HeldFrame holding={holding} show={[visuals, selectedMuscle, tinted, ready, live, restored]} />
+        <HeldFrame holding={holding} show={[visuals, selectedMuscle, tinted, ready, live, restored, stripTop, stripBottom]} />
         {/* Last, so it reads what the camera and the materials said of this frame. */}
         <FrameProbe activity={activity} onRest={onRest} />
       </Canvas>

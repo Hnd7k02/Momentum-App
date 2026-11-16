@@ -24,8 +24,9 @@ import { shownChangeText } from './muscleState';
  * is marked by the accent, like every selection.
  *
  * The rows own no state: the selected group comes from the Gym screen and
- * goes back to it, so the body above and the exercises below always agree
- * with the list.
+ * goes back to it. A tap on a row opens the group's sheet (block 7C), which
+ * shows the row's own figure and state — the row, the body and the sheet
+ * read one value.
  */
 
 /**
@@ -48,6 +49,16 @@ export function lastTrainedText(
   return t('muscle.lastTrained.days', { count: days });
 }
 
+/**
+ * The dot of a group: the one place its identity colour is drawn (D154) —
+ * before its name in its row, and before the same name at the head of its
+ * sheet (contract §9). Pale where the group was not trained in the range.
+ */
+export function MuscleDot({ id, untrained = false }: { id: MuscleGroup; untrained?: boolean }) {
+  const identity = mutedIdentity(IDENTITY_COLOR[id], untrained ? IDENTITY_UNTRAINED_ALPHA : 1);
+  return <span className="muscle-row__dot" aria-hidden="true" style={{ background: identity }} />;
+}
+
 export function MuscleRows({
   views,
   today,
@@ -67,24 +78,20 @@ export function MuscleRows({
   return (
     <ul className="muscle-rows">
       {views.map((view) => {
-        const identity = mutedIdentity(
-          IDENTITY_COLOR[view.id],
-          view.dataState === 'no-history' ? IDENTITY_UNTRAINED_ALPHA : 1,
-        );
         const on = selected === view.id;
         /*
          * One supporting line, and it is when — the approved row carries the
          * recency and nothing else. Which exercise produced the latest day is
          * derived and available on the view, but it belongs where it can be
-         * read against the others: the Übungen list below already answers
-         * "what did I do for this muscle", for whichever group is selected.
+         * read against the others: the group's sheet answers "what did I
+         * do for this muscle", with every exercise and its figure.
          */
         const sub = lastTrainedText(view.lastTrainedAt, today, t);
         // A group with too little to compare also says how much there is,
         // on a line of its own: "2 Übungstage" (contract §7). Set after the
         // recency with a dot it broke as "Vor 9 Tagen ·" on a 393px phone,
         // where the chip leaves the words little room. The full sentence
-        // stands with the group's exercises once the row is chosen.
+        // stands in the group's sheet.
         const days =
           view.state === 'awaitingBaseline'
             ? t(view.exerciseDays === 1 ? 'muscle.exerciseDays.shortOne' : 'muscle.exerciseDays.short', { count: view.exerciseDays })
@@ -94,13 +101,18 @@ export function MuscleRows({
 
         return (
           <li key={view.id} className="muscle-row">
+            {/* The row opens its group's sheet (block 7C): a button that
+                opens a dialog, not a toggle. It is marked while that sheet
+                stands — for the eye, and for whoever looks for it. */}
             <button
               type="button"
               className="muscle-row__button"
-              aria-pressed={on}
+              aria-haspopup="dialog"
+              data-muscle={view.id}
+              data-open={on ? '' : undefined}
               onClick={() => onSelect(view.id)}
             >
-              <span className="muscle-row__dot" aria-hidden="true" style={{ background: identity }} />
+              <MuscleDot id={view.id} untrained={view.dataState === 'no-history'} />
               <span className="muscle-row__text">
                 <span className="muscle-row__name">{t(MUSCLE_LABEL_KEYS[view.id])}</span>
                 {sub ? <span className="muscle-row__sub">{sub}</span> : null}

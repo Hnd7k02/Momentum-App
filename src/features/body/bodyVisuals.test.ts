@@ -3,7 +3,7 @@ import { MUSCLE_GROUPS } from '../../core/model';
 import type { ShownMuscle } from '../gym/muscleState';
 import { BODY_REGIONS } from './muscleMeshMap';
 import { BODY_DIMMED_COLOR, BODY_HELD_COLOR, STATE_COLOR, TINT_STRENGTH, stateIntensity } from './tokens';
-import { toBodyVisuals, visualsByMuscle } from './bodyVisuals';
+import { drawnState, toBodyVisuals, visualsByMuscle } from './bodyVisuals';
 
 const shown = (muscle: ShownMuscle['muscle'], state: ShownMuscle['state'], change: number | null): ShownMuscle => ({
   muscle, state, change, exerciseDays: state === 'noData' ? 0 : 4, compared: change !== null,
@@ -143,5 +143,41 @@ describe('the strength of a tint (contract §7)', () => {
     // Lightly: weaker than a full tint, and never nothing.
     expect(TINT_STRENGTH.awaitingBaseline).toBeGreaterThan(0);
     expect(TINT_STRENGTH.awaitingBaseline).toBeLessThan(1);
+  });
+});
+
+describe('what the body says it draws (block 7C, contract §14)', () => {
+  const shown = (state: ShownMuscle['state'], change: number | null): ShownMuscle => ({
+    muscle: 'chest',
+    state,
+    change,
+    exerciseDays: 3,
+    compared: true,
+  });
+  const visualOf = (state: ShownMuscle['state'], change: number | null) =>
+    visualsByMuscle(toBodyVisuals([shown(state, change)])).chest;
+
+  it('reads each of the five states back from the colours a region is given', () => {
+    expect(drawnState(visualOf('improved', 5), true)).toBe('improved');
+    expect(drawnState(visualOf('declined', -5), true)).toBe('declined');
+    expect(drawnState(visualOf('unchanged', 1), true)).toBe('unchanged');
+    expect(drawnState(visualOf('awaitingBaseline', null), true)).toBe('awaitingBaseline');
+    expect(drawnState(visualOf('noData', null), true)).toBe('noData');
+  });
+
+  it('a rise shown as +2 % is drawn as improved, at the weakest strength', () => {
+    expect(drawnState(visualOf('improved', 1.5), true)).toBe('improved');
+  });
+
+  it('every region of a range is said, the untrained ones as untrained', () => {
+    const visuals = visualsByMuscle(toBodyVisuals([shown('improved', 5)]));
+    expect(BODY_REGIONS.map((id) => drawnState(visuals[id], true))).toEqual(
+      BODY_REGIONS.map((id) => (id === 'chest' ? 'improved' : 'noData')),
+    );
+  });
+
+  it('says nothing while the body says nothing: before the history, one neutral figure', () => {
+    expect(drawnState(visualOf('improved', 5), false)).toBeNull();
+    expect(drawnState(undefined, true)).toBeNull();
   });
 });

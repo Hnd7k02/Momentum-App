@@ -2,7 +2,7 @@
  * The body mesh: loads the GLB, resolves the muscle contract, answers taps.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
-import { Box3, Group, Mesh, MeshStandardMaterial, Raycaster, Vector2 } from 'three';
+import { Box3, Group, Mesh, MeshStandardMaterial, Raycaster, Vector2, Vector3 } from 'three';
 import { addAfterEffect, useThree } from '@react-three/fiber';
 import { isLoaded, useGLTF } from './useGLTF';
 import type { MuscleGroup } from '../../core/model';
@@ -41,6 +41,32 @@ export type BodyModelProps = {
   /** The viewer is held: a change of colour is shown at once, in the one frame it gets. */
   still?: MutableRefObject<boolean>;
 };
+
+/**
+ * The box of one region in the world — of the triangles it draws, not of
+ * the vertices it could draw.
+ *
+ * The regions of the body share one vertex buffer and each draws its own
+ * triangles of it. `Box3.setFromObject` reads a geometry's whole position
+ * attribute, so it gave every region the box of the whole body: a zoom
+ * then "kept the group in view" by keeping the body's middle, and block
+ * 7C, which shows a group enlarged above its sheet, found every group as
+ * tall as the body. The box is built from the vertices the region's own
+ * indices name.
+ */
+function regionBox(mesh: Mesh): Box3 {
+  const position = mesh.geometry.getAttribute('position');
+  const index = mesh.geometry.getIndex();
+  if (!position || !index) return new Box3().setFromObject(mesh);
+  const box = new Box3();
+  const point = new Vector3();
+  const { start, count } = mesh.geometry.drawRange;
+  const end = Math.min(index.count, Number.isFinite(count) ? start + count : index.count);
+  for (let at = Math.max(0, start); at < end; at += 1) {
+    box.expandByPoint(point.fromBufferAttribute(position, index.getX(at)).applyMatrix4(mesh.matrixWorld));
+  }
+  return box.isEmpty() ? new Box3().setFromObject(mesh) : box;
+}
 
 export function BodyModel({
   modelUrl = BODY_MODEL_URL,
@@ -135,7 +161,7 @@ export function BodyModel({
       if (cancelled) return;
       gltf.scene.updateMatrixWorld(true);
       const boxes: RegionBoxes = new Map();
-      for (const [id, mesh] of meshes) boxes.set(id, new Box3().setFromObject(mesh));
+      for (const [id, mesh] of meshes) boxes.set(id, regionBox(mesh));
       setReady(true);
       onReady?.(meshes, boxes);
       invalidate();

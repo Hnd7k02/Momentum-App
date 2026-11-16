@@ -29,6 +29,15 @@
   overflow: hidden;
 }
 
+/* Under a group's sheet the stage shows the group in the strip above it
+   (block 7C): its own buttons are out of sight there — nobody can reach
+   them through the sheet's scrim, and a control that cannot be used is not
+   shown. */
+.body-stage[data-focus] .body-viewer__views,
+.body-stage[data-focus] .body-viewer__reset {
+  visibility: hidden;
+}
+
 /* The viewer fills the stage. */
 .body-stage .body-viewer {
   position: absolute;
@@ -183,9 +192,9 @@
   border-radius: 50%;
 }
 
-/* A chosen row is a selection, so its mark is the accent — never a ring in
-   the muscle's own colour. The name turns semibold as well. */
-.muscle-row__button[aria-pressed='true'] .muscle-row__dot {
+/* The row whose sheet stands is the selection, so its mark is the accent —
+   never a ring in the muscle's own colour. The name turns semibold as well. */
+.muscle-row__button[data-open] .muscle-row__dot {
   outline: 1.5px solid var(--accent);
   outline-offset: 2.5px;
 }
@@ -206,7 +215,7 @@
   color: var(--text-primary);
 }
 
-.muscle-row__button[aria-pressed='true'] .muscle-row__name {
+.muscle-row__button[data-open] .muscle-row__name {
   font-weight: var(--weight-semibold);
 }
 

@@ -1,3 +1,13 @@
+/* The plot's height: the detail's, and the taller one of the muscle sheet
+   (mock-up 2). */
+.exercise-line {
+  --line-plot-height: 110px;
+}
+
+.exercise-line--sheet {
+  --line-plot-height: 132px;
+}
+
 /*
  * The exercise detail's days as a line (`ExerciseLineChart.tsx`; contract
  * §6, the owner's choice at STOP 5b): a neutral 1.5px line with round ends,
@@ -11,7 +21,7 @@
 .exercise-line__axis {
   flex: none;
   position: relative;
-  height: 110px;
+  height: var(--line-plot-height);
   font-size: var(--type-caption);
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -32,7 +42,7 @@
 
 .exercise-line__plot {
   position: relative;
-  height: 110px;
+  height: var(--line-plot-height);
 }
 
 .exercise-line__zero,
@@ -85,7 +95,7 @@
 .exercise-line__endColumn {
   flex: none;
   position: relative;
-  height: 110px;
+  height: var(--line-plot-height);
   font-size: var(--type-caption);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;

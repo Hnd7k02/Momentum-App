@@ -1,0 +1,335 @@
+/*
+ * The muscle sheet's content (block 7C, contract §9, mock-up 2).
+ *
+ * The sheet stands on a Gym screen and is dark with it; every colour is the
+ * world's. The order from the top: the change with its state, what it is a
+ * change of, the range, the line, the exercises, the work volume.
+ */
+.muscle-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The sheet's own body brings air above its content; here the head follows
+   the name directly, as in the mock-up. */
+.sheet__body:has(> .muscle-sheet) {
+  padding-top: 0;
+}
+
+.muscle-sheet__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.muscle-sheet__headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+/* The sheet's one large number (contract §3): the figure step of a sheet's
+   head, with its sign. A rise and a fall take their status ink; a held
+   figure the text colour — never the warning yellow (contract §7). */
+.muscle-sheet__change {
+  margin-right: var(--space-1);
+  font-size: var(--type-figure-l);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.muscle-sheet__change--improved {
+  color: var(--status-strong-ink);
+}
+
+.muscle-sheet__change--declined {
+  color: var(--status-weak-ink);
+}
+
+.muscle-sheet__caption {
+  font-size: var(--type-footnote);
+  color: var(--text-tertiary);
+}
+
+/* What is missing, in a sentence — where there is no figure to show. */
+.muscle-sheet__sentence {
+  padding-top: var(--space-2);
+  font-size: var(--type-subhead);
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.muscle-sheet__section {
+  display: flex;
+  flex-direction: column;
+}
+
+.muscle-sheet__label {
+  padding-bottom: var(--space-2);
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+.muscle-sheet__note {
+  padding-bottom: var(--space-2);
+  font-size: var(--type-footnote);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+.muscle-sheet__list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  border-top: 1px solid var(--separator);
+}
+
+.muscle-sheet__list > li {
+  border-bottom: 1px solid var(--separator);
+}
+
+/* One exercise: its name, its best working set in the range, and its
+   change in the range with the state in words — a row like the ten above
+   the sheet, and as tall. */
+.muscle-sheet__exercise,
+.muscle-sheet__record {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--row-height);
+  padding: var(--space-2) 0;
+  text-align: left;
+  background: none;
+  color: var(--text-tertiary);
+}
+
+.muscle-sheet__exerciseText {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.muscle-sheet__exerciseName {
+  font-size: var(--type-body);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+}
+
+.muscle-sheet__exerciseSet {
+  font-size: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+
+/* The unit follows the caption it stands in: smaller is not possible here. */
+.muscle-sheet__exerciseSet .figure__unit {
+  font-size: inherit;
+  color: inherit;
+}
+
+.muscle-sheet__exerciseRight {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  color: var(--text-primary);
+}
+
+.muscle-sheet__exerciseRight--improved {
+  color: var(--status-strong-ink);
+}
+
+.muscle-sheet__exerciseRight--declined {
+  color: var(--status-weak-ink);
+}
+
+/* In a row the number is the body size, semibold, with tabular digits
+   (contract §3). */
+.muscle-sheet__exerciseChange,
+.muscle-sheet__recordSet {
+  font-size: var(--type-body);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.muscle-sheet__recordSet {
+  flex: none;
+  color: var(--text-primary);
+}
+
+.muscle-sheet__exerciseState {
+  font-size: var(--type-caption);
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+/* ── Work volume per week (D152, contract §6) ───────────────────────────
+
+   Neutral bars from zero, and none of them in a state's colour: the volume
+   is shown and never scored, so it takes no part in any colour. */
+.muscle-volume__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.muscle-volume__note {
+  flex: none;
+  font-size: var(--type-footnote);
+  color: var(--text-tertiary);
+}
+
+/* Few weeks: each bar with its value above and its week beneath. */
+.muscle-volume__chart {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.muscle-volume__column {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* The bar's room: its height is its share of the largest week, from zero
+   (D163). The value stands on the bar. */
+.muscle-volume__track {
+  display: flex;
+  width: 100%;
+  height: 84px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.muscle-volume__value {
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.muscle-volume__value .figure__unit,
+.muscle-volume__axisLabel .figure__unit {
+  font-size: inherit;
+  color: var(--text-tertiary);
+}
+
+.muscle-volume__bar {
+  display: block;
+  width: 36px;
+  max-width: 100%;
+  min-height: 2px;
+  flex: none;
+  border-radius: 5px;
+  background: var(--data-ink);
+  opacity: 0.55;
+}
+
+/* With its value above it a bar has the track less the value's line. */
+.muscle-volume__column .muscle-volume__bar {
+  max-height: calc(100% - 18px);
+}
+
+.muscle-volume__week {
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+/* Many weeks: the contract's axis. The nought and the largest value on the
+   left, each on its line; the first and the last week beneath. */
+.muscle-volume__chart--axis {
+  gap: var(--space-2);
+}
+
+.muscle-volume__axis {
+  position: relative;
+  flex: none;
+  height: 84px;
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.muscle-volume__axisLabel--top {
+  display: block;
+  transform: translateY(-50%);
+}
+
+.muscle-volume__axisLabel--zero {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: translateY(50%);
+}
+
+.muscle-volume__plotColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.muscle-volume__plot {
+  position: relative;
+  display: flex;
+  height: 84px;
+  align-items: flex-end;
+  gap: 3px;
+  border-bottom: 1px solid var(--separator-strong);
+}
+
+.muscle-volume__bound {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  border-top: 1px dashed var(--separator-strong);
+}
+
+.muscle-volume__slot {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.muscle-volume__slot .muscle-volume__bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+}
+
+.muscle-volume__weeks {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+  font-size: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}

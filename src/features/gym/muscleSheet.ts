@@ -97,8 +97,14 @@ export interface MuscleSheetView {
   records: readonly SheetRecord[];
   /** The weeks of the range, oldest first. */
   weeks: readonly SheetWeek[];
-  /** The latest day before the range on which the group was trained, where that is known. */
+  /** The latest day before the range on which the group was trained, where there is one. */
   lastTrainedBefore: DateKey | null;
+  /**
+   * Whether the group was ever trained: `false` only when that was read and
+   * nothing was found, in the range or before it; `null` where it was not
+   * read. Not trained in the range is not "never".
+   */
+  everTrained: boolean | null;
 }
 
 /**
@@ -188,5 +194,6 @@ export function toMuscleSheet({
       .map((day) => ({ exerciseId: day.exerciseId, date: day.date, set: day.best.set })),
     weeks: rangeWeeks(from, to).map((week) => ({ week, number: weekNumber(week), volume: volume.get(week) ?? null })),
     lastTrainedBefore: state === 'noData' ? (lastTrained?.[muscle] ?? null) : null,
+    everTrained: state !== 'noData' ? true : lastTrained === null ? null : lastTrained[muscle] !== undefined,
   };
 }

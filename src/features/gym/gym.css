@@ -540,6 +540,43 @@
   font-size: var(--type-caption);
 }
 
+/*
+ * The chip of a state (contract §5): 11px semibold, surface and text from
+ * the state's family, the neutral one on the secondary surface. The muscle
+ * sheet and the exercise detail both stand a state beside a figure with it.
+ */
+.state-chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: var(--type-caption);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+}
+
+.state-chip--improved {
+  color: var(--status-strong-ink);
+  background: var(--status-strong-tint);
+}
+
+.state-chip--declined {
+  color: var(--status-weak-ink);
+  background: var(--status-weak-tint);
+}
+
+/* Held is neutral, in the text colour — never the warning yellow. */
+.state-chip--unchanged {
+  color: var(--text-primary);
+}
+
+.state-chip--awaitingBaseline {
+  color: var(--sky-ink);
+  background: var(--sky-tint);
+}
+
 /* ── Exercise detail ────────────────────────────────────────────────────── */
 
 .gym-detail__title {
@@ -548,9 +585,55 @@
   overflow-wrap: anywhere;
 }
 
+/* The exercise's one change with its state, and what it is a change of —
+   the muscle sheet's head, at the same size and in the same words (D176). */
+.gym-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.gym-detail__change {
+  margin-right: var(--space-1);
+  font-size: var(--type-figure-l);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.gym-detail__change--improved {
+  color: var(--status-strong-ink);
+}
+
+.gym-detail__change--declined {
+  color: var(--status-weak-ink);
+}
+
+.gym-detail__caption {
+  padding: 2px 0 var(--space-4);
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+}
+
+/* Under the chart: what its line draws. */
+.gym-detail__lineNote {
+  padding-top: var(--space-2);
+  font-size: var(--type-caption);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+.gym-detail:focus {
+  outline: none;
+}
+
 .gym-detail__figures {
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-6);
   flex-wrap: wrap;
 }
 

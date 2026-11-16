@@ -24,6 +24,15 @@
  * - **It can be held.** A host pauses the viewer; a coast then ends at
  *   once, a travel in flight is finished first, and nothing here asks for
  *   another frame until the pause is lifted.
+ * - **It shows a group above its sheet** (block 7C, contract §9). Asked to,
+ *   it travels to the window of the picture that puts the chosen group in
+ *   the strip of the stage a sheet leaves free (`focusOn`) — zoom and place
+ *   together, whatever zoom the fingers had left — and stands there. The
+ *   angle is not its business: a tap never turns the body, and a selection
+ *   made in the list has turned it already. Released, it travels back to
+ *   the whole picture at zoom 1.0, and the angle stays where it is.
+ * - **A touch that changes nothing draws nothing** (D184): a finger that
+ *   lands on a body at rest and lifts again is a tap, and asks for no frame.
  *
  * Under `prefers-reduced-motion` there is no coast and every travel is a
  * jump — drag, tap, pinch and the shortcuts keep working.
@@ -33,7 +42,7 @@ import { Vector3, type Box3, type PerspectiveCamera } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { TapVsDrag } from './useTapVsDrag';
 import { bodyMeasure, fingerSpan, isMeasuring, type FrameActivity } from '../measure/measure';
-import { STAGE, clampWindow, pictureAt, pictureBox, pinchWindow, windowRect, type Box, type Point } from './framing';
+import { STAGE, clampWindow, focusOn, pictureAt, pictureBox, pinchWindow, windowRect, type Box, type FocusStrip, type Point } from './framing';
 import {
   MOTION,
   coast,
@@ -92,6 +101,12 @@ export type CameraRigHandle = {
    * cannot draw its way there. Returns whether the camera already rests.
    */
   hold: (now?: boolean) => boolean;
+  /**
+   * Shows the chosen group in a strip of the stage — the room a sheet
+   * leaves free above it — or, with `null`, goes back to the whole picture
+   * at zoom 1.0. The angle is left as it is either way.
+   */
+  focus: (strip: FocusStrip | null) => void;
 };
 
 export type CameraRigProps = {
@@ -128,6 +143,14 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
   const pitchTo = useRef<number | null>(null);
   const zoomTo = useRef<number | null>(null);
   const coasting = useRef(false);
+  /** The strip the chosen group is shown in, above a sheet; `null` otherwise. */
+  const strip = useRef<FocusStrip | null>(null);
+  /** The window has been asked to go to the group and has not arrived. */
+  const focusing = useRef(false);
+  /** The window is on its way back from a group to the whole picture. */
+  const releasing = useRef(false);
+  /** This touch stopped a motion or moved the camera: its end is worth a frame. */
+  const changed = useRef(false);
   /** When the motion was last advanced; `null` while nothing moves. */
   const steppedAt = useRef<number | null>(null);
 
@@ -220,6 +243,11 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
   const reset = useCallback(
     (now = false) => {
       coasting.current = false;
+      // Back to the start is back to the whole picture: whatever group was
+      // shown above a sheet is asked for again by the host, if it still is.
+      strip.current = null;
+      focusing.current = false;
+      releasing.current = false;
       const front = Math.round(yaw.current.value / 360) * 360;
       if (now || reduced.current) {
         yaw.current = { value: front, velocity: 0 };
@@ -265,10 +293,29 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         }
         // One frame shows where the body stopped, and ends the loop.
         invalidate();
-        return yawTo.current === null && pitchTo.current === null && zoomTo.current === null;
+        return yawTo.current === null && pitchTo.current === null && zoomTo.current === null && !focusing.current && !releasing.current;
+      },
+      focus(next) {
+        if (next) {
+          strip.current = next;
+          releasing.current = false;
+          focusing.current = true;
+          // Whatever zoom the fingers left is replaced by this travel.
+          zoomTo.current = null;
+          coasting.current = false;
+          if (yawTo.current === null) yaw.current.velocity = 0;
+          begin();
+          return;
+        }
+        if (strip.current === null) return;
+        strip.current = null;
+        focusing.current = false;
+        releasing.current = true;
+        zoomTo.current = 1;
+        begin();
       },
     }),
-    [travelTo, reset, invalidate],
+    [travelTo, reset, invalidate, begin],
   );
 
   const element = gl.domElement;
@@ -293,9 +340,19 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       held.set(e.pointerId, { x: e.clientX, y: e.clientY });
       tap.down(e);
       // A finger on the body takes it over: whatever was moving stops here.
+      const wasMoving =
+        coasting.current || yawTo.current !== null || pitchTo.current !== null || zoomTo.current !== null || releasing.current;
+      if (held.size === 1) changed.current = wasMoving;
+      else changed.current = true;
       coasting.current = false;
       yaw.current.velocity = 0;
       yawTo.current = pitchTo.current = zoomTo.current = null;
+      if (releasing.current) {
+        // On its way back from a group: the fingers take over a window
+        // that is inside the picture and inside their own range.
+        releasing.current = false;
+        zoom.current = { value: clamp(zoom.current.value, MOTION.zoomMin, MOTION.zoomMax), velocity: 0 };
+      }
       if (held.size === 1) {
         samples.current = [{ at: e.timeStamp, x: e.clientX }];
       } else {
@@ -318,7 +375,8 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         /* Safari can refuse capture mid-gesture; dragging still works. */
       }
       element.style.cursor = 'grabbing';
-      invalidate();
+      // A finger on a body at rest changes nothing yet (D184): no frame.
+      if (wasMoving) invalidate();
     };
 
     const onMove = (e: PointerEvent) => {
@@ -338,6 +396,7 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         zoom.current = { value: next.zoom, velocity: 0 };
         centre.current = next.centre;
         dragged.current = true;
+        changed.current = true;
         if (isMeasuring()) bodyMeasure.requested(performance.now(), fingerSpan(e));
         invalidate();
         return;
@@ -351,6 +410,7 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       list.push({ at: e.timeStamp, x: e.clientX });
       if (list.length > SAMPLES) list.shift();
       dragged.current = true;
+      changed.current = true;
       if (isMeasuring()) bodyMeasure.requested(performance.now(), fingerSpan(e));
       invalidate();
     };
@@ -372,7 +432,7 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
           pinching.current = false;
           tap.cancel();
         }
-        invalidate();
+        if (changed.current) invalidate();
         return;
       }
       if (!wasTap) {
@@ -384,10 +444,15 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
           coasting.current = true;
           steppedAt.current = performance.now();
         }
-        invalidate();
+        // The settled angle is told with one more frame — where the finger
+        // moved or stopped something. A finger that only rested asks for none.
+        if (changed.current || velocity !== 0) invalidate();
         return;
       }
-      invalidate();
+      // A tap on a body at rest draws nothing by itself (D184): what it
+      // selects asks for its own frame. One that stopped a motion shows
+      // where the body stopped.
+      if (changed.current) invalidate();
       // The events' own times: a busy phone hands a tap over late, and two
       // taps the finger made 150 ms apart are a double tap all the same.
       const now = e.timeStamp;
@@ -415,7 +480,7 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         pinch.current = null;
         element.style.cursor = 'grab';
       }
-      invalidate();
+      if (changed.current) invalidate();
     };
 
     element.style.cursor = 'grab';
@@ -480,6 +545,61 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
 
       const perspective = camera as PerspectiveCamera;
       if (!perspective.isPerspectiveCamera) return false;
+
+      /** Draws the window as it stands, wherever it lies: above a sheet it may leave the picture. */
+      const show = (): void => {
+        const at = centre.current;
+        const scale = zoom.current.value;
+        if (applied.current.zoom === scale && applied.current.x === at.x && applied.current.y === at.y) return;
+        const rect = windowRect(at, scale);
+        perspective.setViewOffset(1, 1, rect.x, rect.y, rect.width, rect.height);
+        applied.current = { zoom: scale, x: at.x, y: at.y };
+      };
+      const share = 1 - Math.exp((-MOTION.travelRate * ms) / 1000);
+
+      if (strip.current !== null) {
+        // The group above its sheet (contract §9): where its box stands in
+        // the picture now — it moves while the body turns to it — decides
+        // the window, and the window travels there.
+        const box = keepBox();
+        if (!box) return false;
+        const goal = focusOn(box, strip.current);
+        let arriving = false;
+        if (!direct && !reduced.current) {
+          const next = zoomTowards(zoom.current, goal.zoom, ms);
+          zoom.current = { value: next.value, velocity: next.velocity };
+          const at = centre.current;
+          centre.current = { x: at.x + (goal.centre.x - at.x) * share, y: at.y + (goal.centre.y - at.y) * share };
+          arriving =
+            !next.done ||
+            Math.abs(goal.centre.x - centre.current.x) > WINDOW_STOP ||
+            Math.abs(goal.centre.y - centre.current.y) > WINDOW_STOP;
+        }
+        if (!arriving) {
+          zoom.current = { value: goal.zoom, velocity: 0 };
+          centre.current = goal.centre;
+        }
+        focusing.current = arriving;
+        show();
+        return arriving;
+      }
+
+      if (releasing.current) {
+        // Back to the whole picture: the zoom travels to 1.0 (the frame
+        // advances it) and the window's middle to the picture's.
+        const there = zoomTo.current === null || direct || reduced.current;
+        if (there) {
+          releasing.current = false;
+          zoomTo.current = null;
+          zoom.current = { value: 1, velocity: 0 };
+        } else {
+          const at = centre.current;
+          centre.current = { x: at.x + (0.5 - at.x) * share, y: at.y + (0.5 - at.y) * share };
+          show();
+          return true;
+        }
+      }
+
       const z = zoom.current.value;
       if (z <= 1 + 1e-4) {
         centre.current = { x: 0.5, y: 0.5 };
@@ -495,7 +615,6 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       let next = wanted;
       let onItsWay = false;
       if (!direct && !reduced.current && (wanted.x !== inside.x || wanted.y !== inside.y)) {
-        const share = 1 - Math.exp((-MOTION.travelRate * ms) / 1000);
         next = { x: inside.x + (wanted.x - inside.x) * share, y: inside.y + (wanted.y - inside.y) * share };
         onItsWay = Math.abs(wanted.x - next.x) > WINDOW_STOP || Math.abs(wanted.y - next.y) > WINDOW_STOP;
         if (!onItsWay) next = wanted;
@@ -542,7 +661,8 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         if (next.done) pitchTo.current = null;
         else moving = true;
       }
-      if (zoomTo.current !== null) {
+      // Above a sheet the zoom follows the group: `applyCamera` advances it.
+      if (zoomTo.current !== null && strip.current === null) {
         const next = zoomTowards(zoom.current, zoomTo.current, dt);
         zoom.current = { value: next.value, velocity: next.velocity };
         if (next.done) zoomTo.current = null;

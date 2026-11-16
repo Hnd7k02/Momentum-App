@@ -55,3 +55,27 @@ export function visualsByMuscle(
   }
   return out;
 }
+
+/**
+ * The state a region is drawn in, read back from what is drawn (block 7C,
+ * contract §14): the tint and the ground the materials are given, and
+ * whether the tint is there at all.
+ *
+ * The body, the row and the sheet must show one state, and a check in the
+ * browser compares them. The row and the sheet say theirs in words; this is
+ * what the body says, in the only terms it has — its colours — so the check
+ * does not take the body's word from the very value it is checking against.
+ * `null` where the body says nothing: before the history is there, every
+ * region is one neutral figure.
+ */
+export function drawnState(visual: MuscleVisual | undefined, tinted: boolean): MuscleState | null {
+  if (!tinted || !visual) return null;
+  const strength = visual.intensity ?? 1;
+  if (visual.tint && strength > 0) {
+    for (const state of ['improved', 'declined', 'awaitingBaseline'] as const) {
+      if (visual.tint === STATE_COLOR[state].model) return state;
+    }
+  }
+  // No tint: a trained muscle stands in white, an untrained one dimmed.
+  return visual.ground === STATE_COLOR.unchanged.ground ? 'unchanged' : 'noData';
+}

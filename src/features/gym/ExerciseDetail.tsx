@@ -1,14 +1,14 @@
-import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
+import { useEffect, useRef } from 'react';
+import { MUSCLE_LABEL_KEYS, MUSCLE_STATE_KEYS } from '../../components/BodyRenderer';
 import { Card, EmptyState, Figure, Section } from '../../components';
 import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
-import { percentChange, type ExerciseComparison, type ExerciseDay } from '../../core/gym/performance';
+import type { ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { signedPercentText } from '../../i18n/typography';
 import { useWeights } from '../../app/useWeights';
-import { changeWords } from './changeWords';
 import { ExerciseLineChart, lineValues } from './ExerciseLineChart';
-import { roundShown } from './muscleState';
+import { roundShown, shownChangeText, shownTrendOfChange } from './muscleState';
 import './gym.css';
 import { useWorld } from '../../app/world';
 
@@ -20,18 +20,36 @@ import { useWorld } from '../../app/world';
  * session's warm-up ramp rather than the shape of progress, and the warm-up
  * is the part that is supposed to be easy. The sets of each day are
  * underneath, where they answer "how did I get there".
+ *
+ * **One exercise has one change** (D176, block 7C): its change in the range
+ * the screen shows — the comparison its muscle groups' figures are formed
+ * from (`exerciseChanges`), and the very number its row in the muscle sheet
+ * carries. It stands at the head with its state and with what it is a
+ * change of, in the words the sheet uses. Until this block the head named
+ * the last day against the one before "Veränderung" and the line ended on a
+ * third, unnamed figure, the last day against the first; "Zuletzt" and
+ * "Davor" are now two sets and no percentage stands between them.
+ *
+ * It lies **on top of** Muskelgruppen rather than in its place: the body
+ * beneath stays as it stood, held, and the sheet it was opened from is
+ * there again when this goes. Focus comes here when it opens and returns to
+ * where it was.
  */
 
 export function ExerciseDetail({
   name,
   days,
-  comparison,
+  change,
+  rangeDays,
   onClose,
 }: {
   name: string;
   /** Newest first. */
   days: ExerciseDay[];
-  comparison: ExerciseComparison | undefined;
+  /** The exercise's change in the range, raw; `null` with nothing to compare. */
+  change: number | null;
+  /** The range the days were loaded for: what "letzte N Tage" means. */
+  rangeDays: number;
   onClose(): void;
 }) {
   const t = useT();
@@ -51,13 +69,22 @@ export function ExerciseDetail({
   const score = (day: ExerciseDay) => <Figure text={scoreText(day)} unit={weights.unitLabel} />;
 
   const latest = days[0] ?? null;
-  const change = percentChange(comparison?.ratio ?? null);
-  // Words and colour from the one rule (`muscleState.ts`): an exercise's
-  // change reads by the same rounding and the same band as its group's, so
-  // the list and the group never contradict each other. The group's rule on
-  // how much there must be to compare does not apply to one exercise.
-  const words = !comparison || comparison.kind === 'noBaseline' ? null : changeWords(change, t);
-  const shown = words?.trend ?? null;
+  // Figure, word and colour from the one rule (`muscleState.ts`): an
+  // exercise's change reads by the same rounding and the same band as its
+  // group's. The group's rule on how much there must be to compare does not
+  // apply to one exercise: two days are a change.
+  const figure = shownChangeText(change);
+  const trend = shownTrendOfChange(change);
+
+  // A screen of its own, on top of the one it was opened from.
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    root.current?.focus({ preventScroll: true });
+    return () => {
+      if (previous?.isConnected) previous.focus({ preventScroll: true });
+    };
+  }, []);
   /*
    * What the line draws, for the table that says the same in words: each
    * day's change since the first day shown, newest first like `days`. The
@@ -66,7 +93,7 @@ export function ExerciseDetail({
   const sinceFirst = lineValues(days).reverse();
 
   return (
-    <div className="screen gym-detail">
+    <div className="screen gym-detail" ref={root} role="dialog" aria-modal="true" aria-label={name} tabIndex={-1}>
       <header className="screen__header gym-session__header">
         <button
           type="button"
@@ -98,6 +125,21 @@ export function ExerciseDetail({
         ) : (
           <>
             <Card>
+              {/* The exercise's one change (D176): figure, state and what it
+                  is a change of — the sheet's own head, in the sheet's own
+                  words. */}
+              <div className="gym-detail__head">
+                {figure !== null && trend !== null ? (
+                  <>
+                    <span className={`gym-detail__change gym-detail__change--${trend}`}>{figure}</span>
+                    <span className={`state-chip state-chip--${trend}`}>{t(MUSCLE_STATE_KEYS[trend])}</span>
+                  </>
+                ) : (
+                  <span className="state-chip state-chip--awaitingBaseline">{t('gym.progress.noBaseline')}</span>
+                )}
+              </div>
+              <p className="gym-detail__caption">{t('muscleSheet.caption', { days: rangeDays })}</p>
+              {/* Two sets, and no percentage between them. */}
               <div className="gym-detail__figures">
                 <div className="gym-detail__figure">
                   <span className="gym-detail__label">{t('gym.detail.latest')}</span>
@@ -105,18 +147,7 @@ export function ExerciseDetail({
                 </div>
                 <div className="gym-detail__figure gym-detail__figure--muted">
                   <span className="gym-detail__label">{t('gym.detail.previous')}</span>
-                  <span className="gym-detail__value">
-                    {days[1] ? score(days[1]) : t('gym.progress.noBaseline')}
-                  </span>
-                </div>
-                <div className="gym-detail__figure">
-                  <span className="gym-detail__label">{t('gym.detail.change')}</span>
-                  {/* Text and colour from the one rounded figure (WP3, B6) and
-                      the band (contract §7): +2 % is "Gehalten", in the text
-                      colour; from +3 % the figure is green. */}
-                  <span className={`gym-detail__value gym-detail__value--${shown ?? 'noBaseline'}`}>
-                    {words?.text ?? t('gym.progress.noBaseline')}
-                  </span>
+                  <span className="gym-detail__value">{days[1] ? score(days[1]) : '–'}</span>
                 </div>
               </div>
               <p className="gym-detail__note">{t('gym.progress.explainMetric')}</p>
@@ -130,7 +161,9 @@ export function ExerciseDetail({
                   its change since the first day shown, which is what the
                   line draws. One picture, one semantic alternative.
                 */}
-                <ExerciseLineChart days={days} />
+                <ExerciseLineChart days={days} state={trend} />
+                {/* What the line draws — its end carries no figure. */}
+                {days.length > 1 ? <p className="gym-detail__lineNote">{t('gym.detail.lineNote')}</p> : null}
 
                 <div className="visually-hidden">
                   <table>

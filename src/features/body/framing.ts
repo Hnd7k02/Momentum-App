@@ -26,8 +26,15 @@ import { MOTION } from './motion';
  *
  * Everything here is arithmetic on numbers between 0 and 1 — the picture's
  * own coordinates, x to the right and y down — so it is tested without a
- * camera (`framing.test.ts`), and block 7C can ask the same functions for
- * the window that holds a group above its sheet.
+ * camera (`framing.test.ts`).
+ *
+ * **Above a sheet the window is not the fingers' but the group's** (block
+ * 7C, contract §9). The group's sheet covers the lower two thirds of the
+ * screen, and what is left of the stage above it is a strip. `focusOn()`
+ * says which window of the picture puts the chosen group in the middle of
+ * that strip, as large as it fits: a window chosen for one group, which may
+ * be smaller than a pinch reaches and may run past the picture's edge —
+ * under the sheet nobody sees the empty ground beside the frame.
  */
 
 export const STAGE = {
@@ -152,4 +159,49 @@ export function fitZoom(box: Box): number {
   const width = box.x1 - box.x0 + 2 * STAGE.keepMargin;
   const height = box.y1 - box.y0 + 2 * STAGE.keepMargin;
   return clampZoom(1 / Math.max(width, height, 1e-6));
+}
+
+/**
+ * The strip of the stage that is free above a sheet: its upper and its
+ * lower edge as shares of the stage's height, from the top.
+ */
+export interface FocusStrip {
+  top: number;
+  bottom: number;
+}
+
+/** How a group is shown above its sheet. */
+export const FOCUS = {
+  /**
+   * The largest zoom a group is shown at. Beyond it the borders between
+   * the regions — a line of triangles of the mesh — become the picture; the
+   * mock-up shows the chest at about this size.
+   */
+  zoomMax: 2.6,
+  /** The room the group keeps to the strip's edges and to the stage's sides, as a share of each. */
+  margin: 0.08,
+} as const;
+
+/**
+ * The zoom and the window's centre that show a box of the picture in the
+ * middle of a strip of the stage, as large as it fits with its margin.
+ *
+ * A group taller than the strip at zoom 1 is not made smaller: its middle
+ * stands in the strip's middle, and the body keeps its size.
+ */
+export function focusOn(box: Box, strip: FocusStrip): { zoom: number; centre: Point } {
+  const width = Math.max(box.x1 - box.x0, 1e-6);
+  const height = Math.max(box.y1 - box.y0, 1e-6);
+  const room = 1 - 2 * FOCUS.margin;
+  const stripHeight = Math.max(strip.bottom - strip.top, 0);
+  const zoom = clamp(Math.min(room / width, (stripHeight * room) / height), 1, FOCUS.zoomMax);
+  // Where on the stage the middle of the group belongs.
+  const at = { x: 0.5, y: (strip.top + strip.bottom) / 2 };
+  return {
+    zoom,
+    centre: {
+      x: (box.x0 + box.x1) / 2 - (at.x - 0.5) / zoom,
+      y: (box.y0 + box.y1) / 2 - (at.y - 0.5) / zoom,
+    },
+  };
 }

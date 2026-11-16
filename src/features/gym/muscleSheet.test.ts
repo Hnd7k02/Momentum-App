@@ -311,4 +311,12 @@ describe('a group that was not trained in the range', () => {
   it('a trained group never says when it was last trained before the range', () => {
     expect(sheet('chest', INPUTS, { chest: '2026-09-30' }).view.lastTrainedBefore).toBeNull();
   });
+
+  it('is "never trained" only where that was read and nothing was found', () => {
+    expect(sheet('calves', INPUTS, {}).view.everTrained).toBe(false);
+    expect(sheet('calves', INPUTS, { calves: '2026-09-30' }).view.everTrained).toBe(true);
+    // Not read is not "never".
+    expect(sheet('calves', INPUTS, null).view.everTrained).toBeNull();
+    expect(sheet('chest', INPUTS, null).view.everTrained).toBe(true);
+  });
 });

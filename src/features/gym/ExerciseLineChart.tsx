@@ -1,8 +1,9 @@
+import type { DateKey } from '../../core/dates';
 import type { ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth } from '../../i18n/format';
 import { useI18n } from '../../i18n/I18nProvider';
 import { signedPercentText } from '../../i18n/typography';
-import { roundShown, trendOfShown } from './muscleState';
+import type { ShownTrend } from './muscleState';
 import './exerciseLineChart.css';
 
 /**
@@ -24,19 +25,17 @@ import './exerciseLineChart.css';
  * - A series that only rises is drawn above its zero line and one that only
  *   falls below it; one that does both has the zero line in the middle.
  * - The line is the neutral data ink at 1.5px with round ends. Only the end
- *   point carries a colour: the state of the end value by the one band
- *   (`muscleState.ts`), the data ink when it is held. The value stands
- *   beside it, right of the plot, as a row's figure stands right of its
- *   line; the first and the last date stand beneath.
- * - **One day is a dot and no value**: one observation is not a change, and
- *   the chart does not print one. No day draws nothing — the detail shows
- *   its empty state instead of this chart.
+ *   point carries a colour: the state of the exercise's one figure — its
+ *   change in the range — by the one band (`muscleState.ts`), the data ink
+ *   when it is held. The first and the last date stand beneath.
+ * - **No figure stands at the line's end** (D176). Until block 7C the end
+ *   value stood there — the last day against the first day shown — beside
+ *   a "Veränderung" above the chart that compared the last day with the
+ *   one before: two numbers for one exercise, and only one of them named.
+ * - **One day is a dot**: one observation is not a change. No day draws
+ *   nothing — the detail shows its empty state instead of this chart.
  *
- * The end value compares the last day with the first day *shown*; the
- * figures above the chart compare the last day with the one before. Both
- * are true statements about named days, and neither is the window
- * comparison the rating runs (D150): this chart is a picture of the days
- * and computes nothing that is scored.
+ * This chart is a picture of the days and computes nothing that is scored.
  */
 
 /** The change, in percent, that reaches the edge of the plot at the least. */
@@ -80,24 +79,56 @@ export function lineY(value: number, range: { low: number; high: number }): numb
   return (range.high - Math.max(range.low, Math.min(range.high, value))) / (range.high - range.low);
 }
 
-export function ExerciseLineChart({ days }: { /** Newest first, as the detail has them. */ days: ExerciseDay[] }) {
+/**
+ * A line of changes on a plot, as every large chart of Gym draws one: the
+ * exercise detail's days and the muscle sheet's trend (block 7C).
+ *
+ * It draws what it is given and decides nothing: the values, the range they
+ * stand in — anything beyond it stays at the edge — the state its end point
+ * carries and the text that stands beside it. With words for a screen
+ * reader it is a picture with a description; without, it is a picture of
+ * what stands beside it and is hidden.
+ *
+ * Two or more values are a line. A single one is a dot where its value is:
+ * one observation is a value, not yet a direction (contract §6).
+ */
+export function LinePlot({
+  values,
+  range,
+  dates,
+  endState,
+  endText = null,
+  label,
+  variant,
+}: {
+  /** Oldest first, in percent. */
+  values: readonly number[];
+  range: { low: number; high: number };
+  /** The first day drawn and, with more than one, the last. */
+  dates: readonly DateKey[];
+  /** What the end point says: a state's colour, or the data ink for held. */
+  endState: ShownTrend;
+  /** The figure beside the end point, on its height; `null` draws none. */
+  endText?: string | null;
+  label?: string;
+  /** The sheet's chart is taller than the detail's. */
+  variant?: 'sheet';
+}) {
   const { language } = useI18n();
-  const ordered = [...days].sort((a, b) => a.date.localeCompare(b.date));
-  const values = lineValues(days);
-  const range = lineRange(values);
   const { low, high } = range;
   const y = (value: number): number => lineY(value, range);
   const x = (index: number): number => (values.length === 1 ? 0.5 : index / (values.length - 1));
   const end = values[values.length - 1] ?? 0;
-  /** One day is not a change: its dot is neutral and no value stands beside it. */
-  const compared = values.length > 1;
-  const shown = roundShown(end) ?? 0;
-  const state = compared ? trendOfShown(shown) : 'unchanged';
   const inset = (share: number): string => `calc(3px + (100% - 6px) * ${share.toFixed(4)})`;
   const zero = y(0);
+  const first = dates[0];
+  const last = dates.length > 1 ? dates[dates.length - 1] : undefined;
 
   return (
-    <div className="gym-detail__chart exercise-line" aria-hidden="true">
+    <div
+      className={variant ? `gym-detail__chart exercise-line exercise-line--${variant}` : 'gym-detail__chart exercise-line'}
+      {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' as const })}
+    >
       <div className="exercise-line__axis">
         {high > 0 ? <span className="exercise-line__label" style={{ top: inset(0) }}>{signedPercentText(high)}</span> : null}
         <span className="exercise-line__label" style={{ top: inset(zero) }}>{signedPercentText(0)}</span>
@@ -111,7 +142,7 @@ export function ExerciseLineChart({ days }: { /** Newest first, as the detail ha
           {low < 0 ? <span className="exercise-line__bound" style={{ top: inset(1) }} /> : null}
           <span className="exercise-line__zero" style={{ top: inset(zero) }} />
           <svg className="exercise-line__svg" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
-            {compared ? (
+            {values.length > 1 ? (
               <polyline
                 className="exercise-line__line"
                 points={values.map((value, index) => `${(x(index) * 100).toFixed(2)},${(y(value) * 100).toFixed(2)}`).join(' ')}
@@ -122,27 +153,64 @@ export function ExerciseLineChart({ days }: { /** Newest first, as the detail ha
               />
             ) : null}
           </svg>
-          <span
-            className={`exercise-line__end exercise-line__end--${state}`}
-            style={{ left: inset(x(values.length - 1)), top: inset(y(end)) }}
-          />
+          {values.length > 0 ? (
+            <span
+              className={`exercise-line__end exercise-line__end--${endState}`}
+              style={{ left: inset(x(values.length - 1)), top: inset(y(end)) }}
+            />
+          ) : null}
         </div>
-        {ordered.length > 0 ? (
+        {first ? (
           <div className="gym-detail__dates">
-            <span>{formatDayAndMonth(language, ordered[0]!.date)}</span>
-            {ordered.length > 1 ? <span>{formatDayAndMonth(language, ordered[ordered.length - 1]!.date)}</span> : null}
+            <span>{formatDayAndMonth(language, first)}</span>
+            {last ? <span>{formatDayAndMonth(language, last)}</span> : null}
           </div>
         ) : null}
       </div>
-      {/* The end value, beside the end point and clear of the line. */}
-      {compared ? (
+      {/* The figure, beside the end point and clear of the line. */}
+      {endText !== null ? (
         <div className="exercise-line__endColumn">
-          <span className={`exercise-line__value exercise-line__value--${state}`} style={{ top: inset(y(end)) }}>
-            {signedPercentText(shown)}
+          <span className={`exercise-line__value exercise-line__value--${endState}`} style={{ top: inset(y(end)) }}>
+            {endText}
           </span>
-          <span className="exercise-line__sizer">{signedPercentText(shown)}</span>
+          <span className="exercise-line__sizer">{endText}</span>
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The exercise detail's chart: each day at its change since the first day
+ * shown.
+ *
+ * **Its end carries no figure** (D176). The exercise has one change — the
+ * one in the range, which stands in the head of the detail and in the
+ * muscle sheet (`exerciseChanges`) — and the height of the line's last day
+ * is a different comparison, the last day against the first. Printed beside
+ * the line it was a second, unnamed number. The line still shows where
+ * every day stands; its end point carries the state of the exercise's one
+ * figure, as every end point carries the state it stands for, and the data
+ * ink for a single day, which has none.
+ */
+export function ExerciseLineChart({
+  days,
+  state = null,
+}: {
+  /** Newest first, as the detail has them. */
+  days: ExerciseDay[];
+  /** The state of the exercise's change in the range; `null` with nothing to compare. */
+  state?: ShownTrend | null;
+}) {
+  const ordered = [...days].sort((a, b) => a.date.localeCompare(b.date));
+  const values = lineValues(days);
+  const dates = ordered.length === 0 ? [] : ordered.length === 1 ? [ordered[0]!.date] : [ordered[0]!.date, ordered[ordered.length - 1]!.date];
+  return (
+    <LinePlot
+      values={values}
+      range={lineRange(values)}
+      dates={dates}
+      endState={values.length > 1 ? (state ?? 'unchanged') : 'unchanged'}
+    />
   );
 }

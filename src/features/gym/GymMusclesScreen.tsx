@@ -59,7 +59,12 @@ export function GymMusclesScreen({
   });
   const [range, setRange] = useState<number>(MUSCLE_TREND_RANGES[0]);
   const [legendOpen, setLegendOpen] = useState(false);
-  const { history: gym, latestSession, loading, failed, reload } = useGymHistoryState(range);
+  // With the history: the range's sets, for the sheet's work volume (D152),
+  // and when each group was last trained before the range, for the sheet of
+  // a group the range holds nothing of.
+  const { history: gym, sets, lastTrained, latestSession, loading, failed, reload } = useGymHistoryState(range, {
+    lastTrained: true,
+  });
   // The empty state's one action: the same flow as the hub's "Training
   // erfassen" — the day's session continued, a plan chosen or a free
   // session — and what it writes reaches this screen through the store's
@@ -112,7 +117,10 @@ export function GymMusclesScreen({
             the rows' place and can be tried again. */}
         <GymProgress
           history={gym}
+          sets={sets}
+          lastTrained={lastTrained}
           rangeDays={range}
+          onRange={setRange}
           latestSession={latestSession}
           loading={loading}
           failed={failed}
