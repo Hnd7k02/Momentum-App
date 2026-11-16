@@ -92,3 +92,132 @@ describe('Sheet focus', () => {
     expect(active()?.id).toBe('launcher-button');
   });
 });
+
+
+/**
+ * A sheet with two heights (block 7C, contract §9): it has a grabber that
+ * is a control, shows what it showed while it leaves, gives focus back to
+ * where its host says when nothing was in focus, and keeps out of the way
+ * of what lies on top of it.
+ */
+let setSheet: (open: boolean) => void = () => undefined;
+let setOnTop: (onTop: boolean) => void = () => undefined;
+let detentsSeen: string[] = [];
+
+function DetentHost() {
+  const [open, setOpenState] = useState(false);
+  const [onTop, setOnTopState] = useState(false);
+  setSheet = setOpenState;
+  setOnTop = setOnTopState;
+  return (
+    <I18nProvider language="de" setLanguage={() => undefined}>
+      <button type="button" id="group-row">Brust</button>
+      <Sheet
+        open={open}
+        title="Brust"
+        onClose={() => setOpenState(false)}
+        detents
+        overBody
+        suspended={onTop}
+        returnFocus={() => document.getElementById('group-row')}
+        onDetentChange={(detent) => detentsSeen.push(detent)}
+      >
+        <button type="button" id="exercise-row">Bankdrücken</button>
+      </Sheet>
+    </I18nProvider>
+  );
+}
+
+const sheet = () => document.querySelector<HTMLElement>('.sheet');
+const scrimOf = () => document.querySelector<HTMLElement>('.sheet-scrim');
+const grabber = () => document.querySelector<HTMLButtonElement>('.sheet__grabber');
+const wait = (ms: number) => act(async () => { await new Promise((resolve) => setTimeout(resolve, ms)); });
+
+async function openDetents() {
+  detentsSeen = [];
+  mounted = await mount(<DetentHost />);
+  await act(async () => setSheet(true));
+  await wait(5);
+}
+
+describe('a sheet with two heights', () => {
+  it('opens on the lower one, solid and over a clear scrim', async () => {
+    await openDetents();
+    expect(sheet()!.dataset.detent).toBe('lower');
+    expect(sheet()!.className).toContain('sheet--detents');
+    expect(sheet()!.className).toContain('sheet--solid');
+    expect(scrimOf()!.className).toContain('sheet-scrim--clear');
+    expect(detentsSeen).toEqual(['lower']);
+  });
+
+  it('has a grabber that is a control with a name, and changes the height', async () => {
+    await openDetents();
+    expect(grabber()!.getAttribute('aria-label')).toBe('Ansicht vergrössern');
+    await act(async () => grabber()!.click());
+    expect(sheet()!.dataset.detent).toBe('upper');
+    expect(grabber()!.getAttribute('aria-label')).toBe('Ansicht verkleinern');
+    expect(detentsSeen).toEqual(['lower', 'upper']);
+    await act(async () => grabber()!.click());
+    expect(sheet()!.dataset.detent).toBe('lower');
+  });
+
+  it('opens on the lower one again, whatever height it was closed at', async () => {
+    await openDetents();
+    await act(async () => grabber()!.click());
+    await act(async () => setSheet(false));
+    await wait(5);
+    await act(async () => setSheet(true));
+    await wait(5);
+    expect(sheet()!.dataset.detent).toBe('lower');
+  });
+
+  it('takes focus when it stands and gives it to where its host says when nothing was in focus', async () => {
+    await openDetents();
+    expect(active()).toBe(sheet());
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(active()?.id).toBe('group-row');
+  });
+
+  it('is gone once its way out has ended, and takes no tap on that way', async () => {
+    await openDetents();
+    await act(async () => setSheet(false));
+    await wait(5);
+    expect(sheet()).toBeNull();
+  });
+
+  it('keeps out of the way of what lies on top of it, and stays what it was', async () => {
+    await openDetents();
+    await act(async () => grabber()!.click());
+    document.getElementById('exercise-row')!.focus();
+    await act(async () => setOnTop(true));
+    expect(scrimOf()!.hasAttribute('data-suspended')).toBe(true);
+    expect(scrimOf()!.getAttribute('aria-hidden')).toBe('true');
+    expect(scrimOf()!.hasAttribute('inert')).toBe(true);
+    // Escape is not the sheet's while something lies on it.
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(sheet()).not.toBeNull();
+    // Whatever lay on top puts focus back on the row it was opened from.
+    document.getElementById('exercise-row')!.focus();
+    await act(async () => setOnTop(false));
+    expect(scrimOf()!.hasAttribute('data-suspended')).toBe(false);
+    expect(sheet()!.dataset.detent).toBe('upper');
+    expect(active()?.id).toBe('exercise-row');
+    // And closing it now still leads back to the group's row.
+    await act(async () => setSheet(false));
+    expect(active()?.id).toBe('group-row');
+  });
+});
+
+describe('every other sheet', () => {
+  it('has no grabber: one stands only where one can drag', async () => {
+    await openFrom(false);
+    expect(document.querySelector('.sheet')).not.toBeNull();
+    expect(document.querySelector('.sheet__grabber')).toBeNull();
+    expect(document.querySelector('.sheet')!.className).toBe('sheet');
+    expect(document.querySelector('.sheet-scrim')!.className).toBe('sheet-scrim');
+  });
+});

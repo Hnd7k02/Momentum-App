@@ -53,6 +53,8 @@ export const en: Translations = {
   'common.add': 'Add',
   'common.skip': 'Skip',
   'common.close': 'Close',
+  'sheet.expand': 'Show more',
+  'sheet.collapse': 'Show less',
   'toast.undo': 'Undo',
   'today.running.logged': 'Run logged.',
   'today.running.undoRefused': "Couldn't undo — the run stays logged.",

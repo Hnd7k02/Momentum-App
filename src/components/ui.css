@@ -615,12 +615,41 @@
   outline: none;
 }
 
+/*
+ * The grabber stands only where one can drag (contract §9, block 7C): on a
+ * sheet with detents, as a control with a name. Its box is the target —
+ * 88 × 44 with the area around it — and the mark is drawn inside. Every
+ * other sheet has none; its header keeps the room the grabber took, so
+ * nothing on it moved.
+ */
 .sheet__grabber {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 17px;
+  margin: 0 auto;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheet__grabber::before {
+  content: '';
+  position: absolute;
+  inset: -8px -12px -19px;
+}
+
+.sheet__grabber::after {
+  content: '';
   width: 36px;
   height: 5px;
+  margin-top: var(--space-1);
   border-radius: var(--radius-pill);
-  background: var(--separator-strong);
-  margin: var(--space-2) auto var(--space-1);
+  background: var(--sheet-grabber);
 }
 
 .sheet__header {
@@ -628,13 +657,27 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) var(--page-gutter) var(--space-2);
+  /* 29px above the title, as when a grabber stood here. */
+  padding: 29px var(--page-gutter) var(--space-2);
+}
+
+.sheet--detents .sheet__header {
+  padding-top: var(--space-3);
+  touch-action: none;
 }
 
 .sheet__title {
   font-size: var(--type-title);
   font-weight: var(--weight-bold);
   letter-spacing: -0.4px;
+}
+
+/* A mark before the title: the muscle sheet's dot. */
+.sheet__title--lead {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
 }
 
 .sheet__close {
@@ -670,6 +713,91 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/*
+ * ── Two heights and a finger (block 7C, contract §9) ────────────────────
+ *
+ * One box as tall as the upper detent — a share of the screen the scrim
+ * covers — standing on its bottom edge and moved down by `--sheet-y`:
+ * nothing at the upper detent, the difference of the two at the lower, its
+ * whole height when it is gone (`sheetDetents.ts`). A drag writes the
+ * offset directly and switches the transition off; letting go switches it
+ * on again. It travels with the sheet's one duration and the one curve,
+ * which under reduced motion take no time.
+ */
+.sheet--detents {
+  height: calc(100% * var(--sheet-detent-upper));
+  max-height: none;
+  padding-bottom: 0;
+  animation: none;
+  transform: translateY(var(--sheet-y, 100%));
+  transition: transform var(--duration-sheet) var(--ease-standard);
+}
+
+.sheet--detents[data-dragging] {
+  transition: none;
+}
+
+/* The content fills what is left of the box and scrolls in it; the room
+   for the home indicator is the end of the content, not of the box. A
+   scroll that reaches its end goes nowhere else: the page behind a sheet
+   never moves. */
+.sheet--detents .sheet__body {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: calc(var(--safe-bottom) + var(--space-6));
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+/* On the lower detent a drag is the sheet's, wherever it begins. */
+.sheet--detents[data-detent='lower'] .sheet__body {
+  touch-action: none;
+}
+
+/* The part of the box that is below the screen on the lower detent: taken
+   out of the content there, so the content ends where the screen does. */
+.sheet__below {
+  display: none;
+  flex: none;
+  height: calc(100% * (1 - var(--sheet-detent-lower) / var(--sheet-detent-upper)));
+}
+
+.sheet--detents[data-short] .sheet__below {
+  display: block;
+}
+
+/*
+ * ── Over the body (block 7C, D146) ──────────────────────────────────────
+ *
+ * The window above this sheet shows the body, and the body may still be
+ * travelling to its group while the sheet rises. So nothing here blurs and
+ * nothing dims: the scrim only takes the tap that closes, and the sheet is
+ * the solid surface, at every moment.
+ */
+.sheet-scrim--clear {
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  animation: none;
+}
+
+.sheet--solid {
+  background: var(--glass-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* On its way out a sheet takes no tap; with something on top of it, it is
+   out of sight as well, and keeps its height and its place. */
+.sheet-scrim[data-leaving] {
+  pointer-events: none;
+}
+
+.sheet-scrim[data-suspended] {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 @keyframes sheet-rise {

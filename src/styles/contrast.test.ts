@@ -382,3 +382,17 @@ describe('the families the contract removed stay removed (D154, D160)', () => {
     expect(declared).toEqual([]);
   });
 });
+
+describe.each(SETS)('%s: a sheet with two heights', (_label, tokens) => {
+  it('its grabber is a control one has to find: 3:1 on the sheet', () => {
+    // The grabber of the muscle sheet changes its height (contract §9); a
+    // control's mark clears 3:1 against the surface it stands on.
+    expect(contrast(hexIn(tokens, '--sheet-grabber'), hexIn(tokens, '--glass-solid'))).toBeGreaterThanOrEqual(LARGE);
+  });
+
+  it('opens at two thirds and is dragged to 92 %', () => {
+    // The two shares of the contract (§9), and the same in both worlds.
+    expect(Number(tokens.get('--sheet-detent-lower'))).toBeCloseTo(2 / 3, 3);
+    expect(Number(tokens.get('--sheet-detent-upper'))).toBe(0.92);
+  });
+});

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, CloseIcon } from './Icons';
 import { stillness } from '../app/stillness';
 import { useT } from '../i18n/I18nProvider';
 import { useDismissToast } from './Toast';
+import { SHEET_Y, bindSheetDrag, type SheetDetent } from './sheetDetents';
 import './ui.css';
 
 /**
@@ -410,6 +411,21 @@ export const SHEET_INITIAL_FOCUS = { 'data-sheet-initial-focus': '' } as const;
  * to the close button — after one letter, typing went nowhere. `onClose` is
  * now read through a ref, so the effect sees the latest one without
  * depending on it.
+ *
+ * **Two heights and a finger** (block 7C, contract §9), for the sheet that
+ * asks for them with `detents`: it opens at two thirds of the screen, is
+ * dragged to 92 % and down to close, and its grabber is a control with a
+ * name that changes the height for whoever does not drag
+ * (`sheetDetents.ts`). It travels in and out; with reduced motion the
+ * travel takes no time. Every other sheet is as tall as its content and
+ * does not move — and **has no grabber: a grabber stands only where one can
+ * drag.** Sheets with fields stay as calm as they were.
+ *
+ * **Over the body** (`overBody`) a sheet is a solid surface and its scrim
+ * neither dims nor blurs: the window above it shows the body, and the body
+ * may still be travelling to the group while the sheet rises (D146 — no
+ * blur over a canvas that draws). Such a sheet does not ask the body to
+ * stop; its host holds the viewer once the camera rests.
  */
 export function Sheet({
   open,
@@ -418,6 +434,11 @@ export function Sheet({
   children,
   footer,
   returnFocus,
+  lead,
+  detents = false,
+  overBody = false,
+  suspended = false,
+  onDetentChange,
 }: {
   open: boolean;
   title: string;
@@ -430,12 +451,29 @@ export function Sheet({
    * at midnight, and the opener is a new node by the time the sheet closes.
    */
   returnFocus?: () => HTMLElement | null;
+  /** A mark before the title — the muscle sheet's dot. Decorative; the title is the name. */
+  lead?: ReactNode;
+  /** Two heights and dragging (contract §9). */
+  detents?: boolean;
+  /** The sheet stands over the 3D body: solid, a clear scrim, and no wait for the body to rest. */
+  overBody?: boolean;
+  /**
+   * Something lies on top of the sheet — the exercise detail opened from
+   * it. The sheet stays as it is, at its height and where it was scrolled,
+   * and is out of sight and out of reach until that goes.
+   */
+  suspended?: boolean;
+  /** The height the sheet came to rest at, whenever it changes. */
+  onDetentChange?: (detent: SheetDetent) => void;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const returnFocusRef = useRef(returnFocus);
   returnFocusRef.current = returnFocus;
+  const onDetentChangeRef = useRef(onDetentChange);
+  onDetentChangeRef.current = onDetentChange;
   const t = useT();
   const dismissToast = useDismissToast();
 
@@ -446,36 +484,126 @@ export function Sheet({
    * once that has happened — and from then on until it is closed, whatever
    * happens beneath it. On every screen without the 3D body nothing can
    * move, and the sheet stands in the render that opened it, as it always
-   * did.
+   * did. A sheet over the body neither blurs nor dims and does not wait.
    */
   const still = useSyncExternalStore(stillness.subscribe, stillness.isStill, () => true);
   const stood = useRef(false);
-  useEffect(() => (open ? stillness.ask() : undefined), [open]);
+  useEffect(() => (open && !overBody ? stillness.ask() : undefined), [open, overBody]);
   if (!open) stood.current = false;
-  else if (still) stood.current = true;
+  else if (still || overBody) stood.current = true;
   const standing = open && stood.current;
+  const standingRef = useRef(standing);
+  standingRef.current = standing;
+
+  /*
+   * A sheet with detents travels: it is in the document from the render
+   * after it comes to stand until its way out has ended, and shows what it
+   * last showed while it leaves.
+   */
+  const [phase, setPhase] = useState<'gone' | 'entering' | 'shown' | 'leaving'>('gone');
+  const [detent, setDetent] = useState<SheetDetent>('lower');
+  const detentRef = useRef(detent);
+  detentRef.current = detent;
+  const last = useRef({ title, children, footer, lead });
+  if (standing) last.current = { title, children, footer, lead };
+
+  useTravelEffect(() => {
+    if (!detents) return;
+    if (standing) {
+      setDetent('lower');
+      setPhase((current) => (current === 'shown' ? 'shown' : 'entering'));
+    } else {
+      setPhase((current) => (current === 'gone' ? 'gone' : 'leaving'));
+    }
+  }, [standing, detents]);
+
+  useTravelEffect(() => {
+    if (phase !== 'entering') return;
+    // The sheet has been laid out below the screen; from there it travels.
+    panelRef.current?.getBoundingClientRect();
+    setPhase('shown');
+  }, [phase]);
 
   useEffect(() => {
-    if (!standing) return undefined;
+    if (phase !== 'leaving') return undefined;
+    const timer = window.setTimeout(() => setPhase('gone'), sheetTravelMs());
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
+  const rendered = detents ? phase !== 'gone' : standing;
+  /** In the document, standing, and with nothing on top of it. */
+  const active = standing && rendered && !suspended;
+
+  useEffect(() => {
+    if (!active) return undefined;
     // A sheet is a new task: an undo left floating beside it could change
     // the very record the sheet is editing (WP3, B9).
     dismissToast();
     const previous = document.activeElement as HTMLElement | null;
     const panel = panelRef.current;
-    const initial = panel?.querySelector<HTMLElement>('[data-sheet-initial-focus]');
-    (initial ?? panel)?.focus({ preventScroll: true });
+    // What was on top of the sheet has gone and put focus back inside it:
+    // it stays where it is.
+    if (!panel?.contains(previous)) {
+      const initial = panel?.querySelector<HTMLElement>('[data-sheet-initial-focus]');
+      (initial ?? panel)?.focus({ preventScroll: true });
+    }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      const target = previous?.isConnected ? previous : (returnFocusRef.current?.() ?? null);
+      // Something is opening on top: focus is its to take, and comes back.
+      if (panel?.isConnected && standingRef.current) return;
+      // A sheet opened with nothing in focus — a tap on the body — and one
+      // whose opener was inside it have no opener to go back to.
+      const from = !previous || previous === document.body || panel?.contains(previous) ? null : previous;
+      const target = from?.isConnected ? from : (returnFocusRef.current?.() ?? null);
       target?.focus({ preventScroll: true });
     };
-  }, [standing, dismissToast]);
+  }, [active, dismissToast]);
 
-  if (!standing) return null;
+  /* ── The two heights ────────────────────────────────────────────────── */
+
+  // The content is as tall as what can be seen of it: on the lower detent
+  // the part of the box below the screen is taken out of it — but only once
+  // the sheet has arrived there, and at once when it starts to rise.
+  useEffect(() => {
+    if (!detents || phase !== 'shown') return undefined;
+    const panel = panelRef.current;
+    if (!panel) return undefined;
+    onDetentChangeRef.current?.(detent);
+    if (detent === 'upper') {
+      panel.removeAttribute('data-short');
+      return undefined;
+    }
+    const timer = window.setTimeout(() => panel.setAttribute('data-short', ''), sheetTravelMs());
+    return () => window.clearTimeout(timer);
+  }, [detents, detent, phase]);
+
+  useEffect(() => {
+    if (!detents || phase !== 'shown') return undefined;
+    const panel = panelRef.current;
+    if (!panel) return undefined;
+    return bindSheetDrag(panel, bodyRef.current, {
+      detent: () => detentRef.current,
+      onStart: () => panel.removeAttribute('data-short'),
+      onRelease: (target) => {
+        if (target === 'closed') onCloseRef.current();
+        else if (target === detentRef.current) {
+          // Back where it was: the content is sized for it again.
+          if (target === 'lower') window.setTimeout(() => panel.setAttribute('data-short', ''), sheetTravelMs());
+        } else setDetent(target);
+      },
+    });
+  }, [detents, phase]);
+
+  if (!rendered) return null;
+
+  const shown = detents && !standing ? last.current : { title, children, footer, lead };
+  const leaving = detents && phase === 'leaving';
+  const hidden = leaving || suspended;
+  const y = !detents ? undefined : phase === 'shown' ? SHEET_Y[detent] : SHEET_Y.closed;
 
   /*
    * Rendered into <body>, not in place: a sheet opened inside the workout or
@@ -484,21 +612,43 @@ export function Sheet({
    * (z 35) — and a toast's action would sit on top of the sheet.
    */
   const scrim = (
-    <div className="sheet-scrim" onClick={onClose} role="presentation">
+    <div
+      className={`sheet-scrim${overBody ? ' sheet-scrim--clear' : ''}`}
+      onClick={onClose}
+      role="presentation"
+      data-leaving={leaving ? '' : undefined}
+      data-suspended={suspended ? '' : undefined}
+      aria-hidden={hidden ? true : undefined}
+      {...(hidden ? { inert: '' } : {})}
+    >
       <div
-        className="sheet"
+        className={`sheet${detents ? ' sheet--detents' : ''}${overBody ? ' sheet--solid' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={shown.title}
         ref={panelRef}
+        data-detent={detents ? detent : undefined}
+        style={y === undefined ? undefined : ({ '--sheet-y': y } as CSSProperties)}
         // Focusable from script only, so a sheet with no marked field can
         // still take focus without adding a tab stop.
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="sheet__grabber" aria-hidden="true" />
+        {/* Only where one can drag (contract §9): a control with a name,
+            for whoever changes the height without dragging. */}
+        {detents ? (
+          <button
+            type="button"
+            className="sheet__grabber"
+            aria-label={t(detent === 'lower' ? 'sheet.expand' : 'sheet.collapse')}
+            onClick={() => setDetent((current) => (current === 'lower' ? 'upper' : 'lower'))}
+          />
+        ) : null}
         <header className="sheet__header">
-          <h2 className="sheet__title">{title}</h2>
+          <h2 className={shown.lead ? 'sheet__title sheet__title--lead' : 'sheet__title'}>
+            {shown.lead}
+            {shown.title}
+          </h2>
           <button
             type="button"
             className="sheet__close"
@@ -508,14 +658,32 @@ export function Sheet({
             <CloseIcon />
           </button>
         </header>
-        <div className="sheet__body">{children}</div>
-        {footer ? <div className="sheet__footer">{footer}</div> : null}
+        <div className="sheet__body" ref={bodyRef}>{shown.children}</div>
+        {shown.footer ? <div className="sheet__footer">{shown.footer}</div> : null}
+        {detents ? <div className="sheet__below" aria-hidden="true" /> : null}
       </div>
     </div>
   );
   // Without a document — the static-markup tests render on the server — it
   // stays in place; the app itself always has one.
   return typeof document === 'undefined' ? scrim : createPortal(scrim, document.body);
+}
+
+/**
+ * Before the browser paints, where there is one: the sheet must be laid out
+ * below the screen before it is told to rise, or it would not travel. The
+ * static-markup tests render without a document, and there it is an
+ * ordinary effect that never runs.
+ */
+const useTravelEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
+
+/** How long a sheet travels: the one duration, as the document has it now — nothing under reduced motion. */
+function sheetTravelMs(): number {
+  if (typeof document === 'undefined') return 0;
+  const value = getComputedStyle(document.documentElement).getPropertyValue('--duration-sheet').trim();
+  const number = Number.parseFloat(value);
+  if (!Number.isFinite(number)) return 0;
+  return value.endsWith('ms') ? number : number * 1000;
 }
 
 /** A round check used by selectable cards. */

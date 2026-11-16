@@ -54,6 +54,8 @@ export const de = {
   'common.add': 'Hinzufügen',
   'common.skip': 'Überspringen',
   'common.close': 'Schliessen',
+  'sheet.expand': 'Ansicht vergrössern',
+  'sheet.collapse': 'Ansicht verkleinern',
   'toast.undo': 'Rückgängig',
   'today.running.logged': 'Lauf eingetragen.',
   'today.running.undoRefused': 'Rückgängig ging nicht mehr – der Lauf bleibt eingetragen.',

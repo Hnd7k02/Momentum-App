@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { layerDepth } from './backLayer';
 import type { TabId } from './TabBar';
 
 /**
@@ -20,6 +21,16 @@ export type DomainTerminal = 'mental' | 'gym';
  * the hash together, and a `popstate` reads the hash back into the state.
  * Nothing else touches either. Sheets, edit windows and onboarding are not
  * places and never enter the URL.
+ *
+ * **Not a place is not the same as not in the history** (block 7C). The
+ * muscle sheet and the exercise detail opened from it each own a history
+ * entry, so that Back closes them instead of leaving the screen — an entry
+ * with the address of the screen they lie on and a mark in its state
+ * (`backLayer.ts`). The hash does not change, so this file reads the same
+ * place back from it and nothing here moves; a link can never name a layer,
+ * and none is restored from an address. `navigate` knows of them in one
+ * respect only: a move made while such an entry is on top takes that entry
+ * over instead of adding one, so no entry without a place is left behind.
  *
  * The area is kept in the state even while another tab is open, so coming
  * back to the terminal restores the area that was being looked at; the hash
@@ -130,7 +141,9 @@ export function useRoute(initial: Route): {
         const next = fromLocation(previous);
         const hash = formatRoute(next);
         if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
-        return next;
+        // A layer that Back closed leaves the place as it is (`backLayer.ts`):
+        // the same route is the same state, and nothing renders for it.
+        return formatRoute(previous) === hash ? previous : next;
       });
     };
     window.addEventListener('popstate', onPop);
@@ -147,6 +160,10 @@ export function useRoute(initial: Route): {
         if (window.location.hash !== hash) {
           // A pushed entry is marked, so `leave` knows Back has somewhere to go.
           if (options?.replace) window.history.replaceState(null, '', hash);
+          // On top lies the entry of a layer, not of a place: the move takes
+          // it over. The place it lay on is still beneath, so Back has
+          // somewhere to go exactly as after a push.
+          else if (layerDepth(window.history.state) > 0) window.history.replaceState({ pushed: true }, '', hash);
           else window.history.pushState({ pushed: true }, '', hash);
         }
       }
