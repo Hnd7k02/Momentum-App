@@ -315,6 +315,8 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 | Ein Tipp dreht nie; die Trägheit hängt nicht an der Bildrate | `body.mjs`, `gym-muscles.mjs` | 7B |
 | Unter dem offenen Sheet entsteht kein Bild; ein Wechsel des Zeitraums zeichnet genau eines | `gym-muscles.mjs` | 7B, 7C |
 | Hände neutral, Prüfpunkte der Zonen | Validator und ein eigener Test | 7A |
+| Jede Gruppe hat mindestens zehn Übungen nach Hauptmuskel; jede Übung nennt Gerät und Bewegung | `catalogue.test.ts` | 7D |
+| «bauch», «ziehen», «maschine» und «eigengewicht» finden genau ihre Übungen, im Training und im Plan | `search.test.ts`, `exercise-search.mjs` | 7D |
 
 ## §15 Zuordnung zu den Blöcken
 
@@ -327,6 +329,7 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 | 7A Körpermodell | §8 Material, Farbe, Licht, neutrale Zone |
 | 7B Interaktion | §8 Grösse, Bedienung, Bewegung, Treffen, der Weg von Heute; §10 für den Körper; die Messanzeige für Bildrate und Ladezeit |
 | 7C Muskel-Sheet | §9, §6 für das Diagramm im Sheet |
+| 7D Übungskatalog | §3, §4 für die Zeile der Auswahl, §5, §11 für «nichts gefunden», §12, §13 |
 | 9 Härtung | §12 auf dem Gerät, §14 als Ganzes |
 
 ## Anhang

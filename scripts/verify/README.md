@@ -84,6 +84,9 @@ points them all at another one. Never run `npx playwright install`.
 | `stage7c-shots.mjs` | **Not a suite: the pictures of block 7C** (`docs/design/wp3/stage7c/`), on `muscle-sheet.mjs`'s device with one exercise more. At 320, 360, 393 and 430: the ten rows after and before their lines stood in one column (D169 — "before" is the screen with the one rule taken out again); the sheet on both heights, at 90 days, "uneinheitlich", with too little, not trained, declined; once in English. **Two kinds of picture are not the app as built, and their names say so**: `kandidat-*` — the forms a single observation could take (D170), for the row, the sheet's chart and the exercise detail, drawn on a copy of the real element from its real numbers — and `zwei-zahlen-*` — the form of D176 that was not built, two named changes, beside `eine-zahl-*`, the form that was. `OUT=<dir> WIDTHS=393` |
 | `stage7c-travel-cost.mjs` | **Not a suite: what the camera's travel to a group costs under the rising sheet** (block 7C, D185). Three ways, three travels there and back each at 393 × 852 and 3×: the solid sheet as built; nothing at all over the body while it travels (the least "the camera first, then the sheet" can cost); and glass over a blurred scrim, which is forbidden and drawn only to be measured. Reads the measuring display's lines under "Drehen" and counts frames of its own. A software renderer's numbers: a comparison between ways, not a phone. Prints; no exit code |
 | `stage7c-check-files.mjs` | **Not a suite: the import files of the check at STOP 7C, and their proof** (`docs/wp3/stage7c/`). The diary of the earlier STOPs has every group rated and improved and would show one of the sheet's five states; so for each day in `DAYS` the device of `muscle-sheet.mjs` and of the pictures is seeded on a clock that reads that morning in Zurich, and the build exports it through its own "Backup exportieren". An empty device on the same day then imports the file through "Backup importieren" and must show the same ten rows and strip, and in seven sheets what the file is made for — otherwise the script throws. **Its rows are written into the database by the script, not typed through the interface**, and the README beside the files says so. `DAYS=2026-11-16,2026-11-17 OUT=docs/wp3/stage7c` |
+| `exercise-search.mjs` | **The exercise catalogue and its search (block 7D, D171, D188).** What each of the owner's four words must find is read from `catalogue.ts` at run time, not from the search: «bauch» every exercise whose primary group is the core, «zieh» every one that names the pulling movement, «maschine» every one on a machine, «eigengewicht» every one loaded by body weight — and the search is held to that list exactly, no row missing, none more; every row says why it was found. Case and the spellings of an umlaut make no difference («RÜCKEN», «ruecken», «rucken»); two words narrow («kabel brust»); the stored English name still finds its exercise first («Bench Press» → Bankdrücken); a word nobody knows says what was searched and makes «Eigene Übung» the primary action, which opens with the word as its name. Without a query every offered exercise stands exactly once, under one heading per group in the app's order. A found exercise is picked into the workout and into a plan, saved by its id. The English screen finds «abs», «pull», «machine» and «bodyweight» with English headings. At 320, 360, 393 and 430 nothing is cut off, nothing scrolls sideways and every row is a 44px target. `WIDTHS=393` |
+| `stage7d-shots.mjs` | **Not a suite: the pictures of block 7D** (`docs/design/wp3/stage7d/`). The picker in a workout at 320, 360, 393 and 430: without a query, at the top and at the core's heading; with «bauch», «zieh», «maschine», «eigengewicht», «kabel brust» and a word nothing answers; the own exercise opened from the empty search. Once in English («abs», and without a query), once from the plan editor («bauch»). `OUT=<dir> WIDTHS=393` |
+| `stage7d-check-files.mjs` | **Not a suite: the import files of the check at STOP 7D, and their proof** (`docs/wp3/stage7d/`). Made by the live build (`LIVE_URL`, the default branch with its own catalogue): for each day in `DAYS` it imports the diary of STOP 7B for that day, makes a plan of Bankdrücken, Latzug and an exercise of the user's own through its interface, and exports it through "Backup exportieren". The build before the block (`BEFORE_URL`) and the build under test (`URL_APP`) then import the file on an empty device and must show the same Gym rating, rows, strip and plan; the build under test must offer every exercise of its catalogue and the user's own, keep every stored exercise byte for byte, and find the user's own by its name — otherwise the script throws. `LIVE_URL=… BEFORE_URL=… URL_APP=… DAYS=2026-11-17,2026-11-18 OUT=docs/wp3/stage7d` |
 
 Two things worth knowing before writing another suite, both of which produced
 false failures here first:
@@ -293,6 +296,28 @@ so that it ends on its one figure. None of these was removed or weakened.
   line at the group's first day; an exercise's line ends on its figure, on
   the side of the zero line its colour says, and its newest table row reads
   the figure; one recorded day draws a sentence, not a chart.
+
+## Checks restated in block 7D (D188)
+
+The catalogue grew from 49 entries to 133, and the picker's list stands
+under headings until something is typed. No check was removed or
+weakened; these were restated because their rule assumed the small
+catalogue.
+
+- **`catalogue.test.ts`** (unit). *Old:* "has 49 entries". *New:* "has
+  133 entries" — the 49 are held by the three tables as before, byte for
+  byte, and a fourth table pins the 84 new ones.
+- **`phase4.mjs`**. *Old:* "search narrows the list" — «Squat» leaves
+  exactly one row, and the first row is picked. *New:* "«Squat» finds the
+  squats, Kniebeuge and Frontkniebeuge among them" — at least two rows and
+  fewer than fifteen — and Kniebeuge is picked by its name.
+- **`phase4-a11y.mjs`**. *Old:* after «Bench», the first row is picked.
+  *New:* Bankdrücken is picked by its name: «Bench» now also finds «Bench
+  Dip» (Bankdips), which ranks beside it.
+- **`wp3-stage1.mjs`** B11 is not restated: it reads the catalogue's
+  source when it runs and asks that the empty search list every entry. It
+  counts 133 on this block's build and fails on an earlier one — so a run
+  against an earlier build is made from that build's checkout.
 
 ## Conventions
 

@@ -407,6 +407,35 @@ for (const width of WIDTHS) {
     check(`${width} session: "Entfernen" is quiet — no surface, no outline, still a 44px target`,
       session.removeBackground === 'rgba(0, 0, 0, 0)' && session.removeBorder === '0px' && session.removeHeight >= 44, short(session));
 
+    /* The picker of block 7D (D171): the long list under its headings, a
+       search, and the empty state — each measured like every screen. */
+    await page.locator('.gym-session__bar').getByRole('button', { name: /Übung hinzufügen/ }).click();
+    await page.locator('.gym-picker__row').first().waitFor();
+    await page.waitForTimeout(500);
+    await look(page, width, 'uebung-waehlen', 'gym');
+    const picker = await page.evaluate(() => ({
+      headings: document.querySelectorAll('.gym-picker__group').length,
+      hint: document.querySelector('.gym-picker__hint')?.textContent ?? null,
+      hintSize: parseFloat(getComputedStyle(document.querySelector('.gym-picker__hint')).fontSize),
+      headingSize: parseFloat(getComputedStyle(document.querySelector('.gym-picker__group')).fontSize),
+    }));
+    check(`${width} picker: one heading per group and a hint in everyday words, nothing under 11px`,
+      picker.headings === 10 && /Name, Muskel, Gerät oder Bewegung/.test(picker.hint ?? '') && picker.hintSize >= 11 && picker.headingSize >= 11, short(picker));
+    await page.getByRole('textbox', { name: 'Suchen' }).fill('maschine');
+    await page.waitForTimeout(400);
+    await look(page, width, 'uebung-suche', 'gym');
+    await page.getByRole('textbox', { name: 'Suchen' }).fill('xylophon');
+    await page.waitForTimeout(400);
+    await look(page, width, 'uebung-leer', 'gym');
+    const empty = await page.evaluate(() => ({
+      text: document.querySelector('.gym-picker__empty')?.textContent ?? null,
+      primaries: document.querySelectorAll('.sheet .button--primary').length,
+    }));
+    check(`${width} picker: nothing found says what was searched, with "Eigene Übung" the one primary action`,
+      /Keine Übung passt zu «xylophon»/.test(empty.text ?? '') && empty.primaries === 1, short(empty));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(600);
+
     await page.locator('.gym-session .gym-session__back').first().click();
     await page.waitForTimeout(1200);
     await scrollTop(page, '.today__scroll');

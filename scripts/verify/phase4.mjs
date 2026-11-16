@@ -22,7 +22,9 @@ async function openGym(page) {
 /**
  * Since WP2-1 the picker shows a built-in under its German catalogue name
  * while the search still matches the stored English one, so the search
- * narrows by the English name and the first row is the one wanted.
+ * narrows by the English name and the first row is the one wanted — since
+ * block 7D because an exercise whose stored name is the query comes first
+ * ("Bench Press" before "Close-Grip Bench Press").
  */
 async function addExercise(page, name) {
   await page.getByRole('button', { name: /Übung hinzufügen/ }).first().click();
@@ -64,10 +66,15 @@ async function fillSet(page, index, reps, weight) {
     groupLabels.slice(0, 2).join(' | '));
   await page.getByRole('textbox', { name: 'Suchen' }).fill('Squat');
   await page.waitForTimeout(300);
-  check('search narrows the list', (await page.locator('.gym-picker__row').count()) === 1);
+  // Since block 7D the catalogue holds several squats (D171): "Squat" no
+  // longer leaves one row but the squats, each found by its name or its
+  // stored English one. (Until then: exactly one row.)
+  const squats = await page.locator('.gym-picker__name').allTextContents();
+  check('search narrows the list: "Squat" finds the squats, Kniebeuge among them',
+    squats.length >= 2 && squats.length < 15 && squats.includes('Kniebeuge') && squats.includes('Frontkniebeuge'), squats.join(' | '));
   check('a custom exercise is offered',
     await page.getByRole('button', { name: 'Eigene Übung' }).isVisible());
-  await page.locator('.gym-picker__row').first().click();
+  await page.locator('.gym-picker__row').filter({ has: page.locator('.gym-picker__name', { hasText: /^Kniebeuge$/ }) }).click();
   await page.waitForTimeout(700);
 
   /* ── One exercise, several sets ───────────────────────────────────────── */

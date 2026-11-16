@@ -233,22 +233,34 @@ function indexed<T extends SearchableExercise>(entry: T, language: Language): In
   return { entry, name, storedName, nameWords, allWords: [...nameWords, ...extra.flatMap((text) => words(foldText(text)))] };
 }
 
+/** Each part of a query word begins one of the words known. */
+const begins = (word: string, known: readonly string[]): boolean =>
+  words(word).every((part) => known.some((candidate) => candidate.startsWith(part)));
+
 /** A query word is found by the name — anywhere in it — or by the beginning of each of its parts. */
 const foundIn = (word: string, names: readonly string[], known: readonly string[]): boolean =>
-  names.some((name) => name.includes(word)) || words(word).every((part) => known.some((candidate) => candidate.startsWith(part)));
+  names.some((name) => name.includes(word)) || begins(word, known);
 
 /**
  * How well an exercise answers a query — 0 is best — or `null` where it
  * does not: 0 its name is the query, 1 its name begins with it, 2 every
- * word is found by its name, 3 found at all.
+ * word begins a word of its name, 3 every word begins a word it is found
+ * by — its group, detail, movement or equipment — and 4 found only inside
+ * a word of its name.
+ *
+ * The last tier keeps what the search found before block 7D, which matched
+ * any part of a name, and puts it where it belongs: «rücken» lies inside
+ * «Bankdrücken», and a search for the back is not to list bench presses
+ * before the pull-ups.
  */
 function rank<T extends SearchableExercise>(item: Indexed<T>, query: string, queryWords: readonly string[]): number | null {
   const names = [item.name, item.storedName];
   if (!queryWords.every((word) => foundIn(word, names, item.allWords))) return null;
   if (names.includes(query)) return 0;
   if (names.some((name) => name.startsWith(query))) return 1;
-  if (queryWords.every((word) => foundIn(word, names, item.nameWords))) return 2;
-  return 3;
+  if (queryWords.every((word) => begins(word, item.nameWords))) return 2;
+  if (queryWords.every((word) => begins(word, item.allWords))) return 3;
+  return 4;
 }
 
 /**

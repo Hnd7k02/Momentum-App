@@ -196,6 +196,21 @@ describe('the order of the hits', () => {
     expect(rest).toEqual(sorted(rest));
   });
 
+  it('puts a hit found only inside a word last: «rücken» lists the back before Bankdrücken', () => {
+    const hits = names('rücken');
+    expect(hits[0]).toBe('Rückenstrecker Maschine');
+    // «rücken» lies inside «drücken»: what the search found before block 7D
+    // is still found, after every exercise of the back.
+    const presses = ['Bankdrücken', 'Bankdrücken Kurzhantel', 'Bankdrücken Smith Machine', 'Enges Bankdrücken', 'Schulterdrücken Kurzhantel'];
+    expect(hits.slice(-presses.length)).toEqual(sorted(presses));
+    const back = EXERCISE_CATALOGUE.filter((entry) => entry.primary.includes('back') && !entry.deprecated).map((entry) => entry.names.de);
+    const lastBack = Math.max(...back.map((name) => hits.indexOf(name)));
+    expect(back.every((name) => hits.includes(name))).toBe(true);
+    expect(lastBack).toBeLessThan(hits.indexOf('Bankdrücken'));
+    // A word that begins a word of the name is no such hit: «hack» finds the hack squat among the names.
+    expect(names('hack')[0]).toBe('Hackenschmidt-Kniebeuge');
+  });
+
   it('lists everything alphabetically for an empty query', () => {
     const all = names('');
     expect(all).toHaveLength(EXERCISE_CATALOGUE.length);

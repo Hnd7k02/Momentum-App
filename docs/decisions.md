@@ -6091,3 +6091,114 @@ and the line ends on the figure at the head). Added: the first point of
 every line in the sheet stands on the zero line (`muscle-sheet.mjs`), the
 detail's line ends on its figure on the side of the zero line its colour
 says, and one day draws a sentence.
+
+## D188 — Block 7D: the catalogue grows to 133, every entry names its movement and its equipment, and the picker searches all of it
+
+**Decision (block 7D, 2026-11-16).** D171 asked for a really large choice
+— machine, cable and bodyweight first, at least ten per group — and a
+keyword search, in the workout and in the plan editor. The block ran in
+the session of 7C, on the model D187 names. The whole list is in
+`docs/design/wp3/stage7d-katalog.md`, with every assignment hesitated over
+and what was left out; **the new ids may still change until the owner has
+accepted the list** (STOP 7D).
+
+### The catalogue
+
+- **133 entries, 84 of them new.** By primary group (before → after):
+  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 10, triceps
+  6 → 14, core 3 → 15, quadriceps 3 → 11, hamstrings and glutes 5 → 14,
+  calves 2 → 10, forearms 2 → 10 (the deadlift counts for two). By
+  equipment: barbell 21, dumbbell 26, cable 26, machine 26, Smith 4,
+  bodyweight 26, SZ bar 2, kettlebell 1, wrist roller 1. By load type:
+  external 105, bodyweight 26, assisted 2.
+- **The 49 entries before stand as they were**: id, roles, load type,
+  English record name, German name and detail. The three tables of
+  `catalogue.test.ts` pass unchanged; a fourth pins the 84. An existing
+  device gets the new entries the next time Gym opens, and its stored
+  entries — a renamed one included — stay byte for byte (a test holds it).
+  Nothing that computes or stores changed: no golden file, no fingerprint,
+  no schema or backup version.
+- **Where a group is by nature one movement** — the calves are calf
+  raises, the forearms wrist curls and reverse curls — the list reaches ten
+  through the equipment and the stance, as the catalogue already did for
+  the lateral raise. The STOP report says so and asks which of them are
+  not wanted.
+- **Lunges, Bulgarian split squats and step-ups are loaded by body
+  weight**, with dumbbells as added weight, the way push-ups are: most are
+  done unloaded, and logged as dumbbell weight only an unloaded set had no
+  load at all. A bodyweight squat and a bodyweight calf raise exist for the
+  same reason. Every entry loaded by body weight is equipment "Eigengewicht"
+  and no other is.
+- **Left out**: exercises measured in time or distance (side plank, dead
+  hang, wall sit, plate pinch, skipping) — the app measures repetitions ×
+  load, and a new measure is not this block's; the adductor machine — none
+  of the ten groups is the adductors; grip variants that are not exercises
+  of their own.
+
+### Movement and equipment
+
+- **Every entry names its movement** from a fixed list: the six of D171 —
+  `push` drücken, `pull` ziehen, `row` rudern, `bend` beugen, `extend`
+  strecken, `raise` heben — and four the six do not describe: `fly` (the
+  arms round the chest, and the rear-delt flys), `rotate` (the core's
+  rotation), `hold` (the core holding against a force: plank, Pallof press,
+  ab wheel) and `carry` (the farmer's walk). An entry may name several: a
+  row is also a pull, so "zieh" finds every row. The deadlift is a lift
+  (Kreuzheben), found by "heben" and not by "ziehen".
+- **`equipment` is now required, and three values are new**: `ezBar`
+  (SZ-Stange), `kettlebell` and `wristRoller` (Unterarmroller), each with
+  its words in both languages.
+- Both are description, written down per entry like the muscles and never
+  read from a name; nothing that rates reads them.
+
+### The search (`core/gym/search.ts`)
+
+- **What it searches**: the shown name and the stored one (as before), the
+  detail, the primary groups with their synonyms, the movement, the
+  equipment, and body weight — for the user's own exercise its name, its
+  groups and its load type, which is all it has. The words live in one
+  place per language, and a test holds that every group and every piece of
+  equipment is found under the label the screen shows for it.
+- **A group is found by its primary role only.** "bauch" lists the core
+  exercises and no other: a push-up names the core among its groups and is
+  not a core exercise.
+- **Case, umlauts and their spellings fold** ("RÜCKEN", "ruecken", "rucken"),
+  **the beginning of a word is enough**, **several words narrow**, and
+  **what was found before is still found** — any part of a name, the stored
+  English name included.
+- **The order**: the exercise whose name is the query, then names that
+  begin with it, then names in which every word of the query begins a
+  word, then hits by group, detail, movement or equipment, and last what
+  is found only inside a word of a name; alphabetical within each. The
+  prompt asked for name hits before the rest and alphabetical order
+  within; the tiers around it are mine. The two above it, so that a query
+  that names an exercise — "Bench Press", "Bankdrücken" — puts that
+  exercise first among the variants the larger catalogue brings. The one
+  at the end because the search before this block matched any part of a
+  name and still does: «rücken» lies inside «Bankdrücken», and a search
+  for the back is not to list five presses before the pull-ups. They are
+  still found, after the back.
+
+### The picker
+
+- **Without a query the list stands under one heading per muscle group**,
+  in the order the app names the groups everywhere, each exercise once,
+  under its first primary group; a user's own exercise stands under its
+  group like a built-in. With a query it is one list, the best answers
+  first.
+- **Why a row was found is in sight**: its second line names its groups
+  (`describeExercise`, unchanged) and beside them its equipment — unless
+  the name already says it ("Seitheben Kabel", "Bauchmaschine").
+- **The field says what can be searched**, in a sentence under it.
+- **Nothing found** says what was searched and that it can be added as an
+  own exercise; "Eigene Übung" becomes the primary action, and the form it
+  opens starts with the word as its name.
+
+**Checks.** `catalogue.test.ts` (133 entries, where it counted 49; ten per
+group; equipment and movement on every entry; body weight and its
+equipment agree; ids from the English names), `search.test.ts`,
+`gym.test.ts` (the existing device), and the browser suite
+`exercise-search.mjs`, which reads what each word must find from the
+catalogue's source and holds the search to it. Restated:
+`phase4.mjs` ("Squat" finds the squats, where it left one row) and
+`phase4-a11y.mjs` (picks Bankdrücken by name, where it took the first row).

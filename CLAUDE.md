@@ -354,6 +354,14 @@ Never conflate them.
   timeout and no guess may answer it: a user who never answers must keep a
   fully working app and be asked again next time.
 - Colour is never the only carrier of meaning.
+- **A built-in exercise is written down, never inferred** (D87, D93,
+  D171, D188): its groups, its primary ones, its load type, its equipment
+  and its movement stand on its catalogue entry, and none of them is read
+  from a name. The 49 entries before block 7D keep their ids, roles, load
+  types and names for good; an id, once released, is never reused. The
+  search (`core/gym/search.ts`) reads the entry and the words of one place
+  per language; it finds a group by its primary role only, and nothing that
+  rates reads the movement or the equipment.
 - **Mind is the wellbeing domain's one name** (D143), in both languages:
   every label reads one key through `i18n/domainNames.ts`. Its stored id
   stays `mental` (D66), and the question category "Mental" is a different
@@ -651,10 +659,12 @@ in version order and applies the chain in one pass.
 
 ## What this app does not do
 
-No food tracking (D139), no exercise database, no calorie or macro targets, no
-food API, no barcode scanner, no meal planning, no shopping list, no Strava
-OAuth, no backend, no login, no social feed, no avatar editor, no muscle-group
-ranks, no automatic plan changes without the user's approval.
+No food tracking (D139), no exercise database from outside — the catalogue
+ships with the app as code (`core/gym/catalogue.ts`, D171, D188): no
+external database, no API, no pictures, no instructions — no calorie or macro
+targets, no food API, no barcode scanner, no meal planning, no shopping list,
+no Strava OAuth, no backend, no login, no social feed, no avatar editor, no
+muscle-group ranks, no automatic plan changes without the user's approval.
 
 Do not introduce a backend because it would simplify something.
 
