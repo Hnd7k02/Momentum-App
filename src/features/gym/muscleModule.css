@@ -5,6 +5,8 @@
 .muscle-module {
   display: flex;
   flex-direction: column;
+  /* Air under the last row, before the exercises begin. */
+  margin-bottom: var(--space-6);
 }
 
 /* ── The stage ──────────────────────────────────────────────────────────
@@ -56,12 +58,27 @@
 
 /* The SVG figure stands in for the canvas on the same stage, clear of the
    buttons' row at its top. */
+/* The flat figure, where no 3D can be drawn: it stands in the stage the
+   body would stand in, and at the body's size — as tall as the stage lets
+   it be, the front and the back side by side. */
 .muscle-module__figure {
   position: absolute;
-  inset: var(--touch-min) 0 0;
-  display: flex;
+  inset: var(--space-4) 0;
+}
+
+.muscle-module__figure .body-renderer {
+  height: 100%;
+}
+
+.muscle-module__figure .body-renderer__figures {
+  flex: 1;
+  min-height: 0;
   align-items: center;
-  justify-content: center;
+}
+
+.muscle-module__figure .body-renderer__figure {
+  width: auto;
+  height: 100%;
 }
 
 /* ── The metrics strip (contract §4) ────────────────────────────────────
