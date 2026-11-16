@@ -119,6 +119,10 @@ const VIEW_LABEL_KEYS = {
 const TURN_TO_SELECTION_BEYOND = 70;
 /** How long a lost context may take to come back before the canvas is replaced: ms. */
 const CONTEXT_WAIT_MS = 1500;
+/** Stable, so that neither is a new value on a render: see the canvas. */
+const NOTHING = () => undefined;
+const MEASURE = { scroll: false } as const;
+
 /** How often a canvas is replaced before the flat figure stands in. */
 const CANVAS_REPLACEMENTS = 2;
 
@@ -509,6 +513,16 @@ export default function BodyViewer({
     >
       <Canvas
         key={generation}
+        // Two frames nobody asked for, taken away (block 7B, found with the
+        // measuring display). The renderer's root sets "pointer missed" in
+        // its store on every render of this element as long as there is
+        // none, and any change to that store draws a frame: a handler that
+        // does nothing ends that. And it measures the canvas again after
+        // every scroll of the page, for an event system this viewer does
+        // not use — the rig reads the canvas's place when a finger lands —
+        // and a new place is a new size, which draws a frame too.
+        onPointerMissed={NOTHING}
+        resize={MEASURE}
         // iPhone reports 3; capping at 2 saves ~55% of the fill rate with no
         // visible difference at this size.
         dpr={[1, 2]}

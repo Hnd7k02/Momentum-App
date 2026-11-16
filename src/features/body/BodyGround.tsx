@@ -72,6 +72,14 @@ function groundGeometry(): BufferGeometry {
   return geometry;
 }
 
+/**
+ * The ground is not part of the body and answers no tap. One function for
+ * every render: a new one would be a changed prop, and a changed prop on
+ * anything in the scene draws a frame — one for every render of the viewer,
+ * with nothing moving (found with the measuring display, block 7B).
+ */
+const NO_RAYCAST = () => null;
+
 export function BodyGround({ visible }: { visible: boolean }) {
   const geometry = useMemo(groundGeometry, []);
   const material = useMemo(
@@ -85,6 +93,5 @@ export function BodyGround({ visible }: { visible: boolean }) {
     },
     [geometry, material],
   );
-  // No raycast: the ground is not part of the body and answers no tap.
-  return <mesh geometry={geometry} material={material} visible={visible} raycast={() => null} renderOrder={1} />;
+  return <mesh geometry={geometry} material={material} visible={visible} raycast={NO_RAYCAST} renderOrder={1} />;
 }

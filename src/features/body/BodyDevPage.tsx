@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import { signedPercentText } from '../../i18n/typography';
 import type { Language } from '../../i18n';
@@ -169,7 +169,10 @@ export function BodyDevPage() {
   const [held, setHeld] = useState(false);
   const [stage, setStage] = useState('loading');
   const [angle, setAngle] = useState(0);
-  const visuals = visualsOf(FIXTURE);
+  // Renders the page again with nothing changed: a viewer that draws a
+  // frame for that draws one for every render of its host.
+  const [, setRenders] = useState(0);
+  const visuals = useMemo(() => visualsOf(FIXTURE), []);
 
   return (
     <I18nProvider language={LANG} setLanguage={() => undefined}>
@@ -199,6 +202,9 @@ export function BodyDevPage() {
           </button>
           <button type="button" data-action="toggle-pause" onClick={() => setPaused((value) => !value)}>
             {paused ? 'resume' : 'pause'}
+          </button>
+          <button type="button" data-action="rerender" onClick={() => setRenders((count) => count + 1)}>
+            render again
           </button>
         </div>
 
