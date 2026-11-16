@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles, fingerTurn } from './lib.mjs';
 
 /**
  * The Muskelgruppen module in the real Gym workspace.
@@ -838,12 +838,12 @@ for (const [width, height] of [[320, 693], [360, 780], [393, 852], [430, 932]]) 
   await page.locator('[data-readout]').waitFor({ timeout: 20000 });
   await page.waitForFunction(() => /\d\s*ms/.test(document.querySelector('[data-readout] dd')?.textContent ?? ''), null, { timeout: 30000 });
   await settle(page);
-  // Turn the body for a while, let go, wait, copy.
-  const box = await page.locator('.body-viewer canvas').boundingBox();
-  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
-  await page.mouse.down();
-  for (let i = 1; i <= 60; i += 1) await page.mouse.move(box.x + box.width * 0.3 + (i % 20) * 6, box.y + box.height * 0.5);
-  await page.mouse.up();
+  // Turn the body for a while, let go, wait, copy — with a finger that keeps
+  // moving whatever the frames do (`fingerTurn`). Until the end of block 7B
+  // this was sixty `mouse.move`s, each waiting for the one before: one hop
+  // a frame, which the display read as sixty pauses, and said "noch nicht
+  // gedreht". It was right; no finger moves like that.
+  await fingerTurn(page, { ms: 2500 });
   await settle(page);
   await page.waitForTimeout(1500);
   await page.getByRole('button', { name: 'Werte kopieren' }).click();

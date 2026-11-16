@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles, openMuscles, openGymHub } from './lib.mjs';
+import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles, openMuscles, openGymHub, fingerTurn } from './lib.mjs';
 
 /**
  * Not a suite: the pictures of block 7B (`docs/design/wp3/stage7b/`).
@@ -141,12 +141,8 @@ for (const width of WIDTHS) {
     await page.goto(URL_APP, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     await toMuscles(page);
-    const box = await page.locator('.body-viewer canvas').boundingBox();
-    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
-    await page.mouse.down();
-    for (let i = 1; i <= 40; i += 1) await page.mouse.move(box.x + box.width * 0.3 + (i % 20) * 6, box.y + box.height * 0.5);
-    await page.mouse.up();
-    await page.waitForTimeout(3500);
+    await fingerTurn(page, { ms: 3000 });
+    await page.waitForTimeout(4000);
     await page.locator('[data-readout]').evaluate((el) => {
       const scroll = document.querySelector('.areas__scroll');
       scroll.scrollTop += el.getBoundingClientRect().top - scroll.getBoundingClientRect().top - 8;

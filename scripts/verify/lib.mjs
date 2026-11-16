@@ -71,6 +71,48 @@ export async function openGymHub(page, { wait = 600 } = {}) {
   await page.waitForTimeout(wait);
 }
 
+/**
+ * Turns the body with a finger that keeps moving, as a real one does: an
+ * event every `every` ms whatever the frames do, back and forth across the
+ * body, for `ms`, and then lets go while it moves.
+ *
+ * `page.mouse.move` waits until each event has been handled, and a browser
+ * that draws slowly handles one a frame: a finger that hops once a frame,
+ * which no finger does — and which the measuring display rightly reads as a
+ * finger that pauses between hops (D181). Here the events are sent on a
+ * clock and none waits for the one before; the browser hands the page
+ * several at once, each with the time it was made, as it does on a phone.
+ */
+export async function fingerTurn(page, { ms = 2000, y = 0.5, from = 0.2, to = 0.8, step = 4, every = 8 } = {}) {
+  const client = await page.context().newCDPSession(page);
+  const box = await page.locator('.body-viewer canvas').boundingBox();
+  const py = box.y + box.height * y;
+  const left = box.x + box.width * from;
+  const right = box.x + box.width * to;
+  const send = (type, x, extra) => client.send('Input.dispatchMouseEvent', { type, x, y: py, pointerType: 'mouse', ...extra });
+  await send('mouseMoved', left, { button: 'none' });
+  await send('mousePressed', left, { button: 'left', buttons: 1, clickCount: 1 });
+  const sent = [];
+  let x = left;
+  let direction = 1;
+  await new Promise((resolve) => {
+    const begun = Date.now();
+    const timer = setInterval(() => {
+      if (Date.now() - begun >= ms) {
+        clearInterval(timer);
+        resolve();
+        return;
+      }
+      x += direction * step;
+      if (x >= right || x <= left) direction = -direction;
+      sent.push(send('mouseMoved', x, { button: 'left', buttons: 1 }).catch(() => undefined));
+    }, every);
+  });
+  await Promise.all(sent);
+  await send('mouseReleased', x, { button: 'left', buttons: 0, clickCount: 1 });
+  await client.detach().catch(() => undefined);
+}
+
 /** Reads the stored domains straight out of IndexedDB. */
 export async function storedDomains(page) {
   return page.evaluate(async () => {

@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles, fingerTurn } from './lib.mjs';
 
 /**
  * Not a suite: the measuring display, read in the headless browser
@@ -72,24 +72,8 @@ async function visit(page) {
   await page.waitForTimeout(800);
 }
 
-/** Turns the body with a finger that keeps moving: back and forth, for `ms`. */
-async function turn(page, ms) {
-  const box = await page.locator('.body-viewer canvas').boundingBox();
-  const y = box.y + box.height * 0.5;
-  const left = box.x + box.width * 0.2;
-  const right = box.x + box.width * 0.8;
-  await page.mouse.move(left, y);
-  await page.mouse.down();
-  const begun = Date.now();
-  let x = left;
-  let direction = 1;
-  while (Date.now() - begun < ms) {
-    x += direction * 4;
-    if (x >= right || x <= left) direction = -direction;
-    await page.mouse.move(x, y);
-  }
-  await page.mouse.up();
-}
+/** Turns the body with a finger that keeps moving: back and forth, for `ms` (`fingerTurn`). */
+const turn = (page, ms) => fingerTurn(page, { ms });
 
 async function measure(page, label) {
   await visit(page);
