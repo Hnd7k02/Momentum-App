@@ -145,6 +145,38 @@ Never conflate them.
   straight to the address, the hub. The hub stays the place for training,
   plans and running and is one tap from Muskelgruppen. Heute loads neither
   the viewer nor the model.
+- **A tap on a muscle or on a row opens the group's sheet, and the
+  selection is the open sheet** (D185, contract §9): one group is chosen
+  while its sheet stands and none once it has gone. A row is a button that
+  opens a dialog, not a toggle. Nothing stands under the ten rows but the
+  way to the hub: the exercises of a group are in its sheet, and an
+  exercise's detail is opened from there and lies **on top of**
+  Muskelgruppen — the body beneath is never taken down. Back walks step by
+  step, exercise, sheet, screen, by the button and by the browser alike,
+  and the address changes for none of it.
+- **The sheet shows the row's number and computes none** (D186): its state
+  and figure are the `ShownMuscle` the row and the body read, its line is
+  `muscleTrend()`, an exercise's change is `exerciseSpans()`
+  (`features/gym/muscleSheet.ts`). The body says what it draws for each
+  group, read back from its colours (`drawnState`), and `muscle-sheet.mjs`
+  compares the three for all ten groups.
+- **One exercise has one change** (D176, D186): the one in the range the
+  screen shows — the comparison its groups' figures are the mean of
+  (`exerciseChanges`). It stands in the exercise's row in the sheet and at
+  the head of the exercise detail, with its state and under the same
+  words. No other percentage of an exercise is printed: "Zuletzt" and
+  "Davor" are two sets, and the detail's line ends without a figure. Do
+  not print a second change for an exercise without a name that says what
+  it compares, and never one that differs between the sheet and the detail.
+- **Work volume is shown and never scored** (D152, D186): Σ reps ×
+  effective load over the working sets, per group and week
+  (`core/gym/volume.ts`), spread over an exercise's groups by the shares
+  the rating spreads its change by and by the roles the day was logged
+  under. It enters no rating, no Boss share, no state and no colour — its
+  bars are neutral, the last one included — and nothing under
+  `core/scoring`, no rating service and not `muscleState.ts` may read it
+  (`volumeUnscored.test.ts`). The sets reach the screen through
+  `loadGymRange`, which stores nothing.
 - Mind's questions are asked **daily**. There is no rhythm engine, no
   per-question schedule, and there never will be.
 - Gym and Running are independent weekly quotas, never a combined one.
@@ -359,9 +391,29 @@ Never conflate them.
   solid, and **a sheet stands over a still body** (D182). Every sheet asks
   whatever can draw by itself to stop and stands once it has
   (`app/stillness.ts`); under it no frame arises unless one is asked for.
-  Do not open a sheet over the body by another way, and do not give the
-  stage a card. The ground is one layer, painted by the shell and by a
-  full-screen overlay; a header never paints it again.
+  **The one sheet that rises over a body still on its way is the muscle
+  sheet, and it has no glass at all** (D185): a solid surface on a scrim
+  that neither dims nor blurs (`overBody`), at every moment, while the
+  camera brings the group into the strip above it; its screen holds the
+  viewer from the moment the camera rests. Do not open a sheet over the
+  body by another way, and do not give the stage a card. The ground is one
+  layer, painted by the shell and by a full-screen overlay; a header never
+  paints it again.
+- **A sheet is as tall as its content and does not move — except the one
+  with two heights** (D185, contract §9): the muscle sheet opens at two
+  thirds of the screen, is dragged to 92 % and down to close, and hands a
+  drag over between itself and its content as a phone does
+  (`components/sheetDetents.ts`); the two shares are tokens. **A grabber
+  stands only where one can drag**, and there it is a control with a name
+  that changes the height. Do not give a sheet with fields a drag, and do
+  not draw a grabber on a sheet that cannot be dragged.
+- **A layer that Back closes owns a history entry with the address of the
+  screen it lies on** (D185, `app/backLayer.ts`): the muscle sheet and the
+  exercise detail opened from it. A sheet is still not a place — no link
+  names it and none is restored from an address — and `route.ts` knows of
+  layers only that a move from a layer's entry takes that entry over. Do
+  not write a layer into the hash, and do not call `history.back()` for one
+  by hand: the entries follow the layers by counting.
 - **Text on glass is measured, not assumed** (D147, D149).
   `design-system.mjs` reads the rendered pixels under every visible run of
   text on every screen at 320, 360, 393 and 430 and holds all of it at
@@ -388,12 +440,15 @@ Never conflate them.
   with three
   exercise days in the range and an exercise on two days, otherwise it is
   "Zu wenig Vergleichsdaten". The body, the flat figure, the rows, the
-  hub's card, the trend above the rows, the exercise list and detail and
-  the golden test all read it; none rounds, compares or counts on its own.
+  hub's card, the trend above the rows, the muscle sheet, the exercise
+  detail and the golden test all read it; none rounds, compares or counts
+  on its own. **"uneinheitlich"** is its word too (`isUneven`, D186): the
+  exercises of a group more than ten points apart *as shown* — a word
+  beside the figure in the sheet, not a state, colouring nothing.
   "Gewertet" means the row prints a figure. Which group an exercise
   belongs to is asked once as well (`exerciseGroups`): the domain's answer,
   its roles as of its latest day in the range — for the count, a row's
-  recency, the trend's days and the exercises of a chosen group. All of it
+  recency, the trend's days and the exercises in a group's sheet. All of it
   is presentation: the rating reads its own windows and `src/core` knows
   none of it.
 - **"Gehalten" is neutral, never the warning yellow** (D153, D161): the
@@ -449,6 +504,14 @@ Never conflate them.
   leave the selection. A drag that begins up or down is the page's. The
   page's own zoom is never locked. A host can hold the viewer; held, it
   draws exactly one frame when what it shows changes, and advances nothing.
+  **Above its sheet the body shows the chosen group** (D185): the host
+  names the strip of the stage the sheet leaves free, and the camera
+  travels to the window that puts the group in it (`framing.focusOn`) —
+  zoom and place, never the angle, whatever zoom the fingers had left —
+  and back to the whole picture at 1.0 when the strip is gone. A region's
+  box is the box of the triangles it draws (`BodyModel.regionBox`): the
+  regions share one vertex buffer. **A touch that changes nothing draws
+  nothing** (D184).
   While the still stands in, a finger moves nothing, and a lost context
   sets the view back to the start: the body returns where its still stood.
   **Nothing in the body's scene is given a value that is new on every
@@ -501,11 +564,21 @@ Never conflate them.
   exercise detail draws a line** (D175): each day as its change since the
   first day shown, on that scale — widened in steps of four where a series
   goes further, never cut off and never from the smallest day to the
-  largest — with the end value beside the plot, and one day as a dot
-  without a value.
+  largest — and one day as a dot. No figure stands at its end (D176): its
+  end point carries the state of the exercise's one change, which stands
+  at the head. **The sheet's chart** is the group's line on the rows'
+  scale: what goes beyond 8 % stays at the edge and the figure beside the
+  end point says how far it went; a series that rises and falls has the
+  zero line in the middle. **The work volume's bars carry no state's
+  colour** (D152) — the one chart whose last bar does not. All lines of
+  the ten rows stand in one column (D169): beside a chart the figure's
+  column has one width.
 - **A screen that loads holds its layout** with calm surfaces
   (`LoadingBlocks`), no shimmer — and never for a load that failed, which
-  says so and can be retried (`LoadFailure`). The body is there before its
+  says so and can be retried (`LoadFailure`). The hub's "Muskelgruppen"
+  card is as tall before its history arrives as after and its title stands
+  in the same place (D168): its text begins at the picture's top and grows
+  downwards only — do not centre it again. The body is there before its
   history: the stage stands from the first render with the body's still in
   it, and the viewer's code and the model load beside the history, not
   after it (D182).

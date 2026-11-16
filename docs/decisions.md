@@ -5694,3 +5694,273 @@ Both are needed only when something was moving or was moved. Two frames a
 touch cost nothing, but they are frames nobody needed and they make the
 display's idle line read "2" after a tap. A point for block 7C, which
 rebuilds what a touch on the body does while a sheet is open.
+
+## D185 — Block 7C: the muscle sheet — two heights, a finger, a Back that closes it, and the body above it
+
+**Decision (block 7C, 2026-11-16).** A tap on a muscle of the body or on a
+group's row opens the group's sheet (contract §9, D152, D155, D161). This
+entry holds how the sheet behaves; what it shows is D186. The block ran in
+the session of block 7B, at the owner's instruction ("Mach mit WP3 weiter
+…"), where D159 has each block start in a fresh session; the model was the
+one D159 names.
+
+### Two heights and a finger
+
+- **The sheet opens at two thirds of the screen and is dragged to 92 %**;
+  dragged down, it closes. The two shares are tokens
+  (`--sheet-detent-lower`, `--sheet-detent-upper`), and the sheet is one box
+  as tall as the upper height that stands on the screen's bottom and is
+  moved down by an offset — a drag writes that offset and nothing is laid
+  out again while a finger moves (`components/sheetDetents.ts`). It travels
+  with the sheet's one duration and the one curve; under reduced motion
+  both take no time.
+- **Who a drag belongs to is decided once, with its first movement**, the
+  way a phone decides it. On the lower height every vertical drag is the
+  sheet's — up raises it, and what the finger goes on after the upper
+  height scrolls the content, in the same gesture. On the upper height a
+  drag on the content scrolls the content; only at the content's very
+  start does a drag down take the sheet with it, back to the lower height
+  and from there away. The grabber and the header always move the sheet. A
+  drag that begins sideways is nobody's. The page behind never moves.
+- **Letting go**: a flick — faster than half a pixel a millisecond — goes
+  one step in its direction from where the sheet is; let go slowly, the
+  sheet takes the nearer height and goes away only once it was pulled 35 %
+  of the way from the lower height to gone. These three numbers are
+  behaviour, like the body's motion, and live in `SHEET_DRAG`, not in the
+  tokens.
+- **The grabber is a control with a name** — "Ansicht vergrössern" /
+  "Ansicht verkleinern" — that changes the height by a tap or a key, on a
+  target of 88 × 44; the cross and Escape stay.
+- **Only this sheet is dragged, and so only this sheet has a grabber.**
+  Every other sheet is as tall as its content, and most of them carry
+  fields: a header that can be dragged beside a keyboard is one more way
+  to lose what was typed, and nobody asked for it. A grabber that cannot
+  be dragged promises what the sheet does not do, so it is gone from
+  those sheets; their header keeps the room it took and nothing on them
+  moved (`wp3-sheets.mjs` unchanged, 330 of 330).
+
+### Back closes the sheet, and the address knows nothing of it
+
+- `route.ts` said "sheets … are not places and never enter the URL", and
+  the contract wants the browser's Back to close this sheet instead of
+  leaving the screen. Both hold: **an open layer owns one history entry
+  with the very address of the screen it lies on**, marked in its state
+  with how many layers lie there (`app/backLayer.ts`). Back pops the
+  entry, the address does not change, and the layer's owner is told to
+  close it. Closing it any other way takes the entry along. The history is
+  made to follow the layers by counting, in one step after the render that
+  changed them — so a layer that closes while another opens reuses the
+  entry, two that close at once go back two, and a step back this module
+  took for a layer closed by hand is never mistaken for the user's.
+- **Two layers use it: the muscle sheet and the exercise detail opened
+  from it.** Back walks step by step — exercise, sheet of the same group,
+  Muskelgruppen — by the button and by the browser alike. Every other
+  sheet is as before: Back leaves the screen under it. Making Back close
+  every sheet is one line per sheet and a question for the owner (STOP
+  7C); it was not done unasked because it changes what a gesture does on
+  every screen of the app.
+- A move made while a layer's entry is on top (`navigate`) takes that
+  entry over instead of adding one, so no entry without a place is left
+  behind; and a Back that only closed a layer renders nothing in the
+  shell — the place did not change.
+
+### The selection is the open sheet
+
+- Until this block a row was a toggle that filtered a list of every
+  exercise under the ten rows, and a tap on the body selected without
+  opening anything. Now **one group is chosen while its sheet stands, and
+  none once it has gone**. A row is a button that opens a dialog
+  (`aria-haspopup="dialog"`), no longer a toggle with a pressed state; it
+  is marked while its sheet stands.
+- **Nothing stands under the ten rows but the way to the hub.** The
+  exercises of a group are in its sheet, each with the figure that enters
+  the group's; a list of every exercise beside that would be the same
+  exercises a second time with nothing to say about a group. The
+  catalogue of all exercises is block 7D's.
+- **The exercise detail lies on top of Muskelgruppen instead of replacing
+  it.** The body beneath is never taken down, stays held, and draws
+  nothing; the sheet is out of sight and out of reach while the exercise
+  is open (`suspended`) and stands again at the height and the place it
+  was left. Focus goes to the detail and returns to the exercise's row;
+  from a sheet it returns to the group's row, whichever way the sheet was
+  opened — a tap on the body has no opener to go back to.
+
+### The body above the sheet
+
+- **The page brings the stage under the header** when the sheet opens, and
+  returns to where the user had it when the sheet goes. What is left of
+  the stage above the sheet's lower height — about 190px on an iPhone — is
+  a strip, and the camera travels to the window of the picture that shows
+  the group in the middle of that strip, as large as it fits with 8 % of
+  room and never larger than 2.6 (`framing.focusOn`). A group at the feet
+  is lifted into the strip: the window may run past the picture's edge,
+  where only the sheet is.
+- **The angle is not the camera's business here.** After a tap on the body
+  it does not change — a tap never turns the body (contract §8). Opened
+  from the list, the body has turned to the group first when it faced
+  away, by the rule of block 7B. Whatever zoom the fingers had left is
+  replaced by the travel; when the sheet goes, the stage is at 1.0 again
+  and the angle stays.
+- **The order**: the sheet rises, the camera travels, and the screen holds
+  the viewer from the moment the strip is known — so the hold takes hold
+  when the camera has arrived and not a frame before. From then on no
+  frame arises under the sheet; a change of the range draws exactly one;
+  an exercise opened on top draws none. On closing, the hold ends first
+  and the camera travels back. Under reduced motion the camera jumps.
+- **Nothing blurs over the body while a frame is drawn** (D146). The
+  prompt named two ways: both surfaces solid until the camera rests, or
+  the camera at its goal before the sheet reaches the body. Built is the
+  first, and for good: the muscle sheet is a solid surface and its scrim
+  neither dims nor blurs, at every moment — not only until the camera
+  rests. The second way keeps the sheet back for the length of a camera
+  travel after the tap, which is what a tap must not feel like; and glass
+  switched on once the camera rests would be a surface that changes its
+  look a second after it has risen. Measured with the measuring display
+  (`scripts/verify/stage7c-travel-cost.mjs`: three travels there and back
+  at 393 × 852, 3×, in the headless browser's software renderer — a
+  comparison between ways, not a phone's numbers): solid as built, 7.4
+  frames a second and a longest frame of 190 ms; with nothing at all over
+  the body while it travels, the least the second way can cost, 7.9 and
+  197 ms; and the forbidden glass over a blurred scrim, 5.8 and 328 ms.
+  The two permitted ways draw alike; the blur is the dear one. The frame
+  rate decides nothing between them, so the tap does: the sheet answers
+  at once.
+- **The stage's own buttons are out of sight under the sheet**: they stand
+  in the strip, and nobody can reach them through the scrim.
+- **A tap on the body above the sheet closes it and chooses nothing.**
+
+### Found on the way
+
+- **Every region had the box of the whole body.** The regions share one
+  vertex buffer and each draws its own triangles of it;
+  `Box3.setFromObject` reads a geometry's whole position attribute. Block
+  7B's "a zoom keeps the chosen group in its window" therefore kept the
+  body's middle in the window. A region's box is now built from the
+  vertices its own indices name (`BodyModel.regionBox`). Nothing of 7B's
+  checks changed for it: a group is chosen only while its sheet stands,
+  and fingers do not reach the body then.
+- **A touch that changes nothing draws nothing** (the point D184 left for
+  this block): a finger that lands on a body at rest and lifts again asks
+  for no frame; one that stops a motion or moves the camera asks for the
+  one that shows it.
+
+**Checks.** `muscle-sheet.mjs` (new, run alone) and `gym-muscles.mjs` hold
+all of the above in the browser; `sheetDetents.test.ts`, `sheet.test.tsx`,
+`backLayer.test.tsx` and `framing.test.ts` hold the rules without one.
+Every rewritten check is listed with its old and its new rule in
+`scripts/verify/README.md`.
+
+## D186 — Block 7C: what the sheet shows — one change for one exercise (D176), the work volume (D152), and the three findings from the iPhone (D168–D170)
+
+**Decision (block 7C, 2026-11-16).**
+
+### The same number, from the same place
+
+- The sheet's state and figure are the very `ShownMuscle` the row and the
+  body read (`shownPerformance`); its line is `muscleTrend()` without the
+  row's cap of twelve points, whose last point is that figure by
+  construction; an exercise's change is `exerciseSpans()`. The sheet
+  computes nothing (`features/gym/muscleSheet.ts`). The body says what it
+  draws for each group on its element, read back from the colours its
+  materials are given (`drawnState`), and a check compares the three for
+  all ten groups on a device with all five states.
+- **The chart** stands on the rows' scale: 8 % reaches the edge and what
+  goes beyond stays there, with the figure beside the end point saying how
+  far it went. A series that only rises stands above its zero line, one
+  that only falls below it, and **one that does both has the zero line in
+  the middle and three labels** — the contract names two ("0 %" and "+8 %"
+  or "−8 %"); a group's line begins at its first comparable day and often
+  crosses zero, and a line cut off at zero would be wrong. The figure
+  stands right of the line, on its height, as in the rows and the exercise
+  detail — in mock-up 2 it stands above the end point, where a falling
+  line runs through it.
+- **"uneinheitlich"** is said where the exercises of a group lie more than
+  ten points apart **as their figures are shown**: +8 % and −2 % are ten
+  and are not, +9 % and −2 % are. The word must be what the figures beside
+  it say, for the reason the band reads the shown figure (`isUneven` in
+  `muscleState.ts`). It stands as a neutral chip beside the state, with one
+  sentence above the exercises; it is a word, not a state, and colours
+  nothing. It is said only beside a figure: a group with too little to
+  compare states no mean to qualify.
+- **Too little to compare**: no chart; the sentence the row's group always
+  had; and under "Erfasst" every exercise-day of the group in the range,
+  newest first. A recorded day leads to its exercise, as a row of the
+  exercises does — with the list under the rows gone it is the only way to
+  an exercise whose groups all have too little.
+- **Not trained in the range**: a sentence, and when the group was last
+  trained before the range (`lastTrainedBefore`, read with the history in
+  one load) — or that it never was, where that was read and nothing
+  found — and the one action, "Training erfassen". Not trained in the
+  range is not "never".
+- **The range in the sheet is the screen's own.**
+
+### One change for one exercise (D176)
+
+- **Built is the form with one figure**: an exercise's change is the one
+  in the range — the comparison its groups' figures are the mean of, the
+  median of its last days against the median of its first — and that
+  figure stands in the exercise's row in the sheet and at the head of the
+  exercise detail, with its state and under the same words, "Bester
+  Arbeitssatz · letzte N Tage" (`exerciseChanges`).
+- On the exercise detail **"Zuletzt" and "Davor" are two sets, and no
+  percentage stands between them** — the comparison with the day before is
+  there as what it is, two sets with what they were. **The line still draws
+  each day at its change since the first day shown, and its end carries no
+  figure**; a sentence under the chart says what the line draws. The end
+  point carries the state of the exercise's one figure.
+- Of the three numbers D176 names, one is left on the screen. The change
+  since the first day stays in the table that reads the line out, column
+  by column, under its own name.
+- **Why one and not two named ones**: body, row and sheet say one number
+  for a group, and the sheet answers "why does this group stand as it
+  does" — with one number an exercise, the group's figure can be read off
+  its exercises. Two named figures would have to stand in every row of the
+  sheet as well (D176: the same in both places), and an exercise could be
+  green and "Gehalten" in one row. The other form is drawn beside the
+  built one in `docs/design/wp3/stage7c/`, and the question goes to the
+  owner at STOP 7C.
+
+### The work volume (D152)
+
+- **Σ reps × effective load over the working sets, per group and week**
+  (`core/gym/volume.ts`). A set marked as a warm-up is out, and so is a
+  set that describes no work; the load is the one the metric reads; a week
+  belongs to its Monday.
+- **A group's share of an exercise is the share the rating spreads the
+  exercise's change by** (`muscleWeights`): primaries 70 %, secondaries
+  30 %, a single group all of it. One exercise is worth one exercise
+  (D92): counted in full for every group it names, a compound movement
+  would make the body's volume grow with the number of groups. **By the
+  roles the day was logged under**, not by today's catalogue: a volume is
+  a sum of what was done.
+- **The weeks of a range are whole weeks**: every week that lies wholly
+  inside it, and the running one. A week only partly inside the range at
+  its start is left out — its bar would stand for less than the week held.
+  30 days are four or five weeks, 90 days twelve or thirteen.
+- **Neutral bars from zero, and none of them in a state's colour** — not
+  the last one either, where contract §6 gives the last bar the state of
+  its change: by D152 the volume enters no colour. A week without a
+  working set is a gap with its week's name, never a bar of no height.
+  Up to five weeks each bar carries its value; from six on the bars stand
+  on the contract's axis.
+- **Nothing that rates reads it**: `volumeUnscored.test.ts` walks the
+  sources. The sets reach the screen through `loadGymRange`, which hands
+  on the read the history is built from; nothing is stored.
+
+### The three findings (D168–D170)
+
+- **D168, built.** The card's text begins at its picture's top and grows
+  downwards only; the card is as tall as its picture in every state. With
+  the load held back, `muscle-card.mjs` measures each of the card's six
+  states at four widths, and English at the narrowest: before the change
+  the title moved by 10 to 30px in 18 of 24 cases, the height never. Whether
+  the doubled title is gone is the owner's to see on the iPhone; if he
+  still sees it with a title that no longer moves, the cause is another.
+- **D169, built.** Beside a chart the figure's column has one width in
+  every row. `muscle-sheet.mjs` compares the charts' edges in both
+  languages at four widths, with "Zurückgegangen" and "+100 %" among the
+  rows.
+- **D170, drawn, not built.** The candidates are drawn with real data for
+  the row, the sheet's chart and the exercise detail
+  (`docs/design/wp3/stage7c/`), with a recommendation; the build keeps the
+  dot until the owner has chosen.

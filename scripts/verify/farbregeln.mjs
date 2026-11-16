@@ -693,11 +693,11 @@ for (const width of WIDTHS) {
     JSON.stringify(rows90.filter((r) => r.name !== NAME.calves).map((r) => [r.name, r.delta, r.state])) === JSON.stringify(rows.filter((r) => r.name !== NAME.calves).map((r) => [r.name, r.delta, r.state])));
   const tile90 = await page.locator('.muscle-strip__cell').nth(1).getAttribute('aria-label');
   check(`${W}: and eight groups are rated`, tile90?.trim() === '8 von 10 Gruppen gewertet', String(tile90));
-  const sentence90 = await pick('hamstringsGlutes');
+  const sentence90 = await sentenceOf('hamstringsGlutes');
   check(`${W}: the sentence names the range on show`, sentence90 === '2 Übungstage in den letzten 90 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.', String(sentence90));
-  await pick('hamstringsGlutes');
+  await closeGroupSheet(page);
   await scrollTop(page);
-  // Choosing a row turned the body to that group; the picture is of the front.
+  // Opening a row's sheet turned the body to that group; the picture is of the front.
   if ((await page.locator('.body-viewer canvas').count()) > 0) {
     await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne', exact: true }).click();
     await page.waitForTimeout(3000);

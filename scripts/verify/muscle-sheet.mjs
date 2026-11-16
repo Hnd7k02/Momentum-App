@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core';
 import { mkdirSync } from 'node:fs';
 import {
-  CHROMIUM, URL_APP, check, summary, onboard, openGymHub, openMuscles, seed, setLanguage,
+  CHROMIUM, URL_APP, check, summary, onboard, openGymHub, openMuscles, seed, seedSheetProfile, setLanguage,
   openGroup, openRow, openGroupSheet, closeGroupSheet, sheetGone, bodyAtRest, sheetExercises, openSheetExercise, closeExercise,
 } from './lib.mjs';
 
@@ -66,93 +66,7 @@ const WATCH_BLUR = () => {
   };
 };
 
-/**
- * The device: every group in a state of its own, set by its sets. A set
- * carries the groups and roles it was logged under, so each exercise here
- * reaches exactly the groups named.
- *
- *   chest        bench press 9×60, 10×60, 8×62.5, 9×62.5 — the check data's
- *                bench: +1.5 % in the range, shown "+2 %"; triceps with it
- *   back         a row that rises a fifth and six exercises that hold: uneven
- *   shoulders    pressed 80, 62 and 44 days ago: nothing in the last 30 days
- *   biceps       curls on two days: too little to compare
- *   core         crunches falling a tenth: declined
- *   quadriceps   squats doubling: +100 %
- *   hamstrings   leg curls, three days alike: held
- *   calves       one day: too little to compare
- *   forearms     the curls' two days and one carry: a single observation, +6 %
- */
-async function seedProfile(page) {
-  await page.evaluate(async () => {
-    const open = () => new Promise((res, rej) => { const r = indexedDB.open('momentum'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-    const all = (db, s) => new Promise((res, rej) => { const r = db.transaction([s], 'readonly').objectStore(s).getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-    const pad = (n, l = 2) => String(n).padStart(l, '0');
-    const key = (d) => `${pad(d.getFullYear(), 4)}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    const shift = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return d; };
-    const isoWeek = (d) => { const t = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12); t.setDate(t.getDate() - ((t.getDay() + 6) % 7) + 3); const y = t.getFullYear(); const f = new Date(y, 0, 4, 12); f.setDate(f.getDate() - ((f.getDay() + 6) % 7) + 3); return `${pad(y, 4)}-W${pad(1 + Math.round((t - f) / (7 * 86400000)))}`; };
-    const db = await open();
-    const snaps = await all(db, 'configSnapshots');
-    const stamp = new Date().toISOString();
-    const sessions = new Map();
-    const sets = [];
-    const exercises = new Map();
-    let order = 0;
-    const log = (back, id, name, muscles, primary, kg, reps, extra = {}) => {
-      const at = shift(-back);
-      const date = key(at);
-      const sessionId = `sheet-gym-${date}`;
-      if (!sessions.has(sessionId)) {
-        sessions.set(sessionId, { id: sessionId, date, weekKey: isoWeek(at), performedAt: new Date(shift(-back).setHours(18, 0, 0, 0)).toISOString(),
-          planId: null, note: null, legacyCarryOver: false, configSnapshotId: snaps[0].id, createdAt: stamp, updatedAt: stamp });
-      }
-      order += 1;
-      sets.push({ id: `sheet-set-${order}`, sessionId, exerciseId: id, date, weightGrams: Math.round(kg * 1000), reps, order,
-        muscles, primaryMuscles: primary, loadType: 'external', createdAt: stamp, ...extra });
-      exercises.set(id, { id, name, muscles, primaryMuscles: primary, builtIn: false, loadType: 'external', durationSeconds: null, attributes: {}, createdAt: stamp, updatedAt: stamp });
-    };
-    // Chest and triceps: the bench press of the check data, with a warm-up
-    // and a second working set on its first day.
-    log(26, 'sx_bench', 'Bankdrücken', ['chest', 'triceps'], ['chest'], 40, 12, { warmUp: true });
-    log(26, 'sx_bench', 'Bankdrücken', ['chest', 'triceps'], ['chest'], 60, 9);
-    log(26, 'sx_bench', 'Bankdrücken', ['chest', 'triceps'], ['chest'], 60, 8);
-    log(19, 'sx_bench', 'Bankdrücken', ['chest', 'triceps'], ['chest'], 60, 10);
-    log(12, 'sx_bench', 'Bankdrücken', ['chest', 'triceps'], ['chest'], 62.5, 8);
-    log(5, 'sx_bench', 'Bankdrücken', ['chest', 'triceps'], ['chest'], 62.5, 9);
-    // Back: one exercise rises a fifth and six hold — more exercises than
-    // the sheet shows at once, so its content scrolls on every phone.
-    for (const back of [24, 17, 10]) log(back, 'sx_pulldown', 'Latzug', ['back'], ['back'], 55, 8);
-    [[24, 40], [17, 44], [10, 48]].forEach(([back, kg]) => log(back, 'sx_row', 'Rudern am Kabel', ['back'], ['back'], kg, 8));
-    [['sx_tbar', 'T-Bar-Rudern', 50], ['sx_dbrow', 'Kurzhantelrudern', 26], ['sx_machine', 'Rudermaschine', 45], ['sx_pullover', 'Überzug am Kabel', 25], ['sx_face', 'Face Pulls', 20]]
-      .forEach(([id, name, kg]) => { for (const back of [13, 3]) log(back, id, name, ['back'], ['back'], kg, 10); });
-    // Shoulders: before the last 30 days, inside the last 90.
-    [[80, 40], [62, 42], [44, 44]].forEach(([back, kg]) => log(back, 'sx_press', 'Überkopfdrücken', ['shoulders'], ['shoulders'], kg, 8));
-    // Biceps: two days, a little more on the second. The forearms come
-    // along as a secondary group.
-    [[15, 16], [6, 17]].forEach(([back, kg]) => log(back, 'sx_curl', 'Hammercurls', ['biceps', 'forearms'], ['biceps'], kg, 10));
-    // Forearms: a third exercise day, of an exercise recorded once.
-    log(10, 'sx_carry', 'Farmer’s Walk', ['forearms'], ['forearms'], 30, 12);
-    // Core: falling a tenth.
-    [[22, 40], [15, 38], [8, 36]].forEach(([back, kg]) => log(back, 'sx_crunch', 'Crunch am Kabel', ['core'], ['core'], kg, 10));
-    // Quadriceps: doubling. Hamstrings and glutes: three days alike.
-    [[23, 50], [16, 75], [9, 100]].forEach(([back, kg]) => log(back, 'sx_squat', 'Kniebeuge', ['quadriceps'], ['quadriceps'], kg, 5));
-    for (const back of [23, 16, 9]) log(back, 'sx_legcurl', 'Beinbeuger', ['hamstringsGlutes'], ['hamstringsGlutes'], 45, 10);
-    // Calves: one day.
-    log(8, 'sx_calf', 'Wadenheben', ['calves'], ['calves'], 40, 12);
-    await new Promise((res, rej) => {
-      const tx = db.transaction(['gymSessions', 'gymSets', 'exercises'], 'readwrite');
-      tx.objectStore('gymSessions').clear();
-      tx.objectStore('gymSets').clear();
-      for (const record of sessions.values()) tx.objectStore('gymSessions').put(record);
-      for (const record of sets) tx.objectStore('gymSets').put(record);
-      for (const record of exercises.values()) tx.objectStore('exercises').put(record);
-      tx.oncomplete = () => res();
-      tx.onerror = () => rej(tx.error);
-    });
-    db.close();
-  });
-}
-
-/** What the profile above must read as, group by group, in the last 30 days. */
+/** What `seedSheetProfile` must read as, group by group, in the last 30 days. */
 const EXPECT = {
   chest: { name: 'Brust', state: 'improved', figure: `+2${NBSP}%` },
   back: { name: 'Rücken', state: 'improved', figure: `+3${NBSP}%`, uneven: true },
@@ -179,7 +93,7 @@ async function open(width, { language = 'de', reducedMotion = 'no-preference', i
   await page.waitForTimeout(400);
   await onboard(page, { gym: 3, running: 2 });
   await seed(page, { days: 90 });
-  await seedProfile(page);
+  await seedSheetProfile(page);
   if (language !== 'de') await setLanguage(page, language);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
