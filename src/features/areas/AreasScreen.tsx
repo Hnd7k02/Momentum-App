@@ -218,6 +218,7 @@ export function AreasScreen({
   section,
   onSelectTerminal,
   onOpenSection,
+  onOpenHub,
 }: {
   configuration: AppConfiguration;
   actions: AreasActions;
@@ -225,7 +226,10 @@ export function AreasScreen({
   /** A destination inside the Gym area, or nothing for the area itself. */
   section?: GymSection | undefined;
   onSelectTerminal(terminal: DomainTerminal): void;
+  /** Opens a section, or — with none — leaves the open one the way it was entered. */
   onOpenSection(section: GymSection | undefined): void;
+  /** Opens the Gym hub from a section, whichever way the section was entered. */
+  onOpenHub(): void;
 }) {
   const t = useT();
   // Bereiche is drawn in the world of the area it shows (WP3 Stage 6).
@@ -396,7 +400,7 @@ export function AreasScreen({
   // Muskelgruppen is its own destination inside the Gym area (WP2-2): the
   // one screen that renders the 3D body, reached from the hub and by link.
   if (terminal === 'gym' && section === 'muscles') {
-    return <GymMusclesScreen onBack={() => onOpenSection(undefined)} />;
+    return <GymMusclesScreen onBack={() => onOpenSection(undefined)} onOpenHub={onOpenHub} />;
   }
 
   return (

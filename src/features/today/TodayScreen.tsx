@@ -59,13 +59,13 @@ const copyOf = (domain: StoredDomainType) => TRAINING_COPY[domain === 'gym' || d
 export function TodayScreen({
   onGoToAreas,
   onGoToRank,
-  onOpenGym,
+  onOpenMuscles,
 }: {
   /** Bereiche, optionally opened on a given area. */
   onGoToAreas(terminal?: DomainTerminal): void;
   onGoToRank?(): void;
-  /** The Gym hub (WP2-2): logging or muscle progress, the user's choice. */
-  onOpenGym?(): void;
+  /** Muskelgruppen, directly (block 7B, D161): the body, one tap from Heute. */
+  onOpenMuscles?(): void;
 }) {
   const t = useT();
   const { language } = useI18n();
@@ -448,11 +448,13 @@ export function TodayScreen({
            */
           const loggable = training.writableDays.includes(date);
           return (
-            <Section key={training.domain} label={t(copy.title)} labelHidden={training.domain === 'gym' && Boolean(onOpenGym)}>
-              {/* Gym's label is the door to its hub (WP2-2): logging stays
-                  the button below; the area itself is one tap away too. */}
-              {training.domain === 'gym' && onOpenGym ? (
-                <button type="button" className="today__areaLink" onClick={onOpenGym} aria-label={t('gymHub.open')}>
+            <Section key={training.domain} label={t(copy.title)} labelHidden={training.domain === 'gym' && Boolean(onOpenMuscles)}>
+              {/* Gym's label is the door to the body (block 7B, D161):
+                  Muskelgruppen, directly. Its name says where it leads.
+                  Logging stays the button below, and the hub — training,
+                  plans, running — is one tap from there. */}
+              {training.domain === 'gym' && onOpenMuscles ? (
+                <button type="button" className="today__areaLink" onClick={onOpenMuscles} aria-label={t('gymHub.muscles.open')}>
                   <span className="section__label today__areaLabel">{t(copy.title)}</span>
                   <ChevronRightIcon size={16} />
                 </button>

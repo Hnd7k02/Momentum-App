@@ -48,7 +48,9 @@ function MainApp({
         {tab === 'today' ? (
           <TodayScreen
             onGoToAreas={(terminal) => navigate(terminal ? { tab: 'areas', terminal } : { tab: 'areas' })}
-            onOpenGym={() => navigate({ tab: 'areas', terminal: 'gym' })}
+            /* The Gym tile leads straight to the body (D161). It pushes, so
+               Back from Muskelgruppen returns to Heute. */
+            onOpenMuscles={() => navigate({ tab: 'areas', terminal: 'gym', section: 'muscles' })}
             onGoToRank={() => navigate({ tab: 'rank' })}
           />
         ) : null}
@@ -63,11 +65,16 @@ function MainApp({
             terminal={route.terminal}
             section={route.section}
             onSelectTerminal={(terminal) => navigate({ terminal })}
-            /* Opening a section pushes, so Back returns to the hub; the
-               section's own back control leaves the way it was entered —
-               walking the pushed entry, or replacing a deep link — so the
-               history never holds the hub twice. */
+            /* Opening a section pushes, so Back returns to where it was
+               opened from — the hub, or Heute, whose Gym tile opens
+               Muskelgruppen directly (D161). The section's own back control
+               leaves the way it was entered: walking the pushed entry, or —
+               after a link straight to the section — replacing it with the
+               hub, so the history never holds the hub twice. */
             onOpenSection={(section) => (section ? navigate({ section }) : leave({ section: undefined }))}
+            /* The hub itself, from a section: a place the user asks for, so
+               it is pushed — also when Back would have led to Heute. */
+            onOpenHub={() => navigate({ section: undefined })}
           />
         ) : null}
       </main>
