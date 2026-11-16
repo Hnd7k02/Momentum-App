@@ -5963,4 +5963,31 @@ Every rewritten check is listed with its old and its new rule in
 - **D170, drawn, not built.** The candidates are drawn with real data for
   the row, the sheet's chart and the exercise detail
   (`docs/design/wp3/stage7c/`), with a recommendation; the build keeps the
-  dot until the owner has chosen.
+  dot until the owner has chosen. Recommended is one rule for all three
+  places — a series is drawn from the baseline of its first day, so a
+  single observation is the line between its two days — and with it the
+  contract's own rule that no chart stands without a value: an exercise
+  with one recorded day gets a sentence in place of a dot on the zero
+  line.
+
+### The check files of this STOP
+
+- D183 has the check files made by the live build's generator: the diary
+  of the earlier STOPs. In that diary every group is rated and improved,
+  and it would show one of the five things the sheet says. **The files of
+  STOP 7C are therefore the device the block's checks and pictures run
+  on** (`seedSheetProfile`), set for each day from 16 to 18 November 2026
+  and exported by the block's build through its own "Backup exportieren"
+  (`scripts/verify/stage7c-check-files.mjs`). Each is read back on an
+  empty device on its day, through "Backup importieren", and must show the
+  same ten rows.
+- **Their rows are written into the database by the script, not typed
+  through the interface**, and the README beside them says so: they are
+  for Muskelgruppen, the sheets, the exercise details and the hub's card,
+  and Heute, Verlauf and Rang show a device nobody lived on. The diary
+  files of STOP 7B stay right on the same days — nothing that computes or
+  stores changed — and stand beside them for a realistic diary.
+- The standing rule itself is unchanged: there is no backup with real
+  data, the files are laid beside the STOP for the day of the check and
+  the day after, and the report says that the run with real data is
+  missing.
