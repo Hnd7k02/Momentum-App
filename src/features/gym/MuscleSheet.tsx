@@ -85,14 +85,17 @@ export function MuscleSheet({
     />
   );
 
-  const values = view.trend.map((point) => point.value);
-  const first = view.trend[0];
-  const last = view.trend[view.trend.length - 1];
+  // The chart draws the line from the baseline of the group's first day
+  // (D170); what it says counts the observations, which the line holds
+  // after its baseline.
+  const values = view.line.map((point) => point.value);
+  const first = view.line[0];
+  const last = view.line[view.line.length - 1];
   const chartLabel =
     !rated || !first || !last
       ? undefined
       : view.trend.length === 1
-        ? t('muscleSheet.chartOne', { group, date: formatDayAndMonth(language, first.date), value: change })
+        ? t('muscleSheet.chartOne', { group, date: formatDayAndMonth(language, last.date), value: change })
         : t('muscleSheet.chart', {
             group,
             first: formatDayAndMonth(language, first.date),

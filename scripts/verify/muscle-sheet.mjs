@@ -139,6 +139,7 @@ const sheetNow = (page) =>
       chartLabel: sheet.querySelector('.exercise-line')?.getAttribute('aria-label') ?? null,
       endValue: sheet.querySelector('.exercise-line__value')?.textContent ?? null,
       lines: sheet.querySelectorAll('.exercise-line__line').length,
+      points: (sheet.querySelector('.exercise-line__line')?.getAttribute('points') ?? '').trim().split(/\s+/).filter(Boolean).map((pair) => pair.split(',').map(Number)),
       axis: [...sheet.querySelectorAll('.exercise-line__label')].map((label) => label.textContent),
       dates: [...sheet.querySelectorAll('.gym-detail__dates span')].map((span) => span.textContent),
       recorded: sheet.querySelectorAll('.muscle-sheet__exercise--record').length,
@@ -201,6 +202,15 @@ async function drag(page, client, from, to, { ms = 320, hold = 120 } = {}) {
       check(`${want.name}: the chart ends on that figure, on the rows' scale, with its first and last date beneath`,
         sheet.chart && sheet.endValue === want.figure && sheet.axis.includes(`0${NBSP}%`) && sheet.axis.every((label) => [`+8${NBSP}%`, `0${NBSP}%`, `${MINUS}8${NBSP}%`].includes(label)) && sheet.dates.length >= 1,
         short({ end: sheet.endValue, axis: sheet.axis, dates: sheet.dates }));
+      // Since STOP 7C a line begins on the baseline of the group's first day
+      // (D170): its first point stands on the zero line, at the first date.
+      const pct = (label) => Number(label.replace(MINUS, '-').replace(/[^\d.+-]/g, ''));
+      const high = Math.max(0, ...sheet.axis.map(pct));
+      const low = Math.min(0, ...sheet.axis.map(pct));
+      const zeroAt = (high / (high - low)) * 100;
+      check(`${want.name}: the line begins on the zero line, at the group's first day, and runs to its last`,
+        sheet.lines === 1 && sheet.points.length >= 2 && Math.abs(sheet.points[0][1] - zeroAt) <= 0.05 && sheet.points[0][0] === 0 && sheet.dates.length === 2,
+        short({ first: sheet.points[0], zeroAt, points: sheet.points.length, dates: sheet.dates }));
       check(`${want.name}: the chart carries a description, and the caption says what the figure is a change of`,
         /^Leistungstrend /.test(sheet.chartLabel ?? '') && sheet.chartLabel.includes(want.figure) && sheet.caption === 'Bester Arbeitssatz · letzte 30 Tage', short({ label: sheet.chartLabel, caption: sheet.caption }));
       check(`${want.name}: "uneinheitlich" is said exactly where the exercises lie more than ten points apart`, sheet.uneven === (want.uneven === true), String(sheet.uneven));
@@ -476,6 +486,18 @@ for (const width of [393, 320]) {
           endValues: el.querySelectorAll('.exercise-line__value').length,
           end: [...(el.querySelector('.exercise-line__end')?.classList ?? [])].find((c) => c.startsWith('exercise-line__end--'))?.split('--')[1] ?? null,
           percents: [...el.querySelectorAll('*')].filter((node) => node.children.length === 0 && !node.closest('.visually-hidden') && !node.closest('.exercise-line__axis') && /%/.test(node.textContent)).map((node) => node.textContent.trim()),
+          // What the line draws, read out: the newest row is the change in the range up to the newest day.
+          newest: el.querySelector('.visually-hidden tbody tr td:last-child')?.textContent ?? null,
+          last: (() => {
+            const pairs = (el.querySelector('.exercise-line__line')?.getAttribute('points') ?? '').trim().split(/\s+/).filter(Boolean);
+            return pairs.length ? Number(pairs[pairs.length - 1].split(',')[1]) : null;
+          })(),
+          // The line begins on the baseline (D170): its first point is the zero line.
+          zero: (() => {
+            const pairs = (el.querySelector('.exercise-line__line')?.getAttribute('points') ?? '').trim().split(/\s+/).filter(Boolean);
+            return pairs.length ? Number(pairs[0].split(',')[1]) : null;
+          })(),
+          oneDay: el.querySelector('.gym-detail__lineNote--one')?.textContent ?? null,
         }));
         if (exercise.change !== null) {
           check(`${days} Tage · ${exercise.name}: the sheet and the detail show one and the same change — ${exercise.change} ${exercise.word} — under the same words`,
@@ -484,9 +506,20 @@ for (const width of [393, 320]) {
           check(`${days} Tage · ${exercise.name}: no second change stands on the detail — no figure at the line, none between "Zuletzt" and "Davor"`,
             detail.endValues === 0 && detail.labels.join('|') === 'Zuletzt|Davor' && detail.percents.length === 1 && detail.percents[0] === exercise.change && detail.end === exercise.state,
             short(detail));
+          // The owner's correction at STOP 7C: the line is the change in the
+          // range day by day, so it ends on the figure — a rise above the
+          // zero line, a fall below it — and its newest day reads the figure.
+          const side = detail.last === null || detail.zero === null ? null : detail.zero - detail.last;
+          check(`${days} Tage · ${exercise.name}: the line ends on that change — ${exercise.change}, on the side of the zero line its colour says`,
+            detail.newest === exercise.change &&
+              (exercise.state === 'improved' ? side > 0.5 : exercise.state === 'declined' ? side < -0.5 : side !== null),
+            short({ newest: detail.newest, last: detail.last, zero: detail.zero, state: exercise.state }));
         } else {
           check(`${days} Tage · ${exercise.name}: recorded once, it has no change in the sheet nor on its detail`,
             detail.figure === null && detail.chip === 'Zu wenig Vergleichsdaten' && detail.percents.length === 0 && detail.endValues === 0, short(detail));
+          // D170, the owner's choice at STOP 7C: one day draws no chart but a sentence.
+          check(`${days} Tage · ${exercise.name}: one day draws no chart, and a sentence says the line begins with the second`,
+            detail.last === null && detail.end === null && detail.oneDay === 'Ein Trainingstag erfasst. Ab dem zweiten zeigt Momentum den Verlauf.', short(detail));
         }
         await closeExercise(page);
       }

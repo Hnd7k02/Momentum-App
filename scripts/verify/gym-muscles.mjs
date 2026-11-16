@@ -207,7 +207,14 @@ const stageEdges = (page) => edgesOf(page, '.body-stage');
   const calves = await chartOf('Waden');
   check('a group still waiting for a baseline draws nothing either', calves.polyline === 0 && calves.dots === 0, JSON.stringify(calves));
   const forearms = await chartOf('Unterarme');
-  check('a single observation is one dot and no line', forearms.polyline === 0 && forearms.dots === 1, JSON.stringify(forearms));
+  // Since STOP 7C a line begins on the baseline of the group's first day
+  // (D170, the owner's choice): a single observation is the shortest line
+  // there is, from the zero line to its value. (Until then: "a single
+  // observation is one dot and no line".)
+  const forearmPoints = (forearms.points ?? '').split(' ').filter(Boolean);
+  check('a single observation is the shortest line: from the zero line to its value, with its end point',
+    forearms.polyline === 1 && forearms.dots === 1 && forearmPoints.length === 2 && forearmPoints[0].split(',')[1] === '12.0', JSON.stringify(forearms));
+  check('and every line begins on the zero line, where its group began', chest.points?.split(' ')[0]?.split(',')[1] === '12.0', String(chest.points));
   const back = await chartOf('Rücken');
   const flatYs = (back.points ?? '').split(' ').map((p) => p.split(',')[1]);
   check('a series whose points are all equal draws flat down the middle', back.polyline === 1 && flatYs.length > 1 && flatYs.every((y) => y === '12.0'), JSON.stringify(back.points));

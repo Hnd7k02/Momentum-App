@@ -11,7 +11,7 @@ import {
 } from '../../core/gym/performance';
 import type { GymHistory } from '../../storage/services/gymService';
 import { exerciseDayCounts, muscleStateOf } from './muscleState';
-import { SPARKLINE_POINTS, muscleTrend, toMuscleAnalytics } from './muscleAnalytics';
+import { SPARKLINE_POINTS, fromBaseline, muscleTrend, toMuscleAnalytics } from './muscleAnalytics';
 
 /** A history the way loadGymHistory() builds one, from in-memory days. */
 function historyOf(inputs: ExerciseDayInput[], names: Record<string, string> = {}): GymHistory {
@@ -217,6 +217,41 @@ describe('toMuscleAnalytics', () => {
     expect(chest.trend[chest.trend.length - 1]!.date).toBe('2026-07-20');
     expect(muscleTrend(historyOf(many).days, 'chest')).toHaveLength(19);
     expect(chest.trend[chest.trend.length - 1]!.value).toBe(chest.delta);
+  });
+
+  it('draws a line from the baseline of the group\'s first training day (D170, the owner\'s choice at STOP 7C)', () => {
+    // Chest: bench on 1 June first, then three observations.
+    expect(view('chest').line[0]).toEqual({ date: '2026-06-01', value: 0 });
+    expect(view('chest').line.slice(1)).toEqual(view('chest').trend);
+    // A single observation is the shortest line there is: from the group's
+    // first day — squat and leg extension on 3 June — to its value. Until
+    // STOP 7C the row drew it as a dot.
+    expect(view('quadriceps').line).toEqual([{ date: '2026-06-03', value: 0 }, view('quadriceps').trend[0]]);
+    // No figure, no line, baseline or not.
+    expect(view('biceps').line).toEqual([]);
+    expect(view('calves').line).toEqual([]);
+  });
+
+  it('a long line shows its most recent points, and no longer its baseline', () => {
+    const many: ExerciseDayInput[] = [];
+    for (let i = 0; i < 20; i += 1) {
+      many.push(day(`2026-07-${String(i + 1).padStart(2, '0')}`, 'ex_bench', ['chest', 'triceps'], ['chest'], [set(5, 60 + i)]));
+    }
+    const chest = toMuscleAnalytics(historyOf(many)).find((v) => v.id === 'chest')!;
+    expect(chest.line).toHaveLength(SPARKLINE_POINTS);
+    expect(chest.line).toEqual(chest.trend);
+    // Eleven observations and the baseline still fit.
+    const few = toMuscleAnalytics(historyOf(many.slice(0, 12))).find((v) => v.id === 'chest')!;
+    expect(few.line).toHaveLength(12);
+    expect(few.line[0]).toEqual({ date: '2026-07-01', value: 0 });
+  });
+
+  it('adds the baseline only before the first point, and to nothing', () => {
+    const points = [{ date: '2026-06-05', value: 3 }];
+    expect(fromBaseline(points, '2026-06-01')).toEqual([{ date: '2026-06-01', value: 0 }, ...points]);
+    expect(fromBaseline(points, '2026-06-05')).toEqual(points);
+    expect(fromBaseline(points, null)).toEqual(points);
+    expect(fromBaseline([], '2026-06-01')).toEqual([]);
   });
 
   it('does not mutate the history it reads', () => {

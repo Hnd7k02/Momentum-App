@@ -168,6 +168,12 @@ Never conflate them.
   "Davor" are two sets, and the detail's line ends without a figure. Do
   not print a second change for an exercise without a name that says what
   it compares, and never one that differs between the sheet and the detail.
+  **Its line is that change day by day** (the owner's correction at STOP
+  7C, D187): each point is the change in the range up to that day, by the
+  same comparison (`exerciseLine`), as a group's line is its figure day by
+  day — so it ends on the figure, and an end point in a rise's colour never
+  lies under the zero line. Never draw an exercise against its first day
+  again where the figure compares something else.
 - **Work volume is shown and never scored** (D152, D186): Σ reps ×
   effective load over the working sets, per group and week
   (`core/gym/volume.ts`), spread over an exercise's groups by the shares
@@ -560,13 +566,20 @@ Never conflate them.
   state. The rows of a list share one scale, −8 % to +8 % — the change at
   which a tint on the body is full, so body and rows speak on one scale
   (D180; ±12 % before) — and bars start at zero (D163): a small change
-  must look small. No data draws nothing and one value draws a dot. **The
-  exercise detail draws a line** (D175): each day as its change since the
-  first day shown, on that scale — widened in steps of four where a series
-  goes further, never cut off and never from the smallest day to the
-  largest — and one day as a dot. No figure stands at its end (D176): its
-  end point carries the state of the exercise's one change, which stands
-  at the head. **The sheet's chart** is the group's line on the rows'
+  must look small. No data draws nothing. **A line begins on the baseline
+  of its first day** (D170, the owner's choice at STOP 7C, D187): the
+  group's or the exercise's first training day in the range, at nought —
+  in the row, in the sheet and in the exercise detail — so a single
+  observation is the shortest line there is, never a dot floating over the
+  zero line (`fromBaseline`, `exerciseLine`); a row that shows only the
+  last twelve points of a long line no longer begins there. **The
+  exercise detail draws a line** (D175): each day as the change in the
+  range up to it (above), on that scale — widened in steps of four where a
+  series goes further, never cut off and never from the smallest day to
+  the largest — and one recorded day as a sentence, not a chart (D170).
+  No figure stands at its end (D176): its end point carries the state of
+  the exercise's one change, which stands at the head and which the line
+  ends on. **The sheet's chart** is the group's line on the rows'
   scale: what goes beyond 8 % stays at the edge and the figure beside the
   end point says how far it went; a series that rises and falls has the
   zero line in the middle. **The work volume's bars carry no state's

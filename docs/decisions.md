@@ -5963,7 +5963,7 @@ Every rewritten check is listed with its old and its new rule in
 - **D170, drawn, not built.** The candidates are drawn with real data for
   the row, the sheet's chart and the exercise detail
   (`docs/design/wp3/stage7c/`), with a recommendation; the build keeps the
-  dot until the owner has chosen. Recommended is one rule for all three
+  dot until the owner has chosen (he chose A at STOP 7C, D187). Recommended is one rule for all three
   places — a series is drawn from the baseline of its first day, so a
   single observation is the line between its two days — and with it the
   contract's own rule that no chart stands without a value: an exercise
@@ -5991,3 +5991,103 @@ Every rewritten check is listed with its old and its new rule in
   data, the files are laid beside the STOP for the day of the check and
   the day after, and the report says that the run with real data is
   missing.
+
+## D187 — STOP 7C: accepted but for the Dips; a line begins on its baseline, an exercise's line is its change day by day, Back for every sheet goes to the tidy-up, and the session runs on Opus
+
+**Decision (owner, 2026-11-16).** His words: "STOP 7C: abgenommen bis auf
+die Dips (Bild anbei). Antworten: 1 A. 2 A, eine Zahl. Dazu eine
+Korrektur: Bei Trizeps › Dips steht «+5 % Verbessert», die Linie endet
+aber grün unter der Nulllinie, und zuletzt stehen 5 × 96 kg nach 5 × 104
+kg. Die Linie einer Übung soll nach derselben Regel rechnen wie die Zahl:
+Jeder Punkt ist die Veränderung im Zeitraum bis zu diesem Tag, so wie bei
+der Linie einer Gruppe. Dann endet sie immer bei der Zahl, und ein grüner
+Endpunkt liegt nie unter null. Pass den Satz unter dem Diagramm an. Die
+Liste «Letzte Trainingstage» zeigt weiter die echten Sätze. Geht das
+nicht sauber, sag mir warum, bevor du es baust. 3 B, als Punkt für den
+Aufräum-Block, unter der Bedingung, dass ein Sheet mit Eingaben dabei
+nichts Getipptes verliert. 4 A. 5 A. iPhone (Datei vom 16.11.): sonst
+alles ok. Ab hier läuft die Session auf Opus, damit Fable für Block 9
+reicht. Halte das als Abweichung von D159 fest." And then: close 7C with
+its checks, HANDOVER and a new preview, and go straight on with 7D to its
+first STOP, with the list of exercises.
+
+### 1 A — a line begins on the baseline of its first day (D170)
+
+- **Every line**, not only a single observation: the group's line in the
+  row and in the sheet begins at nought on the group's first training day
+  in the range, then follows its observations (`fromBaseline`,
+  `MuscleAnalyticsView.line`, `MuscleSheetView.line`); the exercise's line
+  begins at nought on its first day (`exerciseLine`). This is the rule the
+  recommendation named ("a series is drawn from the baseline of its first
+  day"), read as one rule on purpose: applied to a single observation
+  alone, a line would lose its baseline the day a second observation
+  arrived — two days from nought, three days from somewhere else.
+- A single observation is therefore the shortest line there is, from the
+  zero line to its value; until STOP 7C it was a dot floating over the
+  zero line. The nought is the reference itself, which has not changed
+  against itself — not an absence read as a zero. `trend` and
+  `observations` stay the observations, and `dataState` still says
+  "single-observation" for one of them.
+- **In the exercise detail one recorded day draws no chart but a
+  sentence** (candidate B there): "Ein Trainingstag erfasst. Ab dem zweiten
+  zeigt Momentum den Verlauf."
+- A row shows at most the twelve latest points of a line; a long line
+  therefore no longer begins on the baseline in the row. The sheet shows
+  the whole line.
+
+### 2 A — one figure, and the correction: an exercise's line is its change day by day
+
+- **It goes cleanly**, so it was built without asking again. The figure is
+  `exerciseSpans()` over the exercise's days in the range — the median of
+  its last days against the median of its first under the Stage 5b
+  metric. The line takes the very same function on the days up to each
+  day: as if the range had ended that day (`exerciseLine`, beside
+  `exerciseChanges` in `features/gym/muscleSheet.ts`). Its last point is
+  computed from the same days in the same order as the figure and is
+  therefore the figure, to the bit; a unit test holds that for every
+  exercise under both comparisons. Before the Stage 5b era (`firstLast`)
+  the rule is the old one — each day against the first — so no line of
+  that era moves. Nothing of it is scored or stored.
+- The Dips of the check data: 100, 90, 104 and 96 kg at five reps read
+  0, −10, +4 and +5 %, and end on the +5 % at the head, above the zero
+  line. Until now the line drew −10, +4 and −4 and ended green under it.
+- The sentence under the chart: "Jeder Punkt ist die Veränderung im
+  Zeitraum bis zu diesem Tag; der letzte ist die Zahl oben." The table
+  for a screen reader reads the same values under "Veränderung im Zeitraum
+  bis zu diesem Tag". "Zuletzt", "Davor" and "Letzte Trainingstage" still
+  show the real sets.
+
+### 3 B — Back closes every sheet, in the tidy-up block
+
+Added to `docs/wp3/prompts/prompt-aufraeumen.md` as step 4b, with the
+owner's condition: a sheet with fields loses nothing typed when Back
+closes it. Until then Back closes the muscle sheet and the exercise detail
+only (D185). The contract (§9) says so.
+
+### 4 A, 5 A
+
+As built: no list of every exercise under the rows until block 7D, and
+the muscle sheet solid at every moment (D185).
+
+### The model, and the session
+
+- **From this message on the session runs on Opus 5.5, not on the model
+  D159 names (Fable 5.2)**, at the owner's instruction, so that Fable's
+  allowance suffices for block 9. A deviation from D159, recorded as he
+  asked. The commits of this session say which model wrote them.
+- Block 7D follows in the same session, at his instruction, where D159
+  has each block start in a fresh one — as for 7B (D183) and 7C (D185).
+  The rule of the 7D prompt on subagents holds: search and reading runs
+  only, on Sonnet; every assignment and every change is made here.
+
+**Checks restated** (old rule → new, each in `scripts/verify/README.md`):
+`exerciseDetailChart.test.tsx` (the table and the end of the line follow
+the change in the range up to each day; one day draws a sentence, where
+it was a dot), `gym-muscles.mjs` and `release-proof.mjs` (a single
+observation is the line from the zero line to its value, where it was a
+dot), `design-system.mjs` (every point of the exercise's line is its change
+in the range up to its day, where it was its change since the first day,
+and the line ends on the figure at the head). Added: the first point of
+every line in the sheet stands on the zero line (`muscle-sheet.mjs`), the
+detail's line ends on its figure on the side of the zero line its colour
+says, and one day draws a sentence.

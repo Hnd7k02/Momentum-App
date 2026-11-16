@@ -117,7 +117,7 @@ for (const width of WIDTHS) {
     img { display: block; border-radius: 18px; }
   </style>
   <h1>Übungsdetail bei ${width} px: die Linie</h1>
-  <p>Jeder Tag als Veränderung seit dem ersten Tag im Zeitraum. Stand ${CLOCK}, 90 Tage.</p>
+  <p>Jeder Punkt als Veränderung im Zeitraum bis zu diesem Tag (seit STOP 7C; bis dahin: seit dem ersten Tag). Stand ${CLOCK}, 90 Tage.</p>
   ${SERIES.map((series) => `<h2>${series.name}<span>${series.what}</span></h2><img src="${dataUrl(drawn[`${width}-${series.slug}`])}" width="${width - 32}">`).join('')}`;
   const ctx = await browser.newContext({ viewport: { width: width + 40, height: 900 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();

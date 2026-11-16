@@ -45,6 +45,19 @@ import { exerciseGroups, shownPerformance, type ShownPerformance } from './muscl
  * no delta, even where the domain has a ratio for it: the row shows the
  * chip, and a line there would state the trend the chip says is not there
  * yet. `muscleTrend()` itself stays the full series.
+ *
+ * ## The line that is drawn
+ *
+ * **A line begins on the baseline of its first day** (D170, the owner's
+ * choice at STOP 7C, D187): the group's first training day in the range,
+ * at nought — the day everything after it is measured from — and then the
+ * trend's points. `trend` stays the observations, and `line` is what the
+ * row draws (`fromBaseline`). Until then a single observation was a dot
+ * floating over the zero line, which read as an error; now it is the
+ * shortest line there is, from where the group began to where it stands,
+ * and every other line begins where it began too. The nought is not an
+ * absence read as a zero: it is the reference itself, which by definition
+ * has not changed against itself.
  */
 
 export type MuscleDataState =
@@ -85,6 +98,13 @@ export interface MuscleAnalyticsView {
    * `muscleTrend()`.
    */
   trend: readonly MuscleTrendPoint[];
+  /**
+   * What the row draws (D170): the observations from the baseline of the
+   * group's first training day in the range, at nought — capped like the
+   * trend, so a long series shows its most recent points and no longer
+   * begins on the baseline. Empty where the group states no figure.
+   */
+  line: readonly MuscleTrendPoint[];
   /** How many valid observations the range holds in all, before the cap. */
   observations: number;
   /**
@@ -128,6 +148,19 @@ const reaches = (membership: Membership, day: ExerciseDay, muscle: MuscleGroup):
 /** The days on which the group was trained, ascending, each once. */
 function trainingDays(days: readonly ExerciseDay[], muscle: MuscleGroup, membership: Membership): DateKey[] {
   return [...new Set(days.filter((day) => reaches(membership, day, muscle)).map((day) => day.date))].sort();
+}
+
+/**
+ * A line as it is drawn (D170): `points` from the baseline of `first` — the
+ * day they are measured from, at nought — where there is anything to draw.
+ *
+ * `first` lies before the first point by construction: a point needs a day
+ * to compare with, and that day is a training day of the same series. A
+ * `first` that does not (no day, or one not earlier) adds nothing.
+ */
+export function fromBaseline(points: readonly MuscleTrendPoint[], first: DateKey | null | undefined): MuscleTrendPoint[] {
+  if (points.length === 0 || !first || first >= points[0]!.date) return [...points];
+  return [{ date: first, value: 0 }, ...points];
 }
 
 /**
@@ -193,6 +226,7 @@ export function toMuscleAnalytics(
       compared: entry?.compared ?? false,
       lastTrainedAt,
       trend: series.slice(-SPARKLINE_POINTS),
+      line: fromBaseline(series, trained[0]).slice(-SPARKLINE_POINTS),
       observations: series.length,
       latestExerciseLabel: only === null ? null : (history.names.get(only) ?? only),
       latestExerciseIds,

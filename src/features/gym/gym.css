@@ -556,6 +556,12 @@
   color: var(--text-secondary);
 }
 
+/* One recorded day: the sentence stands where the chart would (D170). */
+.gym-detail__lineNote--one {
+  padding-top: 0;
+  font-size: var(--type-footnote);
+}
+
 .gym-detail:focus {
   outline: none;
 }

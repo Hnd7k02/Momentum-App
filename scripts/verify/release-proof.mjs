@@ -119,6 +119,7 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
       lineCap: line ? getComputedStyle(line).strokeLinecap : null,
       lineBBox: bbox ? [Math.round(bbox.x * 10) / 10, Math.round(bbox.y * 10) / 10, Math.round(bbox.width * 10) / 10, Math.round(bbox.height * 10) / 10] : null,
       points: line ? line.getAttribute('points').split(' ').length : 0,
+      firstY: line ? Number(line.getAttribute('points').split(' ')[0].split(',')[1]) : null,
       dots: svg ? svg.querySelectorAll('circle').length : 0,
       rightText: right?.textContent?.trim() ?? '',
       rightColor: right ? getComputedStyle(right).color : null,
@@ -169,7 +170,11 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   // seedMuscles: the forearms have three exercise days and one comparable
   // observation; the biceps a comparison on two exercise days, which states
   // no trend and so draws nothing (contract §7).
-  check('a single observation is a dot and nothing else', charts.filter((c) => c.name === 'Unterarme').length === 1 && charts.filter((c) => c.name === 'Unterarme').every((c) => c.points === 0 && c.dots === 1));
+  // Since STOP 7C (D170, the owner's choice) a line begins on the baseline
+  // of the group's first day: a single observation is the line from the
+  // zero line to its value. (Until then: "a single observation is a dot
+  // and nothing else".)
+  check('a single observation is the shortest line: two points, from the zero line, and its end point', charts.filter((c) => c.name === 'Unterarme').length === 1 && charts.filter((c) => c.name === 'Unterarme').every((c) => c.points === 2 && c.dots === 1 && c.firstY === 12));
   check('groups with nothing to plot draw nothing — untrained, or too little to compare', charts.filter((c) => ['Schultern', 'Waden', 'Bizeps'].includes(c.name)).length === 3 && charts.filter((c) => ['Schultern', 'Waden', 'Bizeps'].includes(c.name)).every((c) => c.points === 0 && c.dots === 0));
   check('every line is the one neutral data ink', measured.length >= 4 && measured.every((c) => c.stroke === ink.data), `${[...new Set(measured.map((c) => c.stroke))].join(' ')} vs ${ink.data}`);
   check('the end point carries the state: the status colour, the data ink when held',

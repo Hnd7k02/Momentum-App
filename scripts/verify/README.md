@@ -256,6 +256,37 @@ weakened**; `wp3-sheets.mjs` is unchanged and green.
   still has it; what it prints of the detail now begins with the head —
   the one change and its caption.
 
+## Checks restated after STOP 7C (D187)
+
+The owner chose that a line begins on the baseline of its first day
+(D170), and that an exercise's line is its change in the range day by day,
+so that it ends on its one figure. None of these was removed or weakened.
+
+- **`exerciseDetailChart.test.tsx`** (unit). *Old:* the table reads each
+  day against the first (+7, +4, +5, +3 %), "Veränderung" stands once, as
+  "Veränderung seit dem ersten Tag", and one day is a dot on the zero line.
+  *New:* the table reads the change in the range up to each day (+4, +3,
+  +5, +3 %, the newest row being the figure at the head), "Veränderung" is
+  never bare — both times it says "im Zeitraum bis zu diesem Tag" — the
+  line's last point stands where the figure does, and one day draws no
+  chart but a sentence. Added: two days are the shortest line, from the
+  baseline.
+- **`gym-muscles.mjs`**. *Old:* "a single observation is one dot and no
+  line". *New:* "a single observation is the shortest line: from the zero
+  line to its value, with its end point"; added "every line begins on the
+  zero line, where its group began".
+- **`release-proof.mjs`**. *Old:* "a single observation is a dot and
+  nothing else". *New:* "a single observation is the shortest line: two
+  points, from the zero line, and its end point".
+- **`design-system.mjs`**. *Old:* "every point is its day's change since
+  the first day shown". *New:* "every point is the change in the range up
+  to its day", worked out in the suite from the sets the table names;
+  added "the line ends on the exercise's one change".
+- **`muscle-sheet.mjs`** (added only): the sheet's line begins on the zero
+  line at the group's first day; an exercise's line ends on its figure, on
+  the side of the zero line its colour says, and its newest table row reads
+  the figure; one recorded day draws a sentence, not a chart.
+
 ## Conventions
 
 `lib.mjs` holds the shared pieces: `CHROMIUM` (the one place the browser

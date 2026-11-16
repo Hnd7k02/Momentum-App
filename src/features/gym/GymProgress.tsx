@@ -312,6 +312,7 @@ export function GymProgress({
           name={exerciseName(openExercise)}
           days={exerciseHistory(history, openExercise)}
           change={changes?.get(openExercise) ?? null}
+          comparison={history?.metric?.comparison ?? 'firstLast'}
           rangeDays={rangeDays}
           onClose={() => setOpenExercise(null)}
         />

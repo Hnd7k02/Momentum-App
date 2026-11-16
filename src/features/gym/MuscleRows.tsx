@@ -123,9 +123,9 @@ export function MuscleRows({
                   little to compare have nothing to draw, and drawing a line
                   there would state a result they do not have. */}
               <span className="muscle-row__chart" aria-hidden="true">
-                {view.trend.length > 0 ? (
+                {view.line.length > 0 ? (
                   <Sparkline
-                    trend={view.trend}
+                    trend={view.line}
                     state={view.state}
                     width={narrow ? SPARK_WIDTH_NARROW : SPARK_WIDTH}
                   />

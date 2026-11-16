@@ -12,7 +12,7 @@ import {
 import type { MuscleGroup } from '../../core/model';
 import type { GymHistory } from '../../storage/services/gymService';
 import { toMuscleAnalytics } from './muscleAnalytics';
-import { exerciseChanges, rangeWeeks, toMuscleSheet, weekNumber } from './muscleSheet';
+import { exerciseChanges, exerciseLine, rangeWeeks, toMuscleSheet, weekNumber } from './muscleSheet';
 import { shownPerformance } from './muscleState';
 
 /**
@@ -139,7 +139,7 @@ describe('the change of one exercise in the range (D176)', () => {
     const inRange = exerciseChanges(history).get('ex_bench')!;
     const sincePrevious = percentChange(history.comparisons.get('ex_bench')!.ratio)!;
     expect(sincePrevious).toBeCloseTo((81.25 / 79.16666666666667 - 1) * 100, 9); // +2.6 %
-    expect((81.25 / 78 - 1) * 100).toBeCloseTo(4.17, 2); // the line's end
+    expect((81.25 / 78 - 1) * 100).toBeCloseTo(4.17, 2); // the last day against the first: where the line ended until STOP 7C
     expect(inRange).not.toBeCloseTo(sincePrevious, 1);
   });
 
@@ -160,6 +160,68 @@ describe('the change of one exercise in the range (D176)', () => {
     // Bench and incline both have the chest as their one primary: equal weight.
     const mean = (byId.get('ex_bench')!.change! + byId.get('ex_incline')!.change!) / 2;
     expect(view.change).toBeCloseTo(mean, 9);
+  });
+});
+
+describe('the line of one exercise (the owner\'s correction at STOP 7C)', () => {
+  const benchDays = () => historyOf(INPUTS).days.filter((entry) => entry.exerciseId === 'ex_bench');
+
+  it('is at each day the change in the range up to that day, from the baseline of the first', () => {
+    const line = exerciseLine(benchDays(), 'median');
+    expect(line.map((point) => point.date)).toEqual(['2026-10-21', '2026-10-28', '2026-11-04', '2026-11-11']);
+    expect(line[0]).toEqual({ date: '2026-10-21', value: 0 });
+    // Two and three days: the last against the first.
+    expect(line[1]!.value).toBeCloseTo((80 / 78 - 1) * 100, 9);
+    expect(line[2]!.value).toBeCloseTo((79.16666666666667 / 78 - 1) * 100, 9);
+    // Four: the two last against the two first — the exercise's figure.
+    expect(line[3]!.value).toBeCloseTo(((79.16666666666667 + 81.25) / 2 / ((78 + 80) / 2) - 1) * 100, 9);
+  });
+
+  it('ends on the exercise\'s one figure, for every exercise of a range, under either comparison', () => {
+    for (const comparison of ['median', 'firstLast'] as const) {
+      const history = historyOf(INPUTS);
+      const changes = exerciseChanges({ days: history.days, metric: { ...METRIC, comparison } });
+      for (const [id, change] of changes) {
+        const line = exerciseLine(history.days.filter((entry) => entry.exerciseId === id), comparison);
+        if (change === null) expect(line).toHaveLength(1);
+        else expect(line[line.length - 1]!.value).toBe(change);
+      }
+    }
+  });
+
+  it('never ends in a rise\'s colour under the zero line: the Dips of the check data', () => {
+    // 100, 90, 104 and 96 kg at five reps. The last day lies 4 % under the
+    // first; the two last lie 5.3 % over the two first, which is the figure.
+    const dips = (date: string, kg: number) => day(date, 'ex_dips', ['triceps'], ['triceps'], [set(5, kg)]);
+    const days = historyOf([dips('2026-10-22', 100), dips('2026-10-29', 90), dips('2026-11-05', 104), dips('2026-11-12', 96)]).days;
+    const values = exerciseLine(days, 'median').map((point) => Math.round(point.value * 100) / 100);
+    expect(values).toEqual([0, -10, 4, 5.26]);
+    // Until STOP 7C the line drew each day against the first and ended at −4 %.
+    expect(values[values.length - 1]).toBeGreaterThan(0);
+  });
+
+  it('before the Stage 5b era is each day against the first, as the line always was', () => {
+    const days = exerciseDays([bench('2026-10-21', [set(5, 60)]), bench('2026-10-28', [set(5, 70)]), bench('2026-11-04', [set(5, 66)]), bench('2026-11-11', [set(5, 63)])]);
+    expect(exerciseLine(days, 'firstLast').map((point) => Math.round(point.value * 1000) / 1000)).toEqual([0, 16.667, 10, 5]);
+  });
+
+  it('is one point at nought for a single day, in any order the days arrive', () => {
+    expect(exerciseLine(historyOf([bench('2026-11-11', [set(9, 62.5)])]).days, 'median')).toEqual([{ date: '2026-11-11', value: 0 }]);
+    expect(exerciseLine([...benchDays()].reverse(), 'median')).toEqual(exerciseLine(benchDays(), 'median'));
+  });
+});
+
+describe('the line a group draws in the sheet (D170, the owner\'s choice at STOP 7C)', () => {
+  it('begins on the baseline of the group\'s first training day, then follows the observations', () => {
+    const { view } = sheet('chest');
+    expect(view.line[0]).toEqual({ date: '2026-10-21', value: 0 });
+    expect(view.line.slice(1)).toEqual(view.trend);
+    expect(view.line[view.line.length - 1]!.value).toBe(view.change);
+  });
+
+  it('a group without a figure draws no line, baseline or not', () => {
+    expect(sheet('biceps').view.line).toEqual([]);
+    expect(sheet('calves').view.line).toEqual([]);
   });
 });
 

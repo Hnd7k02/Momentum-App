@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { MUSCLE_LABEL_KEYS, MUSCLE_STATE_KEYS } from '../../components/BodyRenderer';
 import { Card, EmptyState, Figure, Section } from '../../components';
 import { ChevronLeftIcon, ProgressIcon } from '../../components/Icons';
+import type { GymWindowComparison } from '../../core/model';
 import type { ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth, formatWeekday } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
@@ -28,7 +29,10 @@ import { useWorld } from '../../app/world';
  * change of, in the words the sheet uses. Until this block the head named
  * the last day against the one before "Veränderung" and the line ended on a
  * third, unnamed figure, the last day against the first; "Zuletzt" and
- * "Davor" are now two sets and no percentage stands between them.
+ * "Davor" are now two sets and no percentage stands between them. Since
+ * STOP 7C the line is that one change day by day, so it ends on the figure
+ * at the head (`exerciseLine`), and one recorded day draws no chart but a
+ * sentence (D170).
  *
  * It lies **on top of** Muskelgruppen rather than in its place: the body
  * beneath stays as it stood, held, and the sheet it was opened from is
@@ -40,6 +44,7 @@ export function ExerciseDetail({
   name,
   days,
   change,
+  comparison = 'firstLast',
   rangeDays,
   onClose,
 }: {
@@ -48,6 +53,8 @@ export function ExerciseDetail({
   days: ExerciseDay[];
   /** The exercise's change in the range, raw; `null` with nothing to compare. */
   change: number | null;
+  /** The comparison the range's figures are under (`GymHistory.metric`); the line follows it. */
+  comparison?: GymWindowComparison;
   /** The range the days were loaded for: what "letzte N Tage" means. */
   rangeDays: number;
   onClose(): void;
@@ -86,11 +93,12 @@ export function ExerciseDetail({
     };
   }, []);
   /*
-   * What the line draws, for the table that says the same in words: each
-   * day's change since the first day shown, newest first like `days`. The
-   * first day is what the others are measured against and has none.
+   * What the line draws, for the table that says the same in words: at each
+   * day the exercise's change in the range up to that day, newest first
+   * like `days`. The first day is what the others are measured against and
+   * has none.
    */
-  const sinceFirst = lineValues(days).reverse();
+  const upToDay = lineValues(days, comparison).reverse();
 
   return (
     <div className="screen gym-detail" ref={root} role="dialog" aria-modal="true" aria-label={name} tabIndex={-1}>
@@ -158,12 +166,20 @@ export function ExerciseDetail({
                 {/*
                   The line is decorative and the table below carries the
                   same days in words — each with its best working set and
-                  its change since the first day shown, which is what the
-                  line draws. One picture, one semantic alternative.
+                  the change in the range up to it, which is what the line
+                  draws. One picture, one semantic alternative. One day
+                  draws no chart (D170): a sentence says the line begins
+                  with the second.
                 */}
-                <ExerciseLineChart days={days} state={trend} />
-                {/* What the line draws — its end carries no figure. */}
-                {days.length > 1 ? <p className="gym-detail__lineNote">{t('gym.detail.lineNote')}</p> : null}
+                {days.length > 1 ? (
+                  <>
+                    <ExerciseLineChart days={days} comparison={comparison} state={trend} />
+                    {/* What the line draws — and that it ends on the figure above. */}
+                    <p className="gym-detail__lineNote">{t('gym.detail.lineNote')}</p>
+                  </>
+                ) : (
+                  <p className="gym-detail__lineNote gym-detail__lineNote--one">{t('gym.detail.oneDay')}</p>
+                )}
 
                 <div className="visually-hidden">
                   <table>
@@ -183,7 +199,7 @@ export function ExerciseDetail({
                           <td>
                             {index === days.length - 1
                               ? t('gym.detail.firstDay')
-                              : signedPercentText(roundShown(sinceFirst[index] ?? 0) ?? 0)}
+                              : signedPercentText(roundShown(upToDay[index] ?? 0) ?? 0)}
                           </td>
                         </tr>
                       ))}

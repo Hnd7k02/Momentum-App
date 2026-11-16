@@ -651,9 +651,10 @@ export const de = {
   'gym.detail.tableCaption': 'Bester Arbeitssatz pro Trainingstag',
   'gym.detail.day': 'Tag',
   'gym.detail.value': 'Bester Arbeitssatz',
-  'gym.detail.sinceFirst': 'Veränderung seit dem ersten Tag',
+  'gym.detail.sinceFirst': 'Veränderung im Zeitraum bis zu diesem Tag',
   'gym.detail.firstDay': 'Ausgangswert',
-  'gym.detail.lineNote': 'Die Linie zeigt jeden Tag im Vergleich zum ersten Tag im Zeitraum.',
+  'gym.detail.lineNote': 'Jeder Punkt ist die Veränderung im Zeitraum bis zu diesem Tag; der letzte ist die Zahl oben.',
+  'gym.detail.oneDay': 'Ein Trainingstag erfasst. Ab dem zweiten zeigt Momentum den Verlauf.',
   'gym.detail.open': 'Verlauf dieser Übung öffnen',
 
   'running.distance': 'Distanz',

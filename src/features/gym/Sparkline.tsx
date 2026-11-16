@@ -24,8 +24,13 @@ import type { MuscleTrendPoint } from './muscleAnalytics';
  *
  * - A series whose points are all equal is flat at its own value — on the
  *   zero line when that value is 0 %, which is what "held" looks like.
- * - A single observation draws its dot and no line: one point is a value,
- *   not yet a direction. The dot stands where its value is.
+ * - A line begins on the baseline of its first day (D170, the owner's
+ *   choice at STOP 7C): the row hands it the observations from the group's
+ *   first training day at nought (`MuscleAnalyticsView.line`). A single
+ *   observation is therefore the shortest line there is, from the zero line
+ *   to its value; until STOP 7C it was a dot floating over the zero line,
+ *   which read as an error. A series of one point — which the row no
+ *   longer hands over — would still draw its dot and no line.
  * - No observation draws nothing at all, and the row gives the chart's room
  *   to words instead.
  *

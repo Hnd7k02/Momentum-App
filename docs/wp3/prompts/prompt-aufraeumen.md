@@ -8,12 +8,13 @@ Geschrieben am 11.11.2026, vor allen Blöcken nach 6b. Zeilennummern beziehen si
 
 Momentum ist eine lokale Web-App fürs iPhone, und ihr Repo ist öffentlich. Im aktuellen Stand liegen Dinge, die dort nicht hingehören: ein altes Build-Paket, eine zweite Kopie eines Backups, drei iPad-Screenshots mit Browser-Tabs und einem Chat-Ausschnitt. Eine Lizenzdatei für die App fehlt. Mehrere Dokumente beschreiben einen Stand von vor Monaten. Dario, der Eigentümer, hat mit D157 entschieden, was damit geschieht.
 
-Dazu kommen zwei kleine Punkte, die Dario diesem Block zugewiesen hat (D163):
+Dazu kommen drei kleine Punkte, die Dario diesem Block zugewiesen hat (D163, D187):
 
 - «Pläne verwalten», geöffnet aus dem leeren Muskelgruppen-Screen, führt in die Gym-Übersicht, aber nicht zu den Plänen.
 - Die Prüfung «offline, Gym zeigt den 3D-Körper» in `release-proof.mjs` ist seit vor Stage 6b rot. Der Verdacht: Der Testserver antwortet anders als GitHub Pages.
+- *Nachgetragen am STOP 7C (16.11.2026, D187):* Die Zurück-Geste des Browsers schliesst bisher nur das Muskel-Sheet und das Übungsdetail (D185). Sie soll jedes Sheet der App schliessen – unter der Bedingung, dass ein Sheet mit Eingaben dabei nichts Getipptes verliert.
 
-Die wichtigsten Eigenschaften dieses Blocks: **Er entfernt und berichtigt. Die Git-Historie wird nicht umgeschrieben. Nichts, was die App rechnet oder speichert, ändert sich**, und am Verhalten ändert sich nur der Weg von «Pläne verwalten».
+Die wichtigsten Eigenschaften dieses Blocks: **Er entfernt und berichtigt. Die Git-Historie wird nicht umgeschrieben. Nichts, was die App rechnet oder speichert, ändert sich**, und am Verhalten ändern sich nur der Weg von «Pläne verwalten» und die Zurück-Geste bei Sheets.
 
 Dies ist der letzte Block von WP3.
 
@@ -133,6 +134,12 @@ Berichtige, was falsch ist; schreib nichts neu, was stimmt.
 - Die Adresse bekommt keinen neuen Ort, ausser du begründest, warum es ohne nicht geht.
 - Ein Komponententest und eine Prüfung in einer Browser-Suite halten beide Wege fest.
 
+### Schritt 4b – Zurück schliesst jedes Sheet (D187)
+
+- Die Zurück-Geste des Browsers und des Systems schliesst jedes Sheet, wie sie es seit Block 7C beim Muskel-Sheet tut, und die Adresse ändert sich dafür nicht. Der Mechanismus steht: `useBackLayer` in `src/app/backLayer.ts` (D185); ein Sheet bekommt ihn mit einer Zeile.
+- **Die Bedingung des Eigentümers:** Ein Sheet mit Eingaben verliert dabei nichts Getipptes. Entscheide, wie (das Getippte steht beim nächsten Öffnen wieder da, oder ein Sheet mit ungespeicherter Eingabe schliesst erst nach einer Rückfrage), und begründ es im Bericht.
+- `wp3-sheets.mjs` bleibt unverändert grün. Eine neue Prüfung tippt in jedes Sheet mit Feldern, geht mit der Geste zurück und findet den Text wieder, und sie prüft für jedes Sheet ohne Felder, dass Zurück es schliesst und den Screen stehen lässt.
+
 ### Schritt 5 – Die Offline-Prüfung
 
 1. **Ein Testserver, der wie GitHub Pages antwortet.** Ein kleines Skript unter `scripts/verify/` liefert den gebauten Ordner unter `/Momentum-App/` aus, ohne `Vary: Origin` (D163) und sonst so nah an GitHub Pages, wie du es belegen kannst. Lies dafür die Kopfzeilen einer echten Antwort, wenn deine Netzwerkregeln es zulassen (die Vorschau unter `hnd7k02.github.io` genügt); sonst nenn im Bericht, welche Kopfzeilen du angenommen hast.
@@ -148,7 +155,7 @@ Mach ein Inventar, ohne etwas zu entfernen: die grössten Dateien im aktuellen S
 ### Schritt 7 – Schlussprüfung und Vorschau
 
 1. `tsc -b`, `npm run test` (Exit-Code), `npm run build`, alle Suites über den Befehl aus Block 9, lokal und auf GitHub. Es gibt keine bekannte rote Prüfung mehr, oder du sagst genau, warum doch. Hält `HANDOVER.md` fest, dass der Workflow aus Block 9 noch nicht auf GitHub liegt, entfällt der Lauf dort, und dein Bericht sagt es.
-2. `git diff <Commit vor diesem Block> -- .github/fixtures` ist leer. Unter `src/` haben sich Logik und Verhalten nur dort geändert, wo die Schritte 4 und 5 es verlangen; dazu dürfen Kommentare und die Texte der Nennung berichtigt sein.
+2. `git diff <Commit vor diesem Block> -- .github/fixtures` ist leer. Unter `src/` haben sich Logik und Verhalten nur dort geändert, wo die Schritte 4, 4b und 5 es verlangen; dazu dürfen Kommentare und die Texte der Nennung berichtigt sein.
 3. `git status` ist sauber; die fünf Dateien sind weg; `LICENSE` steht, sobald Dario den Namen genannt hat.
 4. Trag den Stand in `HANDOVER.md` ein und halt in `docs/decisions.md` fest, was du entschieden hast.
 5. Veröffentlich den Build in `Momentum-preview` nach dessen `README.md`, ohne `sw.js`; die Statusleiste bleibt `default`. Warte auf den Workflow und öffne die Seite, soweit deine Netzwerkregeln es zulassen.
@@ -160,7 +167,7 @@ Mach ein Inventar, ohne etwas zu entfernen: die grössten Dateien im aktuellen S
 - die Git-Historie;
 - `.github/fixtures/` ganz, also auch `rc2-export.json`;
 - alles, was rechnet oder speichert: `src/core/`, `src/storage/`, das Datenschema, das Backup-Format, jede Golden-Datei und jeder Fingerabdruck;
-- das Aussehen und Verhalten der App, ausser dem Weg von «Pläne verwalten» und, falls Schritt 5 es verlangt, dem Service Worker;
+- das Aussehen und Verhalten der App, ausser dem Weg von «Pläne verwalten», der Zurück-Geste bei Sheets (Schritt 4b) und, falls Schritt 5 es verlangt, dem Service Worker;
 - jede Regel in `CLAUDE.md` und im Vertrag;
 - `deploy.yml` und der Default-Branch.
 
@@ -179,6 +186,7 @@ Kein Test wird gelöscht oder abgeschwächt. Gehört eine Suite zu einem Stand, 
 - `LICENSE` liegt vor (committet, sobald Dario den Namen genannt hat), und `THIRD-PARTY-NOTICES.md` beschreibt, was ausgeliefert wird und was vom alten Modell noch im Repo liegt.
 - `README.md` beschreibt die App von heute; die sechs Widersprüche aus dem Review sind aufgelöst oder begründet offen.
 - «Pläne verwalten» führt aus dem leeren Muskelgruppen-Screen und von Heute zu den Plänen; Test und Suite halten es fest.
+- Die Zurück-Geste schliesst jedes Sheet, und kein Sheet mit Eingaben verliert dabei etwas Getipptes; eine Suite hält es fest (D187).
 - Die Offline-Prüfung ist grün, mit einem Server, der wie GitHub Pages antwortet, oder der Fehler der App ist behoben und getestet.
 - `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, alle Suites bestehen lokal und, wo der Workflow liegt, auf GitHub.
 - Der Vorschau-Build ist erreichbar.

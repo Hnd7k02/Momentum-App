@@ -7,10 +7,10 @@ import {
   type ExerciseDayInput,
 } from '../../core/gym/performance';
 import { workVolumeByWeek } from '../../core/gym/volume';
-import type { MuscleGroup } from '../../core/model';
+import type { GymWindowComparison, MuscleGroup } from '../../core/model';
 import type { MuscleState } from '../../components/BodyRenderer';
 import type { GymHistory } from '../../storage/services/gymService';
-import { muscleTrend, type MuscleTrendPoint } from './muscleAnalytics';
+import { fromBaseline, muscleTrend, type MuscleTrendPoint } from './muscleAnalytics';
 import { exerciseGroups, isUneven, type ShownPerformance } from './muscleState';
 
 /**
@@ -19,16 +19,20 @@ import { exerciseGroups, isUneven, type ShownPerformance } from './muscleState';
  *
  * **It computes nothing of its own.** The group's state and figure are the
  * very `ShownMuscle` the row and the body read (`shownPerformance`); its
- * line is `muscleTrend()`, whose last point is that figure by construction;
- * an exercise's change is `exerciseSpans()`, the comparison the group's
- * figure is the mean of; and the work volume is `workVolumeByWeek()`. What
- * this file adds is *which rows* each of them is handed, and the order they
- * are shown in.
+ * line is `muscleTrend()`, whose last point is that figure by construction,
+ * drawn from the baseline of the group's first day (D170); an exercise's
+ * change is `exerciseSpans()`, the comparison the group's figure is the
+ * mean of, and its line the same comparison day by day
+ * (`exerciseLine`); and the work volume is `workVolumeByWeek()`. What this
+ * file adds is *which rows* each of them is handed, and the order they are
+ * shown in.
  *
  * Three things on it are shown and never scored: the best working set of an
  * exercise in the range, the list of what was recorded, and the work volume
  * (D152) — which enters no rating, no state and no colour.
  */
+
+const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 /**
  * The change of every exercise of a range — **the one figure an exercise
@@ -47,6 +51,36 @@ export function exerciseChanges(history: Pick<GymHistory, 'days' | 'metric'>): M
     changes.set(span.exerciseId, percentChange(span.ratio));
   }
   return changes;
+}
+
+/**
+ * The line of one exercise (the owner's correction at STOP 7C, D187): **at
+ * each of its days, its change in the range up to that day** — the very
+ * comparison its one figure is (`exerciseChanges`), as if the range had
+ * ended on that day, exactly as the line of a group is its figure day by
+ * day (`muscleTrend`). So the line ends on the figure, by construction, and
+ * an end point in a rise's colour never lies under the zero line. It
+ * begins on the baseline of its first day, at nought (D170).
+ *
+ * Until STOP 7C each day stood at its change since the first day shown:
+ * under the Stage 5b metric another comparison than the figure's, which
+ * set the median of the last days against the median of the first. The
+ * Dips of the check data read +5 % in the range while their last day lay
+ * under their first, and the line ended green below nought. Before the
+ * Stage 5b era (`firstLast`) the two rules are one: each day against the
+ * first.
+ *
+ * `days` are one exercise's, in any order; the result is oldest first, one
+ * point a day. A day whose comparison cannot be divided — a first day with
+ * no score, which a scorable set never has — stands on the zero line.
+ */
+export function exerciseLine(days: readonly ExerciseDay[], comparison: GymWindowComparison): MuscleTrendPoint[] {
+  const ordered = [...days].sort((a, b) => byText(a.date, b.date));
+  return ordered.map((day, index) => {
+    if (index === 0) return { date: day.date, value: 0 };
+    const span = exerciseSpans(ordered.slice(0, index + 1), comparison)[0];
+    return { date: day.date, value: percentChange(span?.ratio ?? null) ?? 0 };
+  });
 }
 
 /** One exercise of the group, as its row in the sheet shows it. */
@@ -87,8 +121,10 @@ export interface MuscleSheetView {
   change: number | null;
   exerciseDays: number;
   compared: boolean;
-  /** The line: one point per training day with something to compare, uncapped. Empty unless the group states a figure. */
+  /** The observations: one point per training day with something to compare, uncapped. Empty unless the group states a figure. */
   trend: readonly MuscleTrendPoint[];
+  /** What the chart draws (D170): the observations from the baseline of the group's first training day in the range, at nought. */
+  line: readonly MuscleTrendPoint[];
   /** The group's exercises, in the order of their ids; a screen sorts them by the name it shows. */
   exercises: readonly SheetExercise[];
   /** The exercises lie more than ten shown points apart (`isUneven`); only ever said beside a figure. */
@@ -130,8 +166,6 @@ export function rangeWeeks(from: DateKey, to: DateKey): WeekKey[] {
 export function weekNumber(week: WeekKey): number {
   return Number(week.slice(week.indexOf('W') + 1));
 }
-
-const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 export function toMuscleSheet({
   muscle,
@@ -178,6 +212,9 @@ export function toMuscleSheet({
     });
 
   const volume = new Map(workVolumeByWeek(sets)[muscle].map((week) => [week.week, week.volume]));
+  // No figure stated, no line drawn (contract §6): exactly as the row.
+  const trend = change === null ? [] : muscleTrend(history.days, muscle, membership, history.metric);
+  const firstDay = mine.reduce<DateKey | null>((first, day) => (first === null || day.date < first ? day.date : first), null);
 
   return {
     muscle,
@@ -185,8 +222,8 @@ export function toMuscleSheet({
     change,
     exerciseDays: entry?.exerciseDays ?? 0,
     compared: entry?.compared ?? false,
-    // No figure stated, no line drawn (contract §6): exactly as the row.
-    trend: change === null ? [] : muscleTrend(history.days, muscle, membership, history.metric),
+    trend,
+    line: fromBaseline(trend, firstDay),
     exercises,
     uneven: change !== null && isUneven(exercises.map((exercise) => exercise.change)),
     records: [...mine]

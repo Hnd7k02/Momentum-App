@@ -1,8 +1,10 @@
 import type { DateKey } from '../../core/dates';
+import type { GymWindowComparison } from '../../core/model';
 import type { ExerciseDay } from '../../core/gym/performance';
 import { formatDayAndMonth } from '../../i18n/format';
 import { useI18n } from '../../i18n/I18nProvider';
 import { signedPercentText } from '../../i18n/typography';
+import { exerciseLine } from './muscleSheet';
 import type { ShownTrend } from './muscleState';
 import './exerciseLineChart.css';
 
@@ -13,8 +15,14 @@ import './exerciseLineChart.css';
  * Until Stage 5b the detail drew bars from zero (D163). Under the Stage 5b
  * metric a day differs from the next by two or three percent, so the bars
  * of a season stood almost level and the plot said little. The line is
- * drawn from the same days: **each day's value as its change since the
- * first day shown**, and the zero line is that first day.
+ * drawn from the same days: **at each day, the exercise's change in the
+ * range up to that day** (`exerciseLine`, the owner's correction at STOP
+ * 7C) — the comparison its one figure is, day by day, as the line of a
+ * group is its figure day by day. It begins on the baseline of its first
+ * day, at nought (D170), and it ends on the figure at the head of the
+ * detail. Until STOP 7C each day stood at its change since the first day,
+ * which under the Stage 5b metric is another comparison than the figure's;
+ * before that era (`firstLast`) the two are one.
  *
  * - **A small change still looks small** (D160, D163). The scale is the one
  *   the muscle rows share — 8 % reaches the edge, 12 % until STOP Kurve
@@ -32,7 +40,8 @@ import './exerciseLineChart.css';
  *   value stood there — the last day against the first day shown — beside
  *   a "Veränderung" above the chart that compared the last day with the
  *   one before: two numbers for one exercise, and only one of them named.
- * - **One day is a dot**: one observation is not a change. No day draws
+ * - **One day draws no chart** (D170): the detail says in a sentence that
+ *   one day is recorded and the line begins with the second. No day draws
  *   nothing — the detail shows its empty state instead of this chart.
  *
  * This chart is a picture of the days and computes nothing that is scored.
@@ -44,11 +53,15 @@ export const LINE_SCALE = 8;
 /** What the reach grows by when a change goes beyond it. */
 const LINE_STEP = 4;
 
-/** Each day's change against the first day of the list, in percent, oldest first. */
-export function lineValues(days: readonly ExerciseDay[]): number[] {
-  const ordered = [...days].sort((a, b) => a.date.localeCompare(b.date));
-  const first = ordered[0]?.best.score ?? 0;
-  return ordered.map((day) => (first > 0 ? (day.best.score / first - 1) * 100 : 0));
+/**
+ * What the line draws, in percent, oldest first: at each day the
+ * exercise's change in the range up to that day, by `comparison`, and the
+ * first day at nought (`exerciseLine`). Under `firstLast` — the comparison
+ * before the Stage 5b era, and the default here — that is each day against
+ * the first.
+ */
+export function lineValues(days: readonly ExerciseDay[], comparison: GymWindowComparison = 'firstLast'): number[] {
+  return exerciseLine(days, comparison).map((point) => point.value);
 }
 
 /** How far the plot reaches from its zero line: the shared scale, or the next step above the largest change. */
@@ -181,29 +194,31 @@ export function LinePlot({
 }
 
 /**
- * The exercise detail's chart: each day at its change since the first day
- * shown.
+ * The exercise detail's chart: at each day the exercise's change in the
+ * range up to that day, from the baseline of its first day.
  *
  * **Its end carries no figure** (D176). The exercise has one change — the
  * one in the range, which stands in the head of the detail and in the
- * muscle sheet (`exerciseChanges`) — and the height of the line's last day
- * is a different comparison, the last day against the first. Printed beside
- * the line it was a second, unnamed number. The line still shows where
- * every day stands; its end point carries the state of the exercise's one
- * figure, as every end point carries the state it stands for, and the data
- * ink for a single day, which has none.
+ * muscle sheet (`exerciseChanges`) — and since STOP 7C the line's last
+ * point is that very change, so a figure beside it would say it twice. Its
+ * end point carries the state of that figure, as every end point carries
+ * the state it stands for, and the data ink for a single day, which has
+ * none.
  */
 export function ExerciseLineChart({
   days,
+  comparison = 'firstLast',
   state = null,
 }: {
   /** Newest first, as the detail has them. */
   days: ExerciseDay[];
+  /** The comparison the range's figures are under (`GymHistory.metric`). */
+  comparison?: GymWindowComparison;
   /** The state of the exercise's change in the range; `null` with nothing to compare. */
   state?: ShownTrend | null;
 }) {
   const ordered = [...days].sort((a, b) => a.date.localeCompare(b.date));
-  const values = lineValues(days);
+  const values = lineValues(days, comparison);
   const dates = ordered.length === 0 ? [] : ordered.length === 1 ? [ordered[0]!.date] : [ordered[0]!.date, ordered[ordered.length - 1]!.date];
   return (
     <LinePlot

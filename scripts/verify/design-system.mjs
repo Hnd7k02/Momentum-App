@@ -652,7 +652,11 @@ for (const width of WIDTHS) {
     await openSheetExercise(page, 'Bankdrücken');
     await look(page, width, 'uebungsdetail', 'gym');
     // The line (contract §6; the owner's choice at STOP 5b, D175): each day
-    // stands at its change since the first day shown, on a scale that
+    // stands at the exercise's change in the range up to that day — the
+    // comparison of its one figure, the median of the last days against the
+    // median of the first, as if the range had ended that day (the owner's
+    // correction at STOP 7C; until then: its change since the first day
+    // shown) — on a scale that
     // reaches 8 % at the least — 12 % until STOP Kurve (D180) — and is
     // never cut off; the zero line is
     // there and named; the line is neutral and only its end point carries
@@ -712,14 +716,23 @@ for (const width of WIDTHS) {
       };
     });
     const percent = (text) => Number(text.replace('−', '-').replace(/[^\d.+-]/g, ''));
-    const changes = line.scores.map((score) => (score / line.scores[0] - 1) * 100);
+    // The comparison of the Stage 5b metric, worked out here from the sets
+    // the table names: half the days, rounded down, three at most, at each
+    // end; the median of each end.
+    const median = (values) => { const sorted = [...values].sort((a, b) => a - b); const middle = sorted.length >> 1; return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2; };
+    const changes = line.scores.map((_, index) => {
+      if (index === 0) return 0;
+      const upTo = line.scores.slice(0, index + 1);
+      const ends = Math.min(3, Math.floor(upTo.length / 2));
+      return (median(upTo.slice(-ends)) / median(upTo.slice(0, ends)) - 1) * 100;
+    });
     const high = Math.max(0, ...line.labels.map((label) => percent(label.text)));
     const low = Math.min(0, ...line.labels.map((label) => percent(label.text)));
     const expectedY = (change) => ((high - change) / (high - low)) * 100;
     const offLine = line.points.length === changes.length
       ? line.points.map(([x, y], index) => Math.max(Math.abs(y - expectedY(changes[index])), Math.abs(x - (index / (changes.length - 1)) * 100)))
       : [Infinity];
-    check(`${width}: the line stands on its days — every point is its day's change since the first day shown (${line.points.length} days), and no bar is left`,
+    check(`${width}: the line stands on its days — every point is the change in the range up to its day (${line.points.length} days), and no bar is left`,
       line.points.length > 1 && line.bars === 0 && Math.max(...offLine) <= 0.6,
       short({ points: line.points.slice(0, 4), changes: changes.slice(0, 4).map((v) => Math.round(v * 10) / 10), off: Math.max(...offLine), bars: line.bars }));
     const furthest = Math.max(...changes.map(Math.abs));
@@ -767,6 +780,10 @@ for (const width of WIDTHS) {
         line.value === null,
       short({ stroke: line.stroke, ink: line.ink, width: line.strokeWidth, end: line.end, value: line.value, plotRight: line.plotRight }));
     check(`${width}: the first and the last date stand beneath the line`, line.dates.length === 2 && line.dates[0] !== line.dates[1], short(line.dates));
+    // Since STOP 7C the line is the one change day by day, so it ends on it.
+    check(`${width}: the line ends on the exercise's one change — ${head.text} at the head, ${Math.round(changes[changes.length - 1] * 10) / 10} % at its end`,
+      head.text !== null && percent(head.text) === Math.sign(changes[changes.length - 1]) * Math.round(Math.abs(changes[changes.length - 1]) + 1e-9),
+      short({ head: head.text, end: changes[changes.length - 1] }));
     await page.locator('.gym-detail .gym-session__scroll').evaluate((el) => { el.scrollTop = el.scrollHeight; });
     await page.waitForTimeout(400);
     await look(page, width, 'uebungsdetail-tage', 'gym');

@@ -636,9 +636,10 @@ export const en: Translations = {
   'gym.detail.tableCaption': 'Best working set per training day',
   'gym.detail.day': 'Day',
   'gym.detail.value': 'Best working set',
-  'gym.detail.sinceFirst': 'Change since the first day',
+  'gym.detail.sinceFirst': 'Change in the range up to that day',
   'gym.detail.firstDay': 'Starting value',
-  'gym.detail.lineNote': 'The line shows each day compared with the first day of the range.',
+  'gym.detail.lineNote': 'Each point is the change in the range up to that day; the last one is the figure above.',
+  'gym.detail.oneDay': 'One training day recorded. From the second on, Momentum shows how it develops.',
   'gym.detail.open': 'Open this exercise’s history',
 
   'running.distance': 'Distance',

@@ -1,5 +1,11 @@
 # The pictures of block 7C
 
+**Since STOP 7C** (D187) the owner's answers are built: a line begins on
+the baseline of its first day (candidate A), one recorded day in the
+exercise detail is a sentence, and an exercise's line is its change in the
+range day by day, ending on its figure. The pictures named `nach-stop-*`
+show that; the others show the block at its STOP.
+
 Made by `scripts/verify/stage7c-shots.mjs` and, for the card,
 `scripts/verify/muscle-card.mjs` (`SHOTS=<dir>`), against the production
 build. The device is the one of `muscle-sheet.mjs` (`seedSheetProfile`):
