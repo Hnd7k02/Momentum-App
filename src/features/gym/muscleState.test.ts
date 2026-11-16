@@ -3,6 +3,7 @@ import { MUSCLE_GROUPS, type MuscleGroup } from '../../core/model';
 import {
   exerciseDays,
   gymPerformanceOverSpan,
+  percentChange,
   type ExerciseDay,
   type MusclePerformance,
 } from '../../core/gym/performance';
@@ -10,13 +11,15 @@ import {
   HELD_DOWN_TO_PERCENT,
   HELD_UP_TO_PERCENT,
   MIN_EXERCISE_DAYS,
+  UNEVEN_BEYOND_POINTS,
   exerciseDayCounts,
   exerciseGroups,
+  isUneven,
   muscleStateOf,
   roundShown,
   shownChangeText,
-  shownPerformance,
   shownPercent,
+  shownPerformance,
   shownTrend,
   shownTrendOfChange,
 } from './muscleState';
@@ -386,5 +389,52 @@ describe('what the screen shows for a range', () => {
     const before = JSON.stringify(performance);
     shownPerformance(days, performance);
     expect(JSON.stringify(performance)).toBe(before);
+  });
+});
+
+describe('"uneinheitlich": the exercises of a group more than ten shown points apart', () => {
+  it('is not said at exactly ten points', () => {
+    expect(isUneven([8, -2])).toBe(false);
+    expect(isUneven([10, 0])).toBe(false);
+    expect(isUneven([0, -10])).toBe(false);
+  });
+
+  it('is said from eleven points on', () => {
+    expect(isUneven([9, -2])).toBe(true);
+    expect(isUneven([11, 0])).toBe(true);
+    expect(isUneven([1, -10])).toBe(true);
+  });
+
+  it('reads the figures as they are shown, not their decimals', () => {
+    // +8.4 and −2.4 are 10.8 apart and stand on screen as +8 % and −2 %.
+    expect(isUneven([8.4, -2.4])).toBe(false);
+    // +8.5 and −2.5 round away from zero, to +9 % and −3 %.
+    expect(isUneven([8.5, -2.5])).toBe(true);
+    // 10.4 points on screen are ten.
+    expect(isUneven([10.4, 0.4])).toBe(false);
+    // The rounding is the one of every figure: 41/40 is +2.5 % and shows as +3 %.
+    expect(isUneven([percentChange(41 / 40), -8])).toBe(true);
+    expect(isUneven([percentChange(41 / 40), -7])).toBe(false);
+  });
+
+  it('is never said of a single exercise, nor of none', () => {
+    expect(isUneven([40])).toBe(false);
+    expect(isUneven([-40])).toBe(false);
+    expect(isUneven([])).toBe(false);
+  });
+
+  it('leaves out an exercise with nothing to compare', () => {
+    expect(isUneven([12, null])).toBe(false);
+    expect(isUneven([null, null])).toBe(false);
+    expect(isUneven([12, null, -1])).toBe(true);
+  });
+
+  it('looks at the widest pair among several', () => {
+    expect(isUneven([3, 5, 9, 13])).toBe(false);
+    expect(isUneven([3, 5, 9, 14])).toBe(true);
+  });
+
+  it('is the rule of the contract: ten points', () => {
+    expect(UNEVEN_BEYOND_POINTS).toBe(10);
   });
 });

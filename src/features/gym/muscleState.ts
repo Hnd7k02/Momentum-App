@@ -112,6 +112,40 @@ export function shownChangeText(change: number | null): string | null {
 }
 
 /**
+ * "uneinheitlich" (contract §7, D160; block 7C).
+ *
+ * A group's figure is a mean of its exercises' changes, and a mean can be a
+ * number none of them shows: +12 % and −6 % make a group of +3 %. Where the
+ * exercises of a group lie **more than ten percentage points apart**, its
+ * sheet says so in one word beside the figure and lists the exercises one by
+ * one, so the mean is never left to speak for them alone.
+ *
+ * The rule reads the changes **as they are shown** — whole percents, by the
+ * one rounding — for the reason the band does: what the word says must be
+ * what the figures beside it say. +8 % and −2 % stand ten points apart on
+ * screen and are not uneven, whatever their decimals; +9 % and −2 % are.
+ * An exercise with nothing to compare has no change and takes no part, so a
+ * single compared exercise is never uneven.
+ *
+ * It is a word, not a state: the group keeps the state its figure gives it,
+ * and nothing is coloured or counted by this.
+ */
+export const UNEVEN_BEYOND_POINTS = 10;
+
+/** Whether changes — raw, as `percentChange()` gives them — lie more than ten shown points apart. */
+export function isUneven(changes: readonly (number | null)[]): boolean {
+  let low = Number.POSITIVE_INFINITY;
+  let high = Number.NEGATIVE_INFINITY;
+  for (const change of changes) {
+    const shown = roundShown(change);
+    if (shown === null) continue;
+    if (shown < low) low = shown;
+    if (shown > high) high = shown;
+  }
+  return high - low > UNEVEN_BEYOND_POINTS;
+}
+
+/**
  * Which groups each exercise of the range belongs to: the groups it gives a
  * weight above zero, by its roles **as of its latest recorded day** there.
  *

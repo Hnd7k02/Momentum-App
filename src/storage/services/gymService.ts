@@ -1,6 +1,6 @@
 import { nowIso, today } from '../../core/clock';
 import { snapshotOn } from '../../core/config/closure';
-import { type DateKey } from '../../core/dates';
+import { addDays, type DateKey } from '../../core/dates';
 import { catalogueRecords } from '../../core/gym/catalogue';
 import { bodyweightOn, effectiveLoadGrams, type BodyweightPoint } from '../../core/gym/load';
 import { gymMetricKey, gymMetricOf, type GymMetric } from '../../core/gym/metric';
@@ -1150,19 +1150,70 @@ function exerciseDaySource(read: SetsInRange): ExerciseDaySource {
  * day's own and are not read here.
  */
 export async function loadGymHistory(from: DateKey, to: DateKey): Promise<GymHistory> {
+  return (await loadGymRange(from, to)).history;
+}
+
+/**
+ * A range's Gym history, and beside it the sets it was read from.
+ *
+ * `sets` is every exercise of every day in the range with **all** of its
+ * sets, each set's load resolved exactly as the metric reads it — the
+ * warm-ups among them, marked. It is there for what is shown and never
+ * scored: the work volume (D152, `core/gym/volume.ts`). Nothing that rates
+ * reads it, and nothing is stored; it is the same read the history is built
+ * from, handed on rather than made twice.
+ *
+ * In the fixed order of the Stage 5b metric — by day, exercise and the
+ * set's place in its workout — whatever metric the history is under.
+ */
+export interface GymRange {
+  history: GymHistory;
+  sets: ExerciseDayInput[];
+}
+
+export async function loadGymRange(from: DateKey, to: DateKey): Promise<GymRange> {
   const [exercises, snapshots] = await Promise.all([listExercises(), configSnapshotsRepository.list()]);
   const metric = gymMetricOf(snapshotOn(snapshots, to));
-  const { days, awaitingBodyweight, warmUpOnly } = exerciseDaySource(await readSetsInRange(from, to, exercises)).under(metric);
+  const read = await readSetsInRange(from, to, exercises);
+  const { days, awaitingBodyweight, warmUpOnly } = exerciseDaySource(read).under(metric);
   return {
-    days,
-    comparisons: latestComparisons(days),
-    recent: gymPerformance(days),
-    overall: gymPerformanceOverSpan(days, metric),
-    names: new Map(exercises.map((exercise) => [exercise.id, exercise.name])),
-    awaitingBodyweight,
-    warmUpOnly,
-    metric,
+    history: {
+      days,
+      comparisons: latestComparisons(days),
+      recent: gymPerformance(days),
+      overall: gymPerformanceOverSpan(days, metric),
+      names: new Map(exercises.map((exercise) => [exercise.id, exercise.name])),
+      awaitingBodyweight,
+      warmUpOnly,
+      metric,
+    },
+    sets: bucketSets(read, [...read.sets].sort(byDayExerciseAndOrder)).inputs,
   };
+}
+
+/**
+ * The latest day before `before` on which each muscle group was trained —
+ * by the groups the sets of that day were logged under.
+ *
+ * For one sentence: a group with nothing in the range a screen shows says
+ * when it was last trained, if it ever was, so that "nothing in the last 30
+ * days" is not read as "never" (contract §11). Read on demand, when such a
+ * group is looked at; a group that was never trained has no entry.
+ */
+export async function lastTrainedBefore(before: DateKey): Promise<Partial<Record<MuscleGroup, DateKey>>> {
+  const [sets, exercises] = await Promise.all([gymSetsRepository.listByDateRange('0000-01-01', addDays(before, -1)), listExercises()]);
+  const byId = new Map(exercises.map((exercise) => [exercise.id, exercise]));
+  const latest: Partial<Record<MuscleGroup, DateKey>> = {};
+  for (const set of sets) {
+    // As the history reads it: the set's own mapping, the catalogue's only
+    // where a legacy row has none.
+    const muscles = set.muscles.length > 0 ? set.muscles : (byId.get(set.exerciseId)?.muscles ?? []);
+    for (const muscle of muscles) {
+      const known = latest[muscle];
+      if (known === undefined || set.date > known) latest[muscle] = set.date;
+    }
+  }
+  return latest;
 }
 
 /** The exercise-days a rating replay needs over its own long range, under each metric it asks for. */

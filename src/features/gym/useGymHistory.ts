@@ -3,8 +3,10 @@ import { addDays, type DateKey } from '../../core/dates';
 import { useLoadable } from '../../app/useLoadable';
 import { useDataVersion } from '../../app/useDataVersion';
 import { useToday } from '../../app/useToday';
+import type { ExerciseDayInput } from '../../core/gym/performance';
+import type { MuscleGroup } from '../../core/model';
 import { gymSessionsRepository } from '../../storage/repositories';
-import { loadGymHistory, type GymHistory } from '../../storage/services/gymService';
+import { lastTrainedBefore, loadGymRange, type GymHistory } from '../../storage/services/gymService';
 
 /**
  * The day of the latest Gym session, up to and including `today`; `null`
@@ -46,12 +48,29 @@ export function latestSessionDay(sessions: readonly { date: DateKey }[], today: 
  * trained" only when that is `null`; otherwise the screen says when the
  * last session was (`muscleGap`). Both are read in one load, so the screen
  * never shows the one without the other.
+ *
+ * And two things only Muskelgruppen's sheet shows (block 7C), from the same
+ * load for the same reason:
+ *
+ * - `sets` — every exercise-day of the range with all of its sets, for the
+ *   work volume, which is shown and never scored (D152). It is the read the
+ *   history is built from, handed on; nothing that rates reads it.
+ * - `lastTrained` — where a screen asks for it, the latest day before the
+ *   range on which each group was trained, so that a group with nothing in
+ *   the range can say when it last was.
  */
 
-export function useGymHistoryState(rangeDays: number): {
+export function useGymHistoryState(
+  rangeDays: number,
+  { lastTrained: withLastTrained = false }: { /** Also read when each group was last trained before the range. */ lastTrained?: boolean } = {},
+): {
   history: GymHistory | null;
+  /** The range's exercise-days with all of their sets; `null` with `history`. */
+  sets: readonly ExerciseDayInput[] | null;
   /** The day of the most recent Gym session, `null` before the first. */
   latestSession: DateKey | null;
+  /** Each group's latest day before the range; `null` unless asked for and loaded. */
+  lastTrained: Partial<Record<MuscleGroup, DateKey>> | null;
   loading: boolean;
   failed: boolean;
   reload(): Promise<void>;
@@ -60,19 +79,23 @@ export function useGymHistoryState(rangeDays: number): {
   const version = useDataVersion();
   const load = useCallback(
     async () => {
-      const [history, sessions] = await Promise.all([
-        loadGymHistory(addDays(to, -(rangeDays - 1)), to),
+      const from = addDays(to, -(rangeDays - 1));
+      const [range, sessions, lastTrained] = await Promise.all([
+        loadGymRange(from, to),
         gymSessionsRepository.getAll(),
+        withLastTrained ? lastTrainedBefore(from) : null,
       ]);
-      return { history, latestSession: latestSessionDay(sessions, to) };
+      return { ...range, latestSession: latestSessionDay(sessions, to), lastTrained };
     },
-    [rangeDays, to],
+    [rangeDays, to, withLastTrained],
   );
-  const { state, reload } = useLoadable(load, [rangeDays, to], [version]);
+  const { state, reload } = useLoadable(load, [rangeDays, to, withLastTrained], [version]);
   const value = state.status === 'ready' ? state.value : null;
   return {
     history: value?.history ?? null,
+    sets: value?.sets ?? null,
     latestSession: value?.latestSession ?? null,
+    lastTrained: value?.lastTrained ?? null,
     loading: state.status === 'loading',
     failed: state.status === 'failed',
     reload,
