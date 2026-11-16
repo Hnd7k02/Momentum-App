@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openGymHub, openMuscles, phone, seed, seedMuscles, seedTraining, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP2-2 — the Gym hub, on the real production build, at 393, 360 and 430.
@@ -73,12 +73,17 @@ for (const width of CHECK_WIDTHS) {
   {
     const { ctx, page, fetched, preview, errors } = await boot(width, { withData: true });
 
-    // Heute: the label opens the hub; the quick-log action does not.
+    // Heute: the Gym label is the door to the body (block 7B, D161) and is
+    // named for it; the quick-log action stays. Until block 7B the label
+    // was named "Gym öffnen" and led to the hub. Where it leads now, and
+    // the way back, is checked further down, once the hub has been seen
+    // with nothing 3D fetched.
     check(`${width}: Heute keeps the quick-log action`, await page.getByRole('button', { name: 'Session eintragen' }).isVisible());
-    check(`${width}: Heute offers the Gym area by name`, await page.getByRole('button', { name: 'Gym öffnen' }).isVisible());
-    await page.getByRole('button', { name: 'Gym öffnen' }).click();
-    await page.waitForTimeout(1800);
-    check(`${width}: Gym öffnen lands on the hub`, (await hash(page)) === '#/areas/gym', await hash(page));
+    check(`${width}: Heute's Gym label is named for where it leads: Muskelgruppen`, await page.getByRole('button', { name: 'Muskelgruppen öffnen' }).isVisible()
+      && (await page.getByRole('button', { name: 'Gym öffnen' }).count()) === 0);
+    check(`${width}: Heute itself fetches nothing 3D`, fetched.length === 0, fetched.join(','));
+    await openGymHub(page, { wait: 1500 });
+    check(`${width}: the tab and the area lead to the hub`, (await hash(page)) === '#/areas/gym', await hash(page));
     check(`${width}: the hub fetches nothing 3D`, fetched.length === 0, fetched.join(','));
 
     const train = await firstView(page, '.gym-hub__training');
@@ -155,7 +160,12 @@ for (const width of CHECK_WIDTHS) {
     check(`${width}: the overall tile and the exercise list came along`, (await page.locator('[data-metric="gym-overall"]').count()) === 1 && (await page.locator('.gym-progress__row').count()) > 0);
     clip = await clipped(page);
     check(`${width}: the muscle destination is not clipped`, clip.length === 0, clip.slice(0, 2).join('; '));
-    check(`${width}: the destination draws the 3D body, not a still`, (await page.locator('.body-viewer canvas').evaluate((c) => c.width > 0 && c.getContext('webgl2') !== null)) && (await page.locator('.muscle-module .body-renderer').count()) === 0 && (await page.locator('.muscle-module img').count()) === 0);
+    // Since block 7B the body's still stands in the stage until the first
+    // picture has been drawn (contract §11). The rule is the same — the
+    // destination draws the 3D body, not a picture of it — and is held once
+    // the stage says the body is shown: no still is left then.
+    await page.waitForFunction(() => document.querySelector('.body-stage')?.getAttribute('data-stage') === 'shown', null, { timeout: 30000 }).catch(() => undefined);
+    check(`${width}: the destination draws the 3D body, not a still`, (await page.locator('.body-stage').getAttribute('data-stage')) === 'shown' && (await page.locator('.body-viewer canvas').evaluate((c) => c.width > 0 && c.getContext('webgl2') !== null)) && (await page.locator('.muscle-module .body-renderer').count()) === 0 && (await page.locator('.muscle-module img').count()) === 0);
     check(`${width}: the body keeps its views`, (await page.locator('.body-viewer__view').count()) === 3);
     if (shoot) await page.screenshot({ path: tag('D', 'muscles-destination') });
     // D3: a selected muscle highlights on the 3D body, as before.
@@ -173,17 +183,52 @@ for (const width of CHECK_WIDTHS) {
     await page.goForward();
     await page.waitForTimeout(900);
     check(`${width}: Forward re-enters Muskelgruppen`, (await hash(page)) === '#/areas/gym/muscles', await hash(page));
-    await page.getByRole('button', { name: 'Zurück' }).click();
+    await page.getByRole('button', { name: 'Zurück', exact: true }).click();
     await page.waitForTimeout(900);
     check(`${width}: the screen's back control returns to the hub`, (await hash(page)) === '#/areas/gym', await hash(page));
     await page.goBack();
     await page.waitForTimeout(900);
-    check(`${width}: and Back then leaves the area the way it was entered`, (await hash(page)) === '#/today', await hash(page));
+    // The hub was entered from the area before it — Bereiche opens on Mind —
+    // and that is where Back leads. (Until block 7B this walk began on
+    // Heute's label, and Back led to Heute.)
+    check(`${width}: and Back then leaves the hub the way it was entered`, (await hash(page)) === '#/areas/mental', await hash(page));
 
     // A deep link.
     await page.goto(`${URL_APP}#/areas/gym/muscles`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(4000);
-    check(`${width}: a link to #/areas/gym/muscles opens the destination`, (await page.locator('.muscle-row').count()) === 10 && ((await page.locator('.screen__title').textContent()) ?? '').trim() === 'Muskelgruppen');
+    check(`${width}: a link to #/areas/gym/muscles opens the destination`, (await page.locator('.muscle-row').count()) === 10 && ((await page.locator('.gym-muscles__title').textContent()) ?? '').trim() === 'Muskelgruppen');
+    // After a link straight to the address there is no place to go back to:
+    // the back control leads to the hub.
+    await page.getByRole('button', { name: 'Zurück', exact: true }).click();
+    await page.waitForTimeout(900);
+    check(`${width}: after a direct link the back control leads to the hub`, (await hash(page)) === '#/areas/gym', await hash(page));
+
+    // From Heute straight to the body, and back to Heute (D161).
+    await page.locator('.tab-bar button', { hasText: 'Heute' }).click();
+    await page.waitForTimeout(700);
+    await page.getByRole('button', { name: 'Muskelgruppen öffnen' }).click();
+    await page.waitForTimeout(2500);
+    check(`${width}: Heute's Gym label lands on Muskelgruppen directly`, (await hash(page)) === '#/areas/gym/muscles' && (await page.locator('.body-stage').count()) === 1, await hash(page));
+    await page.getByRole('button', { name: 'Zurück', exact: true }).click();
+    await page.waitForTimeout(900);
+    check(`${width}: and the back control returns to Heute`, (await hash(page)) === '#/today', await hash(page));
+    await page.getByRole('button', { name: 'Muskelgruppen öffnen' }).click();
+    await page.waitForTimeout(1500);
+    await page.goBack();
+    await page.waitForTimeout(900);
+    check(`${width}: so does the browser's own Back`, (await hash(page)) === '#/today', await hash(page));
+    await page.getByRole('button', { name: 'Muskelgruppen öffnen' }).click();
+    await page.waitForTimeout(1500);
+    const toHub = page.getByRole('button', { name: /Zur Gym-Übersicht/ });
+    await toHub.scrollIntoViewIfNeeded();
+    const toHubBox = await toHub.boundingBox();
+    check(`${width}: from Muskelgruppen the hub is one tap away, on a target of its own`, toHubBox !== null && toHubBox.height >= 44, JSON.stringify(toHubBox));
+    await toHub.click();
+    await page.waitForTimeout(900);
+    check(`${width}: that tap leads to the hub, although Back would have led to Heute`, (await hash(page)) === '#/areas/gym' && (await page.getByRole('button', { name: 'Training erfassen' }).isVisible()), await hash(page));
+    await page.goBack();
+    await page.waitForTimeout(900);
+    check(`${width}: and Back from the hub returns to Muskelgruppen, where the tap was made`, (await hash(page)) === '#/areas/gym/muscles', await hash(page));
 
     // Quick log from Heute still goes straight to the session, not the hub.
     await page.locator('.tab-bar button', { hasText: 'Heute' }).click();
@@ -199,8 +244,7 @@ for (const width of CHECK_WIDTHS) {
   /* ── Without data: the destination exists before the first workout ───── */
   {
     const { ctx, page, fetched, preview, errors } = await boot(width, { withData: false });
-    await page.getByRole('button', { name: 'Gym öffnen' }).click();
-    await page.waitForTimeout(1500);
+    await openGymHub(page, { wait: 1500 });
     const summaryText = ((await page.locator('.gym-hub__musclesSummary').textContent()) ?? '').trim();
     check(`${width}: with no data the entry says so`, summaryText === 'Noch nicht trainiert', summaryText);
     const states = await page.locator('.gym-hub__previewState').evaluateAll((els) => [...new Set(els.map((el) => [...el.classList].find((c) => c.startsWith('gym-hub__previewState--'))))]);
@@ -225,6 +269,24 @@ for (const width of CHECK_WIDTHS) {
     const clip = await clipped(page);
     check(`${width}: the empty destination is not clipped`, clip.length === 0, clip.slice(0, 2).join('; '));
     if (shoot) await page.screenshot({ path: tag('D2', 'muscles-no-data') });
+    // "Pläne verwalten" and Back are two things (block 7B): from the empty
+    // Muskelgruppen, opened from Heute, the plan chooser's link leads to the
+    // hub — where the plans are — and not back to Heute.
+    await page.locator('.tab-bar button', { hasText: 'Heute' }).click();
+    await page.waitForTimeout(700);
+    await page.getByRole('button', { name: 'Muskelgruppen öffnen' }).click();
+    await page.waitForTimeout(2000);
+    // A plan, so that the one action of the empty state opens the chooser.
+    await seedPlan(page);
+    await page.getByRole('button', { name: 'Training erfassen' }).click();
+    await page.waitForTimeout(900);
+    const manage = page.locator('[role="dialog"]').getByRole('button', { name: 'Pläne verwalten' });
+    check(`${width}: the empty state's action opens the plan chooser over a body that stands still`, (await manage.count()) === 1 && (await page.locator('.body-viewer').getAttribute('data-held')) !== null);
+    if ((await manage.count()) === 1) {
+      await manage.click();
+      await page.waitForTimeout(900);
+      check(`${width}: "Pläne verwalten" leads to the hub, not back to Heute`, (await hash(page)) === '#/areas/gym', await hash(page));
+    }
     check(`${width}: no page errors (empty)`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

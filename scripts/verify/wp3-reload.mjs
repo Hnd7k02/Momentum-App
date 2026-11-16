@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, summary, openGymHub } from './lib.mjs';
 
 /**
  * WP3, B2 — screens reload when their inputs change, and the constant
@@ -147,10 +147,15 @@ const readMuscles = (page) =>
       };
     });
     const overall = document.querySelector('[data-metric="gym-overall"]');
+    // Since block 7B the trend heads the metrics strip and the count of
+    // rated groups is the strip's second cell, named as the tile's line read.
+    const rated = document.querySelectorAll('.muscle-strip__cell')[1] ?? null;
     return {
       range: [...document.querySelectorAll('.segmented__option[aria-pressed="true"]')].map((b) => n(b.textContent)),
       rows,
       overall: overall ? n(overall.textContent) : null,
+      counted: rated ? rated.getAttribute('aria-label') : null,
+      ratedCell: rated ? [...rated.children].map((el) => n(el.textContent)).join(' | ') : null,
       exercises: [...document.querySelectorAll('.gym-progress__row')].map((b) => ({
         name: n(b.querySelector('.gym-progress__rowName')?.textContent),
         change: n(b.querySelector('.gym-progress__change')?.textContent),
@@ -276,7 +281,7 @@ for (const [width, height] of SIZES) {
   const { ctx, page, errors } = await boot(width, height);
 
   /* 1 — Muskelgruppen 30 / 90 ─────────────────────────────────────────── */
-  await page.getByRole('button', { name: 'Gym öffnen' }).click();
+  await openGymHub(page);
   await page.waitForTimeout(1500);
   await openMuscles(page, { wait: 4500 });
   const m30 = await settle(() => readMuscles(page), { ready: musclesReady });
@@ -311,10 +316,13 @@ for (const [width, height] of SIZES) {
   const back30 = row(m30, 'Rücken');
   check(`${W}: Rücken, three identical days, reads "0 % Gehalten"`, back30?.state === 'unchanged' && back30?.delta === true && /^0\s%\s?Gehalten$/.test(back30?.right ?? '') && back30?.sub === 'Vor 5 Tagen', short(back30));
 
-  const counted = (m) => Number(/(\d+) von 10 Gruppen gewertet/.exec(m.overall ?? '')?.[1] ?? Number.NaN);
+  const counted = (m) => Number(/^(\d+) von 10 Gruppen gewertet$/.exec(m.counted ?? '')?.[1] ?? Number.NaN);
+  const printed = (m) => Number(/^Gewertet \| (\d+)\s\/\s10 \| Gruppen$/.exec(m.ratedCell ?? '')?.[1] ?? Number.NaN);
   const withDelta = (m) => m.rows.filter((r) => r.delta).length;
-  check(`${W}: the trend tile counts more groups at 90 days than at 30`, counted(m90) === counted(m30) + 1, `${m30.overall} → ${m90.overall}`);
-  check(`${W}: in each range the tile counts exactly the rows that carry a figure`, counted(m30) === withDelta(m30) && counted(m90) === withDelta(m90), `30: ${counted(m30)}/${withDelta(m30)} · 90: ${counted(m90)}/${withDelta(m90)}`);
+  check(`${W}: the strip counts more groups at 90 days than at 30`, counted(m90) === counted(m30) + 1, `${m30.counted} → ${m90.counted}`);
+  check(`${W}: in each range the strip counts exactly the rows that carry a figure, in its cell and in its name`,
+    counted(m30) === withDelta(m30) && counted(m90) === withDelta(m90) && printed(m30) === counted(m30) && printed(m90) === counted(m90),
+    `30: ${counted(m30)}/${withDelta(m30)} (${m30.ratedCell}) · 90: ${counted(m90)}/${withDelta(m90)} (${m90.ratedCell})`);
   check(`${W}: the tile is called "Leistungstrend" in both ranges`, /^Leistungstrend/.test(m30.overall ?? '') && /^Leistungstrend/.test(m90.overall ?? ''), `${m30.overall} | ${m90.overall}`);
   const names30 = m30.exercises.map((e) => e.name);
   const names90 = m90.exercises.map((e) => e.name);
@@ -340,7 +348,7 @@ for (const [width, height] of SIZES) {
   check(`${W}: 90 Tage equals a full reload, toggled to 90`, same(r90, m90), diff(m90, r90));
 
   /* 2 — the hub after Fertig ─────────────────────────────────────────── */
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(1300);
   const hubBefore = await settle(() => readHub(page), { ready: hubReady });
   check(`${W}: Zurück lands on the hub`, hubBefore.hash === '#/areas/gym', hubBefore.hash);
@@ -470,7 +478,7 @@ for (const [width, height] of SIZES) {
   await page.getByRole('button', { name: 'Session eintragen' }).click();
   await page.waitForTimeout(1000);
   await logBench(page, W);
-  await page.getByRole('button', { name: 'Gym öffnen' }).click();
+  await openGymHub(page);
   await page.waitForTimeout(1500);
   const sunday = await settle(() => readHub(page), { ready: hubReady });
   const sundayRunning = await settle(() => readRunning(page), { ready: (r) => r.text !== '' });

@@ -268,25 +268,26 @@ for (const [width, height] of [
   await audit(page, 'bereiche-gym-muskeln-top', width);
   await scrollTo(page, '.muscle-rows');
   await audit(page, 'bereiche-gym-muskeln', width);
-  /* WP3, B5: the rows sit on the card's content edge — no browser list inset. */
+  /* WP3, B5: the rows carry no browser list inset. Until block 7B they stood
+     in a card, on its content edge; the body's stage has no card, and the
+     rows stand on the ground like it — on the screen's one side margin. */
   const inset = await page.locator('.muscle-rows').evaluate((ul) => {
-    const card = ul.closest('.card');
-    const box = card.getBoundingClientRect();
-    const style = getComputedStyle(card);
     const list = getComputedStyle(ul);
     const row = ul.querySelector('.muscle-row').getBoundingClientRect();
     return {
       paddingStart: list.paddingInlineStart,
       marginBlock: `${list.marginBlockStart}/${list.marginBlockEnd}`,
-      offset: Math.round(row.left - (box.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft))),
+      inCard: ul.closest('.card') !== null,
+      left: Math.round(row.left),
+      right: Math.round(window.innerWidth - row.right),
     };
   });
   check(
-    `${width} · muscle rows start on the card's content edge, with no list inset`,
-    inset.paddingStart === '0px' && inset.marginBlock === '0px/0px' && Math.abs(inset.offset) <= 1,
+    `${width} · muscle rows stand on the screen's 16px side margin, outside any card, with no list inset`,
+    inset.paddingStart === '0px' && inset.marginBlock === '0px/0px' && inset.inCard === false && inset.left === 16 && inset.right === 16,
     JSON.stringify(inset),
   );
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(1200);
   /* Laufen, inside the Gym workspace, and a sheet opened from its tile. */
   await scrollTo(page, '[data-metric="running-rating"]');

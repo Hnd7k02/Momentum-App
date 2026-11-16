@@ -5,17 +5,25 @@
  * of the block "Kurve" are measured the same way, so that a ΔE in a design
  * and the ΔE the suite asks for are one measure.
  *
- * A zone is the middle sixth of the picture's width — the trunk and the
+ * A zone is the middle fifth of the picture's width — the trunk and the
  * legs, without the shoulders, arms and hands beside them — and a band of
  * its height. From the front the four bands are the chest, the quadriceps,
  * the calves and the feet; from the back the upper back, the hamstrings,
  * the calves and the heels. The feet are the inert zone (D166): no state
  * ever reaches them.
+ *
+ * The bands are those of the stage (block 7B): the picture is the whole
+ * stage, in which the body stands from 11.5 % to 96 % of the height. Until
+ * block 7B the picture was the body's card, where it stood from 14 % to
+ * 89 %; each band is the same stretch of the body as before, and the zone
+ * is as wide a stretch of the trunk — a fifth of a frame in which the body
+ * is larger than it was in the card's sixth.
  */
-export const ZONES = { upper: [0.26, 0.36], thigh: [0.5, 0.68], calf: [0.72, 0.84], foot: [0.86, 0.9] };
-export const ZONE_X = [0.42, 0.58];
+export const ZONES = { upper: [0.245, 0.355], thigh: [0.515, 0.715], calf: [0.765, 0.895], foot: [0.925, 0.96] };
+export const ZONE_X = [0.4, 0.6];
 /**
- * The card behind the body, as a lightness. The Gym card reads L* 10; the
+ * The ground behind the body, as a lightness — until block 7B the Gym
+ * card's. It reads L* 10 at its lightest under the stage; the
  * darkest tone of the body, an untrained muscle in its own shadow, stays
  * above 23 under the light of D165 — which has no tone mapping, so a held
  * muscle is no longer one flat white and an untrained one no longer one

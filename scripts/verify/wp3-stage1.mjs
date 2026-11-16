@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, smallTargets, summary, openGymHub } from './lib.mjs';
 
 /**
  * WP3, Stage 1 — B4, B5, B6, B9, B10, B11, B12 on the real production
@@ -312,7 +312,7 @@ for (const [width, height] of SIZES) {
     check(`${W}: B4 Heute's Gym week reads 1 / 3`, /^1 \/ 3 /.test(heuteWeek ?? ''), String(heuteWeek));
     check(`${W}: B4 exactly one session is stored`, (await idb(page, 'gymSessions')).length === 1);
 
-    await page.getByRole('button', { name: 'Gym öffnen' }).click();
+    await openGymHub(page);
     await page.waitForTimeout(1200);
     const hubWeek = await until(() => textOf(page.locator('.gym-hub__week')), (v) => v === '1 von 3 Sessions diese Woche');
     check(`${W}: B4 the hub's week line reads exactly "1 von 3 Sessions diese Woche"`, hubWeek === '1 von 3 Sessions diese Woche', String(hubWeek));
@@ -609,7 +609,7 @@ for (const [width, height] of SIZES) {
     await onboard(page, { gym: 3, running: 0, wellbeing: false });
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(900);
-    await page.getByRole('button', { name: 'Gym öffnen' }).click();
+    await openGymHub(page);
     await page.waitForTimeout(1000);
     await page.getByRole('button', { name: 'Training erfassen' }).click();
     await page.waitForTimeout(900);
@@ -700,7 +700,7 @@ for (const [width, height] of SIZES) {
     await pageDayCheck(page, `${W} C`);
     check(`${W}: B6 the two zero-change groups are seeded, three exercise days each`, seeded.sets === 6, short(seeded));
 
-    await page.getByRole('button', { name: 'Gym öffnen' }).click();
+    await openGymHub(page);
     await page.waitForTimeout(1800);
     // The hub's ten markers are the body's tint in miniature, in MUSCLE_GROUPS
     // order: calves is the ninth, forearms the tenth, back the second.
@@ -713,25 +713,24 @@ for (const [width, height] of SIZES) {
     await openMuscles(page, { wait: 4500 });
     await page.locator('.muscle-row').first().waitFor({ timeout: 8000 });
 
-    /* B5 — no list inset, at this width. */
+    /* B5 — no list inset, at this width. Until block 7B the rows stood in
+       a card and began on its content edge; the body's stage has no card,
+       and the rows stand on the ground, on the screen's one side margin. */
     const inset = await page.evaluate(() => {
       const list = document.querySelector('.muscle-rows');
       const s = getComputedStyle(list);
-      const card = list.closest('.card');
-      const cs = getComputedStyle(card);
-      const cr = card.getBoundingClientRect();
       const row = list.querySelector('.muscle-row').getBoundingClientRect();
       return {
         paddingInlineStart: s.paddingInlineStart,
         marginBlockStart: s.marginBlockStart,
         marginBlockEnd: s.marginBlockEnd,
         rowLeft: Math.round(row.left * 100) / 100,
-        contentLeft: Math.round((cr.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft)) * 100) / 100,
+        inCard: list.closest('.card') !== null,
       };
     });
     check(`${W}: B5 the muscle list has no start inset`, inset.paddingInlineStart === '0px', short(inset));
     check(`${W}: B5 the muscle list has no block margins`, inset.marginBlockStart === '0px' && inset.marginBlockEnd === '0px', short(inset));
-    check(`${W}: B5 the first row starts on the card's content edge`, Math.abs(inset.rowLeft - inset.contentLeft) <= 1, short(inset));
+    check(`${W}: B5 the first row starts on the screen's 16px side margin, outside any card`, Math.abs(inset.rowLeft - 16) <= 1 && inset.inCard === false, short(inset));
 
     /* B6 — the rows. */
     const rows = await muscleRows(page);

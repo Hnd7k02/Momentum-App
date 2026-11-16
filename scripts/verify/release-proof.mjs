@@ -208,7 +208,7 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
   await page.waitForTimeout(500);
   check('a selected row is exposed as pressed', (await page.locator('.muscle-row__button[aria-pressed="true"]').count()) === 1);
   // The credits sheet: in the general section of the Gym area, under the hub.
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(900);
   await page.getByRole('button', { name: /3D-Körpermodell/ }).click();
   await page.waitForTimeout(600);

@@ -298,7 +298,7 @@ for (const [w, h] of [[393, 852], [430, 932], [320, 693]]) {
     await typeLetters(page, `${L} picker search`, search, 'Bankdrücken', { shot: shot(2, 'plan-search') });
     await assertEscapeReturns(page, `${L} picker`, opener);
     check(`${L}: the name typed before the picker is still there`, (await fieldState(planName)).value === 'Push A');
-    await page.locator('.plan-editor').getByRole('button', { name: 'Zurück' }).click();
+    await page.locator('.plan-editor').getByRole('button', { name: 'Zurück', exact: true }).click();
     await page.waitForTimeout(700);
   }
 

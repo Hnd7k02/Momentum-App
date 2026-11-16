@@ -48,7 +48,7 @@ await page.waitForTimeout(300);
 await page.getByRole('button', { name: /Wie gut hast du gesch/ }).first().click();
 await page.waitForTimeout(600);
 await shot('393-F-question-detail');
-await page.getByRole('button', { name: 'Zurück' }).click();
+await page.getByRole('button', { name: 'Zurück', exact: true }).click();
 await page.waitForTimeout(400);
 
 // Bereiche → Gym → Muskelgruppen: the muscle map and its rows, on its own

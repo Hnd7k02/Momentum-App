@@ -173,7 +173,7 @@ for (const width of WIDTHS) {
   await page.getByRole('button', { name: /^Pull B/ }).click();
   await page.waitForTimeout(500);
   check(`${width}: duplication is unavailable at five`, await page.getByRole('button', { name: 'Plan duplizieren' }).isDisabled());
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(400);
 
   /* ── Today → the chooser → the draft ────────────────────────────────── */

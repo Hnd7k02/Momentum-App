@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, smallTargets, summary, openGymHub } from './lib.mjs';
 
 /**
  * WP3, Stage 2 — the workout flow, on the real production build.
@@ -275,7 +275,7 @@ for (const [width, height] of SIZES) {
     await back(page);
     await page.waitForTimeout(900);
 
-    await page.getByRole('button', { name: 'Gym öffnen' }).click();
+    await openGymHub(page);
     await page.waitForTimeout(1200);
     const hubLine = await textOf(page.locator('.gym-hub__last'));
     check(`${W}: P7 the hub's Training card says the same`, hubLine === 'Training läuft · 1 Übung · 2 Sätze', String(hubLine));

@@ -187,7 +187,7 @@ async function fresh(opts = {}) {
   const clip = await clipped(page);
   check('the detail view is not clipped at 393px', clip.length === 0, clip.join('; '));
 
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(300);
   check('going back returns to Verlauf',
     await page.getByRole('heading', { name: 'Verlauf', exact: true }).isVisible());

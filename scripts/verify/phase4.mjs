@@ -176,8 +176,14 @@ async function fillSet(page, index, reps, weight) {
   await openMuscles(page, { wait: 1500 });
 
   check('Progress shows the Gym hierarchy', await page.locator('[data-metric="gym-overall"]').isVisible());
-  const counted = await page.locator('[data-metric="gym-overall"] .metric-tile__line').textContent();
-  check('it says how many groups were counted', /von 10 Gruppen/.test(counted ?? ''), counted?.trim());
+  // Since block 7B the trend heads the metrics strip above the body, and
+  // the count of rated groups is the strip's second cell: "7 / 10" over
+  // "Gruppen", named for a screen reader as the tile's line used to read.
+  const counted = await page.locator('.muscle-strip__cell').nth(1).evaluate((cell) => ({
+    name: cell.getAttribute('aria-label'),
+    text: [...cell.children].map((el) => el.textContent.trim()).join(' | '),
+  }));
+  check('it says how many groups were counted', /^\d+ von 10 Gruppen gewertet$/.test(counted.name ?? '') && /^Gewertet \| \d+\u00a0\/\u00a010 \| Gruppen$/.test(counted.text), `${counted.name} · ${counted.text}`);
   const overallSheet = await inSheet(page, 'gym-overall', async (sheet) => ({
     weighting: await sheet.getByText(/Jede Muskelgruppe zählt gleich viel/).isVisible(),
     metric: await sheet.getByText(/bester Arbeitssatz des Tages/).isVisible(),

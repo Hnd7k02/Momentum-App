@@ -406,7 +406,7 @@ for (const width of WIDTHS) {
     await page.getByRole('button', { name: /Wie gut hast du gesch/ }).first().click();
     await page.waitForTimeout(700);
     await look(page, width, 'fragedetail', null);
-    await page.getByRole('button', { name: 'Zurück' }).click();
+    await page.getByRole('button', { name: 'Zurück', exact: true }).click();
     await page.waitForTimeout(500);
   }
 
@@ -506,7 +506,7 @@ for (const width of WIDTHS) {
     await page.getByRole('button', { name: /^Push A/ }).first().click();
     await page.waitForTimeout(800);
     await look(page, width, 'plan-editor', 'gym');
-    await page.getByRole('button', { name: 'Zurück' }).first().click();
+    await page.getByRole('button', { name: 'Zurück', exact: true }).first().click();
     await page.waitForTimeout(700);
     await scrollTop(page, '.areas__scroll');
   }
@@ -516,6 +516,37 @@ for (const width of WIDTHS) {
     await scrollTop(page, '.areas__scroll');
     await openMuscles(page);
     await look(page, width, 'muskelgruppen', 'gym');
+    // The stage of block 7B (contract §8): the header, the metrics strip and
+    // the buttons at the top of the stage are among the runs just measured
+    // on their rendered pixels — each named here, so that a text that
+    // slipped out of the measurement fails as loudly as one that is too pale.
+    {
+      const runs = Object.entries(measured[width] ?? {}).find(([name]) => name.endsWith('-muskelgruppen'))?.[1] ?? [];
+      const of = (part) => runs.filter((run) => String(run.className).includes(part));
+      const stageText = {
+        title: of('gym-muscles__title'),
+        labels: of('muscle-strip__label'),
+        values: of('muscle-strip__value'),
+        subs: of('muscle-strip__sub'),
+        views: of('body-viewer__view'),
+      };
+      const all = Object.values(stageText).flat();
+      check(`${width} muskelgruppen: the header, the three cells of the strip and the three view buttons were measured, each at 4.5:1`,
+        stageText.title.length === 1 && stageText.labels.length === 3 && stageText.values.length >= 2 && stageText.subs.length >= 2 && stageText.views.length === 3
+          && all.every((run) => run.ratio >= (run.large ? LARGE : BODY)),
+        `${Object.entries(stageText).map(([part, list]) => `${part} ${list.length}`).join(', ')} · lowest ${Math.min(...all.map((run) => run.ratio))}`);
+      const strip = await page.evaluate(() => {
+        const el = document.querySelector('.muscle-strip');
+        const r = el.getBoundingClientRect();
+        return {
+          left: r.left, right: window.innerWidth - r.right,
+          cut: [...el.querySelectorAll('span')].filter((span) => span.scrollWidth > span.clientWidth + 1).map((span) => span.textContent.trim()),
+          label: el.querySelector('.muscle-strip__label')?.textContent.trim(),
+        };
+      });
+      check(`${width} muskelgruppen: the strip stands inside the side margins and nothing in it is cut — "Leistungstrend" fits`,
+        strip.left >= 15.5 && strip.right >= 15.5 && strip.cut.length === 0 && strip.label === 'Leistungstrend', JSON.stringify(strip));
+    }
     await scrollTo(page, page.locator('.muscle-rows'), '.areas__scroll', 16);
     await look(page, width, 'muskelgruppen-zeilen', 'gym');
     await page.locator('.muscle-row').filter({ hasText: 'Brust' }).first().locator('button').click();
@@ -709,7 +740,7 @@ for (const width of WIDTHS) {
       String(await page.locator('[role="dialog"]').count()));
     await page.keyboard.press('Escape');
     await page.waitForTimeout(600);
-    await page.locator('.gym-session__back').first().click();
+    await page.locator('.gym-muscles__back').first().click();
     await page.waitForTimeout(700);
   }
 

@@ -5,12 +5,13 @@
  * body. This drives the body round by pointer drag on Muskelgruppen and
  * records every animation frame's duration under four arrangements:
  *
- *   as-built       the card holding the canvas is solid (D146) and the view
- *                  pills over it are solid — the baseline
- *   card-glass     the same card as glass, forced on for the measurement
- *   pills-glass    the card as glass and the view pills over the canvas
+ *   as-built       the stage has no surface of its own and the buttons
+ *                  over it are solid (D146) — the baseline. (Until block 7B
+ *                  the canvas stood in a card, which was solid.)
+ *   card-glass     the stage as glass, forced on for the measurement
+ *   pills-glass    the stage as glass and the view pills over the canvas
  *                  blurred as well
- *   layer-glass    the card as glass and a blurred layer over the lower
+ *   layer-glass    the stage as glass and a blurred layer over the lower
  *                  half of the canvas, the shape of a sheet standing over
  *                  the body (Stage 7)
  *
@@ -50,7 +51,7 @@ await page.locator('.body-viewer canvas').waitFor({ timeout: 20000 });
 await page.waitForTimeout(1500);
 
 const CARD_GLASS =
-  '.card:has(> .muscle-module) { background: var(--glass-fill) !important; backdrop-filter: saturate(160%) blur(var(--glass-blur)) !important; -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur)) !important; }';
+  '.body-stage { background: var(--glass-fill) !important; backdrop-filter: saturate(160%) blur(var(--glass-blur)) !important; -webkit-backdrop-filter: saturate(160%) blur(var(--glass-blur)) !important; }';
 const ARRANGEMENTS = {
   'as-built': '',
   'card-glass': CARD_GLASS,

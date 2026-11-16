@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, summary, textContrast } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, summary, textContrast, openGymHub } from './lib.mjs';
 import { readBody } from './body-tones.mjs';
 
 /**
@@ -211,7 +211,7 @@ async function boot(width, lifts, { sessions = true } = {}) {
 }
 
 const toHub = async (page) => {
-  await page.getByRole('button', { name: 'Gym öffnen' }).click();
+  await openGymHub(page);
   await page.waitForTimeout(1500);
 };
 
@@ -442,18 +442,23 @@ for (const width of WIDTHS) {
   check(`${W}: every rated row draws its line, with the end point in the state's colour or neutral when held`,
     rows.filter((r) => r.delta !== null).every((r) => r.line && r.end === r.state), short(rows.filter((r) => r.delta !== null).map((r) => [r.name, r.line, r.end])));
 
-  /* The figure above the rows. */
+  /* The figure above the rows. Since block 7B it heads the metrics strip
+     above the body: the trend and its state in the first cell, the count of
+     rated groups in the second — printed "7 / 10" over "Gruppen" and named
+     for a screen reader as the tile's line used to read. */
   const tile = await page.evaluate(() => {
     const n = (s) => (s ?? '').replace(/[ \t\n]+/g, ' ').trim();
     const el = document.querySelector('[data-metric="gym-overall"]');
     const trend = el?.querySelector('.gym-progress__trend');
+    const rated = document.querySelectorAll('.muscle-strip__cell')[1] ?? null;
     return {
-      title: n(el?.querySelector('.metric-tile__title, h2, h3')?.textContent),
+      title: n(el?.querySelector('.muscle-strip__label')?.textContent),
       number: trend ? trend.textContent : null,
       trendClass: trend?.className ?? null,
       color: trend ? getComputedStyle(trend).color : null,
-      scale: n(el?.querySelector('.metric-tile__scale')?.textContent),
-      line: n(el?.querySelector('.metric-tile__line')?.textContent),
+      scale: n(el?.querySelector('.muscle-strip__sub')?.textContent),
+      line: rated?.getAttribute('aria-label') ?? null,
+      printed: rated ? [...rated.children].map((child) => n(child.textContent)).join(' | ') : null,
       text: n(el?.textContent),
     };
   });
@@ -463,7 +468,8 @@ for (const width of WIDTHS) {
     tile.number === signed(meanShown) && tile.scale === WORD[stateOfShown(meanShown)], short(tile));
   check(`${W}: held, it is the text colour`, tile.color === T['--text-primary'] && /--unchanged/.test(tile.trendClass ?? ''), short(tile));
   const withFigure = rows.filter((r) => r.delta !== null).length;
-  check(`${W}: "n von 10" names exactly the rows that print a figure`, tile.line === `${withFigure} von 10 Gruppen gewertet` && withFigure === 7, tile.line);
+  check(`${W}: "n von 10" names exactly the rows that print a figure`,
+    tile.line === `${withFigure} von 10 Gruppen gewertet` && withFigure === 7 && tile.printed === `Gewertet | ${withFigure}\u00a0/\u00a010 | Gruppen`, `${tile.line} · ${tile.printed}`);
 
   /* Neutral: no yellow anywhere on this screen. */
   const drawn = await coloursOnScreen(page);
@@ -661,7 +667,7 @@ for (const width of WIDTHS) {
     calves90?.delta === signed(10) && calves90?.state === 'improved' && calves90?.sub === 'Vor 45 Tagen', short(calves90));
   check(`${W}: every other row reads as at 30 days`,
     JSON.stringify(rows90.filter((r) => r.name !== NAME.calves).map((r) => [r.name, r.delta, r.state])) === JSON.stringify(rows.filter((r) => r.name !== NAME.calves).map((r) => [r.name, r.delta, r.state])));
-  const tile90 = await page.locator('[data-metric="gym-overall"] .metric-tile__line').textContent();
+  const tile90 = await page.locator('.muscle-strip__cell').nth(1).getAttribute('aria-label');
   check(`${W}: and eight groups are rated`, tile90?.trim() === '8 von 10 Gruppen gewertet', String(tile90));
   const sentence90 = await pick('hamstringsGlutes');
   check(`${W}: the sentence names the range on show`, sentence90 === '2 Übungstage in den letzten 90 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.', String(sentence90));
