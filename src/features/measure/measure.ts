@@ -192,11 +192,41 @@ export const FAST_FRAME_MS = 25;
 /** The body is idle once nothing has moved for this long. */
 export const IDLE_AFTER_MS = 1000;
 /**
- * A frame follows another only if it was asked for promptly: a finger that
- * rests on the body asks for nothing, and the gap until it moves again is
- * a pause, not a slow frame.
+ * A frame a finger asked for follows the one before it only if the finger
+ * kept moving: a finger that rests on the body asks for nothing, and the
+ * gap until it moves again is a pause, not a slow frame. It kept moving if
+ * no more than this lies between two of its events, or between the end of
+ * a frame and the next event.
  */
-const PROMPT_REQUEST_MS = 50;
+const CONTINUOUS_FINGER_MS = 50;
+
+/**
+ * When the finger made the events behind one request: the first and the
+ * last, by the events' own times.
+ */
+export interface FingerSpan {
+  first: number;
+  last: number;
+}
+
+/**
+ * The span of one pointer event. A browser that is busy drawing hands
+ * several finger events over as one, right before its next frame — and
+ * says, where it supports it, when each of them was made. That is what
+ * tells a slow frame from a pausing finger: during a slow frame the finger
+ * went on making events, during a pause it made none.
+ */
+export function fingerSpan(event: { timeStamp: number; getCoalescedEvents?: () => readonly { timeStamp: number }[] }): FingerSpan {
+  let first = event.timeStamp;
+  try {
+    const made = typeof event.getCoalescedEvents === 'function' ? event.getCoalescedEvents() : [];
+    const earliest = made[0]?.timeStamp;
+    if (typeof earliest === 'number' && earliest < first) first = earliest;
+  } catch {
+    /* a browser that will not say: the event's own time is all there is */
+  }
+  return { first, last: event.timeStamp };
+}
 
 const RECENT_FRAMES = 512;
 const INTERVALS = 2048;
@@ -217,8 +247,14 @@ export class BodyMeasure {
   /** When the last frame had been drawn: its end, where `lastFrameAt` is its beginning. */
   private lastDrawnAt: number | null = null;
   private lastRotating = false;
-  /** The frame after the last one was asked for promptly. */
-  private nextExpected = false;
+  /** The last frame asked for the next one itself: a coast, a travel, a colour on its way. */
+  private nextSelfDriven = false;
+  /** When the finger last made an event, by the event's own time. */
+  private lastFingerAt: number | null = null;
+  /** A finger asked for a frame since the last one. */
+  private fingerMoved = false;
+  /** … and had paused before it did. */
+  private fingerPaused = false;
   private lastActiveAt: number | null = null;
 
   private readonly recent = new Float64Array(RECENT_FRAMES);
@@ -243,8 +279,8 @@ export class BodyMeasure {
     this.openedAt = now;
     this.codeAt = this.modelAt = this.firstFrameAt = null;
     this.codeSource = this.modelSource = NO_RESOURCE;
-    this.lastFrameAt = this.lastDrawnAt = this.lastActiveAt = null;
-    this.lastRotating = this.nextExpected = false;
+    this.lastFrameAt = this.lastDrawnAt = this.lastActiveAt = this.lastFingerAt = null;
+    this.lastRotating = this.nextSelfDriven = this.fingerMoved = this.fingerPaused = false;
     this.recentCount = this.intervalCount = 0;
     this.rotationFrames = this.rotationSum = this.rotationFast = this.rotationLongest = 0;
     this.renderer = null;
@@ -277,17 +313,31 @@ export class BodyMeasure {
   }
 
   /**
-   * A frame was asked for from outside a frame: a finger moved. Prompt is
-   * measured from the moment the last frame had been drawn, not from its
-   * beginning — a frame that took long to draw must not look like a finger
-   * that paused, or the slowest frames would be the ones left out.
+   * A frame was asked for from outside a frame: a finger moved. `finger` is
+   * when it made the events behind this request; without it the request's
+   * own time stands for them.
+   *
+   * The frame this asks for follows the one before it — and the time
+   * between the two is a frame's time — if the finger had not paused. Two
+   * signs say so, and either is enough:
+   *
+   * - its events follow one another closely **by their own times**. A slow
+   *   frame must not look like a finger that paused, or the slowest frames
+   *   would be the ones left out: a browser that needs a tenth of a second
+   *   for a frame hands the finger's events over a tenth of a second
+   *   apart, but they were made every few milliseconds, and say so;
+   * - or the request came soon after the last frame **had been drawn** —
+   *   its end, not its beginning, for the same reason.
    */
-  requested(now: number): void {
+  requested(now: number, finger: FingerSpan = { first: now, last: now }): void {
     this.lastActiveAt = now;
-    const since = this.lastDrawnAt ?? this.lastFrameAt;
-    if (since !== null && !this.nextExpected && now - since <= PROMPT_REQUEST_MS) {
-      this.nextExpected = true;
-    }
+    const before = this.lastFingerAt;
+    const drawn = this.lastDrawnAt ?? this.lastFrameAt;
+    const followsFinger = before !== null && finger.first - before <= CONTINUOUS_FINGER_MS;
+    const followsFrame = drawn !== null && now - drawn <= CONTINUOUS_FINGER_MS;
+    if (!followsFinger && !followsFrame) this.fingerPaused = true;
+    this.fingerMoved = true;
+    this.lastFingerAt = before === null ? finger.last : Math.max(before, finger.last);
   }
 
   /** The frame that `rendered` announced has been drawn. */
@@ -302,7 +352,10 @@ export class BodyMeasure {
   rendered(now: number, { rotating, selfDriven }: { rotating: boolean; selfDriven: boolean }): void {
     this.recent[this.recentCount % RECENT_FRAMES] = now;
     this.recentCount += 1;
-    if (this.lastFrameAt !== null && this.nextExpected) {
+    // This frame follows the last one if that one asked for it, or a finger
+    // did that had not paused.
+    const follows = this.nextSelfDriven || (this.fingerMoved && !this.fingerPaused);
+    if (this.lastFrameAt !== null && follows) {
       const interval = now - this.lastFrameAt;
       this.intervals[this.intervalCount % INTERVALS] = interval;
       this.intervalCount += 1;
@@ -316,7 +369,8 @@ export class BodyMeasure {
     this.lastFrameAt = now;
     this.lastDrawnAt = null;
     this.lastRotating = rotating;
-    this.nextExpected = selfDriven;
+    this.nextSelfDriven = selfDriven;
+    this.fingerMoved = this.fingerPaused = false;
     if (rotating || selfDriven) this.lastActiveAt = now;
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BodyMeasure, FAST_FRAME_MS, FROM_MEMORY, IDLE_AFTER_MS, NO_RESOURCE, deviceFacts, resourceFacts } from './measure';
+import { BodyMeasure, FAST_FRAME_MS, FROM_MEMORY, IDLE_AFTER_MS, NO_RESOURCE, deviceFacts, fingerSpan, resourceFacts } from './measure';
 
 /**
  * The measuring display's arithmetic (block 7B, D181): what counts as a
@@ -184,6 +184,69 @@ describe('the frames of a rotation', () => {
     expect(blind.snapshot(now).rotation.frames).toBe(0);
   });
 
+  it('nor where the browser hands the finger\'s events over with its next frame: their own times decide', () => {
+    const measure = opened(0);
+    measure.firstFrame(0);
+    // The drawing is done elsewhere and takes 120 ms; the page is free
+    // meanwhile, and the browser holds the finger's events back until its
+    // next frame. The finger made one every 8 ms all along, and the one
+    // event the page is handed says so.
+    let now = 1000;
+    let fingerAt = 990;
+    for (let index = 0; index < 10; index += 1) {
+      measure.requested(now - 1, { first: fingerAt + 8, last: now - 2 });
+      fingerAt = now - 2;
+      measure.rendered(now, { rotating: true, selfDriven: false });
+      measure.drawn(now + 3);
+      now += 120;
+    }
+    const { rotation } = measure.snapshot(now);
+    // Ten frames, nine intervals of 120 ms: each of them a slow frame.
+    expect(rotation.frames).toBe(9);
+    expect(rotation.meanFps).toBeCloseTo(1000 / 120, 3);
+    expect(rotation.longestMs).toBeCloseTo(120, 6);
+    expect(rotation.fastShare).toBe(0);
+  });
+
+  it('a pause is still a pause when the events say when they were made', () => {
+    const measure = opened(0);
+    measure.firstFrame(0);
+    let now = 1000;
+    let fingerAt = 990;
+    const drag = (frames: number) => {
+      for (let index = 0; index < frames; index += 1) {
+        measure.requested(now - 1, { first: fingerAt + 8, last: now - 2 });
+        fingerAt = now - 2;
+        measure.rendered(now, { rotating: true, selfDriven: false });
+        now += 120;
+      }
+    };
+    drag(5);
+    // The finger rests for half a second and makes no event; then it moves
+    // on, and the first event it makes is half a second after its last.
+    now += 500;
+    fingerAt = now - 12;
+    drag(5);
+    const { rotation } = measure.snapshot(now);
+    // Four intervals before the pause and four after it; the pause is none.
+    expect(rotation.frames).toBe(8);
+    expect(rotation.longestMs).toBeCloseTo(120, 6);
+  });
+
+  it('where nothing says when the events were made, a frame that slow cannot be told from a pause and is not counted', () => {
+    const measure = opened(0);
+    measure.firstFrame(0);
+    let now = 1000;
+    for (let index = 0; index < 10; index += 1) {
+      // One event a frame, handed over right before it, with its own time only.
+      measure.requested(now - 1);
+      measure.rendered(now, { rotating: true, selfDriven: false });
+      measure.drawn(now + 3);
+      now += 120;
+    }
+    expect(measure.snapshot(now).rotation.frames).toBe(0);
+  });
+
   it('frames that only ease a colour are no rotation', () => {
     const measure = opened(0);
     measure.firstFrame(0);
@@ -297,5 +360,22 @@ describe('who is asking', () => {
     expect(deviceFacts('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15'))
       .toEqual({ device: 'Mac', system: 'macOS 10.15.7', browser: 'Safari 18.1' });
     expect(deviceFacts('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/131.0.0.0 Safari/537.36').device).toBe('X11');
+  });
+});
+
+describe('when a finger made its events', () => {
+  it('is the first of the events a browser handed over as one, and the event\'s own time as the last', () => {
+    const event = { timeStamp: 1118, getCoalescedEvents: () => [{ timeStamp: 1008 }, { timeStamp: 1016 }, { timeStamp: 1118 }] };
+    expect(fingerSpan(event)).toEqual({ first: 1008, last: 1118 });
+  });
+
+  it('is the event\'s own time where the browser hands over nothing more', () => {
+    expect(fingerSpan({ timeStamp: 500 })).toEqual({ first: 500, last: 500 });
+    expect(fingerSpan({ timeStamp: 500, getCoalescedEvents: () => [] })).toEqual({ first: 500, last: 500 });
+  });
+
+  it('never begins after the event itself, and survives a browser that refuses to say', () => {
+    expect(fingerSpan({ timeStamp: 500, getCoalescedEvents: () => [{ timeStamp: 640 }] })).toEqual({ first: 500, last: 500 });
+    expect(fingerSpan({ timeStamp: 500, getCoalescedEvents: () => { throw new Error('not here'); } })).toEqual({ first: 500, last: 500 });
   });
 });

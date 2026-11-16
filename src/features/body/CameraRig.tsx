@@ -32,7 +32,7 @@ import { useCallback, useEffect, useImperativeHandle, useRef, forwardRef, type M
 import { Vector3, type Box3, type PerspectiveCamera } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { TapVsDrag } from './useTapVsDrag';
-import { bodyMeasure, isMeasuring, type FrameActivity } from '../measure/measure';
+import { bodyMeasure, fingerSpan, isMeasuring, type FrameActivity } from '../measure/measure';
 import { STAGE, clampWindow, pictureAt, pictureBox, pinchWindow, windowRect, type Box, type Point } from './framing';
 import {
   MOTION,
@@ -338,7 +338,7 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         zoom.current = { value: next.zoom, velocity: 0 };
         centre.current = next.centre;
         dragged.current = true;
-        if (isMeasuring()) bodyMeasure.requested(performance.now());
+        if (isMeasuring()) bodyMeasure.requested(performance.now(), fingerSpan(e));
         invalidate();
         return;
       }
@@ -351,7 +351,7 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
       list.push({ at: e.timeStamp, x: e.clientX });
       if (list.length > SAMPLES) list.shift();
       dragged.current = true;
-      if (isMeasuring()) bodyMeasure.requested(performance.now());
+      if (isMeasuring()) bodyMeasure.requested(performance.now(), fingerSpan(e));
       invalidate();
     };
 

@@ -5269,10 +5269,24 @@ others.
 
 - *A frame of a rotation* is an interval between two consecutive frames
   drawn while the camera was being turned — by a finger, a coast, a travel
-  or a zoom — where the second was asked for promptly: by the frame before
-  it, or by a finger within 50 ms of it. A finger resting on the body asks
+  or a zoom — where the second followed the first: the first asked for it,
+  or a finger did that had not paused. A finger resting on the body asks
   for nothing, and the gap until it moves again is a pause, not a slow
-  frame. Frames that only ease a colour show the display's rate and are no
+  frame. **Whether a finger paused is read from its own events, by the
+  times they were made**: no more than 50 ms between two of them — or
+  between the end of the last frame and the next event. A browser that
+  needs a tenth of a second for a frame hands the finger's events over a
+  tenth of a second apart, but says when each was made
+  (`getCoalescedEvents`), and a finger that kept moving made one every few
+  milliseconds. The first form of the rule asked whether the request came
+  within 50 ms of the last frame, and so left out exactly the slow frames
+  — found in the closing run, where the software renderer's frames take a
+  tenth of a second and the display said "noch nicht gedreht" after a
+  turn. Where a browser does not say when the events were made, a frame
+  slower than 50 ms that the browser lines its events up with cannot be
+  told from a pause and is not counted — the display then reads better
+  than the truth, which is a limit of the display and is named here.
+  Frames that only ease a colour show the display's rate and are no
   rotation.
 - *The display's rate* is read off the lower quartile of the intervals:
   frames arrive a whole number of refreshes apart, so the shortest regular
