@@ -159,6 +159,8 @@ async function read(build, day, label) {
   await page.waitForTimeout(4500);
   const muscles = {};
   const overall = {};
+  // The metrics strip above the body (block 7B): its three cells, where a build has it.
+  const strip = {};
   // The live build offers 7 and 30 days, the build under test 30 and 90
   // (D164): 30 days is the one range the two can be compared on.
   const offered = (await texts(page.locator('.progress__ranges button'))).map((label) => Number.parseInt(label, 10));
@@ -167,6 +169,13 @@ async function read(build, day, label) {
     await page.waitForTimeout(1500);
     muscles[range] = await muscleRows(page);
     overall[range] = clean(await page.locator('[data-metric="gym-overall"]').first().textContent().catch(() => ''));
+    strip[range] = await page.evaluate(() =>
+      [...document.querySelectorAll('.muscle-strip__cell')].map((cell) =>
+        [...cell.querySelectorAll('.muscle-strip__label, .muscle-strip__value, .muscle-strip__sub')]
+          .map((part) => part.textContent.replace(/\s+/g, ' ').trim())
+          .join(' | '),
+      ),
+    );
     await page.screenshot({ path: `${OUT}/import-${label}-${day}-muskeln-${range}.png`, fullPage: false });
   }
   await page.locator('.progress__ranges button', { hasText: /^30 Tage$/ }).click();
@@ -180,7 +189,7 @@ async function read(build, day, label) {
     await page.waitForTimeout(700);
   }
   await browser.close();
-  return { status, snapshots, wroteOnReload: snapshots.length - before.length, stored, rating, muscles, overall, list, details, errors };
+  return { status, snapshots, wroteOnReload: snapshots.length - before.length, stored, rating, muscles, overall, strip, list, details, errors };
 }
 
 const BUILDS = {
@@ -201,7 +210,7 @@ for (const day of DAYS) {
     check(`${W}: a reload writes nothing`, seen.wroteOnReload === 0, String(seen.wroteOnReload));
     check(`${W}: no page error`, seen.errors.length === 0, seen.errors.slice(0, 2).join(' | '));
     console.log(`     rating: ${seen.rating}`);
-    for (const range of Object.keys(seen.muscles)) console.log(`     ${range} Tage: ${JSON.stringify(seen.muscles[range])}  | ${seen.overall[range]}`);
+    for (const range of Object.keys(seen.muscles)) console.log(`     ${range} Tage: ${JSON.stringify(seen.muscles[range])}  | ${seen.overall[range]}${seen.strip[range]?.length ? `  | strip: ${seen.strip[range].join(' · ')}` : ''}`);
     console.log(`     Bankdrücken: ${JSON.stringify(seen.details['Bankdrücken'])}`);
   }
   const { live, neu } = result[day];
