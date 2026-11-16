@@ -282,6 +282,13 @@ so that it ends on its one figure. None of these was removed or weakened.
   the first day shown". *New:* "every point is the change in the range up
   to its day", worked out in the suite from the sets the table names;
   added "the line ends on the exercise's one change".
+- **`phase4-a11y.mjs`**. *Old:* "and the bars themselves are decorative" —
+  the exercise logged there has one day, which was a dot in a chart hidden
+  from a screen reader. *New:* "and a chart is a picture only: one day draws
+  none, and says so in a sentence; a chart that is drawn is hidden" — the
+  rule for a chart is kept for two days and more, and one day is held to
+  its sentence. (Its pick of "Bankdrücken" by name, where it took the first
+  row, belongs to block 7D: see there.)
 - **`muscle-sheet.mjs`** (added only): the sheet's line begins on the zero
   line at the group's first day; an exercise's line ends on its figure, on
   the side of the zero line its colour says, and its newest table row reads

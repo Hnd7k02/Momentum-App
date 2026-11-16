@@ -37,7 +37,9 @@ await page.getByRole('button', { name: /Übung hinzufügen/ }).first().click();
 await page.waitForTimeout(500);
 await page.getByRole('textbox', { name: 'Suchen' }).fill('Bench');
 await page.waitForTimeout(300);
-await page.locator('.gym-picker__row').first().click();
+// Since block 7D "Bench" finds several bench exercises (D171); the one
+// this suite logs is picked by its name. (Until then: the first row.)
+await page.locator('.gym-picker__row').filter({ has: page.locator('.gym-picker__name', { hasText: /^Bankdrücken$/ }) }).click();
 await page.waitForTimeout(700);
 // A picked exercise arrives with a pending row (D128); its first set is typed there.
 await page.locator('.gym-set--pending input').first().fill('8');
@@ -134,9 +136,22 @@ const table = nodes.find((n) => n.role === 'table');
 check('the chart has a table alternative with the dates', Boolean(table), table?.name);
 const rowHeaders = nodes.filter((n) => n.role === 'rowheader');
 check('one row per training day', rowHeaders.length >= 1, String(rowHeaders.length));
-const chartHidden = await page.evaluate(() =>
-  document.querySelector('.gym-detail__chart')?.getAttribute('aria-hidden') === 'true');
-check('and the bars themselves are decorative', chartHidden);
+// The exercise logged here has one day. Until STOP 7C one day was drawn as
+// a dot in a chart hidden from a screen reader ("and the bars themselves
+// are decorative"); since then one day draws no picture at all (D170, the
+// owner's choice): a sentence stands where the chart would, and the table
+// still carries the day. Where a chart is drawn — two days and more — it is
+// hidden as before.
+const oneDay = await page.evaluate(() => ({
+  charts: document.querySelectorAll('.gym-detail .gym-detail__chart').length,
+  hidden: [...document.querySelectorAll('.gym-detail .gym-detail__chart')].every((el) => el.getAttribute('aria-hidden') === 'true'),
+  sentence: document.querySelector('.gym-detail__lineNote--one')?.textContent ?? null,
+}));
+check('and a chart is a picture only: one day draws none, and says so in a sentence; a chart that is drawn is hidden',
+  rowHeaders.length === 1
+    ? oneDay.charts === 0 && /Ein Trainingstag erfasst/.test(oneDay.sentence ?? '')
+    : oneDay.charts === 1 && oneDay.hidden,
+  JSON.stringify(oneDay));
 
 /* ── Reduced motion ─────────────────────────────────────────────────────── */
 const reduced = await browser.newContext({ ...phone, reducedMotion: 'reduce' });
