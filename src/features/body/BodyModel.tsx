@@ -9,7 +9,7 @@ import type { MuscleGroup } from '../../core/model';
 import type { BodyTap } from './CameraRig';
 import { INERT_REGION, resolveMuscleMeshes, type MuscleMeshes } from './muscleMeshMap';
 import { groupAtTap } from './picking';
-import { useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
+import { afterCompile, useMuscleHighlight, type MuscleVisual } from './useMuscleHighlight';
 import { BODY_INERT_COLOR, BODY_LOOK, type BodyLook } from './tokens';
 import { FROM_MEMORY, bodyMeasure, isMeasuring, resourceFacts, resourceSince, type FrameActivity } from '../measure/measure';
 
@@ -64,6 +64,15 @@ export function BodyModel({
   const wasLoaded = useRef(isLoaded(modelUrl));
   const { gltf, error } = useGLTF(modelUrl);
   const raycaster = useMemo(() => new Raycaster(), []);
+  /**
+   * The compile that is in flight, if one is. three polls the programs of
+   * the materials it was handed until they are ready, and a material that
+   * is disposed meanwhile has no program to ask: the poll throws, in a
+   * timer, where nothing can catch it. So a material that is no longer
+   * needed — the screen was left while the body loaded — is disposed when
+   * the compile it is part of has finished.
+   */
+  const compiling = useRef<Promise<unknown> | null>(null);
 
   // A fetch or parse failure is the viewer's to show, not ours to hide.
   useEffect(() => {
@@ -100,12 +109,15 @@ export function BodyModel({
       onError?.(e as Error);
     }
     return () => {
-      for (const material of inert) material.dispose();
+      // Not while they are being compiled (see `compiling`).
+      afterCompile(compiling.current, () => {
+        for (const material of inert) material.dispose();
+      });
     };
   }, [gltf, onError, surface]);
 
   // The region materials are made here, in the commit that set `meshes`.
-  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface, activity, still });
+  useMuscleHighlight({ meshes, visuals, selected, tinted, invalidate, surface, activity, still, compiling });
 
   /*
    * Compile before the body is shown, and compile what will be drawn: the
@@ -128,7 +140,13 @@ export function BodyModel({
       onReady?.(meshes, boxes);
       invalidate();
     };
-    gl.compileAsync(gltf.scene, camera, scene).then(show, show);
+    const compile = gl.compileAsync(gltf.scene, camera, scene);
+    compiling.current = compile;
+    const done = () => {
+      if (compiling.current === compile) compiling.current = null;
+    };
+    compile.then(done, done);
+    compile.then(show, show);
     return () => {
       cancelled = true;
     };

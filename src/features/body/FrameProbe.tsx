@@ -55,6 +55,7 @@ export function FrameProbe({
     return addAfterEffect(() => {
       if (!drawn.current || !isMeasuring()) return;
       drawn.current = false;
+      bodyMeasure.drawn(performance.now());
       const { render, memory } = gl.info;
       const seen = last.current;
       if (

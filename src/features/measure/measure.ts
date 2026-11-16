@@ -214,6 +214,8 @@ export class BodyMeasure {
   private modelSource: ResourceFacts = NO_RESOURCE;
 
   private lastFrameAt: number | null = null;
+  /** When the last frame had been drawn: its end, where `lastFrameAt` is its beginning. */
+  private lastDrawnAt: number | null = null;
   private lastRotating = false;
   /** The frame after the last one was asked for promptly. */
   private nextExpected = false;
@@ -241,7 +243,7 @@ export class BodyMeasure {
     this.openedAt = now;
     this.codeAt = this.modelAt = this.firstFrameAt = null;
     this.codeSource = this.modelSource = NO_RESOURCE;
-    this.lastFrameAt = this.lastActiveAt = null;
+    this.lastFrameAt = this.lastDrawnAt = this.lastActiveAt = null;
     this.lastRotating = this.nextExpected = false;
     this.recentCount = this.intervalCount = 0;
     this.rotationFrames = this.rotationSum = this.rotationFast = this.rotationLongest = 0;
@@ -274,12 +276,23 @@ export class BodyMeasure {
     this.emit();
   }
 
-  /** A frame was asked for from outside a frame: a finger moved. */
+  /**
+   * A frame was asked for from outside a frame: a finger moved. Prompt is
+   * measured from the moment the last frame had been drawn, not from its
+   * beginning — a frame that took long to draw must not look like a finger
+   * that paused, or the slowest frames would be the ones left out.
+   */
   requested(now: number): void {
     this.lastActiveAt = now;
-    if (this.lastFrameAt !== null && !this.nextExpected && now - this.lastFrameAt <= PROMPT_REQUEST_MS) {
+    const since = this.lastDrawnAt ?? this.lastFrameAt;
+    if (since !== null && !this.nextExpected && now - since <= PROMPT_REQUEST_MS) {
       this.nextExpected = true;
     }
+  }
+
+  /** The frame that `rendered` announced has been drawn. */
+  drawn(now: number): void {
+    this.lastDrawnAt = now;
   }
 
   /**
@@ -301,6 +314,7 @@ export class BodyMeasure {
       }
     }
     this.lastFrameAt = now;
+    this.lastDrawnAt = null;
     this.lastRotating = rotating;
     this.nextExpected = selfDriven;
     if (rotating || selfDriven) this.lastActiveAt = now;

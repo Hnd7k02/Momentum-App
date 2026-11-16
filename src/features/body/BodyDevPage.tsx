@@ -164,6 +164,10 @@ export function BodyDevPage() {
   const [generation, setGeneration] = useState(0);
   const [tinted, setTinted] = useState(true);
   const [view, setView] = useState<BodyView>('front');
+  // The host's pause (block 7B): held, the viewer draws nothing by itself.
+  const [paused, setPaused] = useState(false);
+  const [held, setHeld] = useState(false);
+  const [stage, setStage] = useState('loading');
   const [angle, setAngle] = useState(0);
   const visuals = visualsOf(FIXTURE);
 
@@ -177,7 +181,8 @@ export function BodyDevPage() {
         <h1 style={{ fontSize: 17 }}>Body viewer — dev harness</h1>
         <p data-readout style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
           <span data-angle>{angle}</span>° · <span data-view-readout>{view}</span> ·{' '}
-          <span data-selected-readout>{selected ?? '–'}</span>
+          <span data-selected-readout>{selected ?? '–'}</span> · <span data-stage-readout>{stage}</span>
+          {held ? <span data-held-readout> · held</span> : null}
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
           <button type="button" data-action="toggle-mount" onClick={() => setMounted((m) => !m)}>
@@ -191,6 +196,9 @@ export function BodyDevPage() {
           </button>
           <button type="button" data-action="clear" onClick={() => setSelected(null)}>
             clear selection
+          </button>
+          <button type="button" data-action="toggle-pause" onClick={() => setPaused((value) => !value)}>
+            {paused ? 'resume' : 'pause'}
           </button>
         </div>
 
@@ -217,6 +225,9 @@ export function BodyDevPage() {
                 tinted={tinted}
                 onViewChange={setView}
                 onRotate={setAngle}
+                paused={paused}
+                onHeld={setHeld}
+                onStateChange={setStage}
                 fallback={<p data-fallback>WebGL not available</p>}
                 look={LOOK}
               />

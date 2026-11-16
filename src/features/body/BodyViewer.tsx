@@ -293,13 +293,20 @@ export default function BodyViewer({
     [onSelectMuscle],
   );
 
+  /** The selection the effect below last saw: only a change of it may turn the body. */
+  const seen = useRef<MuscleGroup | null>(null);
   useEffect(() => {
     const own = tapped.current !== null && tapped.current === selectedMuscle;
     tapped.current = null;
-    // A zoom keeps the chosen group in its window (`framing.ts`).
+    // A zoom keeps the chosen group in its window (`framing.ts`). Its box is
+    // known once the model is there, which is why this also runs then.
     keepInView.current = selectedMuscle ? (boxes.current?.get(selectedMuscle) ?? null) : null;
     invalidate.current?.();
-    if (!selectedMuscle || !rig.current) return;
+    const changed = seen.current !== selectedMuscle;
+    seen.current = selectedMuscle;
+    // The model arriving — or arriving again, after a lost context — is no
+    // new selection and turns nothing.
+    if (!changed || !selectedMuscle || !rig.current) return;
     // A tap on the body selects and never turns it (contract §8): the
     // finger is on the group, so the group is in view.
     if (own) return;
@@ -428,6 +435,11 @@ export default function BodyViewer({
     const onLost = (event: Event) => {
       // Without this the browser never gives the context back.
       event.preventDefault();
+      // The still that stands in shows the body as it stands at the start,
+      // and a canvas that replaces this one starts there in any case. So the
+      // view goes back there now, at once: the body returns where its still
+      // stood, whichever way it returns.
+      rig.current?.reset(true);
       setLost(true);
     };
     const onRestored = () => {
@@ -523,6 +535,11 @@ export default function BodyViewer({
         <directionalLight position={[...look.back.position]} intensity={look.back.intensity} />
         <CameraRig
           ref={rig}
+          // A finger moves the body it can see. While the still stands in —
+          // before the first picture, and while a context is away — a drag
+          // would turn a body nobody sees turning, and a tap has nothing
+          // to meet.
+          enabled={state === 'shown'}
           onTap={onTap}
           onAzimuthChange={onAzimuthChange}
           onZoomChange={onZoomChange}

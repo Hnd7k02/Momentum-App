@@ -17,7 +17,7 @@
  * onBeforeCompile patch with its own varyings. Every constant comes from
  * tokens.ts.
  */
-import { useEffect, useRef, useCallback, type MutableRefObject } from 'react';
+import { useEffect, useRef, type MutableRefObject } from 'react';
 import { Color, MeshStandardMaterial } from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { MuscleGroup } from '../../core/model';
@@ -56,7 +56,15 @@ export type HighlightOptions = {
    * a colour does not ease — it is at its goal in that one frame.
    */
   still?: MutableRefObject<boolean>;
+  /** The compile these materials may be part of; they are disposed after it (see `BodyModel`). */
+  compiling?: MutableRefObject<Promise<unknown> | null>;
 };
+
+/** Runs `dispose` once `pending` has finished either way — at once, with nothing pending. */
+export function afterCompile(pending: Promise<unknown> | null | undefined, dispose: () => void): void {
+  if (pending) pending.then(dispose, dispose);
+  else dispose();
+}
 
 /** The two uniforms the rim patch adds; shared by reference with the shader. */
 type RimUniforms = { uRim: { value: number }; uRimColor: { value: Color } };
@@ -196,21 +204,11 @@ export function useMuscleHighlight({
   surface = BODY_LOOK.surface,
   activity,
   still,
+  compiling,
 }: HighlightOptions): void {
   const slots = useRef<Map<MuscleGroup, Slot>>(new Map());
   /** The goals changed since the last frame: the next one starts a change. */
   const fresh = useRef(false);
-
-  /** See CameraRig: an invalidate() inside useFrame is swallowed by that frame. */
-  const pending = useRef(false);
-  const keepAlive = useCallback(() => {
-    if (pending.current) return;      // coalesce: one wake per frame, not one per slot
-    pending.current = true;
-    requestAnimationFrame(() => {
-      pending.current = false;
-      invalidate();
-    });
-  }, [invalidate]);
 
   // One material instance per region, created once, disposed on unmount.
   useEffect(() => {
@@ -241,10 +239,12 @@ export function useMuscleHighlight({
     slots.current = created;
     invalidate();
     return () => {
-      for (const slot of created.values()) slot.material.dispose();
       slots.current = new Map();
+      afterCompile(compiling?.current, () => {
+        for (const slot of created.values()) slot.material.dispose();
+      });
     };
-  }, [meshes, invalidate, surface]);
+  }, [meshes, invalidate, surface, compiling]);
 
   // Recompute targets when data or selection changes; the frame loop eases to
   // them. Mirrors body-viewer.js #retarget.
@@ -310,7 +310,8 @@ export function useMuscleHighlight({
     }
     // Held, the frame is the whole change: every value is at its goal.
     if (still?.current) moving = false;
-    if (moving) keepAlive();
+    // From inside the frame: the next one comes with the next refresh.
+    if (moving) invalidate();
     if (activity) activity.current.easing = moving;
   });
 }

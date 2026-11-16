@@ -143,7 +143,7 @@ describe('the frames of a rotation', () => {
     expect(rotation.fastShare).toBe(1);
   });
 
-  it('a frame that was asked for late does count once the request stream is back', () => {
+  it('a frame that was asked for promptly and drawn late does count', () => {
     const measure = opened(0);
     measure.firstFrame(0);
     measure.rendered(1000, { rotating: true, selfDriven: false });
@@ -154,6 +154,34 @@ describe('the frames of a rotation', () => {
     expect(rotation.frames).toBe(1);
     expect(rotation.longestMs).toBeCloseTo(70, 6);
     expect(rotation.fastShare).toBe(0);
+  });
+
+  it('a slow renderer is not mistaken for a pausing finger: prompt counts from the end of the frame', () => {
+    const measure = opened(0);
+    measure.firstFrame(0);
+    // Each frame takes 110 ms to draw; the finger's next move is handled
+    // the moment the frame is done — 115 ms after the frame began.
+    let now = 1000;
+    for (let index = 0; index < 10; index += 1) {
+      measure.rendered(now, { rotating: true, selfDriven: false });
+      measure.drawn(now + 110);
+      measure.requested(now + 115);
+      now += 120;
+    }
+    const { rotation } = measure.snapshot(now);
+    expect(rotation.frames).toBe(9);
+    expect(rotation.meanFps).toBeCloseTo(1000 / 120, 3);
+    expect(rotation.fastShare).toBe(0);
+    // Without the end of the frame the same moves would have looked 115 ms late.
+    const blind = opened(0);
+    blind.firstFrame(0);
+    now = 1000;
+    for (let index = 0; index < 10; index += 1) {
+      blind.rendered(now, { rotating: true, selfDriven: false });
+      blind.requested(now + 115);
+      now += 120;
+    }
+    expect(blind.snapshot(now).rotation.frames).toBe(0);
   });
 
   it('frames that only ease a colour are no rotation', () => {

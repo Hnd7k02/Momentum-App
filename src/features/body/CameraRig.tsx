@@ -60,6 +60,8 @@ const DOUBLE_TAP_MS = 320;
 const DOUBLE_TAP_PX = 28;
 /** The finger samples kept for the release speed: more than its window ever holds. */
 const SAMPLES = 24;
+/** The zoom's window has arrived within this share of the picture. */
+const WINDOW_STOP = 0.0015;
 
 /** Where a tap landed: in the canvas's own CSS pixels, with the canvas's size. */
 export interface BodyTap {
@@ -78,8 +80,12 @@ export type CameraRigHandle = {
   azimuth: () => number;
   /** The current zoom, 1.0–1.8. */
   zoom: () => number;
-  /** Back to the start: front, zoom 1.0, the first tilt. The selection is the host's and stays. */
-  reset: () => void;
+  /**
+   * Back to the start: front, zoom 1.0, the first tilt. The selection is the
+   * host's and stays. With `now` it is there at once and says so at once —
+   * for a viewer that has nothing to draw the way with (a lost context).
+   */
+  reset: (now?: boolean) => void;
   /**
    * The host asks for stillness. A coast ends now; a travel in flight is
    * finished first — or, with `now`, jumps to its goal, for a viewer that
@@ -138,7 +144,6 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
   const lastAzimuth = useRef(-1);
   const lastZoom = useRef(-1);
   const lastEmitAt = useRef(0);
-  const wakePending = useRef(false);
   const reduced = useRef(false);
   const applied = useRef({ zoom: 0, x: 0, y: 0 });
 
@@ -165,20 +170,6 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
     invalidate();
   }, [camera, invalidate]);
 
-  /**
-   * Asks for the NEXT frame from inside the current one. Deferred by one
-   * animation frame and coalesced, so a motion keeps the demand loop alive
-   * without ever stacking callbacks — and stops asking the moment it rests.
-   */
-  const keepAlive = useCallback(() => {
-    if (wakePending.current) return;
-    wakePending.current = true;
-    requestAnimationFrame(() => {
-      wakePending.current = false;
-      invalidate();
-    });
-  }, [invalidate]);
-
   /** Starts a motion from outside a frame: it counts time from now. */
   const begin = useCallback(() => {
     if (steppedAt.current === null) steppedAt.current = performance.now();
@@ -201,22 +192,52 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
     [begin, invalidate],
   );
 
-  const reset = useCallback(() => {
-    coasting.current = false;
-    const front = Math.round(yaw.current.value / 360) * 360;
-    if (reduced.current) {
-      yaw.current = { value: front, velocity: 0 };
-      pitch.current = { value: MOTION.pitchStart, velocity: 0 };
-      zoom.current = { value: 1, velocity: 0 };
-      yawTo.current = pitchTo.current = zoomTo.current = null;
-      invalidate();
-      return;
-    }
-    yawTo.current = front;
-    pitchTo.current = MOTION.pitchStart;
-    zoomTo.current = 1;
-    begin();
-  }, [begin, invalidate]);
+  /**
+   * Tells the host the angle and the zoom — sparingly: they drive host
+   * state, and telling every frame would re-render the screen while the
+   * body turns. A settled view is always told, whatever the throttle held
+   * back.
+   */
+  const report = useCallback(
+    (now: number, settled: boolean) => {
+      if (!settled && now - lastEmitAt.current <= 200) return;
+      const deg = Math.round(normalizeAngle(yaw.current.value)) % 360;
+      const scale = Math.round(zoom.current.value * 100) / 100;
+      if (onAzimuthChange && deg !== lastAzimuth.current) {
+        lastAzimuth.current = deg;
+        lastEmitAt.current = now;
+        onAzimuthChange(deg);
+      }
+      if (onZoomChange && scale !== lastZoom.current) {
+        lastZoom.current = scale;
+        lastEmitAt.current = now;
+        onZoomChange(scale);
+      }
+    },
+    [onAzimuthChange, onZoomChange],
+  );
+
+  const reset = useCallback(
+    (now = false) => {
+      coasting.current = false;
+      const front = Math.round(yaw.current.value / 360) * 360;
+      if (now || reduced.current) {
+        yaw.current = { value: front, velocity: 0 };
+        pitch.current = { value: MOTION.pitchStart, velocity: 0 };
+        zoom.current = { value: 1, velocity: 0 };
+        yawTo.current = pitchTo.current = zoomTo.current = null;
+        // Said here as well: a viewer that cannot draw runs no frame to say it in.
+        if (now) report(performance.now(), true);
+        invalidate();
+        return;
+      }
+      yawTo.current = front;
+      pitchTo.current = MOTION.pitchStart;
+      zoomTo.current = 1;
+      begin();
+    },
+    [begin, invalidate, report],
+  );
 
   useImperativeHandle(
     ref,
@@ -367,7 +388,9 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
         return;
       }
       invalidate();
-      const now = performance.now();
+      // The events' own times: a busy phone hands a tap over late, and two
+      // taps the finger made 150 ms apart are a double tap all the same.
+      const now = e.timeStamp;
       const before = lastTap.current;
       const near = before !== null && Math.hypot(e.clientX - before.x, e.clientY - before.y) <= DOUBLE_TAP_PX;
       if (before && near && now - before.at <= DOUBLE_TAP_MS && !frozen?.current) {
@@ -435,96 +458,117 @@ export const CameraRig = forwardRef<CameraRigHandle, CameraRigProps>(function Ca
     return pictureBox(points, (camera as PerspectiveCamera).aspect);
   }, [camera, keepInView]);
 
-  const applyCamera = useCallback(() => {
-    const y = yaw.current.value * D2R;
-    const p = pitch.current.value * D2R;
-    const radius = STAGE.distance * Math.cos(p);
-    camera.position.set(
-      TARGET.x + radius * Math.sin(y),
-      TARGET.y + STAGE.distance * Math.sin(p),
-      TARGET.z + radius * Math.cos(y),
-    );
-    camera.lookAt(TARGET);
-    camera.updateMatrixWorld();
+  /**
+   * Puts the camera where the state says, and the zoom's window where its
+   * rules put it (`framing.ts`). Returns whether the window is still on its
+   * way: it never leaves the picture, at once; to a group that was chosen
+   * while the body is zoomed it moves over `ms` like a travel, unless
+   * `direct` — the fingers are placing it themselves — or motion is reduced.
+   */
+  const applyCamera = useCallback(
+    (ms: number, direct: boolean): boolean => {
+      const y = yaw.current.value * D2R;
+      const p = pitch.current.value * D2R;
+      const radius = STAGE.distance * Math.cos(p);
+      camera.position.set(
+        TARGET.x + radius * Math.sin(y),
+        TARGET.y + STAGE.distance * Math.sin(p),
+        TARGET.z + radius * Math.cos(y),
+      );
+      camera.lookAt(TARGET);
+      camera.updateMatrixWorld();
 
-    const perspective = camera as PerspectiveCamera;
-    if (!perspective.isPerspectiveCamera) return;
-    const z = zoom.current.value;
-    if (z <= 1 + 1e-4) {
-      centre.current = { x: 0.5, y: 0.5 };
-      if (applied.current.zoom !== 1) {
-        perspective.clearViewOffset();
-        applied.current = { zoom: 1, x: 0.5, y: 0.5 };
+      const perspective = camera as PerspectiveCamera;
+      if (!perspective.isPerspectiveCamera) return false;
+      const z = zoom.current.value;
+      if (z <= 1 + 1e-4) {
+        centre.current = { x: 0.5, y: 0.5 };
+        if (applied.current.zoom !== 1) {
+          perspective.clearViewOffset();
+          applied.current = { zoom: 1, x: 0.5, y: 0.5 };
+        }
+        return false;
       }
-      return;
-    }
-    const next = clampWindow(centre.current, z, keepBox());
-    centre.current = next;
-    if (applied.current.zoom === z && applied.current.x === next.x && applied.current.y === next.y) return;
-    const rect = windowRect(next, z);
-    // Shares of the picture, not pixels: a resize needs no new numbers.
-    perspective.setViewOffset(1, 1, rect.x, rect.y, rect.width, rect.height);
-    applied.current = { zoom: z, x: next.x, y: next.y };
-  }, [camera, keepBox]);
+      // Inside the picture at once; to the chosen group as a motion.
+      const inside = clampWindow(centre.current, z, null);
+      const wanted = clampWindow(inside, z, keepBox());
+      let next = wanted;
+      let onItsWay = false;
+      if (!direct && !reduced.current && (wanted.x !== inside.x || wanted.y !== inside.y)) {
+        const share = 1 - Math.exp((-MOTION.travelRate * ms) / 1000);
+        next = { x: inside.x + (wanted.x - inside.x) * share, y: inside.y + (wanted.y - inside.y) * share };
+        onItsWay = Math.abs(wanted.x - next.x) > WINDOW_STOP || Math.abs(wanted.y - next.y) > WINDOW_STOP;
+        if (!onItsWay) next = wanted;
+      }
+      centre.current = next;
+      if (applied.current.zoom === z && applied.current.x === next.x && applied.current.y === next.y) return onItsWay;
+      const rect = windowRect(next, z);
+      // Shares of the picture, not pixels: a resize needs no new numbers.
+      perspective.setViewOffset(1, 1, rect.x, rect.y, rect.width, rect.height);
+      applied.current = { zoom: z, x: next.x, y: next.y };
+      return onItsWay;
+    },
+    [camera, keepBox],
+  );
 
   useFrame(() => {
     const now = performance.now();
-    const dt = steppedAt.current === null ? 0 : stepMs(now - steppedAt.current);
     const down = gestures.current.isDown || pointers.current.size > 0;
     let moving = false;
+    if (frozen?.current) {
+      // Held: the one frame a host may ask for shows the body where it
+      // stands. A travel that was asked for meanwhile has not begun — the
+      // pause ends first — so nothing is advanced, and no time is counted.
+      steppedAt.current = null;
+      // The one frame shows the window where it belongs, not on its way.
+      applyCamera(0, true);
+    } else {
+      const dt = steppedAt.current === null ? 0 : stepMs(now - steppedAt.current);
 
-    if (yawTo.current !== null) {
-      const next = travel(yaw.current, yawTo.current, dt);
-      yaw.current = { value: next.value, velocity: next.velocity };
-      if (next.done) yawTo.current = null;
-      else moving = true;
-    } else if (coasting.current && !down) {
-      const next = coast(yaw.current, dt);
-      yaw.current = { value: next.value, velocity: next.velocity };
-      if (next.done) coasting.current = false;
-      else moving = true;
-    }
-    if (pitchTo.current !== null) {
-      const next = travel(pitch.current, pitchTo.current, dt);
-      pitch.current = { value: next.value, velocity: next.velocity };
-      if (next.done) pitchTo.current = null;
-      else moving = true;
-    }
-    if (zoomTo.current !== null) {
-      const next = zoomTowards(zoom.current, zoomTo.current, dt);
-      zoom.current = { value: next.value, velocity: next.velocity };
-      if (next.done) zoomTo.current = null;
-      else moving = true;
-    }
+      if (yawTo.current !== null) {
+        const next = travel(yaw.current, yawTo.current, dt);
+        yaw.current = { value: next.value, velocity: next.velocity };
+        if (next.done) yawTo.current = null;
+        else moving = true;
+      } else if (coasting.current && !down) {
+        const next = coast(yaw.current, dt);
+        yaw.current = { value: next.value, velocity: next.velocity };
+        if (next.done) coasting.current = false;
+        else moving = true;
+      }
+      if (pitchTo.current !== null) {
+        const next = travel(pitch.current, pitchTo.current, dt);
+        pitch.current = { value: next.value, velocity: next.velocity };
+        if (next.done) pitchTo.current = null;
+        else moving = true;
+      }
+      if (zoomTo.current !== null) {
+        const next = zoomTowards(zoom.current, zoomTo.current, dt);
+        zoom.current = { value: next.value, velocity: next.velocity };
+        if (next.done) zoomTo.current = null;
+        else moving = true;
+      }
 
-    applyCamera();
-    steppedAt.current = moving ? now : null;
-    if (moving) keepAlive();
+      // While two fingers place the window it follows them directly.
+      if (applyCamera(dt, pinching.current)) moving = true;
+      steppedAt.current = moving ? now : null;
+      // Asked for from inside the frame, the next one comes with the display's
+      // next refresh. (Until block 7B the request was put off by one animation
+      // frame — a workaround for a renderer that swallowed it — and so every
+      // drawn frame cost two refreshes: half the display's rate.)
+      if (moving) invalidate();
+    }
     if (activity) {
       // A frame drawn for a finger that moved, or for the camera's own motion.
-      activity.current.rotating = moving || dragged.current;
+      activity.current.rotating = !frozen?.current && (moving || dragged.current);
       activity.current.coasting = moving;
-      dragged.current = false;
     }
+    dragged.current = false;
 
-    // Report the angle and the zoom sparingly: they drive host state, and
-    // emitting every frame would re-render the screen while the body turns.
-    // The settled frame is always reported, whatever the throttle held back.
-    const settled = !moving && !down;
-    const due = settled || now - lastEmitAt.current > 200;
-    if (!due) return;
-    const deg = Math.round(normalizeAngle(yaw.current.value)) % 360;
-    const scale = Math.round(zoom.current.value * 100) / 100;
-    if (onAzimuthChange && deg !== lastAzimuth.current) {
-      lastAzimuth.current = deg;
-      lastEmitAt.current = now;
-      onAzimuthChange(deg);
-    }
-    if (onZoomChange && scale !== lastZoom.current) {
-      lastZoom.current = scale;
-      lastEmitAt.current = now;
-      onZoomChange(scale);
-    }
+    // A held frame reports too: a view that was set while nothing could be
+    // drawn — a travel that jumped to its goal — is told with the frame
+    // that shows it.
+    report(now, !moving && !down);
   });
 
   return null;
