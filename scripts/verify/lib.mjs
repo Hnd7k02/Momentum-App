@@ -58,6 +58,19 @@ export async function openMuscles(page, { wait = 4500 } = {}) {
   await page.waitForTimeout(wait);
 }
 
+/**
+ * To the Gym hub, the way a finger reaches it from anywhere: the tab, then
+ * the area. Until block 7B Heute's Gym label led to the hub and the suites
+ * took that way; the label now leads straight to Muskelgruppen (D161) and
+ * is named for it — `wp2-2-shots.mjs` holds that way, and its way back.
+ */
+export async function openGymHub(page, { wait = 600 } = {}) {
+  await page.getByRole('button', { name: 'Bereiche' }).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('radio', { name: 'Gym' }).click();
+  await page.waitForTimeout(wait);
+}
+
 /** Reads the stored domains straight out of IndexedDB. */
 export async function storedDomains(page) {
   return page.evaluate(async () => {
@@ -411,7 +424,9 @@ export async function seedMuscles(page, { days = 42, older = false } = {}) {
  * sheet first — the promise is the same, the place has moved.
  */
 export async function inSheet(page, metric, fn) {
-  await page.locator(`[data-metric="${metric}"] .metric-tile__open`).click();
+  // A tile's own button, or — the metrics strip of Muskelgruppen (block 7B)
+  // — a cell that is the button itself.
+  await page.locator(`[data-metric="${metric}"] .metric-tile__open, button[data-metric="${metric}"]`).click();
   await page.waitForTimeout(450);
   const result = await fn(page.locator('.sheet'));
   await page.keyboard.press('Escape');

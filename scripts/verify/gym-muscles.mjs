@@ -2,12 +2,20 @@ import { chromium } from 'playwright-core';
 import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
 
 /**
- * The Muskelgruppen module in the real Gym workspace, Stage 4.
+ * The Muskelgruppen module in the real Gym workspace.
  *
  * The body, the ten analytics rows and their mini charts, sharing one
  * selection; the chunk that arrives only for Gym; the flat figure that takes
  * over when WebGL or the model is missing; and what the module does when
  * nobody is looking at it.
+ *
+ * And the stage of block 7B (contract §8, §11, §14): the body without a
+ * card at 55 % of the screen with only the header, the range and the
+ * metrics strip above it; a tap that never turns it; its still standing in
+ * the same place while it loads; a sheet that stands only over a body that
+ * is still, and under which no frame arises; a lost graphics context that
+ * ends with the body or the flat figure, never with an empty field; and
+ * the measuring display, off until its user switches it on.
  *
  * Run against the production preview (`vite preview --port 4173`).
  */
@@ -41,10 +49,19 @@ const INSTRUMENT = () => {
   };
   const raf = w.requestAnimationFrame.bind(w);
   w.requestAnimationFrame = (cb) => raf((t) => { w.__probe.raf += 1; cb(t); });
+  // What is drawn: every draw call to a canvas that is in the document.
+  w.__probe.draws = 0;
+  if (w.WebGL2RenderingContext) {
+    const draw = WebGL2RenderingContext.prototype.drawElements;
+    WebGL2RenderingContext.prototype.drawElements = function (...args) {
+      if (this.canvas && this.canvas.isConnected) w.__probe.draws += 1;
+      return draw.apply(this, args);
+    };
+  }
 };
 
-async function open(width, { reducedMotion = 'no-preference', init = null, height = 852 } = {}) {
-  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, hasTouch: true, reducedMotion });
+async function open(width, { reducedMotion = 'no-preference', init = null, height = 852, serviceWorkers = 'allow' } = {}) {
+  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, hasTouch: true, reducedMotion, serviceWorkers });
   await ctx.addInitScript(INSTRUMENT);
   if (init) await ctx.addInitScript(init);
   const page = await ctx.newPage();
@@ -103,6 +120,44 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
     if (now !== last) { last = now; since = Date.now(); } else if (Date.now() - since >= quiet) return;
   }
 };
+
+/**
+ * Where the body stands in its stage, read off the drawn picture: the first
+ * and the last row and column of the stage that carry it, in CSS pixels of
+ * the stage. The body is lighter than the stage's dark ground, so a pixel
+ * counts when it is clearly lighter than the ground — which leaves out the
+ * faint glow under the feet. `selector` is what is pictured: the canvas, or
+ * the stage with the still in it.
+ */
+async function edgesOf(page, selector) {
+  const target = page.locator(selector).first();
+  const box = await target.boundingBox();
+  const png = await target.screenshot({ type: 'png' });
+  return page.evaluate(async ({ png, cssHeight }) => {
+    const blob = new Blob([Uint8Array.from(atob(png), (c) => c.charCodeAt(0))], { type: 'image/png' });
+    const bitmap = await createImageBitmap(blob);
+    const c = document.createElement('canvas');
+    c.width = bitmap.width; c.height = bitmap.height;
+    const g = c.getContext('2d');
+    g.drawImage(bitmap, 0, 0);
+    const scale = bitmap.height / cssHeight;
+    // Below the row of buttons, which are lighter than the ground as well.
+    const from = Math.round(40 * scale);
+    const d = g.getImageData(0, 0, bitmap.width, bitmap.height).data;
+    let top = -1, bottom = -1, left = bitmap.width, right = -1;
+    for (let y = from; y < bitmap.height; y += 1) {
+      let hits = 0;
+      for (let x = 0; x < bitmap.width; x += 1) {
+        const i = (y * bitmap.width + x) * 4;
+        if (d[i] + d[i + 1] + d[i + 2] > 270) { hits += 1; if (x < left) left = x; if (x > right) right = x; }
+      }
+      if (hits > 2 * scale) { if (top < 0) top = y; bottom = y; }
+    }
+    return { top: top / scale, bottom: bottom / scale, left: left / scale, right: right / scale };
+  }, { png: png.toString('base64'), cssHeight: box.height });
+}
+const bodyEdges = (page) => edgesOf(page, '.body-viewer canvas');
+const stageEdges = (page) => edgesOf(page, '.body-stage');
 
 /* ── 393: composition, rows, charts, selection ─────────────────────────── */
 {
@@ -217,6 +272,33 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
     await page.waitForTimeout(700);
     check('a second tap on the same region keeps it selected rather than clearing it', (await selectedRow(page)) === hit, `${hit} → ${await selectedRow(page)}`);
   }
+  // A tap never turns the body (block 7B, contract §8). The trapezius is
+  // seen from the front and belongs to the back, whose row would turn the
+  // body round: a tap on it selects the back and leaves the angle alone.
+  {
+    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
+    await settle(page);
+    let onBack = null;
+    for (const [fx, fy] of [[0.44, 0.235], [0.56, 0.235], [0.43, 0.245], [0.57, 0.245], [0.45, 0.225], [0.55, 0.225], [0.42, 0.25], [0.58, 0.25]]) {
+      await page.waitForTimeout(400);
+      await page.mouse.click(box.x + box.width * fx, box.y + box.height * fy);
+      await page.waitForTimeout(500);
+      if ((await selectedRow(page)) === 'Rücken') { onBack = [fx, fy]; break; }
+    }
+    check('from the front a tap on the trapezius selects the back', onBack !== null, String(onBack));
+    await settle(page);
+    check('and the body does not turn for it: the angle stays 0', (await page.locator('.body-viewer').getAttribute('data-azimuth')) === '0', await page.locator('.body-viewer').getAttribute('data-azimuth'));
+    // The same group chosen in the list does turn the body.
+    await rowOf(page, 'Rücken').locator('button').click();
+    await page.waitForTimeout(400);
+    await rowOf(page, 'Rücken').locator('button').click();
+    await showModule(page);
+    check('the same group chosen in its row turns the body to it', Math.abs((await waitForAzimuth(page, 180)) - 180) <= 3);
+    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
+    await settle(page);
+    await page.mouse.click(box.x + box.width * spot[0], box.y + box.height * spot[1]);
+    await page.waitForTimeout(600);
+  }
   if (OUT) {
     await showModule(page);
     await page.screenshot({ path: `${OUT}/muscles-393-measured-selected.png` });
@@ -230,7 +312,7 @@ const settle = async (page, quiet = 1200, timeout = 20000) => {
   if (OUT) { await showModule(page); await page.screenshot({ path: `${OUT}/muscles-393.png` }); }
 
   /* Laufen moved in — on the Gym hub, beneath the board; Verlauf keeps its row and loses the board. */
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(1200);
   check('Laufen sits inside the Gym workspace', (await page.locator('.areas__running').count()) === 1 && (await page.locator('.areas__running').textContent())?.includes('Laufen'));
   check('with its rating board and its weekly target',
@@ -425,10 +507,17 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
     document.dispatchEvent(new Event('visibilitychange'));
     window.__probe.raf = 0;
   });
+  // The frame in flight when the tab was hidden may still land; after that
+  // nothing does. (Until block 7B this read "fewer than a quarter of the
+  // frames of a watched second" — with one animation frame a drawn frame,
+  // where there were two, a quarter of a slow second is two frames, and the
+  // check is now the stricter one: none.)
+  await page.waitForTimeout(400);
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
   await page.waitForTimeout(1000);
   const hiddenFrames = (await probe(page)).raf;
-  check('a rotation in a hidden tab all but stops running frames',
-    hiddenFrames < visibleFrames / 4, `${hiddenFrames} hidden vs ${visibleFrames} watched`);
+  check('a rotation in a hidden tab stops running frames',
+    hiddenFrames === 0 && visibleFrames > 2 && (await probe(page)).draws === 0, `${hiddenFrames} hidden vs ${visibleFrames} watched`);
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
     document.dispatchEvent(new Event('visibilitychange'));
@@ -441,12 +530,12 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   // from 180 to 0, so finishing is something the angle can show.
   await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
   await page.locator('.areas__scroll').evaluate((el) => { el.scrollTop = el.scrollHeight; });
-  await page.waitForTimeout(300);
-  await page.evaluate(() => { window.__probe.raf = 0; });
+  await page.waitForTimeout(600);
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
   await page.waitForTimeout(1000);
   const awayFrames = (await probe(page)).raf;
   const stuckAt = await page.locator('.body-viewer').getAttribute('data-azimuth');
-  check('a body scrolled out of view all but stops running frames', awayFrames < visibleFrames / 4, `${awayFrames} away vs ${visibleFrames} watched`);
+  check('a body scrolled out of view stops running frames', awayFrames === 0 && (await probe(page)).draws === 0, `${awayFrames} away vs ${visibleFrames} watched`);
   await showModule(page);
   const back = await waitForAzimuth(page, 0);
   check('and scrolling back finishes what it was doing', Math.abs(((back + 180) % 360) - 180) <= 3, `stopped at ${stuckAt}, finished at ${back}`);
@@ -455,7 +544,7 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   let p = await probe(page);
   check('one canvas, one live context and one set of pointer handlers', (await page.locator('canvas').count()) === 1 && p.contexts - p.lost === 1 && p.listeners === 4, JSON.stringify(p));
   // The area switch is on the hub, one step back from the module.
-  await page.getByRole('button', { name: 'Zurück' }).click();
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(900);
   await page.getByRole('radio', { name: 'Mind' }).click();
   await page.waitForTimeout(1200);
@@ -470,6 +559,319 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Seite' }).click();
   await settle(page);
   check('and the body still turns', (await page.locator('.body-viewer').getAttribute('data-azimuth')) === '90', await page.locator('.body-viewer').getAttribute('data-azimuth'));
+  await ctx.close();
+}
+
+/* ── The stage (block 7B, contract §8) ─────────────────────────────────── */
+for (const [width, height] of [[320, 693], [360, 780], [393, 852], [430, 932]]) {
+  const { ctx, page } = await open(width, { height });
+  await toGym(page);
+  const stage = await page.evaluate(() => {
+    const box = (el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height, bottom: r.bottom }; };
+    const stageEl = document.querySelector('.body-stage');
+    const scroll = document.querySelector('.areas__scroll');
+    // Everything that stands above the stage, inside the screen.
+    const above = [...document.querySelectorAll('.screen > header, .areas__scroll > *, .areas__scroll > * > *')]
+      .filter((el) => el !== stageEl && !el.contains(stageEl) && !stageEl.contains(el) && el.getBoundingClientRect().height > 0 && el.getBoundingClientRect().bottom <= stageEl.getBoundingClientRect().top + 1)
+      .map((el) => el.className.toString().split(' ')[0] || el.tagName);
+    let framed = false;
+    for (let el = stageEl; el && el !== scroll; el = el.parentElement) {
+      const style = getComputedStyle(el);
+      if (el.classList.contains('card') || el.hasAttribute('data-card') || style.borderRadius !== '0px' && el !== stageEl || /blur/.test(style.backdropFilter || style.webkitBackdropFilter || '')) framed = true;
+    }
+    const title = document.querySelector('.gym-muscles__title');
+    const strip = document.querySelector('.muscle-strip');
+    const cells = [...document.querySelectorAll('.muscle-strip__cell')].map((cell) => ({
+      width: cell.getBoundingClientRect().width,
+      label: cell.querySelector('.muscle-strip__label')?.textContent.trim(),
+      value: cell.querySelector('.muscle-strip__value')?.textContent.trim(),
+      sub: cell.querySelector('.muscle-strip__sub')?.textContent.trim(),
+      cut: [...cell.querySelectorAll('span')].some((el) => el.scrollWidth > el.clientWidth + 1),
+      sizes: ['label', 'value', 'sub'].map((part) => getComputedStyle(cell.querySelector(`.muscle-strip__${part}`)).fontSize),
+    }));
+    return {
+      stage: box(stageEl), viewport: [window.innerWidth, window.innerHeight], above, framed,
+      title: { size: getComputedStyle(title).fontSize, text: title.textContent.trim() },
+      strip: box(strip), cells,
+      canvas: box(document.querySelector('.body-viewer canvas')),
+      views: box(document.querySelector('.body-viewer__views')), reset: box(document.querySelector('.body-viewer__reset')),
+      viewTargets: [...document.querySelectorAll('.body-viewer__view')].map((el) => { const r = el.getBoundingClientRect(); const before = getComputedStyle(el, '::before'); return r.height - 2 * parseFloat(before.top); }),
+    };
+  });
+  const share = stage.stage.height / stage.viewport[1];
+  check(`${width}: the body's stage takes 55 % of the screen's height`, share >= 0.5499, `${Math.round(stage.stage.height)}px of ${stage.viewport[1]}px, ${(share * 100).toFixed(1)} %`);
+  check(`${width}: it runs from edge to edge and the canvas fills it`, stage.stage.x === 0 && Math.abs(stage.stage.width - width) < 0.5 && Math.abs(stage.canvas.width - width) < 0.5 && Math.abs(stage.canvas.height - stage.stage.height) < 0.5,
+    `${stage.stage.x}, ${stage.stage.width}×${stage.stage.height}, canvas ${stage.canvas.width}×${stage.canvas.height}`);
+  check(`${width}: it stands on the ground, without a card and without glass`, stage.framed === false);
+  check(`${width}: above it stand the header, the range and the metrics strip, and nothing else`,
+    JSON.stringify(stage.above) === JSON.stringify(['screen__header', 'progress__ranges', 'muscle-strip', 'muscle-strip__cell', 'muscle-strip__cell', 'muscle-strip__cell'])
+      || JSON.stringify(stage.above) === JSON.stringify(['screen__header', 'progress__ranges', 'segmented', 'muscle-strip', 'muscle-strip__cell', 'muscle-strip__cell', 'muscle-strip__cell']),
+    stage.above.join(' | '));
+  check(`${width}: the header's title is 17px`, stage.title.size === '17px' && stage.title.text === 'Muskelgruppen', `${stage.title.size} ${stage.title.text}`);
+  const [trend, rated, strongest] = stage.cells;
+  check(`${width}: the strip has three cells, the first 1.35 times as wide as the others`,
+    stage.cells.length === 3 && Math.abs(trend.width / rated.width - 1.35) < 0.02 && Math.abs(rated.width - strongest.width) < 0.6,
+    stage.cells.map((cell) => cell.width.toFixed(1)).join(' : '));
+  check(`${width}: each cell is a label in 11px, a value in the strip's figure step and a line beneath`,
+    stage.cells.every((cell) => JSON.stringify(cell.sizes) === JSON.stringify(['11px', '20px', '11px'])), JSON.stringify(stage.cells.map((cell) => cell.sizes)));
+  check(`${width}: nothing in the strip is cut — "Leistungstrend" fits`, stage.cells.every((cell) => !cell.cut) && trend.label === 'Leistungstrend', JSON.stringify(stage.cells.filter((cell) => cell.cut)));
+  check(`${width}: the trend with its state, the rated groups of ten, and the group that rose most with its change`,
+    /^[+−]?\d+ %$/.test(trend.value) && ['Verbessert', 'Gehalten', 'Zurückgegangen'].includes(trend.sub)
+      && /^\d+ \/ 10$/.test(rated.value) && rated.label === 'Gewertet' && rated.sub === 'Gruppen'
+      && strongest.label === 'Stärkster' && /^\+\d+ %$/.test(strongest.value) && strongest.sub.length > 0,
+    JSON.stringify(stage.cells.map(({ label, value, sub }) => [label, value, sub])));
+  // The strip counts nothing: its figures are the rows'.
+  const printed = await page.locator('.muscle-row').evaluateAll((rows) => rows.map((row) => ({
+    name: row.querySelector('.muscle-row__name')?.textContent.trim(),
+    delta: row.querySelector('.muscle-row__delta')?.textContent ?? null,
+  })));
+  const figures = printed.filter((row) => row.delta !== null);
+  const value = (delta) => Number(delta.replace('−', '-').replace('+', '').replace(/ %$/, ''));
+  const best = figures.filter((row) => value(row.delta) >= 2).sort((a, b) => value(b.delta) - value(a.delta))[0];
+  check(`${width}: "Gewertet" is the number of rows that print a figure`, rated.value === `${figures.length} / 10`, `${rated.value} · ${figures.length} rows`);
+  check(`${width}: "Stärkster" is the row with the largest rise`, best !== undefined && strongest.sub === best.name && strongest.value === best.delta, `${strongest.sub} ${strongest.value} · rows: ${best?.name} ${best?.delta}`);
+  check(`${width}: the views stand at the top of the stage on the leading side, the reset on the trailing one, each inside it`,
+    stage.views.x >= 15 && stage.views.y >= stage.stage.y && stage.reset.x + stage.reset.width <= width && stage.views.x + stage.views.width < stage.reset.x && stage.views.bottom < stage.stage.y + 60,
+    `views ${Math.round(stage.views.x)}–${Math.round(stage.views.x + stage.views.width)}, reset from ${Math.round(stage.reset.x)}`);
+  check(`${width}: the views and the reset are 44px targets`, stage.viewTargets.every((h) => h >= 44) && stage.reset.width >= 44 && stage.reset.height >= 44, `${stage.viewTargets.join(',')} · ${stage.reset.width}×${stage.reset.height}`);
+  check(`${width}: the page does not scroll sideways`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  // Head and feet stay clear of the stage's edge, from the front, the side and the back.
+  const edges = {};
+  for (const view of ['Vorne', 'Seite', 'Hinten']) {
+    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).click();
+    await settle(page);
+    edges[view] = await bodyEdges(page);
+  }
+  check(`${width}: head and feet touch the stage's edge in no view, and the head stands under the row of buttons`,
+    Object.values(edges).every((edge) => edge.top >= 40 && edge.bottom <= stage.stage.height - 4),
+    Object.entries(edges).map(([view, edge]) => `${view}: head at ${edge.top.toFixed(0)}px, feet at ${edge.bottom.toFixed(0)}px of ${Math.round(stage.stage.height)}px`).join(' | '));
+  await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
+  await settle(page);
+  // The rows are reached with one thumb: a drag that begins up or down on the body scrolls the page.
+  check(`${width}: a drag that begins up or down on the body is the page's to scroll`, (await page.locator('.body-viewer canvas').evaluate((c) => getComputedStyle(c).touchAction)) === 'pan-y');
+  if (OUT) await page.screenshot({ path: `${OUT}/stage-${width}.png` });
+  await ctx.close();
+}
+
+/* ── The still, while the body loads (contract §11) ────────────────────── */
+{
+  // No worker, so the model can be held back on its way.
+  const { ctx, page } = await open(393, { serviceWorkers: 'block' });
+  let release = () => undefined;
+  const heldBack = new Promise((resolve) => { release = resolve; });
+  await page.route(/momentum-body\.glb/, async (route) => { await heldBack; await route.continue(); });
+  await page.getByRole('button', { name: 'Bereiche' }).click();
+  await page.waitForTimeout(600);
+  await page.getByRole('radio', { name: 'Gym' }).click();
+  await page.waitForTimeout(800);
+  await openMuscles(page, { wait: 2500 });
+  const loading = await page.evaluate(() => {
+    const stage = document.querySelector('.body-stage');
+    const still = document.querySelector('.body-stage__still');
+    const rect = (el) => { const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; };
+    return { state: stage.getAttribute('data-stage'), still: still ? { loaded: still.complete && still.naturalWidth > 0, box: rect(still) } : null, stage: rect(stage), rows: document.querySelectorAll('.muscle-row').length };
+  });
+  check('while the model is on its way the stage says so and shows the body\'s still', loading.state === 'loading' && loading.still?.loaded === true, JSON.stringify(loading));
+  check('the still stands on the stage\'s middle axis at the stage\'s full height', loading.still !== null && Math.abs(loading.still.box[3] - loading.stage[3]) < 0.5 && Math.abs(loading.still.box[0] + loading.still.box[2] / 2 - (loading.stage[0] + loading.stage[2] / 2)) < 0.5,
+    JSON.stringify(loading.still?.box));
+  check('the rows are there already: the history does not wait for the body', loading.rows === 10, String(loading.rows));
+  const stillEdges = await stageEdges(page);
+  if (OUT) await page.screenshot({ path: `${OUT}/stage-393-loading.png` });
+  release();
+  await page.waitForFunction(() => document.querySelector('.body-stage')?.getAttribute('data-stage') === 'shown', null, { timeout: 30000 });
+  await settle(page);
+  check('once the first picture is drawn the still is gone', (await page.locator('.body-stage__still').count()) === 0);
+  const liveEdges = await stageEdges(page);
+  check('and nothing jumped: the body stands where its still stood, to within two pixels',
+    Math.abs(stillEdges.top - liveEdges.top) <= 2 && Math.abs(stillEdges.bottom - liveEdges.bottom) <= 2 && Math.abs(stillEdges.left - liveEdges.left) <= 2 && Math.abs(stillEdges.right - liveEdges.right) <= 2,
+    `still ${JSON.stringify(stillEdges)} · body ${JSON.stringify(liveEdges)}`);
+  await ctx.close();
+}
+
+/* ── A sheet stands over a still body, and nothing is drawn under it ───── */
+{
+  const { ctx, page } = await open(393);
+  const client = await ctx.newCDPSession(page);
+  await toGym(page);
+  await settle(page);
+  const box = await page.locator('.body-viewer canvas').boundingBox();
+  const heldNow = async () => (await page.locator('.body-viewer').getAttribute('data-held')) !== null;
+  check('with no sheet open the body is not held', !(await heldNow()));
+  // Throw the body, and open the legend while it still turns. 100px in
+  // 60 ms are more than the fastest coast there is, 720° a second: 55° under
+  // the finger and 201° more over a second and a half. The legend's button
+  // is pressed from inside the page the moment the finger has lifted — a
+  // click over the wire would arrive when a software renderer has drawn
+  // most of the coast.
+  const t0 = Date.now() / 1000;
+  const y = box.y + box.height * 0.5;
+  const x0 = box.x + box.width * 0.3;
+  const mouse = (type, x, t, down) => client.send('Input.dispatchMouseEvent', { type, x, y, timestamp: t, button: type === 'mouseMoved' && !down ? 'none' : 'left', buttons: down ? 1 : 0, clickCount: type === 'mouseMoved' ? 0 : 1 });
+  await mouse('mousePressed', x0, t0, true);
+  for (let i = 1; i <= 6; i += 1) await mouse('mouseMoved', x0 + (100 * i) / 6, t0 + 0.01 * i, true);
+  await mouse('mouseReleased', x0 + 100, t0 + 0.065, false);
+  await page.evaluate(() => document.querySelector('.gym-muscles__legendButton').click());
+  await page.locator('.sheet').waitFor({ timeout: 5000 });
+  const stopped = Number(await page.locator('.body-viewer').getAttribute('data-azimuth'));
+  check('the legend stands only once the body is held', await heldNow());
+  check('and the coast it interrupted ended at once, far short of where it would have run', stopped >= 55 && stopped < 200, `${stopped}° of 256°`);
+  await page.waitForTimeout(700);
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
+  await page.waitForTimeout(1200);
+  let under = await probe(page);
+  check('under the open sheet no frame arises and nothing is drawn', under.raf === 0 && under.draws === 0, `${under.raf} frames, ${under.draws} draw calls`);
+  check('and the body stands where it stopped', Number(await page.locator('.body-viewer').getAttribute('data-azimuth')) === stopped);
+  if (OUT) await page.screenshot({ path: `${OUT}/stage-393-legend.png` });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(600);
+  check('closing the sheet lifts the pause, and the coast does not start again', !(await heldNow()) && Number(await page.locator('.body-viewer').getAttribute('data-azimuth')) === stopped);
+  // The sheet that says what the trend is: the strip's first cell.
+  await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Hinten' }).click();
+  await page.locator('button[data-metric="gym-overall"]').click();
+  await page.locator('.sheet').waitFor({ timeout: 8000 });
+  check('the trend\'s explanation waits for a travel to finish and then stands over a held body', (await heldNow()) && (await page.locator('.body-viewer').getAttribute('data-azimuth')) === '180', await page.locator('.body-viewer').getAttribute('data-azimuth'));
+  const explained = ((await page.locator('.sheet').textContent()) ?? '').replace(/\s+/g, ' ');
+  check('what the old tile\'s tap explained is still there', /gehalten/.test(explained) && /Gruppen/.test(explained), explained.slice(0, 140));
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
+  await page.waitForTimeout(1000);
+  under = await probe(page);
+  check('and nothing is drawn under it either', under.raf === 0 && under.draws === 0, `${under.raf} frames, ${under.draws} draw calls`);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(500);
+  check('after it the body answers again', !(await heldNow()));
+  await ctx.close();
+}
+
+/* ── A lost graphics context (block 7B) ────────────────────────────────── */
+{
+  const { ctx, page } = await open(393);
+  await toGym(page);
+  await settle(page);
+  const stageState = () => page.locator('.body-stage').getAttribute('data-stage');
+  const lose = () => page.evaluate(() => {
+    const canvas = document.querySelector('.body-viewer canvas');
+    window.__lose = canvas.getContext('webgl2').getExtension('WEBGL_lose_context');
+    window.__lose.loseContext();
+  });
+  await lose();
+  await page.waitForTimeout(400);
+  check('a lost context is not an empty field: the body\'s still stands in', (await stageState()) === 'lost' && (await page.locator('.body-stage__still').count()) === 1, await stageState());
+  if (OUT) await page.screenshot({ path: `${OUT}/stage-393-context-lost.png` });
+  await page.waitForFunction(() => document.querySelector('.body-stage')?.getAttribute('data-stage') === 'shown', null, { timeout: 30000 }).catch(() => undefined);
+  await settle(page);
+  let p = await probe(page);
+  check('when the context does not come back, a new canvas shows the body again', (await stageState()) === 'shown' && (await page.locator('canvas').count()) === 1 && (await page.locator('.body-stage__still').count()) === 0, `${await stageState()} ${JSON.stringify(p)}`);
+  const edges = await stageEdges(page);
+  check('and the body is really drawn', edges.bottom - edges.top > 300, JSON.stringify(edges));
+  await rowOf(page, 'Brust').locator('button').click();
+  await page.waitForTimeout(500);
+  check('the selection, the rows and the views still work', (await selectedRow(page)) === 'Brust' && (await page.locator('.body-viewer__view').count()) === 3);
+  await ctx.close();
+}
+{
+  // The device gives no context any more: after the loss none can be made.
+  const { ctx, page } = await open(393, {
+    init: () => {
+      const real = HTMLCanvasElement.prototype.getContext;
+      window.__noMore = false;
+      HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
+        if (window.__noMore && /webgl/.test(String(type))) return null;
+        return real.call(this, type, ...rest);
+      };
+    },
+  });
+  await toGym(page);
+  await settle(page);
+  await page.evaluate(() => {
+    const canvas = document.querySelector('.body-viewer canvas');
+    const lose = canvas.getContext('webgl2').getExtension('WEBGL_lose_context');
+    window.__noMore = true;
+    lose.loseContext();
+  });
+  await page.waitForFunction(() => document.querySelector('.muscle-module__figure svg') !== null, null, { timeout: 30000 }).catch(() => undefined);
+  check('where no new context can be made, the flat figure stands in', (await page.locator('.muscle-module__figure svg').count()) > 0 && (await page.locator('canvas').count()) === 0);
+  check('with the rows and the strip beside it', (await page.locator('.muscle-row').count()) === 10 && (await page.locator('.muscle-strip').count()) === 1);
+  await rowOf(page, 'Brust').locator('button').click();
+  await page.waitForTimeout(500);
+  check('and it shares the one selection', (await selectedRow(page)) === 'Brust' && (await page.locator('.body-renderer__muscle--selected').count()) > 0);
+  if (OUT) await page.screenshot({ path: `${OUT}/stage-393-flat.png` });
+  await ctx.close();
+}
+
+/* ── The measuring display (block 7B, D181) ────────────────────────────── */
+{
+  const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, permissions: ['clipboard-read', 'clipboard-write'] });
+  await ctx.addInitScript(INSTRUMENT);
+  const page = await ctx.newPage();
+  await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await onboard(page, { gym: 3, running: 2 });
+  await seed(page, { days: 42 });
+  await seedMuscles(page, { days: 42 });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  await toGym(page);
+  check('the measuring display is off until its user switches it on', (await page.locator('[data-readout]').count()) === 0 && (await page.evaluate(() => Object.keys(localStorage).length)) === 0);
+  await page.getByRole('button', { name: 'Zurück', exact: true }).click();
+  await page.waitForTimeout(700);
+  const toggle = page.getByRole('switch', { name: 'Messanzeige beim Körper' });
+  await toggle.scrollIntoViewIfNeeded();
+  const hint = ((await page.locator('.measure-setting').textContent()) ?? '').replace(/\s+/g, ' ');
+  check('its switch stands in the settings, in everyday words', (await toggle.getAttribute('aria-checked')) === 'false' && /wie schnell der Körper lädt und wie flüssig er sich dreht/.test(hint) && !/WebGL|Frame|FPS|Render/i.test(hint), hint);
+  await toggle.click();
+  await page.waitForTimeout(300);
+  const stored = await page.evaluate(async () => {
+    const open = () => new Promise((res, rej) => { const r = indexedDB.open('momentum'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const db = await open();
+    const all = (store) => new Promise((res, rej) => { const r = db.transaction([store], 'readonly').objectStore(store).getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const everything = {};
+    for (const store of [...db.objectStoreNames]) everything[store] = await all(store);
+    return { local: Object.entries(localStorage), inDatabase: /measure|Messanzeige/i.test(JSON.stringify(everything)) };
+  });
+  check('the switch lives in the browser\'s local storage, under one key, and nowhere in the app\'s data',
+    stored.local.length === 1 && /^momentum\.bodyMeasure:/.test(stored.local[0][0]) && stored.local[0][1] === '1' && stored.inDatabase === false, JSON.stringify(stored));
+  // It survives the reload it exists for.
+  await page.goto('about:blank');
+  await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  await toGym(page, { wait: 1500 });
+  await page.locator('[data-readout]').waitFor({ timeout: 20000 });
+  await page.waitForFunction(() => /\d\s*ms/.test(document.querySelector('[data-readout] dd')?.textContent ?? ''), null, { timeout: 30000 });
+  await settle(page);
+  // Turn the body for a while, let go, wait, copy.
+  const box = await page.locator('.body-viewer canvas').boundingBox();
+  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
+  await page.mouse.down();
+  for (let i = 1; i <= 60; i += 1) await page.mouse.move(box.x + box.width * 0.3 + (i % 20) * 6, box.y + box.height * 0.5);
+  await page.mouse.up();
+  await settle(page);
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Werte kopieren' }).click();
+  await page.waitForTimeout(400);
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  const line = (label) => copied.split('\n').find((l) => l.trim().startsWith(`${label}:`))?.split(': ').slice(1).join(': ') ?? null;
+  check('after a reload it is still on, under the body and beside the canvas',
+    (await page.locator('[data-readout]').count()) === 1 && (await page.evaluate(() => { const r = document.querySelector('[data-readout]').getBoundingClientRect(); const s = document.querySelector('.body-stage').getBoundingClientRect(); return r.top >= s.bottom - 1; })));
+  check('it shows the load: the whole way, code, model and first picture, each in milliseconds and with its source',
+    /^[\d']+ ms$/.test(line('Bis zum ersten Bild') ?? '') && /^[\d']+ ms · (aus dem Speicher der App|aus dem Speicher|aus dem Netz|schon geladen)/.test(line('Code') ?? '') && /^[\d']+ ms · (aus dem Speicher der App|aus dem Speicher|aus dem Netz|schon geladen)/.test(line('Modell') ?? '') && /^[\d']+ ms$/.test(line('Erstes Bild') ?? ''),
+    [line('Bis zum ersten Bild'), line('Code'), line('Modell'), line('Erstes Bild')].join(' | '));
+  check('the turning: mean frames per second, the share under 25 ms, the longest frame',
+    /^[\d.]+ im Mittel$/.test(line('Bilder pro Sekunde') ?? '') && /^[\d.]+ %$/.test(line('Bilder unter 25 ms') ?? '') && /^[\d']+ ms$/.test(line('Längstes Bild') ?? '') && Number(line('Gemessene Bilder')) > 5,
+    [line('Bilder pro Sekunde'), line('Bilder unter 25 ms'), line('Längstes Bild'), line('Gemessene Bilder')].join(' | '));
+  check('the idle second: no frame in it', line('Bilder in der letzten Sekunde') === '0', String(line('Bilder in der letzten Sekunde')));
+  check('what is drawn: twelve draw calls, the triangles, the one texture and its size',
+    line('Zeichenaufrufe') === '12' && line('Dreiecke') === "50'488" && line('Texturen') === '1 · 768 × 1024', [line('Zeichenaufrufe'), line('Dreiecke'), line('Texturen')].join(' | '));
+  check('the pixel ratio used, the display\'s observed rate, device, system and the visible area',
+    line('Pixeldichte') === '2 von 3' && /pro Sekunde, beobachtet$/.test(line('Bildrate des Bildschirms') ?? '') && (line('Gerät') ?? '').length > 3 && line('Sichtbarer Bereich') === '393 × 852 Punkte' && /^393 × 469 Punkte, 55 % der Höhe$/.test(line('Körperbühne') ?? ''),
+    [line('Pixeldichte'), line('Bildrate des Bildschirms'), line('Gerät'), line('Sichtbarer Bereich'), line('Körperbühne')].join(' | '));
+  check('the targets of the review hold where a headless browser can hold them: twelve draw calls, under 80 000 triangles, one texture no larger than 1024',
+    Number(line('Zeichenaufrufe')) <= 12 && Number((line('Dreiecke') ?? '').replace(/'/g, '')) <= 80000 && (line('Texturen') ?? '').startsWith('1 '));
+  // It asks for no frame itself: with the display on, an idle body still draws nothing.
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
+  await page.waitForTimeout(1500);
+  const idle = await probe(page);
+  check('switched on, it asks for no frame: the idle body draws nothing', idle.raf === 0 && idle.draws === 0, `${idle.raf} frames, ${idle.draws} draw calls`);
+  if (OUT) { await page.locator('[data-readout]').scrollIntoViewIfNeeded(); await page.waitForTimeout(300); await page.screenshot({ path: `${OUT}/stage-393-readout.png` }); }
   await ctx.close();
 }
 
