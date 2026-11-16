@@ -236,8 +236,14 @@ weakened**; `wp3-sheets.mjs` is unchanged and green.
   above the sheet checked beside it; without WebGL "the exercises still
   follow it" → "the group's sheet stands over the flat figure with the
   group's exercises"; under reduced motion "selection still works from the
-  rows" → "a row still opens its group's sheet". Two sections are new: the
-  frames under the sheet, and the camera's jump under reduced motion.
+  rows" → "a row still opens its group's sheet"; "selecting a group that
+  faces away turns the body to it" and "the same group chosen in its row
+  turns the body to it" → the same two with "opening … from its row" for
+  "selecting", the angle held to the same three degrees; and after a lost
+  context "the selection, the rows and the views still work" keeps its
+  name and now also holds that the group's sheet stands. Two sections are
+  new: the frames under the sheet, and the camera's jump under reduced
+  motion.
 - **`body-reach.mjs`**. *Old:* a miss leaves the selection alone, so only
   a *change* of selection is a hit. *New:* a hit is a tap after which a
   sheet stands; the sheet is closed before the next tap, and the grid runs
