@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setClock } from '../../core/clock';
-import { EXERCISE_CATALOGUE } from '../../core/gym/catalogue';
+import { EXERCISE_CATALOGUE, catalogueRecords } from '../../core/gym/catalogue';
 import { closeDatabase, deleteDatabase } from '../db';
 import { exercisesRepository, gymSetsRepository } from '../repositories';
 import { applyOnboarding } from './configurationService';
@@ -33,6 +33,25 @@ function freezeAt(day: string, hour = 9): void {
 }
 
 const MONDAY = '2026-03-02';
+
+/** The ids block 7D adds (D171): every entry after the 49 that were there before it. */
+const BLOCK_7D_IDS = new Set([
+  'ex_chest_press_machine', 'ex_pec_deck', 'ex_cable_chest_press', 'ex_high_to_low_cable_fly', 'ex_dumbbell_bench_press', 'ex_dumbbell_fly',
+  'ex_incline_bench_press', 'ex_decline_bench_press', 'ex_smith_machine_bench_press', 'ex_seated_row_machine', 'ex_back_extension_machine',
+  'ex_chin_up', 'ex_inverted_row', 'ex_hyperextension', 'ex_one_arm_dumbbell_row', 'ex_t_bar_row', 'ex_dumbbell_shrug', 'ex_barbell_shrug',
+  'ex_shoulder_press_machine', 'ex_lateral_raise_machine', 'ex_cable_reverse_fly', 'ex_pike_push_up', 'ex_dumbbell_shoulder_press',
+  'ex_arnold_press', 'ex_dumbbell_reverse_fly', 'ex_upright_row', 'ex_cable_curl', 'ex_rope_hammer_curl', 'ex_barbell_curl', 'ex_ez_bar_curl',
+  'ex_concentration_curl', 'ex_bar_pushdown', 'ex_triceps_extension_machine', 'ex_seated_dip_machine', 'ex_bench_dip', 'ex_close_grip_push_up',
+  'ex_close_grip_bench_press', 'ex_dumbbell_overhead_extension', 'ex_triceps_kickback', 'ex_hack_squat', 'ex_smith_machine_squat',
+  'ex_bodyweight_squat', 'ex_front_squat', 'ex_goblet_squat', 'ex_bulgarian_split_squat', 'ex_lunge', 'ex_step_up', 'ex_hip_thrust_machine',
+  'ex_seated_leg_curl', 'ex_cable_glute_kickback', 'ex_cable_pull_through', 'ex_glute_bridge', 'ex_nordic_hamstring_curl',
+  'ex_dumbbell_romanian_deadlift', 'ex_good_morning', 'ex_kettlebell_swing', 'ex_leg_press_calf_raise', 'ex_donkey_calf_raise',
+  'ex_smith_machine_calf_raise', 'ex_bodyweight_calf_raise', 'ex_single_leg_calf_raise', 'ex_dumbbell_calf_raise',
+  'ex_seated_dumbbell_calf_raise', 'ex_barbell_calf_raise', 'ex_ab_crunch_machine', 'ex_rotary_torso_machine', 'ex_cable_woodchop',
+  'ex_pallof_press', 'ex_crunch', 'ex_reverse_crunch', 'ex_bicycle_crunch', 'ex_sit_up', 'ex_lying_leg_raise', 'ex_russian_twist',
+  'ex_ab_wheel_rollout', 'ex_dumbbell_side_bend', 'ex_cable_wrist_curl', 'ex_cable_reverse_curl', 'ex_dumbbell_reverse_wrist_curl',
+  'ex_barbell_wrist_curl', 'ex_barbell_reverse_wrist_curl', 'ex_barbell_reverse_curl', 'ex_wrist_roller', 'ex_ez_bar_reverse_curl',
+]);
 const kg = (value: number) => Math.round(value * 1000);
 
 /**
@@ -101,6 +120,32 @@ describe('the exercise catalogue', () => {
     await exercisesRepository.put({ ...original, name: 'Flachbankdrücken' });
     await ensureExerciseCatalogue();
     expect((await exercisesRepository.get('ex_bench_press'))?.name).toBe('Flachbankdrücken');
+  });
+
+  it('brings the entries of block 7D to a device that holds the 49 before it, and leaves those 49 as they were', async () => {
+    // A device seeded before block 7D: the 49 entries as that build wrote
+    // them, on its own day, and one of them renamed by its user since.
+    const ids49 = new Set(EXERCISE_CATALOGUE.map((entry) => entry.id).filter((id) => !BLOCK_7D_IDS.has(id)));
+    expect(ids49.size).toBe(49);
+    const before = catalogueRecords('2026-01-05T08:00:00.000Z').filter((record) => ids49.has(record.id));
+    const renamed = { ...before.find((record) => record.id === 'ex_lat_pulldown')!, name: 'Latzug breit', updatedAt: '2026-02-01T08:00:00.000Z' };
+    const stored = before.map((record) => (record.id === renamed.id ? renamed : record));
+    await exercisesRepository.putMany(stored);
+    const bytes = JSON.stringify([...(await exercisesRepository.getAll())].sort((a, b) => a.id.localeCompare(b.id)));
+
+    const after = await ensureExerciseCatalogue();
+
+    expect(after).toHaveLength(EXERCISE_CATALOGUE.length);
+    const all = await exercisesRepository.getAll();
+    for (const id of BLOCK_7D_IDS) expect(all.some((record) => record.id === id), id).toBe(true);
+    // The 49 byte for byte, the renamed one with its user's name.
+    const old = all.filter((record) => ids49.has(record.id)).sort((a, b) => a.id.localeCompare(b.id));
+    expect(JSON.stringify(old)).toBe(bytes);
+    expect(old.find((record) => record.id === 'ex_lat_pulldown')?.name).toBe('Latzug breit');
+    // A new entry is written as the catalogue has it, on the day it arrives.
+    const chestPress = all.find((record) => record.id === 'ex_chest_press_machine')!;
+    expect(chestPress).toMatchObject({ name: 'Chest Press Machine', muscles: ['chest', 'triceps', 'shoulders'], primaryMuscles: ['chest'], builtIn: true, loadType: 'external' });
+    expect(chestPress.createdAt.slice(0, 10)).toBe(MONDAY);
   });
 
   it('lets the user add one, with the groups they chose', async () => {

@@ -26,15 +26,42 @@
   color: var(--text-primary);
 }
 
-.gym-picker__groups {
+/* The second line: the groups, and the equipment beside them (block 7D). */
+.gym-picker__meta,
+.gym-picker__groups,
+.gym-picker__equipment {
   font-size: var(--type-caption);
   color: var(--text-secondary);
+}
+
+/* Under the search field: what can be searched for. */
+.gym-picker__hint {
+  padding-top: var(--space-2);
+  font-size: var(--type-caption);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+/* One heading per muscle group, without a query (block 7D). */
+.gym-picker__group {
+  padding: var(--space-5) 0 var(--space-1);
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+.gym-picker__section:first-child .gym-picker__group {
+  padding-top: var(--space-2);
 }
 
 .gym-picker__empty {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
   padding: var(--space-4) 0;
+}
+
+.gym-picker__empty p + p {
+  padding-top: var(--space-1);
 }
 
 .gym-picker__muscles {

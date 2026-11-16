@@ -8,7 +8,8 @@ import {
 import { Button, SHEET_INITIAL_FOCUS, Sheet } from '../../components';
 import { MUSCLE_LABEL_KEYS } from '../../components/BodyRenderer';
 import { catalogueEntry } from '../../core/gym/catalogue';
-import { useT } from '../../i18n/I18nProvider';
+import { foldText, searchExercises, searchableExercise, type SearchableExercise } from '../../core/gym/search';
+import { useI18n, useT } from '../../i18n/I18nProvider';
 import type { NewExerciseInput } from '../../storage/services/gymService';
 import { useExerciseNamer } from './exerciseNames';
 import './gym.css';
@@ -16,11 +17,28 @@ import './gym.css';
 /**
  * Choosing what to do next.
  *
- * A search box and a flat list, because during a workout the user already
- * knows the name and is holding a phone in one hand. The muscle groups are
- * shown on every row rather than used as a filter: they are what the exercise
+ * A search box and a list, because during a workout the user already knows
+ * the name and is holding a phone in one hand. The muscle groups are shown
+ * on every row rather than used as a filter: they are what the exercise
  * *counts for*, and seeing them is how a user notices their session is all
  * chest.
+ *
+ * **Since block 7D** (D171) the catalogue holds well over a hundred
+ * exercises and the search finds them by much more than their name — the
+ * muscle group with its everyday words, the movement, the equipment, body
+ * weight (`core/gym/search.ts`). Two consequences on this screen:
+ *
+ * - **Without a query the list stands under one heading per muscle
+ *   group**, in the order the app names the groups everywhere, each
+ *   exercise once, under its first primary group; with a query it is one
+ *   list, the best answers first.
+ * - **Why a row was found is in sight**: its second line names its groups
+ *   and its equipment — unless the name already says the equipment — so a
+ *   search for "Maschine" never shows a row without a reason.
+ *
+ * No query finds nothing silently: the empty state says what was searched
+ * and makes the one action there is, "Eigene Übung", the primary one; the
+ * form it opens starts with what was typed as the name.
  *
  * A custom exercise names its own muscle groups, which of them are primary,
  * and how it is loaded. Nothing is inferred from the name — a wrong guess
@@ -46,6 +64,7 @@ export function ExercisePicker({
   onCreate(input: NewExerciseInput): void;
 }) {
   const t = useT();
+  const { language } = useI18n();
   const namer = useExerciseNamer();
   const [query, setQuery] = useState('');
   const [creating, setCreating] = useState(false);
@@ -67,29 +86,67 @@ export function ExercisePicker({
    * Every exercise the user may pick, under the name they see it by. A
    * deprecated catalogue entry is not offered — it stays resolvable for
    * what already names it, and that is all (WP2 A2). The search matches the
-   * shown name and the stored one, so "bench" still finds Bankdrücken.
+   * shown name and the stored one as before, so "bench" still finds
+   * Bankdrücken, and since block 7D everything else an exercise is.
    */
   const offered = useMemo(
     () =>
       exercises
         .filter((exercise) => !catalogueEntry(exercise.id)?.deprecated)
         .map((exercise) => ({
+          ...searchableExercise(exercise, namer.name(exercise.id, exercise.name), language),
           exercise,
-          label: namer.name(exercise.id, exercise.name),
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [exercises, namer],
+        })),
+    [exercises, namer, language],
   );
 
-  const matches = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return offered;
-    return offered.filter(
-      (entry) =>
-        entry.label.toLowerCase().includes(needle) ||
-        entry.exercise.name.toLowerCase().includes(needle),
+  const searching = query.trim().length > 0;
+  const matches = useMemo(() => searchExercises(offered, query, language), [offered, query, language]);
+
+  /** Without a query: one heading per group, each exercise under its first primary group. */
+  const sections = useMemo(() => {
+    if (searching) return [];
+    return MUSCLE_GROUPS.map((group) => ({
+      group,
+      entries: matches.filter((entry) => MUSCLE_GROUPS.find((candidate) => entry.primary.includes(candidate)) === group),
+    })).filter((section) => section.entries.length > 0);
+  }, [matches, searching]);
+
+  /** The equipment beside the groups, where the name does not already say it. */
+  const equipmentOf = (entry: SearchableExercise): string | null => {
+    const label = entry.equipment
+      ? t(`gym.equipment.${entry.equipment}` as const)
+      : entry.bodyweight
+        ? t('gym.equipment.bodyweight')
+        : null;
+    if (label === null) return null;
+    return foldText(entry.name).includes(foldText(label)) ? null : label;
+  };
+
+  const row = (entry: (typeof offered)[number]) => {
+    const equipment = equipmentOf(entry);
+    return (
+      <button
+        key={entry.id}
+        type="button"
+        className="gym-picker__row"
+        onClick={() => {
+          onPick(entry.exercise);
+          reset();
+        }}
+      >
+        <span className="gym-picker__name">{entry.name}</span>
+        <span className="gym-picker__meta">
+          <span className="gym-picker__groups">
+            {namer.describe(entry.id, entry.exercise.muscles.map((muscle) => t(MUSCLE_LABEL_KEYS[muscle])))}
+          </span>
+          {equipment ? <span className="gym-picker__equipment">{` · ${equipment}`}</span> : null}
+        </span>
+      </button>
     );
-  }, [offered, query]);
+  };
+
+  const nothing = searching && matches.length === 0;
 
   const reset = () => {
     setQuery('');
@@ -152,7 +209,16 @@ export function ExercisePicker({
             {t('common.add')}
           </Button>
         ) : (
-          <Button variant="secondary" block onClick={() => setCreating(true)}>
+          <Button
+            // Where the search found nothing, this is the one thing to do.
+            variant={nothing ? 'primary' : 'secondary'}
+            block
+            onClick={() => {
+              // What was searched for and not found is the likely name.
+              if (nothing && name.trim() === '') setName(query.trim());
+              setCreating(true);
+            }}
+          >
             {t('gym.picker.custom')}
           </Button>
         )
@@ -245,31 +311,33 @@ export function ExercisePicker({
               onChange={(event) => setQuery(event.target.value)}
               autoComplete="off"
               enterKeyHint="search"
+              aria-describedby="exercise-search-hint"
             />
+            {/* What can be searched for, in everyday words. */}
+            <p id="exercise-search-hint" className="gym-picker__hint">
+              {t('gym.picker.searchHint')}
+            </p>
           </div>
 
-          <div className="gym-picker__list">
-            {matches.length === 0 ? (
-              <p className="gym-picker__empty">{t('gym.picker.empty')}</p>
-            ) : (
-              matches.map(({ exercise, label }) => (
-                <button
-                  key={exercise.id}
-                  type="button"
-                  className="gym-picker__row"
-                  onClick={() => {
-                    onPick(exercise);
-                    reset();
-                  }}
-                >
-                  <span className="gym-picker__name">{label}</span>
-                  <span className="gym-picker__groups">
-                    {namer.describe(exercise.id, exercise.muscles.map((muscle) => t(MUSCLE_LABEL_KEYS[muscle])))}
-                  </span>
-                </button>
-              ))
-            )}
-          </div>
+          {nothing ? (
+            <div className="gym-picker__empty" role="status">
+              <p>{t('gym.picker.empty', { query: query.trim() })}</p>
+              <p>{t('gym.picker.emptyHint')}</p>
+            </div>
+          ) : searching ? (
+            <div className="gym-picker__list">{matches.map(row)}</div>
+          ) : (
+            <div className="gym-picker__list" aria-label={t('gym.picker.groups')}>
+              {sections.map((section) => (
+                <section key={section.group} className="gym-picker__section" aria-labelledby={`gym-picker-${section.group}`}>
+                  <h3 id={`gym-picker-${section.group}`} className="gym-picker__group">
+                    {t(MUSCLE_LABEL_KEYS[section.group])}
+                  </h3>
+                  {section.entries.map(row)}
+                </section>
+              ))}
+            </div>
+          )}
         </>
       )}
     </Sheet>
