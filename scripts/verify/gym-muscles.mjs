@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles, fingerTurn } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles, fingerTurn, openGroup, openRow, openGroupSheet, closeGroupSheet, sheetGone, bodyAtRest, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
 
 /**
  * The Muskelgruppen module in the real Gym workspace.
@@ -49,12 +49,24 @@ const INSTRUMENT = () => {
   };
   const raf = w.requestAnimationFrame.bind(w);
   w.requestAnimationFrame = (cb) => raf((t) => { w.__probe.raf += 1; cb(t); });
-  // What is drawn: every draw call to a canvas that is in the document.
+  // What is drawn: every draw call to a canvas that is in the document —
+  // and every frame: the draw calls of one frame are made in one task, so
+  // the first of a task begins a frame. (A frame is not a fixed number of
+  // draw calls: a region outside the window a zoom shows is not drawn.)
   w.__probe.draws = 0;
+  w.__probe.frames = 0;
+  let inFrame = false;
   if (w.WebGL2RenderingContext) {
     const draw = WebGL2RenderingContext.prototype.drawElements;
     WebGL2RenderingContext.prototype.drawElements = function (...args) {
-      if (this.canvas && this.canvas.isConnected) w.__probe.draws += 1;
+      if (this.canvas && this.canvas.isConnected) {
+        w.__probe.draws += 1;
+        if (!inFrame) {
+          inFrame = true;
+          w.__probe.frames += 1;
+          setTimeout(() => { inFrame = false; }, 0);
+        }
+      }
       return draw.apply(this, args);
     };
   }
@@ -96,8 +108,8 @@ async function showModule(page) {
 }
 
 const rowOf = (page, name) => page.locator('.muscle-row').filter({ hasText: name }).first();
-const selectedRow = (page) =>
-  page.evaluate(() => document.querySelector('.muscle-row__button[aria-pressed="true"] .muscle-row__name')?.textContent ?? null);
+/** The group whose row is marked as open: the one whose sheet stands (block 7C). */
+const selectedRow = (page) => openRow(page);
 const probe = (page) => page.evaluate(() => ({ ...window.__probe }));
 /** Waits for the body to reach an angle, however long the software renderer takes. */
 const waitForAzimuth = async (page, want, timeout = 25000) => {
@@ -242,73 +254,88 @@ const stageEdges = (page) => edgesOf(page, '.body-stage');
   check('no row shows a technical id', !(await page.locator('.muscle-rows').textContent())?.includes('ex_'));
   check('and no row counts its own observations at the user', !/\d+ von \d+ (Beobachtungen|Messungen)/.test(await page.locator('.muscle-rows').textContent() ?? ''));
 
-  /* One selection, both ways. */
-  await rowOf(page, 'Brust').locator('button').click();
-  await page.waitForTimeout(900);
-  check('a row tap selects it', (await selectedRow(page)) === 'Brust');
-  check('and the exercises below follow the selected group', (await page.locator('.section__label').allTextContents()).some((s) => s.includes('Übungen · Brust')));
-  await rowOf(page, 'Rücken').locator('button').click();
-  await showModule(page);
+  /*
+   * One selection, both ways — and since block 7C the selection is the
+   * open sheet (contract §9): a tap on a row or on a muscle opens the
+   * group's sheet, the row is marked while it stands, and closing it
+   * leaves nothing chosen. Until then a row was a toggle that filtered a
+   * list of exercises under the ten rows, and a tap on the body selected
+   * without opening anything; the checks below held those rules and now
+   * hold these.
+   */
+  await openGroupSheet(page, 'Brust');
+  check('a row tap opens the group\'s sheet and marks the row', (await openGroup(page)) === 'Brust' && (await selectedRow(page)) === 'Brust', `${await openGroup(page)} / ${await selectedRow(page)}`);
+  check('and the group\'s exercises stand in its sheet, not under the rows',
+    (await sheetExercises(page)).some((entry) => entry.name === 'Bankdrücken') && (await page.locator('.gym-progress__row').count()) === 0);
+  await closeGroupSheet(page);
+  await openGroupSheet(page, 'Rücken');
   const facing = await waitForAzimuth(page, 180);
-  check('selecting a group that faces away turns the body to it', Math.abs(facing - 180) <= 3, String(facing));
-  await rowOf(page, 'Rücken').locator('button').click();
-  await page.waitForTimeout(700);
-  check('tapping the selected row again clears it, as the list always did', (await selectedRow(page)) === null);
+  check('opening a group that faces away turns the body to it', Math.abs(facing - 180) <= 3, String(facing));
+  await closeGroupSheet(page);
+  check('closing the sheet leaves nothing chosen, and the angle where it was',
+    (await selectedRow(page)) === null && (await openGroup(page)) === null && Math.abs(Number(await page.locator('.body-viewer').getAttribute('data-azimuth')) - 180) <= 3,
+    `${await selectedRow(page)} · ${await page.locator('.body-viewer').getAttribute('data-azimuth')}°`);
 
-  const box = await page.locator('.body-viewer canvas').boundingBox();
+  await showModule(page);
   await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
   await settle(page);
-  // Find a point that hits a region, then tap it twice.
+  const box = await page.locator('.body-viewer canvas').boundingBox();
+  // Find a point that hits a region: its sheet opens.
   let hit = null, spot = null;
   for (const [fx, fy] of [[0.5, 0.3], [0.5, 0.42], [0.5, 0.55], [0.45, 0.62], [0.5, 0.68]]) {
     await page.mouse.click(box.x + box.width * fx, box.y + box.height * fy);
     await page.waitForTimeout(500);
-    const now = await selectedRow(page);
+    const now = await openGroup(page);
     if (now) { hit = now; spot = [fx, fy]; break; }
   }
-  check('a tap on the body selects the group it landed on, and its row', hit !== null, String(hit));
+  check('a tap on the body opens the sheet of the group it landed on, and marks its row', hit !== null && (await selectedRow(page)) === hit, `${hit} / ${await selectedRow(page)}`);
   if (spot) {
-    await page.mouse.click(box.x + box.width * spot[0], box.y + box.height * spot[1]);
-    await page.waitForTimeout(700);
-    check('a second tap on the same region keeps it selected rather than clearing it', (await selectedRow(page)) === hit, `${hit} → ${await selectedRow(page)}`);
+    // A tap on the body above the sheet closes the sheet — and only that:
+    // it chooses no other group (contract §9).
+    await bodyAtRest(page);
+    const sheetTop = await page.locator('.sheet--detents').evaluate((el) => el.getBoundingClientRect().top);
+    const stage = await page.locator('.body-stage').boundingBox();
+    await page.mouse.click(stage.x + stage.width / 2, (stage.y + sheetTop) / 2);
+    await sheetGone(page);
+    await page.waitForTimeout(500);
+    check('a tap on the body above the sheet closes it and chooses nothing', (await openGroup(page)) === null && (await selectedRow(page)) === null, `${await openGroup(page)} / ${await selectedRow(page)}`);
+    await bodyAtRest(page, { held: false });
   }
   // A tap never turns the body (block 7B, contract §8). The trapezius is
   // seen from the front and belongs to the back, whose row would turn the
-  // body round: a tap on it selects the back and leaves the angle alone.
+  // body round: a tap on it opens the back's sheet and leaves the angle alone.
   {
+    await showModule(page);
     await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
     await settle(page);
+    const stageBox = await page.locator('.body-viewer canvas').boundingBox();
     let onBack = null;
     for (const [fx, fy] of [[0.44, 0.235], [0.56, 0.235], [0.43, 0.245], [0.57, 0.245], [0.45, 0.225], [0.55, 0.225], [0.42, 0.25], [0.58, 0.25]]) {
       await page.waitForTimeout(400);
-      await page.mouse.click(box.x + box.width * fx, box.y + box.height * fy);
+      await page.mouse.click(stageBox.x + stageBox.width * fx, stageBox.y + stageBox.height * fy);
       await page.waitForTimeout(500);
-      if ((await selectedRow(page)) === 'Rücken') { onBack = [fx, fy]; break; }
+      const now = await openGroup(page);
+      if (now === 'Rücken') { onBack = [fx, fy]; break; }
+      // Another group's sheet: closed, and the body is whole again before the next tap.
+      if (now !== null) { await closeGroupSheet(page); await showModule(page); }
     }
-    check('from the front a tap on the trapezius selects the back', onBack !== null, String(onBack));
-    await settle(page);
+    check('from the front a tap on the trapezius opens the back\'s sheet', onBack !== null, String(onBack));
+    await bodyAtRest(page);
     check('and the body does not turn for it: the angle stays 0', (await page.locator('.body-viewer').getAttribute('data-azimuth')) === '0', await page.locator('.body-viewer').getAttribute('data-azimuth'));
-    // The same group chosen in the list does turn the body.
-    await rowOf(page, 'Rücken').locator('button').click();
-    await page.waitForTimeout(400);
-    await rowOf(page, 'Rücken').locator('button').click();
-    await showModule(page);
-    check('the same group chosen in its row turns the body to it', Math.abs((await waitForAzimuth(page, 180)) - 180) <= 3);
-    await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
-    await settle(page);
-    await page.mouse.click(box.x + box.width * spot[0], box.y + box.height * spot[1]);
-    await page.waitForTimeout(600);
+    if (OUT) await page.screenshot({ path: `${OUT}/muscles-393-measured-selected.png` });
+    if ((await openGroup(page)) !== null) await closeGroupSheet(page);
+    // The same group opened from its row does turn the body.
+    await openGroupSheet(page, 'Rücken');
+    check('the same group opened from its row turns the body to it', Math.abs((await waitForAzimuth(page, 180)) - 180) <= 3);
+    await closeGroupSheet(page);
   }
-  if (OUT) {
-    await showModule(page);
-    await page.screenshot({ path: `${OUT}/muscles-393-measured-selected.png` });
-  }
-  await rowOf(page, 'Schultern').locator('button').click();
+  await openGroupSheet(page, 'Schultern');
+  check('an untrained group opens its sheet too, and says so', (await selectedRow(page)) === 'Schultern' && /Noch nicht trainiert/.test(await page.locator('.sheet--detents').innerText()));
+  if (OUT) await page.screenshot({ path: `${OUT}/muscles-393-nodata-selected.png` });
+  await closeGroupSheet(page);
+  await showModule(page);
+  await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
   await settle(page);
-  check('selecting an untrained group still reads as selected in the list', (await selectedRow(page)) === 'Schultern');
-  if (OUT) { await showModule(page); await page.screenshot({ path: `${OUT}/muscles-393-nodata-selected.png` }); }
-  await rowOf(page, 'Schultern').locator('button').click();
-  await page.waitForTimeout(600);
   if (OUT) { await showModule(page); await page.screenshot({ path: `${OUT}/muscles-393.png` }); }
 
   /* Laufen moved in — on the Gym hub, beneath the board; Verlauf keeps its row and loses the board. */
@@ -361,33 +388,35 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   check(`${width}: the charts are actually drawn`, drawn >= 6, String(drawn));
   const tall = await page.locator('.muscle-row__button').evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
   check(`${width}: every row clears 44px`, tall.every((h) => h >= 44), tall.join(','));
-  // Every row selectable, including the one the body cannot offer at 320.
+  // Every group's sheet can be opened from its row, including the group
+  // the body cannot offer at 320. (Until block 7C: "can be selected from
+  // their row" — a row toggled its selection, and was tapped again to clear it.)
   const misses = [];
   for (const name of ['Brust', 'Rücken', 'Schultern', 'Bizeps', 'Trizeps', 'Rumpf', 'Quadrizeps', 'Beinbeuger und Gesäss', 'Waden', 'Unterarme']) {
-    await rowOf(page, name).locator('button').click();
-    await page.waitForTimeout(450);
-    if ((await selectedRow(page)) !== name) misses.push(name);
-    await rowOf(page, name).locator('button').click();
-    await page.waitForTimeout(250);
+    await openGroupSheet(page, name, { wait: 150 });
+    if ((await selectedRow(page)) !== name || (await openGroup(page)) !== name) misses.push(name);
+    await closeGroupSheet(page, { wait: 100 });
   }
-  check(`${width}: all ten groups can be selected from their row`, misses.length === 0, misses.join(','));
-  // Start from a known state: nothing selected, body facing front.
-  if ((await selectedRow(page)) !== null) {
-    await rowOf(page, await selectedRow(page)).locator('button').click();
-    await page.waitForTimeout(400);
-  }
+  check(`${width}: every group's sheet opens from its row`, misses.length === 0, misses.join(','));
+  // Start from a known state: nothing open, body facing front.
   await showModule(page);
   await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
   await waitForAzimuth(page, 0);
-  await rowOf(page, 'Trizeps').locator('button').click();
-  await page.waitForTimeout(400);
-  // The row list is long, so selecting from its foot can scroll the body out
-  // of view — where it deliberately stops rendering. Bring it back, then look.
-  await showModule(page);
+  // The row list is long, and a row at its foot is tapped with the body
+  // scrolled out of view — where it deliberately stops rendering. The page
+  // brings the body back under the header by itself.
+  await openGroupSheet(page, 'Trizeps');
   const reached = await waitForAzimuth(page, 180);
-  check(`${width}: selecting the triceps row turns the body to the back`, Math.abs(reached - 180) <= 3, String(reached));
-  await rowOf(page, 'Trizeps').locator('button').click();
-  await page.waitForTimeout(400);
+  check(`${width}: opening the triceps from its row turns the body to the back`, Math.abs(reached - 180) <= 3, String(reached));
+  const strip = await page.evaluate(() => {
+    const stage = document.querySelector('.body-stage').getBoundingClientRect();
+    const sheet = document.querySelector('.sheet--detents').getBoundingClientRect();
+    const header = document.querySelector('.gym-muscles__header').getBoundingClientRect();
+    return { stageTop: Math.round(stage.top), headerBottom: Math.round(header.bottom), sheetTop: Math.round(sheet.top), window: Math.round(sheet.top - Math.max(stage.top, header.bottom)) };
+  });
+  check(`${width}: the page brought the stage under the header, and a strip of the body is free above the sheet`,
+    Math.abs(strip.stageTop - strip.headerBottom) <= 12 && strip.window >= 120, JSON.stringify(strip));
+  await closeGroupSheet(page);
   if (OUT) {
     await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
     await waitForAzimuth(page, 0);
@@ -412,11 +441,11 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   check('without WebGL the flat figure takes the body\'s place', (await page.locator('.muscle-module__figure svg').count()) > 0 && (await page.locator('canvas').count()) === 0);
   check('the rows and their charts are still there', (await page.locator('.muscle-row').count()) === 10 && (await page.locator('.muscle-row__chart svg polyline').count()) > 0);
   check('and the flat figure brings no second list with it', (await page.locator('.body-renderer__legend').count()) === 0);
-  await rowOf(page, 'Brust').locator('button').click();
-  await page.waitForTimeout(600);
+  await openGroupSheet(page, 'Brust');
   check('the fallback shares the one selection', (await selectedRow(page)) === 'Brust' && (await page.locator('.body-renderer__muscle--selected').count()) > 0);
-  check('and the exercises still follow it', (await page.locator('.section__label').allTextContents()).some((s) => s.includes('Übungen · Brust')));
-  if (OUT) { await showModule(page); await page.screenshot({ path: `${OUT}/muscles-393-fallback.png` }); }
+  check('and the group\'s sheet stands over it with the group\'s exercises', (await openGroup(page)) === 'Brust' && (await sheetExercises(page)).length > 0);
+  if (OUT) await page.screenshot({ path: `${OUT}/muscles-393-fallback.png` });
+  await closeGroupSheet(page);
   await ctx.close();
 }
 {
@@ -477,9 +506,8 @@ for (const [width, height] of [[430, 932], [320, 693]]) {
   await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Hinten' }).click();
   await page.waitForTimeout(200);
   check('reduced motion: a shortcut settles at once', (await page.locator('.body-viewer').getAttribute('data-azimuth')) === '180', await page.locator('.body-viewer').getAttribute('data-azimuth'));
-  await rowOf(page, 'Brust').locator('button').click();
-  await page.waitForTimeout(300);
-  check('reduced motion: selection still works from the rows', (await selectedRow(page)) === 'Brust');
+  await openGroupSheet(page, 'Brust', { wait: 200 });
+  check('reduced motion: a row still opens its group\'s sheet', (await selectedRow(page)) === 'Brust' && (await openGroup(page)) === 'Brust');
   await ctx.close();
 }
 
@@ -753,6 +781,148 @@ for (const [width, height] of [[320, 693], [360, 780], [393, 852], [430, 932]]) 
   await ctx.close();
 }
 
+/* ── The muscle sheet: the body stands under it (block 7C, contract §9, §14) ── */
+{
+  const { ctx, page } = await open(393);
+  await toGym(page);
+  await settle(page);
+  const heldNow = async () => (await page.locator('.body-viewer').getAttribute('data-held')) !== null;
+  const view = () => page.locator('.body-viewer').evaluate((el) => ({ zoom: Number(el.dataset.zoom), azimuth: Number(el.dataset.azimuth), focus: el.dataset.focus ?? null }));
+  // What one frame of the body costs in draw calls: the count the checks
+  // below read "exactly one frame" against.
+  await page.evaluate(() => { window.__probe.draws = 0; });
+  await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Seite' }).click();
+  await settle(page);
+  await page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: 'Vorne' }).click();
+  await settle(page);
+  const before = await view();
+
+  // Opened by a tap on the body: the camera brings the group into the
+  // strip above the sheet and then stands; from that moment nothing is drawn.
+  const box = await page.locator('.body-viewer canvas').boundingBox();
+  await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.33);
+  await page.locator('.sheet--detents').waitFor({ timeout: 5000 });
+  const group = await openGroup(page);
+  // While the camera travels nothing blurs over the body: the sheet is a
+  // solid surface and its scrim neither dims nor blurs (D146).
+  const surfaces = await page.evaluate(() => {
+    const css = (el) => { const c = getComputedStyle(el); return { blur: c.backdropFilter || c.webkitBackdropFilter || 'none', background: c.backgroundColor, image: c.backgroundImage }; };
+    return { scrim: css(document.querySelector('.sheet-scrim--clear')), sheet: css(document.querySelector('.sheet--detents')), held: document.querySelector('.body-viewer').hasAttribute('data-held') };
+  });
+  check('while the sheet rises nothing blurs or dims over the body: a clear scrim and a solid sheet',
+    surfaces.scrim.blur === 'none' && surfaces.sheet.blur === 'none' && /rgba\(0, 0, 0, 0\)|transparent/.test(surfaces.scrim.background) && surfaces.scrim.image === 'none' && !/rgba\(.*, 0(\.\d+)?\)$/.test(surfaces.sheet.background),
+    JSON.stringify(surfaces));
+  await bodyAtRest(page);
+  const focused = await view();
+  check('the camera brings the group into the strip above its sheet, and the angle stays where the tap found it',
+    group !== null && focused.focus !== null && focused.zoom > 1.05 && focused.azimuth === before.azimuth, JSON.stringify({ group, before, focused }));
+  check('once the camera rests the body is held', await heldNow());
+  check('the stage\'s own buttons are out of sight under the sheet',
+    await page.evaluate(() => [...document.querySelectorAll('.body-viewer__view, .body-viewer__reset')].every((el) => getComputedStyle(el).visibility === 'hidden')));
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; });
+  await page.waitForTimeout(1500);
+  let under = await probe(page);
+  check('under the open muscle sheet no frame arises and nothing is drawn', under.raf === 0 && under.draws === 0, `${under.raf} frames, ${under.draws} draw calls`);
+
+  // The sheet's other height, a scroll in it and a drag of it move nothing
+  // of the body either.
+  await page.locator('.sheet__grabber').click();
+  await page.waitForTimeout(700);
+  await page.locator('.sheet--detents .sheet__body').evaluate((el) => { el.scrollTop = 200; });
+  await page.waitForTimeout(500);
+  under = await probe(page);
+  check('nor when the sheet changes its height or its content scrolls', under.draws === 0, `${under.draws} draw calls`);
+  check('and the body keeps its place in the strip', JSON.stringify(await view()) === JSON.stringify(focused), JSON.stringify(await view()));
+
+  // The range, changed in the sheet: the body has something new to show
+  // and draws exactly one frame for it.
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; window.__probe.frames = 0; });
+  await page.locator('.sheet--detents .segmented__option', { hasText: '90' }).click();
+  await page.waitForFunction(() => document.querySelector('.sheet--detents .muscle-sheet__caption, .sheet--detents .muscle-sheet__sentence')?.textContent.includes('90'), null, { timeout: 8000 }).catch(() => undefined);
+  await page.waitForTimeout(1200);
+  under = await probe(page);
+  check('a change of the range under the open sheet draws exactly one frame', under.frames === 1 && under.draws > 0 && under.draws <= 12, `${under.frames} frames, ${under.draws} draw calls`);
+  check('and the range is the screen\'s own: changed in the sheet, changed everywhere',
+    (await page.locator('.progress__ranges .segmented__option[aria-pressed="true"]').textContent())?.trim() === '90 Tage');
+  check('the body is still held, and where it stood', (await heldNow()) && JSON.stringify(await view()) === JSON.stringify(focused));
+  await page.evaluate(() => { window.__probe.raf = 0; window.__probe.draws = 0; window.__probe.frames = 0; });
+  await page.waitForTimeout(1000);
+  under = await probe(page);
+  check('and then stands again: no further frame', under.frames === 0 && under.draws === 0, `${under.frames} frames, ${under.draws} draw calls`);
+  await page.locator('.sheet--detents .segmented__option', { hasText: '30' }).click();
+  await page.waitForTimeout(1200);
+
+  // An exercise on top, and back: the body is not taken down and draws nothing.
+  await page.evaluate(() => { window.__probe.contexts = window.__probe.contexts; window.__probe.draws = 0; });
+  const contexts = (await probe(page)).contexts;
+  const first = (await sheetExercises(page))[0];
+  if (first) {
+    await openSheetExercise(page, first.name);
+    await closeExercise(page);
+    under = await probe(page);
+    check('an exercise opened from the sheet and closed again takes no body down and draws no frame',
+      under.contexts === contexts && under.draws === 0 && (await heldNow()) && (await openGroup(page)) === group, `${under.contexts} contexts, ${under.draws} draw calls`);
+  }
+
+  // Closing: the hold ends first, then the camera travels back to the
+  // whole body at zoom 1.0 — and the angle stays.
+  await closeGroupSheet(page);
+  const after = await view();
+  check('closing the sheet lifts the hold and the camera returns to the whole body at zoom 1.0, the angle unchanged',
+    !(await heldNow()) && after.zoom === 1 && after.azimuth === before.azimuth && after.focus === null, JSON.stringify(after));
+  check('and the stage\'s buttons are back',
+    await page.evaluate(() => [...document.querySelectorAll('.body-viewer__view, .body-viewer__reset')].every((el) => getComputedStyle(el).visibility === 'visible')));
+
+  // A zoom the fingers left is replaced by the travel to the group, and
+  // after the sheet the stage is at 1.0 again.
+  const client = await ctx.newCDPSession(page);
+  const canvas = await page.locator('.body-viewer canvas').boundingBox();
+  const cx = canvas.x + canvas.width / 2;
+  const cy = canvas.y + canvas.height * 0.4;
+  const touch = (type, spread) => client.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: cx - spread, y: cy, id: 1 }, { x: cx + spread, y: cy, id: 2 }] });
+  await touch('touchStart', 30);
+  for (let i = 1; i <= 8; i += 1) { await touch('touchMove', 30 + i * 6); await page.waitForTimeout(16); }
+  await touch('touchEnd', 0);
+  await settle(page);
+  const zoomed = await view();
+  check('the body can be zoomed by two fingers before a sheet opens', zoomed.zoom > 1.2, JSON.stringify(zoomed));
+  await openGroupSheet(page, 'Brust');
+  const refocused = await view();
+  await closeGroupSheet(page);
+  check('the travel to the group replaces that zoom, and after the sheet the stage is at 1.0',
+    Math.abs(refocused.zoom - zoomed.zoom) > 0.05 && (await view()).zoom === 1, `${zoomed.zoom} → ${refocused.zoom} → ${(await view()).zoom}`);
+
+  // A touch on a body at rest draws nothing (D184): a finger that lands and
+  // lifts where there is no muscle changes nothing.
+  await showModule(page);
+  await settle(page);
+  await page.evaluate(() => { window.__probe.draws = 0; });
+  const empty = await page.locator('.body-viewer canvas').boundingBox();
+  await page.mouse.click(empty.x + 14, empty.y + empty.height * 0.55);
+  await page.waitForTimeout(700);
+  under = await probe(page);
+  check('a tap beside the body, which changes nothing, draws no frame', under.draws === 0 && (await openGroup(page)) === null, `${under.draws} draw calls`);
+  await ctx.close();
+}
+
+/* ── The muscle sheet under reduced motion: the camera jumps ───────────── */
+{
+  const { ctx, page } = await open(393, { reducedMotion: 'reduce' });
+  await toGym(page);
+  await settle(page);
+  await page.evaluate(() => { window.__probe.draws = 0; window.__probe.frames = 0; });
+  await openGroupSheet(page, 'Rücken', { wait: 200 });
+  const there = await page.locator('.body-viewer').evaluate((el) => ({ zoom: Number(el.dataset.zoom), azimuth: Number(el.dataset.azimuth), held: el.hasAttribute('data-held') }));
+  const frames = (await probe(page)).frames;
+  check('under reduced motion the camera jumps to the group: turned, in the strip and held within a few frames',
+    there.held && there.zoom > 1.05 && Math.abs(there.azimuth - 180) <= 3 && frames <= 6, `${JSON.stringify(there)} in ${frames} frames`);
+  // Reduced motion leaves a transition no time: a thousandth of a millisecond at the most.
+  const travel = await page.locator('.sheet--detents').evaluate((el) => getComputedStyle(el).transitionDuration);
+  check('and the sheet appears and changes its height without travel', Number.parseFloat(travel) < 0.001, travel);
+  await closeGroupSheet(page);
+  await ctx.close();
+}
+
 /* ── A lost graphics context (block 7B) ────────────────────────────────── */
 {
   const { ctx, page } = await open(393);
@@ -774,9 +944,8 @@ for (const [width, height] of [[320, 693], [360, 780], [393, 852], [430, 932]]) 
   check('when the context does not come back, a new canvas shows the body again', (await stageState()) === 'shown' && (await page.locator('canvas').count()) === 1 && (await page.locator('.body-stage__still').count()) === 0, `${await stageState()} ${JSON.stringify(p)}`);
   const edges = await stageEdges(page);
   check('and the body is really drawn', edges.bottom - edges.top > 300, JSON.stringify(edges));
-  await rowOf(page, 'Brust').locator('button').click();
-  await page.waitForTimeout(500);
-  check('the selection, the rows and the views still work', (await selectedRow(page)) === 'Brust' && (await page.locator('.body-viewer__view').count()) === 3);
+  await openGroupSheet(page, 'Brust');
+  check('the selection, the rows and the views still work', (await selectedRow(page)) === 'Brust' && (await openGroup(page)) === 'Brust' && (await page.locator('.body-viewer__view').count()) === 3);
   await ctx.close();
 }
 {
@@ -802,8 +971,7 @@ for (const [width, height] of [[320, 693], [360, 780], [393, 852], [430, 932]]) 
   await page.waitForFunction(() => document.querySelector('.muscle-module__figure svg') !== null, null, { timeout: 30000 }).catch(() => undefined);
   check('where no new context can be made, the flat figure stands in', (await page.locator('.muscle-module__figure svg').count()) > 0 && (await page.locator('canvas').count()) === 0);
   check('with the rows and the strip beside it', (await page.locator('.muscle-row').count()) === 10 && (await page.locator('.muscle-strip').count()) === 1);
-  await rowOf(page, 'Brust').locator('button').click();
-  await page.waitForTimeout(500);
+  await openGroupSheet(page, 'Brust');
   check('and it shares the one selection', (await selectedRow(page)) === 'Brust' && (await page.locator('.body-renderer__muscle--selected').count()) > 0);
   if (OUT) await page.screenshot({ path: `${OUT}/stage-393-flat.png` });
   await ctx.close();

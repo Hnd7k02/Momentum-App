@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, onboard, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, summary, openExerciseAnywhere, closeExercise, closeGroupSheet } from './lib.mjs';
 
 /**
  * WP3, Stage 5b — the pictures of the exercise detail's line (contract §6;
@@ -84,16 +84,14 @@ for (const width of WIDTHS) {
   await page.waitForTimeout(1500);
 
   for (const series of SERIES) {
-    const row = page.locator('.gym-progress__row', { has: page.locator('.gym-progress__rowName', { hasText: new RegExp(`^${series.name}$`) }) }).first();
-    await row.scrollIntoViewIfNeeded();
-    await row.click();
-    await page.locator('.gym-detail').waitFor();
-    await page.waitForTimeout(900);
-    const chart = page.locator('.gym-detail__chart');
-    const card = page.locator('.card', { has: chart }).first();
+    // Since block 7C an exercise is opened from the sheet of its group; the
+    // sheet stays in the document under the detail, with a chart of its own.
+    await openExerciseAnywhere(page, series.name);
+    const chart = page.locator('.gym-detail .gym-detail__chart');
+    const card = page.locator('.gym-detail .card', { has: chart }).first();
     const kind = await page.evaluate(() => ({
-      bars: document.querySelectorAll('.gym-detail__bar').length,
-      line: document.querySelectorAll('.exercise-line__line').length,
+      bars: document.querySelectorAll('.gym-detail .gym-detail__bar').length,
+      line: document.querySelectorAll('.gym-detail .exercise-line__line').length,
     }));
     check(`${width}: ${series.name} is drawn as a line`, kind.line === 1 && kind.bars === 0, JSON.stringify(kind));
     const path = `${OUT}/chart-${width}-${series.slug}.png`;
@@ -101,8 +99,8 @@ for (const width of WIDTHS) {
     drawn[`${width}-${series.slug}`] = path;
     // The whole screen once per width, for the first series.
     if (series === SERIES[0]) await page.screenshot({ path: `${OUT}/uebungsdetail-linie-${width}-screen.png`, fullPage: false });
-    await page.locator('.gym-detail .gym-session__back').click();
-    await page.waitForTimeout(700);
+    await closeExercise(page);
+    await closeGroupSheet(page);
   }
   check(`${width}: no page error`, errors.length === 0, errors.slice(0, 2).join(' | '));
   await ctx.close();

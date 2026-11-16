@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, summary, openGymHub } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, seedMuscles, seedTraining, summary, openGymHub, openGroupSheet, closeGroupSheet, sheetExercises } from './lib.mjs';
 
 /**
  * WP3, B2 — screens reload when their inputs change, and the constant
@@ -156,13 +156,28 @@ const readMuscles = (page) =>
       overall: overall ? n(overall.textContent) : null,
       counted: rated ? rated.getAttribute('aria-label') : null,
       ratedCell: rated ? [...rated.children].map((el) => n(el.textContent)).join(' | ') : null,
-      exercises: [...document.querySelectorAll('.gym-progress__row')].map((b) => ({
-        name: n(b.querySelector('.gym-progress__rowName')?.textContent),
-        change: n(b.querySelector('.gym-progress__change')?.textContent),
-      })),
     };
   });
 const musclesReady = (m) => m.rows.length === 10 && m.range.length === 1;
+
+/**
+ * The exercises of a range, as the sheets of two groups list them (block
+ * 7C): the chest, which is trained in both ranges, and the shoulders, which
+ * the shorter range holds nothing of. Until block 7C one list of every
+ * exercise stood under the ten rows and was read there.
+ */
+async function readExercises(page) {
+  const out = {};
+  for (const group of ['Brust', 'Schultern']) {
+    await openGroupSheet(page, group);
+    out[group] = {
+      exercises: (await sheetExercises(page)).map((e) => ({ name: e.name, change: e.change, word: e.word })),
+      sentence: ((await page.locator('.sheet--detents .muscle-sheet__sentence').first().textContent().catch(() => null)) ?? '').replace(/\s+/g, ' ').trim() || null,
+    };
+    await closeGroupSheet(page);
+  }
+  return out;
+}
 
 /** The hub: the Training card, the muscle entry card, the rating board. */
 const readHub = (page) =>
@@ -286,6 +301,7 @@ for (const [width, height] of SIZES) {
   await openMuscles(page, { wait: 4500 });
   const m30 = await settle(() => readMuscles(page), { ready: musclesReady });
   check(`${W}: Muskelgruppen opens on 30 Tage with ten rows`, same(m30.range, ['30 Tage']) && m30.rows.length === 10, short(m30.range));
+  const e30 = await readExercises(page);
   await scrollTo(page, '.muscle-rows');
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${OUT}/wp3-reload-${W}-muscles-30.png` });
@@ -295,6 +311,7 @@ for (const [width, height] of SIZES) {
   await page.waitForTimeout(900);
   const m90 = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['90 Tage']) });
   check(`${W}: 90 Tage is the pressed range`, same(m90.range, ['90 Tage']), short(m90.range));
+  const e90 = await readExercises(page);
   check(`${W}: the 90-day rows are not the 30-day rows`, !same(m90.rows, m30.rows), diff(m90.rows, m30.rows, ['90 Tage', '30 Tage']));
 
   // seedMuscles({ older }): shoulders pressed 80, 62 and 44 days ago —
@@ -324,9 +341,14 @@ for (const [width, height] of SIZES) {
     counted(m30) === withDelta(m30) && counted(m90) === withDelta(m90) && printed(m30) === counted(m30) && printed(m90) === counted(m90),
     `30: ${counted(m30)}/${withDelta(m30)} (${m30.ratedCell}) · 90: ${counted(m90)}/${withDelta(m90)} (${m90.ratedCell})`);
   check(`${W}: the tile is called "Leistungstrend" in both ranges`, /^Leistungstrend/.test(m30.overall ?? '') && /^Leistungstrend/.test(m90.overall ?? ''), `${m30.overall} | ${m90.overall}`);
-  const names30 = m30.exercises.map((e) => e.name);
-  const names90 = m90.exercises.map((e) => e.name);
-  check(`${W}: the 30-day exercise list is a strict subset of the 90-day one`, names30.length < names90.length && names30.every((name) => names90.includes(name)), `${names30.join('|')} → ${names90.join('|')}`);
+  // What a range holds of exercises, read where they now stand: in the
+  // sheets. The shorter range holds nothing of the shoulders and says when
+  // they were last trained; the longer one lists their exercise.
+  const names30 = [...e30.Brust.exercises, ...e30.Schultern.exercises].map((e) => e.name);
+  const names90 = [...e90.Brust.exercises, ...e90.Schultern.exercises].map((e) => e.name);
+  check(`${W}: the exercises of the 30-day sheets are a strict subset of the 90-day ones`, names30.length < names90.length && names30.every((name) => names90.includes(name)), `${names30.join('|')} → ${names90.join('|')}`);
+  check(`${W}: at 30 days the sheet of Schultern lists nothing and says when they were last trained`,
+    e30.Schultern.exercises.length === 0 && /Kein Satz für diese Gruppe in den letzten 30 Tagen\. Zuletzt trainiert am /.test(e30.Schultern.sentence ?? ''), short(e30.Schultern));
 
   await scrollTo(page, '.muscle-rows');
   await page.waitForTimeout(300);
@@ -337,7 +359,8 @@ for (const [width, height] of SIZES) {
   await page.waitForTimeout(900);
   const m30again = await settle(() => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['30 Tage']) });
   check(`${W}: back on 30 Tage the 30-day rows return exactly`, same(m30again.rows, m30.rows), diff(m30again.rows, m30.rows, ['30 again', '30 first']));
-  check(`${W}: and the trend tile and the exercise list with them`, m30again.overall === m30.overall && same(m30again.exercises, m30.exercises), diff([m30again.overall, m30again.exercises], [m30.overall, m30.exercises], ['30 again', '30 first']));
+  const e30again = await readExercises(page);
+  check(`${W}: and the trend tile and the sheets' exercises with them`, m30again.overall === m30.overall && same(e30again, e30), diff([m30again.overall, e30again], [m30.overall, e30], ['30 again', '30 first']));
 
   // A fresh load of each range shows the same thing the toggle did.
   const r30 = await afterReload(page, () => readMuscles(page), { ready: (m) => musclesReady(m) && same(m.range, ['30 Tage']) }, () => page.waitForTimeout(3500));

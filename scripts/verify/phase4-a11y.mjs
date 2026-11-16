@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, phone, onboard, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, openMuscles, openGroupSheet, openSheetExercise } from './lib.mjs';
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 const ctx = await browser.newContext(phone);
@@ -111,8 +111,23 @@ const figuresHidden = await page.evaluate(() =>
 check('the body figures stay decorative, with the list carrying the facts', figuresHidden);
 
 /* ── The exercise history ───────────────────────────────────────────────── */
-await page.locator('.gym-progress__row').first().click();
-await page.waitForTimeout(700);
+// The exercises of a group stand in the group's sheet (block 7C).
+await openGroupSheet(page, 'Brust');
+nodes = await tree();
+check('the group\'s sheet is a named dialog', nodes.some((n) => n.role === 'dialog' && n.name === 'Brust'),
+  JSON.stringify(nodes.filter((n) => n.role === 'dialog').map((n) => n.name)));
+check('every control in the sheet has a name', unnamed(nodes).length === 0, unnamed(nodes).map((n) => n.role).join(', '));
+check('its grabber is a control with a name', nodes.some((n) => n.role === 'button' && n.name === 'Ansicht vergrössern'));
+// A chart is drawn only where the group states a figure; where it is, it
+// carries a description, and where it is not, a sentence says what is missing.
+if ((await page.locator('.sheet--detents .exercise-line').count()) > 0) {
+  check('its chart has a description', nodes.some((n) => (n.role === 'img' || n.role === 'image') && /Leistungstrend Brust/.test(n.name)),
+    JSON.stringify(nodes.filter((n) => n.role === 'img' || n.role === 'image').map((n) => n.name)));
+} else {
+  check('with no figure it has no chart, and says what is missing',
+    nodes.some((n) => n.role === 'status' && /Übungstag/.test(n.name ?? '')) || /Übungstag/.test((await page.locator('.sheet--detents .muscle-sheet__sentence').textContent()) ?? ''));
+}
+await openSheetExercise(page, /./);
 nodes = await tree();
 check('every control in the exercise history has a name', unnamed(nodes).length === 0);
 const table = nodes.find((n) => n.role === 'table');

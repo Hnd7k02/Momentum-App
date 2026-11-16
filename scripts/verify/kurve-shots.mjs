@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { readBody, stillPicture } from './body-tones.mjs';
-import { CHROMIUM, URL_APP, onboard } from './lib.mjs';
+import { CHROMIUM, URL_APP, onboard, openExerciseAnywhere } from './lib.mjs';
 
 /**
  * Not a suite: an import file on the real screen — the body, the ten rows
@@ -134,16 +134,17 @@ for (const days of [30, 90]) {
 
 // One exercise's detail at 30 days: the head, and the line on its scale.
 await range(main.page, 30);
-const row = main.page.locator('.gym-progress__row', { hasText: EXERCISE }).first();
-await row.scrollIntoViewIfNeeded();
-await row.click();
-await main.page.locator('.gym-detail').waitFor();
-await main.page.waitForTimeout(700);
+// Since block 7C an exercise is opened from the sheet of its group, and its
+// detail carries one change at its head instead of a value at the line's end (D176).
+await openExerciseAnywhere(main.page, EXERCISE);
 numbers.detail = {
   exercise: EXERCISE,
-  head: (await main.page.locator('.gym-detail__figure').allTextContents()).map(clean),
-  axis: (await main.page.locator('.exercise-line__label').allTextContents()).map(clean),
-  endValue: clean(await main.page.locator('.exercise-line__value').first().textContent().catch(() => '')),
+  head: [
+    ...(await main.page.locator('.gym-detail__head, .gym-detail__caption').allTextContents()),
+    ...(await main.page.locator('.gym-detail__figure').allTextContents()),
+  ].map(clean),
+  axis: (await main.page.locator('.gym-detail .exercise-line__label').allTextContents()).map(clean),
+  endValue: clean(await main.page.locator('.gym-detail .exercise-line__value').first().textContent({ timeout: 1000 }).catch(() => '')),
 };
 save('uebungsdetail', await main.page.screenshot());
 written.push('uebungsdetail');

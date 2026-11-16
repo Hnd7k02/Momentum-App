@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, onboard, seed, seedTraining, seedMuscles, openMuscles, openGroupSheet, closeGroupSheet } from './lib.mjs';
 
 /**
  * The committed QA screenshots for the muscle map: the real Gym screen at
@@ -39,7 +39,6 @@ const waitForAzimuth = async (page, want) => {
     await page.waitForTimeout(150);
   }
 };
-const row = (page, name) => page.locator('.muscle-row').filter({ hasText: name }).first().locator('button');
 const shot = (page, name) => page.screenshot({ path: `${OUT}/${name}.png` });
 
 for (const [width, height] of [[393, 852], [430, 932]]) {
@@ -47,18 +46,14 @@ for (const [width, height] of [[393, 852], [430, 932]]) {
   await shot(page, `${width}-A-gym-workspace`);
   await scrollTo(page, '.muscle-module');
   await shot(page, `${width}-B-muskelgruppen`);
-  await row(page, 'Brust').click();
-  await page.waitForTimeout(900);
-  await scrollTo(page, '.muscle-module');
+  // A row opens its group's sheet (block 7C); the page brings the body
+  // under the header by itself, and Escape closes the sheet again.
+  await openGroupSheet(page, 'Brust');
   await shot(page, `${width}-C-measured-selected`);
-  await row(page, 'Brust').click();
-  await page.waitForTimeout(400);
-  await row(page, 'Schultern').click();
-  await page.waitForTimeout(900);
-  await scrollTo(page, '.muscle-module');
+  await closeGroupSheet(page);
+  await openGroupSheet(page, 'Schultern');
   await shot(page, `${width}-D-nodata-selected`);
-  await row(page, 'Schultern').click();
-  await page.waitForTimeout(400);
+  await closeGroupSheet(page);
   await scrollTo(page, '.muscle-module');
   const pills = page.getByRole('group', { name: 'Ansicht' });
   await pills.getByRole('button', { name: 'Vorne' }).click();
@@ -86,9 +81,6 @@ for (const [width, height] of [[393, 852], [430, 932]]) {
     HTMLCanvasElement.prototype.getContext = function (type, ...rest) { return /webgl/.test(String(type)) ? null : real.call(this, type, ...rest); };
   });
   await scrollTo(fb.page, '.muscle-module');
-  await row(fb.page, 'Brust').click();
-  await fb.page.waitForTimeout(600);
-  await scrollTo(fb.page, '.muscle-module');
   await shot(fb.page, `${width}-I-svg-fallback`);
   await fb.ctx.close();
 }
@@ -100,9 +92,7 @@ for (const [width, height] of [[393, 852], [430, 932]]) {
   await shot(page, '320-B-muskelgruppen');
   await scrollTo(page, '.muscle-rows', 24);
   await shot(page, '320-H-sparklines');
-  await row(page, 'Trizeps').click();
-  await page.waitForTimeout(600);
-  await scrollTo(page, '.muscle-module');
+  await openGroupSheet(page, 'Trizeps');
   await waitForAzimuth(page, 180);
   await shot(page, '320-K-triceps-row-selected');
   await ctx.close();

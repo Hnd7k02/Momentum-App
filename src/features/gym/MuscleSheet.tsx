@@ -30,7 +30,8 @@ import './muscleSheet.css';
  * - **A figure**: the line, the exercises, the volume.
  * - **Too little to compare**: no chart. A sentence says how many exercise
  *   days there are and from when a trend appears; "Erfasst" lists what was
- *   recorded; the volume follows.
+ *   recorded — each day leading to its exercise, as a row of the exercises
+ *   does; the volume follows.
  * - **Not trained in the range**: a sentence says what is missing and when
  *   the group was last trained, and the one action that supplies it.
  *
@@ -199,14 +200,24 @@ export function MuscleSheet({
           <h3 className="muscle-sheet__label">{t('muscleSheet.recorded')}</h3>
           <ul className="muscle-sheet__list">
             {view.records.map((record) => (
-              <li key={`${record.exerciseId}-${record.date}`} className="muscle-sheet__record">
-                <span className="muscle-sheet__exerciseText">
-                  <span className="muscle-sheet__exerciseName">{exerciseName(record.exerciseId)}</span>
-                  <span className="muscle-sheet__exerciseSet">{dayText(record.date)}</span>
-                </span>
-                <span className="muscle-sheet__recordSet">
-                  <Figure text={setText(record.set)} unit={weights.unitLabel} />
-                </span>
+              <li key={`${record.exerciseId}-${record.date}`}>
+                {/* A day of an exercise leads to that exercise, like a row
+                    of the list it stands in for: its days are there. */}
+                <button
+                  type="button"
+                  className="muscle-sheet__exercise muscle-sheet__exercise--record"
+                  data-exercise={record.exerciseId}
+                  onClick={() => onOpenExercise(record.exerciseId)}
+                >
+                  <span className="muscle-sheet__exerciseText">
+                    <span className="muscle-sheet__exerciseName">{exerciseName(record.exerciseId)}</span>
+                    <span className="muscle-sheet__exerciseSet">{dayText(record.date)}</span>
+                  </span>
+                  <span className="muscle-sheet__recordSet">
+                    <Figure text={setText(record.set)} unit={weights.unitLabel} />
+                  </span>
+                  <ChevronRightIcon size={18} />
+                </button>
               </li>
             ))}
           </ul>

@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, onboard, openMuscles, seed, seedTraining, seedMuscles, closeGroupSheet } from './lib.mjs';
 
 /**
  * Release evidence for the muscle map, Stage 5: what the network actually
@@ -190,6 +190,7 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
     return {
       buttons: buttons.length,
       pressed: buttons.map((b) => b.getAttribute('aria-pressed')),
+      popup: buttons.map((b) => b.getAttribute('aria-haspopup')),
       names: buttons.map((b) => b.querySelector('.muscle-row__name')?.textContent?.trim()),
       hiddenCharts: [...list.querySelectorAll('svg')].every((s) => s.getAttribute('aria-hidden') === 'true'),
       chartWrappersHidden: [...list.querySelectorAll('.muscle-row__chart')].every((s) => s.getAttribute('aria-hidden') === 'true'),
@@ -198,15 +199,24 @@ async function fresh({ serviceWorkers = 'allow', init = null } = {}) {
     };
   });
   console.log('\n[rows to assistive technology]', JSON.stringify({ buttons: a11y.buttons, hiddenCharts: a11y.hiddenCharts, textOnly: a11y.textOnly }, null, 0).slice(0, 600));
-  check('all ten rows are buttons with a pressed state', a11y.buttons === 10 && a11y.pressed.every((p) => p === 'true' || p === 'false'));
+  // Until block 7C a row was a toggle with a pressed state; it now opens its
+  // group's sheet, and says so: a button that opens a dialog.
+  check('all ten rows are buttons that open a dialog, and none is a toggle', a11y.buttons === 10 && a11y.popup.every((p) => p === 'dialog') && a11y.pressed.every((p) => p === null));
   check('each row names its muscle and its number or state in text', a11y.textOnly.every((t) => /Brust|Rücken|Schultern|Bizeps|Trizeps|Rumpf|Quadrizeps|Beinbeuger|Waden|Unterarme/.test(t) && /%|Noch nicht trainiert|Zu wenig Vergleichsdaten/.test(t)));
   check('the charts are hidden from the accessibility tree', a11y.hiddenCharts && a11y.chartWrappersHidden);
   check('every row keeps a 44px target', a11y.heights.every((h) => h >= 44), a11y.heights.join(','));
   const pills = await page.getByRole('group', { name: 'Ansicht' }).getByRole('button').allTextContents();
   check('the view controls carry translated labels', pills.join('|') === 'Vorne|Seite|Hinten');
-  await page.locator('[data-muscle], .muscle-row__button').first().click();
+  await page.locator('.muscle-row__button').first().click();
+  await page.locator('.sheet--detents').waitFor({ state: 'visible' });
   await page.waitForTimeout(500);
-  check('a selected row is exposed as pressed', (await page.locator('.muscle-row__button[aria-pressed="true"]').count()) === 1);
+  const sheetOf = page.locator('[role="dialog"].sheet--detents');
+  check('a row opens its group\'s sheet: a modal dialog with the group\'s name',
+    (await sheetOf.count()) === 1 && (await sheetOf.getAttribute('aria-modal')) === 'true' && (await sheetOf.getAttribute('aria-label')) === 'Brust' &&
+      (await page.locator('.muscle-row__button[data-open]').count()) === 1,
+    await sheetOf.getAttribute('aria-label').catch(() => null));
+  await closeGroupSheet(page);
+  check('and Escape closes it, with nothing left selected', (await page.locator('[role="dialog"]').count()) === 0 && (await page.locator('.muscle-row__button[data-open]').count()) === 0);
   // The credits sheet: in the general section of the Gym area, under the hub.
   await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.waitForTimeout(900);

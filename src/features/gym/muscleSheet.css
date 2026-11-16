@@ -98,8 +98,7 @@
 /* One exercise: its name, its best working set in the range, and its
    change in the range with the state in words — a row like the ten above
    the sheet, and as tall. */
-.muscle-sheet__exercise,
-.muscle-sheet__record {
+.muscle-sheet__exercise {
   display: flex;
   align-items: center;
   gap: var(--space-3);

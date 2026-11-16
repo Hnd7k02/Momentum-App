@@ -116,19 +116,55 @@ async function muscleRows(page) {
   return rows;
 }
 
+/** The group whose sheet lists each exercise the check opens (block 7C). */
+const GROUP_OF = { 'Bankdrücken': 'Brust', Kniebeuge: 'Quadrizeps', Latzug: 'Rücken' };
+
+/**
+ * One exercise's detail. Until block 7C a list of every exercise stood
+ * under the ten rows — the live build still has it — and since then an
+ * exercise is opened from the sheet of its group.
+ */
 async function exerciseDetail(page, name) {
-  const row = page.locator('.gym-progress__row', { hasText: name }).first();
-  await row.scrollIntoViewIfNeeded();
-  await row.click();
+  const listed = page.locator('.gym-progress__row', { hasText: name });
+  const fromSheet = (await listed.count()) === 0;
+  let sheet = null;
+  if (fromSheet) {
+    await page.locator('.muscle-row__button').filter({ has: page.locator('.muscle-row__name', { hasText: new RegExp(`^${GROUP_OF[name]}$`) }) }).click();
+    await page.locator('.sheet--detents').waitFor();
+    await page.waitForFunction(() => document.querySelector('.body-viewer')?.hasAttribute('data-held') ?? true, null, { timeout: 10000 }).catch(() => undefined);
+    await page.waitForTimeout(500);
+    sheet = clean(await page.locator('.sheet--detents').innerText());
+    const row = page.locator('.sheet--detents .muscle-sheet__exercise', { hasText: name }).first();
+    await row.scrollIntoViewIfNeeded();
+    await row.click();
+  } else {
+    await listed.first().scrollIntoViewIfNeeded();
+    await listed.first().click();
+  }
   await page.locator('.gym-detail').waitFor();
   await page.waitForTimeout(600);
-  const figures = await texts(page.locator('.gym-detail__figure'));
+  const figures = [
+    ...(await texts(page.locator('.gym-detail__head'))),
+    ...(await texts(page.locator('.gym-detail__caption'))),
+    ...(await texts(page.locator('.gym-detail__figure'))),
+  ];
   const days = await page.evaluate(() =>
     [...document.querySelectorAll('.gym-detail .visually-hidden tbody tr')].map((tr) =>
       [...tr.querySelectorAll('th, td')].map((cell) => cell.textContent.replace(/\s+/g, ' ').trim()),
     ),
   );
-  return { figures, days };
+  return { figures, days, sheet, fromSheet };
+}
+
+/** Leaves the detail: back to the list, or to the sheet and then out of it. */
+async function leaveDetail(page, fromSheet) {
+  await page.locator('.gym-detail .gym-session__back').click();
+  await page.waitForTimeout(700);
+  if (!fromSheet) return;
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('.sheet-scrim'), null, { timeout: 5000 }).catch(() => undefined);
+  await page.waitForFunction(() => { const v = document.querySelector('.body-viewer'); return !v || (!v.hasAttribute('data-held') && v.dataset.zoom === '1'); }, null, { timeout: 10000 }).catch(() => undefined);
+  await page.waitForTimeout(400);
 }
 
 async function read(build, day, label) {
@@ -185,8 +221,7 @@ async function read(build, day, label) {
   for (const name of ['Bankdrücken', 'Kniebeuge', 'Latzug']) {
     details[name] = await exerciseDetail(page, name);
     await page.screenshot({ path: `${OUT}/import-${label}-${day}-${name.toLowerCase().replace('ü', 'ue')}.png` });
-    await page.locator('.gym-detail .gym-session__back').click();
-    await page.waitForTimeout(700);
+    await leaveDetail(page, details[name].fromSheet);
   }
   await browser.close();
   return { status, snapshots, wroteOnReload: snapshots.length - before.length, stored, rating, muscles, overall, strip, list, details, errors };

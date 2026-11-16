@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTargets, openMuscles } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTargets, openMuscles, openGroup, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
 import { inSheet } from './lib.mjs';
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
@@ -209,13 +209,14 @@ async function fillSet(page, index, reps, weight) {
   check('an untrained group is told apart from a declining one',
     /Noch nicht trainiert/.test(calfState ?? ''), calfState?.trim());
 
-  await page.locator('.muscle-row__button', { hasText: 'Brust' }).click();
-  await page.waitForTimeout(500);
-  check('selecting a group filters the exercises below it',
-    (await page.locator('.gym-progress__row').count()) === 1);
+  // Until block 7C a row filtered a list of exercises under the ten rows;
+  // the exercises of a group now stand in the group's sheet (contract §9).
+  await openGroupSheet(page, 'Brust');
+  const listed = await sheetExercises(page);
+  check('a tap on a group opens its sheet with the group\'s exercises',
+    (await openGroup(page)) === 'Brust' && listed.length === 1 && listed[0]?.name === 'Bankdrücken', JSON.stringify(listed.map((e) => e.name)));
 
-  await page.locator('.gym-progress__row').first().click();
-  await page.waitForTimeout(600);
+  await openSheetExercise(page, 'Bankdrücken');
   check('an exercise opens its own history',
     await page.getByRole('heading', { name: 'Bankdrücken' }).isVisible());
   check('the history shows the best-set comparison',
@@ -223,9 +224,12 @@ async function fillSet(page, index, reps, weight) {
   clip = await clipped(page);
   check('the exercise history is not clipped', clip.length === 0, clip.slice(0, 2).join('; '));
 
-  // The detail's own back, not the Muskelgruppen screen's beneath it.
-  await page.locator('.gym-detail .gym-session__back').click();
-  await page.waitForTimeout(500);
+  // The detail's own back, not the Muskelgruppen screen's beneath it: it
+  // leads to the sheet the exercise was opened from, and that one is closed
+  // before the tab bar under it can be reached.
+  await closeExercise(page);
+  check('back from the exercise leads into the group\'s sheet', (await openGroup(page)) === 'Brust');
+  await closeGroupSheet(page);
 
   await page.locator('.tab-bar button', { hasText: 'Rang' }).click();
   await page.waitForTimeout(900);

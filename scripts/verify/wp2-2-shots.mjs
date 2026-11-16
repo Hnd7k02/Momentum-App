@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, openGymHub, openMuscles, phone, seed, seedMuscles, seedTraining, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openGroup, openGroupSheet, openGymHub, openMuscles, openRow, phone, seed, seedMuscles, seedTraining, sheetExercises, sheetGone, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP2-2 — the Gym hub, on the real production build, at 393, 360 and 430.
@@ -157,7 +157,10 @@ for (const width of CHECK_WIDTHS) {
     check(`${width}: Muskelgruppen is its own route`, (await hash(page)) === '#/areas/gym/muscles', await hash(page));
     check(`${width}: and the only place the viewer chunk and the model are fetched`, fetched.some((f) => /^BodyViewer.*\.js$/.test(f)) && fetched.includes('momentum-body.glb'), fetched.join(','));
     check(`${width}: the body and the ten rows are there`, (await page.locator('.body-viewer canvas').count()) === 1 && (await page.locator('.muscle-row').count()) === 10);
-    check(`${width}: the overall tile and the exercise list came along`, (await page.locator('[data-metric="gym-overall"]').count()) === 1 && (await page.locator('.gym-progress__row').count()) > 0);
+    // Until block 7C a list of every exercise stood under the ten rows. The
+    // exercises of a group now stand in the group's sheet (contract §9),
+    // and under the rows there is the way to the hub and nothing else.
+    check(`${width}: the overall tile came along, and no list of exercises stands under the rows`, (await page.locator('[data-metric="gym-overall"]').count()) === 1 && (await page.locator('.gym-progress__row').count()) === 0 && (await page.locator('.gym-muscles__toHub').count()) === 1);
     clip = await clipped(page);
     check(`${width}: the muscle destination is not clipped`, clip.length === 0, clip.slice(0, 2).join('; '));
     // Since block 7B the body's still stands in the stage until the first
@@ -168,15 +171,20 @@ for (const width of CHECK_WIDTHS) {
     check(`${width}: the destination draws the 3D body, not a still`, (await page.locator('.body-stage').getAttribute('data-stage')) === 'shown' && (await page.locator('.body-viewer canvas').evaluate((c) => c.width > 0 && c.getContext('webgl2') !== null)) && (await page.locator('.muscle-module .body-renderer').count()) === 0 && (await page.locator('.muscle-module img').count()) === 0);
     check(`${width}: the body keeps its views`, (await page.locator('.body-viewer__view').count()) === 3);
     if (shoot) await page.screenshot({ path: tag('D', 'muscles-destination') });
-    // D3: a selected muscle highlights on the 3D body, as before.
-    await page.locator('.muscle-row').filter({ hasText: 'Brust' }).first().locator('.muscle-row__button').click();
-    await page.waitForTimeout(900);
-    check(`${width}: selecting a row marks it selected`, (await page.locator('.muscle-row__button[aria-pressed="true"] .muscle-row__name').textContent())?.trim() === 'Brust');
-    await page.locator('.body-viewer').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
+    // D3: a tap on a row opens the group's sheet, with the group's
+    // exercises in it; the row is marked while it stands. (Until block 7C
+    // the row was a toggle and the check read its pressed state.)
+    await openGroupSheet(page, 'Brust');
+    check(`${width}: a row opens its group's sheet and is marked as open`, (await openGroup(page)) === 'Brust' && (await openRow(page))?.trim() === 'Brust', `${await openGroup(page)} / ${await openRow(page)}`);
+    check(`${width}: the group's exercises stand in its sheet`, (await sheetExercises(page)).length > 0);
     if (shoot) await page.screenshot({ path: tag('D3', 'muscles-selected') });
 
-    // Back, both ways.
+    // Back, both ways. The first Back closes the sheet and leaves the
+    // screen where it is — and the address as it was; the second leaves.
+    await page.goBack();
+    await sheetGone(page);
+    await page.waitForTimeout(600);
+    check(`${width}: browser Back closes the sheet and stays on Muskelgruppen`, (await openGroup(page)) === null && (await hash(page)) === '#/areas/gym/muscles' && (await page.locator('.muscle-row').count()) === 10, await hash(page));
     await page.goBack();
     await page.waitForTimeout(900);
     check(`${width}: browser Back returns to the hub`, (await hash(page)) === '#/areas/gym', await hash(page));

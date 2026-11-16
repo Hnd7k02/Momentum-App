@@ -41,7 +41,7 @@
  */
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { CHROMIUM, URL_APP, check, summary, phone, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
 
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage6b';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
@@ -287,6 +287,27 @@ for (const width of WIDTHS) {
   await seed(page, { days: 30 });
   await seedTraining(page, { days: 40 });
   await seedMuscles(page);
+  // A second exercise for the back, which rises while the pulldown holds:
+  // the back's two exercises then lie twenty points apart, and its sheet
+  // says "uneinheitlich" (contract §7; block 7C). Only the back: the sets
+  // carry their own mapping.
+  await page.evaluate(async () => {
+    const db = await new Promise((res, rej) => { const q = indexedDB.open('momentum'); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+    const pad = (n, l = 2) => String(n).padStart(l, '0');
+    const key = (d) => `${pad(d.getFullYear(), 4)}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const shift = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return d; };
+    const now = new Date().toISOString();
+    const tx = db.transaction(['gymSets', 'exercises'], 'readwrite');
+    [[19, 40], [12, 44], [5, 48]].forEach(([back, kg]) => {
+      const date = key(shift(-back));
+      tx.objectStore('gymSets').put({ id: `design-row-${date}`, sessionId: `mus-gym-${date}`, exerciseId: 'ex_design_row', date,
+        weightGrams: kg * 1000, reps: 8, order: 1, muscles: ['back'], primaryMuscles: ['back'], loadType: 'external', createdAt: now });
+    });
+    tx.objectStore('exercises').put({ id: 'ex_design_row', name: 'Rudern am Kabel', muscles: ['back'], primaryMuscles: ['back'], builtIn: false,
+      loadType: 'external', durationSeconds: null, attributes: {}, createdAt: now, updatedAt: now });
+    await new Promise((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+    db.close();
+  });
   const stamp = await page.evaluate(() => new Date().toISOString());
   await put(page, 'gymPlans', {
     id: 'design-plan', kind: 'userTrainingPlan', version: 1, name: 'Push A',
@@ -549,18 +570,86 @@ for (const width of WIDTHS) {
     }
     await scrollTo(page, page.locator('.muscle-rows'), '.areas__scroll', 16);
     await look(page, width, 'muskelgruppen-zeilen', 'gym');
-    await page.locator('.muscle-row').filter({ hasText: 'Brust' }).first().locator('button').click();
-    await page.waitForTimeout(900);
-    await scrollTo(page, page.locator('.muscle-rows'), '.areas__scroll', 16);
-    await look(page, width, 'muskelgruppen-auswahl', 'gym');
-    await page.locator('.muscle-row').filter({ hasText: 'Brust' }).first().locator('button').click();
+    /*
+     * The muscle sheet (block 7C, contract §9): in both heights and in each
+     * state of its content — every text at 4.5:1 on its pixels, none under
+     * 11px, nothing sideways. Until block 7C a row was a toggle and a list
+     * of every exercise stood under the rows; the pictures `-auswahl` and
+     * `-uebungen` showed those and are replaced by the sheet's.
+     */
+    await openGroupSheet(page, 'Brust');
+    await look(page, width, 'muskel-sheet', 'gym');
+    // Above the fold on the lower height: the name, the change, the range
+    // and the whole chart with its dates (contract §9).
+    const fold = await page.evaluate(() => {
+      const sheet = document.querySelector('.sheet--detents');
+      const bottom = (selector) => sheet.querySelector(selector)?.getBoundingClientRect().bottom ?? Infinity;
+      return {
+        screen: document.documentElement.clientHeight,
+        sheetTop: sheet.getBoundingClientRect().top,
+        title: bottom('.sheet__title'),
+        change: bottom('.muscle-sheet__change'),
+        range: bottom('.segmented'),
+        chart: bottom('.exercise-line .gym-detail__dates'),
+      };
+    });
+    check(`${width} muskel-sheet: it opens on two thirds of the screen`, Math.abs(fold.sheetTop - fold.screen / 3) <= 2, short(fold));
+    check(`${width} muskel-sheet: name, change, range and chart stand above the fold on the lower height`,
+      [fold.title, fold.change, fold.range, fold.chart].every((edge) => edge <= fold.screen + 0.5), short(fold));
+    const benchInSheet = (await sheetExercises(page)).find((entry) => entry.name === 'Bankdrücken') ?? null;
+
+    await page.locator('.sheet__grabber').click();
     await page.waitForTimeout(700);
-    const rows = page.locator('.gym-progress__row');
-    check(`${width}: Muskelgruppen lists the exercises`, (await rows.count()) > 0, String(await rows.count()));
-    await scrollTo(page, rows, '.areas__scroll', 60);
-    await look(page, width, 'uebungen', 'gym');
-    await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Bankdrücken$/ }) }).first().click();
+    const upper = await page.evaluate(() => {
+      const sheet = document.querySelector('.sheet--detents');
+      return { top: sheet.getBoundingClientRect().top, screen: document.documentElement.clientHeight };
+    });
+    check(`${width} muskel-sheet: the grabber takes it to 92 % of the screen`, Math.abs(upper.top - upper.screen * 0.08) <= 2, short(upper));
+    await look(page, width, 'muskel-sheet-gross', 'gym');
+    // Thirteen weeks of work volume stand in the width, on an axis.
+    await page.locator('.sheet--detents .segmented__option', { hasText: '90' }).click();
     await page.waitForTimeout(1200);
+    const weeks = await page.evaluate(() => {
+      const plot = document.querySelector('.sheet--detents .muscle-volume__plot');
+      const slots = [...document.querySelectorAll('.sheet--detents .muscle-volume__slot')].map((slot) => slot.getBoundingClientRect());
+      return plot === null
+        ? null
+        : { count: slots.length, left: Math.min(...slots.map((r) => r.left)), right: Math.max(...slots.map((r) => r.right)), narrowest: Math.min(...slots.map((r) => r.width)), view: document.documentElement.clientWidth };
+    });
+    check(`${width} muskel-sheet 90: twelve or thirteen weeks stand in the width, each with room for its bar`,
+      weeks !== null && weeks.count >= 12 && weeks.count <= 13 && weeks.left >= 15.5 && weeks.right <= weeks.view - 15.5 && weeks.narrowest >= 8, short(weeks));
+    await look(page, width, 'muskel-sheet-90', 'gym');
+    await page.locator('.sheet--detents .segmented__option', { hasText: '30' }).click();
+    await page.waitForTimeout(1200);
+    await closeGroupSheet(page);
+
+    // The first group the rows show in each state: which groups those are
+    // depends on what this device has logged on its way here.
+    const firstIn = (state) =>
+      page.evaluate((state) => document.querySelector(`.muscle-row__right--${state}`)?.closest('.muscle-row')?.querySelector('.muscle-row__name')?.textContent ?? null, state);
+    for (const [group, slug, words] of [
+      ['Rücken', 'muskel-sheet-uneinheitlich', /uneinheitlich/],
+      [await firstIn('awaitingBaseline'), 'muskel-sheet-wenig', /Zu wenig Vergleichsdaten.*Übungstage? in den letzten 30 Tagen.*Erfasst/s],
+      // "Noch nicht trainiert" is looked at further down, 45 days on: this
+      // device has trained all ten groups by now.
+    ]) {
+      if (group === null) {
+        check(`${width} ${slug}: a group in that state is on the screen`, false, 'none of the ten rows');
+        continue;
+      }
+      await openGroupSheet(page, group);
+      const text = (await page.locator('.sheet--detents').innerText()).replace(/\s+/g, ' ');
+      check(`${width} ${slug}: the sheet of ${group} is in that state`, words.test(text), text.slice(0, 160));
+      if (slug !== 'muskel-sheet-uneinheitlich') {
+        check(`${width} ${slug}: no chart without a figure`, (await page.locator('.sheet--detents .exercise-line').count()) === 0);
+      }
+      await look(page, width, slug, 'gym');
+      await closeGroupSheet(page);
+    }
+
+    // The exercise detail, from the sheet of its group.
+    await openGroupSheet(page, 'Brust');
+    await openSheetExercise(page, 'Bankdrücken');
     await look(page, width, 'uebungsdetail', 'gym');
     // The line (contract §6; the owner's choice at STOP 5b, D175): each day
     // stands at its change since the first day shown, on a scale that
@@ -575,9 +664,12 @@ for (const width of WIDTHS) {
     // scale named on the left, one colour on the latest and in view, the
     // two dates. None is dropped; each states what the line does.
     const line = await page.evaluate(() => {
-      const plot = document.querySelector('.exercise-line__plot');
-      const svg = document.querySelector('.exercise-line__svg').getBoundingClientRect();
-      const poly = document.querySelector('.exercise-line__line');
+      // The detail's own chart: the sheet it was opened from is still in the
+      // document, out of sight, with a chart of its own.
+      const detail = document.querySelector('.gym-detail');
+      const plot = detail.querySelector('.exercise-line__plot');
+      const svg = detail.querySelector('.exercise-line__svg').getBoundingClientRect();
+      const poly = detail.querySelector('.exercise-line__line');
       const points = poly ? poly.getAttribute('points').trim().split(/\s+/).map((pair) => pair.split(',').map(Number)) : [];
       const middle = (el) => { const r = el.getBoundingClientRect(); return (r.top + r.bottom) / 2; };
       const css = (el, prop) => getComputedStyle(el)[prop];
@@ -590,9 +682,9 @@ for (const width of WIDTHS) {
         probe.remove();
         return colour;
       };
-      const end = document.querySelector('.exercise-line__end');
+      const end = detail.querySelector('.exercise-line__end');
       const endBox = end.getBoundingClientRect();
-      const value = document.querySelector('.exercise-line__value');
+      const value = detail.querySelector('.exercise-line__value');
       // The table beside the chart names every day's best working set,
       // newest first; a day's value is that set's strength score (D150):
       // "8 × 60 kg" is 60 × (30 + 8) = 2280.
@@ -601,13 +693,13 @@ for (const width of WIDTHS) {
         .map((m) => (m ? Number(m[2]) * (30 + Number(m[1])) : null))
         .reverse();
       return {
-        bars: document.querySelectorAll('.gym-detail__bar, .gym-detail__bars').length,
+        bars: detail.querySelectorAll('.gym-detail__bar, .gym-detail__bars').length,
         points,
         scores,
-        labels: [...document.querySelectorAll('.exercise-line__label')].map((el) => ({ text: el.textContent, y: middle(el) })),
+        labels: [...detail.querySelectorAll('.exercise-line__label')].map((el) => ({ text: el.textContent, y: middle(el) })),
         svg: { top: svg.top, height: svg.height, left: svg.left, width: svg.width },
-        zeroY: document.querySelector('.exercise-line__zero').getBoundingClientRect().top,
-        bounds: [...document.querySelectorAll('.exercise-line__bound')].map((el) => el.getBoundingClientRect().top),
+        zeroY: detail.querySelector('.exercise-line__zero').getBoundingClientRect().top,
+        bounds: [...detail.querySelectorAll('.exercise-line__bound')].map((el) => el.getBoundingClientRect().top),
         stroke: poly ? css(poly, 'stroke') : null,
         strokeWidth: poly ? css(poly, 'strokeWidth') : null,
         ink: token('--data-ink'),
@@ -616,7 +708,7 @@ for (const width of WIDTHS) {
         end: { cls: end.className, fill: css(end, 'backgroundColor'), x: (endBox.left + endBox.right) / 2, y: (endBox.top + endBox.bottom) / 2, right: endBox.right, size: endBox.width },
         value: value ? { text: value.textContent, cls: value.className, left: value.getBoundingClientRect().left, y: middle(value) } : null,
         plotRight: plot.getBoundingClientRect().right,
-        dates: [...document.querySelectorAll('.gym-detail__dates span')].map((span) => span.textContent),
+        dates: [...detail.querySelectorAll('.gym-detail__dates span')].map((span) => span.textContent),
       };
     });
     const percent = (text) => Number(text.replace('−', '-').replace(/[^\d.+-]/g, ''));
@@ -641,27 +733,46 @@ for (const width of WIDTHS) {
     check(`${width}: the zero line is there and named, and the scale's reach is named on its line`,
       Boolean(zeroLabel) && Math.abs(zeroLabel.y - line.zeroY) <= 2 && line.bounds.length >= 1 && named,
       short({ zero: zeroLabel, zeroY: line.zeroY, bounds: line.bounds, labels: line.labels }));
-    const endChange = changes[changes.length - 1];
-    const endShown = Math.sign(endChange) * Math.round(Math.abs(endChange));
-    // The one-sided band (D180): a rise from +2 %, a fall from −3 %.
-    const endState = endShown >= 2 ? 'improved' : endShown <= -3 ? 'declined' : 'unchanged';
-    const endFill = { improved: line.strong, declined: line.weak, unchanged: line.ink }[endState];
-    const endText = `${endShown > 0 ? '+' : endShown < 0 ? '−' : ''}${Math.abs(endShown)}\u00A0%`;
+    /*
+     * One exercise has one change (D176, block 7C): the one in the range,
+     * at the head of the detail with its state and its name — the very
+     * figure its row in the sheet carries. Until block 7C the head named
+     * the last day against the one before "Veränderung", and the line's
+     * end value, the last day against the first, stood beside the line
+     * without a name; this check held that end value and its state. The
+     * end point now carries the state of the one figure, and no figure
+     * stands at the line.
+     */
+    const head = await page.evaluate(() => {
+      const change = document.querySelector('.gym-detail__change');
+      return {
+        text: change?.textContent ?? null,
+        state: [...(change?.classList ?? [])].find((c) => c.startsWith('gym-detail__change--'))?.split('--')[1] ?? null,
+        chip: document.querySelector('.gym-detail__head .state-chip')?.textContent ?? null,
+        caption: document.querySelector('.gym-detail__caption')?.textContent ?? null,
+        labels: [...document.querySelectorAll('.gym-detail__label')].map((label) => label.textContent),
+      };
+    });
+    check(`${width}: the exercise's one change stands at the head with its state and its name — ${head.text}, the sheet's own figure`,
+      head.text !== null && head.text === benchInSheet?.change && head.state === benchInSheet?.state && head.chip === benchInSheet?.word &&
+        head.caption === 'Bester Arbeitssatz · letzte 30 Tage' && head.labels.join('|') === 'Zuletzt|Davor',
+      short({ head, sheet: benchInSheet }));
+    const endFill = { improved: line.strong, declined: line.weak, unchanged: line.ink }[head.state];
     const lastPoint = line.points[line.points.length - 1] ?? [0, 0];
-    check(`${width}: the line is the neutral ink at 1.5px, and only its end point carries the state — ${endText}, beside it and in view`,
+    check(`${width}: the line is the neutral ink at 1.5px, and only its end point carries a colour — the state of that one change — in view, with no figure beside it`,
       line.stroke === line.ink && line.strokeWidth === '1.5px' &&
-        line.end.cls.includes(`exercise-line__end--${endState}`) && line.end.fill === endFill && Math.abs(line.end.size - 6) <= 0.5 &&
+        line.end.cls.includes(`exercise-line__end--${head.state}`) && line.end.fill === endFill && Math.abs(line.end.size - 6) <= 0.5 &&
         Math.abs(line.end.y - (line.svg.top + (lastPoint[1] / 100) * line.svg.height)) <= 1.5 &&
         line.end.right <= line.plotRight + 0.5 &&
-        line.value !== null && line.value.text === endText && line.value.cls.includes(`exercise-line__value--${endState}`) &&
-        line.value.left >= line.plotRight - 0.5 && Math.abs(line.value.y - line.end.y) <= 2,
+        line.value === null,
       short({ stroke: line.stroke, ink: line.ink, width: line.strokeWidth, end: line.end, value: line.value, plotRight: line.plotRight }));
     check(`${width}: the first and the last date stand beneath the line`, line.dates.length === 2 && line.dates[0] !== line.dates[1], short(line.dates));
     await page.locator('.gym-detail .gym-session__scroll').evaluate((el) => { el.scrollTop = el.scrollHeight; });
     await page.waitForTimeout(400);
     await look(page, width, 'uebungsdetail-tage', 'gym');
-    await page.locator('.gym-detail .gym-session__back').first().click();
-    await page.waitForTimeout(800);
+    await closeExercise(page);
+    check(`${width}: back from the exercise leads into the sheet it was opened from`, (await page.locator('.sheet--detents').count()) === 1 && (await page.locator('.sheet-scrim[data-suspended]').count()) === 0);
+    await closeGroupSheet(page);
   }
 
   /* ── Back to a shared screen: the world is given back ─────────────────── */
@@ -711,6 +822,18 @@ for (const width of WIDTHS) {
       empty.primaries.length === 1 && empty.primaries[0] === 'Training erfassen', short(empty.primaries));
     check(`${width}: nothing is drawn as progress: ten untrained rows, no overall figure`,
       empty.rows.length === 10 && empty.rows.every((row) => /Noch nicht trainiert/.test(row)) && empty.overall === 0, short(empty.rows.slice(0, 2)));
+    // The sheet of a group the range holds nothing of (block 7C, contract
+    // §9, §11): a sentence says what is missing and when the group was last
+    // trained, with the one action that supplies it — and no chart.
+    await openGroupSheet(page, 'Brust');
+    const untrained = (await page.locator('.sheet--detents').innerText()).replace(/\s+/g, ' ');
+    check(`${width} muskel-sheet-nicht-trainiert: the sheet says what is missing, when the group was last trained, and offers the one action`,
+      /Noch nicht trainiert.*Kein Satz für diese Gruppe in den letzten 30 Tagen\. Zuletzt trainiert am \S+, \d+\. \S+\..*Training erfassen/s.test(untrained) &&
+        (await page.locator('.sheet--detents .button--primary').count()) === 1, untrained.slice(0, 200));
+    check(`${width} muskel-sheet-nicht-trainiert: no chart without a figure, and no work volume without work`,
+      (await page.locator('.sheet--detents .exercise-line').count()) === 0 && (await page.locator('.sheet--detents .muscle-volume').count()) === 0);
+    await look(page, width, 'muskel-sheet-nicht-trainiert', 'gym');
+    await closeGroupSheet(page);
     // The other range reaches it: the session of 45 days ago lies inside
     // the last 90 days, so the rows carry figures again and nothing is
     // called empty (contract §7: 30 and 90 days).

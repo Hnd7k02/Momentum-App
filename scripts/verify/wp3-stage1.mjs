@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, smallTargets, summary, openGymHub } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, seed, seedMuscles, smallTargets, summary, openGymHub, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
 
 /**
  * WP3, Stage 1 — B4, B5, B6, B9, B10, B11, B12 on the real production
@@ -751,50 +751,48 @@ for (const [width, height] of SIZES) {
     await page.screenshot({ path: shotPath(width, 'muscles-zero') });
     await layoutChecks(page, `${W} muscle rows`);
 
-    /* B6 — the exercise list, unfiltered. */
-    const listRow = (name) =>
-      page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: new RegExp(`^${name}$`) }) });
-    const listed = async (name) => {
-      const row = listRow(name);
-      if ((await row.count()) === 0) return null;
-      return row.first().evaluate((el) => {
-        const change = el.querySelector('.gym-progress__change');
-        return { text: (change?.textContent ?? '').trim(), kind: [...(change?.classList ?? [])].find((c) => c.startsWith('gym-progress__change--')) ?? null };
-      });
-    };
-    const calfRow = await listed('Wadenheben');
-    const wristRow = await listed('Unterarm-Curls Kurzhantel');
-    check(`${W}: B6 Wadenheben reads Gehalten in the exercise list`, calfRow?.text === 'Gehalten' && calfRow?.kind === 'gym-progress__change--unchanged', short(calfRow));
-    check(`${W}: B6 Unterarm-Curls Kurzhantel reads Gehalten in the exercise list`, wristRow?.text === 'Gehalten' && wristRow?.kind === 'gym-progress__change--unchanged', short(wristRow));
-    if ((await listRow('Unterarm-Curls Kurzhantel').count()) > 0) {
-      await listRow('Unterarm-Curls Kurzhantel').first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
-      await page.waitForTimeout(400);
-    }
-    await page.screenshot({ path: shotPath(width, 'exercise-list') });
-    await layoutChecks(page, `${W} exercise list`);
+    /*
+     * B6 — the exercises, where they now stand: in the sheet of their
+     * group (block 7C). Until then a list of every exercise stood under the
+     * rows, each with its change against the day before — "Gehalten" as a
+     * word in place of a figure. An exercise now has one change, the one
+     * in the range (D176), printed as the figure with its word, as in the
+     * ten rows; and it stands the same at the head of the exercise detail.
+     */
+    for (const [group, name, shoot] of [['Waden', 'Wadenheben', true], ['Unterarme', 'Unterarm-Curls Kurzhantel', false]]) {
+      await openGroupSheet(page, group);
+      const row = (await sheetExercises(page)).find((entry) => entry.name === name) ?? null;
+      check(`${W}: B6 ${name} reads "0 %" with "Gehalten" in the sheet of ${group}`,
+        row?.change === '0\u00a0%' && row?.word === 'Gehalten' && row?.state === 'unchanged', short(row));
+      if (shoot) {
+        await page.screenshot({ path: shotPath(width, 'exercise-list') });
+        await layoutChecks(page, `${W} muscle sheet`);
+      }
 
-    /* B6 — the exercise detail, both cases. */
-    for (const [name, shoot] of [['Wadenheben', true], ['Unterarm-Curls Kurzhantel', false]]) {
-      if ((await listRow(name).count()) === 0) {
-        check(`${W}: B6 ${name} detail opens`, false, 'no row in the exercise list');
+      /* B6 — the exercise detail, both cases. */
+      if (row === null) {
+        check(`${W}: B6 ${name} detail opens`, false, `no row in the sheet of ${group}`);
+        await closeGroupSheet(page);
         continue;
       }
-      await listRow(name).first().click();
-      await page.waitForTimeout(900);
+      await openSheetExercise(page, name);
       const title = await textOf(page.locator('.gym-detail__title'));
-      const value = await page.locator('.gym-detail__figure').nth(2).locator('.gym-detail__value').evaluate((el) => ({
-        text: (el.textContent ?? '').trim(),
-        unchanged: el.classList.contains('gym-detail__value--unchanged'),
-        classes: el.className,
+      const value = await page.locator('.gym-detail__head').evaluate((el) => ({
+        text: (el.querySelector('.gym-detail__change')?.textContent ?? '').trim(),
+        unchanged: el.querySelector('.gym-detail__change')?.classList.contains('gym-detail__change--unchanged') ?? false,
+        chip: (el.querySelector('.state-chip')?.textContent ?? '').trim(),
+        figures: [...document.querySelectorAll('.gym-detail__label')].map((label) => label.textContent.trim()),
       })).catch(() => null);
       check(`${W}: B6 ${name} detail opens`, title === name, String(title));
-      check(`${W}: B6 ${name} detail's change reads Gehalten, neutral`, value?.text === 'Gehalten' && value?.unchanged === true, short(value));
+      check(`${W}: B6 ${name} detail's change reads "0 %" and "Gehalten", neutral — the sheet's own figure`,
+        value?.text === '0\u00a0%' && value?.unchanged === true && value?.chip === 'Gehalten' && value?.text === row.change, short(value));
+      check(`${W}: B6 ${name} detail stands no second change beside it`, JSON.stringify(value?.figures ?? []) === JSON.stringify(['Zuletzt', 'Davor']) && (await page.locator('.exercise-line__value').count()) === 0, short(value?.figures));
       if (shoot) {
         await page.screenshot({ path: shotPath(width, 'exercise-detail') });
         await layoutChecks(page, `${W} exercise detail`);
       }
-      await page.locator('.gym-detail .gym-session__back').click();
-      await page.waitForTimeout(700);
+      await closeExercise(page);
+      await closeGroupSheet(page);
     }
 
     check(`${W} C: no page errors`, errors.length === 0, errors.join(' | '));

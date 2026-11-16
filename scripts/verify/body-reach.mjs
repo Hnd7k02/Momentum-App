@@ -5,8 +5,20 @@ import { CHROMIUM, URL_APP, check, summary, onboard, seed, seedTraining, seedMus
  * How much of the body each region offers a finger, measured, not assumed.
  *
  * Taps a 12px grid over the whole stage at 320, 360, 393 and 430, from the
- * front and from the back, and counts which regions respond. A miss leaves
- * the selection alone, so only a CHANGE of selection is a hit.
+ * front and from the back, and counts which regions respond.
+ *
+ * **What block 7C changed here** (contract §9): a tap on a muscle opens the
+ * group's sheet. A hit is therefore a tap after which a sheet stands — its
+ * group is read from the row it marks — and the sheet is closed again at
+ * once, before the next tap. Until block 7C a tap selected without opening
+ * anything, a miss left the selection alone, and only a *change* of
+ * selection was a hit; the counts per group are higher now (two taps in a
+ * row on one group are two hits), the groups reached are held to the same
+ * rule. The grid runs under reduced motion, where the camera jumps: the
+ * sheet's group would otherwise travel into the strip above it and back
+ * after every hit, and the next tap must find the whole body where the
+ * grid expects it. How a tap, a sheet and the camera behave with motion is
+ * `gym-muscles.mjs`'s and `muscle-sheet.mjs`'s to hold.
  *
  * **What block 7B changed here** (contract §8):
  *
@@ -46,7 +58,7 @@ const FACING = {
   Hinten: ['Rücken', 'Beinbeuger und Gesäss', 'Trizeps', 'Waden'],
 };
 for (const [width, height] of [[393, 852], [430, 932], [360, 780], [320, 693]].filter(([w]) => WIDTHS.includes(w))) {
-  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, hasTouch: true });
+  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, hasTouch: true, reducedMotion: 'reduce' });
   const page = await ctx.newPage();
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
@@ -69,14 +81,21 @@ for (const [width, height] of [[393, 852], [430, 932], [360, 780], [320, 693]].f
   let last = null;
   /** A view pill pressed in place — `locator.click()` would scroll the stage first. */
   const press = (view) => page.getByRole('group', { name: 'Ansicht' }).getByRole('button', { name: view }).evaluate((el) => el.click());
-  const current = () => page.evaluate(() => document.querySelector('.muscle-row__button[aria-pressed="true"] .muscle-row__name')?.textContent ?? null);
+  /** Closes the sheet a hit opened and waits until the whole body stands in the stage again. */
+  const close = async () => {
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+    await page.waitForFunction(() => {
+      const viewer = document.querySelector('.body-viewer');
+      return !document.querySelector('.sheet-scrim') && viewer.dataset.zoom === '1' && !viewer.hasAttribute('data-focus') && !viewer.hasAttribute('data-held');
+    }, null, { timeout: 8000 });
+  };
   const azimuth = async () => Number(await page.locator('.body-viewer').getAttribute('data-azimuth'));
   for (const [view, facing] of [['Vorne', 0], ['Hinten', 180]]) {
     await press(view);
     for (let waited = 0; waited < 12000 && (await azimuth()) !== facing; waited += 100) await page.waitForTimeout(100);
     await page.waitForTimeout(600);
     box = await page.locator('.body-viewer canvas').boundingBox();
-    let prev = await current();
     // The body stands on the stage's middle axis and is about 0.36 of the
     // stage's height wide; the grid covers it and 24px to either side.
     const half = box.height * 0.18 + 24;
@@ -98,15 +117,16 @@ for (const [width, height] of [[393, 852], [430, 932], [360, 780], [320, 693]].f
           last = { x, y, at: Date.now() };
           taps += 1;
           const after = await page.evaluate(() => ({
-            row: document.querySelector('.muscle-row__button[aria-pressed="true"] .muscle-row__name')?.textContent ?? null,
+            row: document.querySelector('.muscle-row__button[data-open] .muscle-row__name')?.textContent ?? null,
             azimuth: Number(document.querySelector('.body-viewer').getAttribute('data-azimuth')),
           }));
-          if (after.row !== prev) {
-            const hit = after.row ?? prev;
-            tally.set(hit, (tally.get(hit) ?? 0) + 1);
-            byView[view].set(hit, (byView[view].get(hit) ?? 0) + 1);
+          if (after.row !== null) {
+            tally.set(after.row, (tally.get(after.row) ?? 0) + 1);
+            byView[view].set(after.row, (byView[view].get(after.row) ?? 0) + 1);
+            await close();
+            // The sheet's own closing is not a tap; the next one is no second of a pair.
+            last = null;
           }
-          prev = after.row;
           if (after.azimuth !== facing) turned += 1;
         }
       }

@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, summary, textContrast, openGymHub } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, onboard, openMuscles, phone, seed, summary, textContrast, openGymHub, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
 import { readBody } from './body-tones.mjs';
 
 /**
@@ -607,54 +607,78 @@ for (const width of WIDTHS) {
   const closed = await page.evaluate(() => ({ dialogs: document.querySelectorAll('[role="dialog"]').length, focus: document.activeElement?.getAttribute('aria-label') ?? null }));
   check(`${W}: Escape closes it and focus returns to ⓘ`, closed.dialogs === 0 && closed.focus === 'Legende öffnen', short(closed));
 
-  /* A group with too little to compare, chosen: the sentence. */
-  const pick = async (group) => {
-    await page.locator('.muscle-row').filter({ has: page.locator('.muscle-row__name', { hasText: new RegExp(`^${NAME[group]}$`) }) }).locator('.muscle-row__button').click();
-    await page.waitForTimeout(500);
-    return page.locator('.gym-progress__tooFew').first().textContent().catch(() => null);
+  /*
+   * A group with too little to compare, opened: the sentence. Until block
+   * 7C a chosen row put it above a list of exercises under the rows; it
+   * now stands in the group's sheet, word for word (contract §9).
+   */
+  const sentenceOf = async (group) => {
+    await openGroupSheet(page, NAME[group]);
+    const text = await page.locator('.sheet--detents .muscle-sheet__sentence').first().textContent().catch(() => null);
+    return text === null ? null : text.replace(/\s+/g, ' ').trim();
   };
-  await scrollTo(page, '.muscle-legend', 12);
-  const hamSentence = (await page.locator('.gym-progress__tooFew').count()) === 0 ? await pick('hamstringsGlutes') : null;
-  check(`${W}: Beinbeuger, chosen, says what is missing`, hamSentence === '2 Übungstage in den letzten 30 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.', String(hamSentence));
-  const foreSentence = await pick('forearms');
+  const hamSentence = await sentenceOf('hamstringsGlutes');
+  check(`${W}: Beinbeuger, opened, says what is missing`, hamSentence === '2 Übungstage in den letzten 30 Tagen. Ab dem dritten zeigt Momentum einen Leistungstrend.', String(hamSentence));
+  check(`${W}: and draws no chart where there is no figure`, (await page.locator('.sheet--detents .exercise-line').count()) === 0);
+  await closeGroupSheet(page);
+  const foreSentence = await sentenceOf('forearms');
   check(`${W}: Unterarme, with three days and no exercise twice, says that`, foreSentence === '3 Übungstage in den letzten 30 Tagen. Ein Leistungstrend braucht dieselbe Übung an zwei Tagen.', String(foreSentence));
-  await pick('forearms'); // toggle off
-  check(`${W}: with no group chosen the sentence is gone`, (await page.locator('.gym-progress__tooFew').count()) === 0);
+  // An exercise recorded once has no change: it stands under "Erfasst"
+  // with its set, and no figure beside it.
+  const recorded = await page.locator('.sheet--detents .muscle-sheet__exercise--record').evaluateAll((rows) => rows.map((row) => ({
+    name: row.querySelector('.muscle-sheet__exerciseName')?.textContent ?? '',
+    set: row.querySelector('.muscle-sheet__recordSet')?.textContent ?? '',
+    figures: row.querySelectorAll('.muscle-sheet__exerciseChange').length,
+  })));
+  const once = recorded.find((e) => e.name === 'Unterarme-Übung A');
+  check(`${W}: one recorded once stands under "Erfasst" with its set and no figure`, once !== undefined && /×/.test(once.set) && once.figures === 0 && /Erfasst/.test(await page.locator('.sheet--detents').innerText()), short(once ?? recorded));
+  await closeGroupSheet(page);
+  check(`${W}: with the sheet closed nothing of it is left`, (await page.locator('[role="dialog"]').count()) === 0 && (await page.locator('.muscle-sheet__sentence').count()) === 0);
 
-  /* The exercise list and the detail: the same band. */
-  const listed = await page.locator('.gym-progress__row').evaluateAll((els) => els.map((el) => {
-    const change = el.querySelector('.gym-progress__change');
-    return {
-      name: el.querySelector('.gym-progress__rowName')?.textContent ?? '',
-      text: change?.textContent ?? '',
-      kind: [...(change?.classList ?? [])].find((c) => c.startsWith('gym-progress__change--'))?.split('--')[1] ?? null,
-      color: change ? getComputedStyle(change).color : null,
-    };
-  }));
-  const ex = (group) => listed.find((e) => e.name === `${NAME[group]}-Übung`);
-  check(`${W}: an exercise at +1 % reads "Gehalten", in the text colour`, ex('biceps')?.text === 'Gehalten' && ex('biceps')?.kind === 'unchanged' && ex('biceps')?.color === T['--text-primary'], short(ex('biceps')));
-  check(`${W}: one at ${MINUS}2 % too`, ex('triceps')?.text === 'Gehalten' && ex('triceps')?.kind === 'unchanged', short(ex('triceps')));
-  check(`${W}: one at +2 % is "+2 %", green`, ex('shoulders')?.text === signed(2) && ex('shoulders')?.kind === 'improved' && ex('shoulders')?.color === T['--status-strong-ink'], short(ex('shoulders')));
-  check(`${W}: one at ${MINUS}3 % is "${MINUS}3 %", red`, ex('core')?.text === signed(-3) && ex('core')?.kind === 'declined' && ex('core')?.color === T['--status-weak-ink'], short(ex('core')));
-  check(`${W}: one recorded once has too little to compare`, listed.find((e) => e.name === 'Unterarme-Übung A')?.text === 'Zu wenig Vergleichsdaten', short(listed.find((e) => e.name === 'Unterarme-Übung A')));
-
-  await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Bizeps-Übung$/ }) }).click();
-  await page.waitForTimeout(900);
-  const detail = await page.locator('.gym-detail__figure').nth(2).locator('.gym-detail__value').evaluate((el) => ({ text: el.textContent.trim(), cls: el.className, color: getComputedStyle(el).color }));
-  check(`${W}: the exercise detail reads +1 % as "Gehalten", in the text colour`, detail.text === 'Gehalten' && /--unchanged/.test(detail.cls) && detail.color === T['--text-primary'], short(detail));
+  /*
+   * The exercises of a group and the exercise detail: the same band, and
+   * the same figure in both places (D176). Until block 7C the list under
+   * the rows printed an exercise's change against the day before, and a
+   * held one as the word "Gehalten" alone; the sheet prints the change in
+   * the range as the figure with its word, as the ten rows do.
+   */
+  const inSheet = async (group) => {
+    await openGroupSheet(page, NAME[group]);
+    const row = (await sheetExercises(page)).find((e) => e.name === `${NAME[group]}-Übung`) ?? null;
+    return row;
+  };
+  const bi = await inSheet('biceps');
+  check(`${W}: an exercise at +1 % reads "+1 %" with "Gehalten", in the text colour`, bi?.change === signed(1) && bi?.word === 'Gehalten' && bi?.state === 'unchanged' && bi?.color === T['--text-primary'], short(bi));
+  await openSheetExercise(page, 'Bizeps-Übung');
+  const detail = await page.locator('.gym-detail__head').evaluate((el) => {
+    const change = el.querySelector('.gym-detail__change');
+    return { text: change?.textContent.trim() ?? null, cls: change?.className ?? '', color: change ? getComputedStyle(change).color : null, chip: el.querySelector('.state-chip')?.textContent.trim() ?? null };
+  });
+  check(`${W}: the exercise detail reads the same +1 % as "Gehalten", in the text colour`, detail.text === bi?.change && detail.chip === 'Gehalten' && /--unchanged/.test(detail.cls) && detail.color === T['--text-primary'], short(detail));
   const detailDrawn = await coloursOnScreen(page);
   check(`${W}: nothing on the exercise detail is drawn in the warning yellow`,
     detailDrawn.elements > 40 && carrying(detailDrawn, yellows).length === 0, `${detailDrawn.elements} elements · ${carrying(detailDrawn, yellows).join(' | ')}`);
   await shot(page, width, 'uebungsdetail-gehalten');
-  await page.locator('.gym-detail .gym-session__back').click();
-  await page.waitForTimeout(700);
-  await page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Schultern-Übung$/ }) }).click();
-  await page.waitForTimeout(900);
-  const detailUp = await page.locator('.gym-detail__figure').nth(2).locator('.gym-detail__value').evaluate((el) => ({ text: el.textContent.trim(), cls: el.className }));
-  check(`${W}: and +2 % as "+2 %", improved`, detailUp.text === signed(2) && /--improved/.test(detailUp.cls), short(detailUp));
+  await closeExercise(page);
+  await closeGroupSheet(page);
+
+  const tri = await inSheet('triceps');
+  check(`${W}: one at ${MINUS}2 % too`, tri?.change === signed(-2) && tri?.word === 'Gehalten' && tri?.state === 'unchanged', short(tri));
+  await closeGroupSheet(page);
+  const sh = await inSheet('shoulders');
+  check(`${W}: one at +2 % is "+2 %", green`, sh?.change === signed(2) && sh?.word === 'Verbessert' && sh?.state === 'improved' && sh?.color === T['--status-strong-ink'], short(sh));
+  await openSheetExercise(page, 'Schultern-Übung');
+  const detailUp = await page.locator('.gym-detail__head').evaluate((el) => {
+    const change = el.querySelector('.gym-detail__change');
+    return { text: change?.textContent.trim() ?? null, cls: change?.className ?? '', chip: el.querySelector('.state-chip')?.textContent.trim() ?? null };
+  });
+  check(`${W}: and the detail reads the same +2 %, improved`, detailUp.text === signed(2) && /--improved/.test(detailUp.cls) && detailUp.chip === 'Verbessert', short(detailUp));
   await shot(page, width, 'uebungsdetail-verbessert');
-  await page.locator('.gym-detail .gym-session__back').click();
-  await page.waitForTimeout(900);
+  await closeExercise(page);
+  await closeGroupSheet(page);
+  const co = await inSheet('core');
+  check(`${W}: one at ${MINUS}3 % is "${MINUS}3 %", red`, co?.change === signed(-3) && co?.word === 'Zurückgegangen' && co?.state === 'declined' && co?.color === T['--status-weak-ink'], short(co));
+  await closeGroupSheet(page);
 
   /* 90 days: what 30 no longer reaches. */
   await scrollTop(page);

@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, smallTargets, summary, openGymHub } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, openMuscles, phone, smallTargets, summary, openGymHub, openGroupSheet, closeGroupSheet, openSheetExercise, closeExercise } from './lib.mjs';
 
 /**
  * WP3, Stage 2 — the workout flow, on the real production build.
@@ -413,15 +413,23 @@ for (const [width, height] of SIZES) {
     await page.getByRole('radio', { name: 'Gym', exact: true }).click();
     await page.waitForTimeout(900);
     await openMuscles(page, { wait: 3500 });
-    const row = page.locator('.gym-progress__row').filter({ has: page.locator('.gym-progress__rowName', { hasText: /^Bankdrücken$/ }) });
-    await row.first().click();
-    await page.waitForTimeout(900);
+    // The exercise is reached through the sheet of its group (block 7C),
+    // which reads in the unit as well: the best working set and the volume.
+    await openGroupSheet(page, 'Brust');
+    const inLb = await page.locator('.sheet--detents').evaluate((sheet) => ({
+      sets: [...sheet.querySelectorAll('.muscle-sheet__exerciseSet, .muscle-sheet__recordSet')].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
+      volume: [...sheet.querySelectorAll('.muscle-volume__value, .muscle-volume__axisLabel--top')].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
+    }));
+    check(`${W}: P4 the muscle sheet reads in lb — the sets and the work volume`,
+      inLb.sets.length > 0 && inLb.sets.every((text) => / lb$/.test(text) && !/kg/.test(text)) && inLb.volume.length > 0 && inLb.volume.every((text) => / lb$/.test(text)),
+      short(inLb));
+    await openSheetExercise(page, 'Bankdrücken');
     const figures = await page.locator('.gym-detail__figure .gym-detail__value').allTextContents();
     check(`${W}: P4 the exercise detail reads in lb`, figures[0]?.trim() === '5 × 135 lb' && figures[1]?.trim() === '5 × 45 lb', short(figures));
     await page.screenshot({ path: shotPath(width, 'exercise-detail-lb') });
     await layoutChecks(page, `${W} exercise detail in lb`);
-    await page.locator('.gym-detail .gym-session__back').click();
-    await page.waitForTimeout(600);
+    await closeExercise(page);
+    await closeGroupSheet(page);
 
     // Back to kg: 62.5 kg unchanged.
     await page.goto(`${URL_APP}#/areas/mental`, { waitUntil: 'networkidle' });

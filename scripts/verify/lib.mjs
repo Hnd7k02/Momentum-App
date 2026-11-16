@@ -49,12 +49,152 @@ export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie
 }
 
 /**
+ * Puts the app into a language the way the settings do: the stored record,
+ * read again on the next load. Reload after it.
+ */
+export async function setLanguage(page, language) {
+  await page.evaluate(async (language) => {
+    const db = await new Promise((res, rej) => { const r = indexedDB.open('momentum'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const settings = await new Promise((res, rej) => { const r = db.transaction(['settings'], 'readonly').objectStore('settings').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    await new Promise((res, rej) => { const tx = db.transaction(['settings'], 'readwrite'); tx.objectStore('settings').put({ ...settings[0], language }); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+  }, language);
+}
+
+/**
  * Bereiche → Gym → Muskelgruppen (WP2-2). The Gym area opens on its hub;
  * the body and the ten rows live one tap further, on `#/areas/gym/muscles`,
  * which is also the only place the 3D chunk is fetched.
  */
 export async function openMuscles(page, { wait = 4500 } = {}) {
   await page.getByRole('button', { name: 'Muskelgruppen öffnen' }).click();
+  await page.waitForTimeout(wait);
+}
+
+/*
+ * ── The muscle sheet (block 7C) ─────────────────────────────────────────
+ *
+ * A tap on a group's row, or on its muscle on the body, opens the group's
+ * sheet; the exercises of a group stand in it, and an exercise's detail is
+ * opened from there. Until block 7C a row was a toggle that filtered a list
+ * of exercises under the ten rows, and the suites looked there.
+ */
+
+/** The group whose sheet stands — by the name in the sheet's title — or `null`. */
+export const openGroup = (page) =>
+  page.evaluate(() => {
+    const scrim = document.querySelector('.sheet-scrim--clear:not([data-leaving])');
+    return scrim?.querySelector('.sheet__title')?.textContent?.trim() ?? null;
+  });
+
+/** The group whose row is marked as open — by the row's own name — or `null`. */
+export const openRow = (page) =>
+  page.evaluate(() => document.querySelector('.muscle-row__button[data-open] .muscle-row__name')?.textContent ?? null);
+
+/** Waits until no muscle sheet is in the document any more: it travels out. */
+export async function sheetGone(page, { timeout = 4000 } = {}) {
+  await page.waitForFunction(() => !document.querySelector('.sheet-scrim--clear'), null, { timeout }).catch(() => undefined);
+}
+
+/**
+ * Opens a group's sheet from its row. `group` is the row's name as shown
+ * ("Brust") or the group's id ("chest"). Waits until the sheet has risen
+ * and the body above it has come to rest.
+ */
+export async function openGroupSheet(page, group, { wait = 500 } = {}) {
+  const row = /^[a-z]/.test(group)
+    ? page.locator(`.muscle-row__button[data-muscle="${group}"]`)
+    : page.locator('.muscle-row__button').filter({ has: page.locator('.muscle-row__name', { hasText: new RegExp(`^${group}$`) }) });
+  await row.click();
+  await page.locator('.sheet--detents').waitFor({ state: 'visible' });
+  await bodyAtRest(page);
+  await page.waitForTimeout(wait);
+}
+
+/** Closes the muscle sheet as Escape does, and waits until it has gone and the body has come back. */
+export async function closeGroupSheet(page, { wait = 300 } = {}) {
+  await page.keyboard.press('Escape');
+  await sheetGone(page);
+  await bodyAtRest(page, { held: false });
+  await page.waitForTimeout(wait);
+}
+
+/**
+ * Waits for the body above a sheet to stand (`held`), or — after the sheet
+ * has gone — to have travelled back to the whole picture. Where no 3D body
+ * is drawn there is nothing to wait for.
+ */
+export async function bodyAtRest(page, { held = true, timeout = 8000 } = {}) {
+  await page
+    .waitForFunction(
+      (held) => {
+        const viewer = document.querySelector('.body-viewer');
+        if (!viewer) return true;
+        return held ? viewer.hasAttribute('data-held') : !viewer.hasAttribute('data-held') && viewer.dataset.zoom === '1';
+      },
+      held,
+      { timeout },
+    )
+    .catch(() => undefined);
+}
+
+/** The exercises the open sheet lists: name, best working set, and the change with its word — or the note where there is none. */
+export const sheetExercises = (page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll('.sheet--detents .muscle-sheet__exercise')].map((row) => {
+      const right = row.querySelector('.muscle-sheet__exerciseRight');
+      return {
+        id: row.getAttribute('data-exercise'),
+        name: row.querySelector('.muscle-sheet__exerciseName')?.textContent ?? '',
+        set: row.querySelector('.muscle-sheet__exerciseSet')?.textContent ?? '',
+        change: row.querySelector('.muscle-sheet__exerciseChange')?.textContent ?? null,
+        word: row.querySelector('.muscle-sheet__exerciseState')?.textContent ?? null,
+        state: [...(right?.classList ?? [])].find((c) => c.startsWith('muscle-sheet__exerciseRight--'))?.split('--')[1] ?? null,
+        color: right ? getComputedStyle(row.querySelector('.muscle-sheet__exerciseChange') ?? right).color : null,
+      };
+    }),
+  );
+
+/** Opens an exercise's detail from the open sheet, by the name its row shows. */
+export async function openSheetExercise(page, name, { wait = 600 } = {}) {
+  const row = page.locator('.sheet--detents .muscle-sheet__exercise').filter({
+    has: page.locator('.muscle-sheet__exerciseName', { hasText: name instanceof RegExp ? name : new RegExp(`^${name}$`) }),
+  });
+  // The exercises may begin under the fold of the lower height.
+  await row.first().scrollIntoViewIfNeeded().catch(() => undefined);
+  await row.first().click();
+  await page.locator('.gym-detail').waitFor({ state: 'visible' });
+  await page.waitForTimeout(wait);
+}
+
+/**
+ * Opens an exercise's detail wherever the exercise stands: the first group,
+ * in the rows' order, whose sheet lists it. For the tools that look at one
+ * exercise by name and do not care which group led to it. Returns that
+ * group's name, or `null` when no sheet lists the exercise.
+ */
+export async function openExerciseAnywhere(page, name) {
+  const groups = await page.locator('.muscle-row__name').allTextContents();
+  for (const group of groups) {
+    await openGroupSheet(page, group.trim(), { wait: 200 });
+    const row = page.locator('.sheet--detents .muscle-sheet__exercise').filter({
+      has: page.locator('.muscle-sheet__exerciseName', { hasText: name instanceof RegExp ? name : new RegExp(`^${name}$`) }),
+    });
+    if ((await row.count()) > 0) {
+      await row.first().scrollIntoViewIfNeeded().catch(() => undefined);
+      await row.first().click();
+      await page.locator('.gym-detail').waitFor({ state: 'visible' });
+      await page.waitForTimeout(600);
+      return group.trim();
+    }
+    await closeGroupSheet(page, { wait: 100 });
+  }
+  return null;
+}
+
+/** Leaves an exercise's detail by its own back button: the sheet it was opened from stands again. */
+export async function closeExercise(page, { wait = 400 } = {}) {
+  await page.locator('.gym-detail .gym-session__back').click();
+  await page.locator('.gym-detail').waitFor({ state: 'detached' });
   await page.waitForTimeout(wait);
 }
 
