@@ -222,8 +222,17 @@ async function openProgress(page) {
   await openProgress(page);
 
   const progress = await page.locator('[data-metric="gym-endurance"] .metric-tile__value').textContent();
-  check('a missed week costs half a week rather than the balance',
-    /1\.5 von 4 Wochen/.test(progress ?? ''), progress?.trim());
+  // Two met weeks less half a week for the missed one: 1.5 — from Tuesday
+  // on. On a Monday the week that ended yesterday is still in progress: a
+  // Sunday session may be written until Monday midnight, and a week is
+  // judged only once nothing can be written into it (D134). The last of the
+  // three seeded weeks then does not count yet, and the tile says 0.5.
+  // (Until block 7B this check asked for 1.5 on every day and failed on
+  // every Monday since the one-day window; the rule it holds is unchanged.)
+  const monday = (await page.evaluate(() => new Date().getDay())) === 1;
+  const expected = monday ? /(^|[^0-9.])0\.5 von 4 Wochen/ : /(^|[^0-9.])1\.5 von 4 Wochen/;
+  check(`a missed week costs half a week rather than the balance${monday ? ' (a Monday: the week that ended yesterday is not judged yet)' : ''}`,
+    expected.test(progress ?? ''), progress?.trim());
   check('and the phase is still running', await page.getByText('Ausdauerphase läuft').isVisible());
   await ctx.close();
 }
