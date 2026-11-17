@@ -41,8 +41,9 @@ const tab = async (page, name) => {
   check('the production build is served', response?.status() === 200, String(response?.status()));
   await page.waitForTimeout(800);
 
+  // A new device opens on the onboarding's opening page (D192).
   check('the app renders on a cold load',
-    await page.getByRole('button', { name: /Los geht/ }).isVisible());
+    await page.locator('.onboarding').isVisible());
   check('every asset loads from the project base path',
     errors.filter((e) => e.startsWith('requestfailed')).length === 0,
     errors.filter((e) => e.startsWith('requestfailed')).slice(0, 2).join(' | '));
@@ -131,7 +132,7 @@ const tab = async (page, name) => {
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
   check('a refresh keeps the user out of onboarding',
-    (await page.getByRole('button', { name: /Los geht/ }).count()) === 0);
+    (await page.locator('.onboarding').count()) === 0);
   check('and the day is still there after the refresh',
     (await page.locator('.check-in--answered').count()) > 0);
 

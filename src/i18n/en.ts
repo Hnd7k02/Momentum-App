@@ -286,6 +286,7 @@ export const en: Translations = {
   'onboarding.concept.rank.title': 'One rank\nfor everything.',
   'onboarding.concept.rank.body': 'Mind and Gym count together. You start as a Rookie.',
   'onboarding.welcome.privacy': 'Everything stays on your iPhone.',
+  'onboarding.opening.title': 'Let\u2019s get it started',
   'onboarding.hero.label':
     'A preview of the app with example values: progress up 9 percent in 30 days, Mind 8 of 10 today, Gym 2 of 3 sessions this week.',
   'onboarding.hero.change': '+9\u00A0%',

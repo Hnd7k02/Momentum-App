@@ -49,7 +49,9 @@ import './onboarding.css';
  * (`OnboardingHero`). What the flow asks, in which order, and what it hands
  * to storage did not change with the look — but for one thing the owner
  * decided at STOP 7E-a2 (D191): Mind opens with three questions chosen,
- * and its «Weiter» waits while none is.
+ * and its «Weiter» waits while none is. At STOP 7E-b (D192) two more: an
+ * opening page before the first slide, and no area chosen until the user
+ * chooses one.
  */
 
 type Step = 'momentum' | 'worlds' | 'rank' | 'domains' | 'questions' | 'sport' | 'summary';
@@ -127,7 +129,12 @@ export function OnboardingFlow({
   const categories = useMemo(() => suggestionsByCategory(language), [language]);
   useOnboardingGround();
 
-  const [chosen, setChosen] = useState<Set<'mental' | 'sport'>>(new Set(['mental']));
+  // Nothing is chosen until the user chooses (the owner at STOP 7E-b, D192):
+  // «Weiter» on the areas waits for a world.
+  const [chosen, setChosen] = useState<Set<'mental' | 'sport'>>(new Set());
+  // The opening page before the first slide (D192): no step of its own, so
+  // it counts nowhere in the marks.
+  const [opened, setOpened] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([...STARTER_QUESTIONS]);
   const [customQuestions, setCustomQuestions] = useState<QuestionDraft[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -556,6 +563,24 @@ export function OnboardingFlow({
       <Button variant="primary" block onClick={finish}>
         {t('onboarding.summary.start')}
       </Button>
+    );
+  }
+
+  if (!opened) {
+    // The opening page (the owner at STOP 7E-b, D192): very empty — one line
+    // in the middle and the usual button beneath. It is not a slide, carries
+    // no marks and has no way back; the first slide follows as it was.
+    return (
+      <div className="onboarding onboarding--opening" data-step="opening">
+        <div className="onboarding__opening">
+          <h1 className="onboarding__openingTitle">{t('onboarding.opening.title')}</h1>
+        </div>
+        <div className="onboarding__footer">
+          <Button variant="primary" block onClick={() => setOpened(true)}>
+            {t('common.continue')}
+          </Button>
+        </div>
+      </div>
     );
   }
 

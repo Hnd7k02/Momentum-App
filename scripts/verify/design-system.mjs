@@ -41,7 +41,7 @@
  */
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { CHROMIUM, URL_APP, check, summary, phone, chooseQuestions, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, chooseQuestions, passOpening, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
 
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage6b';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
@@ -255,6 +255,9 @@ for (const width of WIDTHS) {
 
   /* ── Onboarding: seven steps, all light ───────────────────────────────── */
   const step = async (slug) => { if (wants('onboarding')) await look(page, width, `onboarding-${slug}`, null); };
+  // The opening page before the first slide (D192).
+  await step('0-auftakt');
+  await passOpening(page);
   await step('1-willkommen');
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.waitForTimeout(400);
@@ -264,6 +267,8 @@ for (const width of WIDTHS) {
   await step('3-rang');
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.waitForTimeout(400);
+  // Nothing is chosen at first (D192): both worlds, as before.
+  await page.getByRole('button', { name: /^Mind/ }).click();
   await page.getByRole('button', { name: /^Gym/ }).click();
   await page.waitForTimeout(300);
   await step('4-bereiche');

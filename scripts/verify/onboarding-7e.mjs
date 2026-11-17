@@ -1,11 +1,14 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, chooseQuestions, clipped, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, chooseQuestions, clipped, passOpening, smallTargets, summary } from './lib.mjs';
 
 /**
  * Block 7E — the onboarding, every way through it, in the real build
  * (D190, D191), and the rehearsal of the preview.
  *
- *   A  Mind alone           the three starter questions, one per category,
+ *   A  Mind alone           the opening page — one line and «Weiter», no
+ *                           marks, no way back — then the areas with nothing
+ *                           chosen and «Weiter» held until a world is (D192);
+ *                           the three starter questions, one per category,
  *                           reach storage; Gym and Laufen stay off
  *   B  Gym alone            five sessions and two runs; no question step,
  *                           no question stored
@@ -43,7 +46,7 @@ const STARTERS = ['Wie gut hat dein Alltag heute funktioniert?', 'Wie gut hast d
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 const errors = [];
 
-async function device(url, width) {
+async function device(url, width, { stay = false } = {}) {
   const ctx = await browser.newContext({
     viewport: { width, height: HEIGHT[width] ?? 852 },
     deviceScaleFactor: 1,
@@ -56,6 +59,7 @@ async function device(url, width) {
   page.on('pageerror', (error) => errors.push(String(error)));
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.locator('.onboarding').waitFor({ state: 'visible' });
+  if (!stay) await passOpening(page);
   return { ctx, page };
 }
 
@@ -120,7 +124,20 @@ for (const width of WIDTHS) {
 
   // A: Mind alone, as it opens.
   {
-    const { ctx, page } = await device(URL_APP, width);
+    const { ctx, page } = await device(URL_APP, width, { stay: true });
+    const opening = await page.evaluate(() => ({
+      step: document.querySelector('.onboarding')?.getAttribute('data-step'),
+      heading: document.querySelector('.onboarding h1')?.textContent,
+      buttons: [...document.querySelectorAll('button')].map((button) => button.textContent.trim()),
+      marks: document.querySelectorAll('.onboarding__steps, .onboarding__dot').length,
+    }));
+    check(`${W} A: the flow opens on one line and «Weiter», with no marks and no way back (D192)`,
+      opening.step === 'opening' && opening.heading === 'Let\u2019s get it started' && JSON.stringify(opening.buttons) === '["Weiter"]' && opening.marks === 0,
+      JSON.stringify(opening));
+    problems.push(await look(page, `${W} A opening`));
+    await passOpening(page);
+    check(`${W} A: the first slide is still step one of the marks`,
+      (await page.locator('.onboarding__steps').getAttribute('aria-label')) === 'Schritt 1 von 5');
     problems.push(await look(page, `${W} A momentum`));
     // The hero's chart gives the slide what it lacks, down to 64px, and the
     // slide scrolls only when the chart has reached that floor (useFitPlot)
@@ -148,6 +165,12 @@ for (const width of WIDTHS) {
     await next(page);
     problems.push(await look(page, `${W} A rank`));
     await next(page);
+    const empty = await page.locator('.world-tile--choice[aria-pressed="true"]').count();
+    check(`${W} A: the areas open with nothing chosen, and «Weiter» waits for a world (D192)`,
+      empty === 0 && (await page.getByRole('button', { name: 'Weiter', exact: true }).isDisabled()) &&
+        (await page.locator('.onboarding__note').textContent())?.trim() === 'Wähle mindestens einen Bereich.');
+    problems.push(await look(page, `${W} A domains, none chosen`));
+    await area(page, 'Mind').click();
     problems.push(await look(page, `${W} A domains`));
     await next(page);
     const chosen = await page.locator('.category-group .question-pick[aria-pressed="true"] .question-pick__text').allTextContents();
@@ -177,7 +200,6 @@ for (const width of WIDTHS) {
     await next(page);
     await next(page);
     await area(page, 'Gym').click();
-    await area(page, 'Mind').click();
     await next(page);
     check(`${W} B: Gym alone skips the questions`, (await step(page)) === 'sport');
     await target(page, 'Gym-Sessions pro Woche', 5).click();
@@ -202,6 +224,7 @@ for (const width of WIDTHS) {
     await page.getByRole('button', { name: /Los geht/ }).click();
     await next(page);
     await next(page);
+    await area(page, 'Mind').click();
     await area(page, 'Gym').click();
     await next(page);
     await chooseQuestions(page, []);
@@ -239,6 +262,7 @@ for (const width of WIDTHS) {
     await page.getByRole('button', { name: /Los geht/ }).click();
     await next(page);
     await next(page);
+    await area(page, 'Mind').click();
     await area(page, 'Gym').click();
     await next(page);
     await chooseQuestions(page, []);
@@ -268,6 +292,7 @@ for (const width of WIDTHS) {
   await page.getByRole('button', { name: /Los geht/ }).click();
   await next(page);
   await next(page);
+  await area(page, 'Mind').click();
   await area(page, 'Gym').click();
   await next(page);
   await next(page);
@@ -290,14 +315,14 @@ for (const width of WIDTHS) {
   };
 
   await openRehearsal();
-  check('E: «Einführung ansehen» opens the onboarding at its first slide, in the light world',
-    (await step(page)) === 'momentum' && (await page.evaluate(() => document.documentElement.getAttribute('data-world'))) === null);
+  check('E: «Einführung ansehen» opens the onboarding at its opening page, in the light world',
+    (await step(page)) === 'opening' && (await page.evaluate(() => document.documentElement.getAttribute('data-world'))) === null);
+  await passOpening(page);
   // Other choices than the device's: Mind off, Gym at six, three runs.
   await page.getByRole('button', { name: /Los geht/ }).click();
   await next(page);
   await next(page);
   await area(page, 'Gym').click();
-  await area(page, 'Mind').click();
   await next(page);
   await target(page, 'Gym-Sessions pro Woche', 6).click();
   await target(page, 'Läufe pro Woche', 3).click();
@@ -310,6 +335,7 @@ for (const width of WIDTHS) {
 
   // Left half way, by Back.
   await openRehearsal();
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
   await next(page);
   await page.goBack();

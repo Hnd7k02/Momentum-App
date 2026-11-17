@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, phone, seed, seedLegacyFood, seedTraining, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, passOpening, phone, seed, seedLegacyFood, seedTraining, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP3, Stage 4 — Mind and Gym (P1–P3), on the real production build, under a
@@ -311,6 +311,7 @@ for (const [width, height] of SIZES) {
 for (const [width, height] of SIZES) {
   const W = `C ${width}`;
   const { ctx, page, errors } = await newDevice(width, height);
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.waitForTimeout(400);
   check(`${W}: the second screen names two worlds, Laufen inside Gym`,

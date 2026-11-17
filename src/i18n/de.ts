@@ -293,6 +293,9 @@ export const de = {
   'onboarding.concept.rank.title': 'Ein Rang\nfür alles.',
   'onboarding.concept.rank.body': 'Mind und Gym zählen zusammen. Du startest als Rookie.',
   'onboarding.welcome.privacy': 'Alles bleibt auf deinem iPhone.',
+  // The opening page's one line (D192): the owner's words, the same in both
+  // languages.
+  'onboarding.opening.title': 'Let\u2019s get it started',
   // The hero of the first slide is a picture with example values, and says so.
   'onboarding.hero.label':
     'Vorschau der App mit Beispielwerten: Verlauf plus 9 Prozent in 30 Tagen, Mind heute 8 von 10, Gym 2 von 3 Sessions diese Woche.',

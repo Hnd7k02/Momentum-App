@@ -28,16 +28,29 @@ afterEach(async () => {
   document.documentElement.removeAttribute('data-onboarding');
 });
 
+/**
+ * Mounts the flow, past its opening page unless `stay` asks to see it
+ * (D192): every other test begins on the first slide, as before.
+ */
 async function open(
   language: Language = 'de',
   onFinish: (selection: OnboardingSelection) => void = () => undefined,
   failed = false,
+  { stay = false }: { stay?: boolean } = {},
 ) {
   mounted = await mount(
     <I18nProvider language={language} setLanguage={() => undefined}>
       <OnboardingFlow onFinish={onFinish} failed={failed} />
     </I18nProvider>,
   );
+  if (!stay) {
+    expect(document.querySelector('.onboarding')?.getAttribute('data-step')).toBe('opening');
+    await act(async () =>
+      [...document.querySelectorAll<HTMLButtonElement>('button')]
+        .find((button) => button.textContent?.trim() === translate(language, 'common.continue'))!
+        .click(),
+    );
+  }
 }
 
 const text = () => (document.querySelector('.onboarding')?.textContent ?? '').replace(/\s+/g, ' ');
@@ -75,12 +88,17 @@ const target = (group: string, count: number) =>
     .querySelector(`[role="group"][aria-label="${group}"]`)
     ?.querySelector<HTMLButtonElement>(`button[aria-label="${count} pro Woche"]`);
 
-/** Through the three slides to the areas. */
-async function toAreas(language: Language = 'de'): Promise<void> {
+/**
+ * Through the three slides to the areas, and Mind chosen there — what the
+ * flow opened with until STOP 7E-b, when the areas began empty (D192).
+ * `choose: []` leaves them as they open.
+ */
+async function toAreas(language: Language = 'de', { choose = ['Mind'] }: { choose?: ('Mind' | 'Gym')[] } = {}): Promise<void> {
   await click(buttonNamed(translate(language, 'onboarding.welcome.start')));
   await click(buttonNamed(translate(language, 'common.continue')));
   await click(buttonNamed(translate(language, 'common.continue')));
   expect(step()).toBe('domains');
+  for (const name of choose) await click(area(name));
 }
 
 const next = (language: Language = 'de') => click(buttonNamed(translate(language, 'common.continue')));
@@ -155,9 +173,10 @@ describe('every way through it (block 7E, D191)', () => {
     seen.push(step());
     await next();
     seen.push(step());
-    // Mind is chosen from the start, so the areas need no tap.
-    expect(area('Mind')?.getAttribute('aria-pressed')).toBe('true');
+    // Nothing is chosen until the user chooses (D192).
+    expect(area('Mind')?.getAttribute('aria-pressed')).toBe('false');
     expect(area('Gym')?.getAttribute('aria-pressed')).toBe('false');
+    await click(area('Mind'));
     expect(document.querySelectorAll('.onboarding__dot')).toHaveLength(6);
     await next();
     seen.push(step());
@@ -317,7 +336,8 @@ describe('every way through it (block 7E, D191)', () => {
     // The first step has no way back, and the brand stands there instead.
     expect(document.querySelector('.onboarding__back')).toBeNull();
     expect(document.querySelector('.onboarding__brand')?.textContent).toBe('Momentum');
-    await toAreas();
+    await toAreas('de', { choose: [] });
+    expect(area('Mind')?.getAttribute('aria-pressed')).toBe('true');
     expect(area('Gym')?.getAttribute('aria-pressed')).toBe('true');
     await next();
     expect(chosenQuestions()).toHaveLength(4);
@@ -333,7 +353,8 @@ describe('every way through it (block 7E, D191)', () => {
     await open();
     const steps = () => document.querySelector('.onboarding__steps');
     expect(steps()?.getAttribute('role')).toBe('img');
-    expect(steps()?.getAttribute('aria-label')).toBe('Schritt 1 von 6');
+    // Before an area is chosen the flow has five steps (D192).
+    expect(steps()?.getAttribute('aria-label')).toBe('Schritt 1 von 5');
     await toAreas();
     await click(area('Gym'));
     expect(steps()?.getAttribute('aria-label')).toBe('Schritt 4 von 7');
@@ -365,6 +386,58 @@ describe('every way through it (block 7E, D191)', () => {
   });
 });
 
+describe('the opening page and the empty areas (STOP 7E-b, D192)', () => {
+  it('opens on one line and the usual button, with no marks and no way back', async () => {
+    await open('de', () => undefined, false, { stay: true });
+    expect(step()).toBe('opening');
+    const heading = document.querySelector('.onboarding h1');
+    expect(heading?.textContent).toBe('Let\u2019s get it started');
+    expect(text()).toBe(`Let\u2019s get it started${translate('de', 'common.continue')}`);
+    expect(document.querySelector('.onboarding__steps')).toBeNull();
+    expect(document.querySelector('.onboarding__back')).toBeNull();
+    expect(buttons().map((button) => button.textContent?.trim())).toEqual(['Weiter']);
+  });
+
+  it('counts nowhere in the marks: the first slide is still step one', async () => {
+    await open('de', () => undefined, false, { stay: true });
+    await click(buttonNamed('Weiter'));
+    expect(step()).toBe('momentum');
+    expect(document.querySelector('.onboarding__steps')?.getAttribute('aria-label')).toBe('Schritt 1 von 5');
+    expect(document.querySelectorAll('.onboarding__dot')).toHaveLength(5);
+    expect(document.querySelector('.onboarding__dot--active')).toBe(document.querySelector('.onboarding__dot'));
+    // And the first slide has no way back to it: it begins as it did.
+    expect(document.querySelector('.onboarding__back')).toBeNull();
+    expect(buttonNamed('Los geht\u2019s')).toBeTruthy();
+  });
+
+  it('says the same line in English', async () => {
+    await open('en', () => undefined, false, { stay: true });
+    expect(document.querySelector('.onboarding h1')?.textContent).toBe('Let\u2019s get it started');
+    expect(buttonNamed('Continue')).toBeTruthy();
+  });
+
+  it('the areas open with nothing chosen, and «Weiter» waits for a world, saying why', async () => {
+    await open();
+    await toAreas('de', { choose: [] });
+    expect(area('Mind')?.getAttribute('aria-pressed')).toBe('false');
+    expect(area('Gym')?.getAttribute('aria-pressed')).toBe('false');
+    expect(primary().disabled).toBe(true);
+    expect(note()).toBe(translate('de', 'onboarding.domains.needOne'));
+    await click(area('Gym'));
+    expect(primary().disabled).toBe(false);
+    expect(note()).toBe(translate('de', 'onboarding.domains.hint'));
+  });
+
+  it('a world chosen and taken off again holds «Weiter» once more', async () => {
+    await open();
+    await toAreas('de', { choose: [] });
+    await click(area('Mind'));
+    expect(primary().disabled).toBe(false);
+    await click(area('Mind'));
+    expect(primary().disabled).toBe(true);
+  });
+});
+
 describe('what each step shows (contract §16)', () => {
   it('the hero is one picture of example values: a name that says so, and nothing to operate', async () => {
     await open();
@@ -384,7 +457,10 @@ describe('what each step shows (contract §16)', () => {
     for (let guard = 0; guard < 8 && step() !== 'summary'; guard += 1) {
       visited.push(step()!);
       expect(text(), step()!).not.toMatch(examples);
-      if (step() === 'domains') await click(area('Gym'));
+      if (step() === 'domains') {
+        await click(area('Mind'));
+        await click(area('Gym'));
+      }
       await next();
     }
     expect(text()).not.toMatch(examples);
@@ -400,6 +476,7 @@ describe('what each step shows (contract §16)', () => {
     // Choose two runs, and walk back to the slide.
     await next();
     await next();
+    await click(area('Mind'));
     await click(area('Gym'));
     await next();
     await next();
@@ -440,6 +517,7 @@ describe('what each step shows (contract §16)', () => {
     await next();
     record();
     await next();
+    await click(area('Mind'));
     await click(area('Gym'));
     record();
     await next();

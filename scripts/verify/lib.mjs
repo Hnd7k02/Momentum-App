@@ -19,6 +19,16 @@ export const summary = () => {
 export const phone = { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, acceptDownloads: true };
 
 /**
+ * Passes the onboarding's opening page — one line and «Weiter» (the owner at
+ * STOP 7E-b, D192) — to its first slide. Every walk of the flow begins here.
+ */
+export async function passOpening(page) {
+  await page.locator('.onboarding[data-step="opening"]').waitFor({ state: 'visible' });
+  await page.getByRole('button', { name: /^(Weiter|Continue)$/ }).click();
+  await page.locator('.onboarding[data-step="momentum"]').waitFor({ state: 'visible' });
+}
+
+/**
  * Sets the onboarding's question selection to exactly these (block 7E,
  * D191). Mind opens with three starter questions chosen — one per
  * category — so a click on one of them would take it off; each row is set
@@ -45,11 +55,13 @@ export async function chooseQuestions(page, wanted) {
  */
 export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie war deine Stimmung/], gym = 3, running = 2, food = false, wellbeing = true } = {}) {
   if (food) throw new Error('onboard: Food is not offered (D139) — use seedLegacyFood for a device that had it');
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();   // two worlds
   await page.getByRole('button', { name: 'Weiter' }).click();   // one rank
-  // Domain picker: Mind starts selected; Gym carries the Laufen target too.
-  if (!wellbeing) await page.getByRole('button', { name: /^Mind/ }).click();
+  // Domain picker: nothing is chosen until the user chooses (D192); Gym
+  // carries the Laufen target too.
+  if (wellbeing) await page.getByRole('button', { name: /^Mind/ }).click();
   if (gym || running) await page.getByRole('button', { name: /^Gym/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   if (wellbeing) {

@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, chooseQuestions, setLanguage } from './lib.mjs';
+import { CHROMIUM, URL_APP, chooseQuestions, passOpening, setLanguage } from './lib.mjs';
 
 /**
  * Not a suite: the pictures of block 7E (`docs/design/wp3/stage7e/`).
@@ -24,7 +24,7 @@ const HEIGHT = { 320: 693, 360: 780, 393: 852, 430: 932 };
 const ALL = process.env.ALL === '1';
 const LANGUAGE = process.env.LANGUAGE ?? 'de';
 /** The steps pictured at every width; the rest at 393 only. */
-const EVERYWHERE = new Set(['1-momentum', '6-wochenziele']);
+const EVERYWHERE = new Set(['0-auftakt', '1-momentum', '6-wochenziele']);
 const URL_PREVIEW = process.env.URL_PREVIEW ?? null;
 mkdirSync(OUT, { recursive: true });
 
@@ -73,13 +73,18 @@ for (const width of WIDTHS) {
   };
   const next = (name = 'Weiter') => page.getByRole('button', { name, exact: true }).click();
 
+  // The opening page before the first slide (D192).
+  await shot('0-auftakt');
+  await passOpening(page);
   await shot('1-momentum');
   await page.getByRole('button', { name: /Los geht|Get started/ }).click();
   await shot('2-welten');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
   await shot('3-rang');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
-  // Both worlds: Mind is chosen from the start, Gym is added.
+  // The areas as they open, with nothing chosen (D192); then both worlds.
+  await shot('4a-bereiche-leer');
+  await page.getByRole('button', { name: /^Mind/ }).click();
   await page.getByRole('button', { name: /^Gym/ }).click();
   await shot('4-bereiche');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
@@ -104,8 +109,11 @@ if (URL_PREVIEW) {
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2, hasTouch: true, locale: 'de-CH', serviceWorkers: 'block' });
   const page = await ctx.newPage();
   await page.goto(URL_PREVIEW, { waitUntil: 'networkidle' });
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
-  for (let index = 0; index < 4; index += 1) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+  for (let index = 0; index < 2; index += 1) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+  await page.getByRole('button', { name: /^Mind/ }).click();
+  for (let index = 0; index < 2; index += 1) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
   await page.getByRole('button', { name: 'Starten' }).click();
   await page.locator('.tab-bar').waitFor();
   await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();
