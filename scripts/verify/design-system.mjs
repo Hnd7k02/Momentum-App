@@ -253,10 +253,11 @@ for (const width of WIDTHS) {
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
 
-  /* ── Onboarding: seven steps, all light ───────────────────────────────── */
-  const step = async (slug) => { if (wants('onboarding')) await look(page, width, `onboarding-${slug}`, null); };
-  // The opening page before the first slide (D192).
-  await step('0-auftakt');
+  /* ── Onboarding: the opening page and seven steps, all light ─────────── */
+  const step = async (slug, options) => { if (wants('onboarding')) await look(page, width, `onboarding-${slug}`, null, options); };
+  // The opening page before the first slide (D192) holds two texts by
+  // design — its title and «Weiter» — so two runs are what it must show.
+  await step('0-auftakt', { minRuns: 2 });
   await passOpening(page);
   await step('1-willkommen');
   await page.getByRole('button', { name: /Los geht/ }).click();

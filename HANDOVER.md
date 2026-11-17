@@ -1960,8 +1960,10 @@ the `Momentum-preview` build `275cfbc` — D181, D182, D183, D184)
   drawing buffer 786 × 872, "Apple GPU"; iPhone 15 Pro, iOS 26.3.1 (the
   browser says 18.7), the app from the home screen; screen 393 × 852,
   visible 393 × 793, the stage 393 × 436 (55 %); about 63 frames a second
-  observed. Against block 7B's copies: 161 ms where 193 ms stood, the same
-  scene, the same stage. **For block 9** these and 7B's are the device's
+  observed. Against block 7B's copy in the same state, both files already
+  in memory: 161 ms where 142 ms stood — the model 124 ms where 108, the
+  first picture 35 ms where 32 — the same scene, the same stage; 7B's
+  193 ms was a fresh start out of the cache. **For block 9** these and 7B's are the device's
   baseline (`prompt-9-haertung.md`, section 3).
 - **The owner's measurements** — the first from an iPhone in this project,
   three copies of the measuring display from the build `index-DQBEJ-V9`

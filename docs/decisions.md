@@ -6599,8 +6599,10 @@ their own: the owner checks them in the round of block 9.
 
 ### Tests
 
-`OnboardingFlow.test.tsx` (27 tests): the opening page — one line, one
-button, no marks, no way back, the same line in English — the first slide
+`OnboardingFlow.test.tsx` (28 tests): the opening page — one line, one
+button, no marks, no way back, the same line in English and marked as
+English in both languages, the focus kept on its button into the first
+slide — the first slide
 still step one of five, the areas empty with «Weiter» held and its line,
 and a world chosen and taken off again; the earlier tests walk the same
 paths as before with Mind chosen by hand. `onboarding-7e.mjs` checks the
@@ -6611,7 +6613,29 @@ chooses Mind where it used to be chosen for it (`onboard()` with
 `wellbeing`, `phase2.mjs`, `design-system.mjs`, `wp3-stage4.mjs`,
 `stage7e-shots.mjs`); `release.mjs` finds the onboarding by its element
 where it looked for «Los geht’s» on the first screen; `phase2.mjs` checks
-that nothing is chosen where it used to take Mind off.
+that nothing is chosen where it used to take Mind off. `design-system.mjs`
+measures the opening page with the two runs of text it holds by design —
+its line and «Weiter» — where every other screen must show three.
+
+**Reviewed** before the merge by four readers with a skeptic for every
+finding; five held and are fixed. The opening page went through its own
+return, so pressing «Weiter» unmounted the focused button and dropped a
+keyboard's or a screen reader's focus to the page; it now goes through
+the steps' return and the button stays, with a test. Its line is English
+in a German document and now says so (`lang="en"`), so a screen reader
+does not read it with German sounds. `design-system.mjs` failed the page
+for its two runs (above). `HANDOVER.md` compared 161 ms with 7B's fresh
+start, 193 ms, where the same state — both files already in memory — was
+142 ms. And the records named a preview without the two adjustments; the
+new one is below.
+
+**Verification** (2026-11-17): `tsc -b` clean; `npm run test` exit 0, 141
+files, 2482 tests; `onboarding-7e.mjs` 79 of 79, `design-system.mjs` with
+`ONLY=onboarding` 236 of 236 at four widths; `phase2.mjs` 68 of 68,
+`phase2-a11y.mjs` 17 of 17, `wp3-stage4.mjs` 170 of 170, `release.mjs` 83
+of 83, `phase3.mjs` 46 of 46 and `wp3-sheets.mjs` 330 of 330 on the build
+before the review's fixes, which change no element and no text a walk
+reads.
 
 ### The owner's measurements (17 November 2026, the second opening)
 

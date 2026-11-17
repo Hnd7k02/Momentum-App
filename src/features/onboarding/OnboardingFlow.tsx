@@ -569,49 +569,55 @@ export function OnboardingFlow({
   if (!opened) {
     // The opening page (the owner at STOP 7E-b, D192): very empty — one line
     // in the middle and the usual button beneath. It is not a slide, carries
-    // no marks and has no way back; the first slide follows as it was.
-    return (
-      <div className="onboarding onboarding--opening" data-step="opening">
-        <div className="onboarding__opening">
-          <h1 className="onboarding__openingTitle">{t('onboarding.opening.title')}</h1>
-        </div>
-        <div className="onboarding__footer">
-          <Button variant="primary" block onClick={() => setOpened(true)}>
-            {t('common.continue')}
-          </Button>
-        </div>
+    // no marks and has no way back; the first slide follows as it was. It
+    // goes through the same return as the steps, so its button keeps its
+    // place and the focus stays on it into the first slide. The line is the
+    // owner's English in both languages, and says so to a screen reader.
+    body = (
+      <div className="onboarding__opening">
+        <h1 className="onboarding__openingTitle" lang="en">
+          {t('onboarding.opening.title')}
+        </h1>
       </div>
+    );
+    note = null;
+    action = (
+      <Button variant="primary" block onClick={() => setOpened(true)}>
+        {t('common.continue')}
+      </Button>
     );
   }
 
   return (
-    <div className="onboarding" data-step={step}>
-      <header className="onboarding__header">
-        {stepIndex === 0 ? (
-          <span className="onboarding__brand">
-            <span className="onboarding__logo" aria-hidden="true">
-              <SparkIcon size={16} />
+    <div className={opened ? 'onboarding' : 'onboarding onboarding--opening'} data-step={opened ? step : 'opening'}>
+      {opened ? (
+        <header className="onboarding__header">
+          {stepIndex === 0 ? (
+            <span className="onboarding__brand">
+              <span className="onboarding__logo" aria-hidden="true">
+                <SparkIcon size={16} />
+              </span>
+              {t('app.name')}
             </span>
-            {t('app.name')}
-          </span>
-        ) : (
-          <button type="button" className="onboarding__back" onClick={() => go(-1)} aria-label={t('common.back')}>
-            <ChevronLeftIcon />
-          </button>
-        )}
-        <div
-          className="onboarding__steps"
-          role="img"
-          aria-label={t('onboarding.step', { current: stepIndex + 1, total: steps.length })}
-        >
-          {steps.map((value, index) => (
-            <span
-              key={value}
-              className={`onboarding__dot ${index === stepIndex ? 'onboarding__dot--active' : ''}`.trim()}
-            />
-          ))}
-        </div>
-      </header>
+          ) : (
+            <button type="button" className="onboarding__back" onClick={() => go(-1)} aria-label={t('common.back')}>
+              <ChevronLeftIcon />
+            </button>
+          )}
+          <div
+            className="onboarding__steps"
+            role="img"
+            aria-label={t('onboarding.step', { current: stepIndex + 1, total: steps.length })}
+          >
+            {steps.map((value, index) => (
+              <span
+                key={value}
+                className={`onboarding__dot ${index === stepIndex ? 'onboarding__dot--active' : ''}`.trim()}
+              />
+            ))}
+          </div>
+        </header>
+      ) : null}
 
       {body}
 

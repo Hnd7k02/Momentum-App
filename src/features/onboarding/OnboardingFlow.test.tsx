@@ -410,10 +410,27 @@ describe('the opening page and the empty areas (STOP 7E-b, D192)', () => {
     expect(buttonNamed('Los geht\u2019s')).toBeTruthy();
   });
 
-  it('says the same line in English', async () => {
+  it('says the same line in English, and tells a screen reader it is English in both languages', async () => {
     await open('en', () => undefined, false, { stay: true });
     expect(document.querySelector('.onboarding h1')?.textContent).toBe('Let\u2019s get it started');
+    expect(document.querySelector('.onboarding h1')?.getAttribute('lang')).toBe('en');
     expect(buttonNamed('Continue')).toBeTruthy();
+    await mounted?.unmount();
+    await open('de', () => undefined, false, { stay: true });
+    expect(document.querySelector('.onboarding h1')?.getAttribute('lang')).toBe('en');
+  });
+
+  it('keeps the focus on its button into the first slide', async () => {
+    await open('de', () => undefined, false, { stay: true });
+    const first = buttonNamed('Weiter')!;
+    first.focus();
+    expect(document.activeElement).toBe(first);
+    await click(first);
+    expect(step()).toBe('momentum');
+    // The same button, now «Los geht’s»: a keyboard or a screen reader
+    // stays where it was instead of falling back to the page.
+    expect(document.activeElement).toBe(buttonNamed('Los geht\u2019s'));
+    expect(document.activeElement).toBe(first);
   });
 
   it('the areas open with nothing chosen, and «Weiter» waits for a world, saying why', async () => {
