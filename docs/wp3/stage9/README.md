@@ -379,3 +379,15 @@ files, 2511 tests; `release` 88/88, `design-system` 1408/1408,
 the runner had handed its `ONLY` on to a suite that reads its own — fixed
 in `run-all.mjs`; the whole run sets none and was not affected.) The preview carries
 it: `Momentum-preview` `0d741de`, built from `0557dd8`.
+
+**On GitHub.** Chromium at `f715405` (Inter as the system font): 43
+suites, 5741 of 5742, the one red the known offline check — the same as
+here. The first two full runs, before the font, were red in three checks
+at 320px (Ubuntu's own default font, wider than Inter, cut the
+Muskelgruppen card and strip) and, in the second, in the two harness
+points of `access-wp3` fixed since. WebKit: green in three runs since the
+harness measures screens at rest, 1017 of 1017 at `5ee7663`. In two of six
+WebKit runs before, a notice's button stood in the middle of the journey
+(at 430 and at 393px); which of the two notices it was, the log did not
+say. `release.mjs` now names any notice and page error at every width; it
+has not stood since.
