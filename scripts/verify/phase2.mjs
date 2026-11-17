@@ -101,6 +101,9 @@ async function fresh(opts = {}) {
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
+  // Mind opens with three starter questions chosen (D191): taken off, the
+  // question of the user's own is the one stored, as before.
+  await chooseQuestions(page, []);
 
   await page.getByRole('button', { name: /Eigene Frage/ }).click();
   await page.getByRole('textbox', { name: 'Frage' }).fill('Habe ich Gitarre geübt?');
