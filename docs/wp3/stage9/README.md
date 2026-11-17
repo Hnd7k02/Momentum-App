@@ -333,3 +333,15 @@ out every text of one character — a bubble's digit, a scale's value;
 measured since (333 such texts in `design-system.mjs`, the lowest 4.72:1).
 The other "partly" entries are the scope of a check (which screens, which
 widths), recorded, not new topics.
+
+## Step 10 — the preview
+
+`Momentum-preview` `59aa850` on its `main` (and its branch
+`claude/hopeful-carson-4utktp`), built from `b71cf9e` (application source
+`017cc56`) with `--base=/Momentum-preview/` and
+`VITE_MOMENTUM_DB=momentum-preview`; without `sw.js` and the source maps;
+`index.html` the preview's own, the status bar `default`. Only the main
+bundle, its stylesheet and the viewer's chunk changed; the model, the
+stills, the icons and the manifest are byte for byte what was there. Served
+under its own path here before the push: the opening page, the database
+`momentum-preview`, no service worker, no error.

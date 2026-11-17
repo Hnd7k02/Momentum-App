@@ -18,7 +18,10 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 WP3 — Mind and Gym — as a whole, on `claude/momentum-wp3`, after block 9
 (hardening and the release gate). The live app is still `e30becd` (WP2).
-Record: `docs/wp3/stage9/README.md`; decisions D127–D195.
+Record: `docs/wp3/stage9/README.md`; decisions D127–D195. **Preview:**
+`Momentum-preview` `59aa850`, <https://hnd7k02.github.io/Momentum-preview/>
+— built from `b71cf9e`, no `sw.js`, the status bar `default`, its own
+database `momentum-preview`.
 
 ### What it contains
 
