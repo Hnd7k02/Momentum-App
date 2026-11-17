@@ -1,96 +1,90 @@
-# RC2 — real-device acceptance checklist
+# WP3 release candidate — the check on the iPhone
 
-29 tests, for an actual iPhone (and iPad if you have one). Everything here is
-something browser automation cannot prove: real Safari, the installed
-standalone shell, real touch, the real keyboard, real VoiceOver.
+What only the phone can show, for the release candidate of WP3 (block 9,
+the release gate). Everything a browser can prove runs in
+`scripts/verify/` (`npm run verify`) and on GitHub; this list is what is
+left: real Safari, the app from the Home Screen, a real finger, a real
+VoiceOver, and the measuring display.
 
-Start from a clean slate: Safari → Settings → Clear History and Website Data,
-or use a fresh profile, so test 6 really is a first launch.
+The RC2 checklist that stood here is history; it is recorded with RC2 in
+[`release-candidates.md`](release-candidates.md).
 
-**Build under test:** Momentum V1 **RC2**, application commit `c3e8b7f`.
-**URL:** <https://dario02king.github.io/Momentum-App/> — open it in **Safari**.
+**Build under test:** the preview `Momentum-preview` named in
+`release-candidates.md` (WP3 RC), at <https://hnd7k02.github.io/Momentum-preview/>,
+opened as a Home Screen app. The live app is <https://hnd7k02.github.io/Momentum-App/>
+(the owner, 2026-11-17). Both share one origin; the preview keeps its data
+in a database of its own (`momentum-preview`), so nothing here can touch
+the live app's data.
 
-## How to report what you find
+**Check data:** there is no backup with real data (D183). The check files
+for the day of the check and the day after are named in the STOP report
+of block 9; import the one for the day you check.
 
-| Severity | Means | During RC2 |
-|---|---|---|
-| **Blocker** | Data loss, app will not start or cannot be used, install or offline flow broken, a core action unreachable | Fix before promotion |
-| **Major** | An important workflow is broken or materially confusing | Fix before promotion |
-| **Minor** | A genuine defect that does not block use | Fix if cheap and safe |
-| **Polish** | Visual or copy refinement only | Defer past RC2 unless exceptionally cheap and risk-free |
+| | |
+|---|---|
+| Device | |
+| iOS version | |
+| Date | |
+| Who | |
 
-For each failure note: **test number · severity · what you did · what happened
-· what you expected · device and iOS version.** A photo or screen recording
-beats a description.
+## How to report
 
----
+For each point: ✅, or ❌ with what you did, what happened and what you
+expected. A screenshot or a screen recording beats a description. A point
+that fails is fixed in the session of block 9 and the preview is published
+again.
 
-## Install and the PWA shell
+## The checklist
 
-| # | Action | Expected | ✅/❌ |
+| # | Do | Expected | Result |
 |---|---|---|---|
-| 1 | In Safari, open the URL, then Share → Add to Home Screen | The sheet offers the name **Momentum** with the app icon, not a generic page thumbnail | ☐ |
-| 2 | Tap the Home Screen icon | Opens standalone: **no Safari address bar, no toolbar** | ☐ |
-| 3 | Look at the icon and label on the Home Screen | Icon is sharp at Retina resolution, not stretched or letterboxed; label reads Momentum | ☐ |
-| 4 | Look at the top of the screen in the installed app | Content clears the notch / Dynamic Island; the status bar stays legible over the app background | ☐ |
-| 5 | Swipe up to the app switcher, swipe the app away, relaunch from the icon | Relaunches standalone and lands on Today with everything intact | ☐ |
+| 1 | In the **live app**, Bereiche → Einstellungen → "Backup exportieren", and keep the file somewhere safe | A file `momentum-backup-….json` is saved. **This is the way back.** | |
+| 2 | Only once 1 is done: in the live app, import that same file at once | "Backup wiederhergestellt." — nothing changes. The live build reads its own backup | |
+| 3 | Open the preview, import the file from 1 | Everything is there: answers, sessions, runs, plans. Ernährung is nowhere to be seen. Export a backup there and import it again: nothing changes | |
+| 4 | A whole day: answer the questions, add something for yesterday on Gestern, log a workout with a warm-up set, "Fertig" | Each lands on the day on show; the warm-up set says "Aufwärmsatz" | |
+| 5 | Log a workout **before** answering the day's questions, then look at the Gym tile, Muskelgruppen and Verlauf | The workout is there at once: Muskelgruppen and the exercise detail as always; the Gym tile with its value and "Vorläufig · der Tag ist noch offen"; Verlauf's grid with today as a hollow bar, "vorläufig". Answer the questions: the tile drops the word and keeps the value (D194) | |
+| 6 | The onboarding — in a private tab, or Einstellungen → "Einführung ansehen": tap a corner, the line and the hint on the opening page; then "Womit startest du?" | Every tap goes on. The hint «Screen antippen» is faint, and still readable. Nothing is chosen in the areas, and "Weiter" waits for a world (D192, D193) | |
+| 7 | Muskelgruppen: the body, three sheets | The same number and colour in row, sheet and body | |
+| 8 | VoiceOver on: answer a question on Heute; swipe through the ten rows of Muskelgruppen; open a sheet and close it | Each row says group, figure and state; the sheet has its name; closing returns to the row | |
+| 9 | Settings → Accessibility: "Reduce Motion", then "Reduce Transparency", one at a time | Nothing travels; glass turns solid; everything stays readable | |
+| 10 | As a Home Screen app: both worlds, the status bar, the keyboard in a set row, the tab bar above the Home indicator | Nothing hides under the clock or the indicator; the keyboard leaves the field in view | |
 
-## Core interaction
+**After the go-live only** (not the preview, which has no service worker):
+the live app shows "Neue Version verfügbar"; "Neu laden" reloads once and
+your data is there. Then open it once in flight mode: Heute and the body
+appear (the offline check in `release-proof.mjs` is red until the tidy-up,
+D163).
 
-| # | Action | Expected | ✅/❌ |
+## Measured on the phone, against the targets
+
+The targets are the review's (`docs/wp3/review-2026-11.md`, section I).
+The measurements are the owner's, from the measuring display (block 7B,
+D181; Einstellungen → "Messanzeige"). They stand for the release (the
+owner, 2026-11-17: "Die Messwerte aus 7B und vom 17.11. gelten. Neue
+Messrunden nur, wenn etwas auffällt.").
+
+| | Target | Block 7B (2026-11-16, build `index-DQBEJ-V9`) | 17 November 2026 (build `index-B1RXpspr`) |
 |---|---|---|---|
-| 6 | Complete onboarding from scratch: pick 3 questions, set a weekly Sport target, tap Starten | Lands on Today; your chosen questions are listed; the target you picked is shown | ☐ |
-| 7 | Holding the phone in one hand, answer every question with your thumb only | Every option is comfortably reachable; no stretching to the top of the screen; no mis-taps between adjacent options | ☐ |
-| 8 | Tap an answered (folded) question, change the answer | Row opens, the new answer takes effect, the row folds again after a moment | ☐ |
-| 9 | Open a folded question and tap **Antwort entfernen** | The question returns to the unanswered list and the header count goes back up | ☐ |
-| 10 | Tap the same answer option twice in a row | It stays selected. It must **not** clear | ☐ |
-| 11 | Log a Sport session, then open it and change the type, note and duration | The week counter increases; edits stick | ☐ |
-| 12 | Move through Heute → Verlauf → Rang → Bereiche and back | Tab switching is immediate; each screen keeps its scroll position sensibly; the current tab is obvious | ☐ |
-| 13 | Scroll each screen to its bottom | Scrolling is smooth with normal momentum; nothing is hidden behind the tab bar; no rubber-band revealing browser chrome | ☐ |
+| Body visible, first load over the network | ≤ 2.5 s | 864 ms (files checked over the network, taken from the cache) | — |
+| Body visible, from the cache | ≤ 1 s | 193 ms | — |
+| … both files already in memory | | 142 ms | 161 ms (code 2 ms, model 124 ms, first picture 35 ms) |
+| Turning: frames a second | ≥ 55 on average | 60.2 | about 63 observed |
+| Turning: frames under 25 ms | ≥ 95 % | 100 % of 154 | — |
+| Idle: frames | 0 | 1, and 2 (a touch drew; fixed in 7C, D184/D185) | — |
+| Draw calls | ≤ 12 | 12 | 12 |
+| Triangles | ≤ 80,000 | 50,488 | 50,488 |
+| Textures | one of 1024² | 1 · 768 × 1024 | 1 · 768 × 1024 |
 
-## Persistence
+Device for both: iPhone 15 Pro, iOS 26.3.1 (the browser reports 18.7),
+the app from the Home Screen, screen 393 × 852, visible 393 × 793, the
+body's stage 393 × 436 (55 %), pixel ratio 2 of 3, drawing buffer
+786 × 872, "Apple GPU".
 
-| # | Action | Expected | ✅/❌ |
-|---|---|---|---|
-| 14 | Note today's answers, week count, rank and XP. Force-quit and relaunch | All four are exactly as you left them | ☐ |
-| 15 | Restart the phone, then open the app from the Home Screen | Same again: nothing lost, no re-onboarding | ☐ |
-| 16 | Leave the app for a few hours, come back | Still your data; the date header shows the correct current day | ☐ |
+**Not measured on the phone, and open:** a first load with the files
+really coming over the network; the turning measurement on the 17th; an
+idle second after block 7C's fix. None is a new measuring round unless
+something stands out.
 
-## Offline
+## Results
 
-| # | Action | Expected | ✅/❌ |
-|---|---|---|---|
-| 17 | Open the app online once. Turn on Airplane Mode. Force-quit and relaunch | The app launches fully offline — no error page, no blank screen | ☐ |
-| 18 | Still offline: answer a question, log a Sport session, visit all four tabs | Everything works. Progress and Rank render normally | ☐ |
-| 19 | Still offline: force-quit and relaunch again | The offline changes are still there | ☐ |
-| 20 | Turn Airplane Mode off and use the app | No data loss, no duplicate entries, no reset, no "recovering" state | ☐ |
-
-## iOS-specific UI
-
-| # | Action | Expected | ✅/❌ |
-|---|---|---|---|
-| 21 | Scroll to the bottom of Bereiche and look at the tab bar | The bar clears the home indicator; nothing is cut off underneath it | ☐ |
-| 22 | Rotate to landscape on each of the four tabs | Layout adapts without clipping or overlap. *(Portrait is the designed orientation; landscape must be usable, not beautiful.)* | ☐ |
-| 23 | Bereiche → add a question, type into the text field. Then edit a Sport session's note | The keyboard never covers the field you are typing in; you can scroll while it is open; Sichern/Hinzufügen stays reachable | ☐ |
-| 24 | Dismiss the keyboard | The layout settles back with no leftover gap or jump | ☐ |
-
-## Accessibility
-
-| # | Action | Expected | ✅/❌ |
-|---|---|---|---|
-| 25 | Pinch to zoom in, and out again | Zoom works. *(Blocked zoom would be a Blocker — it was fixed during stage 8, so this test confirms the fix on real hardware.)* | ☐ |
-| 26 | Settings → Accessibility → Display & Text Size → Larger Text, raise it, return to the app | **Known limitation:** the app's own text will not resize — it is fixed in px. Report only if something *breaks*, not that it fails to grow | ☐ |
-| 27 | Turn on VoiceOver. Swipe through Today | Each question is announced with its answer options; the answered rows announce the question and the chosen value; the clear action is reachable | ☐ |
-| 28 | With VoiceOver on Verlauf: use the rotor to move by heading, then find the daily-values table | Headings: Verlauf, Trend, Tagesverlauf. The trend chart is announced as one image with range, direction and values. The table gives dates as column headers and percentages per day. **The 30 bars must not be announced individually** | ☐ |
-| 29 | With VoiceOver on Rang and Bereiche: swipe through both | Rank, Peak and XP are announced as three separate statements; the rank badges are silent (decorative); switches announce their on/off state | ☐ |
-
----
-
-### Notes while testing
-
-Read the expected column before you act — several tests describe known
-limitations deliberately, so you don't spend time reporting something already
-recorded in [`release-candidates.md`](release-candidates.md).
-
-Tests 15 and 22 are the two most likely to be impractical depending on your
-device and patience. Skipping either is fine; mark it and say so.
+*(filled in from the owner's report, with device, iOS version and date)*

@@ -41,10 +41,24 @@ import { BODY_WEIGHT_ON_DAY, EXERCISES, FIRST_DAY, STAGE5B_LAST_DAY, answersOn, 
  * for, and which goes on from the sixth by double progression.
  *
  * Every figure is invented. It is a training diary nobody kept.
+ *
+ * **The update profile** (block 9, step 4): three switches add what a device
+ * on the live build holds besides and the update has to carry — `FOOD=1`
+ * switches Ernährung on in the onboarding, writes a Vorsatz and rates every
+ * day on its own card; `RUNS=1` gives Laufen a target of two and logs a run
+ * on Tuesdays and Saturdays, with distance and time in its sheet; `PLAN=1`
+ * saves a training plan on the first day and starts one workout a week from
+ * it. Without them the script does exactly what it did for Stage 5b.
+ *
+ *   FIRST=2026-09-28 LAST=2026-11-17 FOOD=1 RUNS=1 PLAN=1 \
+ *     OUT=.github/fixtures/wp3-update/live-profile.json node scripts/verify/stage5b-live-backup.mjs
  */
 const URL = process.env.LIVE_URL ?? 'http://127.0.0.1:4273/Momentum-App/';
 const OUT = process.env.OUT ?? 'docs/wp3/stage5b/momentum-pruefdaten-5b.json';
 const TZ = 'Europe/Zurich';
+const WITH_FOOD = process.env.FOOD === '1';
+const WITH_RUNS = process.env.RUNS === '1';
+const WITH_PLAN = process.env.PLAN === '1';
 
 /* ── The plan ───────────────────────────────────────────────────────────── */
 
@@ -62,6 +76,21 @@ if (new Date(`${FIRST}T12:00:00Z`).getUTCDay() !== 1) throw new Error(`FIRST mus
 for (const day of Object.keys(BODY_WEIGHT)) {
   if (!Object.values(TRAINING.get(day) ?? {}).length || !('pullUp' in TRAINING.get(day))) throw new Error(`no pull session on ${day} to enter a body weight on`);
 }
+
+/* ── The update profile's additions (block 9, step 4) ───────────────────── */
+
+/** Food's 1–10 for the day of `index`: mostly 6 to 9, a lapse every ninth day. */
+const foodOn = (index) => (index % 9 === 5 ? 4 : 6 + ((index * 7 + 3) % 4));
+/** A run on Tuesday (5.2 km) and Saturday (8.1 km), a little quicker most weeks. */
+function runOn(day, index) {
+  const weekday = new Date(`${day}T12:00:00Z`).getUTCDay();
+  const week = Math.floor(index / 7);
+  if (weekday === 2) return { km: '5.2', minutes: String(30 - (week % 3)) };
+  if (weekday === 6) return { km: '8.1', minutes: String(48 - (week % 4)) };
+  return null;
+}
+/** The plan saved on the first day, and the weekday its workout is started from it. */
+const PLAN = { name: 'Push', exercises: ['bench', 'press', 'pushdown'] };
 
 /* ── The clock ──────────────────────────────────────────────────────────── */
 
@@ -106,12 +135,14 @@ async function onboard(page) {
   await page.getByRole('button', { name: 'Weiter' }).click();
   // Wellbeing starts chosen; Sport adds Gym and Running, and only Gym gets a target.
   await page.getByRole('button', { name: /^Sport/ }).click();
+  if (WITH_FOOD) await page.getByRole('button', { name: /^Ernährung/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   for (const question of [/Wie gut hast du gesch/, /Wie war deine Stimmung/]) {
     await page.getByRole('button', { name: question }).first().click();
   }
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.locator('.card').nth(0).getByRole('button', { name: '3 pro Woche' }).click();
+  if (WITH_RUNS) await page.locator('.card').nth(1).getByRole('button', { name: '2 pro Woche' }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: 'Starten' }).click();
   await page.getByRole('button', { name: 'Session eintragen' }).waitFor();
@@ -184,6 +215,50 @@ async function logExercise(page, exercise, planned, day) {
   }
 }
 
+/** Ernährung's Vorsatz, written once in its area. */
+async function writeFoodFocus(page) {
+  await page.getByRole('button', { name: 'Bereiche' }).click();
+  await page.getByRole('radio', { name: 'Ernährung' }).click();
+  await page.locator('.food-focus__input').fill('Zmittag selber kochen');
+  await page.getByRole('button', { name: 'Vorsatz sichern' }).click();
+  // The Vorsatz lives in the Food domain's settings.
+  const focus = await until(
+    async () => (await idb(page, 'domains')).find((domain) => domain.type === 'food')?.settings?.focus ?? '',
+    (text) => text === 'Zmittag selber kochen',
+  );
+  if (focus !== 'Zmittag selber kochen') throw new Error(`the Vorsatz was not saved: ${JSON.stringify(focus)}`);
+}
+
+/** The plan, saved through the Gym hub's editor. */
+async function savePlan(page) {
+  await page.getByRole('button', { name: 'Bereiche' }).click();
+  await page.getByRole('radio', { name: 'Gym' }).click();
+  await page.getByRole('button', { name: 'Neuer Plan' }).click();
+  await page.getByLabel('Name des Plans').fill(PLAN.name);
+  for (const key of PLAN.exercises) {
+    await page.getByRole('button', { name: /Übung hinzufügen/ }).first().click();
+    await page.getByRole('textbox', { name: 'Suchen' }).fill(EXERCISES[key].search);
+    await page.locator('.gym-picker__row', { has: page.locator('.gym-picker__name', { hasText: new RegExp(`^${escape(EXERCISES[key].name)}$`) }) }).first().click();
+  }
+  await page.getByRole('button', { name: 'Plan sichern' }).click();
+  await until(async () => (await idb(page, 'gymPlans')).length, (count) => count === 1);
+}
+
+/** A run, one tap on Heute, then its distance and time in its sheet. */
+async function logRun(page, day, run) {
+  const before = (await idb(page, 'runs')).length;
+  await page.getByRole('button', { name: 'Lauf eintragen' }).click();
+  const stored = await until(async () => (await idb(page, 'runs')).filter((entry) => entry.date === day), (rows) => rows.length === 1);
+  if (stored.length !== 1 || (await idb(page, 'runs')).length !== before + 1) throw new Error(`${day}: the run was not stored`);
+  await page.locator('.training-session, .today__session, button').filter({ hasText: /^Lauf/ }).first().click();
+  await page.locator('#session-distance').waitFor();
+  await page.locator('#session-distance').fill(run.km);
+  await page.locator('#session-duration').fill(run.minutes);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  const saved = await until(async () => (await idb(page, 'runs')).find((entry) => entry.date === day), (entry) => entry?.distanceMetres > 0 && entry?.durationSeconds > 0);
+  if (!(saved?.distanceMetres > 0)) throw new Error(`${day}: the run's distance was not saved`);
+}
+
 /* ── The run ────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
@@ -202,17 +277,34 @@ page.on('pageerror', (error) => errors.push(String(error)));
 
 let plannedSets = 0;
 let sessions = 0;
+let runs = 0;
+let days = 0;
 for (let index = 0, day = FIRST; day <= LAST; index += 1, day = dayOffset(day, 1)) {
   const training = TRAINING.get(day);
   // Every day is opened in the morning, a training day a little earlier.
   await ctx.clock.setSystemTime(localInstant(day, training ? 7 : 8, 10 + (index % 5) * 7));
   await page.goto(URL, { waitUntil: 'networkidle' });
-  if (index === 0) await onboard(page);
+  if (index === 0) {
+    await onboard(page);
+    if (WITH_FOOD) await writeFoodFocus(page);
+    if (WITH_PLAN) await savePlan(page);
+    if (WITH_FOOD || WITH_PLAN) await page.goto(URL, { waitUntil: 'networkidle' });
+  }
   await page.getByRole('button', { name: 'Session eintragen' }).waitFor();
-  await answer(page, answersOn(index));
+  await answer(page, WITH_FOOD ? [...answersOn(index), foodOn(index)] : answersOn(index));
+  const run = WITH_RUNS ? runOn(day, index) : null;
+  if (run) {
+    await logRun(page, day, run);
+    runs += 1;
+    await page.goto(URL, { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Session eintragen' }).waitFor();
+  }
 
   if (training) {
     await page.getByRole('button', { name: 'Session eintragen' }).click();
+    // With a plan saved, the button asks which workout: a free one here.
+    const free = page.locator('[role="dialog"]').getByRole('button', { name: 'Freie Session' });
+    if (WITH_PLAN && (await free.count().catch(() => 0)) > 0) await free.click();
     await page.getByRole('button', { name: /Übung hinzufügen/ }).first().waitFor();
     for (const [key, planned] of Object.entries(training)) {
       await logExercise(page, EXERCISES[key], planned, day);
@@ -222,9 +314,14 @@ for (let index = 0, day = FIRST; day <= LAST; index += 1, day = dayOffset(day, 1
     await page.getByRole('button', { name: /Session eintragen|Session öffnen|Training/ }).first().waitFor();
     sessions += 1;
   }
+  days += 1;
   const answers = (await idb(page, 'answers')).filter((record) => record.date === day).length;
   console.log(`${day}  ${training ? `${Object.keys(training).length} exercises` : 'no training'}  answers ${answers}`);
   if (answers !== 2) throw new Error(`${day}: ${answers} answers stored`);
+  if (WITH_FOOD) {
+    const rated = (await idb(page, 'foodDays')).filter((record) => record.date === day).length;
+    if (rated !== 1) throw new Error(`${day}: ${rated} Food ratings stored`);
+  }
 }
 
 /* ── The export, through the interface ──────────────────────────────────── */
@@ -252,6 +349,9 @@ const report = {
   weights: count('weightEntries'),
   answers: count('answers'),
   snapshots: count('configSnapshots'),
+  runs: count('runs'),
+  plans: count('gymPlans'),
+  foodDays: count('foodDays'),
   consoleErrors: errors.length,
 };
 console.log(JSON.stringify(report, null, 2));
@@ -261,6 +361,9 @@ const ok =
   report.sessions === sessions &&
   report.sets === plannedSets &&
   report.weights === Object.keys(BODY_WEIGHT).length &&
+  (!WITH_RUNS || report.runs === runs) &&
+  (!WITH_PLAN || report.plans === 1) &&
+  (!WITH_FOOD || report.foodDays === days) &&
   errors.length === 0;
 await browser.close();
 console.log(ok ? `written: ${OUT}` : 'the export does not hold what was entered');
