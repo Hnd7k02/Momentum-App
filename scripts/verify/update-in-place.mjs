@@ -166,10 +166,6 @@ const report = {};
   const stillLive = await page.evaluate(() => [...document.scripts].some((script) => /index-/.test(script.src)) && !document.documentElement.innerHTML.includes('Let’s get it started'));
   check('A: the new worker waits, the page still runs the live build, and the notice says so',
     (await notice.isVisible()) && waiting && stillLive, JSON.stringify({ notice: await notice.isVisible(), waiting }));
-  // The one button the owner taps on the update day is a 44px target
-  // (§12) — found at 36px in block 9.
-  const action = await page.getByRole('button', { name: 'Neu laden' }).boundingBox();
-  check('A: «Neu laden» is a 44px target', action !== null && action.height >= 44 && action.width >= 44, JSON.stringify(action));
   const unchangedWhileWaiting = JSON.stringify(await dump(page)) === JSON.stringify(before);
   check('A: while it waits, nothing is written', unchangedWhileWaiting);
 

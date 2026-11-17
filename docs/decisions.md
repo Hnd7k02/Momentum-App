@@ -6880,8 +6880,9 @@ each broken once, §12 in the browser. Its record is
    not get through at 34px. Neither appears in an ordinary walk through the
    app, so no suite that measures targets met them; WebKit on GitHub did,
    when the update notice rose in the middle of a run. Both read
-   `--touch-min` now; `noticeTargets.test.ts` holds it, and
-   `update-in-place.mjs` measures «Neu laden» where it stands.
+   `--touch-min` now, and `noticeTargets.test.ts` holds it. On the update
+   day itself the notice is still the live build's, at 36px: it can only
+   be changed for the updates after this one.
 
 **Found and fixed in the harness.** `wp2-2-shots.mjs` counted the
 onboarding's still since block 7E as one of the hub's; the record is
