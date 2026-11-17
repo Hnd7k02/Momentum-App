@@ -346,3 +346,20 @@ bundle, its stylesheet and the viewer's chunk changed; the model, the
 stills, the icons and the manifest are byte for byte what was there. Served
 under its own path here before the push: the opening page, the database
 `momentum-preview`, no service worker, no error.
+
+## Step 10 — the final check
+
+Here, Chromium, on `33a2cf5` (the application as `017cc56`; the harness as
+it stands): `tsc -b` exit 0 (11 s); `npm run test` exit 0 — 144 files,
+2508 tests, the two report files skipped as before (102 s); `npm run
+verify` — **43 suites, 5741 of 5742 checks**, the one red the known
+offline check, which still ends the run with exit 1 (D163). Against the
+baseline: three suites more (`update-in-place`, `today-in-charts`,
+`access-wp3`), 94 checks more, and the six red checks of `wp2-2-shots`
+green. `body-reach` 12/12 in 55 minutes.
+
+`git diff aab8d12 -- .github/fixtures` adds files and changes none: the
+five under `wp3-update/`. Under `src/` the block added tests
+(`provisionalRating`, `keptBoundaries`, `updateRehearsal`, and cases in
+`history`, `heatmap`, `questionDetail`) and changed code for D194 and the
+two fixes of D195 only.

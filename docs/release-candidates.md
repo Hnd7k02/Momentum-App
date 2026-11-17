@@ -51,7 +51,7 @@ database `momentum-preview`.
 |---|---|---|
 | `tsc -b` | exit 0 | exit 0 |
 | `npm run test` | exit 0 · 141 files · 2485 tests | exit 0 · 144 files · 2508 tests |
-| `npm run verify`, Chromium, here | 40 suites · 5641 / 5648 | FINAL_LOCAL |
+| `npm run verify`, Chromium, here | 40 suites · 5641 / 5648 | 43 suites · 5741 / 5742 |
 | GitHub, Chromium | — | FINAL_GITHUB |
 | GitHub, WebKit (5 suites) | — | 1012 / 1012 |
 
