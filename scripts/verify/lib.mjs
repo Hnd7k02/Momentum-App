@@ -877,7 +877,9 @@ export async function textContrast(page) {
     let node;
     while ((node = walker.nextNode())) {
       const text = node.textContent.trim();
-      if (text.length < 2) continue;
+      // One character is text too: a bubble's digit, a scale's value, the
+      // "–" where no group improved (block 9; two characters until then).
+      if (text.length === 0) continue;
       const el = node.parentElement;
       if (!el || seen.has(el) || el.closest('.visually-hidden, script, style')) continue;
       // Hidden from assistive technology is not hidden from the eye: a
