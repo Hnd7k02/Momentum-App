@@ -252,6 +252,49 @@ questions are answered on every day of the file, a plan «Push» is saved,
 and Ernährung was on and rated — in the preview it is gone from every
 screen and its data stays.
 
+## Step 7 — contract §14, every rule broken once
+
+Each rule of §14, and each a later block wrote with a check of its own, was
+broken once on purpose: an edit, a build of its own (a browser rule) or a
+unit run (a rule held by a unit test), and the file restored as it was
+found. None of the breaks is committed. "Caught" means the named check
+failed with the rule's own words, not the suite at large.
+
+| Rule | Held by | The break | Caught by |
+|---|---|---|---|
+| No colour outside `tokens.css` (§2.6 apart) | `designRules.test.ts`, `statusPalette.test.ts` | a hex, a named colour, a status hex written in a stylesheet | "no hex colour outside the token file", "no named colour in a stylesheet", "#ff3b5c appears in tokens.css and nowhere else" |
+| Font sizes through tokens, none under 11px | `designRules.test.ts` | a size in px; a step under 11px | "every font-size … reads a --type-* token", "no size on the scale is under 11px" |
+| `--text-tertiary` holds 4.5:1 on card and ground | `contrast.test.ts` | the token lightened | "--text-tertiary is readable on a card" |
+| Every visible text holds its contrast on its pixels | `design-system.mjs` | Verlauf's range caption in `--data-track` | "393 verlauf-raster: every text reads at 4.5:1 … 1.17" |
+| No screen wider than its viewport | `design-system.mjs` | the grid given a width of 520px | "393 verlauf: no wider than its viewport" |
+| Mint, the area colours, a muscle colour as a surface stay gone | `designRules.test.ts` | a `--mint-*` token back | "nothing reads or declares a --mint-* token" |
+| State follows the shown figure; band and minimum | `muscleState.test.ts` | the held band widened upward, a rise from +3 % | "is one-sided: a rise counts from +2 %, a fall from −3 %" |
+| Body, row and sheet show the same number | `muscle-sheet.mjs` | the sheet's figure shifted | "Brust: its sheet opens … with the same figure and the same state as its row" |
+| Every way back closes the sheet; two heights and the drag | `muscle-sheet.mjs`, `sheetDetents.test.ts`, `backLayer.test.tsx` | the detents changed; a layer's entry replaced instead of pushed | "opens at two thirds and is dragged to 92 %"; five tests of `backLayer.test.tsx` |
+| One exercise, one change, the same in sheet and detail | `muscle-sheet.mjs`, `exerciseDetailChart.test.tsx` | the detail's head given another change | "carries one change at its head" |
+| Nothing that rates reads the work volume | `volumeUnscored.test.ts` | the volume re-exported from `core/gym/performance.ts` | "is read by nothing that scores, ranks, replays or colours" |
+| The card «Muskelgruppen» holds height and title while it loads | `muscle-card.mjs` | its text centred again | "393 · rated: the title stands in the same place before and after — top 48 → 36.4" |
+| All lines of the rows in one column | `muscle-sheet.mjs` | every other row's chart moved 12px | "320 de: in every row that draws a line the line stands in the same column" |
+| A tap never turns the body; motion counts time | `gym-muscles.mjs`, `motion.test.ts`, `body.mjs` | the guard for the body's own tap removed; a step counted per frame | "and the body does not turn for it: the angle stays 0 — 180"; "a long step after a pause counts for a tenth of a second" |
+| Under an open sheet no frame arises | `gym-muscles.mjs` | a held viewer drawing on a timer | "under the open sheet no frame arises and nothing is drawn — 96 draw calls" |
+| Hands neutral; the zones' check points | the validator and its test (`tools`) | the hands given to the forearms — as the validator's own test builds it: an edit of `regionrules.py` rebuilds byte for byte, because the wrist's cut lays the inert zone again | "hands that belong to the forearms" |
+| Ten exercises per group; equipment and movement on every entry | `catalogue.test.ts` | an entry without its equipment | "names the equipment and the movement of every entry" |
+| «bauch» finds exactly its exercises, in the workout and the plan | `search.test.ts`, `exercise-search.mjs` | «Bauch» taken from the core's words | "\"bauch\" finds the core exercises, and no other"; "393 workout: «bauch» finds exactly the 15 exercises — 13 rows" |
+| §16: the onboarding's tokens in the onboarding only; no face loaded | `designRules.test.ts` | the line's token read in `gym.css`; a family set there | "only the onboarding reads its hero figure and its line"; "speaks in the system font" |
+| §16: the line holds 3:1 as a mark | `contrast.test.ts` | the line's end lightened | "--onboarding-line-end at 3:1" |
+| §16: every text of the onboarding on its pixels | `design-system.mjs` | «Screen antippen» in `--data-track` | "393 onboarding-0-auftakt: every text reads at 4.5:1 … 1.12" |
+| §16: at most one dark surface, Gym or the rank | `onboarding-7e.mjs` | the hero painted with a stage token | "at most one dark surface (Gym or the rank)" — **only since block 9**: before, the check counted declared surfaces and let the painted one pass; it now counts what is drawn dark |
+| D193: a tap anywhere on the opening page goes on | `onboarding-7e.mjs` | the page's own tap handler removed | "a tap in each corner, at the top, on the line, below it and on the hint goes on" |
+| Block 9: less transparency makes every glass solid | `access-wp3.mjs` | the tab bar's rule removed | "393 Heute: with less transparency nothing blurs and every surface is solid — tab-bar: blur(20px)" |
+| Block 9 (D194): a workout on an open day stands at once | `today-in-charts.mjs`, `provisionalRating.test.ts`, `history.test.ts` | the tile reading the settled rating | "Gym-Rating: the hub counts the workout, and its tile shows the rating with it at once"; the two unit tests |
+
+Two breaks first came back missed, and both were the harness's: the
+"tap" break was served on a port a server of mine already held, so the
+suite read the unbroken build (the break script now refuses a taken
+port); and the dark hero passed, because the check counted only what
+declared itself dark — the one gap in a check that this step found, closed
+as above.
+
 ## Step 8 — contract §12 in the browser
 
 `access-wp3.mjs`, 64 checks at 393 and 320: **less transparency**
