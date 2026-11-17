@@ -6,10 +6,83 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 | | Application commit | Status |
 |---|---|---|
-| **muscle-map-v1** | app source **`5e554aa`**, tag on the post-cleanup default-branch head | **Released** — see below |
+| **WP3 RC** | app source **`017cc56`**, on `claude/momentum-wp3` | **At the gate** (STOP 9) — see below |
+| **muscle-map-v1** | app source **`5e554aa`**; the tag was never set in the repository (found in block 9) | **Released** — see below |
 | V1 | the release pass after RC2 | Released |
 | RC2 | `c3e8b7f` | Superseded by V1 |
 | RC1 | `ae8b479` | Superseded — never deployed, never tested on a device |
+
+---
+
+## WP3 RC — app source `017cc56`
+
+WP3 — Mind and Gym — as a whole, on `claude/momentum-wp3`, after block 9
+(hardening and the release gate). The live app is still `e30becd` (WP2).
+Record: `docs/wp3/stage9/README.md`; decisions D127–D195.
+
+### What it contains
+
+- **Mind and Gym** (D139, D143): Food switched off as an era from the
+  first load, its data kept; Laufen inside Gym.
+- **One day back** (D132–D138): Heute | Gestern, a week judged when it is
+  over, nothing charged while it can still be written.
+- **The workout flow** (D128–D131, D137): a workout from its first set,
+  undo that puts back what was removed, kg | lb, «Fertig».
+- **A Gym day is worth its best working set** (D150, D151, D172–D175), on
+  Gym's own curve (D177–D180), with warm-ups marked by hand.
+- **The design system** (D145–D149, D160–D163): Mind light, Gym graphite,
+  glass with solid fallbacks, text measured on its pixels.
+- **Muskelgruppen** (D164–D170, D181–D187): a new body model built by
+  script, a stage operated by time and rule, a sheet per group with its
+  line, its exercises' one change each and the work volume (shown, never
+  scored); a measuring display the owner switches on.
+- **The catalogue** of 134 exercises and its search (D188, D189).
+- **The onboarding** in direction C (D190–D193).
+- **Block 9** (D194, D195): a workout on an open day shows at once, as
+  provisional; less transparency makes every glass solid; a kept era
+  boundary holds.
+
+### The check
+
+| | Baseline (`aab8d12`) | This candidate |
+|---|---|---|
+| `tsc -b` | exit 0 | exit 0 |
+| `npm run test` | exit 0 · 141 files · 2485 tests | exit 0 · 144 files · 2508 tests |
+| `npm run verify`, Chromium, here | 41 suites · 5641 / 5648 | FINAL_LOCAL |
+| GitHub, Chromium | — | FINAL_GITHUB |
+| GitHub, WebKit (5 suites) | — | 1012 / 1012 |
+
+The 7 red checks of the baseline: the known offline check in
+`release-proof.mjs` (D163, the tidy-up's) and six in `wp2-2-shots.mjs`
+that counted the onboarding's still since 7E (the harness, fixed).
+
+### On the device
+
+Checked on the iPhone before this block: blocks 7A to 7E on their
+previews, the owner's measurements of 7B and of 17 November (iPhone 15 Pro,
+iOS 26.3.1; `docs/device-tests.md`). **Not yet**: this candidate's
+checklist (`docs/device-tests.md`), VoiceOver, less motion and less
+transparency on the phone, the update in place and offline — which the
+preview cannot show, having no service worker.
+
+### Known limits
+
+- The offline check in `release-proof.mjs` is red until the tidy-up
+  (D163).
+- WebKit on Linux is not Safari on an iPhone: five suites run there as an
+  early warning; the screen reader's tree, the body's frames and its
+  reach are Chromium's alone.
+- One unanswered daily question still holds a whole day open (D111); a
+  workout on such a day shows as provisional (D194).
+
+### The way back
+
+The state to return to is `e30becd`, the head of the default branch
+(proposed tag `live-before-wp3`, not set). The only clean way back is a
+backup exported in the live app before the update: delete the app's data,
+open the live build, import that backup. Everything entered after the
+backup is lost. Rehearsed in `update-in-place.mjs` (C) and
+`updateRehearsal.test.ts`.
 
 ---
 
