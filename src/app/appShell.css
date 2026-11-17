@@ -116,7 +116,9 @@
 }
 
 .update-banner__action {
-  min-height: 36px;
+  /* 44px, as every control (§12): found in block 9 at 36px — the one
+     button the owner taps on the update day. */
+  min-height: var(--touch-min);
   padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--accent-tint);

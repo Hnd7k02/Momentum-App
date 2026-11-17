@@ -6874,6 +6874,14 @@ each broken once, §12 in the browser. Its record is
    is left alone. `keptBoundaries.test.ts` holds all three and a whole
    first load; each case fails without the guard. No released device was
    in that state; no stored value moves.
+3. **The buttons of the two notices were not 44px** (contract §12):
+   «Neu laden» in the update notice at 36px — the one button the owner
+   taps on the update day — and the retry in the notice that a refresh did
+   not get through at 34px. Neither appears in an ordinary walk through the
+   app, so no suite that measures targets met them; WebKit on GitHub did,
+   when the update notice rose in the middle of a run. Both read
+   `--touch-min` now; `noticeTargets.test.ts` holds it, and
+   `update-in-place.mjs` measures «Neu laden» where it stands.
 
 **Found and fixed in the harness.** `wp2-2-shots.mjs` counted the
 onboarding's still since block 7E as one of the hub's; the record is
