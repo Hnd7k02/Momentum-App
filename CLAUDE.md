@@ -373,6 +373,18 @@ Never conflate them.
   (D160): how every screen looks and speaks. The rules below are the ones
   that stay true; `src/styles/designRules.test.ts` and
   `scripts/verify/design-system.mjs` enforce them.
+- **The onboarding has five exceptions of its own, and they stay there**
+  (D190, contract §16): a flat ground without the washes, solid white
+  cards, a coloured gradient line, bars and segments in the first slide's
+  hero only — the one place with example values, an image with no control
+  in it — a 40px hero figure (`--type-figure-hero`), and DM Sans
+  (`--font-onboarding`, one file in `features/onboarding/fonts/`, OFL),
+  with at most one dark surface a screen, always Gym or the rank.
+  Everything else in the flow follows the contract, and nothing of the
+  five reaches a screen of the app: `designRules.test.ts` fails if a file
+  outside `features/onboarding/` reads those tokens or another stylesheet
+  sets a family of its own. A step never shows a number the flow does not
+  hold.
 - Design tokens only (`src/styles/tokens.css`): no colour, font size, layer
   or duration is written anywhere else, and `designRules.test.ts` walks
   `src/` for one. The two exceptions are the rank badge, a fixed graphic

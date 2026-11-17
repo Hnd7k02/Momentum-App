@@ -12,7 +12,7 @@ Belege sind die drei Mockups unter `docs/wp3/mockups/` (Screenshots in `bilder/`
 
 **Leitbild** (festgelegt, D154, D155). Ein heller, einfarbiger Körper auf Graphit, der nur dort Farbe trägt, wo die Trainingsdaten etwas sagen. Darum herum eine Zahlenwelt mit festen Ziffernbreiten und einem Akzent. Mind bleibt hell und ruhig, Gym dunkel; beide benutzen dieselben Bausteine.
 
-**Geltung.** Der Vertrag gilt für jeden Screen. Er ersetzt D89 («The body is a diagram, not an illustration»), die Muskelfarben als Flächenfarbe aus D123 und die Farbangaben der Muskelkarten-Übergabe (`docs/design/muscle-map/`). Über ihm stehen `CLAUDE.md` und alle Regeln der Wertung: Der Vertrag ändert keine Zahl, die die App berechnet.
+**Geltung.** Der Vertrag gilt für jeden Screen. Für das Onboarding gelten zusätzlich die Ausnahmen in §16, und nur dort (D190). Er ersetzt D89 («The body is a diagram, not an illustration»), die Muskelfarben als Flächenfarbe aus D123 und die Farbangaben der Muskelkarten-Übergabe (`docs/design/muscle-map/`). Über ihm stehen `CLAUDE.md` und alle Regeln der Wertung: Der Vertrag ändert keine Zahl, die die App berechnet.
 
 ## §2 Farbe
 
@@ -330,7 +330,34 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 | 7B Interaktion | §8 Grösse, Bedienung, Bewegung, Treffen, der Weg von Heute; §10 für den Körper; die Messanzeige für Bildrate und Ladezeit |
 | 7C Muskel-Sheet | §9, §6 für das Diagramm im Sheet |
 | 7D Übungskatalog | §3, §4 für die Zeile der Auswahl, §5, §11 für «nichts gefunden», §12, §13 |
+| 7E Onboarding | §16, und für alles, was §16 nicht nennt, §3, §4, §5, §11, §12 und §13 |
 | 9 Härtung | §12 auf dem Gerät, §14 als Ganzes |
+
+## §16 Onboarding-Ausnahmen
+
+Festgelegt am STOP 7E-a (16.11.2026, D190). **Dieser Abschnitt gilt nur im Onboarding** – in den Schritten, die eine neue Installation vor dem ersten Screen der App zeigt (`src/features/onboarding/`). Für jeden Screen der App gelten §1 bis §15 unverändert; nichts aus diesem Abschnitt darf dort stehen.
+
+Massgebend für den Look ist der Entwurf «C1 · Momentum, referenznah» (Richtung C am STOP 7E-a). Er zeigt den Look der ersten Slide, nicht den Inhalt der übrigen Schritte.
+
+**Die fünf Ausnahmen**
+
+- **a) Grund.** Der Grund ist flach in `--surface-base`, ohne die Schleier aus `--ground` (§2.2). Karten sind deshalb feste weisse Flächen (`--surface-elevated`, `--radius-card`, `--shadow-card`) statt Glas (§2.7): Es liegt nichts dahinter, was eine Unschärfe zeigen könnte.
+- **b) Farbe in Datenmarken, nur im Hero von Slide 1.** Die Linie ist ein Verlauf `#7c5cf0` → `#5e5ce6` → `#2f8fe8` (`--onboarding-line-start`, `--accent`, `--onboarding-line-end`); die Balken dahinter stehen in `--accent-tint` und laufen nach unten aus; die Mind-Segmente folgen demselben Verlauf; die Gym-Segmente tragen den Gym-Akzent. Der Endpunkt der Linie hat einen Hof. Auf allen anderen Schritten bleiben Datenmarken neutral nach §2.1 und §6 (`--data-ink` auf `--data-track`, auf der Rang-Bühne `--stage-data-ink` auf `--stage-data-track`). Auch im Hero liegt kein Flächenverlauf unter der Linie (§6).
+- **c) Hero-Zahl.** 40 px fett als eigene Zahlstufe, `--type-figure-hero`. Sie steht einmal, im Hero von Slide 1.
+- **d) Beispielwerte, nur im Hero von Slide 1.** Der Hero ist ein Bild: `role="img"` mit einer Beschreibung, die sagt, dass es Beispielwerte sind. Er enthält keine Bedienelemente; was darin wie ein Segment oder eine Marke aussieht, ist gezeichnet. Kein anderer Schritt zeigt einen Wert, den es nicht gibt: Die übrigen Schritte zeigen eine echte Frage aus dem Katalog, die echten Ränge mit ihren Schwellen, die Ziele, die der Ablauf gerade hält – Gym öffnet mit seinem Standardziel, Laufen ohne Ziel und zeigt darum keine Zahl –, und die Auswahl der Person. Mind steht in der Zusammenfassung nur mit mindestens einer Frage: Ohne Frage bleibt Mind ausgeschaltet (`applyOnboarding`), und die Zusammenfassung sagt nichts anderes.
+- **e) Schrift.** DM Sans (SIL Open Font License 1.1), als eine Datei mit den Gewichten 400 bis 700 in der App enthalten (`--font-onboarding`); kein Nachladen von einem fremden Server. Ein Sheet, das das Onboarding öffnet, spricht in derselben Schrift. Die Systemschrift (§3) bleibt für die App.
+
+**Dunkle Flächen.** Sparsam: höchstens eine pro Screen. Sie steht immer für Gym oder für den Rang und bleibt kleiner als die hellen Flächen zusammen. Die Gym-Fläche erklärt für sich die Gym-Welt (`data-world="gym"`) und liest jede Farbe aus diesem Satz; die Rang-Bühne benutzt die Tokens `--stage-*` (§2.6). Der Satz «Die Gym-Karte auf einem hellen Screen ist hell» (§2.2) gilt für die App weiter.
+
+**Sonst gelten die bestehenden Tokens**, ohne neue Farbwerte: `--accent` für die eine Hauptschaltfläche je Schritt (§5), die Statusfarben nur für einen Zustand (der Chip «steigend»), `--accent-tint` mit `--accent-ink` für die Marke einer Welt in ihrer Kachel und für die Marke «Heute». Die zwei Farbwerte aus b) sind die einzigen, die das Onboarding hinzufügt.
+
+**Schriftgrössen** kommen aus der Skala von §3. Wo der Entwurf 12, 14 oder 16 px zeigt, steht die nächste Stufe: 14 wird 15, 16 wird 17; 12 wird die Stufe des Bausteins, den es zeigt – 13 im Segment, 11 im Chip und in der Beschriftung einer Kachel (§5).
+
+**Auswahl.** Eine gewählte Kachel oder Zeile trägt ein gefülltes Häkchen im Akzent (`SelectionMark`), nie einen dicken Rahmen. Die sieben Werte eines Wochenziels stehen als eine Segmentzeile 1–7 statt als sieben Kreise; die Trefferfläche jeder Zelle bleibt 44 px hoch und ihr Anteil der Zeile breit (§12, D163).
+
+**Kurze Bildschirme.** Die drei Slides rücken unter 720 px Höhe enger zusammen, und das Diagramm im Hero gibt Höhe ab (bis 64 px), bevor eine Slide scrollt. Ein Schritt, der dann noch nicht passt, scrollt; die Hauptschaltfläche bleibt stehen.
+
+**Was Tests durchsetzen.** `designRules.test.ts` hält die zwei Farbwerte und die Zahlstufe in `tokens.css`; `contrast.test.ts` hält die Linie als Marke bei 3:1 und den Text auf der Gym-Fläche bei 4,5:1; `design-system.mjs` misst jeden Text der sieben Schritte an den gerenderten Pixeln bei 320, 360, 393 und 430 px.
 
 ## Anhang
 
