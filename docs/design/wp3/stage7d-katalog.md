@@ -55,21 +55,21 @@ in `catalogue.test.ts` follow it entry for entry.
 | Chest | 6 | 15 | 9 |
 | Back | 11 | 20 | 9 |
 | Shoulders | 7 | 15 | 8 |
-| Biceps | 5 | 12 | 7 |
+| Biceps | 5 | 11 | 6 |
 | Triceps | 6 | 14 | 8 |
 | Core | 3 | 15 | 12 |
 | Quadriceps | 3 | 11 | 8 |
 | Hamstrings and glutes | 5 | 14 | 9 |
 | Calves | 2 | 10 | 8 |
 | Forearms | 2 | 10 | 8 |
-| **Entries** | **49** | **135** | **86** |
+| **Entries** | **49** | **134** | **85** |
 
 | Equipment | before | after |
 |---|---|---|
 | Langhantel (`barbell`) | 8 | 21 |
 | Kurzhantel (`dumbbell`) | 10 | 26 |
 | Kabel (`cable`) | 14 | 27 |
-| Maschine (`machine`) | 11 | 27 |
+| Maschine (`machine`) | 11 | 26 |
 | Smith Machine (`smith`) | 1 | 4 |
 | Eigengewicht (`bodyweight`) | 5 | 26 |
 | SZ-Stange (`ezBar`) | 0 | 2 |
@@ -78,7 +78,7 @@ in `catalogue.test.ts` follow it entry for entry.
 
 | Load type | before | after |
 |---|---|---|
-| `external` | 42 | 107 |
+| `external` | 42 | 106 |
 | `bodyweight` | 5 | 26 |
 | `assisted` | 2 | 2 |
 
@@ -87,7 +87,7 @@ in `catalogue.test.ts` follow it entry for entry.
 | drücken (`push`) | 26 |
 | ziehen (`pull`) | 17 |
 | rudern (`row`) | 8 |
-| beugen (`bend`) | 37 |
+| beugen (`bend`) | 36 |
 | strecken (`extend`) | 20 |
 | heben (`raise`) | 23 |
 | Flys (`fly`) | 8 |
@@ -160,14 +160,13 @@ in `catalogue.test.ts` follow it entry for entry.
 |  | `ex_lean_away_lateral_raise` | Seitheben Kurzhantel lean-away | Lean-Away Lateral Raise | seitliche Schulter / Side delts | **Schultern** | Kurzhantel | external | heben |
 | new | `ex_lateral_raise_machine` | Seitheben Maschine | Lateral Raise Machine | seitliche Schulter / Side delts | **Schultern** | Maschine | external | heben |
 
-### Biceps — Bizeps (12; 7 new)
+### Biceps — Bizeps (11; 6 new)
 
 | | id | Deutsch | English | Detail | Groups (primary in bold) | Equipment | Load | Movement |
 |---|---|---|---|---|---|---|---|---|
 |  | `ex_biceps_curl` | Bizeps-Curls | Biceps Curl | Bizeps / Biceps | **Bizeps** | Kurzhantel | external | beugen |
 | new | `ex_cable_curl` | Bizeps-Curls Kabel | Cable Curl | Bizeps / Biceps | **Bizeps** | Kabel | external | beugen |
 | new | `ex_bayesian_cable_curl` | Bayesian Curls Kabel | Bayesian Cable Curl | Bizeps, langer Kopf / Biceps, long head | **Bizeps** | Kabel | external | beugen |
-| new | `ex_biceps_curl_machine` | Bizepsmaschine | Biceps Curl Machine | Bizeps / Biceps | **Bizeps** | Maschine | external | beugen |
 | new | `ex_barbell_curl` | Bizeps-Curls Langhantel | Barbell Curl | Bizeps / Biceps | **Bizeps** | Langhantel | external | beugen |
 |  | `ex_supinating_curl` | Eindreh-Curls | Supinating Curl | Bizeps / Biceps | **Bizeps** | Kurzhantel | external | beugen |
 |  | `ex_hammer_curl` | Hammer Curls | Hammer Curl | Brachialis / Brachioradialis / Brachialis / brachioradialis | **Bizeps**, Unterarme | Kurzhantel | external | beugen |
@@ -176,6 +175,9 @@ in `catalogue.test.ts` follow it entry for entry.
 |  | `ex_preacher_curl` | Preacher-Curls | Preacher Curl | Bizeps, kurzer Kopf / Biceps, short head | **Bizeps** | Maschine | external | beugen |
 |  | `ex_incline_curl` | Schrägbank-Curls | Incline Curl | Bizeps, langer Kopf / Biceps, long head | **Bizeps** | Kurzhantel | external | beugen |
 | new | `ex_ez_bar_curl` | SZ-Curls | EZ-Bar Curl | Bizeps / Biceps | **Bizeps** | SZ-Stange | external | beugen |
+
+Preacher-Curls is the biceps machine of most gyms: it is also found as
+«Bizepsmaschine» and «Scott-Curls» (D189), and keeps its name and id.
 
 ### Triceps — Trizeps (14; 8 new)
 

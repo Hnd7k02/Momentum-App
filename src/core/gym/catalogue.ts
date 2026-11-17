@@ -94,11 +94,11 @@ const de = (deName: string, enName: string): Record<Language, string> => ({ de: 
  * metadata. `catalogue.test.ts` pins the roles, so a later edit that moves
  * one is a test failure rather than a quiet rescoring of new sets.
  *
- * Block 7D (D171, D188) adds 86 entries — 84 at its STOP, and the Bayesian
- * cable curl and the biceps machine the owner asked for after it — at least
- * ten per group by primary, and gives every entry its movement. The 49
- * before it keep their ids, roles, load types, names and details;
- * `catalogue.test.ts` pins the roles of all 135 in four tables. One entry a line: `wp3-stage1.mjs` reads the German
+ * Block 7D (D171, D188) adds 85 entries — 84 at its STOP and the Bayesian
+ * cable curl the owner asked for after it — at least ten per group by
+ * primary, and gives every entry its movement. The 49 before it keep their
+ * ids, roles, load types, names and details; `catalogue.test.ts` pins the
+ * roles of all 134 in four tables. One entry a line: `wp3-stage1.mjs` reads the German
  * names from this file.
  */
 export const EXERCISE_CATALOGUE: CatalogueExercise[] = [
@@ -177,9 +177,7 @@ export const EXERCISE_CATALOGUE: CatalogueExercise[] = [
 
   // Block 7D (D171): curls on the cable, the barbell and the SZ bar.
   { id: 'ex_cable_curl', names: de('Bizeps-Curls Kabel', 'Cable Curl'), detail: de('Bizeps', 'Biceps'), muscles: ['biceps'], primary: ['biceps'], equipment: 'cable', movement: ['bend'] },
-  // Added at the owner's request after STOP 7D (D188): the arm behind the body, the cable from below,
-  // and the curl machine most gyms have.
-  { id: 'ex_biceps_curl_machine', names: de('Bizepsmaschine', 'Biceps Curl Machine'), detail: de('Bizeps', 'Biceps'), muscles: ['biceps'], primary: ['biceps'], equipment: 'machine', movement: ['bend'] },
+  // Added at the owner's request after STOP 7D (D188): the arm behind the body, the cable from below.
   { id: 'ex_bayesian_cable_curl', names: de('Bayesian Curls Kabel', 'Bayesian Cable Curl'), detail: de('Bizeps, langer Kopf', 'Biceps, long head'), muscles: ['biceps'], primary: ['biceps'], equipment: 'cable', movement: ['bend'] },
   { id: 'ex_rope_hammer_curl', names: de('Hammer Curls Seil', 'Rope Hammer Curl'), detail: de('Brachialis / Brachioradialis', 'Brachialis / brachioradialis'), muscles: ['biceps', 'forearms'], primary: ['biceps'], equipment: 'cable', movement: ['bend'] },
   { id: 'ex_barbell_curl', names: de('Bizeps-Curls Langhantel', 'Barbell Curl'), detail: de('Bizeps', 'Biceps'), muscles: ['biceps'], primary: ['biceps'], equipment: 'barbell', movement: ['bend'] },

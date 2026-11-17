@@ -33,7 +33,8 @@ Die wichtigste Eigenschaft dieses Blocks: **Er fügt nichts hinzu und ändert ke
 
 ## 3. Voraussetzung
 
-- Die Blöcke «Farbregeln», 5b, «Kurve», 7A, 7B, 7C und 7D sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen. (7D, der Übungskatalog mit Stichwortsuche, kam am 15.11.2026 dazu: D171. «Kurve», die Leistungskurve und die Farbstärke am Körper passend zur neuen Kennzahl, kam am selben Tag am STOP 5b dazu: D175.)
+- Die Blöcke «Farbregeln», 5b, «Kurve», 7A, 7B, 7C, 7D und 7E sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen. (7D, der Übungskatalog mit Stichwortsuche, kam am 15.11.2026 dazu: D171. «Kurve», die Leistungskurve und die Farbstärke am Körper passend zur neuen Kennzahl, kam am selben Tag am STOP 5b dazu: D175.)
+- **Block 7E ist in `claude/momentum-wp3` zusammengeführt.** 7E lief in einer eigenen Session auf `claude/hopeful-carson-4utktp`, von `adf1ead` aus, und wird vor diesem Block in `claude/momentum-wp3` zusammengeführt (D189). Steht 7E noch nicht auf dem Branch, bau nichts: Sag Dario, dass die Zusammenführung fehlt, und halte an.
 - In `HANDOVER.md` stehen Darios Messwerte vom iPhone aus Block 7B.
 
 Fehlt ein Block, bau nichts. Sag Dario, welcher fehlt, und halte an. Fehlen nur die Messwerte, arbeite weiter und führ sie am Gate als offen.
@@ -137,6 +138,15 @@ Die Punkte 2 bis 5 werden Tests oder Suites, die bleiben. Neue Golden-Dateien f�
 
 Mit dem erfundenen Backup aus Schritt 4 und, falls angehängt, mit Darios eigenem: importieren, exportieren, wieder importieren. Die beiden Exporte sind gleich, und alle Ratings stimmen nach Löschen und Import mit vorher überein. Halt ausserdem fest, was der alte Stand mit einem Backup des neuen tut.
 
+### Schritt 6a – Ein Training erscheint sofort im Chart
+
+Darios Punkt vom STOP 7D (D189), in seinen Worten: «Ein eingetragenes Training erscheint im Entwicklungs-Chart erst am nächsten Tag. Es soll sofort nach dem Speichern erscheinen. Finde die Ursache und prüf, welche Charts betroffen sind (Gym-Rating, Muskelgruppen, Übungsdetail). Solange der Tag noch offen ist, darf der Punkt als vorläufig markiert sein. Vergangene Tage rechnen unverändert.»
+
+- **Erst die Ursache, dann die Änderung.** Zeig Schritt für Schritt, wo der heutige Tag aus dem Chart fällt, für jedes der drei Charts: das Gym-Rating, Muskelgruppen (die Zeilen, das Sheet, der Streifen über dem Körper) und das Übungsdetail. Prüf auch die übrigen Charts, die eine Entwicklung zeigen, und nenn jedes, das betroffen ist.
+- **Ein Training von heute steht nach dem Speichern sofort im Chart.** Solange der Tag noch offen ist, darf sein Punkt als vorläufig markiert sein; wie, entscheidest du im Rahmen des Vertrags und zeigst es am Gate.
+- **Vergangene Tage rechnen unverändert:** jede Golden-Datei und jeder Fingerabdruck bleiben, wie sie sind. Die Regeln für offene Tage bleiben ebenfalls: Eine Woche wird gewertet, wenn sie vorbei ist (D134), und eine Beförderung zählt nur abgeschlossene Tage (D136). Liegt die Ursache in einer dieser Regeln, änderst du die Regel nicht. Du zeigst den offenen Tag als vorläufig und legst Dario die Frage am Gate vor.
+- Eine Browser-Suite hält es für jedes betroffene Chart fest: Training heute speichern, und der Punkt steht sofort da.
+
 ### Schritt 7 – Vertrag §14, als Ganzes
 
 Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block dazugeschrieben hat; die Prüfung, die sie durchsetzt; der Nachweis, dass die Prüfung anschlägt. Für den Nachweis brichst du jede Regel einmal absichtlich und siehst die Prüfung fehlschlagen, wie Stage 6b es für seine Regeln getan hat. Eine Regel ohne Prüfung bekommt eine. Die absichtlichen Brüche committest du nicht.
@@ -164,7 +174,7 @@ Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block
 
 **Unverändert bleiben:**
 
-- jedes Verhalten und jedes Aussehen der App, ausser wo ein Fehler behoben wird, den dieser Block gefunden hat, und ausser der Messanzeige: Entscheidet Dario am Gate, dass sie nicht im Release bleibt, nimmst du sie in dieser Session heraus;
+- jedes Verhalten und jedes Aussehen der App, ausser wo ein Fehler behoben wird, den dieser Block gefunden hat, ausser Darios Punkt in Schritt 6a, und ausser der Messanzeige: Entscheidet Dario am Gate, dass sie nicht im Release bleibt, nimmst du sie in dieser Session heraus;
 - jede bestehende Golden-Datei, jeder Fingerabdruck, jede Grenze in einem Test;
 - `deploy.yml` und der Default-Branch;
 - das Datenschema und das Backup-Format.
@@ -185,6 +195,7 @@ Erstell die Tabelle: jede Regel aus §14 und jede Regel, die ein späterer Block
 - Das Update vom Live-Stand ist als Ganzes geprobt und als Test festgehalten: nichts verloren, die Vergangenheit unverändert, jede Aktivierung einmal.
 - Der Rückweg ist geprobt und in drei Schritten beschrieben.
 - Das Backup geht hin und zurück, ohne dass sich etwas ändert.
+- Ein eingetragenes Training steht sofort in jedem betroffenen Chart, solange der Tag offen ist als vorläufig markiert; vergangene Tage rechnen unverändert (Schritt 6a).
 - Zu jeder Regel aus Vertrag §14 gibt es eine Prüfung, die nachweislich anschlägt.
 - `docs/device-tests.md`, `docs/release-candidates.md` und `HANDOVER.md` beschreiben diesen Stand.
 - Der Release-Kandidat liegt auf der Vorschau.

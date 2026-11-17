@@ -299,15 +299,15 @@ so that it ends on its one figure. None of these was removed or weakened.
 
 ## Checks restated in block 7D (D188)
 
-The catalogue grew from 49 entries to 135, and the picker's list stands
+The catalogue grew from 49 entries to 134, and the picker's list stands
 under headings until something is typed. No check was removed or
 weakened; these were restated because their rule assumed the small
 catalogue.
 
 - **`catalogue.test.ts`** (unit). *Old:* "has 49 entries". *New:* "has
-  135 entries" — the 49 are held by the three tables as before, byte for
-  byte, and a fourth table pins the 86 new ones. (At STOP 7D it said 133
-  and 84; the two exercises the owner added after it made them 135 and 86.)
+  134 entries" — the 49 are held by the three tables as before, byte for
+  byte, and a fourth table pins the 85 new ones. (At STOP 7D it said 133
+  and 84; the owner's Bayesian cable curl after it made them 134 and 85.)
 - **`phase4.mjs`**. *Old:* "search narrows the list" — «Squat» leaves
   exactly one row, and the first row is picked. *New:* "«Squat» finds the
   squats, Kniebeuge and Frontkniebeuge among them" — at least two rows and
@@ -317,7 +317,7 @@ catalogue.
   Dip» (Bankdips), which ranks beside it.
 - **`wp3-stage1.mjs`** B11 is not restated: it reads the catalogue's
   source when it runs and asks that the empty search list every entry. It
-  counts 135 on this block's build and fails on an earlier one — so a run
+  counts 134 on this block's build and fails on an earlier one — so a run
   against an earlier build is made from that build's checkout.
 
 ## Conventions

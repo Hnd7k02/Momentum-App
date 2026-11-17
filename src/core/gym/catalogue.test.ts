@@ -14,7 +14,7 @@ import {
 /**
  * The catalogue after WP3 Stage 1: 49 entries — the 48 of WP2-1 plus the
  * front raise (B12) — and the 29 that iteration 2 shipped are still exactly
- * what they were where it matters. Block 7D adds 86 (D171, D188), pinned
+ * what they were where it matters. Block 7D adds 85 (D171, D188), pinned
  * in a fourth table, and the three tables before it stand as they were.
  *
  * What a built-in *counts for* — its groups, its roles, its load type — and
@@ -88,8 +88,8 @@ const WP3: Pinned[] = [
 ];
 
 /**
- * The 86 ids block 7D adds (D171, D188) — 84 at its STOP, and the Bayesian
- * cable curl and the biceps machine the owner asked for after it — with the mapping he sees on the
+ * The 85 ids block 7D adds (D171, D188) — 84 at its STOP and the Bayesian
+ * cable curl the owner asked for after it — with the mapping he sees on the
  * STOP page (`docs/design/wp3/stage7d-katalog.md`). Until he has accepted
  * the list an id may still change; from the release on it is given for good.
  */
@@ -122,7 +122,6 @@ const BLOCK_7D: Pinned[] = [
   ['ex_upright_row', 'Upright Row', ['shoulders', 'back'], ['shoulders']],
   ['ex_cable_curl', 'Cable Curl', ['biceps'], ['biceps']],
   ['ex_bayesian_cable_curl', 'Bayesian Cable Curl', ['biceps'], ['biceps']],
-  ['ex_biceps_curl_machine', 'Biceps Curl Machine', ['biceps'], ['biceps']],
   ['ex_rope_hammer_curl', 'Rope Hammer Curl', ['biceps', 'forearms'], ['biceps']],
   ['ex_barbell_curl', 'Barbell Curl', ['biceps'], ['biceps']],
   ['ex_ez_bar_curl', 'EZ-Bar Curl', ['biceps'], ['biceps']],
@@ -193,11 +192,11 @@ const BRIEF_NAMES_DE = [
 ];
 
 describe('the catalogue after WP2-1', () => {
-  it('has 135 entries with unique ids', () => {
-    // 49 until block 7D, which adds 86 (D171, D188): 84 at its STOP, and
-    // the Bayesian cable curl and the biceps machine the owner asked for after it.
-    expect(EXERCISE_CATALOGUE).toHaveLength(135);
-    expect(new Set(EXERCISE_CATALOGUE.map((entry) => entry.id)).size).toBe(135);
+  it('has 134 entries with unique ids', () => {
+    // 49 until block 7D, which adds 85 (D171, D188): 84 at its STOP and
+    // the Bayesian cable curl the owner asked for after it.
+    expect(EXERCISE_CATALOGUE).toHaveLength(134);
+    expect(new Set(EXERCISE_CATALOGUE.map((entry) => entry.id)).size).toBe(134);
     expect(EXERCISE_CATALOGUE).toHaveLength(ITERATION_2.length + WP2_1.length + WP3.length + BLOCK_7D.length);
   });
 
@@ -285,7 +284,7 @@ describe('the catalogue after WP2-1', () => {
 });
 
 describe('the catalogue after block 7D (D171)', () => {
-  it('adds the 86 ids with the mapping on the STOP page', () => {
+  it('adds the 85 ids with the mapping on the STOP page', () => {
     for (const [id, en, muscles, primary, loadType] of BLOCK_7D) {
       const entry = catalogueEntry(id);
       expect(entry, id).toBeDefined();

@@ -13,8 +13,9 @@ import { catalogueEntry, type Equipment, type Movement } from './catalogue';
  * whether it is loaded by body weight, which is all it has.
  *
  * **Every word the search knows stands here, once per language** — the
- * synonyms of the groups, the words of the movements, of the equipment and
- * of body weight. A test holds that each group and each piece of equipment
+ * synonyms of the groups, the words of the movements, of the equipment
+ * and of body weight, and the other names of a built-in
+ * (`EXERCISE_WORDS`). A test holds that each group and each piece of equipment
  * is found under the very label the screen shows for it.
  *
  * How a query matches:
@@ -129,6 +130,17 @@ export const BODYWEIGHT_WORDS: Record<Language, readonly string[]> = {
   en: EQUIPMENT_WORDS.en.bodyweight,
 };
 
+/**
+ * Other names one built-in is known by, which its own name does not say
+ * (D189). The entry keeps its name and its id; these words only find it.
+ * "Bizepsmaschine" is the preacher curl machine of most gyms, and Scott
+ * curls are the preacher curl's other name — the owner's two words.
+ */
+export const EXERCISE_WORDS: Record<Language, Readonly<Record<string, readonly string[]>>> = {
+  de: { ex_preacher_curl: ['Bizepsmaschine', 'Scott-Curls'] },
+  en: { ex_preacher_curl: ['Biceps machine', 'Scott curl'] },
+};
+
 /* ── Folding ─────────────────────────────────────────────────────────── */
 
 /**
@@ -230,6 +242,7 @@ function indexed<T extends SearchableExercise>(entry: T, language: Language): In
   for (const movement of entry.movement) extra.push(...MOVEMENT_WORDS[language][movement]);
   if (entry.equipment) extra.push(...EQUIPMENT_WORDS[language][entry.equipment]);
   if (entry.bodyweight) extra.push(...BODYWEIGHT_WORDS[language]);
+  extra.push(...(EXERCISE_WORDS[language][entry.id] ?? []));
   return { entry, name, storedName, nameWords, allWords: [...nameWords, ...extra.flatMap((text) => words(foldText(text)))] };
 }
 
