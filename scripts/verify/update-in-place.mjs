@@ -33,8 +33,9 @@ import { CHROMIUM, check, summary } from './lib.mjs';
  *   D  a backup of this build, imported by the live build — what it does
  *                            (step 6).
  *
- * Needs both builds: this one in `dist` (`npm run build`) and the live state
- * in `LIVE_DIR` (`run-all.mjs` builds it). It serves them itself, on
+ * Needs both builds: this one in `dist` (`npm run build`; `NEW_DIST` names
+ * another directory) and the live state in `LIVE_DIR` (`run-all.mjs` builds
+ * it). It serves them itself, on
  * `PORT` (4295), one after the other.
  */
 const ROOT = resolve(new URL('../..', import.meta.url).pathname);
@@ -47,8 +48,9 @@ const TMP = process.env.RELEASE_TMP ?? tmpdir();
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 const assetsOf = (dist) => readdirSync(join(dist, 'assets')).filter((name) => /\.(js|css)$/.test(name));
+const NEW_DIST = resolve(process.env.NEW_DIST ?? join(ROOT, 'dist'));
 const LIVE_ASSETS = assetsOf(join(LIVE_DIR, 'dist'));
-const NEW_ASSETS = assetsOf(join(ROOT, 'dist'));
+const NEW_ASSETS = assetsOf(NEW_DIST);
 const NEW_INDEX = NEW_ASSETS.find((name) => /^index-.*\.js$/.test(name));
 
 /* ── One address, two builds ───────────────────────────────────────────── */
@@ -57,7 +59,8 @@ let server = null;
 async function serve(which) {
   await stop();
   const cwd = which === 'live' ? LIVE_DIR : ROOT;
-  server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], { cwd, detached: true, stdio: 'ignore' });
+  const outDir = which === 'live' ? [] : ['--outDir', NEW_DIST];
+  server = spawn('npx', ['vite', 'preview', ...outDir, '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], { cwd, detached: true, stdio: 'ignore' });
   for (let i = 0; i < 200; i += 1) {
     try { if ((await fetch(ADDRESS)).ok) return; } catch { /* not yet */ }
     await sleep(150);

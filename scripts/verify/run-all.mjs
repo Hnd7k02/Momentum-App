@@ -85,10 +85,15 @@ const SUITES = [
   { name: 'exercise-search' },
   { name: 'muscle-card' },
   { name: 'onboarding-7e', needs: ['preview'] },
+  // Block 9: the update from the live state, in place and back, on its own
+  // port (4295) from both builds.
+  { name: 'update-in-place', needs: ['live'] },
   // The 3D suites, one by one.
   { name: 'gym-muscles', alone: true },
   { name: 'muscle-sheet', alone: true },
   { name: 'farbregeln', alone: true },
+  { name: 'today-in-charts', alone: true },
+  { name: 'access-wp3', alone: true },
   // 1340 taps a width at 12px, each opening and closing a sheet since 7C:
   // about half an hour a width, two hours in all. Its own limit, not a
   // coarser grid.
@@ -260,6 +265,9 @@ async function runSuite(suite) {
   };
   rows.push(row);
   console.log(`[run-all] ${suite.name}: ${read.passed ?? '?'}/${read.total ?? '?'} in ${seconds(result.ms)}${row.ok ? '' : row.knownOnly ? ' — known red only' : ' — FAILED'}`);
+  // A red suite says why where its log is read: on GitHub, the job's output
+  // is the one place that needs no download.
+  if (!row.ok) for (const line of result.text.split('\n').filter((l) => l.startsWith('FAIL')).slice(0, 12)) console.log(`[run-all]   ${line.slice(0, 400)}`);
 }
 
 if (!broken) {
