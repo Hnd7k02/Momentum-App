@@ -233,3 +233,42 @@ so the import into the preview is the update on that day. Mind's two
 questions are answered on every day of the file, a plan «Push» is saved,
 and Ernährung was on and rated — in the preview it is gone from every
 screen and its data stays.
+
+## Step 8 — contract §12 in the browser
+
+`access-wp3.mjs`, 64 checks at 393 and 320: **less transparency**
+(Chromium's own media emulation) on Heute, Verlauf, Rang, Bereiche, the Gym
+hub, a metric's sheet, Muskelgruppen with its sheet, an exercise's detail
+and a workout — nothing blurs, every card, sheet and bar is solid, every
+text reads at 4.5:1 on its pixels; **less motion** with the muscle sheet —
+once it stands nothing is on its way; **the page's zoom** is locked
+nowhere; **44px and no overflow** on Muskelgruppen, its sheet, an
+exercise's detail and the picker; **the screen reader's way** — ten rows
+each saying group, figure and state, the sheet a named dialog, its chart
+described, the focus back on the row, nothing nameless in the body.
+
+What it found: the tab bar, the bar at the foot of a workout and the
+scrim behind a sheet kept blurring under less transparency — fixed (D195).
+What it found in the harness: a measurement that compared a screenshot
+with text boxes read a moment later while Rang was still settling
+(2.02:1 for «Boss-Rang», with and without less transparency) —
+`textContrast` now measures one layout; and Chromium's tree names
+`role="img"` an «image».
+
+`docs/device-tests.md` is rewritten for this candidate: the ten points
+for the iPhone, a place for device, iOS version and date, and the owner's
+measurements beside the review's targets.
+
+## The read-only review
+
+Four finders over the block's changes (D194, the kept boundary, the
+transparency fix, the harness), each finding put to two skeptics, and a
+sweep of every rule the contract and CLAUDE.md say a test enforces —
+agents that only read, every verdict mine. Fifteen findings; two upheld,
+both in the runner, both fixed: a suite that crashed after its known red
+check was labelled "known red", and a selection that ran nothing ended
+green. The sweep's one gap that §14 covers: the pixel measurement left
+out every text of one character — a bubble's digit, a scale's value;
+measured since (333 such texts in `design-system.mjs`, the lowest 4.72:1).
+The other "partly" entries are the scope of a check (which screens, which
+widths), recorded, not new topics.
