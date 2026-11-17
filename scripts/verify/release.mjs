@@ -238,6 +238,10 @@ const tab = async (page, name) => {
 for (const width of [320, 360, 393, 430, 1280]) {
   const ctx = await browser.newContext({ ...phone, viewport: { width, height: 900 } });
   const page = await ctx.newPage();
+  const widthErrors = [];
+  page.on('pageerror', (error) => widthErrors.push(String(error)));
+  page.on('console', (message) => { if (message.type() === 'error') widthErrors.push(message.text()); });
+  const notices = new Set();
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
   await onboard(page, { gym: 3, running: 2 });
@@ -246,6 +250,7 @@ for (const width of [320, 360, 393, 430, 1280]) {
     await tab(page, name);
     const clip = await clipped(page);
     check(`${name} is not clipped at ${width}px`, clip.length === 0, clip.slice(0, 2).join('; '));
+    for (const text of await page.locator('.update-banner').allTextContents()) notices.add(`${name}: ${text}`);
     const small = await smallTargets(page);
     check(`${name} keeps its targets at ${width}px`, small.length === 0, small.slice(0, 2).join('; '));
     const overflow = await page.evaluate(
@@ -253,6 +258,10 @@ for (const width of [320, 360, 393, 430, 1280]) {
     );
     check(`${name} does not scroll sideways at ${width}px`, overflow <= 1, `${overflow}px`);
   }
+  // A first visit offers no update, and every change of the journey was
+  // stored: neither notice stands (block 9 — WebKit on GitHub showed one).
+  check(`${width}px: no notice stands — no update offered on a first visit, no change that did not take — and no page error`,
+    notices.size === 0 && widthErrors.length === 0, [...notices, ...widthErrors].slice(0, 4).join(' | '));
   await ctx.close();
 }
 
