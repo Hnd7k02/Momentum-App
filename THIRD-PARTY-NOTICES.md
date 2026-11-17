@@ -2,9 +2,9 @@
 
 Momentum ships one asset that is built from third-party data: the 3D body.
 Its source is in the public domain and asks for no credit; the app names it
-all the same, under Bereiche → Einstellungen, and this file ships with every
-build. A second section credits files that are kept in the repository but are
-not part of the app.
+all the same, under Bereiche → Danksagungen. This file lies in the
+repository beside the source. A second section credits files that are kept
+in the repository but are not part of the app.
 
 ## 3D body model — `public/models/momentum-body.glb`
 

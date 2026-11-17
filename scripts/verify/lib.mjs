@@ -19,6 +19,34 @@ export const summary = () => {
 export const phone = { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, acceptDownloads: true };
 
 /**
+ * Passes the onboarding's opening page — one line and «Weiter» (the owner at
+ * STOP 7E-b, D192) — to its first slide. Every walk of the flow begins here.
+ */
+export async function passOpening(page) {
+  await page.locator('.onboarding[data-step="opening"]').waitFor({ state: 'visible' });
+  await page.getByRole('button', { name: /^(Weiter|Continue)$/ }).click();
+  await page.locator('.onboarding[data-step="momentum"]').waitFor({ state: 'visible' });
+}
+
+/**
+ * Sets the onboarding's question selection to exactly these (block 7E,
+ * D191). Mind opens with three starter questions chosen — one per
+ * category — so a click on one of them would take it off; each row is set
+ * by its own pressed state instead, and a walk that names two questions
+ * ends with those two, as it always did.
+ */
+export async function chooseQuestions(page, wanted) {
+  const rows = page.locator('.category-group .question-pick[aria-pressed]');
+  const count = await rows.count();
+  for (let index = 0; index < count; index += 1) {
+    const row = rows.nth(index);
+    const text = (await row.textContent()) ?? '';
+    const want = wanted.some((pattern) => pattern.test(text));
+    if (want !== ((await row.getAttribute('aria-pressed')) === 'true')) await row.click();
+  }
+}
+
+/**
  * Walks the onboarding: three concepts, the picker, then setup.
  *
  * Two worlds since WP3 Stage 4: Mind, and Gym with Laufen inside it. Food is
@@ -27,21 +55,25 @@ export const phone = { viewport: { width: 393, height: 852 }, deviceScaleFactor:
  */
 export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie war deine Stimmung/], gym = 3, running = 2, food = false, wellbeing = true } = {}) {
   if (food) throw new Error('onboard: Food is not offered (D139) — use seedLegacyFood for a device that had it');
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();   // two worlds
-  await page.getByRole('button', { name: 'Weiter' }).click();   // rank + milestones
-  // Domain picker: Mind starts selected; Gym carries the Laufen target too.
-  if (!wellbeing) await page.getByRole('button', { name: /^Mind/ }).click();
+  await page.getByRole('button', { name: 'Weiter' }).click();   // one rank
+  // Domain picker: nothing is chosen until the user chooses (D192); Gym
+  // carries the Laufen target too.
+  if (wellbeing) await page.getByRole('button', { name: /^Mind/ }).click();
   if (gym || running) await page.getByRole('button', { name: /^Gym/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   if (wellbeing) {
-    for (const q of questions) await page.getByRole('button', { name: q }).first().click();
+    await chooseQuestions(page, questions);
     await page.getByRole('button', { name: 'Weiter' }).click();
   }
   if (gym || running) {
-    const cards = page.locator('.card');
-    if (gym) await cards.nth(0).getByRole('button', { name: `${gym} pro Woche` }).click();
-    if (running) await cards.nth(1).getByRole('button', { name: `${running} pro Woche` }).click();
+    // Each target is a group named for what it counts. Since block 7E the
+    // two stand in one card, so they are found by that name, not by card.
+    const target = (name, count) => page.getByRole('group', { name }).getByRole('button', { name: `${count} pro Woche`, exact: true });
+    if (gym) await target('Gym-Sessions pro Woche', gym).click();
+    if (running) await target('Läufe pro Woche', running).click();
     await page.getByRole('button', { name: 'Weiter' }).click();
   }
   await page.getByRole('button', { name: 'Starten' }).click();
@@ -313,9 +345,13 @@ export async function clipped(page) {
   });
 }
 
-/** Every tap target smaller than the minimum. */
-export async function smallTargets(page) {
-  return page.evaluate(() => {
+/**
+ * Every tap target smaller than the minimum. The limits default to the
+ * lenient 40 × 24 the earlier suites were written against; a suite that
+ * holds the contract's 44px passes them (`onboarding-7e.mjs`).
+ */
+export async function smallTargets(page, { height: minHeight = 40, width: minWidth = 24 } = {}) {
+  return page.evaluate(({ minHeight, minWidth }) => {
     const bad = [];
     for (const el of document.querySelectorAll('button, a[href], input, [role="radio"], [role="switch"]')) {
       const r = el.getBoundingClientRect();
@@ -337,10 +373,10 @@ export async function smallTargets(page) {
         height += grow(before.top) + grow(before.bottom);
         width += grow(before.left) + grow(before.right);
       }
-      if (height < 40 || width < 24) bad.push(`${el.className || el.tagName} ${width.toFixed(0)}x${height.toFixed(0)}`);
+      if (height < minHeight || width < minWidth) bad.push(`${el.className || el.tagName} ${width.toFixed(0)}x${height.toFixed(0)}`);
     }
     return [...new Set(bad)];
-  });
+  }, { minHeight, minWidth });
 }
 
 /** Writes past history directly, so Verlauf has something to draw. */

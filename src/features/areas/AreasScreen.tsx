@@ -219,6 +219,7 @@ export function AreasScreen({
   onSelectTerminal,
   onOpenSection,
   onOpenHub,
+  onRehearseOnboarding,
 }: {
   configuration: AppConfiguration;
   actions: AreasActions;
@@ -230,6 +231,8 @@ export function AreasScreen({
   onOpenSection(section: GymSection | undefined): void;
   /** Opens the Gym hub from a section, whichever way the section was entered. */
   onOpenHub(): void;
+  /** Only in the preview build: the onboarding as a rehearsal (D191). */
+  onRehearseOnboarding?: (() => void) | undefined;
 }) {
   const t = useT();
   // Bereiche is drawn in the world of the area it shows (WP3 Stage 6).
@@ -519,6 +522,18 @@ export function AreasScreen({
                   tool its user switches on, kept outside the app's data. */}
               <MeasureSetting />
             </Card>
+            {/* The preview's one extra (D191): the onboarding again, as a
+                rehearsal that writes nothing. The live app has no such row. */}
+            {onRehearseOnboarding ? (
+              <Card rows>
+                <Row
+                  title={t('settings.rehearseOnboarding')}
+                  subtitle={t('settings.rehearseOnboarding.hint')}
+                  trailing={<ChevronRightIcon size={18} />}
+                  onClick={onRehearseOnboarding}
+                />
+              </Card>
+            ) : null}
           </Section>
         </div>
       </div>

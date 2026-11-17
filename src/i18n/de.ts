@@ -43,6 +43,8 @@ export const de = {
   'common.continue': 'Weiter',
   'common.settings': 'Einstellungen',
   'settings.weightUnit': 'Gewichtseinheit',
+  'settings.rehearseOnboarding': 'Einführung ansehen',
+  'settings.rehearseOnboarding.hint': 'Nur in der Vorschau. Ein Probelauf: Nichts wird gespeichert, deine Daten bleiben, wie sie sind.',
   'unit.kg': 'kg',
   'unit.lb': 'lb',
   'unit.kg.name': 'Kilogramm',
@@ -82,12 +84,12 @@ export const de = {
   'onboarding.questions.body': 'Wähle drei bis fünf Fragen. Ändern kannst du sie jederzeit.',
   'onboarding.questions.custom': 'Eigene Frage',
   'onboarding.questions.selected': '{count} ausgewählt',
-  'onboarding.questions.recommendation': 'Drei bis fünf sind ein guter Anfang.',
+  'onboarding.questions.needOne': 'Wähl mindestens eine Frage oder nimm Mind ab.',
   'onboarding.sports.perWeek': '{count} pro Woche',
   'onboarding.summary.title': 'Alles bereit',
   'onboarding.summary.body': 'Du kannst jederzeit unter Bereiche nachjustieren.',
   'onboarding.summary.questions': '{count} Fragen täglich',
-  'onboarding.summary.questionsOne': 'Eine Frage täglich',
+  'onboarding.summary.questionsOne': '1 Frage täglich',
   'onboarding.summary.empty': 'Noch nichts eingerichtet',
   'onboarding.summary.emptyBody':
     'Auch gut. Du kannst unter Bereiche starten, sobald du so weit bist.',
@@ -281,14 +283,35 @@ export const de = {
   'question.categoryLabel': 'Bereich',
   'question.categoryHint': 'Der Bereich bestimmt, wie die Frage in deinen Tageswert einfliesst.',
 
-  'onboarding.concept.momentum.title': 'Momentum',
+  // Block 7E (D190). A title's line break is written: on the three slides
+  // the second line is the point, and a browser would break elsewhere.
+  'onboarding.concept.momentum.title': 'Fortschritt,\nden du siehst.',
   'onboarding.concept.momentum.body':
-    'Fortschritt sieht man selten von Tag zu Tag. Momentum macht ihn sichtbar.',
-  'onboarding.concept.worlds.title': 'Zwei Welten',
+    'Ein kurzer Check-in am Tag, ein Ziel pro Woche. Momentum zeigt dir, wohin das führt.',
+  'onboarding.concept.worlds.title': 'Zwei Welten.\nEin Verlauf.',
   'onboarding.concept.worlds.body': 'Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.',
-  'onboarding.concept.rank.title': 'Rang und Meilensteine',
-  'onboarding.concept.rank.body':
-    'Ein Rang zeigt, wo du stehst. Meilensteine bleiben, auch wenn eine Woche schlecht läuft.',
+  'onboarding.concept.rank.title': 'Ein Rang\nfür alles.',
+  'onboarding.concept.rank.body': 'Mind und Gym zählen zusammen. Du startest als Rookie.',
+  'onboarding.welcome.privacy': 'Alles bleibt auf deinem iPhone.',
+  // The opening page's one line (D192): the owner's words, the same in both
+  // languages.
+  'onboarding.opening.title': 'Let\u2019s get it started',
+  // The hero of the first slide is a picture with example values, and says so.
+  'onboarding.hero.label':
+    'Vorschau der App mit Beispielwerten: Verlauf plus 9 Prozent in 30 Tagen, Mind heute 8 von 10, Gym 2 von 3 Sessions diese Woche.',
+  'onboarding.hero.change': '+9\u00A0%',
+  'onboarding.hero.period': 'Mind und Gym · letzte 30 Tage',
+  'onboarding.hero.mind': '8 von 10',
+  'onboarding.hero.gym': '2 von 3',
+  'onboarding.hero.week': 'Woche',
+  'onboarding.worlds.scale': 'Skala von 1 bis 10, noch nicht beantwortet',
+  'onboarding.worlds.note': 'Beides zählt für denselben Rang.',
+  'onboarding.worlds.runs': 'Läufe',
+  'onboarding.worlds.runsOptional': 'Ein eigenes Wochenziel, wenn du willst.',
+  'onboarding.rank.start': 'Hier startest du',
+  'onboarding.rank.next': 'Nächster Rang',
+  'onboarding.rank.more': '{count} weitere Ränge bis {rank}',
+  'onboarding.rank.path': 'Der Weg zum nächsten Rang: von 0 bis {points}.',
   'onboarding.domains.title': 'Womit startest du?',
   'onboarding.domains.body': 'Ein Bereich genügt. Alles Weitere kommt später.',
   'onboarding.domains.hint': 'Details richtest du ein, wenn du einen Bereich zum ersten Mal öffnest.',

@@ -396,3 +396,42 @@ describe.each(SETS)('%s: a sheet with two heights', (_label, tokens) => {
     expect(Number(tokens.get('--sheet-detent-upper'))).toBe(0.92);
   });
 });
+
+/**
+ * The onboarding's exceptions (contract §16, D190). It is drawn on the
+ * light set; its one dark surface a screen declares the Gym world for
+ * itself and so reads the Gym set, on the Gym world's tinted surface.
+ */
+describe('the onboarding (contract §16)', () => {
+  const light = (name: string) => hexIn(set(ROOT), name);
+  const gym = (name: string) => hexIn(set(ROOT, GYM), name);
+
+  it.each(['--onboarding-line-start', '--accent', '--onboarding-line-end'])(
+    'the hero line reads as a mark on its white card: %s at 3:1',
+    (name) => {
+      // The line is the one coloured data mark the flow draws, and its end
+      // point stands in the last colour.
+      expect(contrast(light(name), light('--surface-elevated'))).toBeGreaterThanOrEqual(LARGE);
+    },
+  );
+
+  it('adds exactly two colours, and they are not the status fills', () => {
+    const added = [...ROOT.keys()].filter((name) => name.startsWith('--onboarding-') && /^#/.test(ROOT.get(name) ?? ''));
+    expect(added.sort()).toEqual(['--onboarding-line-end', '--onboarding-line-start']);
+    for (const name of added) {
+      for (const status of STATUSES) expect(light(name)).not.toBe(light(`--status-${status}`));
+    }
+  });
+
+  it.each(['--text-primary', '--text-secondary', '--accent-ink'])(
+    '%s reads on the Gym surface of a tile at 4.5:1',
+    (name) => {
+      expect(contrast(gym(name), gym('--surface-tinted'))).toBeGreaterThanOrEqual(BODY);
+    },
+  );
+
+  it('the dark tile is the Gym world, not a dark variant of the light one', () => {
+    expect(luminance(gym('--surface-tinted'))).toBeLessThan(0.02);
+    expect(luminance(light('--surface-elevated'))).toBe(1);
+  });
+});

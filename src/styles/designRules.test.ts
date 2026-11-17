@@ -172,15 +172,48 @@ describe('a font size is a token, and none is under 11px (contract §3, §14)', 
 
   it('no size on the scale is under 11px', () => {
     const sizes = [...TOKENS_CSS.matchAll(/(--type-[a-z-]+):\s*([\d.]+)px;/g)].map((match) => [match[1]!, Number(match[2])] as const);
-    // The scale and the three figure steps: ten tokens, all in pixels.
+    // The scale and the three figure steps, and the one step the onboarding
+    // adds for its hero figure (D190): eleven tokens, all in pixels.
     expect(sizes.map(([name]) => name).sort()).toEqual([
-      '--type-body', '--type-caption', '--type-figure-l', '--type-figure-m', '--type-figure-xl',
+      '--type-body', '--type-caption', '--type-figure-hero', '--type-figure-l', '--type-figure-m', '--type-figure-xl',
       '--type-footnote', '--type-headline', '--type-large-title', '--type-subhead', '--type-title',
     ]);
     for (const [name, size] of sizes) expect(size, name).toBeGreaterThanOrEqual(11);
     expect(Math.min(...sizes.map(([, size]) => size))).toBe(11);
     // And no --type-* token is declared in any other unit that would slip by.
     expect(TOKENS_CSS.match(/--type-[a-z-]+:\s*[^;]+;/g)).toHaveLength(sizes.length);
+  });
+});
+
+describe('the onboarding keeps its exceptions to itself (contract §16, D190)', () => {
+  const ONBOARDING = (path: string) => relative(path).startsWith('features/onboarding/');
+
+  it('only the onboarding reads its hero figure and its line', () => {
+    const own = /--(?:type-figure-hero|onboarding-line[a-z-]*)\b/;
+    const readers = scan(ALL.filter((path) => path !== TOKENS && !ONBOARDING(path)), own);
+    expect(describeHits(readers)).toEqual([]);
+  });
+
+  it('the onboarding speaks in the system font, like the app (D191)', () => {
+    // DM Sans came and went in block 7E: the first screens are to read like
+    // everything after them. No stylesheet loads a face, none but the
+    // shell's sets a family, and no font file lies in the source.
+    const sheets = CSS.filter((path) => path !== TOKENS);
+    expect(describeHits(scan(sheets, /@font-face/))).toEqual([]);
+    const families = scan(sheets.filter((path) => relative(path) !== 'styles/global.css'), /font-family:(?!\s*inherit\s*;)[^;]+;/);
+    expect(describeHits(families)).toEqual([]);
+    const fonts = (dir: string): string[] =>
+      readdirSync(dir).flatMap((entry) => {
+        const path = join(dir, entry);
+        return statSync(path).isDirectory() ? fonts(path) : /\.(woff2?|ttf|otf)$/i.test(entry) ? [path] : [];
+      });
+    expect([...fonts(SRC), ...fonts(join(ROOT, 'public'))].map((path) => path.slice(ROOT.length))).toEqual([]);
+    expect(TOKENS_CSS).not.toMatch(/--font-/);
+  });
+
+  it('the app keeps the system font', () => {
+    const global = code(readFileSync(join(SRC, 'styles', 'global.css'), 'utf8'));
+    expect(global).toMatch(/font-family:\s*system-ui/);
   });
 });
 

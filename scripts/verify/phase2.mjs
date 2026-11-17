@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, phone, onboard, storedDomains, storedQuestions, clipped, smallTargets, seed } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, chooseQuestions, passOpening, storedDomains, storedQuestions, clipped, smallTargets, seed } from './lib.mjs';
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 
@@ -14,17 +14,21 @@ async function fresh(opts = {}) {
 /* ── Onboarding ─────────────────────────────────────────────────────────── */
 {
   const { ctx, page } = await fresh();
-  check('onboarding opens on the Momentum concept', await page.getByText('Fortschritt sieht man selten').isVisible());
+  // The opening page before the first slide (D192), then the three slides,
+  // whose titles are block 7E's (D190).
+  check('onboarding opens on its opening page', await page.getByRole('heading', { name: 'Let\u2019s get it started' }).isVisible());
+  await passOpening(page);
+  check('then the Momentum concept', await page.getByRole('heading', { name: /Fortschritt,\s+den du siehst\./ }).isVisible());
 
   await page.getByRole('button', { name: /Los geht/ }).click();
   check('second screen names the two worlds, Laufen inside Gym (WP3 Stage 4)',
-    await page.getByRole('heading', { name: 'Zwei Welten' }).isVisible() &&
+    await page.getByRole('heading', { name: /Zwei Welten\.\s+Ein Verlauf\./ }).isVisible() &&
     await page.getByText('Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.').isVisible());
   check('and says nothing of Food',
     !/Ernährung|Essen/.test((await page.locator('.onboarding').textContent()) ?? ''));
   await page.getByRole('button', { name: 'Weiter' }).click();
-  check('third screen is rank and milestones',
-    await page.getByRole('heading', { name: /Rang und Meilensteine/ }).isVisible());
+  check('third screen is the one rank',
+    await page.getByRole('heading', { name: /Ein Rang\s+für alles\./ }).isVisible());
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   const picker = await page.getByRole('heading', { name: 'Womit startest du?' }).isVisible();
@@ -37,8 +41,7 @@ async function fresh(opts = {}) {
     (await page.getByRole('button', { name: /^Sport$/ }).count()) === 0);
   check('and Food is not offered (D139)', (await page.getByRole('button', { name: /Ernährung/ }).count()) === 0);
 
-  // Deselect everything and check the flow refuses to continue.
-  await page.getByRole('button', { name: /^Mind/ }).click();
+  // Nothing is chosen at first (D192), and the flow refuses to continue.
   const disabled = await page.getByRole('button', { name: 'Weiter' }).isDisabled();
   check('cannot continue with nothing switched on', disabled);
   check('says so rather than only disabling the button',
@@ -53,17 +56,19 @@ async function fresh(opts = {}) {
     await page.getByRole('heading', { name: 'Alltag' }).isVisible() &&
     await page.getByRole('heading', { name: 'Eigene' }).isVisible());
 
-  await page.getByRole('button', { name: /Wie gut hast du gesch/ }).first().click();
-  await page.getByRole('button', { name: /Wie war deine Stimmung/ }).first().click();
+  // Mind opens with three starter questions chosen since block 7E (D191);
+  // the walk ends with the two it always chose.
+  await chooseQuestions(page, [/Wie gut hast du gesch/, /Wie war deine Stimmung/]);
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   check('the sport step offers two independent targets',
     await page.getByText('Gym-Sessions pro Woche').isVisible() &&
     await page.getByText('Läufe pro Woche').isVisible());
 
-  const cards = page.locator('.card');
-  await cards.nth(0).getByRole('button', { name: '4 pro Woche' }).click();
-  await cards.nth(1).getByRole('button', { name: '2 pro Woche' }).click();
+  // Each target by the name of its group: since block 7E (D190) the two
+  // stand in one card.
+  await page.getByRole('group', { name: 'Gym-Sessions pro Woche' }).getByRole('button', { name: '4 pro Woche', exact: true }).click();
+  await page.getByRole('group', { name: 'Läufe pro Woche' }).getByRole('button', { name: '2 pro Woche', exact: true }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   check('the summary lists each target separately',
@@ -94,10 +99,15 @@ async function fresh(opts = {}) {
 /* ── Custom questions ───────────────────────────────────────────────────── */
 {
   const { ctx, page } = await fresh();
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
+  await page.getByRole('button', { name: /^Mind/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
+  // Mind opens with three starter questions chosen (D191): taken off, the
+  // question of the user's own is the one stored, as before.
+  await chooseQuestions(page, []);
 
   await page.getByRole('button', { name: /Eigene Frage/ }).click();
   await page.getByRole('textbox', { name: 'Frage' }).fill('Habe ich Gitarre geübt?');

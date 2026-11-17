@@ -1,101 +1,223 @@
+/*
+ * The onboarding (block 7E, D190, D191; contract «Onboarding-Ausnahmen»).
+ *
+ * Its look is its own, and only its own: a flat ground without the washes,
+ * white cards that are surfaces rather than glass (there is nothing behind
+ * them to blur), and at most one dark surface a screen — Gym's tile or
+ * card, or the rank's stage. It speaks in the app's system font, so the
+ * first screens read like everything after them (D191). Everything is read
+ * from the tokens; the few the flow adds are named for it in `tokens.css`.
+ */
+
+/* While the flow is mounted the document carries its mark, so an
+   overscroll shows the same flat ground the flow paints. */
+[data-onboarding] body {
+  background-image: none;
+}
+
 .onboarding {
   position: relative;
   /* Height, not min-height: the container must be exactly the screen so the
-     question list shrinks and scrolls inside it. */
+     step shrinks and scrolls inside it. */
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--safe-top) + var(--space-4)) var(--gutter-right)
-    calc(var(--safe-bottom) + var(--space-5)) var(--gutter-left);
+  /* The button stands on the device's own bottom inset, or 20px above the
+     edge where there is none. */
+  padding: var(--safe-top) 0 max(var(--safe-bottom), var(--space-5));
   overflow: hidden;
-  /* The flow stands where the shell will: it paints the one ground itself
-     (D146), the same layer every screen is drawn on, and nothing on top. */
+  /* Flat: the one ground colour, without the washes of `--ground`. */
   background: var(--surface-base);
-  background-image: var(--ground);
+  /* The light world's card shadow, resolved here, so a dark surface on
+     this ground can still cast it: inside its own world the token is the
+     heavy shadow of a card on graphite. */
+  --onboarding-shadow: var(--shadow-card);
+  /* The light accent, for the focus ring a dark tile draws on the light
+     ground: inside the Gym world the token is the violet of graphite,
+     which reaches only 2.2:1 on this ground. */
+  --onboarding-ring: var(--accent);
 }
 
-/* Progress dots. Small, quiet, and the only chrome in the flow. */
-.onboarding__progress {
+/* The opening page (D192): one line in the middle of the flat ground, the
+   button beneath it where it stands on every step. */
+.onboarding__opening {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--gutter-right) 0 var(--gutter-left);
+  text-align: center;
+}
+
+.onboarding__openingTitle {
+  font-size: var(--type-large-title);
+  font-weight: var(--weight-bold);
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+/* Header: the brand or the way back on the left, the step marks on the
+   right. The only chrome in the flow. */
+.onboarding__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--touch-min);
+  padding: 0 var(--gutter-right) 0 var(--gutter-left);
+}
+
+.onboarding__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--type-headline);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.3px;
+}
+
+/* The app icon, small: the same mark `public/icon.svg` draws. */
+.onboarding__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-mark-ink);
+  background: var(--brand-mark);
+}
+
+/* Its own box is the target; the chevron stands at the gutter. */
+.onboarding__back {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  margin-left: calc(var(--space-3) * -1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+}
+
+.onboarding__steps {
   display: flex;
   gap: 6px;
   align-items: center;
-  min-height: var(--touch-min);
 }
 
 .onboarding__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-pill);
   background: var(--separator-strong);
   transition: background var(--duration-base) var(--ease-standard),
     width var(--duration-base) var(--ease-standard);
 }
 
 .onboarding__dot--active {
-  width: 22px;
-  border-radius: var(--radius-pill);
+  width: 18px;
   background: var(--accent);
 }
 
+/*
+ * The step is the scroller, not a list inside it: several lists on one step
+ * would be several independent scrollers, and the last row of the first
+ * would sit under a footer it cannot scroll past. The port runs to the
+ * screen's edge and the gutter is its own padding, so a card's shadow has
+ * the gutter to fall into.
+ */
 .onboarding__body {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-  padding-top: var(--space-6);
-  min-height: 0;
-  /*
-   * The step is the scroller, not the list inside it.
-   *
-   * With one flat list of suggestions the list could scroll itself. Grouping
-   * the questions by category makes several lists on one step, and several
-   * independent scrollers is not a screen — the last question of the first
-   * group would sit under a footer it cannot scroll past.
-   */
+  gap: var(--space-5);
+  padding: var(--space-3) var(--gutter-right) var(--space-4) var(--gutter-left);
   overflow-y: auto;
   /* Down only: without this the other axis computes to `auto` as well. */
   overflow-x: clip;
   -webkit-overflow-scrolling: touch;
-  /* Room for the card shadows, which the overflow would otherwise clip. */
-  margin: 0 calc(var(--space-2) * -1);
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
 }
 
-/* A scrolling column scrolls; it never squeezes what is in it. A card with
-   `overflow: hidden` has an automatic minimum height of 0 as a flex item, so
-   on a short screen the two target cards were shrunk and their bubbles cut
-   away instead of the step scrolling. */
+/* A scrolling column scrolls; it never squeezes what is in it. */
 .onboarding__body > * {
   flex-shrink: 0;
+}
+
+/* A concept slide: the picture first, its title beneath. */
+.onboarding__body--slide {
+  gap: var(--space-6);
+}
+
+.onboarding__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.onboarding__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .onboarding__title {
   font-size: var(--type-large-title);
   font-weight: var(--weight-bold);
-  letter-spacing: -0.8px;
-  line-height: 1.15;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+}
+
+/* A slide's title carries its own line break (`de.ts`). */
+.onboarding__title--slide {
+  white-space: pre-line;
 }
 
 .onboarding__lead {
   font-size: var(--type-body);
   color: var(--text-secondary);
-  max-width: 30ch;
-  line-height: 1.45;
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
-/* Footer actions sit within thumb reach and never scroll away. */
+/* Footer: one line of note, the one primary action. Within thumb reach,
+   and it never scrolls away. */
 .onboarding__footer {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding-top: var(--space-5);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--gutter-right) 0 var(--gutter-left);
+}
+
+.onboarding__footer .button {
+  min-height: 56px;
+  border-radius: var(--radius-inner);
+}
+
+.onboarding__note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 20px;
+  font-size: var(--type-footnote);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.onboarding__note svg {
+  flex-shrink: 0;
+  stroke-width: 2;
 }
 
 /* The setup did not get saved. Sits directly above the button that retries it. */
 .onboarding__failure {
   padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-2);
   border-radius: var(--radius-control);
   background: var(--surface-secondary);
   font-size: var(--type-footnote);
@@ -103,89 +225,631 @@
   text-align: center;
 }
 
-/* Welcome ------------------------------------------------------------- */
+.onboarding__hint {
+  font-size: var(--type-footnote);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
 
-.welcome {
-  flex: 1;
+/* Surfaces -------------------------------------------------------------- */
+
+/* A card: white, the card's radius and shadow, one inset. */
+.onboarding-card {
+  padding: var(--card-pad);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-card);
+}
+
+/* The dark one. It declares the Gym world for itself (`data-world`), so
+   every colour inside is Gym's; the shadow is the light ground's. */
+.onboarding-card--gym {
+  background: var(--surface-tinted);
+  box-shadow: var(--onboarding-shadow);
+}
+
+.onboarding-card__head {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-5);
-  padding-bottom: var(--space-10);
-  /* Its own stacking context, so the mark's halo sits behind the mark and
-     still in front of the ground the flow paints. */
-  isolation: isolate;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
-/*
- * The hero mark. A soft lavender-to-sky gradient tile with a faint halo —
- * the one deliberately emotional moment in a flow that is otherwise choices.
- */
-.welcome__mark {
-  position: relative;
-  width: 88px;
-  height: 88px;
-  border-radius: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--space-6);
-  color: var(--brand-mark-ink);
-  background: var(--brand-mark);
-  box-shadow: var(--shadow-brand-mark);
+.onboarding-card__title {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
 }
 
-.welcome__mark::after {
-  content: '';
-  position: absolute;
-  inset: -14px;
-  border-radius: 34px;
-  background: var(--brand-mark-halo);
-  z-index: var(--layer-below);
+.onboarding-card__meta {
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
 }
 
-.welcome__tagline {
-  font-size: var(--type-large-title);
-  font-weight: var(--weight-bold);
-  letter-spacing: -1.1px;
-  line-height: 1.12;
-  max-width: 13ch;
+/* A world's tile -------------------------------------------------------- */
+
+.onboarding__tiles {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-3);
 }
 
-/* Question picker ------------------------------------------------------ */
-
-.question-list {
+.world-tile {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding-bottom: var(--space-2);
+  padding: var(--card-pad);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-card);
+  text-align: left;
 }
 
-/* A soft card: the whole thing is the tap target. */
-.question-pick {
+.world-tile[data-world='gym'] {
+  background: var(--surface-tinted);
+  box-shadow: var(--onboarding-shadow);
+}
+
+.world-tile__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The world's mark, on the tint of its own accent. */
+.world-tile__icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-tint);
+  color: var(--accent-ink);
+}
+
+/* Two tiles side by side leave a narrow phone about 106px inside each:
+   the mark and the gaps give way there, so the head's three parts fit
+   on one line without running into the inset. */
+@media (max-width: 374px) {
+  .world-tile__head {
+    gap: var(--space-1);
+  }
+
+  .world-tile__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+  }
+}
+
+.world-tile__name {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.1px;
+}
+
+.world-tile__meta {
+  margin-left: auto;
+  font-size: var(--type-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* A tile's figure: the number at the tile's step, its unit beside it. */
+.world-tile__figure {
+  font-size: var(--type-figure-l);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.world-tile__figure .figure__unit {
+  margin-left: 5px;
+  letter-spacing: 0;
+}
+
+/* Segments: so many of so many. Neutral, as every value mark is. */
+.segments {
+  display: flex;
+  gap: 3px;
+}
+
+.segments > i {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--data-track);
+}
+
+.segments > i[data-on] {
+  background: var(--data-ink);
+}
+
+/* The two coloured kinds are the hero's (contract «Onboarding-Ausnahmen»):
+   Mind's follow the trend line's gradient — one gradient laid over the
+   whole row, each segment showing its own part of it — and Gym's take
+   Gym's accent. */
+.segments--line > i[data-on] {
+  background-color: var(--accent);
+  background-image: var(--onboarding-line);
+  background-size: calc(var(--segments) * 100% + (var(--segments) - 1) * 3px) 100%;
+  background-position: calc(var(--segment) / (var(--segments) - 1) * 100%) 0;
+}
+
+.segments--accent {
+  gap: 4px;
+}
+
+.segments--accent > i[data-on] {
+  background: var(--accent);
+}
+
+/* A tile that is chosen: a control. Its mark is filled in the accent when
+   it is on — never a thick edge round the tile. */
+.world-tile--choice {
+  min-height: 148px;
+  gap: var(--space-2);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.world-tile--choice:active {
+  transform: scale(0.99);
+}
+
+.world-tile--choice[data-world='gym']:focus-visible {
+  outline-color: var(--onboarding-ring);
+}
+
+.world-tile--choice .world-tile__head {
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.world-tile--choice .world-tile__name {
+  font-size: var(--type-headline);
+}
+
+/* The first slide's picture ---------------------------------------------- */
+
+.onboarding-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.onboarding-hero__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.onboarding-hero__title {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+}
+
+/* The range, drawn as the segment it is in the app — a picture of one. */
+.onboarding-hero__range {
+  display: flex;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-input);
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+}
+
+.onboarding-hero__range > span {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.onboarding-hero__range > span[data-on] {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--shadow-selected);
+}
+
+.onboarding-hero__figure {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: var(--space-3);
+}
+
+/* The hero figure: the onboarding's own figure step, bold. */
+.onboarding-hero__change {
+  font-size: var(--type-figure-hero);
+  font-weight: var(--weight-bold);
+  letter-spacing: -1.4px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* A state, so the status family: "steigend" as a word on its tint. */
+.onboarding-hero__chip svg {
+  stroke-width: 2.6;
+}
+
+.onboarding-hero__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px 4px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--status-strong-tint);
+  color: var(--status-strong-ink);
+  font-size: var(--type-caption);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.onboarding-hero__period {
+  margin-top: 2px;
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+}
+
+/*
+ * The plot. As wide as the card and, left alone, in the reference's
+ * proportion, 325 : 116. On a short screen it is the one thing in the slide
+ * that gives up height, before the slide has to scroll — down to 64px
+ * (`useFitPlot` in `OnboardingHero.tsx` takes from it what the slide
+ * lacks). Nothing here knows how many lines a sentence takes: the system
+ * font decides that, and it differs from phone to phone.
+ */
+.onboarding-hero__plot {
+  position: relative;
+  height: var(
+    --plot-height,
+    calc((100vw - var(--gutter-left) - var(--gutter-right) - 2 * var(--card-pad)) * 116 / 325)
+  );
+  min-height: 64px;
+  margin-top: var(--space-3);
+}
+
+/* The bars: the accent's tint, running out towards the foot. */
+.onboarding-hero__bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.onboarding-hero__bars > i {
+  width: 4.615%;
+  height: calc(var(--bar) * 100%);
+  border-radius: var(--radius-pill);
+  background-image: linear-gradient(to bottom, var(--accent-tint), var(--surface-elevated));
+}
+
+/* Where color-mix() is known the bars keep a quarter of the tint at their
+   foot. A declaration with var() is accepted when it is parsed and only
+   found invalid when it is computed, so without this query an iPhone on
+   iOS 15 or 16.0–16.1 would draw no bar at all, not the plainer one. */
+@supports (color: color-mix(in srgb, currentColor 50%, transparent)) {
+  .onboarding-hero__bars > i {
+    background-image: linear-gradient(
+      to bottom,
+      var(--accent-tint),
+      color-mix(in srgb, var(--accent-tint) 25%, var(--surface-elevated))
+    );
+  }
+}
+
+/* Today's bar keeps more of itself. */
+.onboarding-hero__bars > i:last-child {
+  background-image: linear-gradient(to bottom, var(--accent-tint), var(--accent-tint));
+}
+
+.onboarding-hero__chart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.onboarding-hero__line {
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.onboarding-hero__line-start {
+  stop-color: var(--onboarding-line-start);
+}
+
+.onboarding-hero__line-mid {
+  stop-color: var(--accent);
+}
+
+.onboarding-hero__line-end {
+  stop-color: var(--onboarding-line-end);
+}
+
+/* The end point and its halo: two round boxes about one point. */
+.onboarding-hero__end {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.onboarding-hero__end::before,
+.onboarding-hero__end::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--onboarding-line-end);
+}
+
+.onboarding-hero__end::before {
+  inset: -10px;
+  opacity: 0.16;
+}
+
+.onboarding-hero__end::after {
+  inset: -6.5px;
+  border: 2.5px solid var(--surface-elevated);
+}
+
+.onboarding-hero__axis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  font-size: var(--type-caption);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.onboarding-hero__today {
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-tint);
+  color: var(--accent-ink);
+  font-weight: var(--weight-semibold);
+}
+
+/* Two worlds -------------------------------------------------------------- */
+
+.onboarding-worlds__question {
+  margin-top: var(--space-3);
+  font-size: var(--type-body);
+  line-height: 1.35;
+}
+
+/* The scale, not answered: ten neutral cells. A picture, not a control. */
+.onboarding-worlds__scale {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--space-3);
+}
+
+.onboarding-worlds__scale > span {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-input);
+  color: var(--text-secondary);
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.onboarding-worlds__gym {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.onboarding-worlds__goals {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.onboarding-worlds__goal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.onboarding-worlds__goal .segments {
+  gap: 4px;
+}
+
+.onboarding-worlds__goalName {
+  font-size: var(--type-headline);
+  font-weight: var(--weight-semibold);
+}
+
+/* The body's still: small and still. */
+.onboarding-worlds__body {
+  flex-shrink: 0;
+  width: 64px;
+  height: auto;
+  filter: drop-shadow(var(--shadow-figure));
+}
+
+/* One rank ---------------------------------------------------------------- */
+
+/* The stage (D16): the Boss's dark surface, from the `--stage-*` tokens. */
+.rank-stage {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4) var(--card-pad) var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--stage-surface);
+  background-image: var(--stage-ground);
+  box-shadow: var(--shadow-stage);
+  color: var(--stage-text);
+  text-align: center;
+}
+
+.rank-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--stage-sheen);
+  pointer-events: none;
+}
+
+.rank-stage > * {
+  position: relative;
+}
+
+.rank-stage__name {
+  margin-top: calc(var(--space-2) * -1);
+  font-size: var(--type-title);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+}
+
+.rank-stage__start {
+  margin-top: 2px;
+  font-size: var(--type-subhead);
+  color: var(--stage-text-secondary);
+}
+
+.rank-stage__path {
+  align-self: stretch;
+  margin-top: var(--space-5);
+}
+
+/* A value, so neutral: the stage's data ink on its track. */
+.rank-stage__track {
+  position: relative;
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--stage-data-track);
+}
+
+.rank-stage__track > i {
+  position: absolute;
+  left: 0;
+  top: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--stage-data-ink);
+}
+
+.rank-stage__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  font-size: var(--type-caption);
+  color: var(--stage-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-stage__next {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--stage-data-track);
+  text-align: left;
+}
+
+.rank-stage__nextBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rank-stage__kicker {
+  font-size: var(--type-caption);
+  color: var(--stage-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-stage__nextName {
+  font-size: var(--type-headline);
+  font-weight: var(--weight-semibold);
+}
+
+.rank-stage__from {
+  font-size: var(--type-footnote);
+  color: var(--stage-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rank-beyond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) 10px;
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+}
+
+.rank-beyond__badges {
+  display: flex;
+  gap: 3px;
+}
+
+/* Questions --------------------------------------------------------------- */
+
+/*
+ * One card for a category, its questions as rows with a fine line between
+ * them. The picker is grouped because the score is grouped: the daily value
+ * means within a category before it means across them.
+ */
+.category-group {
+  padding-bottom: 0;
+}
+
+.category-group__title {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.2px;
+}
+
+.category-group__body {
+  margin-top: 2px;
+  padding-bottom: var(--space-3);
+  font-size: var(--type-footnote);
+  color: var(--text-secondary);
+}
+
+/* A row: the whole of it is the tap target. */
+.question-list > li {
+  border-top: 1px solid var(--separator);
+}
+
+.category-group .question-pick {
   display: flex;
   align-items: center;
   gap: var(--space-4);
   width: 100%;
-  min-height: 72px;
-  padding: var(--space-4) var(--space-5);
-  border-radius: 20px;
-  background: var(--surface-elevated);
-  border: 1.5px solid transparent;
-  box-shadow: var(--shadow-card);
+  min-height: var(--row-height);
+  padding: var(--space-3) 0;
   text-align: left;
-  transition: border-color var(--duration-fast) var(--ease-standard),
-    box-shadow var(--duration-fast) var(--ease-standard),
-    transform var(--duration-fast) var(--ease-standard);
-}
-
-.question-pick:active {
-  transform: scale(0.99);
-}
-
-/* Chosen: the accent on the edge, and the mark inside says so again. */
-.question-pick[aria-pressed='true'] {
-  border-color: var(--accent);
 }
 
 .question-pick__body {
@@ -193,7 +857,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 6px;
   align-items: flex-start;
 }
 
@@ -203,88 +867,210 @@
   letter-spacing: -0.2px;
 }
 
-.question-pick--custom {
+/* "Eigene Frage": a text button, in the accent's ink. */
+.category-group .question-pick--custom {
   justify-content: flex-start;
-  gap: var(--space-3);
+  gap: var(--space-2);
   color: var(--accent-ink);
-  font-weight: var(--weight-semibold);
   font-size: var(--type-subhead);
-  border-style: dashed;
-  border-color: var(--separator-strong);
-  background: transparent;
-  box-shadow: none;
-  min-height: 56px;
+  font-weight: var(--weight-semibold);
 }
 
-.question-pick__count {
-  font-size: var(--type-footnote);
-  color: var(--text-secondary);
-  min-height: 20px;
-  text-align: center;
+/* Weekly targets ----------------------------------------------------------- */
+
+.week-goals {
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
-/* Summary -------------------------------------------------------------- */
-
-.summary__list {
+.week-goals__goal {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding: var(--card-pad) 0;
 }
 
-.summary__item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  border-radius: 20px;
-  background: var(--surface-elevated);
-  box-shadow: var(--shadow-card);
-  font-size: var(--type-body);
-  letter-spacing: -0.2px;
+.week-goals__goal + .week-goals__goal {
+  border-top: 1px solid var(--separator);
 }
 
-/* Neutral, like every area mark (D160). */
-.summary__mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-secondary);
-  color: var(--text-secondary);
+.week-goals__label {
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-semibold);
 }
 
 /*
- * Question categories.
- *
- * The picker is grouped because the score is grouped: the daily value means
- * within a category before it means across them, so a user choosing six
- * questions from one shelf and none from another is making a decision about
- * weighting whether or not they know it. Showing the shelves is how they get
- * to know it.
+ * Seven values as one segment row instead of seven circles: the same
+ * control with the same names, drawn for this card. The cell is the target
+ * — 44px high and its share of the row wide, touching its neighbours, the
+ * one exception to 44px the row of seven has had since D163 — and the
+ * chosen value's pill is drawn inside it, 3px in from the track's edge.
  */
-.category-group {
+.week-goals .bubble-row {
+  border-radius: var(--radius-control);
+  background: var(--surface-input);
+}
+
+.week-goals .bubble {
+  aspect-ratio: auto;
+  height: var(--touch-min);
+  max-height: none;
+  font-size: var(--type-subhead);
+  font-weight: var(--weight-medium);
+}
+
+.week-goals .bubble::before {
+  top: 3px;
+  bottom: 3px;
+  left: 1px;
+  right: 1px;
+  width: auto;
+  aspect-ratio: auto;
+  transform: none;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+}
+
+.week-goals .bubble:first-child::before {
+  left: 3px;
+}
+
+.week-goals .bubble:last-child::before {
+  right: 3px;
+}
+
+.week-goals .bubble:active::before {
+  transform: scale(0.96);
+}
+
+.week-goals .bubble[aria-pressed='true'] {
+  font-weight: var(--weight-semibold);
+}
+
+.week-goals .bubble[aria-pressed='true']::before {
+  background: var(--accent);
+}
+
+.week-goals .bubble:focus-visible::before {
+  outline-offset: 1px;
+}
+
+/* Summary ------------------------------------------------------------------ */
+
+.summary__item + .summary__item {
+  margin-top: var(--space-1);
+}
+
+/* In a tile of the summary the unit is a phrase, and it may break. */
+.summary__list .world-tile__figure .figure__unit {
+  display: block;
+  margin: 2px 0 0;
+}
+
+.summary__list .world-tile__figure {
+  line-height: 1.1;
+}
+
+.summary__rank {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+.summary__rankBody {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 2px;
 }
 
-.category-group__title {
-  font-size: var(--type-subhead);
+.summary__rankName {
+  font-size: var(--type-headline);
   font-weight: var(--weight-semibold);
-  color: var(--text-primary);
-  letter-spacing: -0.2px;
 }
 
-.category-group__body {
+.summary__rankNote,
+.summary__rankNext {
   font-size: var(--type-footnote);
   color: var(--text-secondary);
-  margin-top: -4px;
+  font-variant-numeric: tabular-nums;
 }
 
-.onboarding__hint {
-  font-size: var(--type-footnote);
-  color: var(--text-secondary);
+.summary__rankNext {
+  text-align: right;
+}
+
+/*
+ * A short screen — a phone's browser with its bars showing. The slide draws
+ * closer together before it scrolls: the same things, with less air.
+ */
+@media (max-height: 720px) {
+  .onboarding__body {
+    gap: var(--space-4);
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-2);
+  }
+
+  .onboarding__body--slide {
+    gap: var(--space-4);
+  }
+
+  .onboarding__footer {
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+  }
+
+  .onboarding__footer .button {
+    min-height: 50px;
+  }
+
+  .onboarding-hero__trend {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .onboarding-hero__figure,
+  .onboarding-hero__plot {
+    margin-top: var(--space-2);
+  }
+
+  .onboarding-worlds__question,
+  .onboarding-worlds__scale {
+    margin-top: var(--space-2);
+  }
+
+  .onboarding-worlds__goals {
+    gap: var(--space-3);
+  }
+
+  .world-tile {
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .rank-stage {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-4);
+  }
+
+  .rank-stage .badge-svg {
+    width: 84px;
+    height: 98px;
+  }
+
+  .rank-stage__path {
+    margin-top: var(--space-4);
+  }
+
+  .rank-stage__next {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+  }
 }

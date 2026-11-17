@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, clipped, onboard, phone, seed, seedLegacyFood, seedTraining, smallTargets, summary } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, clipped, onboard, passOpening, phone, seed, seedLegacyFood, seedTraining, smallTargets, summary } from './lib.mjs';
 
 /**
  * WP3, Stage 4 — Mind and Gym (P1–P3), on the real production build, under a
@@ -311,10 +311,12 @@ for (const [width, height] of SIZES) {
 for (const [width, height] of SIZES) {
   const W = `C ${width}`;
   const { ctx, page, errors } = await newDevice(width, height);
+  await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.waitForTimeout(400);
   check(`${W}: the second screen names two worlds, Laufen inside Gym`,
-    (await text(page.locator('.welcome__tagline'))) === 'Zwei Welten' &&
+    // The slide's title since block 7E (D190), with its written line break.
+    (await text(page.locator('.onboarding__title'))).replace(/\s+/g, ' ') === 'Zwei Welten. Ein Verlauf.' &&
       (await text(page.locator('.onboarding__lead'))) === 'Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.');
   await noFood(page, `${W} concept`);
   await layoutChecks(page, `${W} concept`);
