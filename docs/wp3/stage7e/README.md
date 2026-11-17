@@ -51,6 +51,17 @@ STOP 7E-b are in `docs/design/wp3/stage7e-b/`.
   Back at any step, or a reload return to the app, and nothing is written
   — `onboarding-7e.mjs` reads every store of the preview's database
   before and after and finds them byte for byte the same.
+- **What it costs now**: without the font, the stylesheet is 11,144 bytes
+  larger than at block 7D's head (1,633 gzip) and the script 13,039
+  (3,430 gzip) — about 5 kB an installation fetches more, where STOP 7E-a2
+  cost 42.
+- **Verification** (2026-11-17, on `06f902f`): `tsc -b` clean; `npm run
+  test` exit 0, 141 files, 2476 tests; `onboarding-7e.mjs` 67 of 67,
+  `phase2.mjs` 67 of 67, `phase2-a11y.mjs` 17 of 17, `wp3-stage4.mjs`
+  170 of 170, `design-system.mjs` with `ONLY=onboarding` 212 of 212 at
+  four widths (lowest text 4.71:1, «Heute» in the hero at 320). Reviewed
+  by four readers with a skeptic for every finding: seven held, all
+  fixed (D191).
 - **The pictures**: `docs/design/wp3/stage7e-b/` — every step at 393, the
   first slide and the weekly targets at 320 and 430, the question step as
   it opens and with no question chosen, and the preview's row
