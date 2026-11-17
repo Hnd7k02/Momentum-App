@@ -55,6 +55,11 @@ async function boot(width, { withData }) {
     await seedMuscles(page, { days: 42 });
     await seedPlan(page);
   }
+  // What the hub fetches is counted from here. Since block 7E the
+  // onboarding's Gym card shows the same still (D191), so the walk through
+  // it fetched the file once already — the same file, which said nothing
+  // about the hub (block 9).
+  preview.length = 0;
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
   return { ctx, page, fetched, preview, errors };
