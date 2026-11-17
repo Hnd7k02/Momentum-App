@@ -6316,8 +6316,46 @@ built on the head of that branch (`adf1ead`) on a branch of its own.
   with every other built file, so every installation downloads it once.
 - **Credited** under Bereiche → Einstellungen → Danksagungen, with the
   copyright line and the licence, and in `THIRD-PARTY-NOTICES.md`; the
-  licence text lies beside the file (`OFL.txt`). Whether the app takes it
-  too is a question of STOP 7E-a2.
+  licence text ships with every build (`public/licenses/dm-sans-OFL.txt`).
+  Whether the app takes it too is a question of STOP 7E-a2.
+
+- **It has no tabular figures**: «1111» measures 49.9px and «8888» 97.3px
+  at 40px, with `tabular-nums` and without. No numbers stand in a column
+  in the onboarding — the scale 1–10 and the segments 1–7 are centred in
+  cells of one width — so the contract's rule (§3) is met there by the
+  layout, not by the face. For the app it is the main cost of taking the
+  face (STOP 7E-a2).
+
+### Found by the review before the STOP
+
+Three readers went over the block — behaviour and scope, the contract and
+accessibility, copy and layout — and a skeptic tried to refute each
+finding. Five held, and are fixed:
+
+- **The summary set "Eine Frage täglich" at the tile's figure step**, a
+  sentence at 28px bold that broke into three lines at 320px, where two
+  questions printed "3" with "Fragen täglich" as its unit. One question is
+  now "1 Frage täglich", a figure with its unit like the others.
+- **The tiles and the rank's stage left the card inset** (14px and 20px):
+  both are `--card-pad` now (contract §4). Under 375px the head of a tile
+  takes a smaller mark and smaller gaps, so "Gym" and "Woche" fit beside
+  the mark at 320px without running into the inset (they ran 7.5px into
+  it).
+- **The focus ring of the dark Gym tile** was the Gym accent on the light
+  ground, 2.2:1; it is the light accent now.
+- **The bars of the hero vanished where `color-mix()` is unknown** (iOS 15
+  and 16.0–16.1): a declaration with `var()` is accepted when it is parsed
+  and only fails when it is computed, so the plain gradient before it
+  never took over. The mixed foot now stands in a feature query.
+- **The picture script's English walk** stopped on its second step: a new
+  device starts in German, and the script now sets the stored language
+  first.
+
+Refuted: that the first slide's "ein Ziel pro Woche" contradicts two
+targets (it is the canvas's sentence, and the setup says "je ein eigenes
+Ziel"); that the notices claimed a file in the build that is not there
+(the claim was older than the block — and the font's licence now does
+ship, as `licenses/dm-sans-OFL.txt`).
 
 ### Short screens
 

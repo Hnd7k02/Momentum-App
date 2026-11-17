@@ -4,8 +4,8 @@ Momentum ships two things that are not its own: the 3D body, which is built
 from third-party data, and the typeface of its onboarding. The body's source
 is in the public domain and asks for no credit; the app names it all the
 same, and the typeface's licence asks for its notice. Both are named under
-Bereiche → Einstellungen → Danksagungen, and this file ships with every
-build. A last section credits files that are kept in the repository but are
+Bereiche → Einstellungen → Danksagungen. This file lies in the repository
+beside the source; the typeface's licence text ships with every build. A last section credits files that are kept in the repository but are
 not part of the app.
 
 ## 3D body model — `public/models/momentum-body.glb`
@@ -51,8 +51,8 @@ What Momentum made of them, by script and reproducibly (`tools/body/`):
 **DM Sans**, Copyright 2014 The DM Sans Project Authors
 (https://github.com/googlefonts/dm-fonts), licensed under the **SIL Open
 Font License, Version 1.1** (https://openfontlicense.org). The licence text
-lies beside the font file, in `src/features/onboarding/fonts/OFL.txt`, as it
-came with the font.
+ships with every build as `licenses/dm-sans-OFL.txt` (from
+`public/licenses/`), as it came with the font.
 
 The file is the Latin subset of the variable font with its weight axis, as
 the package `@fontsource-variable/dm-sans` 5.3.0 distributes it (36,932

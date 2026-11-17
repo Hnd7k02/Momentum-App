@@ -47,8 +47,10 @@ English.
   installation downloads it once; the browser reads it only while the
   onboarding shows text in it.
 - **The build** against block 7D's head (`adf1ead`): the stylesheet
-  +11,341 bytes (+1,798 gzip), the script +13,201 bytes (+3,419 gzip).
+  +11,815 bytes (+1,869 gzip), the script +13,196 bytes (+3,422 gzip).
   In all, an installation fetches about 42 kB more, 37 of them the font.
+  The font's licence text goes out with the build as well
+  (`licenses/dm-sans-OFL.txt`, 4,502 bytes); it is not precached.
 - **No new dependency**, no stored record, no schema or backup version;
   `applyOnboarding` and what the flow hands to it are as they were.
 
@@ -78,10 +80,15 @@ English.
 
 - The three slides fit without scrolling at 320 × 693, 390 × 664, 393 ×
   659 and on every taller screen; the areas, the weekly targets and the
-  summary from 320 × 568 (the targets but for 11px there). The questions
-  scroll by nature. On 360 × 640 and 375 × 647 the first slide scrolls by
+  summary from 320 × 568. The questions scroll by nature. On 360 × 640 and 375 × 647 the first slide scrolls by
   about 30px; on 320 × 568 and 375 × 548 the slides scroll by up to
   130px, the button stays.
+- **The face is DM Sans at its small optical size**: the file has the
+  weight axis only. The package's file with the optical-size axis as well
+  (62,724 bytes, 25,792 more) sets the 34px titles about 6 % tighter
+  («den du siehst.» 203.7px instead of 217.3px) and the 40px figure 4 %;
+  13px text stays as it is. Not taken: the owner asked for the weights 400
+  to 700, and the canvas's own letter-spacing was kept.
 - The second slide's title is «Zwei Welten. Ein Verlauf.» and the third's
   «Ein Rang für alles.»; «Rang und Meilensteine» is gone with the
   milestones the slide no longer shows.
