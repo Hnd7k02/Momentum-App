@@ -6474,7 +6474,7 @@ checks one state.
   They are chosen, not fixed: any can be taken off. **While Mind has no
   question, «Weiter» waits** and the line above it says "Wähl mindestens
   eine Frage oder nimm Mind ab." (in English "Choose at least one
-  question, or take Mind off."), where "Drei bis fünf sind ein guter
+  question, or switch Mind off."), where "Drei bis fünf sind ein guter
   Anfang." stood. This is the one change of behaviour the block makes: a
   user who taps through now starts with three questions, where Mind used
   to stay off without one (`applyOnboarding` switches Mind on only with a
@@ -6540,6 +6540,20 @@ removed or weakened: `lib.mjs` sets the question choice exactly
 (`chooseQuestions`), since a tap on a starter would take it off;
 `phase2.mjs`'s own question is stored alone after the starters are taken
 off.
+
+### Found by the review before STOP 7E-b
+
+Four readers — the rehearsal, the starter questions, the system font and
+the layout, the tests and the records — and a skeptic for every finding.
+Seven held, all small, and are fixed: the English hint said "take Mind
+off" and says "switch Mind off", the catalogue's verb for an area;
+`HANDOVER.md` still spoke of DM Sans and of STOP 7E-a2; the notices again
+claimed to ship with every build, which they never did; the chart's fit
+had no test and now has one in `onboarding-7e.mjs` (at the phone's height,
+200px shorter and back); the suite's "44px" check measured 40 × 24 and
+now measures 44 × 44, a target cell of the seven excused its width only;
+and the test of a question of the user's own did not check the order it
+names. Nothing was found in the rehearsal or the starter questions.
 
 ### The merge
 

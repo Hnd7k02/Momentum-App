@@ -333,9 +333,13 @@ export async function clipped(page) {
   });
 }
 
-/** Every tap target smaller than the minimum. */
-export async function smallTargets(page) {
-  return page.evaluate(() => {
+/**
+ * Every tap target smaller than the minimum. The limits default to the
+ * lenient 40 × 24 the earlier suites were written against; a suite that
+ * holds the contract's 44px passes them (`onboarding-7e.mjs`).
+ */
+export async function smallTargets(page, { height: minHeight = 40, width: minWidth = 24 } = {}) {
+  return page.evaluate(({ minHeight, minWidth }) => {
     const bad = [];
     for (const el of document.querySelectorAll('button, a[href], input, [role="radio"], [role="switch"]')) {
       const r = el.getBoundingClientRect();
@@ -357,10 +361,10 @@ export async function smallTargets(page) {
         height += grow(before.top) + grow(before.bottom);
         width += grow(before.left) + grow(before.right);
       }
-      if (height < 40 || width < 24) bad.push(`${el.className || el.tagName} ${width.toFixed(0)}x${height.toFixed(0)}`);
+      if (height < minHeight || width < minWidth) bad.push(`${el.className || el.tagName} ${width.toFixed(0)}x${height.toFixed(0)}`);
     }
     return [...new Set(bad)];
-  });
+  }, { minHeight, minWidth });
 }
 
 /** Writes past history directly, so Verlauf has something to draw. */

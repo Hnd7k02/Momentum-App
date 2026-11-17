@@ -102,7 +102,12 @@ async function look(page, label) {
     };
   });
   const cut = await clipped(page);
-  const small = (await smallTargets(page)).filter((entry) => !/^bubble /.test(entry));
+  // 44px both ways (contract §12). A target cell of the seven is excused
+  // its width only — it is its share of the row (D163) — never its height.
+  const small = (await smallTargets(page, { height: 44, width: 44 })).filter((entry) => {
+    const size = / (\d+)x(\d+)$/.exec(entry);
+    return !(/^bubble /.test(entry) && size && Number(size[2]) >= 44);
+  });
   const ok = !facts.wider && facts.dark <= 1 && facts.darkKinds && facts.heroOperable === 0 && facts.heroRole === 'img' && cut.length === 0 && small.length === 0;
   return ok ? null : `${label}: ${JSON.stringify({ ...facts, cut, small })}`;
 }
@@ -117,6 +122,27 @@ for (const width of WIDTHS) {
   {
     const { ctx, page } = await device(URL_APP, width);
     problems.push(await look(page, `${W} A momentum`));
+    // The hero's chart gives the slide what it lacks, down to 64px, and the
+    // slide scrolls only when the chart has reached that floor (useFitPlot)
+    // — at the phone's height, and again on a screen 200px shorter, which
+    // the chart has to refit to.
+    const fits = () => page.evaluate(() => {
+      const slide = document.querySelector('.onboarding__body');
+      const plot = document.querySelector('.onboarding-hero__plot');
+      const over = slide.scrollHeight - slide.clientHeight;
+      const height = plot.getBoundingClientRect().height;
+      return { over, height: Math.round(height), fitted: plot.style.getPropertyValue('--plot-height') !== '', ok: over <= 0.5 || height <= 64.5 };
+    });
+    const tall = await fits();
+    await page.setViewportSize({ width, height: (HEIGHT[width] ?? 852) - 200 });
+    await page.waitForTimeout(300);
+    const short = await fits();
+    await page.setViewportSize({ width, height: HEIGHT[width] ?? 852 });
+    await page.waitForTimeout(300);
+    const back = await fits();
+    check(`${W} A: the slide scrolls only once the hero's chart is at its floor — tall, 200px shorter (fitted), and back`,
+      tall.ok && short.ok && short.fitted && short.height < tall.height && back.ok && back.height === tall.height,
+      JSON.stringify({ tall, short, back }));
     await page.getByRole('button', { name: /Los geht/ }).click();
     problems.push(await look(page, `${W} A worlds`));
     await next(page);

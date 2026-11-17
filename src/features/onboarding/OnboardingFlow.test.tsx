@@ -292,10 +292,11 @@ describe('every way through it (block 7E, D191)', () => {
       await click(question(start));
     }
     expect(primary().disabled).toBe(false);
+    // A starter chosen again after it: the library's questions come first.
+    await click(question('Wie war deine Stimmung'));
     await next();
     await click(buttonNamed('Starten'));
-    expect(finished[0]!.questions).toHaveLength(1);
-    expect(finished[0]!.questions[0]).toMatchObject({ text: 'Habe ich heute gelesen?' });
+    expect(finished[0]!.questions.map((q) => q.text)).toEqual(['Wie war deine Stimmung heute?', 'Habe ich heute gelesen?']);
   });
 
   it('back walks step by step and keeps every choice', async () => {
@@ -355,7 +356,7 @@ describe('every way through it (block 7E, D191)', () => {
     for (const start of ['How well did your day run', 'How well did you sleep', 'How was your mood']) {
       await click(question(start));
     }
-    expect(note()).toBe('Choose at least one question, or take Mind off.');
+    expect(note()).toBe('Choose at least one question, or switch Mind off.');
     await click(question('How well did you sleep'));
     await next('en');
     expect(text()).toContain('1 question daily');

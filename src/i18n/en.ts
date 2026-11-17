@@ -83,7 +83,7 @@ export const en: Translations = {
   'onboarding.questions.body': 'Pick three to five questions. You can change them at any time.',
   'onboarding.questions.custom': 'Your own question',
   'onboarding.questions.selected': '{count} selected',
-  'onboarding.questions.needOne': 'Choose at least one question, or take Mind off.',
+  'onboarding.questions.needOne': 'Choose at least one question, or switch Mind off.',
   'onboarding.sports.perWeek': '{count} per week',
   'onboarding.summary.title': 'You are set',
   'onboarding.summary.body': 'You can adjust all of this later under Areas.',
