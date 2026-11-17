@@ -132,6 +132,14 @@ the 18th:
 | 22.–23.11. | open / scored | 727.9 → 717.5, 717.0 | 799.2 → 796.8 | 665.5 → 656.8 | 740.4 → 738.9, 737.4 | held | one day back (D132): with no answers these days close after a day, not three — and once closed, an unanswered day is a miss |
 | 24.–25.11. | open / open | 715.7, 703.3 → 717.0 | 799.2, 749.6 → 796.8 | 612.7 → 656.8 | 740.4 → 737.4 | held | nothing is charged while it can be written (D134, D135): the live build charges the week's miss and Gym's and Laufen's abstinence on open days; this build waits for the day to close and the week to be over |
 
+**Read on the update day itself** the picture is another, and on purpose:
+the 18th stands at 849 in this build against 831 in the live build
+(`after-update-2026-11-18.json`: 848.96). The week of the update holds a
+session and is not over, so its attendance counts as met until it is
+judged (D134); once it is — Tuesday the 24th — the same day stands at
+832.7, still not below the live build's 831.2. A user sees the Gym rating
+rise on the update day and settle a week later.
+
 No promotion was due in the profile, so D136 shows nothing here; it is
 held by its own tests and suites (`wp3-stage5b`, `p8Reversal.test.ts`).
 
@@ -182,7 +190,7 @@ before is unchanged; once the day is complete its own values stand.
 > - Ernährung verschwindet aus der Oberfläche. Ihre Daten bleiben gespeichert, nichts wird gelöscht.
 > - Heute | Gestern: Eintragen geht für heute und gestern, nicht weiter zurück.
 > - Neues Aussehen: Mind hell, Gym dunkel; Muskelgruppen mit dem Körper und einem Sheet je Gruppe.
-> - Gym rechnet ab diesem Tag mit der neuen Kennzahl (bester Arbeitssatz, Aufwärmsätze zählen nicht). Das Gym-Rating steht danach an keinem Tag tiefer als nach der alten Rechnung; im Probeprofil +1,5 Punkte am ersten Tag und bis +5 in der ersten Woche.
+> - Gym rechnet ab diesem Tag mit der neuen Kennzahl (bester Arbeitssatz, Aufwärmsätze zählen nicht). Das Gym-Rating steht danach an keinem Tag tiefer als nach der alten Rechnung. Im Probeprofil springt es am Update-Tag um 18 Punkte, weil die laufende Woche als erfüllt zählt, und setzt sich, wenn sie vorbei ist.
 > - Eine Woche wird erst gewertet, wenn sie vorbei ist (Dienstag 00:00). Bis dahin zählt eine Woche mit Training als erfüllt.
 > - Ein Training steht sofort im Rating und in Verlauf, als «vorläufig», bis der Tag abgeschlossen ist.
 > - Alles vor dem Update bleibt, wie es war.
@@ -227,6 +235,16 @@ RUNS=1 PLAN=1`, `LAST=` the day):
 | 17 November 2026 | `momentum-pruefdaten-9-2026-11-17.json` | 22 · 286 · 102 · 15 · 51 |
 | 18 November 2026 | `momentum-pruefdaten-9-2026-11-18.json` | 22 · 286 · 104 · 15 · 52 |
 | 19 November 2026 | `momentum-pruefdaten-9-2026-11-19.json` | 23 · 298 · 106 · 15 · 53 |
+
+Read off both builds on the file's own day (`stage5b-import-check.mjs`,
+11/11 each: accepted by both, every set kept, one snapshot written by this
+build with all three eras, a reload writing nothing):
+
+| Day | Gym rating, live app | Gym rating, preview | Muskelgruppen, 30 days |
+|---|---|---|---|
+| 17 November | 845 | 863 | +5 %, 10 of 10 groups, strongest Bizeps +8 % |
+| 18 November | 831 | 849 | +5 %, 10 of 10, Bizeps +8 % |
+| 19 November | 865 | 871 | +6 %, 10 of 10, Bizeps +11 % |
 
 **Take the file of the day you check**: its last session is on that day,
 so the import into the preview is the update on that day. Mind's two
