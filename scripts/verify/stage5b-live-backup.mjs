@@ -47,8 +47,9 @@ import { BODY_WEIGHT_ON_DAY, EXERCISES, FIRST_DAY, STAGE5B_LAST_DAY, answersOn, 
  * switches Ernährung on in the onboarding, writes a Vorsatz and rates every
  * day on its own card; `RUNS=1` gives Laufen a target of two and logs a run
  * on Tuesdays and Saturdays, with distance and time in its sheet; `PLAN=1`
- * saves a training plan on the first day and starts one workout a week from
- * it. Without them the script does exactly what it did for Stage 5b.
+ * saves a training plan on the first day through the hub's editor, and the
+ * workouts are then begun as free sessions from the chooser it brings.
+ * Without them the script does exactly what it did for Stage 5b.
  *
  *   FIRST=2026-09-28 LAST=2026-11-17 FOOD=1 RUNS=1 PLAN=1 \
  *     OUT=.github/fixtures/wp3-update/live-profile.json node scripts/verify/stage5b-live-backup.mjs
@@ -89,7 +90,7 @@ function runOn(day, index) {
   if (weekday === 6) return { km: '8.1', minutes: String(48 - (week % 4)) };
   return null;
 }
-/** The plan saved on the first day, and the weekday its workout is started from it. */
+/** The plan saved on the first day. */
 const PLAN = { name: 'Push', exercises: ['bench', 'press', 'pushdown'] };
 
 /* ── The clock ──────────────────────────────────────────────────────────── */
@@ -250,11 +251,18 @@ async function logRun(page, day, run) {
   await page.getByRole('button', { name: 'Lauf eintragen' }).click();
   const stored = await until(async () => (await idb(page, 'runs')).filter((entry) => entry.date === day), (rows) => rows.length === 1);
   if (stored.length !== 1 || (await idb(page, 'runs')).length !== before + 1) throw new Error(`${day}: the run was not stored`);
-  await page.locator('.training-session, .today__session, button').filter({ hasText: /^Lauf/ }).first().click();
+  // The card lists the week's runs; today's is the one with a time of day
+  // (an earlier one shows its weekday), and the newest of them.
+  await page
+    .locator('button')
+    .filter({ has: page.locator('.row__title', { hasText: /^Laufen$/ }) })
+    .filter({ has: page.locator('.session-row__time', { hasText: /^\d{1,2}:\d{2}/ }) })
+    .last()
+    .click();
   await page.locator('#session-distance').waitFor();
   await page.locator('#session-distance').fill(run.km);
   await page.locator('#session-duration').fill(run.minutes);
-  await page.getByRole('button', { name: 'Speichern' }).click();
+  await page.locator('[role="dialog"]').getByRole('button', { name: 'Sichern' }).click();
   const saved = await until(async () => (await idb(page, 'runs')).find((entry) => entry.date === day), (entry) => entry?.distanceMetres > 0 && entry?.durationSeconds > 0);
   if (!(saved?.distanceMetres > 0)) throw new Error(`${day}: the run's distance was not saved`);
 }
@@ -304,8 +312,10 @@ for (let index = 0, day = FIRST; day <= LAST; index += 1, day = dayOffset(day, 1
     await page.getByRole('button', { name: 'Session eintragen' }).click();
     // With a plan saved, the button asks which workout: a free one here.
     const free = page.locator('[role="dialog"]').getByRole('button', { name: 'Freie Session' });
-    if (WITH_PLAN && (await free.count().catch(() => 0)) > 0) await free.click();
-    await page.getByRole('button', { name: /Übung hinzufügen/ }).first().waitFor();
+    const add = page.getByRole('button', { name: /Übung hinzufügen/ }).first();
+    await Promise.race([free.waitFor(), add.waitFor()]);
+    if (await free.isVisible().catch(() => false)) await free.click();
+    await add.waitFor();
     for (const [key, planned] of Object.entries(training)) {
       await logExercise(page, EXERCISES[key], planned, day);
       plannedSets += planned.length;
