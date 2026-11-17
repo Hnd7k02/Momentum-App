@@ -57,7 +57,7 @@ let server = null;
 async function serve(which) {
   await stop();
   const cwd = which === 'live' ? LIVE_DIR : ROOT;
-  server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd, detached: true, stdio: 'ignore' });
+  server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], { cwd, detached: true, stdio: 'ignore' });
   for (let i = 0; i < 200; i += 1) {
     try { if ((await fetch(ADDRESS)).ok) return; } catch { /* not yet */ }
     await sleep(150);

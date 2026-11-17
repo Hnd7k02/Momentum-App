@@ -220,10 +220,13 @@ if (!broken) {
   }
 }
 if (!broken) {
-  serve('app', ['vite', 'preview', '--port', String(PORT.app), '--strictPort'], ROOT);
-  if (needed.has('preview')) serve('preview', ['vite', 'preview', '--outDir', 'dist-preview', '--port', String(PORT.preview), '--strictPort'], ROOT);
-  if (needed.has('live')) serve('live', ['vite', 'preview', '--port', String(PORT.live), '--strictPort'], LIVE_DIR);
-  if (needed.has('dev')) serve('dev', ['vite', '--port', String(PORT.dev), '--strictPort'], ROOT);
+  // On the address the suites ask for: `localhost` is IPv6 alone on some
+  // machines (a GitHub runner among them), and 127.0.0.1 then finds nobody.
+  const host = ['--host', '127.0.0.1'];
+  serve('app', ['vite', 'preview', '--port', String(PORT.app), '--strictPort', ...host], ROOT);
+  if (needed.has('preview')) serve('preview', ['vite', 'preview', '--outDir', 'dist-preview', '--port', String(PORT.preview), '--strictPort', ...host], ROOT);
+  if (needed.has('live')) serve('live', ['vite', 'preview', '--port', String(PORT.live), '--strictPort', ...host], LIVE_DIR);
+  if (needed.has('dev')) serve('dev', ['vite', '--port', String(PORT.dev), '--strictPort', ...host], ROOT);
   for (const name of needed) {
     if (!(await reachable(ADDRESS[name]))) { broken = true; console.log(`[run-all] the ${name} server did not answer at ${ADDRESS[name]}`); }
   }
