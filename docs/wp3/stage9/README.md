@@ -373,6 +373,9 @@ the notice that a refresh did not get through were 36 and 34px — both
 every width, that no notice stands on a first visit and no page error
 occurs, and names the notice if one does (88 checks where it had 83). Run
 again here after the fix: `tsc -b` exit 0; `npm run test` exit 0, 145
-files, 2511 tests; `release` 88/88, `design-system`, `geometry`,
-`update-in-place`, `wp3-reload`, `phase2-a11y` green. The preview carries
+files, 2511 tests; `release` 88/88, `design-system` 1408/1408,
+`geometry` 111/111, `update-in-place` 16/16, `wp3-reload` 128/128,
+`phase2-a11y` 17/17. (A first rerun of `design-system` ran 32 checks:
+the runner had handed its `ONLY` on to a suite that reads its own — fixed
+in `run-all.mjs`; the whole run sets none and was not affected.) The preview carries
 it: `Momentum-preview` `0d741de`, built from `0557dd8`.
