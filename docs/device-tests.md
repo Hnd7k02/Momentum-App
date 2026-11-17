@@ -51,9 +51,10 @@ again.
 
 **After the go-live only** (not the preview, which has no service worker):
 the live app shows "Neue Version verfügbar"; "Neu laden" reloads once and
-your data is there. Then open it once in flight mode: Heute and the body
-appear (the offline check in `release-proof.mjs` is red until the tidy-up,
-D163).
+your data is there. Then open it once in flight mode: Heute appears, and
+Gym shows its rows with the flat figure where the body stands — the body
+itself does not draw offline yet; that is the red offline check in
+`release-proof.mjs`, the tidy-up's (D163).
 
 ## Measured on the phone, against the targets
 
