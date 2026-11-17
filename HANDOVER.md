@@ -2409,10 +2409,11 @@ owner accepted it at STOP 7E-b on 2026-11-17, and it is merged into
   nothing chosen, «Weiter» waiting for a world. **Then the owner's
   adjustment** (D193): the opening page has no button — a tap anywhere
   goes on, the page itself takes it, and a faint «Screen antippen» in
-  `--text-tertiary` (the faintest grey §3 allows, 5.33:1) says so, a real
-  button for a keyboard and a screen reader. No STOP of their own: the
+  `--text-tertiary` (the faintest text token, 5.33:1; a fainter grey above
+  4.5:1 would be a new colour value) says so, a real button for a keyboard
+  and a screen reader. No STOP of their own: the
   owner checks all three in the round of block 9.
-- **Tests**: `OnboardingFlow.test.tsx` walks every path (27 tests);
+- **Tests**: `OnboardingFlow.test.tsx` walks every path (31 tests);
   `onboarding-7e.mjs` walks four paths at four widths in the real build,
   reads back what each stored, holds every step to the screen, 44px
   targets, one dark surface and the chart's fit, and proves the rehearsal
@@ -2420,7 +2421,8 @@ owner accepted it at STOP 7E-b on 2026-11-17, and it is merged into
   (`scripts/verify/README.md`): `onboard()` and the walks find each
   target by its group and set the question choice exactly
   (`chooseQuestions`); `phase2.mjs` stores its own question alone after
-  the starters are taken off; the slides' new titles.
+  the starters are taken off; the slides' new titles; `passOpening()`
+  taps the middle of the screen where it tapped «Weiter» (D193).
 - **Reviewed before each STOP** by readers with a skeptic for every
   finding: five findings held at 7E-a2 and seven at 7E-b, all fixed
   (D190, D191).

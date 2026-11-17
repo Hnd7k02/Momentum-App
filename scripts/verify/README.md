@@ -395,7 +395,9 @@ The opening page has no «Weiter»: a tap anywhere goes on, and a faint
   over the viewport, edges included, lands on the page and on nothing laid
   over it (in the rehearsal too); a real tap in each corner, at the top, on
   the line, below it and on the hint goes on, each on a fresh page; Tab
-  and Enter go on, with the focus on «Los geht’s».
+  and Enter go on, with the focus on «Los geht’s»; the page shows a hand
+  to a pointer and sets no tap highlight, which would flash over the
+  whole screen.
 - **`design-system.mjs`** keeps the two runs of text the page holds by
   design — now its line and the hint. A transparent layer over the screen,
   tried first, hid the line from the hit test this measurement relies on;

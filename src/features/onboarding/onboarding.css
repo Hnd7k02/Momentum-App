@@ -59,17 +59,22 @@
 }
 
 /* A tap anywhere on the opening page goes on (the owner, D193): the page
-   takes the click, so it says so to a pointer. */
+   takes the click, so it says so to a pointer. Tap highlight is Safari's,
+   not ours (global.css): with a hand over the whole page, a browser would
+   otherwise flash its highlight over the whole screen on every tap. */
 .onboarding--opening {
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* The hint names that tap, where the button stands on every step: a real
    button for a keyboard and a screen reader, as high as the button it
    stands in for and the box a focus ring is drawn on. It is set in the
-   faintest grey the contract allows — `--text-tertiary`, 5.33:1 on this
-   ground, where every text must reach 4.5:1 (contract §3, §12) — and in no
-   accent: what is operable here is the screen, not the words. */
+   faintest text token, `--text-tertiary` — 5.33:1 on this ground, where
+   every text must reach 4.5:1 (contract §3, §12); a fainter grey would be
+   a new colour value, which §16 does not add without the owner's word —
+   and in no accent: what is operable here is the screen, not the words
+   (the opening page's own exception, §16, D193). */
 .onboarding__tap {
   min-height: 56px;
   display: flex;

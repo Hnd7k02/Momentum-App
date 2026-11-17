@@ -6683,23 +6683,28 @@ untouched.
   — the flow's root, which is the whole screen — takes the click: on the
   line, on the hint, on the empty ground, at the edges. Once the first
   slide shows, the page takes no click.
-- **"Ganz schwach" is the faintest grey the contract allows.** Every text
-  reaches 4.5:1 (contract §3, D149; §12), and `--text-tertiary` is the
-  app's faintest text: 5.33:1 on the onboarding's flat ground, 5.32:1 as
-  `design-system.mjs` measures it on the pixels. A fainter grey would fall
-  under that line for the one word that says how to go on; it would be an
-  exception of the onboarding's own that the owner has not made, and it is
-  not built.
+- **"Ganz schwach" is the faintest text token.** Every text reaches 4.5:1
+  (contract §3, D149; §12), and `--text-tertiary` is the app's faintest
+  text: 5.33:1 on the onboarding's flat ground, 5.32:1 as
+  `design-system.mjs` measures it on the pixels. On this flat ground a
+  fainter grey would still clear 4.5:1 — down to about `#6e6e79`, 4.59:1 —
+  but it would be a new colour value, and §16 adds none beyond the two of
+  its b): a token of the onboarding's own that the owner has not asked for
+  by name, and it is not built. The step it would buy is small (5.33 to
+  4.59:1); a grey that reads as much fainter would fall under 4.5:1 for the
+  one word that says how to go on.
 - **For a keyboard and a screen reader** the hint is a real button: Tab
   reaches it, Enter goes on, and VoiceOver reads it by its words. Its click
   is the page's, so there is one way on. The button goes with the page;
   where it held the focus, the focus goes on to «Los geht’s» — the finding
   of D192's review stays fixed — and a tap that gave it none moves none.
-- **Colour has three jobs** (§2.1): the accent means operable. Here what is
-  operable is the screen, and the hint is its name in grey at the owner's
-  word — the opening page's own rule, written into contract §16 beside the
-  page; nothing of it reaches a screen of the app. A pointer shows the
-  hand over the whole page.
+- **The opening page's own exception** (§2.1, §5): the accent means
+  operable, and the buttons have one order — none of whose steps is grey.
+  Here what is operable is the screen, and the hint is its name in grey at
+  the owner's word. That is an exception of the opening page alone, beside
+  the onboarding's four in contract §16 and in `CLAUDE.md`; nothing of it
+  reaches a screen of the app. A pointer shows the hand over the whole
+  page, and no browser flashes a tap highlight over it.
 - **Why the page takes the click, and not a layer.** The first build laid a
   transparent layer over the screen as the hint's target. A text under a
   layer cannot be reached by a hit test, and `design-system.mjs` measures
@@ -6720,7 +6725,8 @@ opening page and on nothing
 laid over it, in the live build and in the rehearsal; a real tap in each
 corner, at the top, on the line, between line and hint and on the hint,
 each on a fresh page, goes on; Tab and Enter go on, with the focus on
-«Los geht’s»; the hint is `--text-tertiary`, 13px, regular, on no surface.
+«Los geht’s»; the hint is `--text-tertiary`, 13px, regular, on no surface;
+the page shows a hand to a pointer and no tap highlight.
 `design-system.mjs` measures the line and the hint (two runs, lowest
 5.32:1).
 
@@ -6733,8 +6739,24 @@ above. `design-system.mjs` keeps the two runs the page holds by design,
 now its line and the hint.
 
 **Verification** (2026-11-17): `tsc -b` clean; `npm run test` exit 0, 141
-files, 2485 tests; `onboarding-7e.mjs` 96 of 96, `design-system.mjs` with
+files, 2485 tests; `onboarding-7e.mjs` 100 of 100, `design-system.mjs` with
 `ONLY=onboarding` 236 of 236, `phase2.mjs` 68 of 68, `phase2-a11y.mjs` 17
-of 17, `wp3-stage4.mjs` 170 of 170, `release.mjs` 83 of 83. Pictures: the
+of 17, `wp3-stage4.mjs` 170 of 170, `release.mjs` 83 of 83 — and eighteen
+more suites whose walks pass the opening page, all passed: `phase3` 46,
+`phase3-a11y` 9, `phase4` 54, `phase4-a11y` 20, `phase41` 52, `phase5` 46,
+`phase7` 57, `phase8` 56, `wp3-stage1` 318, `wp3-stage2` 201, `wp3-stage3`
+153, `wp3-stage5b` 357, `wp3-reload` 128, `wp3-sheets` 330, `gym-muscles`
+198, `muscle-sheet` 265, `muscle-card` 210, `terminal` 43. Pictures: the
 opening page at 320, 393 and 430 and both overviews in
 `docs/design/wp3/stage7e-b/`.
+
+**Reviewed** by four readers with a skeptic for every finding; five held
+and are fixed. The page's hand cursor would have let a browser on Android
+flash its tap highlight over the whole screen on every tap; the opening
+page now sets none, as the app does everywhere. The records called
+`--text-tertiary` the faintest grey the contract allows; it is the
+faintest text token, and a fainter grey above 4.5:1 would be a new colour
+value (above). §16 and `CLAUDE.md` now name the hint as the opening page's
+own exception to §2.1 and §5. `HANDOVER.md` counted 27 unit tests where
+there are 31, and named a preview without the change; the new one follows
+below.

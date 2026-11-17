@@ -71,8 +71,10 @@ checks it in the round of block 9 with the two adjustments above.
 
 - **As built**: no «Weiter» on the opening page; where it stood,
   «Screen antippen» ("Tap the screen") in `--text-tertiary`, 13px,
-  regular — the faintest grey the contract allows, 5.33:1 on the flat
-  ground; every text reaches 4.5:1 (§3), and a fainter one is not built.
+  regular — the faintest text token, 5.33:1 on the flat ground; every
+  text reaches 4.5:1 (§3), and a fainter grey above that line (down to
+  about `#6e6e79`, 4.59:1) would be a new colour value §16 does not add
+  without the owner's word, so it is not built.
   While the page shows, the page itself takes the tap — the line, the
   hint, the empty ground, the edges. The hint is a real button for a
   keyboard and a screen reader, and the focus goes on to «Los geht’s».
@@ -82,11 +84,14 @@ checks it in the round of block 9 with the two adjustments above.
   stands; the page takes the click instead.
 - **Verification** (2026-11-17): `tsc -b` clean; `npm run test` exit 0,
   141 files, 2485 tests (`OnboardingFlow.test.tsx` 31); `onboarding-7e.mjs`
-  96 of 96 — a grid of 153 points over the screen, and a real tap in each
+  100 of 100 — a grid of 153 points over the screen, and a real tap in each
   corner, at the top, on the line, below it and on the hint, at four
   widths, and Tab and Enter; `design-system.mjs` with `ONLY=onboarding`
   236 of 236 (the hint 5.32:1 on its pixels); `phase2.mjs` 68,
-  `phase2-a11y.mjs` 17, `wp3-stage4.mjs` 170, `release.mjs` 83, all passed.
+  `phase2-a11y.mjs` 17, `wp3-stage4.mjs` 170, `release.mjs` 83, and
+  eighteen more suites whose walks pass the opening page (D193 lists
+  them), all passed. Reviewed by four readers with a skeptic for every
+  finding: five held, all fixed (D193).
 - **Pictures**: `docs/design/wp3/stage7e-b/320-0-auftakt.png`,
   `393-0-auftakt.png`, `430-0-auftakt.png`, and both overviews made again.
 

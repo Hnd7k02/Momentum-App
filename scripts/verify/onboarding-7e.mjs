@@ -172,6 +172,10 @@ for (const width of WIDTHS) {
         buttons: [...document.querySelectorAll('button')].map((button) => button.textContent.trim()),
         marks: document.querySelectorAll('.onboarding__steps, .onboarding__dot').length,
         hint: style ? { color: style.color === tertiary, size: style.fontSize, weight: style.fontWeight, background: style.backgroundColor } : null,
+        page: (() => {
+          const root = getComputedStyle(document.querySelector('.onboarding'));
+          return { cursor: root.cursor, highlight: root.webkitTapHighlightColor };
+        })(),
       };
     });
     check(`${W} A: the flow opens on one line and a faint «Screen antippen» — no button, no marks, no way back (D192, D193)`,
@@ -180,6 +184,8 @@ for (const width of WIDTHS) {
     check(`${W} A: the hint is the faintest grey of the contract, 13px regular, on no surface of its own`,
       opening.hint?.color === true && opening.hint.size === '13px' && opening.hint.weight === '400' && opening.hint.background === 'rgba(0, 0, 0, 0)',
       JSON.stringify(opening.hint));
+    check(`${W} A: the page shows a hand to a pointer and no browser's tap highlight over the whole screen`,
+      opening.page.cursor === 'pointer' && opening.page.highlight === 'rgba(0, 0, 0, 0)', JSON.stringify(opening.page));
     const misses = await missesOfTheScreen(page);
     check(`${W} A: every point of the screen lands on the opening page, which takes the tap — edges, line and hint included (D193)`,
       misses.length === 0, misses.slice(0, 4).join(' | '));
