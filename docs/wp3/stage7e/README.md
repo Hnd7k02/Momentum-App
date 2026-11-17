@@ -38,7 +38,8 @@ chosen, three questions, three gym sessions and two runs.
 | 7 Zusammenfassung | `393-7-zusammenfassung.png` | | |
 
 `ALL=1` pictures every step at every width; `LANGUAGE=en` walks it in
-English.
+English. `uebersicht-393.jpg` and `uebersicht-breiten.jpg` set the same
+pictures side by side, at half size, for a phone.
 
 ## What it costs
 
