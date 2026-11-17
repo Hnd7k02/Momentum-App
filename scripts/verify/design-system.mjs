@@ -40,7 +40,7 @@
  * gradients would weigh about 100 MB in the repository.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { URL_APP, check, summary, phone, chooseQuestions, passOpening, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise, launch } from './lib.mjs';
+import { URL_APP, check, summary, phone, chooseQuestions, passOpening, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise, launch, settle } from './lib.mjs';
 
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage6b';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
@@ -149,6 +149,7 @@ async function look(page, width, slug, expected, { minRuns = 3 } = {}) {
   counter += 1;
   const W = `${width} ${slug}`;
   const name = `${String(counter).padStart(2, '0')}-${slug}`;
+  await settle(page);
   await page.screenshot({ path: `${OUT}/${width}-${name}.jpg`, type: 'jpeg', quality: 82 });
 
   const drawn = await world(page);

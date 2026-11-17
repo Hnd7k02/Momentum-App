@@ -373,6 +373,23 @@ export async function clipped(page) {
  * lenient 40 × 24 the earlier suites were written against; a suite that
  * holds the contract's 44px passes them (`onboarding-7e.mjs`).
  */
+/**
+ * Waits until nothing on the page is on its way — no finite animation or
+ * transition running — for at most `ms`. A measurement that reads the
+ * page's boxes and then its pixels must not straddle a sheet still rising:
+ * the two would describe different moments. WebKit on a slow runner showed
+ * it first (block 9). An endless animation is not waited for.
+ */
+export async function settle(page, ms = 3000) {
+  await page
+    .waitForFunction(
+      () => document.getAnimations().every((animation) => animation.playState !== 'running' || animation.effect?.getComputedTiming().endTime === Infinity),
+      null,
+      { timeout: ms },
+    )
+    .catch(() => undefined);
+}
+
 export async function smallTargets(page, { height: minHeight = 40, width: minWidth = 24 } = {}) {
   return page.evaluate(({ minHeight, minWidth }) => {
     const bad = [];

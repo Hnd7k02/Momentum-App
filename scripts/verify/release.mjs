@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, launch } from './lib.mjs';
+import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, launch, settle } from './lib.mjs';
 
 /**
  * The V1 release smoke test, against the **production build**.
@@ -26,6 +26,7 @@ function watch(page, errors) {
 const tab = async (page, name) => {
   await page.locator('.tab-bar__tab', { hasText: name }).click();
   await page.waitForTimeout(700);
+  await settle(page);
 };
 
 /* ── A cold load of the built bundle ────────────────────────────────────── */
