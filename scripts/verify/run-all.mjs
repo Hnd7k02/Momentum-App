@@ -252,6 +252,9 @@ async function runSuite(suite) {
   const env = {
     OUT: out, SHOTS: out, BODY_SHOTS: out, RELEASE_TMP: join(out, 'tmp'),
     URL_APP: ADDRESS.app, URL_PREVIEW: ADDRESS.preview, LIVE_URL: ADDRESS.live, BODY_URL: `${ADDRESS.dev}#/dev/body`,
+    // The runner's choice of suites is not a suite's own choice of screens:
+    // design-system and wp3-midnight read ONLY too.
+    ONLY: '',
     BROWSER,
     ...(BROWSER === 'webkit' ? (suite.webkitEnv ?? {}) : {}),
   };
