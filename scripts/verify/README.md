@@ -86,6 +86,7 @@ points them all at another one. Never run `npx playwright install`.
 | `stage7c-check-files.mjs` | **Not a suite: the import files of the check at STOP 7C, and their proof** (`docs/wp3/stage7c/`). The diary of the earlier STOPs has every group rated and improved and would show one of the sheet's five states; so for each day in `DAYS` the device of `muscle-sheet.mjs` and of the pictures is seeded on a clock that reads that morning in Zurich, and the build exports it through its own "Backup exportieren". An empty device on the same day then imports the file through "Backup importieren" and must show the same ten rows and strip, and in seven sheets what the file is made for — otherwise the script throws. **Its rows are written into the database by the script, not typed through the interface**, and the README beside the files says so. `DAYS=2026-11-16,2026-11-17 OUT=docs/wp3/stage7c` |
 | `exercise-search.mjs` | **The exercise catalogue and its search (block 7D, D171, D188).** What each of the owner's four words must find is read from `catalogue.ts` at run time, not from the search: «bauch» every exercise whose primary group is the core, «zieh» every one that names the pulling movement, «maschine» every one on a machine, «eigengewicht» every one loaded by body weight — and the search is held to that list exactly, no row missing, none more; every row says why it was found. Case and the spellings of an umlaut make no difference («RÜCKEN», «ruecken», «rucken»); two words narrow («kabel brust»); the stored English name still finds its exercise first («Bench Press» → Bankdrücken); a word nobody knows says what was searched and makes «Eigene Übung» the primary action, which opens with the word as its name. Without a query every offered exercise stands exactly once, under one heading per group in the app's order. A found exercise is picked into the workout and into a plan, saved by its id. The English screen finds «abs», «pull», «machine» and «bodyweight» with English headings. At 320, 360, 393 and 430 nothing is cut off, nothing scrolls sideways and every row is a 44px target. `WIDTHS=393` |
 | `stage7d-shots.mjs` | **Not a suite: the pictures of block 7D** (`docs/design/wp3/stage7d/`). The picker in a workout at 320, 360, 393 and 430: without a query, at the top and at the core's heading; with «bauch», «zieh», «maschine», «eigengewicht», «kabel brust» and a word nothing answers; the own exercise opened from the empty search. Once in English («abs», and without a query), once from the plan editor («bauch»). `OUT=<dir> WIDTHS=393` |
+| `stage7e-shots.mjs` | **Not a suite: the pictures of block 7E** (`docs/design/wp3/stage7e/`). A new device walks the onboarding by its own buttons, both worlds chosen, three questions, three gym sessions and two runs: every step at 393, the first slide and the weekly targets at 320 and 430 (`ALL=1` every step at every width). It prints for each step whether the page runs wider than the screen, how far the step scrolls, and the face its title is set in. `OUT=<dir> WIDTHS=… LANGUAGE=en` |
 | `stage7d-check-files.mjs` | **Not a suite: the import files of the check at STOP 7D, and their proof** (`docs/wp3/stage7d/`). Made by the live build (`LIVE_URL`, the default branch with its own catalogue): for each day in `DAYS` it imports the diary of STOP 7B for that day, makes a plan of Bankdrücken, Latzug and an exercise of the user's own through its interface, and exports it through "Backup exportieren". The build before the block (`BEFORE_URL`) and the build under test (`URL_APP`) then import the file on an empty device and must show the same Gym rating, rows, strip and plan; the build under test must offer every exercise of its catalogue and the user's own, keep every stored exercise byte for byte, and find the user's own by its name — otherwise the script throws. `LIVE_URL=… BEFORE_URL=… URL_APP=… DAYS=2026-11-17,2026-11-18 OUT=docs/wp3/stage7d` |
 
 Two things worth knowing before writing another suite, both of which produced
@@ -318,6 +319,32 @@ catalogue.
   source when it runs and asks that the empty search list every entry. It
   counts 133 on this block's build and fails on an earlier one — so a run
   against an earlier build is made from that build's checkout.
+
+## Checks restated in block 7E (D190)
+
+The onboarding changed how it looks, not what it asks. No check was
+removed or weakened; these were restated because they found an element by
+the look it had.
+
+- **`lib.mjs` `onboard()`, `design-system.mjs` and `phase2.mjs`**. *Old:* the two weekly
+  targets are found in the first and the second `.card`. *New:* the two
+  stand in one card, and each is found by the name of its group
+  («Gym-Sessions pro Woche», «Läufe pro Woche») — the name the control
+  always had.
+- **`design-system.mjs`** `bubbles()`. *Old:* each of the seven is a
+  target 44px high and its share of the row wide, around a round circle
+  that fits. *New:* the same targets, and in the onboarding (`segments`)
+  around a pill that fits instead of a circle (contract §16) — the round
+  circle is still held everywhere else.
+- **`phase2.mjs`** and **`wp3-stage4.mjs`**, the titles. *Old:* the slides' titles
+  «Zwei Welten» and «Rang und Meilensteine», and the first slide by its
+  sentence «Fortschritt sieht man selten …». *New:* «Zwei Welten. Ein
+  Verlauf.», «Ein Rang für alles.» and «Fortschritt, den du siehst.» —
+  the copy of D190; that the second slide names the two worlds with
+  Laufen inside Gym is checked as before.
+- **Not restated, on purpose**: `stage5b-import-check.mjs`,
+  `stage5b-live-backup.mjs` and `stage7d-check-files.mjs` walk the *live*
+  build's onboarding (`e30becd`), which still has a card per target.
 
 ## Conventions
 

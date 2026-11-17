@@ -62,9 +62,10 @@ async function fresh(opts = {}) {
     await page.getByText('Gym-Sessions pro Woche').isVisible() &&
     await page.getByText('Läufe pro Woche').isVisible());
 
-  const cards = page.locator('.card');
-  await cards.nth(0).getByRole('button', { name: '4 pro Woche' }).click();
-  await cards.nth(1).getByRole('button', { name: '2 pro Woche' }).click();
+  // Each target by the name of its group: since block 7E (D190) the two
+  // stand in one card.
+  await page.getByRole('group', { name: 'Gym-Sessions pro Woche' }).getByRole('button', { name: '4 pro Woche', exact: true }).click();
+  await page.getByRole('group', { name: 'Läufe pro Woche' }).getByRole('button', { name: '2 pro Woche', exact: true }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   check('the summary lists each target separately',
