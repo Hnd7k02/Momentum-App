@@ -30,10 +30,10 @@ import {
   settingsRepository,
 } from '../repositories';
 import { reconcilePromotionConfirmation } from './promotionConfirmationService';
-import { buildGymRating, type GymRatingState } from './gymRatingService';
+import { replayGymRating, type GymRatingState } from './gymRatingService';
 import { loadExerciseDaySource, type ExerciseDaySource } from './gymService';
 import {
-  buildRunningRating,
+  replayRunningRating,
   loadRunObservations,
   type RunningRatingState,
 } from './runningRatingService';
@@ -126,6 +126,16 @@ export interface BossProgression {
    * produced its rating. There is no separate Running-to-Boss formula.
    */
   running: RunningRatingState;
+  /**
+   * The training ratings as they stand if the open days that hold a session
+   * of theirs counted now (block 9, step 6a, D194): `null` for a domain when
+   * no open day holds one. A workout or a run saved before a question of
+   * its day is answered is not counted until the day is complete or has
+   * closed (D111); a screen shows these as provisional meanwhile. Read by
+   * nothing that rates, and kept beside the states, which the baselines
+   * freeze.
+   */
+  provisional: { gym: number | null; running: number | null };
 }
 
 /** Which era each day belongs to, resolved once rather than per domain. */
@@ -268,7 +278,7 @@ export async function loadBossProgression(
   const gymDayStates = domainDayStates(history, 'gym', p8Day);
   const firstDate = dates[0];
   const lastDate = dates[dates.length - 1];
-  const gym = buildGymRating({
+  const gymReplay = replayGymRating({
     history,
     dayStates: gymDayStates,
     snapshots,
@@ -282,7 +292,7 @@ export async function loadBossProgression(
      scoring code once its own evidence has been reduced to a percentage. */
   const runs = await runsRepository.getAll();
   const runningDayStates = domainDayStates(history, 'running', p8Day);
-  const running = buildRunningRating({
+  const runningReplay = replayRunningRating({
     history,
     dayStates: runningDayStates,
     snapshots,
@@ -290,6 +300,8 @@ export async function loadBossProgression(
     runs: firstDate && lastDate ? await loadRunObservations(firstDate, lastDate) : [],
     reference,
   });
+  const gym = gymReplay.state;
+  const running = runningReplay.state;
 
   /** The two training domains supply their own rating series; the rest fold. */
   const supplied: Partial<Record<DomainType, { state: GymRatingState | RunningRatingState; days: DayState[] }>> = {
@@ -399,6 +411,7 @@ export async function loadBossProgression(
     legacy,
     gym,
     running,
+    provisional: { gym: gymReplay.provisional, running: runningReplay.provisional },
   };
 }
 

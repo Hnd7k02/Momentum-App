@@ -6764,3 +6764,86 @@ there are 31, and named a preview without the change; the new one follows.
 **Preview**: `Momentum-preview` `efbb731`, built from `695fd08`, with the
 opening page that has no button — the build block 9 checks D192's and
 D193's adjustments on.
+
+## D194 — Block 9, step 6a: a workout saved on a day still open shows at once, as provisional; the rule that holds the day open stays
+
+**The owner's point** (STOP 7D, D189), in his words: "Ein eingetragenes
+Training erscheint im Entwicklungs-Chart erst am nächsten Tag. Es soll
+sofort nach dem Speichern erscheinen. Finde die Ursache und prüf, welche
+Charts betroffen sind (Gym-Rating, Muskelgruppen, Übungsdetail). Solange
+der Tag noch offen ist, darf der Punkt als vorläufig markiert sein.
+Vergangene Tage rechnen unverändert."
+
+### The cause, step by step
+
+Reproduced on the check file of block 7D, a workout saved at ten in the
+morning before the day's questions were answered (`today-in-charts.mjs`,
+`provisionalRating.test.ts`):
+
+1. A day with a question still unanswered is **open** while it can be
+   written (D111, `dayScore.ts`): today and, in the P8 era, yesterday.
+2. `domainDayStates` (`bossService.ts`) gives every domain the day's own
+   status — "an open day is one the user can still finish … can only
+   postpone a day being counted, never bring it forward".
+3. `buildGymRating` counts a day only when that status is `scored`
+   (`gymRatingService.ts`); Running's the same. So the workout's day is
+   *skipped*: no target, no movement. The rating moves once the questions
+   are answered — the same day — or once the day has closed, two days
+   later; a user who answers on the next day, on Gestern, sees it "am
+   nächsten Tag".
+4. Verlauf's grid (`historyService.ts`) leaves an open day empty in every
+   row, and the question history does the same with an answer given on it.
+
+**What was not affected**: Muskelgruppen — the rows, the sheet's line, the
+strip — and the exercise detail read the sets of the range, today
+included, and showed the workout at once. On a Wednesday the Gym rating
+seemed to move too: the running week count of a week begun before the
+update lifted the earlier days of that week; the workout's own day stayed
+skipped. On a Monday nothing moved.
+
+**Verlauf's curve** is RC2's overall fold, which counts a day as far as
+its questions are answered (`dayWeight`): a workout on a day with no
+answer weighs nothing there even if the day counted. It moves once the
+questions are answered, on the same day. That is a scoring rule, and it
+is unchanged.
+
+### What is built
+
+The rule stays (D111, CLAUDE.md: "deliberately unchanged … not a licence
+to redesign it"). Beside it, what the open day already holds, **shown as
+provisional and read by nothing that rates**:
+
+- **The Gym and Laufen ratings.** `replayGymRating` and
+  `replayRunningRating` run the same fold a second time, an open day that
+  holds a session of their own taken as scored; the Boss replay carries
+  the result as `provisional.gym` and `provisional.running`, `null` when no
+  open day holds one. The hub's rating tile shows that number and says
+  "Vorläufig · der Tag ist noch offen"; its sheet says why. Once the day
+  is complete the rating lands exactly on it (`provisionalRating.test.ts`).
+  The cost is a second fold over days whose windows are already computed.
+- **Verlauf's grid and the question history.** `provisionalOf(history)`
+  gives an open day's values per domain as the day would score them now —
+  an unanswered question is not yet a miss — overall as their mean, and
+  per question the answer given. Drawn as a **hollow bar** in its band's
+  ink, written "71 % (vorläufig)" in the table a screen reader reads, and
+  named in the legend, "Vorläufig: der Tag ist noch offen", only where one
+  is drawn. A row's average and count read the final days only.
+- **Kept apart from what the baselines freeze.** The history, the rating
+  states and every golden file are what they were: the first build put the
+  values inside the history and the states, and the Stage 2 baseline and
+  the Stage 5b legacy test found the extra key, value for value unchanged.
+  The values now stand beside them. No golden file was frozen again, no
+  fingerprint moved, no rule of D111, D134 or D136 changed.
+
+A one-time sight: on the update day the days aged two and three before it
+read as open in the history (D132's one-time cost), so they too stand as
+provisional for those two days.
+
+### For the gate
+
+Whether a domain's day should close on its own obligations — so that a
+workout counts in the Gym rating at once, whatever Mind still owes — is
+D111's question, recorded as worth revisiting "as daily domains multiply".
+It is put to the owner at the gate, with the recommendation to keep the
+rule for this release and to decide it after WP3, as a scoring era of its
+own.

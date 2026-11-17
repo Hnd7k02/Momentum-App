@@ -10,7 +10,7 @@ import {
   setWeeklyTarget,
 } from './configurationService';
 import { logSession, saveAnswer } from './checkInService';
-import { loadHistory } from './historyService';
+import { loadHistory, provisionalOf } from './historyService';
 
 /**
  * The weekly-quota domain these suites exercise is Gym.
@@ -221,5 +221,87 @@ describe('the shape handed to the Progress screen', () => {
     const history = await loadHistory('2025-03-20', '2025-03-01');
     expect(history.days).toEqual([]);
     expect(history.empty).toBe(true);
+  });
+});
+
+describe('an open day, shown as provisional (block 9, step 6a, D194)', () => {
+  /**
+   * The owner, at STOP 7D: a workout logged today appeared in the history
+   * only the next day. The cause is D111 — a question still unanswered holds
+   * the whole day open, and an open day is no data in the series. The rule
+   * stays; what the open day already holds is handed on beside the series,
+   * and nothing in them moves.
+   */
+  async function aDayWithAWorkoutAndAQuestionOpen() {
+    freezeAt('2025-03-03');
+    await applyOnboarding({
+      questions: [
+        { text: 'A', type: 'boolean', category: 'eigene' },
+        { text: 'B', type: 'scale', category: 'eigene' },
+      ],
+      gymTargetPerWeek: 3,
+    });
+    freezeAt('2025-03-05', 18);
+    const questions = (await loadHistory('2025-03-05', '2025-03-05')).questions;
+    await saveAnswer('2025-03-05', questions[1]!.id, 7);
+    await logSession('gym', '2025-03-05');
+    return questions;
+  }
+
+  it('holds the workout and the answer of a day still open, and leaves the series as they were', async () => {
+    const questions = await aDayWithAWorkoutAndAQuestionOpen();
+    const history = await loadHistory('2025-03-03', '2025-03-05');
+    const today = at(history, '2025-03-05');
+    expect(history.days[today]?.status).toBe('open');
+    // The series: no data for the open day, exactly as before.
+    expect(history.overall[today]).toBeNull();
+    expect(history.mental[today]).toBeNull();
+    expect(history.gym[today]).toBeNull();
+    // Beside them: what it holds so far.
+    const gym = history.days[today]!.domains.find((entry) => entry.domain === 'gym')!.score;
+    const mental = history.days[today]!.domains.find((entry) => entry.domain === 'mental')!.score;
+    expect(gym).not.toBeNull();
+    expect(provisionalOf(history).gym[today]).toBe(gym);
+    expect(mental).toBe(70); // the one answer, not yet a miss beside it
+    expect(provisionalOf(history).mental[today]).toBe(mental);
+    expect(provisionalOf(history).overall[today]).toBe((gym! + 70) / 2);
+    const [a, b] = [history.questions.find((q) => q.id === questions[0]!.id)!, history.questions.find((q) => q.id === questions[1]!.id)!];
+    expect(b.scores[today]).toBeNull();
+    expect(provisionalOf(history).questions.get(b.id)?.[today]).toBe(70);
+    expect(provisionalOf(history).questions.get(a.id)?.[today]).toBeNull(); // unanswered: not a miss yet, and nothing to show
+  });
+
+  it('is empty on every day that is not open, and gives way to the day itself once it closes', async () => {
+    const questions = await aDayWithAWorkoutAndAQuestionOpen();
+    const open = await loadHistory('2025-03-03', '2025-03-05');
+    for (const [index, day] of open.days.entries()) {
+      if (day.status === 'open') continue;
+      const derived = provisionalOf(open);
+      for (const series of [derived.overall, derived.mental, derived.sports, derived.gym, derived.running, derived.food]) expect(series[index]).toBeNull();
+      for (const series of derived.questions.values()) expect(series[index]).toBeNull();
+    }
+
+    // Two days on, the 5th has closed: its own value stands, the
+    // unanswered question a miss, and nothing provisional is left.
+    freezeAt('2025-03-07', 9);
+    const closed = await loadHistory('2025-03-03', '2025-03-07');
+    const fifth = at(closed, '2025-03-05');
+    expect(closed.days[fifth]?.status).toBe('scored');
+    expect(closed.gym[fifth]).not.toBeNull();
+    expect(provisionalOf(closed).gym[fifth]).toBeNull();
+    expect(provisionalOf(closed).overall[fifth]).toBeNull();
+    expect(closed.questions.find((q) => q.id === questions[0]!.id)!.scores[fifth]).toBe(0);
+    expect(provisionalOf(closed).questions.get(questions[1]!.id)?.[fifth]).toBeNull();
+  });
+
+  it('gives way the moment the day is complete', async () => {
+    const questions = await aDayWithAWorkoutAndAQuestionOpen();
+    await saveAnswer('2025-03-05', questions[0]!.id, true);
+    const history = await loadHistory('2025-03-03', '2025-03-05');
+    const today = at(history, '2025-03-05');
+    expect(history.days[today]?.status).toBe('scored');
+    expect(history.gym[today]).not.toBeNull();
+    expect(provisionalOf(history).gym[today]).toBeNull();
+    expect(provisionalOf(history).overall[today]).toBeNull();
   });
 });

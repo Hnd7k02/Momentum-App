@@ -56,12 +56,18 @@ export function GymOverview({
   state,
   started,
   enabled = true,
+  provisional = null,
 }: {
   state: GymRatingState;
   /** False until a session has actually been logged. */
   started: boolean;
   /** Switched on today; a switched-off domain has no weekly target either. */
   enabled?: boolean;
+  /**
+   * The rating with a workout of a day still open counted (D111), or `null`
+   * (block 9, step 6a, D194): shown in its place, and said to be provisional.
+   */
+  provisional?: number | null;
 }) {
   const t = useT();
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -79,7 +85,10 @@ export function GymOverview({
 
   // The rating on its own 0–1000 scale. Gym has no rank of its own to
   // measure against; the Boss is the only rank.
-  const ratingValue = Math.round(state.rating);
+  // A workout on a day that is still open is not counted until the day is
+  // complete or has closed (D111); until then the tile shows the rating as
+  // it stands with it, and says that it is provisional (block 9, D194).
+  const ratingValue = Math.round(provisional ?? state.rating);
   const attendancePercent =
     state.weeklyTarget > 0
       ? Math.min(100, (state.sessionsThisWeek / state.weeklyTarget) * 100)
@@ -157,9 +166,11 @@ export function GymOverview({
           primary
           bar={ratingBar}
           line={
-            state.maintenance
-              ? `${t('gym.maintenance.title')} · ${t('gym.rating.summary')}`
-              : t('gym.rating.summary')
+            provisional !== null
+              ? t('rating.provisional')
+              : state.maintenance
+                ? `${t('gym.maintenance.title')} · ${t('gym.rating.summary')}`
+                : t('gym.rating.summary')
           }
           onOpen={() => setDetail('rating')}
         />
@@ -235,6 +246,7 @@ export function GymOverview({
         bar={ratingBar}
         onClose={close}
       >
+        {provisional !== null ? <p>{t('rating.provisionalExplain')}</p> : null}
         <p>{t('gym.rating.explain')}</p>
         <p>{t('gym.rating.movesGradually')}</p>
         {state.maintenance ? <p>{t('gym.maintenance.body')}</p> : null}

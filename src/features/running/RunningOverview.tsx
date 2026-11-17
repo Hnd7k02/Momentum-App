@@ -44,11 +44,14 @@ export function RunningOverview({
   state,
   started,
   enabled = true,
+  provisional = null,
 }: {
   state: RunningRatingState;
   started: boolean;
   /** Switched on today; a switched-off domain has no weekly target either. */
   enabled?: boolean;
+  /** The rating with a run of a day still open counted, or `null` (D194): shown as provisional. */
+  provisional?: number | null;
 }) {
   const t = useT();
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -65,7 +68,9 @@ export function RunningOverview({
   }
 
   // The rating on its own 0–1000 scale; Running has no rank of its own.
-  const ratingValue = Math.round(state.rating);
+  // As in Gym (block 9, D194): a run on a day still open shows at once, as
+  // a provisional rating, until the day is complete or has closed.
+  const ratingValue = Math.round(provisional ?? state.rating);
   const attendancePercent =
     state.weeklyTarget > 0
       ? Math.min(100, (state.sessionsThisWeek / state.weeklyTarget) * 100)
@@ -140,9 +145,11 @@ export function RunningOverview({
           scale={ratingScale?.trim()}
           bar={ratingBar}
           line={
-            state.maintenance
-              ? `${t('gym.maintenance.title')} · ${t('running.rating.summary')}`
-              : t('running.rating.summary')
+            provisional !== null
+              ? t('rating.provisional')
+              : state.maintenance
+                ? `${t('gym.maintenance.title')} · ${t('running.rating.summary')}`
+                : t('running.rating.summary')
           }
           onOpen={() => setDetail('rating')}
         />
@@ -212,6 +219,7 @@ export function RunningOverview({
         bar={ratingBar}
         onClose={close}
       >
+        {provisional !== null ? <p>{t('rating.provisionalExplainRun')}</p> : null}
         <p>{t('running.rating.explain')}</p>
         {state.maintenance ? <p>{t('running.maintenance.body')}</p> : null}
       </MetricDetailSheet>

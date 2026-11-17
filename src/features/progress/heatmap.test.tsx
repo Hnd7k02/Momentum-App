@@ -68,3 +68,37 @@ describe('a question row', () => {
     expect(html).toContain(translate('de', 'score.none'));
   });
 });
+
+describe('a day still open (block 9, step 6a, D194)', () => {
+  const rows: HeatmapRow[] = [
+    { key: 'overall', label: 'Gesamt', values: [80, 60, null], provisional: [null, null, 71] },
+    { key: 'gym', label: 'Gym', values: [40, 40, null], provisional: [null, null, 100] },
+  ];
+
+  it('draws what it holds so far as a hollow bar in its band, and says "vorläufig" in the table', () => {
+    const html = render(rows);
+    expect(html).toContain('heatmap__bar heatmap__bar--provisional heatmap__bar--good');
+    expect(html).toContain('heatmap__bar heatmap__bar--provisional heatmap__bar--strong');
+    expect(html).toContain(`<td>${translate('de', 'heatmap.provisional', { value: '71 %' })}</td>`);
+    expect(html).toContain('71 % (vorläufig)');
+  });
+
+  it('names the hollow bar in the legend, only where one is drawn', () => {
+    expect(render(rows)).toContain(translate('de', 'heatmap.provisionalLegend'));
+    const none = rows.map((row) => ({ ...row, provisional: [null, null, null] }));
+    expect(render(none)).not.toContain(translate('de', 'heatmap.provisionalLegend'));
+    expect(render(none)).not.toContain('heatmap__bar--provisional');
+  });
+
+  it('keeps it out of the row\'s average and its count: those are the final days', () => {
+    const html = render([rows[1]!]);
+    expect(html).toContain('>40 %<'); // the mean of 40 and 40, not of 40, 40 and 100
+    expect(html).toContain(translate('de', 'heatmap.rowSummary', { recorded: 2, total: 3, missing: 1 }));
+  });
+
+  it('never stands where the day has its own value', () => {
+    const html = render([{ key: 'gym', label: 'Gym', values: [40, 40, 90], provisional: [null, null, 100] }]);
+    expect(html).not.toContain('heatmap__bar--provisional');
+    expect(html).not.toContain('vorläufig');
+  });
+});

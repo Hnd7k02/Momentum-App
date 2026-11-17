@@ -291,6 +291,26 @@
   background: var(--status-strong);
 }
 
+/* A day still open (block 9, step 6a, D194): what it holds so far, as a
+   hollow bar — the outline in its band's ink at the value's height, nothing
+   filled — until the day closes or is complete and its own value takes the
+   place. The table and the legend say "vorläufig" in a word. */
+.heatmap__bar--provisional {
+  background: transparent;
+}
+.heatmap__bar--provisional.heatmap__bar--weak {
+  box-shadow: inset 0 0 0 1.5px var(--status-weak-ink);
+}
+.heatmap__bar--provisional.heatmap__bar--mixed {
+  box-shadow: inset 0 0 0 1.5px var(--status-mixed-ink);
+}
+.heatmap__bar--provisional.heatmap__bar--good {
+  box-shadow: inset 0 0 0 1.5px var(--status-good-ink);
+}
+.heatmap__bar--provisional.heatmap__bar--strong {
+  box-shadow: inset 0 0 0 1.5px var(--status-strong-ink);
+}
+
 /* A day with no data is an unfilled track, never another colour. */
 .heatmap__empty {
   width: 100%;
@@ -357,4 +377,8 @@
 }
 .heatmap__swatch--none {
   background: var(--status-empty);
+}
+.heatmap__swatch--provisional {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--data-ink);
 }

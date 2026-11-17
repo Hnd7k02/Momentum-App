@@ -11,6 +11,8 @@ export interface RunningRatingView {
   started: boolean;
   /** Whether the domain is switched on today, so it has a weekly target. */
   enabled: boolean;
+  /** The rating with a run of a day still open counted, shown as provisional (D194); else `null`. */
+  provisional: number | null;
 }
 
 /**
@@ -30,7 +32,7 @@ export function useRunningRating(): RunningRatingView | null {
     const boss = await loadBossProgression(date);
     const ledger = boss.domains.find((domain) => domain.domain === 'running')!;
     const week = await loadTrainingWeek('running', date);
-    return { state: boss.running, started: ledger.started, enabled: week !== null };
+    return { state: boss.running, started: ledger.started, enabled: week !== null, provisional: boss.provisional.running };
   }, [date]);
   const { state } = useLoadable(load, [date], [version]);
   return state.status === 'ready' ? state.value : null;

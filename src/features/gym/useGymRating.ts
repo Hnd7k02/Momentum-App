@@ -11,6 +11,8 @@ export interface GymRatingView {
   started: boolean;
   /** Whether the domain is switched on today, so it has a weekly target. */
   enabled: boolean;
+  /** The rating with a workout of a day still open counted, shown as provisional (D194); else `null`. */
+  provisional: number | null;
 }
 
 /**
@@ -41,7 +43,7 @@ export function useGymRatingState(): { view: GymRatingView | null; loading: bool
     const boss = await loadBossProgression(date);
     const ledger = boss.domains.find((domain) => domain.domain === 'gym')!;
     const week = await loadTrainingWeek('gym', date);
-    return { state: boss.gym, started: ledger.started, enabled: week !== null };
+    return { state: boss.gym, started: ledger.started, enabled: week !== null, provisional: boss.provisional.gym };
   }, [date]);
   const { state } = useLoadable(load, [date], [version]);
   return { view: state.status === 'ready' ? state.value : null, loading: state.status === 'loading' };

@@ -11,6 +11,12 @@ export interface HeatmapRow {
   key: string;
   label: string;
   values: (number | null)[];
+  /**
+   * What a day that is still open holds so far, aligned with `values`, shown
+   * as provisional where `values` has nothing (block 9, step 6a, D194). It
+   * enters no average and no count: the row's figures are its final days.
+   */
+  provisional?: (number | null)[];
   /** Rows nested under this one, revealed on tap. */
   children?: HeatmapRow[];
   /** Set on a row that opens something of its own — a question's history. */
@@ -50,12 +56,21 @@ export function summarise(values: (number | null)[]) {
  * are the part a screen reader actually needs, are not in the shape at all.
  * The numbers live in the table at the bottom of this file instead.
  */
-function Strip({ values }: { values: (number | null)[] }) {
+function Strip({ values, provisional }: { values: (number | null)[]; provisional?: (number | null)[] }) {
   return (
     <div className="heatmap__strip" aria-hidden="true">
-      {values.map((value, index) => (
+      {values.map((value, index) => {
+        const open = value === null ? (provisional?.[index] ?? null) : null;
+        return (
         <span key={index} className="heatmap__cell">
-          {value === null ? (
+          {open !== null ? (
+            // A day still open (D194): what it holds so far, hollow, until
+            // it closes or is complete and its own value takes the place.
+            <span
+              className={`heatmap__bar heatmap__bar--provisional heatmap__bar--${bandOf(open)}`}
+              style={{ height: `${Math.max(8, open)}%` }}
+            />
+          ) : value === null ? (
             <span className="heatmap__empty" />
           ) : (
             <span
@@ -66,7 +81,8 @@ function Strip({ values }: { values: (number | null)[] }) {
             />
           )}
         </span>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -152,7 +168,7 @@ function Row({
           {t('heatmap.rowSummary', { recorded, total, missing })}
         </span>
       ) : null}
-      <Strip values={row.values} />
+      <Strip values={row.values} provisional={row.provisional} />
       {expandable ? (
         <div id={childrenId}>
           {expanded
@@ -215,13 +231,20 @@ function DataTable({ rows, days }: { rows: HeatmapRow[]; days: DateKey[] }) {
           {rows.map((row) => (
             <tr key={row.key}>
               <th scope="row">{row.label}</th>
-              {row.values.map((value, index) => (
+              {row.values.map((value, index) => {
+                const open = value === null ? (row.provisional?.[index] ?? null) : null;
                 // Rounded, like every value the screen shows. Unrounded, a
                 // reader hears "70.83333333333333 Prozent".
-                <td key={index}>
-                  {value === null ? t('score.none') : percentText(Math.round(value))}
-                </td>
-              ))}
+                return (
+                  <td key={index}>
+                    {open !== null
+                      ? t('heatmap.provisional', { value: percentText(Math.round(open)) })
+                      : value === null
+                        ? t('score.none')
+                        : percentText(Math.round(value))}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -244,6 +267,10 @@ export function Heatmap({ rows, days }: { rows: HeatmapRow[]; days: DateKey[] })
 
   const shown = rows.flatMap((row) =>
     open.has(row.key) && row.children ? [row, ...row.children] : [row],
+  );
+  // The legend names the hollow bar only where one is drawn.
+  const anyProvisional = shown.some((row) =>
+    row.values.some((value, index) => value === null && (row.provisional?.[index] ?? null) !== null),
   );
 
   return (
@@ -269,6 +296,12 @@ export function Heatmap({ rows, days }: { rows: HeatmapRow[]; days: DateKey[] })
           <span className="heatmap__swatch heatmap__swatch--none" aria-hidden="true" />
           {t('score.none')}
         </li>
+        {anyProvisional ? (
+          <li className="heatmap__legendItem">
+            <span className="heatmap__swatch heatmap__swatch--provisional" aria-hidden="true" />
+            {t('heatmap.provisionalLegend')}
+          </li>
+        ) : null}
       </ul>
     </div>
   );

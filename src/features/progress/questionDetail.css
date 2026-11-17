@@ -183,6 +183,24 @@
   background: var(--status-strong);
 }
 
+/* An answer on a day that is still open (D194): hollow, the outline in
+   its band's ink, as in the history grid. */
+.question-detail__bar--provisional {
+  background: transparent;
+}
+.question-detail__bar--provisional.question-detail__bar--weak {
+  box-shadow: inset 0 0 0 1.5px var(--status-weak-ink);
+}
+.question-detail__bar--provisional.question-detail__bar--mixed {
+  box-shadow: inset 0 0 0 1.5px var(--status-mixed-ink);
+}
+.question-detail__bar--provisional.question-detail__bar--good {
+  box-shadow: inset 0 0 0 1.5px var(--status-good-ink);
+}
+.question-detail__bar--provisional.question-detail__bar--strong {
+  box-shadow: inset 0 0 0 1.5px var(--status-strong-ink);
+}
+
 .question-detail__row {
   display: flex;
   align-items: center;

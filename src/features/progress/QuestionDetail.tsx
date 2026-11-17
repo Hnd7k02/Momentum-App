@@ -33,13 +33,19 @@ interface Point {
 
 export interface QuestionDetailProps {
   question: HistoryQuestionRow;
+  /**
+   * An answer already given on a day that is still open, aligned with
+   * `days` (block 9, step 6a, D194); `null` elsewhere. Derived beside the
+   * history (`provisionalOf`), never part of it.
+   */
+  provisional?: (number | null)[];
   days: DateKey[];
   onClose(): void;
   /** Absent when the question is not being asked today. */
   onAnswerToday?: (() => void) | undefined;
 }
 
-export function QuestionDetail({ question, days, onClose, onAnswerToday }: QuestionDetailProps) {
+export function QuestionDetail({ question, provisional, days, onClose, onAnswerToday }: QuestionDetailProps) {
   const t = useT();
   const { language } = useI18n();
   const uid = useId();
@@ -50,6 +56,29 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
         .map((percent, index) => ({ date: days[index]!, percent }))
         .filter((point): point is Point => point.percent !== null),
     [question, days],
+  );
+
+  /**
+   * An answer already given on a day that is still open (block 9, step 6a,
+   * D194): shown as provisional in the bars, the table and the recent days,
+   * never in the figures, which read the final days only.
+   */
+  const provisionalAt = (index: number): number | null =>
+    question.scores[index] === null ? (provisional?.[index] ?? null) : null;
+  const provisionalPoints = useMemo<Point[]>(
+    () =>
+      days
+        .map((date, index) => ({ date, percent: question.scores[index] === null ? (provisional?.[index] ?? null) : null }))
+        .filter((point): point is Point => point.percent !== null),
+    [question, provisional, days],
+  );
+  const recent = useMemo(
+    () =>
+      [
+        ...points.map((point) => ({ ...point, provisional: false })),
+        ...provisionalPoints.map((point) => ({ ...point, provisional: true })),
+      ].sort((a, b) => a.date.localeCompare(b.date)),
+    [points, provisionalPoints],
   );
 
   const isScale = question.type === 'scale';
@@ -97,7 +126,7 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
           </p>
         ) : null}
 
-        {points.length === 0 ? (
+        {points.length === 0 && provisionalPoints.length === 0 ? (
           <Card>
             <EmptyState
               icon={<ProgressIcon size={26} />}
@@ -157,9 +186,20 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
                   alternative, nothing announced twice.
                 */}
                 <div className="question-detail__chart" aria-hidden="true">
-                  {question.scores.map((percent, index) => (
+                  {question.scores.map((percent, index) => {
+                    const open = provisionalAt(index);
+                    return (
                     <span key={index} className="question-detail__cell">
-                      {percent === null ? (
+                      {open !== null ? (
+                        <span
+                          className={
+                            isScale
+                              ? `question-detail__bar question-detail__bar--provisional question-detail__bar--${scaleBandOf(open / 10)}`
+                              : `question-detail__bar question-detail__bar--provisional question-detail__bar--${open === 100 ? 'strong' : 'weak'}`
+                          }
+                          style={{ height: `${Math.max(8, open)}%` }}
+                        />
+                      ) : percent === null ? (
                         <span className="question-detail__empty" />
                       ) : (
                         <span
@@ -172,7 +212,8 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
                         />
                       )}
                     </span>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <p className="visually-hidden" id={chartId}>
@@ -202,10 +243,17 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
                     <tbody>
                       {days.map((day, index) => {
                         const percent = question.scores[index] ?? null;
+                        const open = provisionalAt(index);
                         return (
                           <tr key={day}>
                             <th scope="row">{formatDayAndMonth(language, day)}</th>
-                            <td>{percent === null ? t('score.none') : readValue(percent)}</td>
+                            <td>
+                              {open !== null
+                                ? t('heatmap.provisional', { value: readValue(open) })
+                                : percent === null
+                                  ? t('score.none')
+                                  : readValue(percent)}
+                            </td>
                           </tr>
                         );
                       })}
@@ -219,10 +267,11 @@ export function QuestionDetail({ question, days, onClose, onAnswerToday }: Quest
               <Card>
                 {/* Newest first: the recent days are the ones anyone opens
                     this screen to look at. */}
-                {[...points].reverse().slice(0, 14).map((point) => (
+                {[...recent].reverse().slice(0, 14).map((point) => (
                   <div key={point.date} className="question-detail__row">
                     <span className="question-detail__rowDay">
                       {formatWeekday(language, point.date)} · {formatDayAndMonth(language, point.date)}
+                      {point.provisional ? ` · ${t('questionDetail.provisional')}` : null}
                     </span>
                     <span
                       className={

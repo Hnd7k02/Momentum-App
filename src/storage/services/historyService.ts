@@ -60,6 +60,61 @@ export interface HistoryQuestionRow {
   scores: (number | null)[];
 }
 
+/**
+ * What each day that is still open holds so far, aligned with a history's
+ * `days` (block 9, step 6a, D194).
+ *
+ * An open day — something due is still unanswered and the day can still be
+ * written (D111) — is no data in the history's series: an open day never
+ * counts against anyone. But what it already holds is real: a workout logged
+ * today, a question answered. These are those values — per domain as the day
+ * would score them now (an unanswered question is not yet a miss), overall
+ * as the mean of the domains that have one, and per question the answer
+ * given. Every other day is `null`. A screen may show them **as
+ * provisional**; nothing that scores reads them, and the day's own value
+ * replaces them once it closes or is complete.
+ *
+ * Derived from the history, never part of it: the history is what the
+ * baselines freeze, value for value.
+ */
+export interface ProvisionalSeries {
+  overall: (number | null)[];
+  mental: (number | null)[];
+  sports: (number | null)[];
+  gym: (number | null)[];
+  running: (number | null)[];
+  food: (number | null)[];
+  /** Per question id. */
+  questions: Map<string, (number | null)[]>;
+}
+
+export function provisionalOf(history: History): ProvisionalSeries {
+  const { days } = history;
+  const domain = (type: StoredDomainType) =>
+    days.map((day) => (day.status === 'open' ? (day.domains.find((entry) => entry.domain === type)?.score ?? null) : null));
+  return {
+    overall: days.map((day) => {
+      if (day.status !== 'open') return null;
+      const known = day.domains.map((entry) => entry.score).filter((value): value is number => value !== null);
+      return known.length > 0 ? known.reduce((sum, value) => sum + value, 0) / known.length : null;
+    }),
+    mental: domain('mental'),
+    sports: domain('sports'),
+    gym: domain('gym'),
+    running: domain('running'),
+    food: domain('food'),
+    // An answer given on an open day; an unanswered question there is not
+    // a miss yet, so it stays empty. `questionScores` holds the day's due
+    // questions that were answered, and nothing else.
+    questions: new Map(
+      history.questions.map((question) => [
+        question.id,
+        days.map((day) => (day.status === 'open' ? (day.questionScores.get(question.id) ?? null) : null)),
+      ]),
+    ),
+  };
+}
+
 /** One weekly-quota domain's week: what was asked, and what happened. */
 export interface HistoryWeekDomain {
   domain: StoredDomainType;

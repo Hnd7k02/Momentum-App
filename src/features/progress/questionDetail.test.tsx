@@ -157,3 +157,28 @@ describe('the 1-10 palette, where a 1-10 value appears', () => {
     expect(html).toContain('>6<');
   });
 });
+
+describe('an answer on a day still open (block 9, step 6a, D194)', () => {
+  const open = row({ scores: [30, null, 70, null] });
+  const provisional = [null, null, null, 90];
+
+  it('stands in the bars as a hollow bar, and in the table and the recent days as provisional', () => {
+    const html = render({ question: open, provisional, days, onClose: noop });
+    expect(html).toContain('question-detail__bar--provisional');
+    expect(html).toContain(translate('de', 'heatmap.provisional', { value: translate('de', 'answer.scaleValue', { value: 9, band: translate('de', 'status.strong') }) }));
+    expect(html).toContain(` · ${translate('de', 'questionDetail.provisional')}`);
+  });
+
+  it('leaves the figures to the final days', () => {
+    const html = render({ question: open, provisional, days, onClose: noop });
+    // Two final answers of four days; the current one is the 7, not the 9.
+    expect(html).toContain(translate('de', 'questionDetail.answered', { recorded: 2, total: 4 }));
+    expect(html).toMatch(/question-detail__figureValue[^"]*">7</);
+  });
+
+  it('is a history of its own when the open day holds the only answer', () => {
+    const html = render({ question: row({ scores: [null, null, null, null] }), provisional, days, onClose: noop });
+    expect(html).not.toContain(translate('de', 'questionDetail.noData'));
+    expect(html).toContain('question-detail__bar--provisional');
+  });
+});

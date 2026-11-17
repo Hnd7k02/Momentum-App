@@ -195,6 +195,8 @@ export const en: Translations = {
   'progress.scoredDays': '{count} of {total} days recorded',
 
   'heatmap.range': 'Last {count} days',
+  'heatmap.provisional': '{value} (provisional)',
+  'heatmap.provisionalLegend': 'Provisional: the day is still open',
   'heatmap.rowSummary': '{recorded} of {total} days recorded, {missing} without data',
   'heatmap.tableCaption': 'Daily values for the last {count} days, in percent',
   'heatmap.tableRowHeader': 'Area',
@@ -337,6 +339,7 @@ export const en: Translations = {
   'questionDetail.average': 'Average',
   'questionDetail.answered': 'Answered on {recorded} of {total} days',
   'questionDetail.range': 'Last {count} days',
+  'questionDetail.provisional': 'provisional',
   'questionDetail.history': 'History',
   'questionDetail.noData': 'There is nothing for this question in this period yet.',
   'questionDetail.answerToday': 'Answer for today',
@@ -572,6 +575,9 @@ export const en: Translations = {
   'gym.progress.ratingNote':
     'The Gym rating measures your own development rather than absolute strength: 40\u00A0% attendance, 60\u00A0% personal performance development.',
 
+  'rating.provisional': 'Provisional · the day is still open',
+  'rating.provisionalExplain': 'Your workout is already counted here. The value is provisional while its day is open: until every question of the day is answered or the day can no longer be filled in. Until then the Boss rank does not count it yet.',
+  'rating.provisionalExplainRun': 'Your run is already counted here. The value is provisional while its day is open: until every question of the day is answered or the day can no longer be filled in. Until then the Boss rank does not count it yet.',
   'gym.rating.title': 'Gym rating',
   'gym.rating.summary': '40\u00A0% attendance · 60\u00A0% performance',
   'gym.attendance.scale': 'of {target} sessions',

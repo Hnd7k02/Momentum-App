@@ -199,6 +199,8 @@ export const de = {
   'progress.scoredDays': '{count} von {total} Tagen erfasst',
 
   'heatmap.range': 'Letzte {count} Tage',
+  'heatmap.provisional': '{value} (vorläufig)',
+  'heatmap.provisionalLegend': 'Vorläufig: der Tag ist noch offen',
   'heatmap.rowSummary': '{recorded} von {total} Tagen erfasst, {missing} ohne Daten',
   'heatmap.tableCaption': 'Tageswerte der letzten {count} Tage in Prozent',
   'heatmap.tableRowHeader': 'Bereich',
@@ -347,6 +349,7 @@ export const de = {
   'questionDetail.average': 'Durchschnitt',
   'questionDetail.answered': '{recorded} von {total} Tagen beantwortet',
   'questionDetail.range': 'Letzte {count} Tage',
+  'questionDetail.provisional': 'vorläufig',
   'questionDetail.history': 'Verlauf',
   'questionDetail.noData': 'Für diese Frage gibt es in diesem Zeitraum noch nichts.',
   'questionDetail.answerToday': 'Heute beantworten',
@@ -592,6 +595,9 @@ export const de = {
   'gym.progress.ratingNote':
     'Das Gym-Rating misst deine eigene Entwicklung, nicht absolute Stärke: 40\u00A0% Anwesenheit, 60\u00A0% persönliche Leistungsentwicklung.',
 
+  'rating.provisional': 'Vorläufig · der Tag ist noch offen',
+  'rating.provisionalExplain': 'Dein Training ist schon eingerechnet. Der Wert ist vorläufig, solange sein Tag offen ist: bis alle Fragen des Tages beantwortet sind oder der Tag nicht mehr nachgetragen werden kann. Bis dahin zählt der Boss-Rang ihn noch nicht.',
+  'rating.provisionalExplainRun': 'Dein Lauf ist schon eingerechnet. Der Wert ist vorläufig, solange sein Tag offen ist: bis alle Fragen des Tages beantwortet sind oder der Tag nicht mehr nachgetragen werden kann. Bis dahin zählt der Boss-Rang ihn noch nicht.',
   'gym.rating.title': 'Gym-Rating',
   'gym.rating.summary': '40\u00A0% Anwesenheit · 60\u00A0% Leistung',
   'gym.attendance.scale': 'von {target} Sessions',

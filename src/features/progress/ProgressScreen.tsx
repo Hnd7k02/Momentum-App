@@ -6,6 +6,7 @@ import { ProgressIcon } from '../../components/Icons';
 import { formatDayAndMonth } from '../../i18n/format';
 import { useI18n, useT } from '../../i18n/I18nProvider';
 import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
+import { provisionalOf } from '../../storage/services/historyService';
 import { Heatmap, type HeatmapRow } from './Heatmap';
 import { QuestionDetail } from './QuestionDetail';
 import { TrendCurve } from './TrendCurve';
@@ -40,6 +41,8 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
     return {
       history,
       start,
+      // What each open day holds so far (D194): derived, never part of the history.
+      provisional: provisionalOf(history),
       days: history.days.slice(start),
       activity: history.activity.slice(start),
       ratings: points.slice(start),
@@ -70,21 +73,32 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
 
   const rows: HeatmapRow[] = useMemo(() => {
     if (!window) return [];
-    const { history, start } = window;
+    const { history, start, provisional: open } = window;
     const slice = <T,>(values: T[]) => values.slice(start);
+    // What an open day holds so far rides beside each row, shown as
+    // provisional (block 9, step 6a, D194).
+    const has = (values: (number | null)[]) => values.some((value) => value !== null);
     const result: HeatmapRow[] = [
-      { key: 'overall', label: t('progress.overall'), values: slice(history.overall) },
+      {
+        key: 'overall',
+        label: t('progress.overall'),
+        values: slice(history.overall),
+        provisional: slice(open.overall),
+      },
     ];
     const mental = slice(history.mental);
-    if (mental.some((value) => value !== null) || history.questions.length > 0) {
+    const mentalOpen = slice(open.mental);
+    if (has(mental) || has(mentalOpen) || history.questions.length > 0) {
       result.push({
         key: 'mental',
         label: t(DOMAIN_NAME_KEYS.mental),
         values: mental,
+        provisional: mentalOpen,
         children: history.questions.map((question) => ({
           key: question.id,
           label: question.text,
           values: slice(question.scores),
+          provisional: slice(open.questions.get(question.id) ?? []),
           // Tapping a question opens that question, not Today. Today is
           // where you act; this is where you look.
           onOpen: () => setOpenQuestionId(question.id),
@@ -92,14 +106,15 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
       });
     }
     // Every training domain that has anything to show, including the retired
-    // one on a device that still carries it.
-    const training: { key: string; label: string; values: (number | null)[] }[] = [
-      { key: 'gym', label: t('domain.gym'), values: slice(history.gym) },
-      { key: 'running', label: t('domain.running'), values: slice(history.running) },
-      { key: 'sports', label: t('domain.legacySport'), values: slice(history.sports) },
+    // one on a device that still carries it — a first workout on a day still
+    // open included.
+    const training: HeatmapRow[] = [
+      { key: 'gym', label: t('domain.gym'), values: slice(history.gym), provisional: slice(open.gym) },
+      { key: 'running', label: t('domain.running'), values: slice(history.running), provisional: slice(open.running) },
+      { key: 'sports', label: t('domain.legacySport'), values: slice(history.sports), provisional: slice(open.sports) },
     ];
     for (const row of training) {
-      if (row.values.some((value) => value !== null)) result.push(row);
+      if (has(row.values) || has(row.provisional ?? [])) result.push(row);
     }
     return result;
   }, [window, t]);
@@ -109,7 +124,10 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
     if (!window || openQuestionId === null) return null;
     const row = window.history.questions.find((question) => question.id === openQuestionId);
     if (!row) return null;
-    return { ...row, scores: row.scores.slice(window.start) };
+    return {
+      question: { ...row, scores: row.scores.slice(window.start) },
+      provisional: (window.provisional.questions.get(row.id) ?? []).slice(window.start),
+    };
   }, [window, openQuestionId]);
 
   // Still loading, failed outright, or loaded — three states, never one.
@@ -151,13 +169,14 @@ export function ProgressScreen({ onGoToToday }: { onGoToToday?: () => void } = {
   if (openQuestion) {
     return (
       <QuestionDetail
-        question={openQuestion}
+        question={openQuestion.question}
+        provisional={openQuestion.provisional}
         days={window.days.map((day) => day.date)}
         onClose={() => setOpenQuestionId(null)}
         // Offered only while the question is actually being asked; sending
         // someone to a check-in for a question nobody is asking is a dead end.
         onAnswerToday={
-          openQuestion.status === 'active' && onGoToToday
+          openQuestion.question.status === 'active' && onGoToToday
             ? () => {
                 setOpenQuestionId(null);
                 onGoToToday();

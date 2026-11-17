@@ -198,6 +198,16 @@ export interface GymRatingInput {
 }
 
 export function buildGymRating(input: GymRatingInput): GymRatingState {
+  return replayGymRating(input).state;
+}
+
+/**
+ * The Gym rating, and beside it the rating as it stands if the open days
+ * that hold a Gym session counted now (block 9, step 6a, D194): `null` when
+ * no open day holds one. Kept apart from the state, which is what the
+ * baselines freeze.
+ */
+export function replayGymRating(input: GymRatingInput): { state: GymRatingState; provisional: number | null } {
   const { history, dayStates, snapshots, sessionDates } = input;
   const dates = history.days.map((day) => day.date);
 
@@ -378,6 +388,8 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
   const weekWindowOf = weekWindows(snapshots);
 
   const modernDays: TrainingRatingDay[] = [];
+  /** Per modern day: still open (D111), with a Gym session on it (D194). */
+  const openWithSession: boolean[] = [];
   for (let index = legacyEnd; index < dates.length; index += 1) {
     const date = dates[index]!;
     const state = dayStates[index];
@@ -426,13 +438,34 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
       // a week is only known to have been met once it is over.
       enduranceUnlocked: index >= unlockedFrom,
     });
+    openWithSession.push(
+      state?.status === 'open' && sessionDates.has(date) && week !== undefined && !(pausedOn(date) && (week?.sessions ?? 0) === 0),
+    );
   }
 
   const carried = legacyEnd === 0 ? undefined : legacy.points[legacyEnd - 1]?.rating;
-  const modern = computeTrainingRating(modernDays, {
+  const foldOptions = {
     ...(carried === undefined ? {} : { start: carried }),
     peak: legacyEnd === 0 ? RATING.START : legacy.peak,
-  });
+  };
+  const modern = computeTrainingRating(modernDays, foldOptions);
+
+  /*
+   * Block 9, step 6a (D194). A workout saved on a day that is still open —
+   * a question of that day unanswered (D111) — is not counted until the day
+   * is complete or has closed, so the rating did not move with it until
+   * then: "erst am nächsten Tag". The rule stays. Beside it, the rating as
+   * it stands if those days counted now: the same fold over the same days,
+   * an open day that holds a Gym session taken as scored. A screen shows it
+   * as provisional; nothing that rates reads it, and it is absent on every
+   * load where no open day holds a session.
+   */
+  const provisional = openWithSession.some(Boolean)
+    ? computeTrainingRating(
+        modernDays.map((day, index) => (openWithSession[index] ? { ...day, scored: true } : day)),
+        foldOptions,
+      )
+    : null;
 
   /* One series, whose increments change definition at one point. */
   const points: RatingPoint[] = [
@@ -470,7 +503,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
       }
     : null;
 
-  return {
+  const state: GymRatingState = {
     points,
     detail: modern.points,
     rating,
@@ -492,6 +525,7 @@ export function buildGymRating(input: GymRatingInput): GymRatingState {
     ...(decayPending ? { decayPending } : {}),
     maintenance: lastDetail?.maintenance ?? false,
   };
+  return { state, provisional: provisional ? provisional.current : null };
 }
 
 /**

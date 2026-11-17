@@ -95,7 +95,7 @@ function HubCards({
         onOpen={onOpenMuscles}
       />
       {gymRating ? (
-        <GymOverview state={gymRating.state} started={gymRating.started} enabled={gymRating.enabled} />
+        <GymOverview state={gymRating.state} started={gymRating.started} enabled={gymRating.enabled} provisional={gymRating.provisional} />
       ) : ratingLoading ? (
         // The rating board holds its place, so the plans below do not jump
         // when the replay behind it arrives (contract §11).

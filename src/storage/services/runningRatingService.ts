@@ -156,6 +156,15 @@ export interface RunningRatingInput {
 }
 
 export function buildRunningRating(input: RunningRatingInput): RunningRatingState {
+  return replayRunningRating(input).state;
+}
+
+/**
+ * The Running rating, and beside it the rating as it stands if the open days
+ * that hold a run counted now (block 9, step 6a, D194): `null` when no open
+ * day holds one. Kept apart from the state, which the baselines freeze.
+ */
+export function replayRunningRating(input: RunningRatingInput): { state: RunningRatingState; provisional: number | null } {
   const { history, dayStates, snapshots, runDates } = input;
   const dates = history.days.map((day) => day.date);
 
@@ -282,6 +291,8 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
   const weekWindowOf = weekWindows(snapshots);
 
   const modernDays: TrainingRatingDay[] = [];
+  /** Per modern day: still open (D111), with a run on it (D194). */
+  const openWithRun: boolean[] = [];
   for (let index = legacyEnd; index < dates.length; index += 1) {
     const date = dates[index]!;
     const state = dayStates[index];
@@ -329,13 +340,32 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
       // A week is only known to have been met once it is over.
       enduranceUnlocked: index >= unlockedFrom,
     });
+    openWithRun.push(
+      state?.status === 'open' && runDates.has(date) && week !== undefined && !(pausedOn(date) && (week?.sessions ?? 0) === 0),
+    );
   }
 
   const carried = legacyEnd === 0 ? undefined : legacy.points[legacyEnd - 1]?.rating;
-  const modern = computeTrainingRating(modernDays, {
+  const foldOptions = {
     ...(carried === undefined ? {} : { start: carried }),
     peak: legacyEnd === 0 ? RATING.START : legacy.peak,
-  });
+  };
+  const modern = computeTrainingRating(modernDays, foldOptions);
+
+  /*
+   * Block 9, step 6a (D194), as for Gym: a run saved on a day that is still
+   * open (D111) is not counted until the day is complete or has closed.
+   * Beside the rating, the rating as it stands if those days counted now —
+   * the same fold, an open day that holds a run taken as scored. Shown as
+   * provisional, read by nothing that rates, absent when no open day holds
+   * a run.
+   */
+  const provisional = openWithRun.some(Boolean)
+    ? computeTrainingRating(
+        modernDays.map((day, index) => (openWithRun[index] ? { ...day, scored: true } : day)),
+        foldOptions,
+      )
+    : null;
 
   /* One series, whose increments change definition at one point. */
   const points: RatingPoint[] = [
@@ -370,7 +400,7 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
     : null;
   const trendFrom = addDays(input.reference, -(TRAINING_RATING.TREND_WINDOW_DAYS - 1));
 
-  return {
+  const state: RunningRatingState = {
     points,
     detail: modern.points,
     rating: last?.rating ?? RATING.START,
@@ -398,6 +428,7 @@ export function buildRunningRating(input: RunningRatingInput): RunningRatingStat
         (entry.distanceMetres === null || entry.durationSeconds === null),
     ).length,
   };
+  return { state, provisional: provisional ? provisional.current : null };
 }
 
 /**
