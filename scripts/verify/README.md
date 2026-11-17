@@ -10,6 +10,38 @@ session so the next run means the same thing as the last one.
 
 ## Running them
 
+**All of them, by one command** (block 9, step 1):
+
+```sh
+npm run verify                    # build, serve, run every suite, print the table
+npm run verify -- --no-build      # with the builds that are there
+ONLY=phase2,release npm run verify   # a selection
+```
+
+`run-all.mjs` builds the app, the preview build with a database of its own
+(`dist-preview`) and the live state `e30becd` — the default branch's head,
+in `LIVE_DIR` (default `<tmp>/momentum-live-e30becd`), from `git archive`,
+built once and kept (`--rebuild-live` builds it again). It serves them on
+4173, 4174 and 4273 and the dev server on 5173, refuses a port that is
+already taken, runs the ordinary suites `JOBS` at a time (default 2) and
+then the 3D suites one by one with nothing beside them, writes every
+suite's pictures and log under `.artifacts/verify/<run>/` — never into
+`docs/` — prints the table (suite, passed of total, duration, result) and
+writes it as `table.md` and `results.json`. **It exits 1 if anything
+failed**: a build, a server or one check. The one known red check,
+`release-proof.mjs` "offline, Gym still shows the 3D body" (red since
+before Stage 6b, the tidy-up's, D163), stays red: the table marks it as
+known and the exit code is still 1 while it fails.
+
+**On GitHub** `.github/workflows/verify-wp3.yml` runs on every push to
+`claude/momentum-wp3`: `npm ci`, `tsc -b`, `npm run test`, `npm run verify`
+in Chromium, and the WebKit selection below. It publishes nothing and has
+no right to; `deploy.yml` is untouched. There the workflow installs the
+browsers at the version of `playwright-core` and points the suites at
+them (`CHROMIUM_PATH`; WebKit from Playwright's own place).
+
+**One at a time**, as before:
+
 ```sh
 npm run build
 npx vite preview --port 4173 &          # the scripts expect this exact port
@@ -27,6 +59,26 @@ current build — Playwright's own default path is not populated here. The
 path is named once, as `CHROMIUM` in `lib.mjs`, and every script and
 `tools/render-body-preview.mjs` launch with it; `CHROMIUM_PATH=<binary>`
 points them all at another one. Never run `npx playwright install`.
+
+### WebKit (block 9, step 3)
+
+`BROWSER=webkit npm run verify` runs, on GitHub, the suites that launch
+through `launch()` in `lib.mjs` (`WEBKIT_SUITES`). **It is an early
+warning: WebKit under Linux is not Safari on an iPhone**, and the owner's
+check on the phone decides. A cloud session has Chromium only and never
+installs a browser.
+
+| Suite | In WebKit | Why |
+|---|---|---|
+| `release.mjs` | yes | the whole journey through the app |
+| `wp3-sheets.mjs` | yes | typing into every sheet |
+| `terminal.mjs` | yes | the areas |
+| `design-system.mjs` | yes, at 393 | every screen's text on its pixels |
+| `muscle-sheet.mjs` | parts 1, 4 and 5 | Muskelgruppen with the sheet: the same number in row, sheet and body; one change per exercise; the lines in one column. Parts 2 and 3 drag the sheet with a finger through the Chromium protocol (a CDP session) and stay in Chromium. Where WebKit under Linux has no WebGL, the screen shows the flat figure, and the body's colours are not checked there |
+| `gym-muscles.mjs`, `body.mjs` | no | they count frames and turn the body through the Chromium protocol; the body's frames and draw calls are Chromium's to measure |
+| `body-reach.mjs`, `farbregeln.mjs` | no | they read the body's picture pixel by pixel on a grid tuned to Chromium's rendering |
+| `phase*-a11y.mjs` | no | they read the accessibility tree through the Chromium protocol |
+| every other suite | not yet | they run in Chromium; nothing in them is bound to it, and they can join the list when WebKit is worth the time on GitHub |
 
 ## What each one covers
 
@@ -88,6 +140,10 @@ points them all at another one. Never run `npx playwright install`.
 | `stage7d-shots.mjs` | **Not a suite: the pictures of block 7D** (`docs/design/wp3/stage7d/`). The picker in a workout at 320, 360, 393 and 430: without a query, at the top and at the core's heading; with «bauch», «zieh», «maschine», «eigengewicht», «kabel brust» and a word nothing answers; the own exercise opened from the empty search. Once in English («abs», and without a query), once from the plan editor («bauch»). `OUT=<dir> WIDTHS=393` |
 | `stage7e-shots.mjs` | **Not a suite: the pictures of block 7E** (`docs/design/wp3/stage7e/` at STOP 7E-a2, `docs/design/wp3/stage7e-b/` since). A new device walks the onboarding by its own buttons, both worlds chosen, three questions, three gym sessions and two runs: every step at 393, the first slide and the weekly targets at 320 and 430 (`ALL=1` every step at every width), the opening page and the areas as they open (since D192), the question step as it opens and with none chosen, and — given `URL_PREVIEW` — the preview's row «Einführung ansehen». It prints for each step whether the page runs wider than the screen, how far the step scrolls, and the face its title is set in. `OUT=<dir> WIDTHS=… LANGUAGE=en URL_PREVIEW=<url>` |
 | `onboarding-7e.mjs` | **Block 7E: the onboarding, every way through it** (D190, D191). Against the production preview at 320, 360, 393 and 430: the opening page — one line and a faint «Screen antippen», no button and no marks; every point of the screen lands on the page, and a real tap in each corner, on the line and on the hint goes on, as do Tab and Enter (D193) — and the areas opening with nothing chosen, «Weiter» held (D192); Mind alone — the three starter questions, one per category, reach storage; Gym alone at five sessions and two runs, without a question step; Mind and Gym with every starter taken off — «Weiter» waits and says «Wähl mindestens eine Frage oder nimm Mind ab.» — then one question of the library and one of the user's own; Mind taken off from the question step. Each path's domains, targets and questions are read back from the database. Every step of every path: no wider than the screen, nothing cut sideways, every control a 44px target (the seven target cells aside, D163), at most one dark surface and it Gym or the rank, the hero one picture with nothing to operate. The live build has no rehearsal. **And the rehearsal on a preview build** (`URL_PREVIEW`, a build with `VITE_MOMENTUM_DB=momentum-preview` served on 4174): every store of the preview's database read before and after a rehearsal walked to its end with other choices, one left by Back and one by a reload — byte for byte the same each time, and the live app's database never opened. |
+| `run-all.mjs` | **Not a suite: every suite, by one command** (block 9, step 1; `npm run verify`). Above, under "Running them". |
+| `today-in-charts.mjs` | **Block 9, step 6a: a workout saved today stands in every chart at once** (D194). On the check file of block 7D, imported on a Monday, a workout saved before the day's questions are answered: the chest row says "Heute", its sheet's line reaches today with one measurement more, Bankdrücken lists today first and its line ends on it, every earlier day reads as it did; the hub counts it and its rating tile shows the rating with it at once, "Vorläufig · der Tag ist noch offen"; Verlauf's grid shows today hollow and "vorläufig" in Gym and overall, names the hollow bar in its legend, leaves every day before the week as it was; a question answered today stands as provisional in its history; once the day is complete its own values stand, the curve moves and the tile shows the same value as the rating. |
+| `update-in-place.mjs` | **Block 9, steps 4 to 6: the update and the way back, in one browser.** The live state `e30becd` and this build served one after the other under one address (4295), so one database and one service worker meet them: the update waits, "Neue Version verfügbar", one reload, nothing of the live build left in the cache, every record kept, the three eras on the update day, a second load writing nothing; the live build again on the updated data (described); the clean way back (two exports alike, the data of the backup); and a backup of this build in the live build (described). Needs `dist` and the live state (`run-all.mjs` builds both). |
+| `update-live-outputs.mjs` | **Not a suite: what the live state shows, day by day, read by its own code** (block 9, step 4). Copies `src/storage/services/fixtures/updateOutputs.ts` into the live state, runs it there on a backup and a day, and writes the JSON `updateRehearsal.test.ts` compares the days before the update with. `BACKUP=… REFERENCE=… OUT=…` |
 | `stage7d-check-files.mjs` | **Not a suite: the import files of the check at STOP 7D, and their proof** (`docs/wp3/stage7d/`). Made by the live build (`LIVE_URL`, the default branch with its own catalogue): for each day in `DAYS` it imports the diary of STOP 7B for that day, makes a plan of Bankdrücken, Latzug and an exercise of the user's own through its interface, and exports it through "Backup exportieren". The build before the block (`BEFORE_URL`) and the build under test (`URL_APP`) then import the file on an empty device and must show the same Gym rating, rows, strip and plan; the build under test must offer every exercise of its catalogue and the user's own, keep every stored exercise byte for byte, and find the user's own by its name — otherwise the script throws. `LIVE_URL=… BEFORE_URL=… URL_APP=… DAYS=2026-11-17,2026-11-18 OUT=docs/wp3/stage7d` |
 
 Two things worth knowing before writing another suite, both of which produced
