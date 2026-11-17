@@ -191,17 +191,19 @@ before is unchanged; once the day is complete its own values stand.
 > - Ernährung verschwindet aus der Oberfläche. Ihre Daten bleiben gespeichert, nichts wird gelöscht.
 > - Heute | Gestern: Eintragen geht für heute und gestern, nicht weiter zurück.
 > - Neues Aussehen: Mind hell, Gym dunkel; Muskelgruppen mit dem Körper und einem Sheet je Gruppe.
-> - Gym rechnet ab diesem Tag mit der neuen Kennzahl (bester Arbeitssatz, Aufwärmsätze zählen nicht). Das Gym-Rating steht danach an keinem Tag tiefer als nach der alten Rechnung. Im Probeprofil springt es am Update-Tag um 18 Punkte, weil die laufende Woche als erfüllt zählt, und setzt sich, wenn sie vorbei ist.
+> - Gym rechnet ab diesem Tag mit der neuen Kennzahl: dem besten Arbeitssatz. Sätze, die du von Hand als Aufwärmsatz markierst, zählen nicht. Im Probeprofil steigt das Gym-Rating am Update-Tag um 18 Punkte (831 → 849), weil die laufende Woche als erfüllt zählt, und setzt sich, wenn sie vorbei ist (832,7). Danach liegt es höchstens 2,4 Punkte unter der alten Rechnung, an Tagen, die der neue Stand schon abschliesst und der alte noch nicht.
 > - Eine Woche wird erst gewertet, wenn sie vorbei ist (Dienstag 00:00). Bis dahin zählt eine Woche mit Training als erfüllt.
 > - Ein Training steht sofort im Rating und in Verlauf, als «vorläufig», bis der Tag abgeschlossen ist.
-> - Alles vor dem Update bleibt, wie es war.
+> - Alles vor dem Update bleibt, wie es war. Einmalig stehen am Update-Tag die zwei Tage vor gestern in Verlauf für zwei Tage als «vorläufig» (D194).
 
 The prompt asks for "the number from block 5b" for the Gym rating's
 move in the first weeks. That number (−42 after a week, D174) was the
 reason for block "Kurve": under the curve at three the rating stands on
 no day lower than under the old rules for a history of five weeks or more
 (D177, D180). The decisions come first; the text says what holds now,
-with the profile's own figures.
+with the profile's own figures — including the 2.4 points it stands
+lower on the 22nd to the 24th, days this build has closed and the live
+build has not.
 
 **The merge plan** (the owner's step; not done here):
 
