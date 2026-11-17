@@ -6847,3 +6847,52 @@ D111's question, recorded as worth revisiting "as daily domains multiply".
 It is put to the owner at the gate, with the recommendation to keep the
 rule for this release and to decide it after WP3, as a scoring era of its
 own.
+
+## D195 — Block 9: what the hardening found and fixed, and the way back it rehearsed
+
+**Context.** Block 9 adds nothing and changes no behaviour except where it
+fixes what it finds, and the owner's point of step 6a (D194). It proves the
+release: one command for every suite, the whole check on GitHub, a
+selection in WebKit, the update from the live state `e30becd` rehearsed as
+a whole, the way back, the backup there and back, the contract's rules
+each broken once, §12 in the browser. Its record is
+`docs/wp3/stage9/README.md`.
+
+**Found and fixed in the app.**
+
+1. **Less transparency left three surfaces blurring** (contract §12,
+   D146). Cards and sheets turned solid; the tab bar and the bar at the
+   foot of a workout kept their translucent material and blur, and the
+   scrim behind a sheet its blur. Under `prefers-reduced-transparency:
+   reduce` they are solid now (`appShell.css`, `gym.css`, `ui.css`);
+   `access-wp3.mjs` holds it on every screen with glass. Nothing else of
+   the look changed.
+2. **A snapshot between today and a kept era boundary took the era**
+   (HANDOVER's risk from the closing review of Stage 5b). The guard is one
+   line in each of `ensureSessionWindowEra`, `ensureFoodRetired` and
+   `ensureGymMetricEra`: a later snapshot dated before the kept boundary
+   is left alone. `keptBoundaries.test.ts` holds all three and a whole
+   first load; each case fails without the guard. No released device was
+   in that state; no stored value moves.
+
+**Found and fixed in the harness.** `wp2-2-shots.mjs` counted the
+onboarding's still since block 7E as one of the hub's; the record is
+reset at the reload. Vite's `localhost` is `::1` alone on a GitHub runner;
+every server the runner starts names `127.0.0.1`. A new push cancelled a
+check under way; the Chromium job under way now finishes and the newest
+waits, and the WebKit job, minutes long, runs at once.
+
+**The way back.** The state to return to is the head of the default
+branch, `e30becd`. The live build opens data this build has loaded, shows
+it without Food and writes nothing — but it does not know the window, the
+metric or the curve the snapshot carries, and would score every new day by
+its own rules. The only clean way back is the data deleted, the live
+build, and the backup exported before the update; rehearsed, two exports
+alike. A tag on `e30becd` is proposed as **`live-before-wp3`**; whether
+and who sets it is the owner's at the gate. The repository has no tag
+today: `muscle-map-v1`, named in HANDOVER, does not exist in it.
+
+**Not changed.** Every golden file and fingerprint, the schema and the
+backup format, `deploy.yml` and the default branch. The new files under
+`.github/fixtures/wp3-update/` are an invented profile lived through the
+live build's screens and the readings of both builds; no one's own data.

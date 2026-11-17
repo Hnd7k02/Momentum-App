@@ -29,17 +29,17 @@ on:
 permissions:
   contents: read
 
-# A run takes hours: a push lets the run under way finish, and the newest
-# push waits behind it (an older waiting one is dropped).
-concurrency:
-  group: verify-${{ github.ref }}
-  cancel-in-progress: false
-
+# Each job queues on its own: the Chromium job takes hours, and a push lets
+# the one under way finish while the newest waits behind it (an older
+# waiting one is dropped); the WebKit job, minutes, runs at once.
 jobs:
   chromium:
     name: Typecheck, tests, build and every suite (Chromium)
     runs-on: ubuntu-latest
     timeout-minutes: 330
+    concurrency:
+      group: verify-chromium-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,6 +69,9 @@ jobs:
     name: A selection of the suites in WebKit (an early warning, not Safari on an iPhone)
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    concurrency:
+      group: verify-webkit-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

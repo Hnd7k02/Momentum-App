@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright-core';
@@ -268,6 +268,11 @@ const report = {};
   await page.reload({ waitUntil: 'networkidle' });
   const fromNew = await exportThroughScreen(page, 'from-new');
   await ctx.close();
+  // A warm-up is the one new fact a set of this build can carry (D151): the
+  // first working set marked as the owner would mark it.
+  const marked = structuredClone(fromNew);
+  marked.data.gymSets[0].warmUp = true;
+  writeFileSync(join(TMP, 'from-new-marked.json'), JSON.stringify(marked));
 
   await serve('live');
   const old = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true, locale: 'de-CH', timezoneId: 'Europe/Zurich', acceptDownloads: true, serviceWorkers: 'block' });
@@ -275,7 +280,7 @@ const report = {};
   const livePage = await old.newPage();
   const liveErrors = [];
   livePage.on('pageerror', (error) => liveErrors.push(String(error)));
-  await liveDeviceWith(livePage, join(TMP, 'from-new.json')).catch((error) => liveErrors.push(String(error)));
+  await liveDeviceWith(livePage, join(TMP, 'from-new-marked.json')).catch((error) => liveErrors.push(String(error)));
   const status = await livePage.locator('.backup__status').first().textContent().catch(() => null);
   const held = await dump(livePage).catch(() => null);
   report.liveImportsNew = {
@@ -283,7 +288,7 @@ const report = {};
     status,
     errors: liveErrors.slice(0, 3),
     snapshotsWithWindow: (held?.configSnapshots ?? []).filter((snapshot) => snapshot.config.scoring.sessionWindowDays !== undefined).length,
-    setsWithWarmUpField: (held?.gymSets ?? []).filter((set) => 'warmUp' in set).length,
+    warmUpKept: (held?.gymSets ?? []).filter((set) => set.warmUp === true).length,
   };
   check('D: the live build reads a backup of this build (what it keeps is in the report)', report.liveImportsNew.accepted, JSON.stringify(report.liveImportsNew).slice(0, 300));
   await old.close();
