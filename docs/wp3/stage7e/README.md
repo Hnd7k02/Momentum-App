@@ -76,13 +76,49 @@ English.
   `tabular-nums` and without. The app's columns of figures (contract §3)
   rely on them.
 
+## Estimate: the three exceptions in the whole app (not built)
+
+Read from the code by three readers, one per exception; the paths and
+counts are theirs, checked against the repository.
+
+- **The flat ground** — about half a block, up to one if the Gym card
+  needs a second look at a STOP. About 8 files and 40–60 lines of CSS: the
+  two `--ground` tokens, the four places that paint the ground
+  (`global.css`, `appShell.css`, the Gym overlay in `gym.css`,
+  `questionDetail.css`) and the card in `ui.css`. **Ground and cards are
+  one decision**: glass over a flat ground shows nothing (a Mind card
+  would be 1.05:1 on the ground), so the cards go solid as in the
+  onboarding. It reverses owner choices (D148's washes, D160's bound) and
+  amends D146 and D147. Verification dominates: the design suite at four
+  widths in both worlds, seven more suites, about 170 pictures.
+- **The coloured line** — about one block, after four decisions: whether
+  the line may end in blue at all (#2f8fe8 is the hue of «Zu wenig
+  Vergleichsdaten», 209° against 207°), which middle stop Gym takes, 1.5
+  or 2.5px, all four charts or Verlauf only. Code is a quarter of it
+  (`TrendCurve.tsx`, `Sparkline.tsx`, `ExerciseLineChart.tsx`, three CSS
+  rules); it reopens D154 and D160 and reverses D162, which took a
+  lilac-to-sky gradient off the Boss bar; `designSystem.test.tsx`,
+  `designRules.test.ts`, `release-proof.mjs` and `design-system.mjs` fail
+  by design and would be rewritten. The end point, which carries the
+  state, loses its contrast on a blue end (red 1.03:1).
+- **DM Sans** — about one block if figures may be proportional or stay in
+  the system face, about two if a cut with tabular figures has to be
+  made. The move itself is an hour or two; **the figures are the cost**:
+  74 `tabular-nums` declarations in 19 stylesheets (and one on the dev
+  page) would silently stop working
+  (the muscle rows' column of figures, the strip, Verlauf, the sets). A
+  font that is not preloaded also shows the system face for a moment on
+  every cold start (a preload in the build, or a wait in `main.tsx`);
+  19 suites check text geometry; `ch`-based widths in the set row grow
+  8.4 %; the arrows ↗ ↘ → are not in the file.
+
 ## Seen and left
 
 - The three slides fit without scrolling at 320 × 693, 390 × 664, 393 ×
   659 and on every taller screen; the areas, the weekly targets and the
-  summary from 320 × 568. The questions scroll by nature. On 360 × 640 and 375 × 647 the first slide scrolls by
-  about 30px; on 320 × 568 and 375 × 548 the slides scroll by up to
-  130px, the button stays.
+  summary from 320 × 568. The questions scroll by nature. On 360 × 640
+  and 375 × 647 the first slide scrolls by about 30px; on 320 × 568 and
+  375 × 548 the slides scroll by up to 130px, and the button stays.
 - **The face is DM Sans at its small optical size**: the file has the
   weight axis only. The package's file with the optical-size axis as well
   (62,724 bytes, 25,792 more) sets the 34px titles about 6 % tighter

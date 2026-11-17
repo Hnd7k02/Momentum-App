@@ -2349,6 +2349,12 @@ merged; **the presentation is built and waits for the owner at STOP
   by card); `design-system.mjs` holds the seven segments as targets of
   44px around a pill instead of a round circle; `phase2.mjs` and
   `wp3-stage4.mjs` read the slides' new titles.
+- **Verification** (2026-11-17, on `75ee4b9`): `tsc -b` clean; `npm run
+  test` exit 0, 140 files, 2454 tests; `phase2.mjs` 67 of 67,
+  `wp3-stage4.mjs` 170 of 170, `design-system.mjs` with `ONLY=onboarding`
+  212 of 212 at 320, 360, 393 and 430 (lowest text 4.58:1). Reviewed
+  before the STOP by three readers with a skeptic for every finding: five
+  held and are fixed, two were refuted (D190).
 - **After the owner's go** (D190): the tests for every path, the replay of
   the onboarding in the preview without losing data, the preview, and
   STOP 7E-b with at most eight check points.
