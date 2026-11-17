@@ -213,3 +213,23 @@ with the profile's own figures.
    verfügbar», one reload, the data there, then once in flight mode. The
    first load writes the three eras on that day; from then on the way back
    is the backup of step 1 of the checklist.
+
+## The check files
+
+There is no backup with real data. The owner's check uses invented diaries
+made by the live build (`e30becd`) itself, through its own interface, and
+exported by its own «Backup exportieren» — exactly what his live app would
+hand the preview (`stage5b-live-backup.mjs`, `FIRST=2026-09-28 FOOD=1
+RUNS=1 PLAN=1`, `LAST=` the day):
+
+| Check on | File | Sessions · sets · answers · runs · Food days |
+|---|---|---|
+| 17 November 2026 | `momentum-pruefdaten-9-2026-11-17.json` | 22 · 286 · 102 · 15 · 51 |
+| 18 November 2026 | `momentum-pruefdaten-9-2026-11-18.json` | 22 · 286 · 104 · 15 · 52 |
+| 19 November 2026 | `momentum-pruefdaten-9-2026-11-19.json` | 23 · 298 · 106 · 15 · 53 |
+
+**Take the file of the day you check**: its last session is on that day,
+so the import into the preview is the update on that day. Mind's two
+questions are answered on every day of the file, a plan «Push» is saved,
+and Ernährung was on and rated — in the preview it is gone from every
+screen and its data stays.
