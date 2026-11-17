@@ -12,7 +12,7 @@ Belege sind die drei Mockups unter `docs/wp3/mockups/` (Screenshots in `bilder/`
 
 **Leitbild** (festgelegt, D154, D155). Ein heller, einfarbiger Körper auf Graphit, der nur dort Farbe trägt, wo die Trainingsdaten etwas sagen. Darum herum eine Zahlenwelt mit festen Ziffernbreiten und einem Akzent. Mind bleibt hell und ruhig, Gym dunkel; beide benutzen dieselben Bausteine.
 
-**Geltung.** Der Vertrag gilt für jeden Screen. Für das Onboarding gelten zusätzlich die Ausnahmen in §16, und nur dort (D190). Er ersetzt D89 («The body is a diagram, not an illustration»), die Muskelfarben als Flächenfarbe aus D123 und die Farbangaben der Muskelkarten-Übergabe (`docs/design/muscle-map/`). Über ihm stehen `CLAUDE.md` und alle Regeln der Wertung: Der Vertrag ändert keine Zahl, die die App berechnet.
+**Geltung.** Der Vertrag gilt für jeden Screen. Für das Onboarding gelten zusätzlich die Ausnahmen in §16, und nur dort (D190, D191). Er ersetzt D89 («The body is a diagram, not an illustration»), die Muskelfarben als Flächenfarbe aus D123 und die Farbangaben der Muskelkarten-Übergabe (`docs/design/muscle-map/`). Über ihm stehen `CLAUDE.md` und alle Regeln der Wertung: Der Vertrag ändert keine Zahl, die die App berechnet.
 
 ## §2 Farbe
 
@@ -335,17 +335,17 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 
 ## §16 Onboarding-Ausnahmen
 
-Festgelegt am STOP 7E-a (16.11.2026, D190). **Dieser Abschnitt gilt nur im Onboarding** – in den Schritten, die eine neue Installation vor dem ersten Screen der App zeigt (`src/features/onboarding/`). Für jeden Screen der App gelten §1 bis §15 unverändert; nichts aus diesem Abschnitt darf dort stehen.
+Festgelegt am STOP 7E-a (16.11.2026, D190), angepasst am STOP 7E-a2 (17.11.2026, D191). **Dieser Abschnitt gilt nur im Onboarding** – in den Schritten, die eine neue Installation vor dem ersten Screen der App zeigt (`src/features/onboarding/`). Für jeden Screen der App gelten §1 bis §15 unverändert; nichts aus diesem Abschnitt darf dort stehen.
 
 Massgebend für den Look ist der Entwurf «C1 · Momentum, referenznah» (Richtung C am STOP 7E-a). Er zeigt den Look der ersten Slide, nicht den Inhalt der übrigen Schritte.
 
-**Die fünf Ausnahmen**
+**Die vier Ausnahmen**
 
 - **a) Grund.** Der Grund ist flach in `--surface-base`, ohne die Schleier aus `--ground` (§2.2). Karten sind deshalb feste weisse Flächen (`--surface-elevated`, `--radius-card`, `--shadow-card`) statt Glas (§2.7): Es liegt nichts dahinter, was eine Unschärfe zeigen könnte.
 - **b) Farbe in Datenmarken, nur im Hero von Slide 1.** Die Linie ist ein Verlauf `#7c5cf0` → `#5e5ce6` → `#2f8fe8` (`--onboarding-line-start`, `--accent`, `--onboarding-line-end`); die Balken dahinter stehen in `--accent-tint` und laufen nach unten aus; die Mind-Segmente folgen demselben Verlauf; die Gym-Segmente tragen den Gym-Akzent. Der Endpunkt der Linie hat einen Hof. Auf allen anderen Schritten bleiben Datenmarken neutral nach §2.1 und §6 (`--data-ink` auf `--data-track`, auf der Rang-Bühne `--stage-data-ink` auf `--stage-data-track`). Auch im Hero liegt kein Flächenverlauf unter der Linie (§6).
 - **c) Hero-Zahl.** 40 px fett als eigene Zahlstufe, `--type-figure-hero`. Sie steht einmal, im Hero von Slide 1.
 - **d) Beispielwerte, nur im Hero von Slide 1.** Der Hero ist ein Bild: `role="img"` mit einer Beschreibung, die sagt, dass es Beispielwerte sind. Er enthält keine Bedienelemente; was darin wie ein Segment oder eine Marke aussieht, ist gezeichnet. Kein anderer Schritt zeigt einen Wert, den es nicht gibt: Die übrigen Schritte zeigen eine echte Frage aus dem Katalog, die echten Ränge mit ihren Schwellen, die Ziele, die der Ablauf gerade hält – Gym öffnet mit seinem Standardziel, Laufen ohne Ziel und zeigt darum keine Zahl –, und die Auswahl der Person. Mind steht in der Zusammenfassung nur mit mindestens einer Frage: Ohne Frage bleibt Mind ausgeschaltet (`applyOnboarding`), und die Zusammenfassung sagt nichts anderes.
-- **e) Schrift.** DM Sans (SIL Open Font License 1.1), als eine Datei mit den Gewichten 400 bis 700 in der App enthalten (`--font-onboarding`); kein Nachladen von einem fremden Server. Ein Sheet, das das Onboarding öffnet, spricht in derselben Schrift. Die Systemschrift (§3) bleibt für die App. Die Datei hat **keine festen Ziffernbreiten** («1111» misst bei 40 px 49,9 px, «8888» 97,3 px, mit und ohne `tabular-nums`). Im Onboarding stehen keine Zahlen untereinander – die Skala 1–10 und die Segmente 1–7 stehen mittig in gleich breiten Zellen –, die Regel aus §3 ist dort also durch das Layout erfüllt, nicht durch die Schrift.
+**Die Schrift ist die der App** (§3, D191). Vom STOP 7E-a bis zum STOP 7E-a2 stand hier als fünfte Ausnahme DM Sans; sie ist wieder heraus: Der Einstieg soll aussehen wie alles danach, und es spart 37 kB. Damit gelten auch im Onboarding die festen Ziffernbreiten, die DM Sans nicht hatte.
 
 **Dunkle Flächen.** Sparsam: höchstens eine pro Screen. Sie steht immer für Gym oder für den Rang und bleibt kleiner als die hellen Flächen zusammen. Die Gym-Fläche erklärt für sich die Gym-Welt (`data-world="gym"`) und liest jede Farbe aus diesem Satz; die Rang-Bühne benutzt die Tokens `--stage-*` (§2.6). Nur der Fokusring einer dunklen Kachel, der ausserhalb von ihr auf dem hellen Grund liegt, nimmt den hellen Akzent (`--onboarding-ring`), weil der violette Akzent von Graphit dort nur 2,2:1 erreicht. Der Satz «Die Gym-Karte auf einem hellen Screen ist hell» (§2.2) gilt für die App weiter.
 
@@ -355,9 +355,11 @@ Massgebend für den Look ist der Entwurf «C1 · Momentum, referenznah» (Richtu
 
 **Auswahl.** Eine gewählte Kachel oder Zeile trägt ein gefülltes Häkchen im Akzent (`SelectionMark`), nie einen dicken Rahmen. Die sieben Werte eines Wochenziels stehen als eine Segmentzeile 1–7 statt als sieben Kreise; die Trefferfläche jeder Zelle bleibt 44 px hoch und ihr Anteil der Zeile breit (§12, D163).
 
-**Kurze Bildschirme.** Die drei Slides rücken unter 720 px Höhe enger zusammen, und das Diagramm im Hero gibt Höhe ab (bis 64 px), bevor eine Slide scrollt. Ein Schritt, der dann noch nicht passt, scrollt; die Hauptschaltfläche bleibt stehen.
+**Kurze Bildschirme.** Die drei Slides rücken unter 720 px Höhe enger zusammen, und das Diagramm im Hero gibt die Höhe ab, die der Slide fehlt (bis 64 px), bevor sie scrollt. Wie viel fehlt, wird gemessen und nicht angenommen: Wie viele Zeilen ein Satz braucht, entscheidet die Systemschrift, und sie ist von Telefon zu Telefon eine andere. Ein Schritt, der dann noch nicht passt, scrollt; die Hauptschaltfläche bleibt stehen.
 
-**Was Tests durchsetzen.** `designRules.test.ts` hält die zwei Farbwerte und die Zahlstufe in `tokens.css`; `contrast.test.ts` hält die Linie als Marke bei 3:1 und den Text auf der Gym-Fläche bei 4,5:1; `design-system.mjs` misst jeden Text der sieben Schritte an den gerenderten Pixeln bei 320, 360, 393 und 430 px.
+**Mind-Fragen** (D191). Der Schritt öffnet mit drei Startfragen, je einer pro Kategorie. Solange keine Frage gewählt ist, wartet «Weiter» und darunter steht «Wähl mindestens eine Frage oder nimm Mind ab.» – als Wort, nicht nur als gesperrte Schaltfläche.
+
+**Was Tests durchsetzen.** `designRules.test.ts` hält die zwei Farbwerte und die Zahlstufe in `tokens.css`, nur das Onboarding liest sie, und kein Stylesheet lädt eine Schrift oder setzt eine eigene Familie; `contrast.test.ts` hält die Linie als Marke bei 3:1 und den Text auf der Gym-Fläche bei 4,5:1; `design-system.mjs` misst jeden Text der sieben Schritte an den gerenderten Pixeln bei 320, 360, 393 und 430 px; `onboarding-7e.mjs` geht jeden Weg bei denselben Breiten und hält höchstens eine dunkle Fläche, 44 px Trefferflächen und einen Hero ohne Bedienelement.
 
 ## Anhang
 

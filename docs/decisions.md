@@ -6381,6 +6381,9 @@ built on the head of that branch (`adf1ead`) on a branch of its own.
 
 ### DM Sans
 
+*(Taken out again at STOP 7E-a2: the onboarding speaks in the system
+font, D191. Kept here as the record of what stood.)*
+
 - **One file**: the Latin subset of the variable font with its weight
   axis, 36,932 bytes (`features/onboarding/fonts/`), taken from the package
   `@fontsource-variable/dm-sans` 5.3.0 and not a dependency of the build.
@@ -6441,3 +6444,107 @@ gives up height — down to 64px — before the slide scrolls; the step is a
 size container, and the chart takes what its height leaves. Where that is
 not enough the step scrolls and the button stays: by about 30px at 360 ×
 640 and 375 × 647, by up to 130px at 320 × 568 and 375 × 548.
+
+## D191 — STOP 7E-a2: go; the body stays, the rank stays focused, Mind opens with three questions, and the onboarding speaks in the system font
+
+**Decision (owner, 2026-11-17).** His words: "STOP 7E-a2: Go. Antworten:
+1 A. 2 A. 3 A, mit dem Hinweis «Wähl mindestens eine Frage oder nimm Mind
+ab». 4 Nein. Nimm DM Sans auch im Onboarding heraus und nutze die
+Systemschrift wie in der App. Der Einstieg soll aussehen wie alles danach,
+und es spart 37 kB. Die übrigen Ausnahmen bleiben aufs Onboarding
+beschränkt. Ob die App später nachzieht, entscheide ich nach WP3." And
+for the order: merge the head of `claude/momentum-wp3` into the block's
+branch first — a merge, no rewrite — take the next free number for a new
+decision, then the tests for every path, an onboarding that can be played
+in the preview without losing data, the preview, and STOP 7E-b; after his
+acceptance the branch is merged into `claude/momentum-wp3`, so block 9
+checks one state.
+
+### The answers, as built
+
+- **1 A — the body stays in the Gym card** of the second slide: the Gym
+  hub's still, 64px wide, without WebGL.
+- **2 A — the rank stays focused**: Rookie, the way to Challenger, and the
+  six ranks beyond as one line.
+- **3 A — Mind opens with three questions chosen**, one from each category
+  — "Wie gut hat dein Alltag heute funktioniert?", "Wie gut hast du
+  geschlafen?", "Wie war deine Stimmung heute?" (`STARTER_QUESTIONS`:
+  `routine`, `sleep`, `mood`) — so the day's value, the mean within a
+  category before the mean across them (D17), weighs the three alike.
+  They are chosen, not fixed: any can be taken off. **While Mind has no
+  question, «Weiter» waits** and the line above it says "Wähl mindestens
+  eine Frage oder nimm Mind ab." (in English "Choose at least one
+  question, or take Mind off."), where "Drei bis fünf sind ein guter
+  Anfang." stood. This is the one change of behaviour the block makes: a
+  user who taps through now starts with three questions, where Mind used
+  to stay off without one (`applyOnboarding` switches Mind on only with a
+  question, as before).
+- **4 No — DM Sans does not go into the app.** And at his word it leaves
+  the onboarding too: the flow speaks in the app's system font. The font
+  file, its licence in the build, its token, its row under Danksagungen
+  and its section in `THIRD-PARTY-NOTICES.md` are gone; an installation
+  fetches 36,932 bytes less. With the system font the onboarding has
+  tabular figures again. **The four other exceptions stay in the
+  onboarding only** (contract §16): the flat ground, the coloured line,
+  bars and segments in the first slide's hero, the 40px hero figure, and
+  the example values in that hero alone. Whether the app follows is his
+  decision after WP3.
+
+### What followed from the system font
+
+- **The hero's chart is fitted by measurement.** How many lines a
+  sentence takes is the system font's, and it differs from phone to phone
+  (SF Pro on the iPhone, Inter in the suites); a remainder measured for
+  one font would be wrong for the next. `useFitPlot` lays the chart out
+  at its proportion, reads how far the slide overflows, and lowers the
+  chart by that much, never under 64px — before the first paint and when
+  the slide's box changes size. It writes nothing but the chart's height.
+  The container-query version of STOP 7E-a2 is gone.
+- **The tile's head under 375px** keeps its smaller mark and gaps (D190's
+  review): "Gym" and "Woche" fit beside the mark at 320px in both fonts.
+
+### The rehearsal in the preview
+
+- **Only a preview build offers it**: a build whose database has a name of
+  its own (`VITE_MOMENTUM_DB`, `app/preview.ts`). The live app, the tests
+  and the suites open `momentum` and have no such entry; nothing in the
+  live app changes.
+- **Bereiche → Einstellungen → «Einführung ansehen»** ("Nur in der
+  Vorschau. Ein Probelauf: Nichts wird gespeichert, deine Daten bleiben,
+  wie sie sind."). The flow stands in for the app, from its first slide,
+  in the stored language and in the light world, as a new device sees it.
+  Walked to its end, «Starten» returns to the app; Back leaves it at any
+  step (a layer that owns a history entry, `useBackLayer`, D185), and so
+  does a reload. **It hands nothing to storage**: the flow itself writes
+  nothing, and in the rehearsal its end is only a way back.
+- `onboarding-7e.mjs` proves it on a preview build: a device set up and
+  with an answer of today, every store of its database read before and
+  after a rehearsal walked to its end with other choices, one left by
+  Back and one by a reload — byte for byte the same each time, and the
+  live app's database never opened.
+
+### Tests for every path
+
+`OnboardingFlow.test.tsx` walks every way through the flow (22 tests):
+Mind alone, Mind and Gym, Gym alone with both targets, no area, the
+starter questions and taking them off, Mind without a question and its
+hint, Mind taken off from the question step, a question of the user's
+own, Back through every step with every choice kept, the step's name for
+a screen reader, the failure message, English; and what each step shows
+— the hero as one picture with nothing to operate, no example value
+after it, Laufen without a number until a target is chosen, the rank
+slide without milestones, at most one dark surface a step and it Gym or
+the rank. `onboarding-7e.mjs` walks four paths at 320, 360, 393 and 430
+in the real build and reads back what each stored. Restated, nothing
+removed or weakened: `lib.mjs` sets the question choice exactly
+(`chooseQuestions`), since a tap on a starter would take it off;
+`phase2.mjs`'s own question is stored alone after the starters are taken
+off.
+
+### The merge
+
+`claude/momentum-wp3` at `3e153fa` (STOP 7D accepted, D189) was merged
+into `claude/hopeful-carson-4utktp` with a merge commit; the conflicts
+were the two documents both had appended to — `docs/decisions.md` (the
+D188 addendum and D189 before D190) and `HANDOVER.md`. **This is D191**,
+the next free number after D190.

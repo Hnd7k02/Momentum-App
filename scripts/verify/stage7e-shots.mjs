@@ -9,9 +9,11 @@ import { CHROMIUM, URL_APP, chooseQuestions, setLanguage } from './lib.mjs';
  * chosen: the three slides, the areas, the Mind questions, the weekly
  * targets and the summary. Every step at 393; the first slide and the
  * weekly targets at 320 and 430 as well (`ALL=1` pictures every step at
- * every width).
+ * every width). Since STOP 7E-a2 (D191) also the question step as it
+ * opens — the three starter questions chosen — and with none chosen, and,
+ * given `URL_PREVIEW`, the preview's row «Einführung ansehen».
  *
- *   OUT=docs/design/wp3/stage7e node scripts/verify/stage7e-shots.mjs
+ *   OUT=docs/design/wp3/stage7e-b node scripts/verify/stage7e-shots.mjs
  *
  * It types nothing into the database: the flow is walked by its own
  * buttons, and a new browser context is a new device.
@@ -23,6 +25,7 @@ const ALL = process.env.ALL === '1';
 const LANGUAGE = process.env.LANGUAGE ?? 'de';
 /** The steps pictured at every width; the rest at 393 only. */
 const EVERYWHERE = new Set(['1-momentum', '6-wochenziele']);
+const URL_PREVIEW = process.env.URL_PREVIEW ?? null;
 mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
@@ -80,6 +83,9 @@ for (const width of WIDTHS) {
   await page.getByRole('button', { name: /^Gym/ }).click();
   await shot('4-bereiche');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
+  await shot('5a-fragen-start');
+  await chooseQuestions(page, []);
+  await shot('5b-fragen-keine');
   await chooseQuestions(page, [/Wie gut hast du gesch|How well did you sleep/, /Wie war deine Stimmung|How was your mood/, /frischen Luft|get outside/]);
   await shot('5-fragen');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
@@ -90,6 +96,23 @@ for (const width of WIDTHS) {
   await shot('6-wochenziele');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
   await shot('7-zusammenfassung');
+  await ctx.close();
+}
+
+// The preview's one extra: the row that opens the onboarding as a rehearsal.
+if (URL_PREVIEW) {
+  const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2, hasTouch: true, locale: 'de-CH', serviceWorkers: 'block' });
+  const page = await ctx.newPage();
+  await page.goto(URL_PREVIEW, { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /Los geht/ }).click();
+  for (let index = 0; index < 4; index += 1) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+  await page.getByRole('button', { name: 'Starten' }).click();
+  await page.locator('.tab-bar').waitFor();
+  await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /Einführung ansehen/ }).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/393-8-vorschau-einfuehrung.png` });
   await ctx.close();
 }
 
