@@ -54,6 +54,28 @@ jobs:
       # The browser playwright-core expects, at its own version. The cloud
       # sessions use the image's Chromium and never install one.
       - run: npx playwright-core install --with-deps chromium
+      # The app speaks in the system font (D191), which the phone draws as
+      # SF. The suites measure text at 320px, so the runner draws Inter,
+      # close to SF, as the cloud sessions do (the same fontconfig file) —
+      # not Ubuntu's own default, which is wider and cut the Muskelgruppen
+      # card and strip at 320px in the first run (block 9).
+      - name: Inter as the system font
+        run: |
+          sudo apt-get install -y fonts-inter
+          sudo tee /etc/fonts/conf.d/56-prefer-inter.conf > /dev/null <<'EOF'
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+            <alias><family>system-ui</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>ui-sans-serif</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>-apple-system</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>BlinkMacSystemFont</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>Segoe UI</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>sans-serif</family><prefer><family>Inter</family></prefer></alias>
+          </fontconfig>
+          EOF
+          fc-cache -f
+          echo "system-ui is $(fc-match system-ui)"
       - name: npm run verify
         run: |
           export CHROMIUM_PATH="$(node -e "import('playwright-core').then(({ chromium }) => console.log(chromium.executablePath()))")"
@@ -80,6 +102,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright-core install --with-deps webkit
+      # The app speaks in the system font (D191), which the phone draws as
+      # SF. The suites measure text at 320px, so the runner draws Inter,
+      # close to SF, as the cloud sessions do (the same fontconfig file) —
+      # not Ubuntu's own default, which is wider and cut the Muskelgruppen
+      # card and strip at 320px in the first run (block 9).
+      - name: Inter as the system font
+        run: |
+          sudo apt-get install -y fonts-inter
+          sudo tee /etc/fonts/conf.d/56-prefer-inter.conf > /dev/null <<'EOF'
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+            <alias><family>system-ui</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>ui-sans-serif</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>-apple-system</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>BlinkMacSystemFont</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>Segoe UI</family><prefer><family>Inter</family></prefer></alias>
+            <alias><family>sans-serif</family><prefer><family>Inter</family></prefer></alias>
+          </fontconfig>
+          EOF
+          fc-cache -f
+          echo "system-ui is $(fc-match system-ui)"
       - name: BROWSER=webkit npm run verify
         run: BROWSER=webkit npm run verify
       - uses: actions/upload-artifact@v4
