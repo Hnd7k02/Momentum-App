@@ -81,7 +81,7 @@ const SUITES = [
   { name: 'wp3-stage1' }, { name: 'wp3-stage2' }, { name: 'wp3-stage3' }, { name: 'wp3-stage4' },
   { name: 'wp3-stage5b' },
   { name: 'stage5b-import-check', needs: ['live'] },
-  { name: 'design-system' },
+  { name: 'design-system', webkitEnv: { WIDTHS: '393' } },
   { name: 'exercise-search' },
   { name: 'muscle-card' },
   { name: 'onboarding-7e', needs: ['preview'] },
@@ -89,7 +89,10 @@ const SUITES = [
   { name: 'gym-muscles', alone: true },
   { name: 'muscle-sheet', alone: true },
   { name: 'farbregeln', alone: true },
-  { name: 'body-reach', alone: true },
+  // 1340 taps a width at 12px, each opening and closing a sheet since 7C:
+  // about half an hour a width, two hours in all. Its own limit, not a
+  // coarser grid.
+  { name: 'body-reach', alone: true, timeout: 3 * 60 * 60 * 1000 },
   { name: 'body', alone: true, needs: ['dev'] },
 ];
 
@@ -104,7 +107,7 @@ const children = new Set();
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 const seconds = (ms) => `${(ms / 1000).toFixed(0)} s`;
 
-function run(command, commandArgs, { cwd = ROOT, env = {}, log } = {}) {
+function run(command, commandArgs, { cwd = ROOT, env = {}, log, timeout = SUITE_TIMEOUT } = {}) {
   return new Promise((done) => {
     const started = Date.now();
     const child = spawn(command, commandArgs, { cwd, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -114,7 +117,7 @@ function run(command, commandArgs, { cwd = ROOT, env = {}, log } = {}) {
     const take = (chunk) => { text += chunk; out?.write(chunk); };
     child.stdout.on('data', take);
     child.stderr.on('data', take);
-    const timer = setTimeout(() => { take(`\n[run-all] timed out after ${seconds(SUITE_TIMEOUT)}\n`); child.kill('SIGKILL'); }, SUITE_TIMEOUT);
+    const timer = setTimeout(() => { take(`\n[run-all] timed out after ${seconds(timeout)}\n`); child.kill('SIGKILL'); }, timeout);
     child.on('close', (code, signal) => {
       clearTimeout(timer);
       children.delete(child);
@@ -235,9 +238,10 @@ async function runSuite(suite) {
     OUT: out, SHOTS: out, BODY_SHOTS: out, RELEASE_TMP: join(out, 'tmp'),
     URL_APP: ADDRESS.app, URL_PREVIEW: ADDRESS.preview, LIVE_URL: ADDRESS.live, BODY_URL: `${ADDRESS.dev}#/dev/body`,
     BROWSER,
+    ...(BROWSER === 'webkit' ? (suite.webkitEnv ?? {}) : {}),
   };
   console.log(`[run-all] ${suite.name} …`);
-  const result = await run('node', [join('scripts', 'verify', `${suite.name}.mjs`)], { env, log: join(RUN, `${suite.name}.log`) });
+  const result = await run('node', [join('scripts', 'verify', `${suite.name}.mjs`)], { env, log: join(RUN, `${suite.name}.log`), ...(suite.timeout ? { timeout: suite.timeout } : {}) });
   const read = readResult(result.text);
   const known = KNOWN_RED[suite.name] ?? [];
   const unknown = read.failed.filter((name) => !known.some((entry) => name.includes(entry.check)));

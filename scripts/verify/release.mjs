@@ -1,6 +1,5 @@
-import { chromium } from 'playwright-core';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTargets } from './lib.mjs';
+import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, launch } from './lib.mjs';
 
 /**
  * The V1 release smoke test, against the **production build**.
@@ -11,9 +10,8 @@ import { CHROMIUM, URL_APP, check, summary, phone, onboard, clipped, smallTarget
  * console errors anywhere along the way. A dev server proves none of that.
  */
 
-const browser = await chromium.launch({
-  executablePath: CHROMIUM,
-});
+// Chromium, or WebKit on GitHub (block 9, step 3).
+const browser = await launch();
 
 const TMP = process.env.RELEASE_TMP ?? '/tmp';
 

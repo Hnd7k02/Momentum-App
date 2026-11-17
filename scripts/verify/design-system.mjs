@@ -39,9 +39,8 @@
  * JPEG at twice the CSS size: 150 lossless phone screenshots of glass and
  * gradients would weigh about 100 MB in the repository.
  */
-import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { CHROMIUM, URL_APP, check, summary, phone, chooseQuestions, passOpening, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise } from './lib.mjs';
+import { URL_APP, check, summary, phone, chooseQuestions, passOpening, seed, seedTraining, seedMuscles, openMuscles, clipped, textContrast, openGroupSheet, closeGroupSheet, sheetExercises, openSheetExercise, closeExercise, launch } from './lib.mjs';
 
 const OUT = process.env.OUT ?? 'docs/design/wp3/stage6b';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
@@ -65,7 +64,8 @@ function berlinNoon(day) {
   throw new Error(`no Berlin noon for ${day}`);
 }
 
-const browser = await chromium.launch({ executablePath: CHROMIUM });
+// Chromium, or WebKit on GitHub (block 9, step 3).
+const browser = await launch();
 const short = (value) => JSON.stringify(value)?.slice(0, 160);
 const wants = (group) => ONLY.length === 0 || ONLY.includes(group);
 

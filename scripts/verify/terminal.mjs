@@ -1,5 +1,4 @@
-import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, phone, onboard, seed, seedTraining } from './lib.mjs';
+import { URL_APP, check, summary, phone, onboard, seed, seedTraining, launch } from './lib.mjs';
 
 /**
  * The domain terminal, Stage A — two areas since WP3 Stage 4: Mind | Gym.
@@ -11,9 +10,8 @@ import { CHROMIUM, URL_APP, check, summary, phone, onboard, seed, seedTraining }
  * left by an older build (#/areas/food) landing on Mind, corrected.
  */
 
-const browser = await chromium.launch({
-  executablePath: CHROMIUM,
-});
+// Chromium, or WebKit on GitHub (block 9, step 3).
+const browser = await launch();
 
 const ctx = await browser.newContext(phone);
 const page = await ctx.newPage();

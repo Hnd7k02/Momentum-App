@@ -1,8 +1,8 @@
-import { chromium } from 'playwright-core';
 import { mkdirSync } from 'node:fs';
 import {
-  CHROMIUM, URL_APP, check, summary, onboard, openGymHub, openMuscles, seed, seedSheetProfile, setLanguage,
+  URL_APP, check, summary, onboard, openGymHub, openMuscles, seed, seedSheetProfile, setLanguage,
   openGroup, openRow, openGroupSheet, closeGroupSheet, sheetGone, bodyAtRest, sheetExercises, openSheetExercise, closeExercise,
+  launch, WEBKIT,
 } from './lib.mjs';
 
 /**
@@ -38,7 +38,8 @@ const NBSP = ' ';
 const MINUS = '−';
 const short = (value, n = 260) => JSON.stringify(value)?.slice(0, n);
 
-const browser = await chromium.launch({ executablePath: CHROMIUM });
+// Chromium, or WebKit on GitHub (block 9, step 3).
+const browser = await launch();
 
 /**
  * Counts, for every frame the body draws while a sheet is in the document,
@@ -282,7 +283,9 @@ async function drag(page, client, from, to, { ms = 320, hold = 120 } = {}) {
 }
 
 /* ── 2. Every way back; the exercise on top ────────────────────────────── */
-{
+// Its finger is the Chromium protocol's (a CDP session): Chromium only.
+if (WEBKIT) console.log('NOTE  WebKit: part 2, every way back, is left out — its drags need the Chromium protocol');
+if (!WEBKIT) {
   const { ctx, page, errors } = await open(393);
   const client = await ctx.newCDPSession(page);
   const start = await place(page);
@@ -374,7 +377,9 @@ async function drag(page, client, from, to, { ms = 320, hold = 120 } = {}) {
 }
 
 /* ── 3. Two heights and a finger ───────────────────────────────────────── */
-for (const width of [393, 320]) {
+// The same finger: Chromium only.
+if (WEBKIT) console.log('NOTE  WebKit: part 3, two heights and a finger, is left out — its drags need the Chromium protocol');
+if (!WEBKIT) for (const width of [393, 320]) {
   const { ctx, page, errors } = await open(width);
   const client = await ctx.newCDPSession(page);
   const screen = HEIGHT[width];

@@ -4,6 +4,25 @@ export const URL_APP = process.env.URL_APP ?? 'http://127.0.0.1:4173/Momentum-Ap
 // image's link to its current build; CHROMIUM_PATH=<binary> points every suite
 // and tool at another one. Never `npx playwright install`.
 export const CHROMIUM = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium';
+
+/*
+ * The browser a suite launches (block 9, step 3). `BROWSER=webkit` launches
+ * WebKit — on GitHub, where the workflow installs it at the version of
+ * `playwright-core`; a cloud session has Chromium only and never installs a
+ * browser. `WEBKIT_PATH` names another WebKit binary. Only the suites in
+ * `WEBKIT_SUITES` launch through `launch()`; the others are bound to
+ * Chromium and say why in `scripts/verify/README.md`.
+ *
+ * WebKit under Linux is an early warning, not Safari on an iPhone.
+ */
+export const BROWSER = process.env.BROWSER ?? 'chromium';
+export const WEBKIT = BROWSER === 'webkit';
+export const WEBKIT_SUITES = ['release', 'wp3-sheets', 'terminal', 'design-system', 'muscle-sheet'];
+export async function launch(options = {}) {
+  const { chromium, webkit } = await import('playwright-core');
+  if (WEBKIT) return webkit.launch({ ...(process.env.WEBKIT_PATH ? { executablePath: process.env.WEBKIT_PATH } : {}), ...options });
+  return chromium.launch({ executablePath: CHROMIUM, ...options });
+}
 export const results = [];
 export const check = (n, p, d = '') => {
   results.push({ n, p, d });
