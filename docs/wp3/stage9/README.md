@@ -46,9 +46,10 @@ tests (90 s); the three builds green.
 | muscle-sheet (alone) | 265/265 | 382 s | |
 | farbregeln (alone) | 334/334 | 587 s | |
 | body (alone, dev server) | 97/97 | 577 s | |
-| body-reach (alone) | *(see below)* | | cut off by the runner's first time limit of 30 minutes; it needs about two hours |
+| body-reach (alone) | 12/12 | 3473 s | first cut off by the runner's time limit of 30 minutes, then run alone with its own limit of three hours |
 
-40 suites; 5629 of 5636 checks before `body-reach`.
+40 suites, 5641 of 5648 checks: the known red offline check and the six
+of `wp2-2-shots.mjs`, which lay in the harness.
 
 ## Step 1 — one command
 
