@@ -29,9 +29,11 @@ on:
 permissions:
   contents: read
 
+# A run takes hours: a push lets the run under way finish, and the newest
+# push waits behind it (an older waiting one is dropped).
 concurrency:
   group: verify-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   chromium:
