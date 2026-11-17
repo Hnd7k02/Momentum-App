@@ -607,6 +607,11 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+  /* The scrim dims and no longer blurs what lies under it (block 9). */
+  .sheet-scrim {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /* The dialog takes focus only when it has no field to offer (WP3, B1); the

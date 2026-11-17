@@ -31,6 +31,16 @@
   padding-right: var(--safe-right);
 }
 
+/* Solid for a person who asked for less transparency, as a card and a sheet
+   are (D146) — found in block 9: the bar kept its blur. */
+@media (prefers-reduced-transparency: reduce) {
+  .tab-bar {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 .tab-bar__tab {
   flex: 1;
   min-height: var(--tab-bar-height);

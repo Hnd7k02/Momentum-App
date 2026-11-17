@@ -159,6 +159,15 @@
   border-top: 1px solid var(--glass-border);
 }
 
+/* Solid where less transparency was asked for, like the tab bar (block 9). */
+@media (prefers-reduced-transparency: reduce) {
+  .gym-session__bar {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 /* Inside the workout the bar holds the safe area, so the scroll needs none. */
 .gym-session__bar ~ .gym-session__scroll,
 .gym-session__scroll:has(+ .gym-session__bar) {
