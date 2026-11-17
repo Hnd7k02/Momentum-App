@@ -656,6 +656,11 @@
   gap: 4px;
 }
 
+.onboarding-worlds__goalName {
+  font-size: var(--type-headline);
+  font-weight: var(--weight-semibold);
+}
+
 /* The body's still: small and still. */
 .onboarding-worlds__body {
   flex-shrink: 0;

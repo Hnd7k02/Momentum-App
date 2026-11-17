@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
-import { GYM, RANKS, RUNNING } from '../../core/config/constants';
+import { GYM, RANKS } from '../../core/config/constants';
 import { Button, Figure, SelectionMark } from '../../components';
 import {
   ChevronLeftIcon,
@@ -217,8 +217,10 @@ export function OnboardingFlow({
             <span className="onboarding-card__title">{t(DOMAIN_NAME_KEYS.gym)}</span>
             <span className="onboarding-card__meta">{t('sports.thisWeek')}</span>
           </div>
-          {/* Nothing is done yet, and the targets are the ones the setup
-              step opens with: no example stands here. */}
+          {/* Nothing is done yet, and a number stands only where the flow
+              holds one: Gym opens on its default target, Laufen on none
+              (the setup step leaves it unchosen), so Laufen says that it
+              can have one rather than borrowing an example (contract §16 d). */}
           <div className="onboarding-worlds__goal">
             <p className="world-tile__figure">
               <Figure
@@ -229,13 +231,19 @@ export function OnboardingFlow({
             <Segments done={0} of={gymTarget ?? GYM.DEFAULT_TARGET_PER_WEEK} />
           </div>
           <div className="onboarding-worlds__goal">
-            <p className="world-tile__figure">
-              <Figure
-                text={t('running.attendance.value', { sessions: 0, target: runningTarget ?? RUNNING.DEFAULT_TARGET_PER_WEEK })}
-                figure={0}
-              />
-            </p>
-            <Segments done={0} of={runningTarget ?? RUNNING.DEFAULT_TARGET_PER_WEEK} />
+            {runningTarget === null ? (
+              <>
+                <p className="onboarding-worlds__goalName">{t('onboarding.worlds.runs')}</p>
+                <p className="onboarding-card__meta">{t('onboarding.worlds.runsOptional')}</p>
+              </>
+            ) : (
+              <>
+                <p className="world-tile__figure">
+                  <Figure text={t('running.attendance.value', { sessions: 0, target: runningTarget })} figure={0} />
+                </p>
+                <Segments done={0} of={runningTarget} />
+              </>
+            )}
           </div>
         </div>
         {/* The body's still, as the Gym hub shows it: small, and it does
@@ -481,7 +489,10 @@ export function OnboardingFlow({
 
         {/* What was chosen, and nothing else: no example stands here. */}
         <div className="onboarding__tiles summary__list">
-          {chosen.has('mental') ? (
+          {/* Mind is switched on by its questions: chosen without one, it
+              stays off (`applyOnboarding`), and the summary does not say
+              otherwise. */}
+          {chosen.has('mental') && questionCount > 0 ? (
             <WorldTile world="mind" name={t(DOMAIN_NAME_KEYS.mental)}>
               <p className="world-tile__figure summary__item">
                 {questionCount === 1 ? (

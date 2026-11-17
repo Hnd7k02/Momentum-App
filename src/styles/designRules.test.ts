@@ -185,6 +185,36 @@ describe('a font size is a token, and none is under 11px (contract §3, §14)', 
   });
 });
 
+describe('the onboarding keeps its exceptions to itself (contract §16, D190)', () => {
+  const ONBOARDING = (path: string) => relative(path).startsWith('features/onboarding/');
+
+  it('only the onboarding reads its typeface, its hero figure and its line', () => {
+    const own = /--(?:font-onboarding|type-figure-hero|onboarding-line[a-z-]*)\b/;
+    const readers = scan(ALL.filter((path) => path !== TOKENS && !ONBOARDING(path)), own);
+    expect(describeHits(readers)).toEqual([]);
+  });
+
+  it('only the onboarding sets DM Sans, and it ships the face with its licence', () => {
+    // The credits name the face in words (`i18n`); no stylesheet outside the
+    // flow sets it, and no stylesheet but the shell's and the flow's sets a
+    // family of its own.
+    const others = CSS.filter((path) => path !== TOKENS && !ONBOARDING(path));
+    expect(describeHits(scan(others, /DM Sans/))).toEqual([]);
+    const families = scan(others.filter((path) => relative(path) !== 'styles/global.css'), /font-family:(?!\s*inherit\s*;)[^;]+;/);
+    expect(describeHits(families)).toEqual([]);
+    const css = readFileSync(join(SRC, 'features/onboarding/onboarding.css'), 'utf8');
+    // One face, from the app's own files: no URL with a host.
+    expect(css.match(/@font-face/g)).toHaveLength(1);
+    expect(css).not.toMatch(/url\(\s*['"]?(?:https?:)?\/\//);
+    expect(readFileSync(join(SRC, 'features/onboarding/fonts/OFL.txt'), 'utf8')).toMatch(/SIL OPEN FONT LICENSE Version 1\.1/);
+  });
+
+  it('the app keeps the system font', () => {
+    const global = code(readFileSync(join(SRC, 'styles', 'global.css'), 'utf8'));
+    expect(global).toMatch(/font-family:\s*system-ui/);
+  });
+});
+
 describe('layers and motion are tokens (contract §10)', () => {
   it('every z-index reads a --layer-* token', () => {
     expect(describeHits(scan(CSS.filter((path) => path !== TOKENS), /z-index:(?!\s*var\(--layer-[a-z-]+\)\s*;)[^;]+;/))).toEqual([]);

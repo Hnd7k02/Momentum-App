@@ -307,6 +307,8 @@ export const de = {
   'onboarding.hero.week': 'Woche',
   'onboarding.worlds.scale': 'Skala von 1 bis 10, noch nicht beantwortet',
   'onboarding.worlds.note': 'Beides zählt für denselben Rang.',
+  'onboarding.worlds.runs': 'Läufe',
+  'onboarding.worlds.runsOptional': 'Ein eigenes Wochenziel, wenn du willst.',
   'onboarding.rank.start': 'Hier startest du',
   'onboarding.rank.next': 'Nächster Rang',
   'onboarding.rank.more': '{count} weitere Ränge bis {rank}',

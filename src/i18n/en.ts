@@ -299,6 +299,8 @@ export const en: Translations = {
   'onboarding.hero.week': 'Week',
   'onboarding.worlds.scale': 'Scale from 1 to 10, not answered yet',
   'onboarding.worlds.note': 'Both count towards the same rank.',
+  'onboarding.worlds.runs': 'Runs',
+  'onboarding.worlds.runsOptional': 'A weekly target of their own, if you want one.',
   'onboarding.rank.start': 'This is where you start',
   'onboarding.rank.next': 'Next rank',
   'onboarding.rank.more': '{count} more ranks up to {rank}',
