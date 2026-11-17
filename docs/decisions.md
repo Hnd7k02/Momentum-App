@@ -6562,3 +6562,72 @@ into `claude/hopeful-carson-4utktp` with a merge commit; the conflicts
 were the two documents both had appended to — `docs/decisions.md` (the
 D188 addendum and D189 before D190) and `HANDOVER.md`. **This is D191**,
 the next free number after D190.
+
+## D192 — STOP 7E-b: accepted; an opening page before the first slide, the areas open empty, and block 7E merged into claude/momentum-wp3
+
+**Decision (owner, 2026-11-17).** His words: "STOP 7E-b: abgenommen, mit
+zwei kleinen Anpassungen: 1. Neue erste Seite vor Slide 1: sehr leer, in
+der Mitte nur «Let's get it started», darunter der gewohnte Knopf zum
+Weitergehen. Sie zählt in der Fortschrittsanzeige nicht als Slide. Danach
+geht es weiter wie jetzt. 2. «Womit startest du?»: Standardmässig ist
+nichts ausgewählt. «Weiter» bleibt gesperrt, bis eine Welt gewählt ist.
+Dafür kein eigener STOP mehr: Tests, neue Vorschau, dann
+claude/hopeful-carson-4utktp in claude/momentum-wp3 zusammenführen und
+pushen. Die zwei Anpassungen prüfe ich in der Runde von Block 9 mit." And
+his measurements from the iPhone, for `HANDOVER.md` and block 9 (below).
+
+**Block 7E is accepted** with both adjustments, which have no STOP of
+their own: the owner checks them in the round of block 9.
+
+### The two adjustments, as built
+
+- **The opening page.** Before the first slide stands a page with one line
+  in its middle, «Let’s get it started» — the owner's words, the same in
+  both languages, with the typographic apostrophe of «Los geht’s» — and
+  «Weiter» beneath it, where the button stands on every step: "der
+  gewohnte Knopf zum Weitergehen", read as the button that goes on, not as
+  the first slide's «Los geht’s», so that the first slide stays as it was.
+  The page is not a step: no marks, no brand, no way back; the first slide
+  is still step one of the marks, and has no way back to the page.
+  `data-step="opening"`. A rehearsal in the preview begins on it too.
+- **The areas open empty.** «Womit startest du?» has nothing chosen;
+  «Weiter» waits, and the line beneath says "Wähle mindestens einen
+  Bereich." — the words it always had when nothing was chosen — until a
+  world is. Until then the marks count the five steps every path has.
+  Choosing Mind still opens its question step with the three starter
+  questions (D191).
+
+### Tests
+
+`OnboardingFlow.test.tsx` (27 tests): the opening page — one line, one
+button, no marks, no way back, the same line in English — the first slide
+still step one of five, the areas empty with «Weiter» held and its line,
+and a world chosen and taken off again; the earlier tests walk the same
+paths as before with Mind chosen by hand. `onboarding-7e.mjs` checks the
+opening page and the empty areas at four widths and begins the rehearsal
+on the opening page. **Restated, nothing removed or weakened:** every walk
+of the new build passes the opening page (`passOpening` in `lib.mjs`) and
+chooses Mind where it used to be chosen for it (`onboard()` with
+`wellbeing`, `phase2.mjs`, `design-system.mjs`, `wp3-stage4.mjs`,
+`stage7e-shots.mjs`); `release.mjs` finds the onboarding by its element
+where it looked for «Los geht’s» on the first screen; `phase2.mjs` checks
+that nothing is chosen where it used to take Mind off.
+
+### The owner's measurements (17 November 2026, the second opening)
+
+From the measuring display on his iPhone, build `index-B1RXpspr` (the
+preview `8a5df95`): to the first picture 161 ms — code 2 ms and model
+124 ms, both already loaded, the first picture 35 ms; 12 draw calls,
+50,488 triangles, one texture of 768 × 1024, pixel ratio 2 of 3, drawing
+buffer 786 × 872, "Apple GPU"; iPhone 15 Pro, iOS 26.3.1 (the browser
+says 18.7), the app from the home screen, screen 393 × 852, visible
+393 × 793, the body's stage 393 × 436 (55 %), about 63 frames a second
+observed. Recorded in `HANDOVER.md` beside those of block 7B, as block 9's
+baseline from the device.
+
+### The merge
+
+`claude/hopeful-carson-4utktp` is merged into `claude/momentum-wp3` with a
+merge commit and pushed, so block 9 checks one state (D189). `claude/
+momentum-wp3` had not moved since `3e153fa`, which the block's branch
+already holds.

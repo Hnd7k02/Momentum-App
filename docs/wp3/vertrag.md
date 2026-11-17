@@ -335,7 +335,7 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 
 ## §16 Onboarding-Ausnahmen
 
-Festgelegt am STOP 7E-a (16.11.2026, D190), angepasst am STOP 7E-a2 (17.11.2026, D191). **Dieser Abschnitt gilt nur im Onboarding** – in den Schritten, die eine neue Installation vor dem ersten Screen der App zeigt (`src/features/onboarding/`). Für jeden Screen der App gelten §1 bis §15 unverändert; nichts aus diesem Abschnitt darf dort stehen.
+Festgelegt am STOP 7E-a (16.11.2026, D190), angepasst am STOP 7E-a2 und am STOP 7E-b (17.11.2026, D191, D192). **Dieser Abschnitt gilt nur im Onboarding** – in den Schritten, die eine neue Installation vor dem ersten Screen der App zeigt (`src/features/onboarding/`). Für jeden Screen der App gelten §1 bis §15 unverändert; nichts aus diesem Abschnitt darf dort stehen.
 
 Massgebend für den Look ist der Entwurf «C1 · Momentum, referenznah» (Richtung C am STOP 7E-a). Er zeigt den Look der ersten Slide, nicht den Inhalt der übrigen Schritte.
 
@@ -356,6 +356,10 @@ Massgebend für den Look ist der Entwurf «C1 · Momentum, referenznah» (Richtu
 **Auswahl.** Eine gewählte Kachel oder Zeile trägt ein gefülltes Häkchen im Akzent (`SelectionMark`), nie einen dicken Rahmen. Die sieben Werte eines Wochenziels stehen als eine Segmentzeile 1–7 statt als sieben Kreise; die Trefferfläche jeder Zelle bleibt 44 px hoch und ihr Anteil der Zeile breit (§12, D163).
 
 **Kurze Bildschirme.** Die drei Slides rücken unter 720 px Höhe enger zusammen, und das Diagramm im Hero gibt die Höhe ab, die der Slide fehlt (bis 64 px), bevor sie scrollt. Wie viel fehlt, wird gemessen und nicht angenommen: Wie viele Zeilen ein Satz braucht, entscheidet die Systemschrift, und sie ist von Telefon zu Telefon eine andere. Ein Schritt, der dann noch nicht passt, scrollt; die Hauptschaltfläche bleibt stehen.
+
+**Die Auftaktseite** (D192). Vor der ersten Slide steht eine sehr leere Seite: in der Mitte nur «Let’s get it started» in der Grösse eines Titels, darunter «Weiter» an der Stelle der Hauptschaltfläche. Sie ist kein Schritt: keine Schrittmarken, kein Logo, kein Weg zurück; die erste Slide bleibt Schritt eins.
+
+**Bereiche** (D192). «Womit startest du?» öffnet ohne Auswahl; «Weiter» wartet, und darunter steht «Wähle mindestens einen Bereich.», bis eine Welt gewählt ist.
 
 **Mind-Fragen** (D191). Der Schritt öffnet mit drei Startfragen, je einer pro Kategorie. Solange keine Frage gewählt ist, wartet «Weiter» und darunter steht «Wähl mindestens eine Frage oder nimm Mind ab.» – als Wort, nicht nur als gesperrte Schaltfläche.
 

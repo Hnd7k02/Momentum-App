@@ -384,12 +384,14 @@ Never conflate them.
   in the flow follows the contract, and nothing of the four reaches a
   screen of the app: `designRules.test.ts` fails if a file outside
   `features/onboarding/` reads those tokens. A step never shows a number
-  the flow does not hold. **Mind opens with three starter questions**, one
-  per category (`STARTER_QUESTIONS`), and «Weiter» waits while none is
-  chosen. **Only a preview build replays it** (`app/preview.ts`: a
-  database of its own): Einstellungen → «Einführung ansehen» walks the
-  flow as a rehearsal that hands nothing to storage — never in the live
-  app.
+  the flow does not hold. **It begins on an opening page** — «Let’s get it
+  started» and «Weiter», no step and no marks (D192) — and **the areas open
+  with nothing chosen**, «Weiter» waiting for a world. **Mind opens with
+  three starter questions**, one per category (`STARTER_QUESTIONS`), and
+  «Weiter» waits while none is chosen. **Only a preview build replays
+  it** (`app/preview.ts`: a database of its own): Einstellungen →
+  «Einführung ansehen» walks the flow as a rehearsal that hands nothing to
+  storage — never in the live app.
 - Design tokens only (`src/styles/tokens.css`): no colour, font size, layer
   or duration is written anywhere else, and `designRules.test.ts` walks
   `src/` for one. The two exceptions are the rank badge, a fixed graphic

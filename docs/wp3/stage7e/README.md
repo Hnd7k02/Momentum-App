@@ -36,6 +36,22 @@ D189) was merged into the branch first.
 the pictures of `docs/design/wp3/stage7e/` show it in that face. Those of
 STOP 7E-b are in `docs/design/wp3/stage7e-b/`.
 
+## STOP 7E-b — accepted (D192)
+
+Accepted on 17 November 2026, with two adjustments that have no STOP of
+their own — the owner checks them in the round of block 9:
+
+- **An opening page** before the first slide: very empty, «Let’s get it
+  started» in its middle and «Weiter» beneath. It is no step: no marks, no
+  brand, no way back; the first slide is still step one.
+- **The areas open with nothing chosen**; «Weiter» waits, with «Wähle
+  mindestens einen Bereich.», until a world is chosen.
+
+Then the tests, a new preview, and the branch merged into
+`claude/momentum-wp3` and pushed, so block 9 checks one state. Pictures:
+`docs/design/wp3/stage7e-b/393-0-auftakt.png` and
+`393-4a-bereiche-leer.png` beside the others of STOP 7E-b.
+
 ## STOP 7E-b — what is built after the go
 
 - **The answers**, as above (D191).

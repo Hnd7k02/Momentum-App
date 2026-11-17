@@ -35,7 +35,8 @@ Die wichtigste Eigenschaft dieses Blocks: **Er fügt nichts hinzu und ändert ke
 
 - Die Blöcke «Farbregeln», 5b, «Kurve», 7A, 7B, 7C, 7D und 7E sind abgenommen; `HANDOVER.md` nennt jeden als abgenommen. (7D, der Übungskatalog mit Stichwortsuche, kam am 15.11.2026 dazu: D171. «Kurve», die Leistungskurve und die Farbstärke am Körper passend zur neuen Kennzahl, kam am selben Tag am STOP 5b dazu: D175.)
 - **Block 7E ist in `claude/momentum-wp3` zusammengeführt.** 7E lief in einer eigenen Session auf `claude/hopeful-carson-4utktp`, von `adf1ead` aus, und wird vor diesem Block in `claude/momentum-wp3` zusammengeführt (D189). Steht 7E noch nicht auf dem Branch, bau nichts: Sag Dario, dass die Zusammenführung fehlt, und halte an.
-- In `HANDOVER.md` stehen Darios Messwerte vom iPhone aus Block 7B.
+- In `HANDOVER.md` stehen Darios Messwerte vom iPhone aus Block 7B und vom 17.11.2026 (Block 7E, D192): bis zum ersten Bild 161 ms beim zweiten Öffnen, 12 Zeichenaufrufe, 50'488 Dreiecke, etwa 63 Bilder pro Sekunde.
+- In der Runde dieses Blocks prüft Dario zwei Anpassungen aus 7E mit, die keinen eigenen STOP hatten (D192): die Auftaktseite «Let’s get it started» vor der ersten Slide und «Womit startest du?» ohne Vorauswahl, «Weiter» gesperrt bis eine Welt gewählt ist. Nimm beide in die Prüfliste fürs iPhone auf.
 
 Fehlt ein Block, bau nichts. Sag Dario, welcher fehlt, und halte an. Fehlen nur die Messwerte, arbeite weiter und führ sie am Gate als offen.
 
