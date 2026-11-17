@@ -172,9 +172,10 @@ describe('a font size is a token, and none is under 11px (contract §3, §14)', 
 
   it('no size on the scale is under 11px', () => {
     const sizes = [...TOKENS_CSS.matchAll(/(--type-[a-z-]+):\s*([\d.]+)px;/g)].map((match) => [match[1]!, Number(match[2])] as const);
-    // The scale and the three figure steps: ten tokens, all in pixels.
+    // The scale and the three figure steps, and the one step the onboarding
+    // adds for its hero figure (D190): eleven tokens, all in pixels.
     expect(sizes.map(([name]) => name).sort()).toEqual([
-      '--type-body', '--type-caption', '--type-figure-l', '--type-figure-m', '--type-figure-xl',
+      '--type-body', '--type-caption', '--type-figure-hero', '--type-figure-l', '--type-figure-m', '--type-figure-xl',
       '--type-footnote', '--type-headline', '--type-large-title', '--type-subhead', '--type-title',
     ]);
     for (const [name, size] of sizes) expect(size, name).toBeGreaterThanOrEqual(11);

@@ -1,9 +1,11 @@
 # Third-party notices
 
-Momentum ships one asset that is built from third-party data: the 3D body.
-Its source is in the public domain and asks for no credit; the app names it
-all the same, under Bereiche → Einstellungen, and this file ships with every
-build. A second section credits files that are kept in the repository but are
+Momentum ships two things that are not its own: the 3D body, which is built
+from third-party data, and the typeface of its onboarding. The body's source
+is in the public domain and asks for no credit; the app names it all the
+same, and the typeface's licence asks for its notice. Both are named under
+Bereiche → Einstellungen → Danksagungen, and this file ships with every
+build. A last section credits files that are kept in the repository but are
 not part of the app.
 
 ## 3D body model — `public/models/momentum-body.glb`
@@ -43,6 +45,21 @@ What Momentum made of them, by script and reproducibly (`tools/body/`):
 
 `asset.copyright` inside the GLB names MakeHuman, Anny and CC0, and
 `npm run validate:body` checks it on every build.
+
+## Typeface of the onboarding — `src/features/onboarding/fonts/dm-sans-latin-wght-normal.woff2`
+
+**DM Sans**, Copyright 2014 The DM Sans Project Authors
+(https://github.com/googlefonts/dm-fonts), licensed under the **SIL Open
+Font License, Version 1.1** (https://openfontlicense.org). The licence text
+lies beside the font file, in `src/features/onboarding/fonts/OFL.txt`, as it
+came with the font.
+
+The file is the Latin subset of the variable font with its weight axis, as
+the package `@fontsource-variable/dm-sans` 5.3.0 distributes it (36,932
+bytes, sha256 `9fea608a…7543`); it was taken from that package and is not a
+dependency of the build. The app uses the weights 400 to 700 and only in
+the onboarding (D190). It is served with the app and never fetched from
+another host. The font is not sold by itself, and its name is unchanged.
 
 ## Kept in the repository, not shipped
 
