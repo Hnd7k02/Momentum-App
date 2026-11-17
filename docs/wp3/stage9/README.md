@@ -365,3 +365,14 @@ five under `wp3-update/`. Under `src/` the block added tests
 (`provisionalRating`, `keptBoundaries`, `updateRehearsal`, and cases in
 `history`, `heatmap`, `questionDetail`) and changed code for D194 and the
 two fixes of D195 only.
+
+**After the final run, from WebKit on GitHub:** a notice's button stood at
+36px in the middle of the journey. The buttons of the update notice and of
+the notice that a refresh did not get through were 36 and 34px — both
+44px now (D195, `noticeTargets.test.ts`). `release.mjs` now also holds, at
+every width, that no notice stands on a first visit and no page error
+occurs, and names the notice if one does (88 checks where it had 83). Run
+again here after the fix: `tsc -b` exit 0; `npm run test` exit 0, 145
+files, 2511 tests; `release` 88/88, `design-system`, `geometry`,
+`update-in-place`, `wp3-reload`, `phase2-a11y` green. The preview carries
+it: `Momentum-preview` `0d741de`, built from `0557dd8`.

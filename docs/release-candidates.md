@@ -6,7 +6,7 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 | | Application commit | Status |
 |---|---|---|
-| **WP3 RC** | app source **`017cc56`**, on `claude/momentum-wp3` | **At the gate** (STOP 9) — see below |
+| **WP3 RC** | app source **`1d28b5b`**, on `claude/momentum-wp3` | **At the gate** (STOP 9) — see below |
 | **muscle-map-v1** | app source **`5e554aa`**; the tag was never set in the repository (found in block 9) | **Released** — see below |
 | V1 | the release pass after RC2 | Released |
 | RC2 | `c3e8b7f` | Superseded by V1 |
@@ -14,13 +14,13 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 ---
 
-## WP3 RC — app source `017cc56`
+## WP3 RC — app source `1d28b5b`
 
 WP3 — Mind and Gym — as a whole, on `claude/momentum-wp3`, after block 9
 (hardening and the release gate). The live app is still `e30becd` (WP2).
 Record: `docs/wp3/stage9/README.md`; decisions D127–D195. **Preview:**
-`Momentum-preview` `59aa850`, <https://hnd7k02.github.io/Momentum-preview/>
-— built from `b71cf9e`, no `sw.js`, the status bar `default`, its own
+`Momentum-preview` `0d741de`, <https://hnd7k02.github.io/Momentum-preview/>
+— built from `0557dd8`, no `sw.js`, the status bar `default`, its own
 database `momentum-preview`.
 
 ### What it contains
@@ -43,7 +43,7 @@ database `momentum-preview`.
 - **The onboarding** in direction C (D190–D193).
 - **Block 9** (D194, D195): a workout on an open day shows at once, as
   provisional; less transparency makes every glass solid; a kept era
-  boundary holds.
+  boundary holds; the buttons of the two notices are 44px targets.
 
 ### The check
 
