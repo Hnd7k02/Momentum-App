@@ -20,6 +20,42 @@ owner restated it at STOP 7E-a:
 - only after his go: the tests for every path, the preview, and **STOP
   7E-b** with at most eight check points.
 
+## STOP 7E-a2 — the answers (D191)
+
+Go, on 17 November 2026: **1 A** the body stays in the Gym card; **2 A**
+the rank stays focused; **3 A** Mind opens with three starter questions,
+one per category, and «Weiter» waits with «Wähl mindestens eine Frage
+oder nimm Mind ab.» while none is chosen; **4 No** — DM Sans does not go
+into the app, and at the owner's word it leaves the onboarding as well:
+the flow speaks in the system font, like everything after it, and an
+installation fetches 36,932 bytes less. The other exceptions stay in the
+onboarding only. The head of `claude/momentum-wp3` (STOP 7D accepted,
+D189) was merged into the branch first.
+
+**Sections below that speak of DM Sans** describe STOP 7E-a2 as it stood;
+the pictures of `docs/design/wp3/stage7e/` show it in that face. Those of
+STOP 7E-b are in `docs/design/wp3/stage7e-b/`.
+
+## STOP 7E-b — what is built after the go
+
+- **The answers**, as above (D191).
+- **The tests for every path**: `OnboardingFlow.test.tsx` (22 tests: every
+  way through the flow, what it hands on, and what each step shows) and
+  the browser suite `onboarding-7e.mjs` (four paths at 320, 360, 393 and
+  430 in the real build, each read back from storage; every step held to
+  the screen's width, 44px targets, at most one dark surface and a hero
+  with nothing to operate).
+- **The rehearsal in the preview**: Bereiche → Einstellungen →
+  «Einführung ansehen», only in a build with a database of its own. The
+  flow stands in for the app from its first slide; «Starten» at its end,
+  Back at any step, or a reload return to the app, and nothing is written
+  — `onboarding-7e.mjs` reads every store of the preview's database
+  before and after and finds them byte for byte the same.
+- **The pictures**: `docs/design/wp3/stage7e-b/` — every step at 393, the
+  first slide and the weekly targets at 320 and 430, the question step as
+  it opens and with no question chosen, and the preview's row
+  (`stage7e-shots.mjs` with `URL_PREVIEW`).
+
 ## STOP 7E-a2 — the pictures
 
 `docs/design/wp3/stage7e/`, made by `scripts/verify/stage7e-shots.mjs`
