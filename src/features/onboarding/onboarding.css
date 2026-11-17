@@ -1,29 +1,17 @@
 /*
- * The onboarding (block 7E, D190; contract «Onboarding-Ausnahmen»).
+ * The onboarding (block 7E, D190, D191; contract «Onboarding-Ausnahmen»).
  *
  * Its look is its own, and only its own: a flat ground without the washes,
  * white cards that are surfaces rather than glass (there is nothing behind
- * them to blur), DM Sans, and at most one dark surface a screen — Gym's
- * tile or card, or the rank's stage. Everything is still read from the
- * tokens; the few the flow adds are named for it in `tokens.css`.
+ * them to blur), and at most one dark surface a screen — Gym's tile or
+ * card, or the rank's stage. It speaks in the app's system font, so the
+ * first screens read like everything after them (D191). Everything is read
+ * from the tokens; the few the flow adds are named for it in `tokens.css`.
  */
 
-/* DM Sans, one file for the weights 400 to 700 (SIL Open Font License 1.1,
-   shipped with the build as `licenses/dm-sans-OFL.txt`). Served with the app,
-   never fetched from elsewhere. */
-@font-face {
-  font-family: 'DM Sans';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('./fonts/dm-sans-latin-wght-normal.woff2') format('woff2');
-}
-
-/* While the flow is mounted the document carries its mark, so a sheet it
-   opens — drawn into `<body>`, outside the flow — speaks in the same face,
-   and an overscroll shows the same flat ground. */
+/* While the flow is mounted the document carries its mark, so an
+   overscroll shows the same flat ground the flow paints. */
 [data-onboarding] body {
-  font-family: var(--font-onboarding);
   background-image: none;
 }
 
@@ -40,7 +28,6 @@
   overflow: hidden;
   /* Flat: the one ground colour, without the washes of `--ground`. */
   background: var(--surface-base);
-  font-family: var(--font-onboarding);
   /* The light world's card shadow, resolved here, so a dark surface on
      this ground can still cast it: inside its own world the token is the
      heavy shadow of a card on graphite. */
@@ -492,44 +479,20 @@
 
 /*
  * The plot. As wide as the card and, left alone, in the reference's
- * proportion. On a short screen it is the one thing in the slide that gives
- * up height, before the slide has to scroll: the step is a size container,
- * and the plot takes what the step's height leaves once everything else on
- * the slide has its own — never less than 64px, never more than its
- * proportion. `--hero-rest` is that everything else, measured
- * (`scripts/verify/stage7e-shots.mjs` prints it); a little too much only
- * makes the plot give way a little early, a little too little lets the
- * slide scroll by as much. Where the units are unknown the plot keeps its
- * proportion and the slide scrolls.
+ * proportion, 325 : 116. On a short screen it is the one thing in the slide
+ * that gives up height, before the slide has to scroll — down to 64px
+ * (`useFitPlot` in `OnboardingHero.tsx` takes from it what the slide
+ * lacks). Nothing here knows how many lines a sentence takes: the system
+ * font decides that, and it differs from phone to phone.
  */
-.onboarding__body--slide {
-  container-type: size;
-}
-
 .onboarding-hero__plot {
   position: relative;
-  aspect-ratio: 325 / 116;
+  height: var(
+    --plot-height,
+    calc((100vw - var(--gutter-left) - var(--gutter-right) - 2 * var(--card-pad)) * 116 / 325)
+  );
   min-height: 64px;
   margin-top: var(--space-3);
-  --hero-rest: 490px;
-}
-
-/* From 390px the sentence under the title stands in two lines, not three. */
-@media (min-width: 390px) {
-  .onboarding-hero__plot {
-    --hero-rest: 466px;
-  }
-}
-
-@supports (height: 1cqh) {
-  .onboarding-hero__plot {
-    aspect-ratio: auto;
-    height: clamp(
-      64px,
-      calc(100cqh - var(--hero-rest)),
-      calc((100cqw - 2 * var(--card-pad)) * 116 / 325)
-    );
-  }
 }
 
 /* The bars: the accent's tint, running out towards the foot. */
@@ -1055,16 +1018,6 @@
   .onboarding-hero__figure,
   .onboarding-hero__plot {
     margin-top: var(--space-2);
-  }
-
-  .onboarding-hero__plot {
-    --hero-rest: 450px;
-  }
-
-  @media (min-width: 390px) {
-    .onboarding-hero__plot {
-      --hero-rest: 426px;
-    }
   }
 
   .onboarding-worlds__question,

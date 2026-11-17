@@ -1,4 +1,4 @@
-import { useId, type CSSProperties, type ReactNode } from 'react';
+import { useId, useLayoutEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { useToday } from '../../app/useToday';
 import { Figure } from '../../components';
 import { GymIcon, MindIcon, TrendUpIcon } from '../../components/Icons';
@@ -107,12 +107,47 @@ export function Segments({
   );
 }
 
+/** The plot gives way down to this, and no further: below it the slide scrolls. */
+const PLOT_FLOOR = 64;
+
+/**
+ * On a short screen the plot gives up the height the slide lacks, before
+ * the slide scrolls (contract §16, «Kurze Bildschirme»). How much is
+ * lacking depends on how many lines each sentence takes, which the system
+ * font decides and which differs between phones — so it is measured, not
+ * assumed: the plot is laid out at its proportion, the slide's overflow is
+ * read, and the plot is lowered by that much, never under `PLOT_FLOOR`.
+ * Before the first paint, and again whenever the slide's box changes size.
+ * It writes nothing but the plot's height.
+ */
+function useFitPlot(plot: RefObject<HTMLDivElement>): void {
+  useLayoutEffect(() => {
+    const element = plot.current;
+    const slide = element?.closest<HTMLElement>('.onboarding__body');
+    if (!element || !slide) return undefined;
+    const fit = () => {
+      element.style.removeProperty('--plot-height');
+      const lacking = slide.scrollHeight - slide.clientHeight;
+      if (lacking <= 0) return;
+      const height = Math.max(PLOT_FLOOR, element.getBoundingClientRect().height - lacking);
+      element.style.setProperty('--plot-height', `${height}px`);
+    };
+    fit();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(fit);
+    observer.observe(slide);
+    return () => observer.disconnect();
+  }, [plot]);
+}
+
 export function OnboardingHero() {
   const t = useT();
   const { language } = useI18n();
   const today = useToday();
   const id = useId();
   const line = `${id}-line`;
+  const plot = useRef<HTMLDivElement>(null);
+  useFitPlot(plot);
 
   return (
     <div className="onboarding-hero" role="img" aria-label={t('onboarding.hero.label')}>
@@ -134,7 +169,7 @@ export function OnboardingHero() {
         </div>
         <p className="onboarding-hero__period">{t('onboarding.hero.period')}</p>
 
-        <div className="onboarding-hero__plot">
+        <div className="onboarding-hero__plot" ref={plot}>
           <span className="onboarding-hero__bars">
             {BAR_TOPS.map((top, index) => (
               <i key={index} style={{ '--bar': 1 - top / HEIGHT } as CSSProperties} />

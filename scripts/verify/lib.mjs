@@ -19,6 +19,24 @@ export const summary = () => {
 export const phone = { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, acceptDownloads: true };
 
 /**
+ * Sets the onboarding's question selection to exactly these (block 7E,
+ * D191). Mind opens with three starter questions chosen — one per
+ * category — so a click on one of them would take it off; each row is set
+ * by its own pressed state instead, and a walk that names two questions
+ * ends with those two, as it always did.
+ */
+export async function chooseQuestions(page, wanted) {
+  const rows = page.locator('.category-group .question-pick[aria-pressed]');
+  const count = await rows.count();
+  for (let index = 0; index < count; index += 1) {
+    const row = rows.nth(index);
+    const text = (await row.textContent()) ?? '';
+    const want = wanted.some((pattern) => pattern.test(text));
+    if (want !== ((await row.getAttribute('aria-pressed')) === 'true')) await row.click();
+  }
+}
+
+/**
  * Walks the onboarding: three concepts, the picker, then setup.
  *
  * Two worlds since WP3 Stage 4: Mind, and Gym with Laufen inside it. Food is
@@ -35,7 +53,7 @@ export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie
   if (gym || running) await page.getByRole('button', { name: /^Gym/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   if (wellbeing) {
-    for (const q of questions) await page.getByRole('button', { name: q }).first().click();
+    await chooseQuestions(page, questions);
     await page.getByRole('button', { name: 'Weiter' }).click();
   }
   if (gym || running) {

@@ -18,12 +18,6 @@ export const de = {
   'areas.general': 'Weiteres',
   'areas.credits': 'Danksagungen',
   'areas.credits.body': '3D-Körpermodell',
-  'areas.credits.font': 'Schrift DM Sans',
-  'areas.credits.fontSubtitle': 'SIL Open Font License 1.1',
-  'areas.credits.fontBody':
-    'Die ersten Schritte der App sind in der Schrift DM Sans gesetzt, Copyright 2014 The DM Sans Project Authors. Sie steht unter der SIL Open Font License 1.1.',
-  'areas.credits.fontNote': 'Die Schrift ist in der App enthalten. Es wird nichts aus dem Netz nachgeladen.',
-  'areas.credits.fontProject': 'DM Sans ansehen',
   'areas.credits.bodySubtitle': 'Aus MakeHuman, CC0 1.0',
   'areas.credits.modified':
     'Für Momentum geformt: in eine entspannte Haltung gebracht, mit Muskelzeichnung versehen '
@@ -88,7 +82,7 @@ export const de = {
   'onboarding.questions.body': 'Wähle drei bis fünf Fragen. Ändern kannst du sie jederzeit.',
   'onboarding.questions.custom': 'Eigene Frage',
   'onboarding.questions.selected': '{count} ausgewählt',
-  'onboarding.questions.recommendation': 'Drei bis fünf sind ein guter Anfang.',
+  'onboarding.questions.needOne': 'Wähl mindestens eine Frage oder nimm Mind ab.',
   'onboarding.sports.perWeek': '{count} pro Woche',
   'onboarding.summary.title': 'Alles bereit',
   'onboarding.summary.body': 'Du kannst jederzeit unter Bereiche nachjustieren.',

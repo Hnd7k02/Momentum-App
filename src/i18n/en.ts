@@ -17,12 +17,6 @@ export const en: Translations = {
   'areas.general': 'More',
   'areas.credits': 'Credits',
   'areas.credits.body': '3D body model',
-  'areas.credits.font': 'DM Sans typeface',
-  'areas.credits.fontSubtitle': 'SIL Open Font License 1.1',
-  'areas.credits.fontBody':
-    'The first steps of the app are set in the typeface DM Sans, Copyright 2014 The DM Sans Project Authors. It is licensed under the SIL Open Font License 1.1.',
-  'areas.credits.fontNote': 'The typeface is part of the app. Nothing is loaded from the network.',
-  'areas.credits.fontProject': 'View DM Sans',
   'areas.credits.bodySubtitle': 'From MakeHuman, CC0 1.0',
   'areas.credits.modified':
     'Shaped for Momentum: brought into a relaxed posture, given its muscle relief '
@@ -87,7 +81,7 @@ export const en: Translations = {
   'onboarding.questions.body': 'Pick three to five questions. You can change them at any time.',
   'onboarding.questions.custom': 'Your own question',
   'onboarding.questions.selected': '{count} selected',
-  'onboarding.questions.recommendation': 'Three to five is a good start.',
+  'onboarding.questions.needOne': 'Choose at least one question, or take Mind off.',
   'onboarding.sports.perWeek': '{count} per week',
   'onboarding.summary.title': 'You are set',
   'onboarding.summary.body': 'You can adjust all of this later under Areas.',

@@ -43,11 +43,13 @@ import './onboarding.css';
  * (D139), and nothing here can switch it on.
  *
  * **How it looks is the onboarding's own** (block 7E, D190; contract
- * «Onboarding-Ausnahmen»): a flat ground, white cards, DM Sans, and at most
+ * «Onboarding-Ausnahmen»): a flat ground, white cards, and at most
  * one dark surface a screen — always Gym or the rank. The first slide's
  * picture is the one place with example values and coloured data marks
  * (`OnboardingHero`). What the flow asks, in which order, and what it hands
- * to storage did not change with the look.
+ * to storage did not change with the look — but for one thing the owner
+ * decided at STOP 7E-a2 (D191): Mind opens with three questions chosen,
+ * and its «Weiter» waits while none is.
  */
 
 type Step = 'momentum' | 'worlds' | 'rank' | 'domains' | 'questions' | 'sport' | 'summary';
@@ -86,16 +88,25 @@ const RANK_NEXT = RANKS[1];
 const RANKS_BEYOND = RANKS.slice(2);
 const RANK_TOP = RANKS[RANKS.length - 1]!;
 
+/**
+ * The questions a new user starts with (the owner at STOP 7E-a2, D191):
+ * one from each category, so the day's value weighs the three alike — it
+ * is the mean within a category before the mean across them (D17). They
+ * are chosen, not fixed: any of them can be taken off, and «Weiter» waits
+ * until at least one question is chosen, or Mind is taken off.
+ */
+export const STARTER_QUESTIONS = ['routine', 'sleep', 'mood'] as const;
+
 /** The question the worlds slide shows: a real one, from the library. */
 const SAMPLE_QUESTION = 'mood';
 const SCALE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 /**
- * The onboarding's typeface reaches what it opens, too: a sheet is drawn
- * into `<body>`, outside the flow. The document carries the mark while the
- * flow is mounted, as it carries the world.
+ * The flat ground reaches what lies beyond the flow, too: an overscroll
+ * shows `<body>`. The document carries the mark while the flow is mounted,
+ * as it carries the world.
  */
-function useOnboardingFace(): void {
+function useOnboardingGround(): void {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-onboarding', '');
@@ -114,10 +125,10 @@ export function OnboardingFlow({
   const t = useT();
   const { language } = useI18n();
   const categories = useMemo(() => suggestionsByCategory(language), [language]);
-  useOnboardingFace();
+  useOnboardingGround();
 
   const [chosen, setChosen] = useState<Set<'mental' | 'sport'>>(new Set(['mental']));
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([...STARTER_QUESTIONS]);
   const [customQuestions, setCustomQuestions] = useState<QuestionDraft[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [gymTarget, setGymTarget] = useState<number | null>(GYM.DEFAULT_TARGET_PER_WEEK);
@@ -422,11 +433,11 @@ export function OnboardingFlow({
       <p className="onboarding__note" aria-live="polite">
         {chosenQuestions.length > 0
           ? t('onboarding.questions.selected', { count: chosenQuestions.length })
-          : t('onboarding.questions.recommendation')}
+          : t('onboarding.questions.needOne')}
       </p>
     );
     action = (
-      <Button variant="primary" block onClick={() => go(1)}>
+      <Button variant="primary" block disabled={chosenQuestions.length === 0} onClick={() => go(1)}>
         {t('common.continue')}
       </Button>
     );

@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, setLanguage } from './lib.mjs';
+import { CHROMIUM, URL_APP, chooseQuestions, setLanguage } from './lib.mjs';
 
 /**
  * Not a suite: the pictures of block 7E (`docs/design/wp3/stage7e/`).
@@ -80,9 +80,7 @@ for (const width of WIDTHS) {
   await page.getByRole('button', { name: /^Gym/ }).click();
   await shot('4-bereiche');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
-  for (const question of [/Wie gut hast du gesch|How well did you sleep/, /Wie war deine Stimmung|How was your mood/, /frischen Luft|get outside/]) {
-    await page.getByRole('button', { name: question }).first().click();
-  }
+  await chooseQuestions(page, [/Wie gut hast du gesch|How well did you sleep/, /Wie war deine Stimmung|How was your mood/, /frischen Luft|get outside/]);
   await shot('5-fragen');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
   await page

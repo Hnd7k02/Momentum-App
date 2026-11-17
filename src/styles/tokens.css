@@ -368,17 +368,15 @@
   /*
    * The onboarding's own (block 7E, D190; contract «Onboarding-Ausnahmen»).
    * Nothing outside `features/onboarding/` reads these, and the contract
-   * stays as it is for every screen of the app.
+   * stays as it is for every screen of the app. The flow speaks in the
+   * app's system font (D191).
    *
-   * - Its typeface, DM Sans (OFL), shipped with the app as one file; the
-   *   system font follows for a glyph it lacks and until it has loaded.
    * - The hero figure of the first slide: a figure step of its own, bold.
    * - The trend line of that hero: a gradient from this violet through the
    *   accent to this blue. The eight filled Mind segments beside it run
    *   along the same gradient. These two are the only colours the block
    *   adds; no other step of the flow carries a coloured data mark.
    */
-  --font-onboarding: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --type-figure-hero: 40px;
   --onboarding-line-start: #7c5cf0;
   --onboarding-line-end: #2f8fe8;

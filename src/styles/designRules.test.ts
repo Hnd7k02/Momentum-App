@@ -188,26 +188,27 @@ describe('a font size is a token, and none is under 11px (contract §3, §14)', 
 describe('the onboarding keeps its exceptions to itself (contract §16, D190)', () => {
   const ONBOARDING = (path: string) => relative(path).startsWith('features/onboarding/');
 
-  it('only the onboarding reads its typeface, its hero figure and its line', () => {
-    const own = /--(?:font-onboarding|type-figure-hero|onboarding-line[a-z-]*)\b/;
+  it('only the onboarding reads its hero figure and its line', () => {
+    const own = /--(?:type-figure-hero|onboarding-line[a-z-]*)\b/;
     const readers = scan(ALL.filter((path) => path !== TOKENS && !ONBOARDING(path)), own);
     expect(describeHits(readers)).toEqual([]);
   });
 
-  it('only the onboarding sets DM Sans, and it ships the face with its licence', () => {
-    // The credits name the face in words (`i18n`); no stylesheet outside the
-    // flow sets it, and no stylesheet but the shell's and the flow's sets a
-    // family of its own.
-    const others = CSS.filter((path) => path !== TOKENS && !ONBOARDING(path));
-    expect(describeHits(scan(others, /DM Sans/))).toEqual([]);
-    const families = scan(others.filter((path) => relative(path) !== 'styles/global.css'), /font-family:(?!\s*inherit\s*;)[^;]+;/);
+  it('the onboarding speaks in the system font, like the app (D191)', () => {
+    // DM Sans came and went in block 7E: the first screens are to read like
+    // everything after them. No stylesheet loads a face, none but the
+    // shell's sets a family, and no font file lies in the source.
+    const sheets = CSS.filter((path) => path !== TOKENS);
+    expect(describeHits(scan(sheets, /@font-face/))).toEqual([]);
+    const families = scan(sheets.filter((path) => relative(path) !== 'styles/global.css'), /font-family:(?!\s*inherit\s*;)[^;]+;/);
     expect(describeHits(families)).toEqual([]);
-    const css = readFileSync(join(SRC, 'features/onboarding/onboarding.css'), 'utf8');
-    // One face, from the app's own files: no URL with a host.
-    expect(css.match(/@font-face/g)).toHaveLength(1);
-    expect(css).not.toMatch(/url\(\s*['"]?(?:https?:)?\/\//);
-    // The licence goes out with every build, beside the face it covers.
-    expect(readFileSync(join(ROOT, 'public', 'licenses', 'dm-sans-OFL.txt'), 'utf8')).toMatch(/SIL OPEN FONT LICENSE Version 1\.1/);
+    const fonts = (dir: string): string[] =>
+      readdirSync(dir).flatMap((entry) => {
+        const path = join(dir, entry);
+        return statSync(path).isDirectory() ? fonts(path) : /\.(woff2?|ttf|otf)$/i.test(entry) ? [path] : [];
+      });
+    expect([...fonts(SRC), ...fonts(join(ROOT, 'public'))].map((path) => path.slice(ROOT.length))).toEqual([]);
+    expect(TOKENS_CSS).not.toMatch(/--font-/);
   });
 
   it('the app keeps the system font', () => {

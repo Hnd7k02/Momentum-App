@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP, check, summary, phone, onboard, storedDomains, storedQuestions, clipped, smallTargets, seed } from './lib.mjs';
+import { CHROMIUM, URL_APP, check, summary, phone, onboard, chooseQuestions, storedDomains, storedQuestions, clipped, smallTargets, seed } from './lib.mjs';
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 
@@ -54,8 +54,9 @@ async function fresh(opts = {}) {
     await page.getByRole('heading', { name: 'Alltag' }).isVisible() &&
     await page.getByRole('heading', { name: 'Eigene' }).isVisible());
 
-  await page.getByRole('button', { name: /Wie gut hast du gesch/ }).first().click();
-  await page.getByRole('button', { name: /Wie war deine Stimmung/ }).first().click();
+  // Mind opens with three starter questions chosen since block 7E (D191);
+  // the walk ends with the two it always chose.
+  await chooseQuestions(page, [/Wie gut hast du gesch/, /Wie war deine Stimmung/]);
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   check('the sport step offers two independent targets',
