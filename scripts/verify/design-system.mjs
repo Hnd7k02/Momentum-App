@@ -90,7 +90,7 @@ const tab = async (page, name) => {
  * the row wide, touching its neighbours — and the circle drawn inside it is
  * round and fits.
  */
-async function bubbles(page, W) {
+async function bubbles(page, W, { segments = false } = {}) {
   const rows = await page.evaluate(() => [...document.querySelectorAll('.bubble-row')].map((row) => {
     const round1 = (value) => Math.round(value * 10) / 10;
     const items = [...row.querySelectorAll('.bubble')].map((bubble) => {
@@ -112,8 +112,12 @@ async function bubbles(page, W) {
     };
   }));
   check(`${W}: the seven target bubbles stand in one row`, rows.length > 0 && rows.every((row) => row.count === 7 && row.lines === 1), short(rows));
-  check(`${W}: each bubble is a target 44px high and its share of the row wide, around a round circle`,
-    rows.length > 0 && rows.every((row) => row.round && row.fits && row.targetH >= 43.9 && row.targetW >= Math.min(44, row.pitch) - 0.1), short(rows));
+  // In the onboarding the seven are one segment row (block 7E, D190): the
+  // same targets, and inside each a pill instead of a circle.
+  check(segments
+    ? `${W}: each segment is a target 44px high and its share of the row wide, around a pill that fits`
+    : `${W}: each bubble is a target 44px high and its share of the row wide, around a round circle`,
+    rows.length > 0 && rows.every((row) => (segments || row.round) && row.fits && row.targetH >= 43.9 && row.targetW >= Math.min(44, row.pitch) - 0.1), short(rows));
   check(`${W}: neighbouring targets touch — no dead strip, no overlap`, rows.length > 0 && rows.every((row) => row.seam <= 0.1), short(rows));
 }
 
@@ -272,11 +276,13 @@ for (const width of WIDTHS) {
   await step('5-fragen');
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.waitForTimeout(400);
-  await page.locator('.card').nth(0).getByRole('button', { name: '3 pro Woche' }).click();
-  await page.locator('.card').nth(1).getByRole('button', { name: '2 pro Woche' }).click();
+  // The two targets stand in one card since block 7E: each is found by the
+  // name of its group.
+  await page.getByRole('group', { name: 'Gym-Sessions pro Woche' }).getByRole('button', { name: '3 pro Woche', exact: true }).click();
+  await page.getByRole('group', { name: 'Läufe pro Woche' }).getByRole('button', { name: '2 pro Woche', exact: true }).click();
   await page.waitForTimeout(300);
   await step('6-wochenziele');
-  if (wants('onboarding')) await bubbles(page, `${width} onboarding`);
+  if (wants('onboarding')) await bubbles(page, `${width} onboarding`, { segments: true });
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.waitForTimeout(400);
   await step('7-uebersicht');

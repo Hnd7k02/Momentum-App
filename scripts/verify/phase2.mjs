@@ -14,17 +14,18 @@ async function fresh(opts = {}) {
 /* ── Onboarding ─────────────────────────────────────────────────────────── */
 {
   const { ctx, page } = await fresh();
-  check('onboarding opens on the Momentum concept', await page.getByText('Fortschritt sieht man selten').isVisible());
+  // The three slides' titles are block 7E's (D190).
+  check('onboarding opens on the Momentum concept', await page.getByRole('heading', { name: /Fortschritt,\s+den du siehst\./ }).isVisible());
 
   await page.getByRole('button', { name: /Los geht/ }).click();
   check('second screen names the two worlds, Laufen inside Gym (WP3 Stage 4)',
-    await page.getByRole('heading', { name: 'Zwei Welten' }).isVisible() &&
+    await page.getByRole('heading', { name: /Zwei Welten\.\s+Ein Verlauf\./ }).isVisible() &&
     await page.getByText('Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.').isVisible());
   check('and says nothing of Food',
     !/Ernährung|Essen/.test((await page.locator('.onboarding').textContent()) ?? ''));
   await page.getByRole('button', { name: 'Weiter' }).click();
-  check('third screen is rank and milestones',
-    await page.getByRole('heading', { name: /Rang und Meilensteine/ }).isVisible());
+  check('third screen is the one rank',
+    await page.getByRole('heading', { name: /Ein Rang\s+für alles\./ }).isVisible());
   await page.getByRole('button', { name: 'Weiter' }).click();
 
   const picker = await page.getByRole('heading', { name: 'Womit startest du?' }).isVisible();

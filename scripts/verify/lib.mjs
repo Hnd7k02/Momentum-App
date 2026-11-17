@@ -29,7 +29,7 @@ export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie
   if (food) throw new Error('onboard: Food is not offered (D139) — use seedLegacyFood for a device that had it');
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();   // two worlds
-  await page.getByRole('button', { name: 'Weiter' }).click();   // rank + milestones
+  await page.getByRole('button', { name: 'Weiter' }).click();   // one rank
   // Domain picker: Mind starts selected; Gym carries the Laufen target too.
   if (!wellbeing) await page.getByRole('button', { name: /^Mind/ }).click();
   if (gym || running) await page.getByRole('button', { name: /^Gym/ }).click();
@@ -39,9 +39,11 @@ export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie
     await page.getByRole('button', { name: 'Weiter' }).click();
   }
   if (gym || running) {
-    const cards = page.locator('.card');
-    if (gym) await cards.nth(0).getByRole('button', { name: `${gym} pro Woche` }).click();
-    if (running) await cards.nth(1).getByRole('button', { name: `${running} pro Woche` }).click();
+    // Each target is a group named for what it counts. Since block 7E the
+    // two stand in one card, so they are found by that name, not by card.
+    const target = (name, count) => page.getByRole('group', { name }).getByRole('button', { name: `${count} pro Woche`, exact: true });
+    if (gym) await target('Gym-Sessions pro Woche', gym).click();
+    if (running) await target('Läufe pro Woche', running).click();
     await page.getByRole('button', { name: 'Weiter' }).click();
   }
   await page.getByRole('button', { name: 'Starten' }).click();

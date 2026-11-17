@@ -314,7 +314,8 @@ for (const [width, height] of SIZES) {
   await page.getByRole('button', { name: /Los geht/ }).click();
   await page.waitForTimeout(400);
   check(`${W}: the second screen names two worlds, Laufen inside Gym`,
-    (await text(page.locator('.welcome__tagline'))) === 'Zwei Welten' &&
+    // The slide's title since block 7E (D190), with its written line break.
+    (await text(page.locator('.onboarding__title'))).replace(/\s+/g, ' ') === 'Zwei Welten. Ein Verlauf.' &&
       (await text(page.locator('.onboarding__lead'))) === 'Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.');
   await noFood(page, `${W} concept`);
   await layoutChecks(page, `${W} concept`);
