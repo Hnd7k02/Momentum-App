@@ -188,6 +188,13 @@ const only = process.env.ONLY ? new Set(process.env.ONLY.split(',')) : null;
 const webkitList = BROWSER === 'webkit' ? (await import('./lib.mjs')).WEBKIT_SUITES : null;
 const chosen = SUITES.filter((suite) => (!only || only.has(suite.name)) && (!webkitList || webkitList.includes(suite.name)));
 const needed = new Set(['app', ...chosen.flatMap((suite) => suite.needs ?? [])]);
+// A selection that runs nothing is no green run: a name not in the list, or
+// a choice the WebKit list leaves empty, ends the run before it starts.
+const unknownNames = only ? [...only].filter((name) => !SUITES.some((suite) => suite.name === name)) : [];
+if (unknownNames.length > 0 || chosen.length === 0) {
+  console.log(`[run-all] nothing to run${unknownNames.length ? ` — no suite named ${unknownNames.join(', ')}` : ''}`);
+  process.exit(1);
+}
 
 async function step(label, command, commandArgs, options) {
   console.log(`[run-all] ${label} …`);
@@ -252,16 +259,18 @@ async function runSuite(suite) {
   const result = await run('node', [join('scripts', 'verify', `${suite.name}.mjs`)], { env, log: join(RUN, `${suite.name}.log`), ...(suite.timeout ? { timeout: suite.timeout } : {}) });
   const read = readResult(result.text);
   const known = KNOWN_RED[suite.name] ?? [];
-  const unknown = read.failed.filter((name) => !known.some((entry) => name.includes(entry.check)));
+  const unknown = read.failed.filter((name) => !known.some((entry) => name.startsWith(entry.check)));
   const row = {
     name: suite.name,
     kind: suite.alone ? '3D, alone' : 'suite',
-    ok: result.code === 0 && read.total !== null && read.passed === read.total,
+    ok: result.code === 0 && read.total !== null && read.total > 0 && read.passed === read.total,
     passed: read.passed,
     total: read.total,
     ms: result.ms,
     failed: read.failed,
-    knownOnly: result.code !== 0 && read.failed.length > 0 && unknown.length === 0,
+    // Known red only when the suite ran to its end and nothing else failed:
+    // a suite that crashed or was stopped after its known check is red.
+    knownOnly: result.code !== 0 && read.total !== null && read.failed.length > 0 && unknown.length === 0 && read.total - read.passed === read.failed.length,
   };
   rows.push(row);
   console.log(`[run-all] ${suite.name}: ${read.passed ?? '?'}/${read.total ?? '?'} in ${seconds(result.ms)}${row.ok ? '' : row.knownOnly ? ' — known red only' : ' — FAILED'}`);
