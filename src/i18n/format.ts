@@ -25,6 +25,11 @@ export function formatDayAndMonth(language: Language, day: DateKey): string {
   return formatter(language, { day: 'numeric', month: 'long' }).format(middayOf(day));
 }
 
+/** "17. Okt." / "17 Oct" — for an axis, where the month has no room. */
+export function formatDayAndMonthShort(language: Language, day: DateKey): string {
+  return formatter(language, { day: 'numeric', month: 'short' }).format(middayOf(day));
+}
+
 /** "Montag" / "Monday". */
 export function formatWeekday(language: Language, day: DateKey): string {
   return formatter(language, { weekday: 'long' }).format(middayOf(day));

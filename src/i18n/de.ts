@@ -18,6 +18,12 @@ export const de = {
   'areas.general': 'Weiteres',
   'areas.credits': 'Danksagungen',
   'areas.credits.body': '3D-Körpermodell',
+  'areas.credits.font': 'Schrift DM Sans',
+  'areas.credits.fontSubtitle': 'SIL Open Font License 1.1',
+  'areas.credits.fontBody':
+    'Die ersten Schritte der App sind in der Schrift DM Sans gesetzt, Copyright 2014 The DM Sans Project Authors. Sie steht unter der SIL Open Font License 1.1.',
+  'areas.credits.fontNote': 'Die Schrift ist in der App enthalten. Es wird nichts aus dem Netz nachgeladen.',
+  'areas.credits.fontProject': 'DM Sans ansehen',
   'areas.credits.bodySubtitle': 'Aus MakeHuman, CC0 1.0',
   'areas.credits.modified':
     'Für Momentum geformt: in eine entspannte Haltung gebracht, mit Muskelzeichnung versehen '
@@ -281,14 +287,30 @@ export const de = {
   'question.categoryLabel': 'Bereich',
   'question.categoryHint': 'Der Bereich bestimmt, wie die Frage in deinen Tageswert einfliesst.',
 
-  'onboarding.concept.momentum.title': 'Momentum',
+  // Block 7E (D190). A title's line break is written: on the three slides
+  // the second line is the point, and a browser would break elsewhere.
+  'onboarding.concept.momentum.title': 'Fortschritt,\nden du siehst.',
   'onboarding.concept.momentum.body':
-    'Fortschritt sieht man selten von Tag zu Tag. Momentum macht ihn sichtbar.',
-  'onboarding.concept.worlds.title': 'Zwei Welten',
+    'Ein kurzer Check-in am Tag, ein Ziel pro Woche. Momentum zeigt dir, wohin das führt.',
+  'onboarding.concept.worlds.title': 'Zwei Welten.\nEin Verlauf.',
   'onboarding.concept.worlds.body': 'Mind und Gym, Laufen inbegriffen. Du wählst, was zählt.',
-  'onboarding.concept.rank.title': 'Rang und Meilensteine',
-  'onboarding.concept.rank.body':
-    'Ein Rang zeigt, wo du stehst. Meilensteine bleiben, auch wenn eine Woche schlecht läuft.',
+  'onboarding.concept.rank.title': 'Ein Rang\nfür alles.',
+  'onboarding.concept.rank.body': 'Mind und Gym zählen zusammen. Du startest als Rookie.',
+  'onboarding.welcome.privacy': 'Alles bleibt auf deinem iPhone.',
+  // The hero of the first slide is a picture with example values, and says so.
+  'onboarding.hero.label':
+    'Vorschau der App mit Beispielwerten: Verlauf plus 9 Prozent in 30 Tagen, Mind heute 8 von 10, Gym 2 von 3 Sessions diese Woche.',
+  'onboarding.hero.change': '+9\u00A0%',
+  'onboarding.hero.period': 'Mind und Gym · letzte 30 Tage',
+  'onboarding.hero.mind': '8 von 10',
+  'onboarding.hero.gym': '2 von 3',
+  'onboarding.hero.week': 'Woche',
+  'onboarding.worlds.scale': 'Skala von 1 bis 10, noch nicht beantwortet',
+  'onboarding.worlds.note': 'Beides zählt für denselben Rang.',
+  'onboarding.rank.start': 'Hier startest du',
+  'onboarding.rank.next': 'Nächster Rang',
+  'onboarding.rank.more': '{count} weitere Ränge bis {rank}',
+  'onboarding.rank.path': 'Der Weg zum nächsten Rang: von 0 bis {points}.',
   'onboarding.domains.title': 'Womit startest du?',
   'onboarding.domains.body': 'Ein Bereich genügt. Alles Weitere kommt später.',
   'onboarding.domains.hint': 'Details richtest du ein, wenn du einen Bereich zum ersten Mal öffnest.',

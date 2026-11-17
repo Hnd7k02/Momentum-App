@@ -188,3 +188,43 @@ export function SparkIcon({ size = 24, className }: IconProps) {
     </svg>
   );
 }
+
+/** Mind: a check in a circle — the day's check-in. */
+export function MindIcon({ size = 24, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M8.4 12.3 11 14.9l4.8-5.3" />
+    </svg>
+  );
+}
+
+/** Gym: a barbell, seen from the front. */
+export function GymIcon({ size = 24, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M9 12h6M2.8 10.2v3.6M21.2 10.2v3.6" />
+      <rect x="5.5" y="7" width="3.5" height="10" rx="1.5" />
+      <rect x="15" y="7" width="3.5" height="10" rx="1.5" />
+    </svg>
+  );
+}
+
+/** A closed lock: what stays on the device. */
+export function LockIcon({ size = 24, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <rect x="5" y="10.5" width="14" height="10" rx="2.6" />
+      <path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5" />
+    </svg>
+  );
+}
+
+/** A rise: up and to the right. */
+export function TrendUpIcon({ size = 24, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M6 18 18 6M9.5 6H18v8.5" />
+    </svg>
+  );
+}

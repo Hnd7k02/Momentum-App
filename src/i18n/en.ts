@@ -17,6 +17,12 @@ export const en: Translations = {
   'areas.general': 'More',
   'areas.credits': 'Credits',
   'areas.credits.body': '3D body model',
+  'areas.credits.font': 'DM Sans typeface',
+  'areas.credits.fontSubtitle': 'SIL Open Font License 1.1',
+  'areas.credits.fontBody':
+    'The first steps of the app are set in the typeface DM Sans, Copyright 2014 The DM Sans Project Authors. It is licensed under the SIL Open Font License 1.1.',
+  'areas.credits.fontNote': 'The typeface is part of the app. Nothing is loaded from the network.',
+  'areas.credits.fontProject': 'View DM Sans',
   'areas.credits.bodySubtitle': 'From MakeHuman, CC0 1.0',
   'areas.credits.modified':
     'Shaped for Momentum: brought into a relaxed posture, given its muscle relief '
@@ -276,14 +282,27 @@ export const en: Translations = {
   'question.categoryLabel': 'Area',
   'question.categoryHint': 'The area decides how the question feeds into your daily score.',
 
-  'onboarding.concept.momentum.title': 'Momentum',
+  'onboarding.concept.momentum.title': 'Progress\nyou can see.',
   'onboarding.concept.momentum.body':
-    'Progress is hard to see day to day. Momentum makes it visible.',
-  'onboarding.concept.worlds.title': 'Two worlds',
+    'One short check-in a day, one target a week. Momentum shows you where that leads.',
+  'onboarding.concept.worlds.title': 'Two worlds.\nOne trend.',
   'onboarding.concept.worlds.body': 'Mind and Gym, running included. You choose what counts.',
-  'onboarding.concept.rank.title': 'Rank and milestones',
-  'onboarding.concept.rank.body':
-    'A rank shows where you stand. Milestones stay, even when a week goes badly.',
+  'onboarding.concept.rank.title': 'One rank\nfor everything.',
+  'onboarding.concept.rank.body': 'Mind and Gym count together. You start as a Rookie.',
+  'onboarding.welcome.privacy': 'Everything stays on your iPhone.',
+  'onboarding.hero.label':
+    'A preview of the app with example values: progress up 9 percent in 30 days, Mind 8 of 10 today, Gym 2 of 3 sessions this week.',
+  'onboarding.hero.change': '+9\u00A0%',
+  'onboarding.hero.period': 'Mind and Gym · last 30 days',
+  'onboarding.hero.mind': '8 of 10',
+  'onboarding.hero.gym': '2 of 3',
+  'onboarding.hero.week': 'Week',
+  'onboarding.worlds.scale': 'Scale from 1 to 10, not answered yet',
+  'onboarding.worlds.note': 'Both count towards the same rank.',
+  'onboarding.rank.start': 'This is where you start',
+  'onboarding.rank.next': 'Next rank',
+  'onboarding.rank.more': '{count} more ranks up to {rank}',
+  'onboarding.rank.path': 'The way to the next rank: from 0 to {points}.',
   'onboarding.domains.title': 'Where do you start?',
   'onboarding.domains.body': 'One area is enough. The rest can come later.',
   'onboarding.domains.hint': 'You set the details up when you first open an area.',
