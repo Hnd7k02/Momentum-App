@@ -52,6 +52,16 @@ Then the tests, a new preview, and the branch merged into
 `docs/design/wp3/stage7e-b/393-0-auftakt.png` and
 `393-4a-bereiche-leer.png` beside the others of STOP 7E-b.
 
+- **Preview**: `Momentum-preview` `258d09f`, built from `86a4629` — the
+  build block 9 checks the two adjustments on.
+- **Verification** (2026-11-17, on `86a4629`): `tsc -b` clean; `npm run
+  test` exit 0, 141 files, 2482 tests (`OnboardingFlow.test.tsx` 28);
+  `onboarding-7e.mjs` 79 of 79, `design-system.mjs` with `ONLY=onboarding`
+  236 of 236 at four widths; `phase2.mjs` 68, `phase2-a11y.mjs` 17,
+  `wp3-stage4.mjs` 170, `release.mjs` 83, `phase3.mjs` 46 and
+  `wp3-sheets.mjs` 330, all passed. Reviewed by four readers with a
+  skeptic for every finding: five held, all fixed (D192).
+
 ## STOP 7E-b — what is built after the go
 
 - **The answers**, as above (D191).

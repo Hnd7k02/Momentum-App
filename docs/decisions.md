@@ -6629,6 +6629,9 @@ start, 193 ms, where the same state — both files already in memory — was
 142 ms. And the records named a preview without the two adjustments; the
 new one is below.
 
+**Preview**: `Momentum-preview` `258d09f`, built from `86a4629`, with the
+opening page and the empty areas — the build block 9 checks them on.
+
 **Verification** (2026-11-17): `tsc -b` clean; `npm run test` exit 0, 141
 files, 2482 tests; `onboarding-7e.mjs` 79 of 79, `design-system.mjs` with
 `ONLY=onboarding` 236 of 236 at four widths; `phase2.mjs` 68 of 68,

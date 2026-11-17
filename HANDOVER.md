@@ -2421,8 +2421,10 @@ owner accepted it at STOP 7E-b on 2026-11-17, and it is merged into
   finding: five findings held at 7E-a2 and seven at 7E-b, all fixed
   (D190, D191).
 - **Verification**: see STOP 7E-b in `docs/wp3/stage7e/README.md`.
-- **Preview**: `Momentum-preview` `8a5df95` (published 2026-11-17, built
-  from `6806630`). Data to rehearse on: the files of `docs/wp3/stage7d/`
+- **Preview**: `Momentum-preview` `258d09f` (published 2026-11-17, built
+  from `86a4629`), with the opening page and the empty areas — the build
+  block 9 checks them on; `8a5df95`, built from `6806630`, was STOP
+  7E-b's. Data to rehearse on: the files of `docs/wp3/stage7d/`
   for 17 and 18 November. **The run with real data is missing: there is
   no backup with real data** (D183).
 
