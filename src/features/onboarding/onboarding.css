@@ -9,7 +9,8 @@
  */
 
 /* DM Sans, one file for the weights 400 to 700 (SIL Open Font License 1.1,
-   `fonts/OFL.txt`). Shipped with the app, never fetched from elsewhere. */
+   shipped with the build as `licenses/dm-sans-OFL.txt`). Served with the app,
+   never fetched from elsewhere. */
 @font-face {
   font-family: 'DM Sans';
   font-style: normal;
@@ -44,6 +45,10 @@
      this ground can still cast it: inside its own world the token is the
      heavy shadow of a card on graphite. */
   --onboarding-shadow: var(--shadow-card);
+  /* The light accent, for the focus ring a dark tile draws on the light
+     ground: inside the Gym world the token is the violet of graphite,
+     which reaches only 2.2:1 on this ground. */
+  --onboarding-ring: var(--accent);
 }
 
 /* Header: the brand or the way back on the left, the step marks on the
@@ -267,7 +272,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: 14px;
+  padding: var(--card-pad);
   border-radius: var(--radius-card);
   background: var(--surface-elevated);
   box-shadow: var(--shadow-card);
@@ -296,6 +301,21 @@
   justify-content: center;
   background: var(--accent-tint);
   color: var(--accent-ink);
+}
+
+/* Two tiles side by side leave a narrow phone about 106px inside each:
+   the mark and the gaps give way there, so the head's three parts fit
+   on one line without running into the inset. */
+@media (max-width: 374px) {
+  .world-tile__head {
+    gap: var(--space-1);
+  }
+
+  .world-tile__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+  }
 }
 
 .world-tile__name {
@@ -371,6 +391,10 @@
 
 .world-tile--choice:active {
   transform: scale(0.99);
+}
+
+.world-tile--choice[data-world='gym']:focus-visible {
+  outline-color: var(--onboarding-ring);
 }
 
 .world-tile--choice .world-tile__head {
@@ -487,13 +511,13 @@
   aspect-ratio: 325 / 116;
   min-height: 64px;
   margin-top: var(--space-3);
-  --hero-rest: 486px;
+  --hero-rest: 490px;
 }
 
 /* From 390px the sentence under the title stands in two lines, not three. */
 @media (min-width: 390px) {
   .onboarding-hero__plot {
-    --hero-rest: 462px;
+    --hero-rest: 466px;
   }
 }
 
@@ -522,11 +546,20 @@
   height: calc(var(--bar) * 100%);
   border-radius: var(--radius-pill);
   background-image: linear-gradient(to bottom, var(--accent-tint), var(--surface-elevated));
-  background-image: linear-gradient(
-    to bottom,
-    var(--accent-tint),
-    color-mix(in srgb, var(--accent-tint) 25%, var(--surface-elevated))
-  );
+}
+
+/* Where color-mix() is known the bars keep a quarter of the tint at their
+   foot. A declaration with var() is accepted when it is parsed and only
+   found invalid when it is computed, so without this query an iPhone on
+   iOS 15 or 16.0–16.1 would draw no bar at all, not the plainer one. */
+@supports (color: color-mix(in srgb, currentColor 50%, transparent)) {
+  .onboarding-hero__bars > i {
+    background-image: linear-gradient(
+      to bottom,
+      var(--accent-tint),
+      color-mix(in srgb, var(--accent-tint) 25%, var(--surface-elevated))
+    );
+  }
 }
 
 /* Today's bar keeps more of itself. */
@@ -678,7 +711,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-4) var(--space-5) var(--space-5);
+  padding: var(--space-4) var(--card-pad) var(--space-5);
   border-radius: var(--radius-card);
   background: var(--stage-surface);
   background-image: var(--stage-ground);
@@ -1032,6 +1065,15 @@
     .onboarding-hero__plot {
       --hero-rest: 426px;
     }
+  }
+
+  .onboarding-worlds__question,
+  .onboarding-worlds__scale {
+    margin-top: var(--space-2);
+  }
+
+  .onboarding-worlds__goals {
+    gap: var(--space-3);
   }
 
   .world-tile {

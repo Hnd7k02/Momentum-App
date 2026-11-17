@@ -495,11 +495,14 @@ export function OnboardingFlow({
           {chosen.has('mental') && questionCount > 0 ? (
             <WorldTile world="mind" name={t(DOMAIN_NAME_KEYS.mental)}>
               <p className="world-tile__figure summary__item">
-                {questionCount === 1 ? (
-                  t('onboarding.summary.questionsOne')
-                ) : (
-                  <Figure text={t('onboarding.summary.questions', { count: questionCount })} figure={questionCount} />
-                )}
+                <Figure
+                  text={
+                    questionCount === 1
+                      ? t('onboarding.summary.questionsOne')
+                      : t('onboarding.summary.questions', { count: questionCount })
+                  }
+                  figure={questionCount}
+                />
               </p>
             </WorldTile>
           ) : null}

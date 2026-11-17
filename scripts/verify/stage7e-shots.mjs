@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { CHROMIUM, URL_APP } from './lib.mjs';
+import { CHROMIUM, URL_APP, setLanguage } from './lib.mjs';
 
 /**
  * Not a suite: the pictures of block 7E (`docs/design/wp3/stage7e/`).
@@ -40,6 +40,12 @@ for (const width of WIDTHS) {
   page.on('pageerror', (error) => console.log('  pageerror:', error.message));
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.locator('.onboarding').waitFor({ state: 'visible' });
+  // A new device starts in German; the language is the stored setting.
+  if (LANGUAGE !== 'de') {
+    await setLanguage(page, LANGUAGE);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.locator('.onboarding').waitFor({ state: 'visible' });
+  }
 
   const shot = async (slug) => {
     await page.evaluate(() => document.fonts.ready);

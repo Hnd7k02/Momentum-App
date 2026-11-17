@@ -206,7 +206,8 @@ describe('the onboarding keeps its exceptions to itself (contract §16, D190)', 
     // One face, from the app's own files: no URL with a host.
     expect(css.match(/@font-face/g)).toHaveLength(1);
     expect(css).not.toMatch(/url\(\s*['"]?(?:https?:)?\/\//);
-    expect(readFileSync(join(SRC, 'features/onboarding/fonts/OFL.txt'), 'utf8')).toMatch(/SIL OPEN FONT LICENSE Version 1\.1/);
+    // The licence goes out with every build, beside the face it covers.
+    expect(readFileSync(join(ROOT, 'public', 'licenses', 'dm-sans-OFL.txt'), 'utf8')).toMatch(/SIL OPEN FONT LICENSE Version 1\.1/);
   });
 
   it('the app keeps the system font', () => {

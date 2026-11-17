@@ -92,7 +92,7 @@ export const en: Translations = {
   'onboarding.summary.title': 'You are set',
   'onboarding.summary.body': 'You can adjust all of this later under Areas.',
   'onboarding.summary.questions': '{count} questions daily',
-  'onboarding.summary.questionsOne': 'One question daily',
+  'onboarding.summary.questionsOne': '1 question daily',
   'onboarding.summary.empty': 'Nothing set up yet',
   'onboarding.summary.emptyBody': 'That is fine. Start from Areas whenever you are ready.',
   'onboarding.summary.start': 'Start',

@@ -93,7 +93,7 @@ export const de = {
   'onboarding.summary.title': 'Alles bereit',
   'onboarding.summary.body': 'Du kannst jederzeit unter Bereiche nachjustieren.',
   'onboarding.summary.questions': '{count} Fragen täglich',
-  'onboarding.summary.questionsOne': 'Eine Frage täglich',
+  'onboarding.summary.questionsOne': '1 Frage täglich',
   'onboarding.summary.empty': 'Noch nichts eingerichtet',
   'onboarding.summary.emptyBody':
     'Auch gut. Du kannst unter Bereiche starten, sobald du so weit bist.',

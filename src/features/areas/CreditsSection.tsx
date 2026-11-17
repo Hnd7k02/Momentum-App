@@ -21,7 +21,7 @@ const FONT_LICENCE_URL = 'https://openfontlicense.org';
  *
  * The onboarding's typeface, DM Sans, is under the SIL Open Font License 1.1
  * (D190): its copyright line and its licence are named here, and the licence
- * text lies beside the font file (`features/onboarding/fonts/OFL.txt`).
+ * text ships with the build (`public/licenses/dm-sans-OFL.txt`).
  */
 export function CreditsSection() {
   const t = useT();
