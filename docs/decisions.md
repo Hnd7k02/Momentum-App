@@ -6092,7 +6092,7 @@ every line in the sheet stands on the zero line (`muscle-sheet.mjs`), the
 detail's line ends on its figure on the side of the zero line its colour
 says, and one day draws a sentence.
 
-## D188 — Block 7D: the catalogue grows to 134, every entry names its movement and its equipment, and the picker searches all of it
+## D188 — Block 7D: the catalogue grows to 135, every entry names its movement and its equipment, and the picker searches all of it
 
 **Decision (block 7D, 2026-11-16).** D171 asked for a really large choice
 — machine, cable and bodyweight first, at least ten per group — and a
@@ -6104,17 +6104,17 @@ accepted the list** (STOP 7D).
 
 ### The catalogue
 
-- **134 entries, 85 of them new** — 133 and 84 at STOP 7D, and the one
+- **135 entries, 86 of them new** — 133 and 84 at STOP 7D, and the two
   the owner added after it (below). By primary group (before → after):
-  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 11, triceps
+  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 12, triceps
   6 → 14, core 3 → 15, quadriceps 3 → 11, hamstrings and glutes 5 → 14,
   calves 2 → 10, forearms 2 → 10 (the deadlift counts for two). By
-  equipment: barbell 21, dumbbell 26, cable 27, machine 26, Smith 4,
+  equipment: barbell 21, dumbbell 26, cable 27, machine 27, Smith 4,
   bodyweight 26, SZ bar 2, kettlebell 1, wrist roller 1. By load type:
-  external 106, bodyweight 26, assisted 2.
+  external 107, bodyweight 26, assisted 2.
 - **The 49 entries before stand as they were**: id, roles, load type,
   English record name, German name and detail. The three tables of
-  `catalogue.test.ts` pass unchanged; a fourth pins the 85. An existing
+  `catalogue.test.ts` pass unchanged; a fourth pins the 86. An existing
   device gets the new entries the next time Gym opens, and its stored
   entries — a renamed one included — stay byte for byte (a test holds it).
   Nothing that computes or stores changed: no golden file, no fingerprint,
@@ -6195,7 +6195,7 @@ accepted the list** (STOP 7D).
   own exercise; "Eigene Übung" becomes the primary action, and the form it
   opens starts with the word as its name.
 
-**Checks.** `catalogue.test.ts` (134 entries, where it counted 49; ten per
+**Checks.** `catalogue.test.ts` (135 entries, where it counted 49; ten per
 group; equipment and movement on every entry; body weight and its
 equipment agree; ids from the English names), `search.test.ts`,
 `gym.test.ts` (the existing device), and the browser suite
@@ -6219,3 +6219,13 @@ of the biceps — biceps alone as its group and primary, the cable, by
 weight, "beugen"; its detail "Bizeps, langer Kopf" as the incline curl's.
 The catalogue holds 134 entries, the biceps 11 by primary. Restated:
 `catalogue.test.ts` counts 134 where it counted 133 at the STOP.
+
+**Second addendum (owner, the same day).** "Bizeps-Maschine: Bizeps hat mit
+10 die kürzeste Liste, und die Maschine steht in den meisten Gyms." Added
+without a further check, as he asked: **"Bizepsmaschine" / Biceps Curl
+Machine** (`ex_biceps_curl_machine`) — biceps alone as its group and
+primary, the machine, by weight, "beugen", detail "Bizeps"; named as the
+"Trizepsmaschine" is. The catalogue holds 135 entries, the biceps 12 by
+primary, the machine 27, and «maschine» finds it: `search.test.ts` and
+`exercise-search.mjs` hold the word to one exercise more, and
+`catalogue.test.ts` counts 135.

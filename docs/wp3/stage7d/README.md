@@ -23,12 +23,12 @@ line below held, or the file would not be here:
 - the same Gym rating, the same ten rows and the same strip above the body
   on both builds — the catalogue moves no figure;
 - the same plan on both, its three exercises in their order;
-- the build of this block offers **135 exercises**: the 134 of its
+- the build of this block offers **136 exercises**: the 135 of its
   catalogue and the user's own — the build before it offered 50 (134
-  and 133 at STOP 7D, before the owner's Bayesian cable curl; both files
-  were read back again on the build with it);
+  and 133 at STOP 7D, before the two exercises the owner added after it;
+  both files were read back again on the build with them);
 - **every exercise the file holds stands as it was, byte for byte**, after
-  the new build has added its 85;
+  the new build has added its 86;
 - «zercher» finds the user's own exercise on both.
 
 **Take the file of the day you check, and import it into the preview**
