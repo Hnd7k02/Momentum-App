@@ -38,8 +38,8 @@
   --onboarding-ring: var(--accent);
 }
 
-/* The opening page (D192): one line in the middle of the flat ground, the
-   button beneath it where it stands on every step. */
+/* The opening page (D192, D193): one line in the middle of the flat ground
+   and a faint hint where the button stands on every step. */
 .onboarding__opening {
   flex: 1;
   min-height: 0;
@@ -56,6 +56,29 @@
   letter-spacing: -1.1px;
   line-height: 1.12;
   text-wrap: balance;
+}
+
+/* A tap anywhere on the opening page goes on (the owner, D193): the page
+   takes the click, so it says so to a pointer. */
+.onboarding--opening {
+  cursor: pointer;
+}
+
+/* The hint names that tap, where the button stands on every step: a real
+   button for a keyboard and a screen reader, as high as the button it
+   stands in for and the box a focus ring is drawn on. It is set in the
+   faintest grey the contract allows — `--text-tertiary`, 5.33:1 on this
+   ground, where every text must reach 4.5:1 (contract §3, §12) — and in no
+   accent: what is operable here is the screen, not the words. */
+.onboarding__tap {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--type-footnote);
+  font-weight: var(--weight-regular);
+  color: var(--text-tertiary);
+  text-align: center;
 }
 
 /* Header: the brand or the way back on the left, the step marks on the
@@ -1026,7 +1049,8 @@
     padding-top: var(--space-2);
   }
 
-  .onboarding__footer .button {
+  .onboarding__footer .button,
+  .onboarding__tap {
     min-height: 50px;
   }
 

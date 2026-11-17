@@ -62,6 +62,34 @@ Then the tests, a new preview, and the branch merged into
   `wp3-sheets.mjs` 330, all passed. Reviewed by four readers with a
   skeptic for every finding: five held, all fixed (D192).
 
+## After STOP 7E-b — the opening page without a button (D193)
+
+The owner, the same day: "Auf der Titelseite den Weiterbutton weg nehmen
+und in ganz schwacher grauer schrift "Screen antippen" schreiben. Egal wo
+man dann auf den screen clickt, kommt man weiter." No STOP of its own; he
+checks it in the round of block 9 with the two adjustments above.
+
+- **As built**: no «Weiter» on the opening page; where it stood,
+  «Screen antippen» ("Tap the screen") in `--text-tertiary`, 13px,
+  regular — the faintest grey the contract allows, 5.33:1 on the flat
+  ground; every text reaches 4.5:1 (§3), and a fainter one is not built.
+  While the page shows, the page itself takes the tap — the line, the
+  hint, the empty ground, the edges. The hint is a real button for a
+  keyboard and a screen reader, and the focus goes on to «Los geht’s».
+- **A layer was tried first** and given up: a transparent layer over the
+  screen hid the line from the hit test, and `design-system.mjs` — which
+  measures only the text a hit test reaches — lost it. The measurement
+  stands; the page takes the click instead.
+- **Verification** (2026-11-17): `tsc -b` clean; `npm run test` exit 0,
+  141 files, 2485 tests (`OnboardingFlow.test.tsx` 31); `onboarding-7e.mjs`
+  96 of 96 — a grid of 153 points over the screen, and a real tap in each
+  corner, at the top, on the line, below it and on the hint, at four
+  widths, and Tab and Enter; `design-system.mjs` with `ONLY=onboarding`
+  236 of 236 (the hint 5.32:1 on its pixels); `phase2.mjs` 68,
+  `phase2-a11y.mjs` 17, `wp3-stage4.mjs` 170, `release.mjs` 83, all passed.
+- **Pictures**: `docs/design/wp3/stage7e-b/320-0-auftakt.png`,
+  `393-0-auftakt.png`, `430-0-auftakt.png`, and both overviews made again.
+
 ## STOP 7E-b — what is built after the go
 
 - **The answers**, as above (D191).

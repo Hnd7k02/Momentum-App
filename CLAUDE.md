@@ -385,8 +385,11 @@ Never conflate them.
   screen of the app: `designRules.test.ts` fails if a file outside
   `features/onboarding/` reads those tokens. A step never shows a number
   the flow does not hold. **It begins on an opening page** — «Let’s get it
-  started» and «Weiter», no step and no marks (D192) — and **the areas open
-  with nothing chosen**, «Weiter» waiting for a world. **Mind opens with
+  started», no step and no marks (D192), and **no button to find**: a tap
+  anywhere goes on, the page itself takes it, and a faint «Screen
+  antippen» in `--text-tertiary` says so, a real button for a keyboard
+  (D193) — and **the areas open with nothing chosen**, «Weiter» waiting
+  for a world. **Mind opens with
   three starter questions**, one per category (`STARTER_QUESTIONS`), and
   «Weiter» waits while none is chosen. **Only a preview build replays
   it** (`app/preview.ts`: a database of its own): Einstellungen →
