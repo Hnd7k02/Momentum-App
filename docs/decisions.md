@@ -6630,7 +6630,8 @@ start, 193 ms, where the same state — both files already in memory — was
 new one is below.
 
 **Preview**: `Momentum-preview` `258d09f`, built from `86a4629`, with the
-opening page and the empty areas — the build block 9 checks them on.
+opening page and the empty areas. Since D193 block 9 checks them on
+`efbb731`, which carries the opening page without a button.
 
 **Verification** (2026-11-17): `tsc -b` clean; `npm run test` exit 0, 141
 files, 2482 tests; `onboarding-7e.mjs` 79 of 79, `design-system.mjs` with
@@ -6758,5 +6759,8 @@ page now sets none, as the app does everywhere. The records called
 faintest text token, and a fainter grey above 4.5:1 would be a new colour
 value (above). §16 and `CLAUDE.md` now name the hint as the opening page's
 own exception to §2.1 and §5. `HANDOVER.md` counted 27 unit tests where
-there are 31, and named a preview without the change; the new one follows
-below.
+there are 31, and named a preview without the change; the new one follows.
+
+**Preview**: `Momentum-preview` `efbb731`, built from `695fd08`, with the
+opening page that has no button — the build block 9 checks D192's and
+D193's adjustments on.

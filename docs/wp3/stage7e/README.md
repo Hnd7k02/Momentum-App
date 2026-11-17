@@ -52,8 +52,9 @@ Then the tests, a new preview, and the branch merged into
 `docs/design/wp3/stage7e-b/393-0-auftakt.png` and
 `393-4a-bereiche-leer.png` beside the others of STOP 7E-b.
 
-- **Preview**: `Momentum-preview` `258d09f`, built from `86a4629` — the
-  build block 9 checks the two adjustments on.
+- **Preview**: `Momentum-preview` `258d09f`, built from `86a4629`, with
+  the two adjustments; since D193 block 9 checks them on `efbb731`
+  (below).
 - **Verification** (2026-11-17, on `86a4629`): `tsc -b` clean; `npm run
   test` exit 0, 141 files, 2482 tests (`OnboardingFlow.test.tsx` 28);
   `onboarding-7e.mjs` 79 of 79, `design-system.mjs` with `ONLY=onboarding`
@@ -92,6 +93,8 @@ checks it in the round of block 9 with the two adjustments above.
   eighteen more suites whose walks pass the opening page (D193 lists
   them), all passed. Reviewed by four readers with a skeptic for every
   finding: five held, all fixed (D193).
+- **Preview**: `Momentum-preview` `efbb731`, built from `695fd08` — the
+  build block 9 checks the three adjustments on (`258d09f` was D192's).
 - **Pictures**: `docs/design/wp3/stage7e-b/320-0-auftakt.png`,
   `393-0-auftakt.png`, `430-0-auftakt.png`, and both overviews made again.
 
