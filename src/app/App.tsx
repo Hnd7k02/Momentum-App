@@ -10,6 +10,8 @@ import { ToastOutlet, ToastProvider } from '../components/Toast';
 import type { BossWeights } from '../core/boss';
 import type { StorageFailure } from '../storage/db';
 import { registerServiceWorker, type UpdateHandle } from './serviceWorker';
+import { useBackLayer } from './backLayer';
+import { isPreviewBuild } from './preview';
 import { TabBar } from './TabBar';
 import { useRoute } from './route';
 import { useMomentum } from './useMomentum';
@@ -26,6 +28,7 @@ function MainApp({
   update,
   actionFailed,
   onDismissFailure,
+  onRehearseOnboarding,
 }: {
   configuration: AppConfiguration;
   actions: AreasActions;
@@ -33,6 +36,8 @@ function MainApp({
   update: UpdateHandle | null;
   actionFailed: boolean;
   onDismissFailure(): void;
+  /** Only in the preview: shows the onboarding as a rehearsal. */
+  onRehearseOnboarding?: (() => void) | undefined;
 }) {
   // Today is where the app opens: the daily check-in is the whole point.
   // The tab and the terminal's area are one route, mirrored to the URL.
@@ -75,6 +80,7 @@ function MainApp({
             /* The hub itself, from a section: a place the user asks for, so
                it is pushed — also when Back would have led to Heute. */
             onOpenHub={() => navigate({ section: undefined })}
+            onRehearseOnboarding={onRehearseOnboarding}
           />
         ) : null}
       </main>
@@ -165,6 +171,11 @@ export function App() {
     dismissActionFailure,
   } = useMomentum();
   const [update, setUpdate] = useState<UpdateHandle | null>(null);
+  // The onboarding as a rehearsal (preview only, D191): it stands in for
+  // the app until it is walked to its end or Back is used, and hands
+  // nothing to storage.
+  const [rehearsing, setRehearsing] = useState(false);
+  useBackLayer(rehearsing, () => setRehearsing(false));
 
   useEffect(() => {
     registerServiceWorker(setUpdate);
@@ -182,6 +193,8 @@ export function App() {
         <StorageProblem reason={state.reason} onRetry={() => void refresh()} />
       ) : state.configuration.settings.onboardingCompletedAt === null ? (
         <OnboardingFlow onFinish={finishOnboarding} failed={actionFailed} />
+      ) : rehearsing ? (
+        <OnboardingFlow onFinish={() => setRehearsing(false)} />
       ) : (
         <WeightUnitProvider unit={weightUnitOf(state.configuration.settings.weightUnit)}>
           <MainApp
@@ -191,6 +204,7 @@ export function App() {
             update={update}
             actionFailed={actionFailed}
             onDismissFailure={dismissActionFailure}
+            onRehearseOnboarding={isPreviewBuild() ? () => setRehearsing(true) : undefined}
           />
         </WeightUnitProvider>
       )}

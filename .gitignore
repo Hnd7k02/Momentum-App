@@ -20,3 +20,6 @@ coverage
 # Bodies built by tools/body/build.py: rebuilt from the data, byte for byte.
 /tools/body/out/
 __pycache__/
+
+# The preview build the onboarding suite serves beside the ordinary one.
+/dist-preview

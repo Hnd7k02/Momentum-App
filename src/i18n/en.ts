@@ -42,6 +42,8 @@ export const en: Translations = {
   'common.continue': 'Continue',
   'common.settings': 'Settings',
   'settings.weightUnit': 'Weight unit',
+  'settings.rehearseOnboarding': 'View the introduction',
+  'settings.rehearseOnboarding.hint': 'In the preview only. A rehearsal: nothing is saved, and your data stays as it is.',
   'unit.kg': 'kg',
   'unit.lb': 'lb',
   'unit.kg.name': 'kilograms',

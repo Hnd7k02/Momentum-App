@@ -43,6 +43,8 @@ export const de = {
   'common.continue': 'Weiter',
   'common.settings': 'Einstellungen',
   'settings.weightUnit': 'Gewichtseinheit',
+  'settings.rehearseOnboarding': 'Einführung ansehen',
+  'settings.rehearseOnboarding.hint': 'Nur in der Vorschau. Ein Probelauf: Nichts wird gespeichert, deine Daten bleiben, wie sie sind.',
   'unit.kg': 'kg',
   'unit.lb': 'lb',
   'unit.kg.name': 'Kilogramm',
