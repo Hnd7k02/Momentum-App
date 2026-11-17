@@ -214,9 +214,10 @@ for (const width of WIDTHS) {
   await page.waitForTimeout(900);
   const sheet = await tree();
   const dialog = sheet.find((node) => node.role === 'dialog' && /Brust/.test(node.name));
-  const chart = sheet.find((node) => node.role === 'img' && /Leistungstrend Brust/.test(`${node.name} ${node.description}`));
+  // Chromium's tree calls role="img" an "image".
+  const chart = sheet.find((node) => (node.role === 'img' || node.role === 'image') && /Leistungstrend Brust/.test(`${node.name} ${node.description}`));
   check('the sheet is a dialog named for its group', Boolean(dialog), JSON.stringify(sheet.filter((n) => n.role === 'dialog')));
-  check('its chart carries its description', Boolean(chart), JSON.stringify(sheet.filter((n) => n.role === 'img').slice(0, 3)));
+  check('its chart carries its description', Boolean(chart), JSON.stringify(sheet.filter((n) => n.role === 'img' || n.role === 'image').slice(0, 3)));
   await page.keyboard.press('Escape');
   await page.waitForTimeout(1200);
   const focused = await page.evaluate(() => document.activeElement?.getAttribute('data-muscle') ?? document.activeElement?.className ?? null);

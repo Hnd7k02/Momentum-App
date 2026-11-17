@@ -853,8 +853,41 @@ export async function seedConfirmation(page, { days = 30, value = 10, today = fa
  * about 2.5:1; since Stage 6b they are held like any other text (D149), and
  * the flag only says which runs they are.
  */
+/**
+ * Where every visible text stands, as one string: a screen still settling —
+ * a history arriving, a badge pushing the line beneath it down — changes it.
+ */
+const textLayout = (page) =>
+  page.evaluate(() => {
+    const out = [String(Math.round(scrollY))];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode()) && out.length < 400) {
+      if (!node.textContent.trim()) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const r = range.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) out.push(`${Math.round(r.left)},${Math.round(r.top)}`);
+    }
+    return out.join(' ');
+  });
+
 export async function textContrast(page) {
-  const png = (await page.screenshot({ type: 'png' })).toString('base64');
+  // The pixels come from a screenshot and the boxes from the page a moment
+  // later: both must describe the same layout. Where a text moved in
+  // between, the screen was still settling, and it is measured again.
+  let rows = [];
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const before = await textLayout(page);
+    const png = (await page.screenshot({ type: 'png' })).toString('base64');
+    rows = await measureText(page, png);
+    if ((await textLayout(page)) === before) break;
+    await page.waitForTimeout(500);
+  }
+  return rows;
+}
+
+function measureText(page, png) {
   return page.evaluate(async (b64) => {
     const img = new Image();
     img.src = 'data:image/png;base64,' + b64;
