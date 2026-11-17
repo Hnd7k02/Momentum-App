@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D192). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D195). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -2776,7 +2776,12 @@ own history; no population norms, ever.
   hashes `days` in index order. That makes it a scoring-engine work package
   with its own deliberate re-pin, not a WP2 side effect.
 - **There is no way back from the Stage 5b update except a backup taken
-  before it** (review risk 9). After the first load the configuration
+  before it** (review risk 9) — **rehearsed in block 9** (D195,
+  `update-in-place.mjs` B and C): the live build opens updated data without
+  an error and writes nothing, but scores new days by its own rules; the
+  clean way back is the data deleted, the live build, the backup from before
+  the update — two exports alike. The tag `live-before-wp3` on `e30becd` is
+  proposed, not set. After the first load the configuration
   carries `scoring.gymMetric` from that day on. A build from before the
   stage would not read the field and would score the new days by the old
   metric — and it would not read `warmUp` either. Going back therefore means
@@ -2810,8 +2815,8 @@ own history; no population norms, ever.
   count. What stays as it was, and is the price of not making every missed
   rep a decline: "+2 %" is green and "−2 %" is neutral. The legend says
   why.
-- **A snapshot dated between today and a kept era boundary takes the era's
-  marker** (found in the closing review of Stage 5b; the same in all three
+- ~~**A snapshot dated between today and a kept era boundary takes the era's
+  marker**~~ — **done in block 9** (D195, `keptBoundaries.test.ts`) (found in the closing review of Stage 5b; the same in all three
   load steps — `ensureSessionWindowEra`, `ensureFoodRetired`,
   `ensureGymMetricEra`). Each step leaves today alone when the local date
   has moved back across a boundary written before now, and then gives

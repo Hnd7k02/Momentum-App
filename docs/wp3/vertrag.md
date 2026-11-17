@@ -302,7 +302,7 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 | Kein Farbwert ausserhalb von `tokens.css`, ausser §2.6 | Suche über `src/`, wie `statusPalette.test.ts` | 6b |
 | Schriftgrössen nur über Tokens, keine unter 11 px | Suche über die CSS-Dateien | 6b |
 | `--text-tertiary` hält 4,5:1 gegen Karte und Grund | `contrast.test.ts` | 6b |
-| Jeder sichtbare Text hält seinen Kontrast an den gerenderten Pixeln | Browser-Suite, heute `wp3-stage6a.mjs` | 6b |
+| Jeder sichtbare Text hält seinen Kontrast an den gerenderten Pixeln | `design-system.mjs` (vor Stage 6b `wp3-stage6a.mjs`) | 6b |
 | Kein Screen ist breiter als sein Viewport | Browser-Suite bei vier Breiten | 6b |
 | Mint, die Bereichsfarben und die Muskelfarbe als Fläche kommen nicht mehr vor | Suche nach den entfernten Tokens | 6b |
 | Zustand folgt der angezeigten Zahl; Band und Mindestdaten | `muscleState.test.ts` | Farbregeln |
@@ -317,6 +317,8 @@ Gebaut in Block 7C (D185, D186). Was dort entschieden wurde, steht bei jedem Pun
 | Hände neutral, Prüfpunkte der Zonen | Validator und ein eigener Test | 7A |
 | Jede Gruppe hat mindestens zehn Übungen nach Hauptmuskel; jede Übung nennt Gerät und Bewegung | `catalogue.test.ts` | 7D |
 | «bauch», «ziehen», «maschine» und «eigengewicht» finden genau ihre Übungen, im Training und im Plan | `search.test.ts`, `exercise-search.mjs` | 7D |
+| Bei reduzierter Transparenz ist jedes Glas deckend, die Tab-Leiste, die Leiste eines Trainings und der Schleier eines Sheets eingeschlossen, und jeder Text hält 4,5:1; bei reduzierter Bewegung fährt nichts; das Vergrössern der Seite ist nirgends gesperrt | `access-wp3.mjs` | 9 |
+| Ein Training eines offenen Tages steht sofort im Chart, als vorläufig; vergangene Tage rechnen unverändert | `today-in-charts.mjs`, `provisionalRating.test.ts`, `history.test.ts` | 9 (D194) |
 
 ## §15 Zuordnung zu den Blöcken
 

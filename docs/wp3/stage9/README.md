@@ -171,3 +171,45 @@ before the day's questions stands at once in the chest row, its sheet's
 line, the exercise detail, the hub's count and rating tile (provisional),
 Verlauf's grid (hollow, «vorläufig») and the question history; every day
 before is unchanged; once the day is complete its own values stand.
+
+## Step 9 — for the owner, and the merge
+
+**What changes for him on the update day** (German, as he reads it):
+
+> Vorher: In der Live-App unter Bereiche → Einstellungen ein Backup
+> exportieren und sicher ablegen. Das ist dein Rückweg.
+> - Die App zeigt «Neue Version verfügbar». Ein Tipp lädt neu; deine Daten bleiben.
+> - Ernährung verschwindet aus der Oberfläche. Ihre Daten bleiben gespeichert, nichts wird gelöscht.
+> - Heute | Gestern: Eintragen geht für heute und gestern, nicht weiter zurück.
+> - Neues Aussehen: Mind hell, Gym dunkel; Muskelgruppen mit dem Körper und einem Sheet je Gruppe.
+> - Gym rechnet ab diesem Tag mit der neuen Kennzahl (bester Arbeitssatz, Aufwärmsätze zählen nicht). Das Gym-Rating steht danach an keinem Tag tiefer als nach der alten Rechnung; im Probeprofil +1,5 Punkte am ersten Tag und bis +5 in der ersten Woche.
+> - Eine Woche wird erst gewertet, wenn sie vorbei ist (Dienstag 00:00). Bis dahin zählt eine Woche mit Training als erfüllt.
+> - Ein Training steht sofort im Rating und in Verlauf, als «vorläufig», bis der Tag abgeschlossen ist.
+> - Alles vor dem Update bleibt, wie es war.
+
+The prompt asks for "the number from block 5b" for the Gym rating's
+move in the first weeks. That number (−42 after a week, D174) was the
+reason for block "Kurve": under the curve at three the rating stands on
+no day lower than under the old rules for a history of five weeks or more
+(D177, D180). The decisions come first; the text says what holds now,
+with the profile's own figures.
+
+**The merge plan** (the owner's step; not done here):
+
+1. The tidy-up block first, on `claude/momentum-wp3` (`prompt-aufraeumen.md`):
+   it takes old files out of the public state and brings the licence file,
+   so the release does not publish what the tidy-up removes. Its own check
+   runs on the branch (this workflow).
+2. A tag on the state to return to, if the owner wants one:
+   `live-before-wp3` on `e30becd`.
+3. The merge: `claude/momentum-wp3` into `claude/momentum-pwa-spec-j82dhm`.
+   `e30becd` is an ancestor of the branch, so it is a fast-forward — no
+   merge commit is needed. The push starts `deploy.yml`: `npm ci`,
+   `tsc -b`, `npm run test`, `npm run build` (the body's validator first),
+   and the publish to Pages at <https://hnd7k02.github.io/Momentum-App/>.
+   `verify-wp3.yml` does not run there.
+4. After it: the deploy run green; the address serves the new `index-*.js`
+   and `sw.js`; on the iPhone point 10 of the checklist — «Neue Version
+   verfügbar», one reload, the data there, then once in flight mode. The
+   first load writes the three eras on that day; from then on the way back
+   is the backup of step 1 of the checklist.
