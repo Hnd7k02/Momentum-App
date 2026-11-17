@@ -6092,7 +6092,7 @@ every line in the sheet stands on the zero line (`muscle-sheet.mjs`), the
 detail's line ends on its figure on the side of the zero line its colour
 says, and one day draws a sentence.
 
-## D188 — Block 7D: the catalogue grows to 133, every entry names its movement and its equipment, and the picker searches all of it
+## D188 — Block 7D: the catalogue grows to 134, every entry names its movement and its equipment, and the picker searches all of it
 
 **Decision (block 7D, 2026-11-16).** D171 asked for a really large choice
 — machine, cable and bodyweight first, at least ten per group — and a
@@ -6104,16 +6104,17 @@ accepted the list** (STOP 7D).
 
 ### The catalogue
 
-- **133 entries, 84 of them new.** By primary group (before → after):
-  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 10, triceps
+- **134 entries, 85 of them new** — 133 and 84 at STOP 7D, and the one
+  the owner added after it (below). By primary group (before → after):
+  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 11, triceps
   6 → 14, core 3 → 15, quadriceps 3 → 11, hamstrings and glutes 5 → 14,
   calves 2 → 10, forearms 2 → 10 (the deadlift counts for two). By
-  equipment: barbell 21, dumbbell 26, cable 26, machine 26, Smith 4,
+  equipment: barbell 21, dumbbell 26, cable 27, machine 26, Smith 4,
   bodyweight 26, SZ bar 2, kettlebell 1, wrist roller 1. By load type:
-  external 105, bodyweight 26, assisted 2.
+  external 106, bodyweight 26, assisted 2.
 - **The 49 entries before stand as they were**: id, roles, load type,
   English record name, German name and detail. The three tables of
-  `catalogue.test.ts` pass unchanged; a fourth pins the 84. An existing
+  `catalogue.test.ts` pass unchanged; a fourth pins the 85. An existing
   device gets the new entries the next time Gym opens, and its stored
   entries — a renamed one included — stay byte for byte (a test holds it).
   Nothing that computes or stores changed: no golden file, no fingerprint,
@@ -6194,7 +6195,7 @@ accepted the list** (STOP 7D).
   own exercise; "Eigene Übung" becomes the primary action, and the form it
   opens starts with the word as its name.
 
-**Checks.** `catalogue.test.ts` (133 entries, where it counted 49; ten per
+**Checks.** `catalogue.test.ts` (134 entries, where it counted 49; ten per
 group; equipment and movement on every entry; body weight and its
 equipment agree; ids from the English names), `search.test.ts`,
 `gym.test.ts` (the existing device), and the browser suite
@@ -6202,3 +6203,19 @@ equipment agree; ids from the English names), `search.test.ts`,
 catalogue's source and holds the search to it. Restated:
 `phase4.mjs` ("Squat" finds the squats, where it left one row) and
 `phase4-a11y.mjs` (picks Bankdrücken by name, where it took the first row).
+
+**Addendum (owner, 2026-11-17, after STOP 7D and before accepting the
+list).** He asked whether four exercises are in the catalogue and to add
+those that are not. Three were: the cable fly from high to low ("Cable Fly
+top-down", `ex_high_to_low_cable_fly`, new in this block), at shoulder
+height ("Cable Fly straight", `ex_chest_fly`) and from low to high ("Cable
+Fly bottom-up", `ex_cable_fly_low_to_high`) — the names the training press
+uses for the three pulley heights, high-to-low, middle and low-to-high —
+and the barbell row on the Smith machine ("Rudern Smith Machine",
+`ex_smith_row`). One was not, and is added: **"Bayesian Curls Kabel" /
+Bayesian Cable Curl** (`ex_bayesian_cable_curl`), the curl with the arm
+behind the body and the cable from below, which stretches the long head
+of the biceps — biceps alone as its group and primary, the cable, by
+weight, "beugen"; its detail "Bizeps, langer Kopf" as the incline curl's.
+The catalogue holds 134 entries, the biceps 11 by primary. Restated:
+`catalogue.test.ts` counts 134 where it counted 133 at the STOP.

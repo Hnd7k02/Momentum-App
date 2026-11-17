@@ -40,7 +40,7 @@ const BLOCK_7D_IDS = new Set([
   'ex_incline_bench_press', 'ex_decline_bench_press', 'ex_smith_machine_bench_press', 'ex_seated_row_machine', 'ex_back_extension_machine',
   'ex_chin_up', 'ex_inverted_row', 'ex_hyperextension', 'ex_one_arm_dumbbell_row', 'ex_t_bar_row', 'ex_dumbbell_shrug', 'ex_barbell_shrug',
   'ex_shoulder_press_machine', 'ex_lateral_raise_machine', 'ex_cable_reverse_fly', 'ex_pike_push_up', 'ex_dumbbell_shoulder_press',
-  'ex_arnold_press', 'ex_dumbbell_reverse_fly', 'ex_upright_row', 'ex_cable_curl', 'ex_rope_hammer_curl', 'ex_barbell_curl', 'ex_ez_bar_curl',
+  'ex_arnold_press', 'ex_dumbbell_reverse_fly', 'ex_upright_row', 'ex_cable_curl', 'ex_bayesian_cable_curl', 'ex_rope_hammer_curl', 'ex_barbell_curl', 'ex_ez_bar_curl',
   'ex_concentration_curl', 'ex_bar_pushdown', 'ex_triceps_extension_machine', 'ex_seated_dip_machine', 'ex_bench_dip', 'ex_close_grip_push_up',
   'ex_close_grip_bench_press', 'ex_dumbbell_overhead_extension', 'ex_triceps_kickback', 'ex_hack_squat', 'ex_smith_machine_squat',
   'ex_bodyweight_squat', 'ex_front_squat', 'ex_goblet_squat', 'ex_bulgarian_split_squat', 'ex_lunge', 'ex_step_up', 'ex_hip_thrust_machine',
