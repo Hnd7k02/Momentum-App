@@ -105,10 +105,26 @@ async function look(page, label) {
       (element) => !element.parentElement?.closest('[data-world="gym"]'),
     );
     const hero = document.querySelector('.onboarding-hero');
+    // What is drawn dark, not only what is declared so (block 9): a surface
+    // painted dark by a stylesheet counts as one, wherever it stands.
+    const luminance = (css) => {
+      const m = css.match(/rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)/);
+      if (!m || (m[4] !== undefined && Number(m[4]) < 0.5)) return null;
+      const channel = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+      return 0.2126 * channel(Number(m[1])) + 0.7152 * channel(Number(m[2])) + 0.0722 * channel(Number(m[3]));
+    };
+    const painted = [...document.querySelectorAll('.onboarding *')].filter((element) => {
+      const box = element.getBoundingClientRect();
+      if (box.width * box.height < 2000) return false;
+      const value = luminance(getComputedStyle(element).backgroundColor);
+      return value !== null && value < 0.06;
+    });
+    const paintedTop = painted.filter((element) => !painted.some((other) => other !== element && other.contains(element)));
+    const surfaces = new Set([...dark, ...paintedTop.map((element) => element.closest('[data-world="gym"], .rank-stage') ?? element)]);
     return {
       wider: document.documentElement.scrollWidth > window.innerWidth + 0.5,
-      dark: dark.length,
-      darkKinds: dark.every((element) => element.getAttribute('data-world') === 'gym' || element.classList.contains('rank-stage')),
+      dark: surfaces.size,
+      darkKinds: [...surfaces].every((element) => element.getAttribute('data-world') === 'gym' || element.classList.contains('rank-stage')),
       heroOperable: hero ? hero.querySelectorAll('button, a[href], input, [tabindex], [role="button"]').length : 0,
       heroRole: hero ? hero.getAttribute('role') : 'img',
     };
