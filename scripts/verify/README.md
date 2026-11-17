@@ -74,7 +74,7 @@ installs a browser.
 | `wp3-sheets.mjs` | yes | typing into every sheet |
 | `terminal.mjs` | yes | the areas |
 | `design-system.mjs` | yes, at 393 | every screen's text on its pixels |
-| `muscle-sheet.mjs` | parts 1, 4 and 5 | Muskelgruppen with the sheet: the same number in row, sheet and body; one change per exercise; the lines in one column. Parts 2 and 3 drag the sheet with a finger through the Chromium protocol (a CDP session) and stay in Chromium. Where WebKit under Linux has no WebGL, the screen shows the flat figure, and the body's colours are not checked there |
+| `muscle-sheet.mjs` | parts 1, 4 and 5 | Muskelgruppen with the sheet: the same number in row, sheet and body; one change per exercise; the lines in one column. Parts 2 and 3 drag the sheet with a finger through the Chromium protocol (a CDP session) and stay in Chromium. On GitHub's runner WebKit has WebGL: the viewer runs there and the body's states are checked as in Chromium (204/204 in the first run) |
 | `gym-muscles.mjs`, `body.mjs` | no | they count frames and turn the body through the Chromium protocol; the body's frames and draw calls are Chromium's to measure |
 | `body-reach.mjs`, `farbregeln.mjs` | no | they read the body's picture pixel by pixel on a grid tuned to Chromium's rendering |
 | `phase*-a11y.mjs` | no | they read the accessibility tree through the Chromium protocol |
