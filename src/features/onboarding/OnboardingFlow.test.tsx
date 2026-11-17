@@ -45,11 +45,7 @@ async function open(
   );
   if (!stay) {
     expect(document.querySelector('.onboarding')?.getAttribute('data-step')).toBe('opening');
-    await act(async () =>
-      [...document.querySelectorAll<HTMLButtonElement>('button')]
-        .find((button) => button.textContent?.trim() === translate(language, 'common.continue'))!
-        .click(),
-    );
+    await act(async () => document.querySelector<HTMLButtonElement>('.onboarding__tap')!.click());
   }
 }
 
@@ -387,50 +383,86 @@ describe('every way through it (block 7E, D191)', () => {
 });
 
 describe('the opening page and the empty areas (STOP 7E-b, D192)', () => {
-  it('opens on one line and the usual button, with no marks and no way back', async () => {
+  it('opens on one line and a faint hint, with no button to find, no marks and no way back (D193)', async () => {
     await open('de', () => undefined, false, { stay: true });
     expect(step()).toBe('opening');
     const heading = document.querySelector('.onboarding h1');
     expect(heading?.textContent).toBe('Let\u2019s get it started');
-    expect(text()).toBe(`Let\u2019s get it started${translate('de', 'common.continue')}`);
+    expect(text()).toBe('Let\u2019s get it startedScreen antippen');
     expect(document.querySelector('.onboarding__steps')).toBeNull();
     expect(document.querySelector('.onboarding__back')).toBeNull();
-    expect(buttons().map((button) => button.textContent?.trim())).toEqual(['Weiter']);
+    // One control and no «Weiter»: the hint is its name, and it is not
+    // drawn as a button of the design system.
+    expect(buttons().map((button) => button.textContent?.trim())).toEqual(['Screen antippen']);
+    expect(buttonNamed(translate('de', 'common.continue'))).toBeUndefined();
+    const tap = document.querySelector('.onboarding__footer .onboarding__tap')!;
+    expect(tap.tagName).toBe('BUTTON');
+    expect(tap.classList.contains('button')).toBe(false);
+    expect(tap.getAttribute('aria-label')).toBeNull();
   });
 
   it('counts nowhere in the marks: the first slide is still step one', async () => {
     await open('de', () => undefined, false, { stay: true });
-    await click(buttonNamed('Weiter'));
+    await click(buttonNamed('Screen antippen'));
     expect(step()).toBe('momentum');
     expect(document.querySelector('.onboarding__steps')?.getAttribute('aria-label')).toBe('Schritt 1 von 5');
     expect(document.querySelectorAll('.onboarding__dot')).toHaveLength(5);
     expect(document.querySelector('.onboarding__dot--active')).toBe(document.querySelector('.onboarding__dot'));
     // And the first slide has no way back to it: it begins as it did.
     expect(document.querySelector('.onboarding__back')).toBeNull();
+    expect(document.querySelector('.onboarding__tap')).toBeNull();
     expect(buttonNamed('Los geht\u2019s')).toBeTruthy();
   });
 
-  it('says the same line in English, and tells a screen reader it is English in both languages', async () => {
+  it('says the same line in English, with its hint, and tells a screen reader the line is English in both languages', async () => {
     await open('en', () => undefined, false, { stay: true });
     expect(document.querySelector('.onboarding h1')?.textContent).toBe('Let\u2019s get it started');
     expect(document.querySelector('.onboarding h1')?.getAttribute('lang')).toBe('en');
-    expect(buttonNamed('Continue')).toBeTruthy();
+    expect(buttons().map((button) => button.textContent?.trim())).toEqual(['Tap the screen']);
     await mounted?.unmount();
     await open('de', () => undefined, false, { stay: true });
     expect(document.querySelector('.onboarding h1')?.getAttribute('lang')).toBe('en');
+    // The hint is the only thing in the German page that is not English.
+    expect(document.querySelector('.onboarding__tap')?.getAttribute('lang')).toBeNull();
   });
 
-  it('keeps the focus on its button into the first slide', async () => {
+  it('goes on wherever it is tapped: the line, the empty page, the hint (D193)', async () => {
+    for (const target of ['.onboarding__openingTitle', '.onboarding__opening', '.onboarding--opening', '.onboarding__footer', '.onboarding__tap']) {
+      await open('de', () => undefined, false, { stay: true });
+      await click(document.querySelector(target));
+      expect(step(), target).toBe('momentum');
+      await mounted?.unmount();
+    }
+  });
+
+  it('takes a tap on the page only while it shows: a click on the first slide moves nothing', async () => {
     await open('de', () => undefined, false, { stay: true });
-    const first = buttonNamed('Weiter')!;
-    first.focus();
-    expect(document.activeElement).toBe(first);
-    await click(first);
+    await click(document.querySelector('.onboarding__openingTitle'));
     expect(step()).toBe('momentum');
-    // The same button, now «Los geht’s»: a keyboard or a screen reader
-    // stays where it was instead of falling back to the page.
+    await click(document.querySelector('.onboarding'));
+    await click(document.querySelector('.onboarding-hero'));
+    expect(step()).toBe('momentum');
+  });
+
+  it('hands a keyboard\'s or a screen reader\'s focus on to the first slide\'s button', async () => {
+    await open('de', () => undefined, false, { stay: true });
+    const tap = buttonNamed('Screen antippen')!;
+    tap.focus();
+    expect(document.activeElement).toBe(tap);
+    await click(tap);
+    expect(step()).toBe('momentum');
+    // The control is gone with the page; the focus does not fall back to
+    // the page but goes on to «Los geht’s».
+    expect(tap.isConnected).toBe(false);
     expect(document.activeElement).toBe(buttonNamed('Los geht\u2019s'));
-    expect(document.activeElement).toBe(first);
+  });
+
+  it('moves no focus after a tap that gave the control none', async () => {
+    await open('de', () => undefined, false, { stay: true });
+    (document.activeElement as HTMLElement | null)?.blur();
+    await click(buttonNamed('Screen antippen'));
+    expect(step()).toBe('momentum');
+    expect(document.activeElement).toBe(document.body);
   });
 
   it('the areas open with nothing chosen, and «Weiter» waits for a world, saying why', async () => {

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { GYM, RANKS } from '../../core/config/constants';
 import { Button, Figure, SelectionMark } from '../../components';
 import {
@@ -135,6 +135,25 @@ export function OnboardingFlow({
   // The opening page before the first slide (D192): no step of its own, so
   // it counts nowhere in the marks.
   const [opened, setOpened] = useState(false);
+  // A tap anywhere on the opening page goes on (D193): the page takes the
+  // click, wherever it lands — the line, the hint, the empty ground — and
+  // the hint is a real button for a keyboard and a screen reader, whose
+  // click reaches the page the same way. The button goes when the first
+  // slide comes, so where it held the focus the focus goes on to the first
+  // slide's button instead of falling back to the page; a tap that gave it
+  // no focus moves none.
+  const footer = useRef<HTMLDivElement>(null);
+  const tap = useRef<HTMLButtonElement>(null);
+  const focusOnOpen = useRef(false);
+  const openFlow = () => {
+    focusOnOpen.current = tap.current !== null && document.activeElement === tap.current;
+    setOpened(true);
+  };
+  useLayoutEffect(() => {
+    if (!opened || !focusOnOpen.current) return;
+    focusOnOpen.current = false;
+    footer.current?.querySelector<HTMLButtonElement>('button')?.focus();
+  }, [opened]);
   const [selectedIds, setSelectedIds] = useState<string[]>([...STARTER_QUESTIONS]);
   const [customQuestions, setCustomQuestions] = useState<QuestionDraft[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -567,12 +586,13 @@ export function OnboardingFlow({
   }
 
   if (!opened) {
-    // The opening page (the owner at STOP 7E-b, D192): very empty — one line
-    // in the middle and the usual button beneath. It is not a slide, carries
-    // no marks and has no way back; the first slide follows as it was. It
-    // goes through the same return as the steps, so its button keeps its
-    // place and the focus stays on it into the first slide. The line is the
-    // owner's English in both languages, and says so to a screen reader.
+    // The opening page (the owner at STOP 7E-b, D192; his adjustment, D193):
+    // very empty — one line in the middle and, where the button stands on
+    // every step, a faint hint. There is no button to find: a tap anywhere
+    // goes on (the page's own click, below), and the hint names it. It is
+    // not a slide, carries no marks and has no way back; the first slide
+    // follows as it was. The line is the owner's English in both
+    // languages, and says so to a screen reader.
     body = (
       <div className="onboarding__opening">
         <h1 className="onboarding__openingTitle" lang="en">
@@ -582,14 +602,19 @@ export function OnboardingFlow({
     );
     note = null;
     action = (
-      <Button variant="primary" block onClick={() => setOpened(true)}>
-        {t('common.continue')}
-      </Button>
+      // No handler of its own: its click is the page's (`openFlow`).
+      <button type="button" className="onboarding__tap" ref={tap}>
+        {t('onboarding.opening.tap')}
+      </button>
     );
   }
 
   return (
-    <div className={opened ? 'onboarding' : 'onboarding onboarding--opening'} data-step={opened ? step : 'opening'}>
+    <div
+      className={opened ? 'onboarding' : 'onboarding onboarding--opening'}
+      data-step={opened ? step : 'opening'}
+      onClick={opened ? undefined : openFlow}
+    >
       {opened ? (
         <header className="onboarding__header">
           {stepIndex === 0 ? (
@@ -621,7 +646,7 @@ export function OnboardingFlow({
 
       {body}
 
-      <div className="onboarding__footer">
+      <div className="onboarding__footer" ref={footer}>
         {note}
         {action}
       </div>

@@ -19,12 +19,16 @@ export const summary = () => {
 export const phone = { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, hasTouch: true, acceptDownloads: true };
 
 /**
- * Passes the onboarding's opening page — one line and «Weiter» (the owner at
- * STOP 7E-b, D192) — to its first slide. Every walk of the flow begins here.
+ * Passes the onboarding's opening page — one line and a faint «Screen
+ * antippen» (the owner at STOP 7E-b, D192, and after it, D193) — to its
+ * first slide. There is no button to find: the whole screen goes on, so
+ * every walk taps the middle of the screen, where the line stands, and
+ * proves that on its way. Every walk of the flow begins here.
  */
 export async function passOpening(page) {
   await page.locator('.onboarding[data-step="opening"]').waitFor({ state: 'visible' });
-  await page.getByRole('button', { name: /^(Weiter|Continue)$/ }).click();
+  const { width, height } = await page.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight }));
+  await page.mouse.click(Math.round(width / 2), Math.round(height / 2));
   await page.locator('.onboarding[data-step="momentum"]').waitFor({ state: 'visible' });
 }
 

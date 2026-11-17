@@ -256,7 +256,8 @@ for (const width of WIDTHS) {
   /* ── Onboarding: the opening page and seven steps, all light ─────────── */
   const step = async (slug, options) => { if (wants('onboarding')) await look(page, width, `onboarding-${slug}`, null, options); };
   // The opening page before the first slide (D192) holds two texts by
-  // design — its title and «Weiter» — so two runs are what it must show.
+  // design — its line and the faint «Screen antippen» (D193) — so two runs
+  // are what it must show; the hint is measured like every caption.
   await step('0-auftakt', { minRuns: 2 });
   await passOpening(page);
   await step('1-willkommen');
