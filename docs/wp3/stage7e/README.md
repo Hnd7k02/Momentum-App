@@ -62,6 +62,9 @@ STOP 7E-b are in `docs/design/wp3/stage7e-b/`.
   four widths (lowest text 4.71:1, «Heute» in the hero at 320). Reviewed
   by four readers with a skeptic for every finding: seven held, all
   fixed (D191).
+- **The preview**: `Momentum-preview` `8a5df95`, built from `6806630`.
+  Data to rehearse on: the check files of block 7D for 17 and 18 November
+  (`docs/wp3/stage7d/`); there is no backup with real data (D183).
 - **The pictures**: `docs/design/wp3/stage7e-b/` — every step at 393, the
   first slide and the weekly targets at 320 and 430, the question step as
   it opens and with no question chosen, and the preview's row

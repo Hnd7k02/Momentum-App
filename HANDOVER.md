@@ -2404,6 +2404,10 @@ D190, D191, `docs/wp3/stage7e/README.md`)
   finding: five findings held at 7E-a2 and seven at 7E-b, all fixed
   (D190, D191).
 - **Verification**: see STOP 7E-b in `docs/wp3/stage7e/README.md`.
+- **Preview**: `Momentum-preview` `8a5df95` (published 2026-11-17, built
+  from `6806630`). Data to rehearse on: the files of `docs/wp3/stage7d/`
+  for 17 and 18 November. **The run with real data is missing: there is
+  no backup with real data** (D183).
 
 **Infrastructure only — built, tested, not reachable from any screen**
 - Rest days, pause periods, tombstones, profile: stores +
