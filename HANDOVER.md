@@ -2875,6 +2875,24 @@ own history; no population norms, ever.
 
 ## Verification status
 
+**The WP3 release candidate (block 9, 2026-11-17)** — application source
+`017cc56`; record `docs/wp3/stage9/README.md`:
+
+| | |
+|---|---|
+| Typecheck | `tsc -b` exit 0 |
+| Unit tests | `npm run test` **exit 0** — 144 files, 2508 tests (the two report files skipped, as before) |
+| Browser, here (Chromium) | `npm run verify`: **43 suites, 5741 of 5742** — the one red is the known offline check in `release-proof.mjs` (D163, the tidy-up's) |
+| Browser, GitHub (Chromium) | `verify-wp3.yml`, the same command: GITHUB_FIGURE |
+| Browser, GitHub (WebKit) | five suites, **1012 of 1012** in three runs since the harness measures screens at rest |
+| Baseline at `aab8d12` | 40 suites, 5641 of 5648 |
+| The update | `updateRehearsal.test.ts` 6/6 and `update-in-place.mjs` 16/16: nothing lost, every day before the update as the live build showed it, each activation once, one reload, nothing of the live build left in the cache, the way back by the backup |
+| Contract §14 and §16 | every rule broken once and caught (the table in the record) |
+| Real device | **the owner's iPhone 15 Pro, iOS 26.3.1**: blocks 7A to 7E accepted on their previews; the measuring display's values of 7B and of 17 November against the review's targets in `docs/device-tests.md`. This candidate's checklist: open |
+| Not verified | VoiceOver itself, Safari's own engine, the update and offline on the device (the preview has no service worker) |
+
+Taken at the muscle-map release and carried since, below.
+
 Taken at the muscle-map release (`735efca`) and carried since; each WP3 stage
 records its own verification in its block above, and its STOP report. Since
 WP3 Stage 4 the Phase 6 suites are retired with the Food screens (D139), the
