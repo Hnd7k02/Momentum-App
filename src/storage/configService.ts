@@ -116,13 +116,19 @@ const metricEraOf = (snapshot: { config: AppConfigSnapshot }): 0 | 1 | 2 =>
  */
 function livedGymMetric(all: readonly ConfigSnapshotRecord[], date: DateKey): { field: unknown } | undefined {
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= date);
+  if (inForce === undefined || keptGymMetricEra(all, date) === undefined) return undefined;
+  return { field: (inForce.config as { scoring?: { gymMetric?: unknown } } | null)?.scoring?.gymMetric };
+}
+
+/** The boundary of the Stage 5b era dated after `date` that stays where it is (above), or `undefined`. */
+function keptGymMetricEra(all: readonly ConfigSnapshotRecord[], date: DateKey): ConfigSnapshotRecord | undefined {
+  const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= date);
   if (inForce === undefined) return undefined;
   const era = metricEraOf(inForce);
   if (era === 2) return undefined;
   const boundary = all.find((snapshot) => snapshot.effectiveFrom > date && metricEraOf(snapshot) > era);
   if (boundary === undefined) return undefined;
-  if (now().getTime() < Date.parse(boundary.createdAt)) return undefined;
-  return { field: (inForce.config as { scoring?: { gymMetric?: unknown } } | null)?.scoring?.gymMetric };
+  return now().getTime() < Date.parse(boundary.createdAt) ? undefined : boundary;
 }
 
 /** `config` with the Stage 5b marker as a day before a kept boundary had it: absent, or as stored. */
@@ -247,11 +253,14 @@ export async function ensureSessionWindowEra(
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
   const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
   let appended = false;
-  if (inForce !== null && !marked(inForce) && keptSessionWindowEra(all, effectiveFrom) === undefined) {
+  const kept = keptSessionWindowEra(all, effectiveFrom);
+  if (inForce !== null && !marked(inForce) && kept === undefined) {
     await configSnapshotsRepository.append(withMarker(inForce.config), effectiveFrom);
     appended = true;
   }
   for (const snapshot of later) {
+    // Dated before a kept boundary: its days were lived under the old era (block 9).
+    if (kept !== undefined && snapshot.effectiveFrom < kept.effectiveFrom) continue;
     if (!marked(snapshot)) {
       await configSnapshotsRepository.append(withMarker(snapshot.config), snapshot.effectiveFrom);
       appended = true;
@@ -337,11 +346,14 @@ export async function ensureFoodRetired(
 
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
   const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
-  if (inForce !== null && foodOn(inForce) && keptFoodSwitchOff(all, effectiveFrom) === undefined) {
+  const kept = keptFoodSwitchOff(all, effectiveFrom);
+  if (inForce !== null && foodOn(inForce) && kept === undefined) {
     await configSnapshotsRepository.append(withoutFood(inForce.config), effectiveFrom);
     retired = true;
   }
   for (const snapshot of later) {
+    // Dated before a kept switch-off: its days were lived with Food (block 9).
+    if (kept !== undefined && snapshot.effectiveFrom < kept.effectiveFrom) continue;
     if (foodOn(snapshot)) {
       await configSnapshotsRepository.append(withoutFood(snapshot.config), snapshot.effectiveFrom);
       retired = true;
@@ -420,16 +432,19 @@ export async function ensureGymMetricEra(
   const inForce = [...all].reverse().find((snapshot) => snapshot.effectiveFrom <= effectiveFrom) ?? null;
   const later = all.filter((snapshot) => snapshot.effectiveFrom > effectiveFrom);
   let appended = false;
+  const kept = keptGymMetricEra(all, effectiveFrom);
   if (
     inForce !== null &&
     readable(inForce) &&
     metricEraOf(inForce) < 2 &&
-    livedGymMetric(all, effectiveFrom) === undefined
+    kept === undefined
   ) {
     await configSnapshotsRepository.append(complete(inForce.config), effectiveFrom);
     appended = true;
   }
   for (const snapshot of later) {
+    // Dated before a kept boundary: its days were lived under the earlier metric (block 9).
+    if (kept !== undefined && snapshot.effectiveFrom < kept.effectiveFrom) continue;
     if (readable(snapshot) && metricEraOf(snapshot) < 2) {
       await configSnapshotsRepository.append(complete(snapshot.config), snapshot.effectiveFrom);
       appended = true;
