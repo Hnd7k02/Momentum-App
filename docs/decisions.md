@@ -6092,7 +6092,7 @@ every line in the sheet stands on the zero line (`muscle-sheet.mjs`), the
 detail's line ends on its figure on the side of the zero line its colour
 says, and one day draws a sentence.
 
-## D188 — Block 7D: the catalogue grows to 133, every entry names its movement and its equipment, and the picker searches all of it
+## D188 — Block 7D: the catalogue grows to 134, every entry names its movement and its equipment, and the picker searches all of it
 
 **Decision (block 7D, 2026-11-16).** D171 asked for a really large choice
 — machine, cable and bodyweight first, at least ten per group — and a
@@ -6104,16 +6104,17 @@ accepted the list** (STOP 7D).
 
 ### The catalogue
 
-- **133 entries, 84 of them new.** By primary group (before → after):
-  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 10, triceps
+- **134 entries, 85 of them new** — 133 and 84 at STOP 7D, and the one
+  the owner added after it (below). By primary group (before → after):
+  chest 6 → 15, back 11 → 20, shoulders 7 → 15, biceps 5 → 11, triceps
   6 → 14, core 3 → 15, quadriceps 3 → 11, hamstrings and glutes 5 → 14,
   calves 2 → 10, forearms 2 → 10 (the deadlift counts for two). By
-  equipment: barbell 21, dumbbell 26, cable 26, machine 26, Smith 4,
+  equipment: barbell 21, dumbbell 26, cable 27, machine 26, Smith 4,
   bodyweight 26, SZ bar 2, kettlebell 1, wrist roller 1. By load type:
-  external 105, bodyweight 26, assisted 2.
+  external 106, bodyweight 26, assisted 2.
 - **The 49 entries before stand as they were**: id, roles, load type,
   English record name, German name and detail. The three tables of
-  `catalogue.test.ts` pass unchanged; a fourth pins the 84. An existing
+  `catalogue.test.ts` pass unchanged; a fourth pins the 85. An existing
   device gets the new entries the next time Gym opens, and its stored
   entries — a renamed one included — stay byte for byte (a test holds it).
   Nothing that computes or stores changed: no golden file, no fingerprint,
@@ -6194,7 +6195,7 @@ accepted the list** (STOP 7D).
   own exercise; "Eigene Übung" becomes the primary action, and the form it
   opens starts with the word as its name.
 
-**Checks.** `catalogue.test.ts` (133 entries, where it counted 49; ten per
+**Checks.** `catalogue.test.ts` (134 entries, where it counted 49; ten per
 group; equipment and movement on every entry; body weight and its
 equipment agree; ids from the English names), `search.test.ts`,
 `gym.test.ts` (the existing device), and the browser suite
@@ -6202,6 +6203,80 @@ equipment agree; ids from the English names), `search.test.ts`,
 catalogue's source and holds the search to it. Restated:
 `phase4.mjs` ("Squat" finds the squats, where it left one row) and
 `phase4-a11y.mjs` (picks Bankdrücken by name, where it took the first row).
+
+**Addendum (owner, 2026-11-17, after STOP 7D and before accepting the
+list).** He asked whether four exercises are in the catalogue and to add
+those that are not. Three were: the cable fly from high to low ("Cable Fly
+top-down", `ex_high_to_low_cable_fly`, new in this block), at shoulder
+height ("Cable Fly straight", `ex_chest_fly`) and from low to high ("Cable
+Fly bottom-up", `ex_cable_fly_low_to_high`) — the names the training press
+uses for the three pulley heights, high-to-low, middle and low-to-high —
+and the barbell row on the Smith machine ("Rudern Smith Machine",
+`ex_smith_row`). One was not, and is added: **"Bayesian Curls Kabel" /
+Bayesian Cable Curl** (`ex_bayesian_cable_curl`), the curl with the arm
+behind the body and the cable from below, which stretches the long head
+of the biceps — biceps alone as its group and primary, the cable, by
+weight, "beugen"; its detail "Bizeps, langer Kopf" as the incline curl's.
+The catalogue holds 134 entries, the biceps 11 by primary. Restated:
+`catalogue.test.ts` counts 134 where it counted 133 at the STOP.
+
+## D189 — STOP 7D: the catalogue accepted, the biceps machine is the preacher curl, 7E before 9, and an open day in the charts
+
+**Decision (owner, 2026-11-17).** In his words: "Preacher-Curls ist genau
+diese Maschine: Nimm die Bizepsmaschine wieder heraus. Gib Preacher-Curls
+dafür «Bizepsmaschine» und «Scott-Curls» als zusätzliche Suchwörter. Name
+und ID bleiben. Damit ist 7D abgenommen. Fragen: 2 A, 3 A, 4 A, 5 A. Eine
+Messart nach Zeit kommt als Idee fürs nächste Update ins HANDOVER. Block 7E
+läuft schon in einer eigenen Session auf dem Branch
+claude/hopeful-carson-4utktp (Basis adf1ead). Schreib dafür keinen Prompt.
+Trag nur die Reihenfolge 5b, Kurve, 7B, 7C, 7D, 7E, 9, Aufräumen ein, mit
+dem Hinweis, dass 7E vor Block 9 in claude/momentum-wp3 zusammengeführt
+wird." And a point for block 9, below.
+
+**Block 7D is accepted** with the list as it stands: 134 entries, 85 of
+them new, the Bayesian cable curl among them (D188's addendum). From this
+acceptance **the 85 new ids are given for good**. His answers to the
+questions of the STOP page, each as built: the calves and forearms stay at
+ten by equipment and stance (2 A); lunges, Bulgarian split squats and
+step-ups are loaded by body weight, dumbbells as added weight (3 A); shrugs
+stay under the back (4 A); exercises measured in time or distance stay out
+until there is a measure for them (5 A) — **a measure by time is an idea
+for the next update**, recorded in `HANDOVER.md`, not a block of WP3.
+
+**The biceps machine.** He asked for it after the STOP ("Bizeps-Maschine:
+Bizeps hat mit 10 die kürzeste Liste, und die Maschine steht in den meisten
+Gyms"); it was added as `ex_biceps_curl_machine` (`35a5c9c`, with its
+HANDOVER entry `93dfcca`) and published in the preview build `8ee9215` of
+`Momentum-preview`; both commits are reverted and the preview is replaced:
+**"Preacher-Curls" is that machine**. Its id stood in a preview only and
+was never accepted. **Preacher-Curls keeps its name and
+its id** (`ex_preacher_curl`) and is found by two more words, "Bizepsmaschine"
+and "Scott-Curls" — in English "Biceps machine" and "Scott curl" —
+written in `EXERCISE_WORDS` in `core/gym/search.ts` beside the other words
+of the search, not on the catalogue entry, which stays as it was. A preview
+device that opened Gym on `8ee9215` holds a record of the removed entry;
+importing a check file replaces it.
+
+**The order of WP3 from here: 5b, Kurve, 7B, 7C, 7D, 7E, 9, the tidy-up.**
+Block 7E runs in a session of its own on `claude/hopeful-carson-4utktp`,
+from `adf1ead`; this session writes no prompt for it. **7E is merged into
+`claude/momentum-wp3` before block 9**, and block 9 begins from there
+(`prompt-9-haertung.md`, section 3).
+
+**A point for block 9** (owner, in his words): "Ein eingetragenes Training
+erscheint im Entwicklungs-Chart erst am nächsten Tag. Es soll sofort nach
+dem Speichern erscheinen. Finde die Ursache und prüf, welche Charts
+betroffen sind (Gym-Rating, Muskelgruppen, Übungsdetail). Solange der Tag
+noch offen ist, darf der Punkt als vorläufig markiert sein. Vergangene Tage
+rechnen unverändert." Recorded in `HANDOVER.md` and in
+`prompt-9-haertung.md` as step 6a; not built now.
+
+**Checks.** `search.test.ts` gains a test: «bizepsmaschine»,
+«Bizeps-Maschine», «scott» and «Scott-Curls» find Preacher-Curls alone, and
+so do «scott curl» and «biceps machine» on the English screen, while a
+search for the biceps still lists the curls before it. With the revert,
+`catalogue.test.ts` counts 134 again and the list of what «maschine» finds
+in `search.test.ts` is the 26 it was.
 
 ## D190 — STOP 7E-a: the onboarding takes direction C, with five exceptions that hold in the onboarding only, and DM Sans
 

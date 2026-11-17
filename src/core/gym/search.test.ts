@@ -3,7 +3,7 @@ import { MUSCLE_GROUPS, type ExerciseRecord, type Language } from '../model';
 import { de as deCatalogue } from '../../i18n/de';
 import { en as enCatalogue } from '../../i18n/en';
 import { EXERCISE_CATALOGUE, catalogueRecords, type Equipment } from './catalogue';
-import { EQUIPMENT_WORDS, GROUP_WORDS, foldText, searchExercises, searchableExercise, type SearchableExercise } from './search';
+import { EQUIPMENT_WORDS, EXERCISE_WORDS, GROUP_WORDS, foldText, searchExercises, searchableExercise, type SearchableExercise } from './search';
 
 /**
  * The picker's search (block 7D, D171): what each of the owner's four words
@@ -209,6 +209,22 @@ describe('the order of the hits', () => {
     expect(lastBack).toBeLessThan(hits.indexOf('Bankdrücken'));
     // A word that begins a word of the name is no such hit: «hack» finds the hack squat among the names.
     expect(names('hack')[0]).toBe('Hackenschmidt-Kniebeuge');
+  });
+
+  it('finds the preacher curl by its other names, and nothing else by them (D189)', () => {
+    expect(names('bizepsmaschine')).toEqual(['Preacher-Curls']);
+    expect(names('Bizeps-Maschine')).toEqual(['Preacher-Curls']);
+    expect(names('scott')).toEqual(['Preacher-Curls']);
+    expect(names('Scott-Curls')).toEqual(['Preacher-Curls']);
+    expect(names('scott curl', 'en')).toEqual(['Preacher Curl']);
+    expect(names('biceps machine', 'en')).toEqual(['Preacher Curl']);
+    // A word of a group finds the group as before: the preacher curl stands among the biceps, not ahead of them.
+    expect(names('bizeps')[0]).not.toBe('Preacher-Curls');
+    // Other names hang on built-ins that exist, the same ones in both languages.
+    for (const language of ['de', 'en'] as const) {
+      for (const id of Object.keys(EXERCISE_WORDS[language])) expect(EXERCISE_CATALOGUE.some((entry) => entry.id === id), id).toBe(true);
+    }
+    expect(Object.keys(EXERCISE_WORDS.de)).toEqual(Object.keys(EXERCISE_WORDS.en));
   });
 
   it('lists everything alphabetically for an empty query', () => {
