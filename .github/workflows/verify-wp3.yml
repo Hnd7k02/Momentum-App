@@ -1,0 +1,85 @@
+# The whole check, on every push to the WP3 branch (block 9, step 2).
+#
+# It publishes nothing and has no right to: `deploy.yml` is the only workflow
+# that deploys, and only the default branch can. This one reads the
+# repository, builds it, and runs what a release of WP3 has to pass:
+#
+#   - `tsc -b` and `npm run test` (the exit code, not the summary),
+#   - `npm run verify`: the build, the preview build with a database of its
+#     own, the live state `e30becd` (built from history, hence the full
+#     checkout), and every browser suite — the 3D suites one by one,
+#   - and a selection of the suites in WebKit, as an early warning. WebKit
+#     under Linux is not Safari on an iPhone, and the owner's check on the
+#     phone is what decides; `scripts/verify/README.md` lists what runs there
+#     and what does not, and why.
+#
+# The one known red check — `release-proof.mjs`, "offline, Gym still shows
+# the 3D body", red since before Stage 6b and the tidy-up's (D163) — stays
+# red here as it does locally: the Chromium job fails while it does. The
+# table at the end of the job's log, and the uploaded results, say whether
+# anything else failed.
+name: Verify WP3
+
+on:
+  push:
+    branches:
+      - claude/momentum-wp3
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromium:
+    name: Typecheck, tests, build and every suite (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm run test
+      # The browser playwright-core expects, at its own version. The cloud
+      # sessions use the image's Chromium and never install one.
+      - run: npx playwright-core install --with-deps chromium
+      - name: npm run verify
+        run: |
+          export CHROMIUM_PATH="$(node -e "import('playwright-core').then(({ chromium }) => console.log(chromium.executablePath()))")"
+          npm run verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verify-chromium
+          path: .artifacts/verify
+          retention-days: 14
+
+  webkit:
+    name: A selection of the suites in WebKit (an early warning, not Safari on an iPhone)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright-core install --with-deps webkit
+      - name: BROWSER=webkit npm run verify
+        run: BROWSER=webkit npm run verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verify-webkit
+          path: .artifacts/verify
+          retention-days: 14
