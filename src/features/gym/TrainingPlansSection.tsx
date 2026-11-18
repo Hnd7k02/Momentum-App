@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { TrainingPlanRecord } from '../../core/model';
 import { Card, Row, Section } from '../../components';
 import { ChevronRightIcon, PlusIcon } from '../../components/Icons';
@@ -23,12 +23,17 @@ import './gym.css';
  * line under the list, never a modal. The editor takes the workspace over
  * while it is open, the way an exercise's detail already does.
  */
-export function TrainingPlansSection() {
+export function TrainingPlansSection({ onReady }: { /** The plans are loaded and the section has its height. */ onReady?: () => void } = {}) {
   const t = useT();
   const load = useCallback(() => listTrainingPlans(), []);
   // The section reloads itself after each of its own writes.
   const { state, reload } = useLoadable(load, []);
   const [editing, setEditing] = useState<TrainingPlanRecord | null | 'new'>(null);
+
+  const ready = state.status !== 'loading';
+  useEffect(() => {
+    if (ready) onReady?.();
+  }, [ready, onReady]);
 
   const plans = state.status === 'ready' ? state.value : [];
   const slots = planSlotsOf(plans.length);

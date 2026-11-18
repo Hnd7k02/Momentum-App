@@ -299,6 +299,42 @@ for (const width of CHECK_WIDTHS) {
       await manage.click();
       await page.waitForTimeout(900);
       check(`${width}: "Pläne verwalten" leads to the hub, not back to Heute`, (await hash(page)) === '#/areas/gym', await hash(page));
+      // …and on the hub to the plans themselves (the tidy-up, D163): the
+      // move says what it was made for, the hub brings its plans into view
+      // and puts the focus on their heading. Back returns to Muskelgruppen.
+      await page.waitForTimeout(600);
+      const arrived = await firstView(page, '.plans__slots');
+      check(`${width}: from the empty Muskelgruppen, "Pläne verwalten" stands at the training plans`, arrived.inView && (await page.getByRole('button', { name: /^Push A/ }).isVisible()), JSON.stringify(arrived));
+      const focused = await page.evaluate(() => ({ tag: document.activeElement?.tagName, text: document.activeElement?.textContent }));
+      check(`${width}: and the focus is on the plans' heading`, focused.tag === 'H2' && focused.text === 'Trainingspläne', JSON.stringify(focused));
+      if (shoot) await page.screenshot({ path: tag('E2', 'plans-from-muscles') });
+      await page.goBack();
+      await page.waitForTimeout(1500);
+      check(`${width}: Back from there returns to Muskelgruppen`, (await hash(page)) === '#/areas/gym/muscles' && (await page.locator('.muscle-row').count()) === 10, await hash(page));
+
+      // The same from Heute: the plan chooser of its Gym card.
+      await page.locator('.tab-bar button', { hasText: 'Heute' }).click();
+      await page.waitForTimeout(700);
+      await page.getByRole('button', { name: 'Session eintragen' }).first().click();
+      await page.waitForTimeout(900);
+      const fromToday = page.locator('[role="dialog"]').getByRole('button', { name: 'Pläne verwalten' });
+      check(`${width}: Heute's Gym card opens the plan chooser`, (await fromToday.count()) === 1);
+      if ((await fromToday.count()) === 1) {
+        await fromToday.click();
+        await page.waitForTimeout(1500);
+        const there = await firstView(page, '.plans__slots');
+        check(`${width}: from Heute, "Pläne verwalten" stands at the training plans`, (await hash(page)) === '#/areas/gym' && there.inView, `${await hash(page)} ${JSON.stringify(there)}`);
+        const focus = await page.evaluate(() => ({ tag: document.activeElement?.tagName, text: document.activeElement?.textContent }));
+        check(`${width}: and the focus is on the plans' heading (from Heute)`, focus.tag === 'H2' && focus.text === 'Trainingspläne', JSON.stringify(focus));
+        await page.goBack();
+        await page.waitForTimeout(900);
+        check(`${width}: Back from there returns to Heute`, (await hash(page)) === '#/today', await hash(page));
+        // The hub opened for itself starts at its top: the intent was taken once.
+        await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();
+        await page.waitForTimeout(1200);
+        const top = await page.locator('.areas__scroll').evaluate((el) => el.scrollTop);
+        check(`${width}: the hub opened by its tab starts at its top`, (await hash(page)) === '#/areas/gym' && top === 0, `${await hash(page)} scrollTop ${top}`);
+      }
     }
     check(`${width}: no page errors (empty)`, errors.length === 0, errors.join(' | '));
     await ctx.close();

@@ -17,6 +17,7 @@ import { yesterdayOutstanding, type TrainingSession } from '../../storage/servic
 import type { TranslationKey } from '../../i18n';
 import { DOMAIN_NAME_KEYS } from '../../i18n/domainNames';
 import '../pause/pause.css';
+import { arriveAt } from '../../app/hubIntent';
 import { useTrainingLauncher } from '../gym/useTrainingLauncher';
 import { BossSummary } from './BossSummary';
 import { CheckInItem } from './CheckInItem';
@@ -153,7 +154,12 @@ export function TodayScreen({
   const gym = useTrainingLauncher({
     date,
     onClosed: () => void reload(),
-    onManagePlans: () => onGoToAreas('gym'),
+    // The plans stand on the Gym hub: the move says what it is made for,
+    // and the hub brings them into view (`app/hubIntent.ts`).
+    onManagePlans: () => {
+      arriveAt('plans');
+      onGoToAreas('gym');
+    },
   });
 
   /*

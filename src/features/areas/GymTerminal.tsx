@@ -1,4 +1,4 @@
-import { useRef, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { MUSCLE_TREND_RANGES } from '../../core/config/constants';
 import { useToday } from '../../app/useToday';
 import { GymOverview } from '../gym/GymOverview';
@@ -9,6 +9,7 @@ import { useGymHistoryState } from '../gym/useGymHistory';
 import { useGymRatingState } from '../gym/useGymRating';
 import { LoadingBlocks } from '../../components';
 import { useTrainingLauncher } from '../gym/useTrainingLauncher';
+import { takeHubIntent } from '../../app/hubIntent';
 
 /**
  * The Gym hub (WP2-2): the Gym area's front page.
@@ -84,6 +85,57 @@ function HubCards({
   const range = MUSCLE_TREND_RANGES[0];
   const { view: gymRating, loading: ratingLoading } = useGymRatingState();
   const { history: gym, latestSession, failed: historyFailed } = useGymHistoryState(range);
+
+  /*
+   * Opened for the plans (`app/hubIntent.ts`): «Pläne verwalten» on Heute or
+   * on Muskelgruppen led here. The plans stand under the rating board, so
+   * they are brought into view once both have loaded and the page has its
+   * heights — at once, without a travel, since the user did not see where
+   * it started — and the focus goes to their heading, where a screen reader
+   * arrives too. What still settles above them in the moments after (the
+   * Training card's lines) moves the page under them, not them: the place
+   * is held until the user touches the page, and no longer than a second.
+   */
+  const [toPlans, setToPlans] = useState(false);
+  const [plansReady, setPlansReady] = useState(false);
+  const onPlansReady = useCallback(() => setPlansReady(true), []);
+  useEffect(() => {
+    if (takeHubIntent() === 'plans') setToPlans(true);
+  }, []);
+  useEffect(() => {
+    if (!toPlans || !plansReady || ratingLoading) return undefined;
+    const target = plansRef.current;
+    const scroller = target?.closest<HTMLElement>('.areas__scroll');
+    if (!target || !scroller) return undefined;
+    const bring = () => {
+      const offset = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      scroller.scrollTo({ top: scroller.scrollTop + offset - 8, behavior: 'auto' });
+    };
+    bring();
+    const heading = target.querySelector<HTMLElement>('h2');
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
+    setToPlans(false);
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(bring);
+    for (const child of Array.from(scroller.children)) observer.observe(child);
+    const stop = () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+      scroller.removeEventListener('pointerdown', stop);
+      scroller.removeEventListener('wheel', stop);
+      scroller.removeEventListener('touchstart', stop);
+    };
+    const timer = window.setTimeout(stop, 1000);
+    scroller.addEventListener('pointerdown', stop, { passive: true });
+    scroller.addEventListener('wheel', stop, { passive: true });
+    scroller.addEventListener('touchstart', stop, { passive: true });
+    // Not a cleanup of this effect: taking the intent re-renders, and the
+    // place is held across that render.
+    return undefined;
+  }, [toPlans, plansReady, ratingLoading, plansRef]);
   return (
     <>
       <TrainingCard onStart={onStart} onManagePlans={onManagePlans} />
@@ -102,7 +154,7 @@ function HubCards({
         <LoadingBlocks heights={[150, 120]} />
       ) : null}
       <div ref={plansRef}>
-        <TrainingPlansSection />
+        <TrainingPlansSection onReady={onPlansReady} />
       </div>
     </>
   );

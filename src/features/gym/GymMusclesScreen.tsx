@@ -7,6 +7,7 @@ import { useT } from '../../i18n/I18nProvider';
 import { GymProgress } from './GymProgress';
 import { LEGEND_STATES } from './MuscleModule';
 import { useGymHistoryState } from './useGymHistory';
+import { arriveAt } from '../../app/hubIntent';
 import { useTrainingLauncher } from './useTrainingLauncher';
 import { useToday } from '../../app/useToday';
 import '../areas/areas.css';
@@ -71,7 +72,16 @@ export function GymMusclesScreen({
   // change version. "Pläne verwalten" lives on the hub: it leads there, not
   // back to wherever this screen was opened from.
   const date = useToday();
-  const launcher = useTrainingLauncher({ date, onClosed: () => undefined, onManagePlans: onOpenHub });
+  const launcher = useTrainingLauncher({
+    date,
+    onClosed: () => undefined,
+    // The hub is told what it is opened for, and shows its plans
+    // (`app/hubIntent.ts`); Back from there returns here.
+    onManagePlans: () => {
+      arriveAt('plans');
+      onOpenHub();
+    },
+  });
 
   // The workout is a screen of its own, on top of this one.
   if (launcher.open) return <>{launcher.overlay}</>;
