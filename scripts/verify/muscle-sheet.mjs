@@ -253,8 +253,24 @@ async function drag(page, client, from, to, { ms = 320, hold = 120 } = {}) {
   const kg = (line) => Number((/: ([\d']+)\skg$/.exec(line ?? '')?.[1] ?? 'NaN').replace(/'/g, ''));
   const firstChest = chestWeeks.map(kg).find((value) => Number.isFinite(value));
   const firstTriceps = tricepsShare.map(kg).find((value) => Number.isFinite(value));
-  check('the volume is the working sets\' reps × load, spread over the exercise\'s groups: chest 70 %, triceps 30 % of 1020 kg',
-    firstChest === 714 && firstTriceps === 306, `${firstChest} + ${firstTriceps}`);
+  // Which week that is depends on the weekday (found in the tidy-up, on a
+  // Wednesday): a week only partly inside the range at its start is left
+  // out (`rangeWeeks`), and the bench press's first day lies 26 days back,
+  // the range's first day 29. From Saturday to Tuesday that day's week
+  // begins inside the range and is the first bar — 9 × 60 and 8 × 60, 1020
+  // kg, the warm-up left out. From Wednesday to Friday its Monday lies
+  // before the range: the week is left out, and the first bar is the next
+  // week's 10 × 60, 600 kg. Until the tidy-up the check knew the first
+  // case only and was red three days a week.
+  const firstWeekShown = await page.evaluate(() => {
+    const at = (back) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - back); return d; };
+    const monday = at(26);
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    return monday.getTime() >= at(29).getTime();
+  });
+  const firstTotal = firstWeekShown ? 1020 : 600;
+  check(`the volume is the working sets' reps × load, spread over the exercise's groups: chest 70 %, triceps 30 % of ${firstTotal} kg — ${firstWeekShown ? 'the first day\'s week, the warm-up left out' : 'the first day\'s week lies partly before the range and is left out'}`,
+    firstChest === firstTotal * 0.7 && firstTriceps === firstTotal * 0.3, `${firstChest} + ${firstTriceps}`);
 
   /* 90 days: what the longer range reaches, in the sheet as on the screen. */
   await openGroupSheet(page, 'shoulders');
