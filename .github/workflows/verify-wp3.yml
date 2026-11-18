@@ -13,11 +13,15 @@
 #     phone is what decides; `scripts/verify/README.md` lists what runs there
 #     and what does not, and why.
 #
-# The one known red check — `release-proof.mjs`, "offline, Gym still shows
-# the 3D body", red since before Stage 6b and the tidy-up's (D163) — stays
-# red here as it does locally: the Chromium job fails while it does. The
-# table at the end of the job's log, and the uploaded results, say whether
-# anything else failed.
+# There is no known red check since the tidy-up: `release-proof.mjs`,
+# "offline, Gym still shows the 3D body", red since before Stage 6b, was the
+# test server's (D163) — the suites now read the builds from a server that
+# answers as GitHub Pages does (`scripts/verify/pages-server.mjs`). The
+# table at the end of a job's log, and the uploaded results, say what
+# failed if anything did.
+#
+# Started by hand, `only: webkit` runs the WebKit selection alone — minutes
+# instead of hours — for when that job is to be seen green more than once.
 name: Verify WP3
 
 on:
@@ -25,6 +29,11 @@ on:
     branches:
       - claude/momentum-wp3
   workflow_dispatch:
+    inputs:
+      only:
+        description: "'webkit' runs the WebKit selection alone; empty runs both jobs"
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -35,6 +44,7 @@ permissions:
 jobs:
   chromium:
     name: Typecheck, tests, build and every suite (Chromium)
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.only != 'webkit' }}
     runs-on: ubuntu-latest
     timeout-minutes: 330
     concurrency:

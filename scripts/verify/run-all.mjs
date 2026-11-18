@@ -18,10 +18,11 @@ import { join, resolve } from 'node:path';
  *    today — in a directory outside the repository (`LIVE_DIR`, default
  *    `<tmp>/momentum-live-e30becd`), from `git archive`, with `npm ci`. The
  *    live state is built once and kept; `--rebuild-live` builds it again.
- * 2. **Serves** them: the app on 4173, the preview build on 4174, the live
- *    state on 4273 and the dev server on 5173 (`body.mjs` needs its harness
- *    page). A port already taken fails the run rather than testing whatever
- *    is listening there.
+ * 2. **Serves** them, as GitHub Pages serves a site (`pages-server.mjs`,
+ *    since the tidy-up): the app on 4173, the preview build on 4174, the
+ *    live state on 4273 — and Vite's dev server on 5173 (`body.mjs` needs
+ *    its harness page). A port already taken fails the run rather than
+ *    testing whatever is listening there.
  * 3. **Runs every suite** — every script under `scripts/verify/` that counts
  *    checks — the ordinary ones `JOBS` at a time (default 2), then the five
  *    3D suites **one by one, with nothing else running**: they count frames
@@ -32,10 +33,14 @@ import { join, resolve } from 'node:path';
  *    `table.md` and `results.json` beside the logs, stops the servers, and
  *    **exits 1 if anything failed**, a build, a server or a single check.
  *
- * **The one known red check stays red** and is not hidden: `release-proof.mjs`
- * "offline, Gym still shows the 3D body" has failed since before Stage 6b and
- * belongs to the tidy-up (D163). The table marks a suite whose only failures
- * are known ones as such, and the run still exits 1 while it fails.
+ * **There is no known red check** since the tidy-up. Until then
+ * `release-proof.mjs` "offline, Gym still shows the 3D body" had failed
+ * since before Stage 6b (D163): the suites read the build from `vite
+ * preview`, which answers with `Vary: Origin`, and the worker's cache then
+ * refused the body's chunk to its own import. The builds are now served as
+ * GitHub Pages serves them (`pages-server.mjs`), and the check is green.
+ * `KNOWN_RED` stays as the place a known red check would be named — the
+ * table would mark it, and the run would still exit 1 while it failed.
  *
  * `BROWSER=webkit` runs the suites that can launch WebKit there (block 9,
  * step 3; the list is `WEBKIT_SUITES` in `lib.mjs`) and nothing else.
@@ -103,10 +108,13 @@ const SUITES = [
   { name: 'body', alone: true, needs: ['dev'] },
 ];
 
-/** Checks that are red and known, by suite: the table says so, the exit code does not forgive them. */
-const KNOWN_RED = {
-  'release-proof': [{ check: 'offline, Gym still shows the 3D body', why: 'red since before Stage 6b; the tidy-up block (D163)' }],
-};
+/**
+ * Checks that are red and known, by suite: the table says so, the exit code
+ * does not forgive them. None since the tidy-up: the offline check of
+ * `release-proof.mjs`, red since before Stage 6b, was the test server's
+ * (D163, `pages-server.mjs`).
+ */
+const KNOWN_RED = {};
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -134,9 +142,9 @@ function run(command, commandArgs, { cwd = ROOT, env = {}, log, timeout = SUITE_
   });
 }
 
-function serve(name, commandArgs, cwd) {
+function serve(name, commandArgs, cwd, command = 'npx') {
   const log = join(RUN, `server-${name}.log`);
-  const child = spawn('npx', commandArgs, { cwd, env: process.env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+  const child = spawn(command, commandArgs, { cwd, env: process.env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
   children.add(child);
   const out = createWriteStream(log);
   child.stdout.pipe(out);
@@ -227,7 +235,8 @@ if (needed.has('live') && (REBUILD_LIVE || !existsSync(join(LIVE_DIR, 'dist', 'i
 if (!broken) {
   for (const [name, port] of Object.entries(PORT)) {
     if (!needed.has(name)) continue;
-    if (await reachable(`http://127.0.0.1:${port}/`, { timeout: 500 })) {
+    // Anything that answers there, with whatever status, is in the way.
+    if (await fetch(`http://127.0.0.1:${port}/`).then(() => true, () => false)) {
       broken = true;
       console.log(`[run-all] port ${port} is taken: stop whatever serves it, so that the suites test this build`);
     }
@@ -237,9 +246,16 @@ if (!broken) {
   // On the address the suites ask for: `localhost` is IPv6 alone on some
   // machines (a GitHub runner among them), and 127.0.0.1 then finds nobody.
   const host = ['--host', '127.0.0.1'];
-  serve('app', ['vite', 'preview', '--port', String(PORT.app), '--strictPort', ...host], ROOT);
-  if (needed.has('preview')) serve('preview', ['vite', 'preview', '--outDir', 'dist-preview', '--port', String(PORT.preview), '--strictPort', ...host], ROOT);
-  if (needed.has('live')) serve('live', ['vite', 'preview', '--port', String(PORT.live), '--strictPort', ...host], LIVE_DIR);
+  // The three builds are served as GitHub Pages serves them
+  // (`pages-server.mjs`, the tidy-up, D163) — not by `vite preview`, whose
+  // `Vary: Origin` kept the offline check red for months: a cache does not
+  // hand a response stored under that header to a request that sends
+  // another `Origin`, and Pages sends no such header. The dev server is
+  // Vite's own: it serves source, and only `body.mjs` reads it.
+  const pages = (name, dir) => serve(name, [join(ROOT, 'scripts/verify/pages-server.mjs'), '--dir', dir, '--port', String(PORT[name]), ...host], ROOT, 'node');
+  pages('app', join(ROOT, 'dist'));
+  if (needed.has('preview')) pages('preview', join(ROOT, 'dist-preview'));
+  if (needed.has('live')) pages('live', join(LIVE_DIR, 'dist'));
   if (needed.has('dev')) serve('dev', ['vite', '--port', String(PORT.dev), '--strictPort', ...host], ROOT);
   for (const name of needed) {
     if (!(await reachable(ADDRESS[name]))) { broken = true; console.log(`[run-all] the ${name} server did not answer at ${ADDRESS[name]}`); }
