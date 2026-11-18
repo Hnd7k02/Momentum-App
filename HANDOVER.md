@@ -2901,7 +2901,7 @@ are replay tests seeded through the repositories.
 
 | | |
 |---|---|
-| Real device (muscle map) | ~~iPhone, from the `Momentum-preview` build `5db6fc4` of the release candidate `bc57ec6`: … all approved. Screenshots: `docs/design/muscle-map/qa/device/IMG_0648–0650.png`~~ — **not a record of an iPhone** (block 9): the three files are iPad screenshots of a draft. The first measurements from an iPhone are the owner's, from block 7B on (D184, `docs/device-tests.md`) |
+| Real device (muscle map) | ~~iPhone, from the `Momentum-preview` build `5db6fc4` of the release candidate `bc57ec6`: … all approved. Screenshots: three files under `docs/design/muscle-map/qa/device/`~~ — **not a record of an iPhone** (block 9): the three files were iPad screenshots of a draft, and the tidy-up took them out of the tree (D157; they stay in the history). The first measurements from an iPhone are the owner's, from block 7B on (D184, `docs/device-tests.md`) |
 | Muscle map QA | `docs/design/muscle-map/INTEGRATION-QA.md`: 50 items — 47 PASS, 1 FAIL (two harness checks, neither product), 2 NOT VERIFIED (preview serving, real-device Safari). Evidence under `docs/design/muscle-map/qa/` |
 | Muscle map suites | `gym-muscles.mjs` 71/71 · `terminal.mjs` 42/42 · `geometry.mjs` 117/117 · `release-proof.mjs` 21/21 · `body.mjs` 38/39 (its dev-page tap grid is coarser than an upper arm; the 8px production probe reaches 10/10) · `body-reach.mjs` 393 10/10, 430 9/10 at 12px and 10/10 at 8px, 320 9/10 at 12px as accepted |
 | Real device (Pass 2) | iPhone 15 class, from the preview build: the five conditions above, all clean. Recorded here because nothing in `scripts/verify/` can stand in for it |

@@ -6,7 +6,7 @@
 | Merge | `90bf328`, a merge commit into `claude/momentum-pwa-spec-j82dhm` (which carried the later upload `04c3d72`); conflict-free, no source overlap |
 | Housekeeping | `6ba7935`: the device-review screenshots moved to `qa/device/`, the byte-identical root copy of the design canvas removed (md5 `4644b709829f9f256fde90a778e00f41` on both) |
 | Release head | the documentation commit on top of `6ba7935`, tagged **`muscle-map-v1`**. It differs from `bc57ec6` only by the merge history, the relocation of the device evidence, the removal of the redundant canvas copy, and release/handover documentation |
-| Device review | approved by the product owner on iPhone from the preview `5db6fc4`; screenshots `qa/device/IMG_0648.png`, `IMG_0649.png`, `IMG_0650.png` |
+| Device review | approved by the product owner on the phone from the preview `5db6fc4`. *(Corrected in the tidy-up of WP3, 2026-11: the three screenshots once named here, under `qa/device/`, were iPad screenshots of a draft, not a record of that review; they left the tree with D157 and stay in the history.)* |
 | App source last changed | `5e554aa` (Stage 4b); every later commit is docs, scripts and screenshots only |
 | Base for all comparisons | `fc2ffff` — the last commit before any muscle-map code (the handoff package as supplied) |
 | Date | 2026-09-11 |
@@ -31,7 +31,7 @@ Evidence files live in `docs/design/muscle-map/qa/`:
 - `bundle-and-worker.txt` — artefact sizes, precache lists for both bases, model URLs
 - `body-reach.txt`, `body-reach-8px.txt`, `body-reach-8px-320.txt` — direct hit coverage
 - `<width>-<letter>-<slug>.png` — the screenshots, from `scripts/verify/qa-shots.mjs`
-- `device/IMG_0648.png`, `IMG_0649.png`, `IMG_0650.png` — the product owner's real-device review screenshots, unchanged from the upload
+- ~~`device/` — three screenshots~~ — removed in the tidy-up of WP3 (D157): iPad screenshots of a draft, not a record of the device review
 
 ## Record
 
@@ -86,7 +86,7 @@ Evidence files live in `docs/design/muscle-map/qa/`:
 | 47 | Production bundle measurements | PASS | `bundle-and-worker.txt` — see the table below; main +0.06 kB gzip against the Stage 4b baseline, viewer +0.00 kB |
 | 48 | Preview deployment | PASS (push) / NOT VERIFIED (serving) | Momentum-preview `5db6fc4` on `main`, pushed 2026-09-11T21:54:25Z (`ec8dd8c..5db6fc4 main -> main`), built from `75cf2a5`; its index.html references `assets/index-CVyd9Y_w.js` and `assets/index-c0r-SqIw.css`; `models/momentum-body.glb` and `assets/BodyViewer-hDJmfRtX.js` are in the commit. Whether GitHub Pages is serving it could not be observed from this environment: the egress proxy denies `dario02king.github.io` by organisation policy (19 rejected connections at 21:57Z). The push is the evidence; the first load on the phone is the check |
 | 49 | PWA/service-worker asset behaviour | PASS (desktop) | `bundle-and-worker.txt`: production precache carries `/Momentum-App/models/momentum-body.glb` and both viewer files, zero `Momentum-preview` strings; the preview-base build carries `/Momentum-preview/…` for all three, zero `Momentum-App` strings. `release-proof.txt`: after install the worker holds 12 entries incl. the model and the chunk; offline, the shell loads and Gym shows the 3D body with 10 rows. Real iOS PWA offline behaviour is NOT VERIFIED — see item 50 and the device checklist |
-| 50 | Real-device Safari review | NOT VERIFIED here / APPROVED by the product owner | Cannot be observed from the build environment. Performed on the phone from preview `5db6fc4`: the 3D body, touch rotation, muscle selection, shared row/body selection, mini sparklines, recency/status layout, Running placement and the credits UI approved; `qa/device/`. iOS PWA offline stays for the production site |
+| 50 | Real-device Safari review | NOT VERIFIED here / APPROVED by the product owner | Cannot be observed from the build environment. Performed on the phone from preview `5db6fc4`: the 3D body, touch rotation, muscle selection, shared row/body selection, mini sparklines, recency/status layout, Running placement and the credits UI approved (the owner's word; the screenshots once kept under `qa/device/` were not a record of it and left the tree with D157). iOS PWA offline stays for the production site |
 
 Items marked NOT VERIFIED by the environment, beyond 50: 200 % text zoom
 (no harness supports it; nothing here has measured it) and iOS PWA offline

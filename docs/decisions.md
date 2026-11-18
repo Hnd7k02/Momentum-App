@@ -2326,7 +2326,8 @@ in the decay code and the model were `iteration-2-plan.md` numbers. Checked
 again during the rest-day inspection: **the plan cites them too and defines
 neither.** No file in this repository, and no file in its entire git history,
 defines a D42 or D43 meaning rest days or pause periods. The original brief
-(`.github/Claude I6 backup request`, 357 lines) does not mention either
+(`.github/Claude I6 backup request`, 357 lines; out of the tree since the
+tidy-up of WP3, D157, and still in the history) does not mention either
 concept at all.
 
 They are **dangling references to a document that has never been here**. In

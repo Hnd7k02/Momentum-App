@@ -134,8 +134,9 @@ after real-device approval of the candidate `bc57ec6`.
 harness checks, neither a product defect), 2 NOT VERIFIED (preview serving
 from the build environment; real-device Safari, since performed by the
 product owner and approved). Evidence and screenshots under
-`docs/design/muscle-map/qa/`, the device-review screenshots under
-`docs/design/muscle-map/qa/device/`. Every difference from the handoff:
+`docs/design/muscle-map/qa/`. (Three screenshots once kept under
+`qa/device/` as the device review were iPad screenshots of a draft; they
+left the tree in the tidy-up of WP3, D157.) Every difference from the handoff:
 `docs/design/muscle-map/HANDOFF-DEVIATIONS.md`.
 
 ### Known, not product
