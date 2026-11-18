@@ -161,7 +161,9 @@ and hold the backup's data record for record.
 **The state to return to** is the head of the default branch, `e30becd`.
 The repository has no tag (HANDOVER named `muscle-map-v1`, which does not
 exist). Proposed: **`live-before-wp3`** on `e30becd`. Not set: whether and
-who sets it is the owner's at the gate.
+who sets it is the owner's at the gate. *(2026-11-18, D202: he asked the
+merging session to set it; that session could not push a tag, and it is
+his to set.)*
 
 ## Step 6 — the backup there and back
 
@@ -205,7 +207,9 @@ with the profile's own figures — including the 2.4 points it stands
 lower on the 22nd to the 24th, days this build has closed and the live
 build has not.
 
-**The merge plan** (the owner's step; not done here):
+**The merge plan** (the owner's step; not done here — *done on
+2026-11-18 at his word, D202: `docs/wp3/aufraeumen/README.md`, "After the
+STOP"*):
 
 1. The tidy-up block first, on `claude/momentum-wp3` (`prompt-aufraeumen.md`):
    it takes old files out of the public state and brings the licence file,

@@ -9,7 +9,8 @@ history is not rewritten, and nothing that computes or stores changed:
 It ran in one session, on the model D159 names. Subagents were not used.
 Branch: `claude/momentum-wp3`, as the prompt allows; the session's own
 branch `claude/dreamy-shannon-xdg39z` carries the same commits. No pull
-request, no merge, nothing on the default branch.
+request. Nothing was merged before the owner's ✅ and his word; what
+happened then is at the end, "After the STOP".
 
 ## Step 0 — the baseline
 
@@ -44,9 +45,13 @@ prompts that list the files are records and stay as written.
 
 ## Step 2 — the licence
 
-- **`LICENSE` is prepared and not committed.** The copyright line needs a
-  name and a year, and the owner has not given them to this session; no
-  name is invented. Its text, three things and no more: the app — code,
+- **`LICENSE` was prepared and, at the STOP, not committed**: the session
+  asked the owner for the name and the year. *(It should not have had to:
+  `HANDOVER.md` and `docs/decisions.md` held his answer of 11 November,
+  which the session overlooked. His answer at the STOP, on 18 November,
+  is the later word and stands — D202: the account name `Hnd7k02`, 2026 —
+  and the file is committed with it.)* Its text, three things and no
+  more: the app — code,
   design, texts — is protected by copyright, all rights reserved; the 3D
   body has a licence of its own, in `THIRD-PARTY-NOTICES.md`; the owner's
   drawings are excluded (D157).
@@ -304,3 +309,64 @@ opening page, the new mark, the empty onboarding, the database
 Its `Publish preview` run on GitHub ended in success; the page itself
 could not be opened from this session, whose network rules close
 `github.io`.
+
+## After the STOP — accepted, merged, released (D202)
+
+**The owner's answers** (2026-11-18): `LICENSE` names the account,
+`Hnd7k02`, and 2026. The tag `live-before-wp3` on `e30becd` is set by the
+session before the merge; the merge is a fast-forward by the session, at
+his explicit word; offline and the update are not rehearsed on the device
+before the go-live — he checks both directly after it. The cover picture
+he had meant is the app icon, with a picture of it as the target; the
+session had read it as the first slide's picture (D201, corrected by
+D202). The inventory after the go-live; the measuring display's two
+wishes as a small block after WP3; the status bar from edge to edge not
+in this release but as a small block after the go-live, together with the
+backup protection. His checklist with the check file of 18 November:
+1 to 9 ✅. His backup of the live app: made. And: "Merge!!!"
+
+**The two conditions of the merge** (D196), both met for `a8c5f95`:
+
+- his ✅ on the tidy-up's preview, `Momentum-preview` `65207c1`, built from
+  `e185f91` — the same application source, `f9848b6`;
+- `verify-wp3.yml` green on exactly `a8c5f95`, run 45: `tsc -b`, `npm run
+  test`, and `npm run verify` in Chromium — **44 suites, 5989 of 5989** —
+  and the WebKit selection green.
+
+**The merge.** 2026-11-18, 14:02 UTC: `git push origin a8c5f95:
+claude/momentum-pwa-spec-j82dhm`, a fast-forward from `e30becd` over 324
+commits, nothing forced. `deploy.yml` ran on it (run 15): `npm ci`, the typecheck, `npm run test`
+and the build green, and the site published to GitHub Pages at 14:05
+UTC — **WP3 is the live app**, at
+<https://hnd7k02.github.io/Momentum-App/>. The address itself could not
+be opened from the session, whose network rules close `github.io`; the
+owner's point 10 is the check of it.
+
+**The tag is not on GitHub.** `live-before-wp3` is set on `e30becd` in the
+session's clone; its push was refused with HTTP 403 — the session's
+access pushes branches and no tags — and no tool of the session creates
+one. The commit stays in the history of the default branch whatever
+happens; the tag is a name for it and can be set at any time: `git push
+origin e30becd:refs/tags/live-before-wp3`. The merge was not held for it:
+the way back is the owner's backup (D195), which he had made.
+
+**What a read-only sweep found before the merge** (four search runs over
+the tracked tree, no edits by them): in the commit that was merged,
+`HANDOVER.md` and `docs/release-candidates.md` carried unfilled
+placeholders — `%(app)s` and nine of its kind — where the block's last
+record should have printed its figures: the session's script wrote the
+templates and never filled them. Documents only; the merged commit shows
+them on the default branch until the second fast-forward. They are filled
+in the commit that carries this section. Also found, and corrected there:
+`CLAUDE.md` named `core/gym/rating.ts`, a file renamed to
+`core/scoring/trainingRating.ts` in Phase 5. Not found: an e-mail
+address, a local path, a session address or anything like a key in 657
+text files. Found and left for the owner to decide: his full name, in
+two lines that record his answer of 11 November about the licence.
+
+**After the merge, on `claude/momentum-wp3`:** `LICENSE`, this section,
+D202, and the documents that said "not merged". They reach the default
+branch by a second fast-forward once the workflow is green on their
+commit. The application's files are the same in both; the service
+worker's revision is made of the names of the built files, so that
+second publication changes nothing an installed app can see.

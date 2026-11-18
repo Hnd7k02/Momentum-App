@@ -6,7 +6,7 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 | | Application commit | Status |
 |---|---|---|
-| **WP3 RC, after the tidy-up** | app source **`%(app)s`**, on `claude/momentum-wp3` | **At the STOP of the tidy-up** — the gate passed (D196); see below |
+| **WP3** | app source **`f9848b6`**, merged as `a8c5f95` | **Released on 2026-11-18** (D202) — see below |
 | WP3 RC | app source `1d28b5b` | Superseded by the tidy-up: the candidate of STOP 9 |
 | **muscle-map-v1** | app source **`5e554aa`**; the tag was never set in the repository (found in block 9) | **Released** — see below |
 | V1 | the release pass after RC2 | Released |
@@ -15,11 +15,11 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 ---
 
-## WP3 RC, after the tidy-up — app source `%(app)s`
+## WP3 — released on 2026-11-18, app source `f9848b6`
 
 The candidate of STOP 9 and the last block of WP3 on top of it
 (`docs/wp3/aufraeumen/README.md`, D196–D201). **Preview:**
-`Momentum-preview` `%(preview)s`, <https://hnd7k02.github.io/Momentum-preview/>
+`Momentum-preview` `65207c1`, <https://hnd7k02.github.io/Momentum-preview/>
 — built from `e185f91`, no `sw.js`, the status bar `default`, its own
 database `momentum-preview`.
 
@@ -31,17 +31,22 @@ Back closes every sheet and keeps what was typed (D200). Nothing that
 computes or stores: `src/core/`, `src/storage/` and `.github/fixtures/`
 are as they were.
 
-**Checked:** `HANDOVER.md`, "Verification status". **Open:** the owner's
-short list on the phone (`docs/device-tests.md`, "After the tidy-up"),
-the name for `LICENSE`, and the merge — only after his ✅ and a green
-GitHub run on exactly the commit that is merged.
+**Checked:** `HANDOVER.md`, "Verification status". **Accepted** by the
+owner on his iPhone on 2026-11-18 — points 1 to 9 of the short list
+(`docs/device-tests.md`, "After the tidy-up"), with his backup made.
+**Merged** the same day at his word (D202): the default branch
+fast-forwarded from `e30becd` to `a8c5f95`, the commit `verify-wp3.yml`
+had run green (run 45: Chromium 44 suites, 5989 of 5989; WebKit green),
+and published by `deploy.yml`. **Open:** his check of the live app —
+the update notice, one reload, the data, flight mode.
 
 ---
 
 ## WP3 RC — app source `1d28b5b`
 
 WP3 — Mind and Gym — as a whole, on `claude/momentum-wp3`, after block 9
-(hardening and the release gate). The live app is still `e30becd` (WP2).
+(hardening and the release gate). The live app was still `e30becd` (WP2)
+when this was written; WP3 is live since 2026-11-18.
 Record: `docs/wp3/stage9/README.md`; decisions D127–D195. **Preview:**
 `Momentum-preview` `0d741de`, <https://hnd7k02.github.io/Momentum-preview/>
 — built from `0557dd8`, no `sw.js`, the status bar `default`, its own
@@ -105,7 +110,8 @@ preview cannot show, having no service worker.
 ### The way back
 
 The state to return to is `e30becd`, the head of the default branch
-(proposed tag `live-before-wp3`, not set). The only clean way back is a
+until the merge of 2026-11-18 (the tag `live-before-wp3` is the owner's
+to set: the merging session could not push a tag). The only clean way back is a
 backup exported in the live app before the update: delete the app's data,
 open the live build, import that backup. Everything entered after the
 backup is lost. Rehearsed in `update-in-place.mjs` (C) and

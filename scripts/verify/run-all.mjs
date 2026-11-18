@@ -14,8 +14,9 @@ import { join, resolve } from 'node:path';
  *
  * 1. **Builds** the app (`npm run build`), the preview build with a database
  *    of its own (`dist-preview`, for the onboarding's rehearsal) and the live
- *    state `e30becd` — the default branch's head, what the owner's phone runs
- *    today — in a directory outside the repository (`LIVE_DIR`, default
+ *    state `e30becd` — the default branch's head until WP3 was merged on
+ *    2026-11-18, the build an update to WP3 starts from; "live" in the
+ *    suites means that state — in a directory outside the repository (`LIVE_DIR`, default
  *    `<tmp>/momentum-live-e30becd`), from `git archive`, with `npm ci`. The
  *    live state is built once and kept; `--rebuild-live` builds it again.
  * 2. **Serves** them, as GitHub Pages serves a site (`pages-server.mjs`,

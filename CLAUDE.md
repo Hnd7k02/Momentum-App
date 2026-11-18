@@ -735,8 +735,9 @@ Do not introduce a backend because it would simplify something.
 | Tombstone | have I hit this absolute benchmark |
 
 Conflating them would ruin both, so the boundary is an API boundary as much as
-a conceptual one: nothing in `core/gym/rating.ts` reads a benchmark table, and
-no personal-development percentage belongs inside a Tombstone.
+a conceptual one: nothing in `core/scoring/trainingRating.ts` reads a
+benchmark table, and no personal-development percentage belongs inside a
+Tombstone.
 
 ## When a product decision is not settled
 

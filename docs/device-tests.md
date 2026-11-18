@@ -1,11 +1,14 @@
 # WP3 release candidate — the check on the iPhone
 
-**Where this stands (2026-11-18).** The owner worked through the
-checklist below on the preview `0d741de` and found it in order but for
-two points (see "Results"). Both went into the tidy-up, with what else he
-added (D196). **What he checks again, on the preview of the tidy-up, is
-the short list at the end: "After the tidy-up".** The checklist of the
-gate stays here as it was checked.
+**Where this stands (2026-11-18, after the merge).** The owner worked
+through the checklist below on the preview `0d741de` and found it in
+order but for two points (see "Results"). Both went into the tidy-up,
+with what else he added (D196). On the tidy-up's preview he then checked
+the short list at the end, "After the tidy-up": **points 1 to 9 ✅**, and
+WP3 was merged and published the same day (D202). **What is left is
+point 10, on the live app**: the update notice, one reload, the data,
+then flight mode. The checklist of the gate stays here as it was
+checked.
 
 What only the phone can show, for the release candidate of WP3 (block 9,
 the release gate). Everything a browser can prove runs in
@@ -132,8 +135,14 @@ card's finding was on a device without training.
 | 6 | Back on a sheet with fields: Bereiche → Mind → «Frage hinzufügen», type half a question, swipe back; open «Frage hinzufügen» again. Then the same with «Übung hinzufügen» in a workout: type into the search, swipe back, open it again | The text stands there again. Closed with the cross instead, the field opens empty, as always | |
 | 7 | Import the check file of the day. A sample that nothing else moved: Heute, Muskelgruppen with one sheet, a workout with a warm-up set | As at the gate: the same number in row, sheet and body | |
 | 8 | The Home Screen | The icon is the new one, as in `docs/wp3/prompts/aufraeumen-icon/vorschau-icon.png` | |
-| 9 | On GitHub, in the browser, the branch `claude/momentum-wp3` | The zip, the copy of the backup and the three pictures are gone from the tree; the front page describes the app of today. `LICENSE` follows once the name and the year for it are given | |
+| 9 | On GitHub, in the browser, the branch `claude/momentum-wp3` | The zip, the copy of the backup and the three pictures are gone from the tree; the front page describes the app of today. `LICENSE` follows by a second fast-forward: it was committed after the merge (D202) | |
 | 10 | **After the go-live only:** the live app shows «Neue Version verfügbar», «Neu laden» reloads once, the data is there. Then flight mode: Heute appears, and in Muskelgruppen the body stands (D163). Then delete the repository `Momentum-preview`, if you no longer need it | | |
+
+**Result (the owner, 2026-11-18, on his iPhone, the preview `65207c1`,
+with the check file of 18 November):** "Prüfliste mit der Prüfdatei vom
+18.11.: 1 bis 9 ✅". And: "Backup gemacht" — the backup of the live app
+from before the update, the way back. Point 10 is open: it is the live
+app's.
 
 Not to be repeated from the checklist of the gate: points 1 and 2 (the
 live app did not change), 5 (D194), 8 and 9 (VoiceOver, less motion and

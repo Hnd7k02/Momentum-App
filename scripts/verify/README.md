@@ -19,7 +19,9 @@ ONLY=phase2,release npm run verify   # a selection
 ```
 
 `run-all.mjs` builds the app, the preview build with a database of its own
-(`dist-preview`) and the live state `e30becd` — the default branch's head,
+(`dist-preview`) and the live state `e30becd` — the default branch's head
+until WP3 was merged on 2026-11-18, the build an update to WP3 starts
+from; "the live build" in the suites means that state —
 in `LIVE_DIR` (default `<tmp>/momentum-live-e30becd`), from `git archive`,
 built once and kept (`--rebuild-live` builds it again). It serves them on
 4173, 4174 and 4273 **as GitHub Pages serves a site** (`pages-server.mjs`,

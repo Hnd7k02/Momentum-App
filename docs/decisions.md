@@ -7132,7 +7132,10 @@ What named them says so now.
 — all rights reserved for the app, the body model's own licence in
 `THIRD-PARTY-NOTICES.md`, the owner's drawings excluded — is prepared and
 **not committed**: the copyright line needs a name and a year the owner
-has not given this session, and no name is invented. The notices and the
+has not given this session, and no name is invented. *(So it stood at the
+STOP. The repository did hold an answer of 11 November, which the
+session had overlooked; his answer at the STOP names the account and
+2026, and the file is committed with that — D202.)* The notices and the
 credits in the app were brought to the shipped model by block 7A and say
 the same thing; nothing in them needed changing.
 
@@ -7218,6 +7221,13 @@ data, and stay recognisably the same picture. That reading is the
 session's; it is said at the STOP, with the picture before and after, so
 that he can say if he meant another.
 
+***He meant another** (2026-11-18, D202): the cover picture is the app
+icon. What is built here is what the session read, not what he asked
+for. It was on the preview he checked — point 1 of his list names the
+new values, and he ticked it — and it went live with WP3; whether it
+stays is his to say, and taking it back is one commit. What he asked for
+is in D202.*
+
 **As built** (`OnboardingHero.tsx`, the two catalogues):
 
 | | Before | After |
@@ -7232,3 +7242,126 @@ The picture's description for a screen reader says the new values. It is
 still one image with nothing to operate, still the only place with
 example values, and nothing of its look changed: colours, sizes, the chip
 "steigend", the axis.
+
+## D202 — STOP of the tidy-up: accepted, the answers, and WP3 merged and released
+
+**Decision (owner, 2026-11-18).** His words:
+
+> Antworten zu STOP Aufräumen:
+> 1. LICENSE: b, Kontoname Hnd7k02, Jahr 2026.
+> 2. Zu STOP 9: Den Tag live-before-wp3 auf e30becd setzt du vor dem
+>    Merge. Du mergst als Fast-Forward, auf mein ausdrückliches Wort.
+>    Offline und Update werden vor dem Go-live nicht auf dem Gerät
+>    geprobt; ich prüfe beides direkt nach dem Go-live.
+> 3. Titelbild: das im Anhang
+> 4. Inventar: a
+> 5. Messanzeige: a
+>
+> Statusleiste: nicht mehr in diesem Release, sondern als eigener kleiner
+> Block nach dem Go-live, zusammen mit dem Backup-Schutz.
+>
+> Prüfliste mit der Prüfdatei vom 18.11.: 1 bis 9 ✅
+>
+> Backup gemacht
+>
+> Merge!!!🥳
+
+### What each answer settles
+
+1. **`LICENSE`**: all rights reserved, "Copyright (c) 2026 Hnd7k02" — the
+   account's name, not a person's. The repository already held an answer
+   to this question, of 11 November, in the record of the colour-rules
+   block; the tidy-up's session overlooked it and asked again. The later
+   word stands. The file is committed with it; `package.json` has said
+   `UNLICENSED` since the tidy-up.
+2. **The three answers of STOP 9 that D196 could not write down**: the
+   tag `live-before-wp3` on `e30becd` is set by the session before the
+   merge; the merge is a fast-forward by the session, at his explicit
+   word; offline and the update are **not** rehearsed on the device
+   before the go-live — he checks both directly after it.
+3. **The cover picture is the app icon**, and his attachment is its
+   target: a picture of the icon with a larger and stronger star, a
+   clearer sheen, and deeper colour than the build's. So "Cover Bild
+   anhand Daten marginal verbessern, dass es einen Top-Eindruck macht,
+   aber Fingerprint behält" (D196) was about the icon: a little better
+   by its own data, the same icon. **D201 read it as the first slide's
+   picture and was wrong.** Nothing of the icon was changed for the
+   release: he had seen and ticked the icon as built (point 8), and a
+   picture he has not seen does not go live on a word that says "merge".
+   It is the next small block, with a preview of its own and his ✅.
+4. **The inventory**: as proposed — the stage pictures into an archive
+   and `tsconfig.node.tsbuildinfo` out of the tree, after the go-live.
+5. **The measuring display's two wishes** (D184): a small block of their
+   own after WP3.
+
+And beside the five: **the status bar from edge to edge is not in this
+release** — it was the backlog's since STOP 6b (D163) — but a small block
+after the go-live, **together with the backup protection**
+("Backup-Schutz"). Nothing in the repository says yet what that
+protection is; its scope is his to give when the block is written.
+
+### The merge
+
+**Both conditions of D196 held for `a8c5f95`.** His ✅ on points 1 to 9
+of the tidy-up's list, on the preview `Momentum-preview` `65207c1`, with
+the check file of 18 November — and his backup of the live app made, the
+way back (D195). And `verify-wp3.yml` green on exactly that commit, run
+45: `tsc -b`, `npm run test`, `npm run verify` in Chromium with **44
+suites and 5989 of 5989 checks**, and the WebKit selection.
+
+**Merged on 2026-11-18 at 14:02 UTC**, at his word: the default branch
+`claude/momentum-pwa-spec-j82dhm` fast-forwarded from `e30becd` to
+`a8c5f95` — 324 commits, no merge commit, nothing forced — and published
+by `deploy.yml` (run 15). **WP3 is the live app.**
+
+**Why that commit and not one with `LICENSE` in it.** The licence file
+and this record could only be written after his answers, and a commit
+that carries them is another commit: by his own rule it needs a green
+run of its own, two hours. The commit he had checked and GitHub had run
+was `a8c5f95`. So that one was merged at once, and `LICENSE` and the
+record follow by a second fast-forward when their run is green. The
+application's files are the same in both, and the service worker's
+revision is the names of the built files (`vite.config.ts`), so the
+second publication is nothing an installed app can notice.
+
+**The tag was not set on GitHub**, against his answer 2. The session set
+`live-before-wp3` on `e30becd` in its clone; the push was refused with
+HTTP 403 — its access pushes branches and no tags — and it has no other
+way to make one. The merge was not held for it: `e30becd` stays in the
+history of the default branch for good, a tag only names it, and what
+the way back needs is the backup, which he had. He sets the tag:
+`git push origin e30becd:refs/tags/live-before-wp3`.
+
+### Found by a read-only sweep before the merge
+
+Four search runs over the tracked tree — statements the merge makes
+stale, references to files that are not there, strings that do not belong
+in a public repository, and where the code names the live state. Search
+and read only, as D159 allows; every judgement and every edit is the
+session's.
+
+- **The merged commit carries unfilled placeholders** in `HANDOVER.md`
+  and `docs/release-candidates.md` — `%(app)s` and nine of its kind. The
+  tidy-up's last record was written by a script that held the templates
+  and never filled them, and the session checked the record's own file
+  for leftovers and not those two. Documents only. Filled in the commit
+  that carries this decision; until the second fast-forward the default
+  branch shows them.
+- `CLAUDE.md` named `core/gym/rating.ts`; the file has been
+  `core/scoring/trainingRating.ts` since Phase 5. Corrected.
+- No e-mail address, local path, session address or key-like string in
+  657 text files.
+- **His full name stands in two lines** that record his answer of 11
+  November about the licence (`HANDOVER.md`, this file). He has now
+  chosen the account's name for the licence itself. Whether those two
+  lines keep his name is his to say; they are left as they are.
+- The suites call `e30becd` "the live state" in some ninety places. It
+  is the state an update to WP3 starts from, and that is what they test;
+  the two sentences that said it is what his phone runs "today" say now
+  that it was, until 2026-11-18.
+
+### Open after this
+
+His check of the live app (the update notice, one reload, the data,
+flight mode); the second fast-forward; the tag; the icon; and the small
+blocks after the go-live named above. Then, as its own gate, D158.
