@@ -13,8 +13,9 @@ Dazu kommen drei kleine Punkte, die Dario diesem Block zugewiesen hat (D163, D18
 - «Pläne verwalten», geöffnet aus dem leeren Muskelgruppen-Screen, führt in die Gym-Übersicht, aber nicht zu den Plänen.
 - Die Prüfung «offline, Gym zeigt den 3D-Körper» in `release-proof.mjs` ist seit vor Stage 6b rot. Der Verdacht: Der Testserver antwortet anders als GitHub Pages.
 - *Nachgetragen am STOP 7C (16.11.2026, D187):* Die Zurück-Geste des Browsers schliesst bisher nur das Muskel-Sheet und das Übungsdetail (D185). Sie soll jedes Sheet der App schliessen – unter der Bedingung, dass ein Sheet mit Eingaben dabei nichts Getipptes verliert.
+- *Nachgetragen nach STOP 9 (18.11.2026):* ein neues App-Icon. Nur Grafik, keine Logik (Schritt 4c).
 
-Die wichtigsten Eigenschaften dieses Blocks: **Er entfernt und berichtigt. Die Git-Historie wird nicht umgeschrieben. Nichts, was die App rechnet oder speichert, ändert sich**, und am Verhalten ändern sich nur der Weg von «Pläne verwalten» und die Zurück-Geste bei Sheets.
+Die wichtigsten Eigenschaften dieses Blocks: **Er entfernt und berichtigt. Die Git-Historie wird nicht umgeschrieben. Nichts, was die App rechnet oder speichert, ändert sich**, am Verhalten ändern sich nur der Weg von «Pläne verwalten» und die Zurück-Geste bei Sheets, und am Aussehen nur das App-Icon und die Marke im Kopf der Einführung.
 
 Dies ist der letzte Block von WP3.
 
@@ -140,6 +141,23 @@ Berichtige, was falsch ist; schreib nichts neu, was stimmt.
 - **Die Bedingung des Eigentümers:** Ein Sheet mit Eingaben verliert dabei nichts Getipptes. Entscheide, wie (das Getippte steht beim nächsten Öffnen wieder da, oder ein Sheet mit ungespeicherter Eingabe schliesst erst nach einer Rückfrage), und begründ es im Bericht.
 - `wp3-sheets.mjs` bleibt unverändert grün. Eine neue Prüfung tippt in jedes Sheet mit Feldern, geht mit der Geste zurück und findet den Text wieder, und sie prüft für jedes Sheet ohne Felder, dass Zurück es schliesst und den Screen stehen lässt.
 
+### Schritt 4c – Das neue App-Icon (nachgetragen am 18.11.2026)
+
+Darios Nachtrag nach STOP 9, in seinen Punkten. Nur Grafik, keine Logik. Das Ziel zeigt `docs/wp3/prompts/aufraeumen-icon/vorschau-icon.png` (seine Vorschau, auf den Inhalt zugeschnitten): oben das Icon gross, darunter vorher und nachher auf hellem und dunklem Grund und als Marke neben dem Namen.
+
+1. **Quelle.** `docs/wp3/prompts/aufraeumen-icon/icon-full.svg` ist das SVG aus Darios Nachricht, Byte für Byte. Lege es als `public/icon-full.svg` ab. Es ist randlos, ohne eigene Ecken. Daraus zwei Varianten:
+   - `public/icon.svg` (ersetzt die heutige): dasselbe, ergänzt um `<clipPath id="r"><rect width="1024" height="1024" rx="229"/></clipPath>` in `defs`. Die äussere Gruppe wird `<g clip-path="url(#r)">`, und als letztes Element darin steht `<rect x="2" y="2" width="1020" height="1020" rx="227" fill="none" stroke="url(#rim)" stroke-width="4"/>`.
+   - `public/icon-small.svg`, für alles unter 48 px: wie `icon.svg`, aber ohne die zwei Pfade der Glanzfläche (`fill="url(#sheen)"` und `stroke="url(#edge)"`), ohne die zwei Gruppen mit Glow-Filter (`#glowWide`, `#glow`) und ohne den Rand. Der Stern hat `stroke-width` 64 statt 30.
+2. **PNGs aus den SVGs**, mit Chromium gerendert über ein Skript `tools/render-icons.mjs`, damit sie wiederholbar sind:
+   - `apple-touch-icon.png` (180) und `icon-maskable-512.png` aus `icon-full.svg`, deckend, ohne eigene Ecken; iOS und Android runden selbst.
+   - `icon-192.png` und `icon-512.png` aus `icon.svg`, Ecken transparent.
+   - Dateinamen, Manifest und `index.html` bleiben gleich.
+3. **In der App.** Die 28-px-Marke im Kopf der Einführung (`.onboarding__logo` in `src/features/onboarding/onboarding.css`, heute ein CSS-Verlauf aus `--brand-mark` mit `SparkIcon` in `OnboardingFlow.tsx`) zeigt `icon-small.svg` als Bild mit `alt=""`; der Name steht daneben. `SparkIcon` bleibt unverändert, Heute und Bereiche brauchen es. Liest danach niemand mehr `--brand-mark` und `--brand-mark-ink`, entferne beide. (`--brand-mark-halo` und `--shadow-brand-mark` liest schon heute niemand. Der Nachtrag nennt sie nicht: Leg sie Dario in Schritt 6 vor.)
+4. **Ein neuer Entscheid.** Das Icon ist eine festgelegte Grafik wie das Rang-Abzeichen (D48): Seine Farben stehen nur in den SVG-Dateien, nicht in `tokens.css`. Halte das in einem neuen Entscheid fest. Trag die Ausnahme dort nach, wo die bestehenden stehen: im Vertrag §2.6 und in `CLAUDE.md` («The two exceptions are the rank badge …»). `designRules.test.ts` sucht nur unter `src/`; die SVG-Dateien in `public/` liegen ausserhalb seines Felds.
+5. **Prüfen.** Leg die gerenderten Bilder bei 180, 60 und 28 px neben die Vorschau, als ein Bild im STOP-Bericht.
+
+Dazu: Die Vorschau bekommt beim Veröffentlichen die neuen Icon-Dateien mit (`icon*.svg`, die vier PNGs). Ihr `index.html` bleibt ihr eigenes. Weil die neuen Dateien unter `public/` liegen, stehen sie auch in der Liste des Service Workers; das ist gewollt.
+
 ### Schritt 5 – Die Offline-Prüfung
 
 1. **Ein Testserver, der wie GitHub Pages antwortet.** Ein kleines Skript unter `scripts/verify/` liefert den gebauten Ordner unter `/Momentum-App/` aus, ohne `Vary: Origin` (D163) und sonst so nah an GitHub Pages, wie du es belegen kannst. Lies dafür die Kopfzeilen einer echten Antwort, wenn deine Netzwerkregeln es zulassen (die Vorschau unter `hnd7k02.github.io` genügt); sonst nenn im Bericht, welche Kopfzeilen du angenommen hast.
@@ -167,7 +185,7 @@ Mach ein Inventar, ohne etwas zu entfernen: die grössten Dateien im aktuellen S
 - die Git-Historie;
 - `.github/fixtures/` ganz, also auch `rc2-export.json`;
 - alles, was rechnet oder speichert: `src/core/`, `src/storage/`, das Datenschema, das Backup-Format, jede Golden-Datei und jeder Fingerabdruck;
-- das Aussehen und Verhalten der App, ausser dem Weg von «Pläne verwalten», der Zurück-Geste bei Sheets (Schritt 4b) und, falls Schritt 5 es verlangt, dem Service Worker;
+- das Aussehen und Verhalten der App, ausser dem Weg von «Pläne verwalten», der Zurück-Geste bei Sheets (Schritt 4b), dem App-Icon und der Marke im Kopf der Einführung (Schritt 4c) und, falls Schritt 5 es verlangt, dem Service Worker;
 - jede Regel in `CLAUDE.md` und im Vertrag;
 - `deploy.yml` und der Default-Branch.
 
@@ -187,6 +205,7 @@ Kein Test wird gelöscht oder abgeschwächt. Gehört eine Suite zu einem Stand, 
 - `README.md` beschreibt die App von heute; die sechs Widersprüche aus dem Review sind aufgelöst oder begründet offen.
 - «Pläne verwalten» führt aus dem leeren Muskelgruppen-Screen und von Heute zu den Plänen; Test und Suite halten es fest.
 - Die Zurück-Geste schliesst jedes Sheet, und kein Sheet mit Eingaben verliert dabei etwas Getipptes; eine Suite hält es fest (D187).
+- Das neue App-Icon liegt in allen Grössen vor, aus `icon-full.svg` wiederholbar gerendert (`tools/render-icons.mjs`); Dateinamen, Manifest und `index.html` sind unverändert; die Marke der Einführung zeigt `icon-small.svg`; ein neuer Entscheid hält fest, dass die Farben des Icons nur in den SVG-Dateien stehen (Schritt 4c).
 - Die Offline-Prüfung ist grün, mit einem Server, der wie GitHub Pages antwortet, oder der Fehler der App ist behoben und getestet.
 - `tsc -b` ist sauber, `npm run test` endet mit Exit 0, der Build läuft, alle Suites bestehen lokal und, wo der Workflow liegt, auf GitHub.
 - Der Vorschau-Build ist erreichbar.
@@ -202,7 +221,7 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 5. Die Offline-Prüfung: woran es lag, und was jetzt läuft.
 6. Die Zahlen: Tests und Suites gegen die Ausgangsmessung.
 7. Das Inventar aus Schritt 6 mit deinen Vorschlägen.
-8. Die Adresse der Vorschau und die Prüfliste fürs iPhone.
+8. Die Adresse der Vorschau und die Prüfliste fürs iPhone; dazu das Bild mit dem neuen Icon bei 180, 60 und 28 px neben der Vorschau (Schritt 4c).
 9. Höchstens fünf Fragen, jede mit Optionen und deiner Empfehlung.
 10. Der Stand in git für beide Repos, und was vom Plan für den Merge aus Block 9 jetzt als Nächstes kommt.
 
@@ -213,8 +232,9 @@ Schreib Dario einen Bericht auf Deutsch, den er auf dem Telefon lesen kann:
 3. Zurück führt beide Male zum vorigen Screen: zu Muskelgruppen oder zu Heute.
 4. Bereiche → Einstellungen: Die Nennung des 3D-Modells stimmt.
 5. Eine Stichprobe, dass sonst nichts anders ist: Heute, Muskelgruppen mit einem Sheet, ein Workout.
-6. Auf GitHub im Browser: Die fünf Altdateien (das Zip, die Backup-Kopie, die drei Bilder) sind im aktuellen Stand weg, die Lizenzdatei steht, und die Startseite des Repos beschreibt die App von heute.
-7. Erst nach dem Go-live: Flugmodus einschalten und die Live-App öffnen. Heute erscheint, und in Muskelgruppen steht der Körper (D163).
-8. Erst nach dem Go-live: das Repo der Vorschau löschen, wenn du es nicht mehr brauchst.
+6. Die Vorschau vom Home-Bildschirm löschen und neu hinzufügen: Das Icon sieht aus wie in der Vorschau (`docs/wp3/prompts/aufraeumen-icon/vorschau-icon.png`), und die Marke im Kopf der Einführung ebenso.
+7. Auf GitHub im Browser: Die fünf Altdateien (das Zip, die Backup-Kopie, die drei Bilder) sind im aktuellen Stand weg, die Lizenzdatei steht, und die Startseite des Repos beschreibt die App von heute.
+8. Erst nach dem Go-live: Flugmodus einschalten und die Live-App öffnen. Heute erscheint, und in Muskelgruppen steht der Körper (D163).
+9. Erst nach dem Go-live: das Repo der Vorschau löschen, wenn du es nicht mehr brauchst.
 
 Dann wartest du auf Darios Abnahme. Was er findet, behebst du in derselben Session und veröffentlichst die Vorschau neu. Damit ist WP3 gebaut; offen bleiben der Merge nach dem Plan aus Block 9 und, als eigenes Gate danach, D158.

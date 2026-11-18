@@ -2960,6 +2960,12 @@ before the gate and without his order**; the merge plan is in
 for the tidy-up from D184: the measuring display printing how many frames
 it drew in all, and naming a file checked over the network and taken from
 the cache as that — not built in block 9 (no new topics at the gate).
+**Added to the tidy-up by the owner after STOP 9 (2026-11-18): a new app
+icon** — graphics only, no logic — as step 4c of
+`docs/wp3/prompts/prompt-aufraeumen.md`; his SVG, byte for byte, and his
+preview as the target lie in `docs/wp3/prompts/aufraeumen-icon/`. Nothing
+of it is built on the release candidate: a file in `public/` enters the
+service worker's list.
 
 **WP3 block 7E is accepted and merged** (D192): `claude/hopeful-carson-4utktp`
 is merged into `claude/momentum-wp3`, so block 9 checks one state. **In the
