@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { keepDraft, takeDraft } from '../../components/sheetDraft';
 import { QUESTION_CATEGORIES, type QuestionCategory, type QuestionRecord, type QuestionType } from '../../core/model';
 import { Button, SHEET_INITIAL_FOCUS, Segmented, Sheet } from '../../components';
 import { ArchiveIcon, PauseIcon, PlayIcon } from '../../components/Icons';
@@ -50,13 +51,17 @@ export function QuestionSheet({
   const [category, setCategory] = useState<QuestionCategory>('eigene');
   const [confirmingArchive, setConfirmingArchive] = useState(false);
 
+  // What Back left behind stands again (D187, `sheetDraft.ts`): for the same
+  // question, or for a new one.
+  const draftKey = `question:${question?.id ?? 'new'}`;
   useEffect(() => {
     if (!open) return;
-    setText(question?.text ?? '');
-    setType(question?.type ?? 'boolean');
-    setCategory(question?.category ?? 'eigene');
+    const draft = takeDraft<QuestionSheetSubmit>(draftKey);
+    setText(draft?.text ?? question?.text ?? '');
+    setType(draft?.type ?? question?.type ?? 'boolean');
+    setCategory(draft?.category ?? question?.category ?? 'eigene');
     setConfirmingArchive(false);
-  }, [open, question]);
+  }, [open, question, draftKey]);
 
   const trimmed = text.trim();
   const isEdit = Boolean(question);
@@ -66,6 +71,7 @@ export function QuestionSheet({
       open={open}
       title={isEdit ? t('question.edit') : t('question.new')}
       onClose={onClose}
+      onBack={() => keepDraft<QuestionSheetSubmit>(draftKey, { text, type, category })}
       footer={
         <Button
           variant="primary"

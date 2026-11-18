@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { keepDraft, takeDraft } from '../../components/sheetDraft';
 import type { DateKey } from '../../core/dates';
 
 import { Button, Sheet } from '../../components';
@@ -47,6 +48,14 @@ function paceText(metres: number, seconds: number): string {
   return `${minutes}:${String(Math.round(perKm % 60)).padStart(2, '0')}`;
 }
 
+/** The fields as typed: what Back keeps (`sheetDraft.ts`). */
+interface SessionDraft {
+  note: string;
+  duration: string;
+  distance: string;
+  date: DateKey | null;
+}
+
 export function SessionSheet({
   open,
   session,
@@ -76,14 +85,18 @@ export function SessionSheet({
   const [distance, setDistance] = useState('');
   const [date, setDate] = useState<DateKey | null>(null);
 
+  // What Back left behind for this run stands again (D187, `sheetDraft.ts`).
+  // A run that can no longer be written shows what is stored (below).
+  const draftKey = `session:${session?.id ?? ''}`;
   useEffect(() => {
     if (!open) return;
-    setNote(session?.note ?? '');
-    setDuration(session?.durationMinutes ? String(session.durationMinutes) : '');
-    setDistance(session?.distanceMetres ? kmText(session.distanceMetres) : '');
-    setDate(session?.date ?? null);
+    const draft = takeDraft<SessionDraft>(draftKey);
+    setNote(draft?.note ?? session?.note ?? '');
+    setDuration(draft?.duration ?? (session?.durationMinutes ? String(session.durationMinutes) : ''));
+    setDistance(draft?.distance ?? (session?.distanceMetres ? kmText(session.distanceMetres) : ''));
+    setDate(draft ? draft.date : (session?.date ?? null));
     // Reset when the sheet opens for a session, not when the day turns.
-  }, [open, session]);
+  }, [open, session, draftKey]);
 
   /*
    * Read-only once the run's own day has left the window: nothing about it
@@ -118,6 +131,9 @@ export function SessionSheet({
       open={open}
       title={t('sports.session')}
       onClose={onClose}
+      onBack={() => {
+        if (editable) keepDraft<SessionDraft>(draftKey, { note, duration, distance, date });
+      }}
       returnFocus={returnFocus}
       footer={
         editable ? (

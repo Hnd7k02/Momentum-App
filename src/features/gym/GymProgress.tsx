@@ -292,6 +292,9 @@ export function GymProgress({
         detents
         overBody
         suspended={openExercise !== null}
+        // This screen owns the layer (above): the sheet and the exercise
+        // detail opened from it walk back step by step.
+        hostsBack
       >
         {sheet ? (
           <MuscleSheet

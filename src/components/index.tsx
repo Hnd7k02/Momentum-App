@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, CloseIcon } from './Icons';
+import { useBackLayer } from '../app/backLayer';
 import { stillness } from '../app/stillness';
 import { useT } from '../i18n/I18nProvider';
 import { useDismissToast } from './Toast';
@@ -426,6 +427,15 @@ export const SHEET_INITIAL_FOCUS = { 'data-sheet-initial-focus': '' } as const;
  * may still be travelling to the group while the sheet rises (D146 — no
  * blur over a canvas that draws). Such a sheet does not ask the body to
  * stop; its host holds the viewer once the camera rests.
+ *
+ * **Back closes it** (the tidy-up of WP3, D187): every sheet is a layer
+ * that owns a history entry with the address of the screen it lies on
+ * (`app/backLayer.ts`), so the gesture from the edge of an iPhone closes
+ * the sheet and leaves the screen. Back is told apart from the sheet's own
+ * ways out: `onBack` is called first, and a sheet with fields keeps there
+ * what was typed (`sheetDraft.ts`). A host that already owns the layer —
+ * the muscle sheet, whose selection and exercise detail walk back step by
+ * step — says so with `hostsBack`.
  */
 export function Sheet({
   open,
@@ -439,6 +449,8 @@ export function Sheet({
   overBody = false,
   suspended = false,
   onDetentChange,
+  onBack,
+  hostsBack = false,
 }: {
   open: boolean;
   title: string;
@@ -465,6 +477,10 @@ export function Sheet({
   suspended?: boolean;
   /** The height the sheet came to rest at, whenever it changes. */
   onDetentChange?: (detent: SheetDetent) => void;
+  /** Back is about to close the sheet (`onClose` follows): keep what was typed. */
+  onBack?: () => void;
+  /** The host owns the layer Back closes (`useBackLayer`); the sheet adds none. */
+  hostsBack?: boolean;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -474,8 +490,16 @@ export function Sheet({
   returnFocusRef.current = returnFocus;
   const onDetentChangeRef = useRef(onDetentChange);
   onDetentChangeRef.current = onDetentChange;
+  const onBackRef = useRef(onBack);
+  onBackRef.current = onBack;
   const t = useT();
   const dismissToast = useDismissToast();
+
+  // Back closes the sheet and leaves the screen (D187).
+  useBackLayer(open && !hostsBack, () => {
+    onBackRef.current?.();
+    onCloseRef.current();
+  });
 
   /*
    * No glass over a moving body (D146, block 7B). A sheet blurs and dims

@@ -73,6 +73,8 @@ export function ExercisePicker({
   const [primary, setPrimary] = useState<MuscleGroup[]>([]);
   const [loadType, setLoadType] = useState<ExerciseLoadType>('external');
   const nameRef = useRef<HTMLInputElement>(null);
+  /** Back is closing the picker: its fields are kept. */
+  const byBack = useRef(false);
 
   // The sheet focuses the search when it opens (WP3, B1). Switching to the
   // custom form inside the open sheet is the picker's own change of view, so
@@ -185,8 +187,16 @@ export function ExercisePicker({
       open={open}
       title={t('gym.picker.title')}
       onClose={() => {
-        reset();
+        // Back keeps what was typed (D187): the search and the form of an
+        // exercise of the user's own stay as they are and stand again when
+        // the picker opens next — for as long as the workout or the plan it
+        // was opened in. Every other way out empties it, as before.
+        if (!byBack.current) reset();
+        byBack.current = false;
         onClose();
+      }}
+      onBack={() => {
+        byBack.current = true;
       }}
       footer={
         creating ? (

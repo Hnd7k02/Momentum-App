@@ -84,6 +84,8 @@ const SUITES = [
   { name: 'design-system', webkitEnv: { WIDTHS: '393' } },
   { name: 'exercise-search' },
   { name: 'muscle-card' },
+  // The tidy-up: Back closes every sheet, and nothing typed is lost (D187).
+  { name: 'back-sheets' },
   { name: 'onboarding-7e', needs: ['preview'] },
   // Block 9: the update from the live state, in place and back, on its own
   // port (4295) from both builds.
