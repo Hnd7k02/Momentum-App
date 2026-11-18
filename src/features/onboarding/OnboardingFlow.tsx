@@ -7,7 +7,6 @@ import {
   LockIcon,
   MindIcon,
   PlusIcon,
-  SparkIcon,
 } from '../../components/Icons';
 import { QuestionSheet, type QuestionSheetSubmit } from '../../domains/mental/QuestionSheet';
 import { questionTypeLabelKey } from '../../domains/mental/questionLabels';
@@ -619,9 +618,17 @@ export function OnboardingFlow({
         <header className="onboarding__header">
           {stepIndex === 0 ? (
             <span className="onboarding__brand">
-              <span className="onboarding__logo" aria-hidden="true">
-                <SparkIcon size={16} />
-              </span>
+              {/* The app icon in its small drawing (`public/icon-small.svg`,
+                  made by `tools/render-icons.mjs`): a picture beside the
+                  name, which is what says it. */}
+              <img
+                className="onboarding__logo"
+                src={`${import.meta.env.BASE_URL}icon-small.svg`}
+                alt=""
+                width={28}
+                height={28}
+                decoding="async"
+              />
               {t('app.name')}
             </span>
           ) : (

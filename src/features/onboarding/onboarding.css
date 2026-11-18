@@ -106,16 +106,14 @@
   letter-spacing: -0.3px;
 }
 
-/* The app icon, small: the same mark `public/icon.svg` draws. */
+/* The app icon, small: `public/icon-small.svg`, the drawing made for
+   sizes under 48px. It brings its own colours and corners — a fixed
+   graphic, like the rank badge (D198) — so nothing here paints it. */
 .onboarding__logo {
+  display: block;
   width: 28px;
   height: 28px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand-mark-ink);
-  background: var(--brand-mark);
+  flex: none;
 }
 
 /* Its own box is the target; the chevron stands at the gutter. */

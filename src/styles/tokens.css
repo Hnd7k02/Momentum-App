@@ -358,13 +358,6 @@
   --stage-data-track: #3f3f52;
   --shadow-stage: 0 12px 32px rgba(11, 12, 17, 0.28);
 
-  /* The app icon, as `public/icon.svg` draws it; the welcome screen shows
-     it. A fixed graphic, like the rank badge. */
-  --brand-mark: linear-gradient(150deg, #9d8cf5 0%, #7fb6f2 100%);
-  --brand-mark-ink: #ffffff;
-  --brand-mark-halo: radial-gradient(closest-side, rgba(157, 140, 245, 0.24), transparent);
-  --shadow-brand-mark: 0 10px 30px rgba(125, 118, 235, 0.32), 0 2px 6px rgba(16, 24, 40, 0.06);
-
   /*
    * The onboarding's own (block 7E, D190; contract «Onboarding-Ausnahmen»).
    * Nothing outside `features/onboarding/` reads these, and the contract
