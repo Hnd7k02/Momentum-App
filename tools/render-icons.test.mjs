@@ -2,28 +2,59 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { FIRST, FIRST_STAR, TUNED, starPath, tuneIcon } from './icon-source.mjs';
 
 /**
- * The app icon's files (the tidy-up of WP3, step 4c, D198).
+ * The app icon's files (the tidy-up of WP3, step 4c, D198; the values the
+ * owner chose after the release, D203).
  *
  * `tools/render-icons.mjs` makes them from one source and can say whether
  * they still are what it makes (`--check`) — but that needs a browser, and
  * this test runs where there is none. So it holds what can be read: the
- * source is the owner's drawing byte for byte, and the two drawings made
- * from it are what the step describes.
+ * owner's first drawing is kept as he sent it, the source is that drawing
+ * with the values of D203 and nothing else changed, and the two drawings
+ * made from the source are what the step describes.
  */
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path) => readFileSync(join(ROOT, path));
 const text = (path) => read(path).toString('utf8');
 
-const STAR = 'M512 300C524.7 408.1 615.9 499.3 724 512C615.9 524.7 524.7 615.9 512 724C499.3 615.9 408.1 524.7 300 512C408.1 499.3 499.3 408.1 512 300Z';
+const DRAWING = 'docs/wp3/prompts/aufraeumen-icon/icon-full.svg';
+const STAR = starPath(TUNED.star);
 const count = (haystack, needle) => haystack.split(needle).length - 1;
 
 describe('the app icon', () => {
-  it('has the owner\'s drawing as its source, byte for byte', () => {
-    expect(read('public/icon-full.svg').equals(read('docs/wp3/prompts/aufraeumen-icon/icon-full.svg'))).toBe(true);
+  it('keeps the owner\'s first drawing, and reads its star as the one it has', () => {
+    const drawing = text(DRAWING);
+    expect(count(drawing, FIRST_STAR)).toBe(3);
+    // The star's description in numbers is the drawing's own star, to the character.
+    expect(starPath(FIRST)).toBe(FIRST_STAR);
+  });
+
+  it('has that drawing with the values of D203 as its source, and nothing else of it changed', () => {
+    const drawing = text(DRAWING);
+    const source = text('public/icon-full.svg');
+    expect(source).toBe(tuneIcon(drawing));
     // Full bleed: no corners of its own, no clip.
-    expect(text('public/icon-full.svg')).not.toContain('clip-path');
+    expect(source).not.toContain('clip-path');
+    // The same drawing: every element and every colour, in the same order —
+    // with the numbers taken out, the two are one text.
+    const shape = (svg) => svg.replace(/d="M[^"]*"/g, 'd=""').replace(/(stroke-width|opacity|stop-opacity)="[\d.]+"/g, '$1=""');
+    expect(shape(source)).toBe(shape(drawing));
+    const colours = (svg) => svg.match(/#[0-9a-fA-F]{3,6}\b/g);
+    expect(colours(source)).toEqual(colours(drawing));
+    // What D203 changed, read off the file.
+    expect(count(source, STAR)).toBe(3);
+    expect(source).toContain(`stroke="url(#line)" stroke-width="${TUNED.line}"`);
+    expect(TUNED.star.reach).toBeGreaterThan(FIRST.reach);
+    expect(TUNED.star.inward).toBeLessThan(FIRST.inward);
+  });
+
+  it('keeps the star inside what a system may cut away', () => {
+    // A maskable icon is safe within the middle 80 %: a circle of 410 round
+    // the centre of the 1024 square. The star's tips, with half its widest
+    // glow, stay well inside it.
+    expect(TUNED.star.reach + TUNED.glowWide.width / 2).toBeLessThan(410);
   });
 
   it('icon.svg is the source clipped to rounded corners, with the rim as its last element', () => {

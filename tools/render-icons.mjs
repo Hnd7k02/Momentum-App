@@ -5,17 +5,21 @@
 //                                          under public/ is not what the
 //                                          source makes
 //
-// The source is `public/icon-full.svg`: the owner's drawing, byte for byte
-// (`docs/wp3/prompts/aufraeumen-icon/icon-full.svg`) — full bleed, with no
-// corners of its own. Everything else is made from it here, so the icon is
-// changed in one file and never by hand in six:
+// The source is the owner's first drawing, byte for byte
+// (`docs/wp3/prompts/aufraeumen-icon/icon-full.svg`), with the values he
+// chose for it afterwards (`tools/icon-source.mjs`, D203) — full bleed, with
+// no corners of its own. Everything is made from that here, so the icon is
+// changed in one place and never by hand in seven files:
 //
+//   icon-full.svg          the first drawing with the values of D203: the
+//                          star larger and sharper, its line stronger, the
+//                          sheen clearer, the colours deeper
 //   icon.svg               the same, clipped to rounded corners, with a
 //                          fine light rim — for a browser tab and wherever
 //                          the icon stands on a ground of its own
 //   icon-small.svg         for anything under 48px: without the sheen, the
 //                          two glows and the rim, and the star drawn with a
-//                          stroke of 64 where the large one has 30 — at
+//                          stroke of 64 where the large one has 38 — at
 //                          28px the fine parts are noise and the star a hair
 //   apple-touch-icon.png   180, from icon-full.svg: opaque, no corners —
 //   icon-maskable-512.png  512, likewise — iOS and Android round it themselves
@@ -29,12 +33,15 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TUNED, starPath, tuneIcon } from './icon-source.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
 const CHECK = process.argv.includes('--check');
 
-const full = readFileSync(join(PUBLIC, 'icon-full.svg'), 'utf8');
+/** The owner's first drawing, kept as he sent it. */
+const DRAWING = join(ROOT, 'docs', 'wp3', 'prompts', 'aufraeumen-icon', 'icon-full.svg');
+const full = tuneIcon(readFileSync(DRAWING, 'utf8'));
 
 /** Replaces exactly one occurrence, or says what the source no longer holds. */
 function once(text, find, put) {
@@ -47,10 +54,10 @@ const CLIP = '<clipPath id="r"><rect width="1024" height="1024" rx="229"/></clip
 const RIM = '<rect x="2" y="2" width="1020" height="1020" rx="227" fill="none" stroke="url(#rim)" stroke-width="4"/>';
 const SHEEN = '<path d="M0 0H1024V236Q566 548 0 706Z" fill="url(#sheen)"/>';
 const EDGE = '<path d="M1024 236Q566 548 0 706" fill="none" stroke="url(#edge)" stroke-width="7" filter="url(#soft)"/>';
-const STAR = 'M512 300C524.7 408.1 615.9 499.3 724 512C615.9 524.7 524.7 615.9 512 724C499.3 615.9 408.1 524.7 300 512C408.1 499.3 499.3 408.1 512 300Z';
-const GLOW_WIDE = `<g filter="url(#glowWide)" opacity="0.55"><path d="${STAR}" fill="none" stroke="#f1e6ff" stroke-width="56" stroke-linejoin="round"/></g>`;
-const GLOW = `<g filter="url(#glow)" opacity="0.75"><path d="${STAR}" fill="none" stroke="#ffffff" stroke-width="36" stroke-linejoin="round"/></g>`;
-const STAR_STROKE = 'stroke="url(#line)" stroke-width="30"';
+const STAR = starPath(TUNED.star);
+const GLOW_WIDE = `<g filter="url(#glowWide)" opacity="${TUNED.glowWide.opacity}"><path d="${STAR}" fill="none" stroke="#f1e6ff" stroke-width="${TUNED.glowWide.width}" stroke-linejoin="round"/></g>`;
+const GLOW = `<g filter="url(#glow)" opacity="${TUNED.glow.opacity}"><path d="${STAR}" fill="none" stroke="#ffffff" stroke-width="${TUNED.glow.width}" stroke-linejoin="round"/></g>`;
+const STAR_STROKE = `stroke="url(#line)" stroke-width="${TUNED.line}"`;
 
 // The rounded icon: a clip in the definitions, the outer group clipped by
 // it, and the rim as the group's last element.
@@ -63,6 +70,7 @@ for (const part of [SHEEN, EDGE, GLOW_WIDE, GLOW]) small = once(small, part, '')
 small = once(small, STAR_STROKE, 'stroke="url(#line)" stroke-width="64"');
 
 const files = new Map([
+  ['icon-full.svg', Buffer.from(full, 'utf8')],
   ['icon.svg', Buffer.from(rounded, 'utf8')],
   ['icon-small.svg', Buffer.from(small, 'utf8')],
 ]);
@@ -109,6 +117,6 @@ for (const [name, bytes] of files) {
   }
 }
 if (stale > 0) {
-  console.error(`render-icons: ${stale} file(s) under public/ are not what icon-full.svg makes — run node tools/render-icons.mjs`);
+  console.error(`render-icons: ${stale} file(s) under public/ are not what the owner's drawing and the values of D203 make — run node tools/render-icons.mjs`);
   process.exit(1);
 }
