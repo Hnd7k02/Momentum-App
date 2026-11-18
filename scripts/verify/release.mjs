@@ -29,6 +29,58 @@ const tab = async (page, name) => {
   await settle(page);
 };
 
+/**
+ * What the browser tells a page of its worker on a first visit — written
+ * down, so that a notice that stands can be read against it.
+ *
+ * Before any script of the app: every state the installing worker reports,
+ * with whether the page had a controller at that moment and whether that
+ * controller was this very worker. `hold` keeps the page busy for so many
+ * milliseconds from the moment the worker is found — the app has taken its
+ * own listener by then — which is what a slow phone does to a first visit:
+ * the worker installs, activates and claims the page while the page cannot
+ * listen, and all of it is reported at once.
+ */
+async function recordWorker(ctx, { hold = 0 } = {}) {
+  await ctx.addInitScript((holdMs) => {
+    const container = navigator.serviceWorker;
+    if (!container) return;
+    const seen = { found: 0, states: [], held: false };
+    window.__worker = seen;
+    const register = container.register.bind(container);
+    container.register = (...args) => {
+      const pending = register(...args);
+      void pending.then((registration) => {
+        registration.addEventListener('updatefound', () => {
+          seen.found += 1;
+          const installing = registration.installing;
+          installing?.addEventListener('statechange', () => {
+            const controller = container.controller;
+            seen.states.push({ state: installing.state, controlled: controller !== null, bySelf: controller === installing });
+          });
+          if (holdMs > 0) {
+            setTimeout(() => {
+              const end = performance.now() + holdMs;
+              while (performance.now() < end) { /* the page is busy */ }
+              seen.held = true;
+            }, 0);
+          }
+        });
+      }, () => {});
+      return pending;
+    };
+  }, hold);
+}
+const workerSeen = (page) => page.evaluate(() => window.__worker ?? null);
+/** One line of what was recorded, for a check's detail. */
+function workerLine(seen) {
+  if (!seen) return 'no worker in this browser';
+  if (seen.found === 0) return 'no worker was found while the page listened';
+  const installed = seen.states.find((entry) => entry.state === 'installed');
+  const states = seen.states.map((entry) => `${entry.state}${entry.controlled ? (entry.bySelf ? ' (controlled, by this worker)' : ' (controlled, by another)') : ''}`).join(' → ');
+  return `${seen.found} worker found; ${installed ? `"installed" reached a page ${installed.controlled ? 'already controlled' : 'without a controller'}` : '"installed" was not reported'}; ${states}`;
+}
+
 /* ── A cold load of the built bundle ────────────────────────────────────── */
 {
   const ctx = await browser.newContext(phone);
@@ -242,6 +294,7 @@ for (const width of [320, 360, 393, 430, 1280]) {
   page.on('pageerror', (error) => widthErrors.push(String(error)));
   page.on('console', (message) => { if (message.type() === 'error') widthErrors.push(message.text()); });
   const notices = new Set();
+  await recordWorker(ctx);
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
   await onboard(page, { gym: 3, running: 2 });
@@ -261,7 +314,37 @@ for (const width of [320, 360, 393, 430, 1280]) {
   // A first visit offers no update, and every change of the journey was
   // stored: neither notice stands (block 9 — WebKit on GitHub showed one).
   check(`${width}px: no notice stands — no update offered on a first visit, no change that did not take — and no page error`,
-    notices.size === 0 && widthErrors.length === 0, [...notices, ...widthErrors].slice(0, 4).join(' | '));
+    notices.size === 0 && widthErrors.length === 0,
+    notices.size === 0 && widthErrors.length === 0 ? '' : `${[...notices, ...widthErrors].slice(0, 4).join(' | ')} — ${workerLine(await workerSeen(page))}`);
+  await ctx.close();
+}
+
+/* ── A first visit on a busy page ───────────────────────────────────────── */
+/*
+ * The notice of the block above came and went in WebKit on GitHub: one
+ * first visit in a few dozen. This one is made to meet it. The page is held
+ * busy while its first worker installs, activates and claims it, and only
+ * then hears of any of it — and a first visit offers no update, however
+ * late the page learns that its worker is installed.
+ */
+{
+  const HOLD = Number(process.env.RELEASE_HOLD ?? 6000);
+  const ctx = await browser.newContext(phone);
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(String(error)));
+  await recordWorker(ctx, { hold: HOLD });
+  await page.goto(URL_APP, { waitUntil: 'load' });
+  // The worker is found, the page is held, and then it hears the rest.
+  await page.waitForFunction(() => window.__worker?.held === true, null, { timeout: HOLD + 30000 }).catch(() => null);
+  await page.waitForFunction(() => navigator.serviceWorker?.controller != null, null, { timeout: 30000 }).catch(() => null);
+  await page.waitForTimeout(1500);
+  const seen = await workerSeen(page);
+  const notices = await page.locator('.update-banner').allTextContents();
+  check('a first visit on a busy page: the worker was found, and the page was held while it installed',
+    seen !== null && seen.found === 1 && seen.held === true, workerLine(seen));
+  check('a first visit on a busy page offers no update — however late the page hears that its worker is installed',
+    notices.length === 0 && errors.length === 0, `${notices.length > 0 ? `${notices.join(' | ')} — ` : ''}${workerLine(seen)}${errors.length > 0 ? ` — ${errors[0]}` : ''}`);
   await ctx.close();
 }
 
