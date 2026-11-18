@@ -702,7 +702,10 @@ in version order and applies the chain in one pass.
 - The vitest workspace has two projects: `berlin` for `*.test.ts(x)` and
   `sao_paulo` for `*.tz.test.ts` — date logic runs in a zone where local
   midnight has not always existed. All date arithmetic is anchored at midday
-  for that reason.
+  for that reason. A test has thirty seconds there, not vitest's five:
+  the replay tests walk whole profiles, and a slow runner once failed one
+  on the clock alone — what a replay may cost is measured in
+  `replayPerformance.test.ts`, not by a default.
 - Browser and accessibility verification live in
   [`scripts/verify/`](scripts/verify/README.md) and are part of finishing a
   phase, not an optional extra. `npm run verify` serves the builds **as

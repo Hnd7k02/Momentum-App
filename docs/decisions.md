@@ -7192,6 +7192,14 @@ Wednesday 18 November, before this block's first commit and after it. It
 now holds what the rule gives for the day it runs on. **A check that
 depends on the weekday is a broken check.**
 
+And in the unit tests: vitest's default time limit of five seconds, which
+nobody had chosen. A replay test of `gymMetricEra` — untouched by the
+block, two and a half seconds here — crossed it on GitHub's runner in run
+42, and the test after it failed on the database the first was still
+writing. A test has thirty seconds now (`vitest.workspace.ts`). A time
+limit says the machine was slow, not that a rule broke; what a replay may
+cost is measured in `replayPerformance.test.ts`.
+
 **Not built, and said:** two wishes for the measuring display from D184
 (the number of frames drawn in all; a file checked over the network and
 taken from the cache named as that). `HANDOVER.md` had left them "for the

@@ -1,5 +1,12 @@
 # WP3 release candidate — the check on the iPhone
 
+**Where this stands (2026-11-18).** The owner worked through the
+checklist below on the preview `0d741de` and found it in order but for
+two points (see "Results"). Both went into the tidy-up, with what else he
+added (D196). **What he checks again, on the preview of the tidy-up, is
+the short list at the end: "After the tidy-up".** The checklist of the
+gate stays here as it was checked.
+
 What only the phone can show, for the release candidate of WP3 (block 9,
 the release gate). Everything a browser can prove runs in
 `scripts/verify/` (`npm run verify`) and on GitHub; this list is what is
@@ -52,9 +59,11 @@ again.
 **After the go-live only** (not the preview, which has no service worker):
 the live app shows "Neue Version verfügbar"; "Neu laden" reloads once and
 your data is there. Then open it once in flight mode: Heute appears, and
-Gym shows its rows with the flat figure where the body stands — the body
-itself does not draw offline yet; that is the red offline check in
-`release-proof.mjs`, the tidy-up's (D163).
+**in Muskelgruppen the body stands**. *(Until the tidy-up this said the
+flat figure would stand there: the offline check in `release-proof.mjs`
+was red. It was the test server's, not the app's — D163, D200 — and is
+green against a server that answers as GitHub Pages does. The phone in
+flight mode is still what decides.)*
 
 ## Measured on the phone, against the targets
 
@@ -88,4 +97,44 @@ something stands out.
 
 ## Results
 
-*(filled in from the owner's report, with device, iOS version and date)*
+**2026-11-18, the owner, on his iPhone, the preview `0d741de`** (the
+iPhone 15 Pro of the measurements above; he did not restate device and
+iOS version with this report). His words: "Prüfliste: Bis auf die zwei
+Punkte unten ist alles in Ordnung."
+
+| # | Result |
+|---|---|
+| 1–5, 7–10 | ✅ in order |
+| 6, the onboarding | ❌ **it chooses for the user**: three questions (D191) and a Gym target of three stood chosen before he chose. To be empty, with «Weiter» held and a hint until he has chosen at least one question and a Gym target; Laufen optional; the second slide to name Gym's target in a sentence, as Laufen's, not as «0 von 3». **Built in the tidy-up, D197** |
+| beside the list, the Gym hub | ❌ **the Muskelgruppen card on a first load**, now and then: «Noch nicht trainiert» shown to half its height, the hint under it missing; right on the next load. Two screenshots. **Not reproduced on a runner; the cause named as far as it can be and the card put there whole, D199** — whether it is gone is his to see |
+
+## After the tidy-up — what to check again
+
+**Build under test:** the preview of the tidy-up, the `Momentum-preview`
+commit named in `release-candidates.md` (WP3 RC, after the tidy-up), at
+<https://hnd7k02.github.io/Momentum-preview/>. **Remove the preview from
+the Home Screen and add it again first**: an app on the Home Screen keeps
+the icon it was added with.
+
+**Check data:** the file of the day you check, from
+`docs/wp3/aufraeumen/` — `momentum-pruefdaten-aufraeumen-2026-11-18.json`
+on 18 November, and so on to the 21st. Made by the live app itself, as
+the files of block 9 were. **Do points 1 and 2 before you import it**: the
+card's finding was on a device without training.
+
+| # | Do | Expected | Result |
+|---|---|---|---|
+| 1 | The preview, freshly added, **before any import**: walk the introduction | The first slide's picture reads +12 %, Mind 9 von 10, Gym 3 von 3, and is the same picture (D201). The mark beside «Momentum» is the new icon. The second slide says «Dein Wochenziel wählst du gleich.» under Gym — no «0 von 3». Bereiche, the questions and the weekly targets each open with **nothing chosen**; «Weiter» waits with its sentence — «Wähle mindestens einen Bereich.», «Wähl mindestens eine Frage oder nimm Mind ab.», «Wähl ein Wochenziel fürs Gym. Laufen ist freiwillig.» — and a target for Laufen alone does not open the way (D197) | |
+| 2 | Still without data: close the app fully and open it, then Bereiche → Gym. **Five to ten times** — the finding did not show every time | The Muskelgruppen card says «Noch nicht trainiert» in full, with the hint «Ab dem dritten Übungstag …» under it, **every time** (D199). If it is cut again once, a screenshot — the cause is then another | |
+| 3 | On that empty device, save one plan first (Bereiche → Gym → «Neuer Plan», one exercise is enough): without a plan «Training erfassen» opens a workout at once and there is no chooser. Then Muskelgruppen → «Training erfassen» → «Pläne verwalten» in the chooser | You stand at «Trainingspläne» on the Gym hub. Back — the gesture — returns to Muskelgruppen (D200) | |
+| 4 | The same from Heute: «Session eintragen» on the Gym card → «Pläne verwalten» | You stand at «Trainingspläne». Back returns to Heute | |
+| 5 | Back on sheets without fields: the legend in Muskelgruppen, «3D-Körpermodell» under Bereiche, the «i» of the weighting on Rang — open each, swipe back from the edge | The sheet closes and the screen stays where it was. A second swipe leaves the screen, as before (D187) | |
+| 6 | Back on a sheet with fields: Bereiche → Mind → «Frage hinzufügen», type half a question, swipe back; open «Frage hinzufügen» again. Then the same with «Übung hinzufügen» in a workout: type into the search, swipe back, open it again | The text stands there again. Closed with the cross instead, the field opens empty, as always | |
+| 7 | Import the check file of the day. A sample that nothing else moved: Heute, Muskelgruppen with one sheet, a workout with a warm-up set | As at the gate: the same number in row, sheet and body | |
+| 8 | The Home Screen | The icon is the new one, as in `docs/wp3/prompts/aufraeumen-icon/vorschau-icon.png` | |
+| 9 | On GitHub, in the browser, the branch `claude/momentum-wp3` | The zip, the copy of the backup and the three pictures are gone from the tree; the front page describes the app of today. `LICENSE` follows once the name and the year for it are given | |
+| 10 | **After the go-live only:** the live app shows «Neue Version verfügbar», «Neu laden» reloads once, the data is there. Then flight mode: Heute appears, and in Muskelgruppen the body stands (D163). Then delete the repository `Momentum-preview`, if you no longer need it | | |
+
+Not to be repeated from the checklist of the gate: points 1 and 2 (the
+live app did not change), 5 (D194), 8 and 9 (VoiceOver, less motion and
+less transparency: nothing of them changed), and the measurements.

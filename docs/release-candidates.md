@@ -6,11 +6,35 @@ happened; RC1 is not rewritten to pretend its defect never existed.
 
 | | Application commit | Status |
 |---|---|---|
-| **WP3 RC** | app source **`1d28b5b`**, on `claude/momentum-wp3` | **At the gate** (STOP 9) — see below |
+| **WP3 RC, after the tidy-up** | app source **`%(app)s`**, on `claude/momentum-wp3` | **At the STOP of the tidy-up** — the gate passed (D196); see below |
+| WP3 RC | app source `1d28b5b` | Superseded by the tidy-up: the candidate of STOP 9 |
 | **muscle-map-v1** | app source **`5e554aa`**; the tag was never set in the repository (found in block 9) | **Released** — see below |
 | V1 | the release pass after RC2 | Released |
 | RC2 | `c3e8b7f` | Superseded by V1 |
 | RC1 | `ae8b479` | Superseded — never deployed, never tested on a device |
+
+---
+
+## WP3 RC, after the tidy-up — app source `%(app)s`
+
+The candidate of STOP 9 and the last block of WP3 on top of it
+(`docs/wp3/aufraeumen/README.md`, D196–D201). **Preview:**
+`Momentum-preview` `%(preview)s`, <https://hnd7k02.github.io/Momentum-preview/>
+— built from `e185f91`, no `sw.js`, the status bar `default`, its own
+database `momentum-preview`.
+
+**What changed against the candidate of STOP 9**, and nothing else: the
+onboarding chooses nothing for the user (D197); the first slide's picture
+(D201); the app icon (D198); the hub's Muskelgruppen card is a new element
+when its words change (D199); «Pläne verwalten» arrives at the plans, and
+Back closes every sheet and keeps what was typed (D200). Nothing that
+computes or stores: `src/core/`, `src/storage/` and `.github/fixtures/`
+are as they were.
+
+**Checked:** `HANDOVER.md`, "Verification status". **Open:** the owner's
+short list on the phone (`docs/device-tests.md`, "After the tidy-up"),
+the name for `LICENSE`, and the merge — only after his ✅ and a green
+GitHub run on exactly the commit that is merged.
 
 ---
 
