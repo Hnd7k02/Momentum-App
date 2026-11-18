@@ -299,6 +299,8 @@ async function runSuite(suite) {
   // A red suite says why where its log is read: on GitHub, the job's output
   // is the one place that needs no download.
   if (!row.ok) for (const line of result.text.split('\n').filter((l) => l.startsWith('FAIL')).slice(0, 12)) console.log(`[run-all]   ${line.slice(0, 400)}`);
+  // What a suite has to say even when it is green (`NOTE …`): into the job's log, which is all a session can read of a run on GitHub.
+  for (const line of result.text.split('\n').filter((l) => l.startsWith('NOTE')).slice(0, 6)) console.log(`[run-all]   ${line.slice(0, 400)}`);
 }
 
 if (!broken) {
