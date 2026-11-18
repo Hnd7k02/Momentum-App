@@ -52,7 +52,7 @@ database `momentum-preview`.
 | `tsc -b` | exit 0 | exit 0 |
 | `npm run test` | exit 0 · 141 files · 2485 tests | exit 0 · 144 files · 2508 tests |
 | `npm run verify`, Chromium, here | 40 suites · 5641 / 5648 | 43 suites · 5741 / 5742 |
-| GitHub, Chromium | — | 43 suites · 5741 / 5742 (at `f715405`) |
+| GitHub, Chromium | — | 43 suites · 5746 / 5747 on the candidate's final state `d8abe4e` (5741 / 5742 at `f715405`, before `release` held the notices) |
 | GitHub, WebKit (5 suites) | — | 1017 / 1017 (at `5ee7663`) |
 
 The 7 red checks of the baseline: the known offline check in

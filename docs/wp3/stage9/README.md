@@ -391,3 +391,7 @@ WebKit runs before, a notice's button stood in the middle of the journey
 (at 430 and at 393px); which of the two notices it was, the log did not
 say. `release.mjs` now names any notice and page error at every width; it
 has not stood since.
+
+**On the candidate's final state** (`d8abe4e`, the notice fix and
+`release`'s notice checks in): GitHub Chromium 43 suites, 5746 of 5747,
+the one red the known offline check; WebKit green.
