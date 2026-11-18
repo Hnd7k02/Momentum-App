@@ -301,11 +301,11 @@ export const de = {
   'onboarding.opening.tap': 'Screen antippen',
   // The hero of the first slide is a picture with example values, and says so.
   'onboarding.hero.label':
-    'Vorschau der App mit Beispielwerten: Verlauf plus 9 Prozent in 30 Tagen, Mind heute 8 von 10, Gym 2 von 3 Sessions diese Woche.',
-  'onboarding.hero.change': '+9\u00A0%',
+    'Vorschau der App mit Beispielwerten: Verlauf plus 12 Prozent in 30 Tagen, Mind heute 9 von 10, Gym 3 von 3 Sessions diese Woche.',
+  'onboarding.hero.change': '+12\u00A0%',
   'onboarding.hero.period': 'Mind und Gym · letzte 30 Tage',
-  'onboarding.hero.mind': '8 von 10',
-  'onboarding.hero.gym': '2 von 3',
+  'onboarding.hero.mind': '9 von 10',
+  'onboarding.hero.gym': '3 von 3',
   'onboarding.hero.week': 'Woche',
   'onboarding.worlds.scale': 'Skala von 1 bis 10, noch nicht beantwortet',
   'onboarding.worlds.note': 'Beides zählt für denselben Rang.',

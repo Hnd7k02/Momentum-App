@@ -517,12 +517,12 @@ describe('what each step shows (contract §16)', () => {
     expect(hero.getAttribute('aria-label')).toBe(translate('de', 'onboarding.hero.label'));
     expect(hero.getAttribute('aria-label')).toMatch(/Beispielwerten/);
     expect(hero.querySelectorAll(OPERABLE)).toHaveLength(0);
-    expect(hero.textContent).toContain('+9 %');
+    expect(hero.textContent).toContain('+12 %');
   });
 
   it('no step after the first shows an example value', async () => {
     await open();
-    const examples = /\+9|8 von 10|2 von 3|Beispiel/;
+    const examples = /\+12|9 von 10|3 von 3|Beispiel/;
     await click(buttonNamed('Los geht’s'));
     const visited: string[] = [];
     for (let guard = 0; guard < 8 && step() !== 'summary'; guard += 1) {

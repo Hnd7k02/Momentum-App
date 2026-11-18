@@ -34,18 +34,24 @@ import { formatDayAndMonthShort } from '../../i18n/format';
 const WIDTH = 325;
 const HEIGHT = 116;
 /** Where each of the eleven bars begins, from the top. */
-const BAR_TOPS = [58, 50, 56, 42, 34, 40, 26, 30, 18, 12, 4] as const;
-/** The line through the bars' middles, as the reference draws it. */
+const BAR_TOPS = [58, 50, 56, 41, 33, 39, 25, 29, 17, 10, 2] as const;
+/**
+ * The line through the bars' middles, as the reference draws it — raised a
+ * little at the owner's word after STOP 9 (D201): every height of it a
+ * tenth further from its start, so it ends higher and keeps its shape, the
+ * three small dips included. The figures beside it rose with it: +12 %,
+ * Mind 9 of 10, Gym's week met.
+ */
 const LINE =
-  'M7.5 78 C12.7 76.7 28.2 70.3 38.5 70 C48.8 69.7 59.2 77.3 69.5 76 C79.8 74.7 90.2 65.7 100.5 62 ' +
-  'C110.8 58.3 121.2 54.3 131.5 54 C141.8 53.7 152.2 61.7 162.5 60 C172.8 58.3 183.2 45.7 193.5 44 ' +
-  'C203.8 42.3 214.2 51.3 224.5 50 C234.8 48.7 245.2 39.3 255.5 36 C265.8 32.7 276.2 32.7 286.5 30 ' +
-  'C296.8 27.3 312.3 21.7 317.5 20';
+  'M7.5 78 C12.7 76.6 28.2 69.5 38.5 69.2 C48.8 68.8 59.2 77.2 69.5 75.8 ' +
+  'C79.8 74.4 90.2 64.4 100.5 60.3 C110.8 56.3 121.2 51.8 131.5 51.5 C141.8 51.2 152.2 60 162.5 58.1 ' +
+  'C172.8 56.3 183.2 42.4 193.5 40.5 C203.8 38.6 214.2 48.5 224.5 47.1 ' +
+  'C234.8 45.7 245.2 35.3 255.5 31.7 C265.8 28 276.2 28 286.5 25 C296.8 22.1 312.3 15.9 317.5 14';
 /** Where the line ends, as shares of the plot. */
-const END = { left: 317.5 / WIDTH, top: 20 / HEIGHT } as const;
+const END = { left: 317.5 / WIDTH, top: 14 / HEIGHT } as const;
 
-const MIND = { done: 8, of: 10 } as const;
-const GYM = { done: 2, of: 3 } as const;
+const MIND = { done: 9, of: 10 } as const;
+const GYM = { done: 3, of: 3 } as const;
 
 /**
  * A world's tile: its mark and name, a word for the period, and whatever
