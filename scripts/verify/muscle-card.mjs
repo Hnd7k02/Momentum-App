@@ -1,6 +1,5 @@
-import { chromium } from 'playwright-core';
 import { mkdirSync } from 'node:fs';
-import { CHROMIUM, URL_APP, check, summary, onboard, seed, seedMuscles, setLanguage } from './lib.mjs';
+import { URL_APP, check, summary, launch, onboard, seed, seedMuscles, setLanguage } from './lib.mjs';
 
 /**
  * The hub's "Muskelgruppen" card holds its place while it loads (D168).
@@ -20,6 +19,17 @@ import { CHROMIUM, URL_APP, check, summary, onboard, seed, seedMuscles, setLangu
  *
  * In German at the four widths, and in English at the narrowest, where a
  * longer sentence would be the first to outgrow the card.
+ *
+ * **And what stands on the glass is what a fresh paint would put there**
+ * (the tidy-up, D197). The owner's second finding on the iPhone, on a first
+ * load now and then: "Noch nicht trainiert" stood there cut in half and the
+ * hint under it was missing; a second load was right. The card's text had
+ * changed under a living sheet of glass — the two lines that held their
+ * place became words — and the picture kept only part of it. So each state
+ * is photographed as it stands once the history has arrived, the card is
+ * then taken out of the page and put back, which paints it from nothing,
+ * and the two pictures must be the same. In Chromium, and in WebKit on
+ * GitHub (`BROWSER=webkit`), the nearest thing to Safari a runner has.
  *
  * Run against the production preview (`vite preview --port 4173`).
  */
@@ -162,7 +172,54 @@ const STATES = [
   },
 ];
 
-const browser = await chromium.launch({ executablePath: CHROMIUM });
+const browser = await launch();
+
+/**
+ * How far two pictures of the card differ: the pixels that are not the
+ * same, and the box they lie in. Counted in the page, which can read a
+ * picture; a channel may differ by eight, the noise of a blur drawn twice.
+ */
+const differ = (page, first, second) =>
+  page.evaluate(async ([a, b]) => {
+    const read = async (data) => {
+      const image = new Image();
+      image.src = `data:image/png;base64,${data}`;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      return context.getImageData(0, 0, canvas.width, canvas.height);
+    };
+    const [one, two] = [await read(a), await read(b)];
+    if (one.width !== two.width || one.height !== two.height) return { pixels: -1, box: `${one.width}×${one.height} against ${two.width}×${two.height}` };
+    let pixels = 0;
+    let [left, top, right, bottom] = [one.width, one.height, -1, -1];
+    for (let y = 0; y < one.height; y += 1) {
+      for (let x = 0; x < one.width; x += 1) {
+        const i = (y * one.width + x) * 4;
+        if (Math.abs(one.data[i] - two.data[i]) > 8 || Math.abs(one.data[i + 1] - two.data[i + 1]) > 8 || Math.abs(one.data[i + 2] - two.data[i + 2]) > 8) {
+          pixels += 1;
+          left = Math.min(left, x); top = Math.min(top, y); right = Math.max(right, x); bottom = Math.max(bottom, y);
+        }
+      }
+    }
+    return { pixels, box: pixels ? `x ${left}–${right}, y ${top}–${bottom} of ${one.width}×${one.height}` : '' };
+  }, [first.toString('base64'), second.toString('base64')]);
+
+/** Takes the card out of the page and puts it back: its next picture is painted from nothing. */
+const paintAfresh = (page) =>
+  page.evaluate(async () => {
+    const card = document.querySelector('.gym-hub__muscles');
+    const frame = () => new Promise((done) => requestAnimationFrame(() => done()));
+    card.style.display = 'none';
+    await frame();
+    await frame();
+    card.style.removeProperty('display');
+    await frame();
+    await frame();
+  });
 
 /** Where the card and its title stand, and whether every line of it is inside it. */
 const measure = (page) =>
@@ -239,6 +296,18 @@ for (const { width, language } of RUNS) {
         loading !== null && loaded !== null && Math.abs(loading.top - loaded.top) <= 0.5, `${loading?.top} → ${loaded?.top}`);
       check(`${label}: every line of the card is inside it, and none is cut off`, loaded !== null && loaded.inside && !loaded.cut, loaded?.text);
       check(`${label}: nothing scrolls sideways`, loaded !== null && loaded.scrollWidth <= loaded.viewport, `${loaded?.scrollWidth} / ${loaded?.viewport}`);
+
+      // The picture on the glass, against the same card painted from nothing.
+      // Its text, where the finding was — not its edge, which shows the
+      // ground and what loads beneath the card.
+      const stands = await page.locator('.gym-hub__musclesBody').screenshot();
+      await paintAfresh(page);
+      await page.waitForTimeout(150);
+      const afresh = await page.locator('.gym-hub__musclesBody').screenshot();
+      if (OUT) await page.locator('.gym-hub__muscles').screenshot({ path: `${OUT}/card-${tag}-afresh-${width}.png` });
+      const difference = await differ(page, stands, afresh);
+      check(`${label}: the card's text, once its history has arrived, stands as a fresh paint puts it there`,
+        difference.pixels === 0, difference.pixels === 0 ? '' : `${difference.pixels} pixels differ, ${difference.box}`);
     } catch (error) {
       check(`${label}: the card could be looked at`, false, String(error).split('\n')[0]);
     }

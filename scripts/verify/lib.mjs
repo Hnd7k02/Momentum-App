@@ -17,7 +17,7 @@ export const CHROMIUM = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium'
  */
 export const BROWSER = process.env.BROWSER ?? 'chromium';
 export const WEBKIT = BROWSER === 'webkit';
-export const WEBKIT_SUITES = ['release', 'wp3-sheets', 'terminal', 'design-system', 'muscle-sheet'];
+export const WEBKIT_SUITES = ['release', 'wp3-sheets', 'terminal', 'design-system', 'muscle-sheet', 'muscle-card'];
 export async function launch(options = {}) {
   const { chromium, webkit } = await import('playwright-core');
   if (WEBKIT) return webkit.launch({ ...(process.env.WEBKIT_PATH ? { executablePath: process.env.WEBKIT_PATH } : {}), ...options });
