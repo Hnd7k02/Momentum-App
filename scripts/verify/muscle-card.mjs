@@ -21,7 +21,7 @@ import { URL_APP, check, summary, launch, onboard, seed, seedMuscles, setLanguag
  * longer sentence would be the first to outgrow the card.
  *
  * **And what stands on the glass is what a fresh paint would put there**
- * (the tidy-up, D197). The owner's second finding on the iPhone, on a first
+ * (the tidy-up, D199). The owner's second finding on the iPhone, on a first
  * load now and then: "Noch nicht trainiert" stood there cut in half and the
  * hint under it was missing; a second load was right. The card's text had
  * changed under a living sheet of glass — the two lines that held their
@@ -30,6 +30,11 @@ import { URL_APP, check, summary, launch, onboard, seed, seedMuscles, setLanguag
  * then taken out of the page and put back, which paints it from nothing,
  * and the two pictures must be the same. In Chromium, and in WebKit on
  * GitHub (`BROWSER=webkit`), the nearest thing to Safari a runner has.
+ * **Neither showed the finding** — before the fix, in all thirty cases
+ * each: it is the phone's. What the suite can hold is the fix's mechanism
+ * (the card with its words is a new element, which a browser paints from
+ * nothing) and that the picture stays right; whether the finding is gone
+ * is the owner's to see.
  *
  * Run against the production preview (`vite preview --port 4173`).
  */
@@ -279,12 +284,17 @@ for (const { width, language } of RUNS) {
       const loading = await measure(page);
       if (OUT) await page.locator('.gym-hub__muscles').screenshot({ path: `${OUT}/card-${tag}-loading-${width}.png` });
       check(`${label}: while its history loads the card says nothing yet`, loading !== null && loading.summary.trim() === '', JSON.stringify(loading?.summary));
+      // The card that loads is marked: the one that stands afterwards must
+      // be another element, put there whole (D199).
+      await page.evaluate(() => { document.querySelector('.gym-hub__muscles').__loadingCard = true; });
 
       await page.waitForFunction(() => (document.querySelector('.gym-hub__musclesSummary')?.textContent ?? '').trim() !== '', null, { timeout: 15000 });
       await page.waitForTimeout(250);
       const loaded = await measure(page);
       if (OUT) await page.locator('.gym-hub__muscles').screenshot({ path: `${OUT}/card-${tag}-loaded-${width}.png` });
 
+      const fresh = await page.evaluate(() => ({ cards: document.querySelectorAll('.gym-hub__muscles').length, same: document.querySelector('.gym-hub__muscles').__loadingCard === true }));
+      check(`${label}: the card with its words is a new element, not the loading one with its text changed`, fresh.cards === 1 && !fresh.same, JSON.stringify(fresh));
       check(`${label}: the card is in the state the check asked for`, loaded !== null && state.words[language].test(loaded.text), loaded?.text);
       check(`${label}: the card is as tall before the history arrives as after`,
         loading !== null && loaded !== null && Math.abs(loading.height - loaded.height) <= 0.5,

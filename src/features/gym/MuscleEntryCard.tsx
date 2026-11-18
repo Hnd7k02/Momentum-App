@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { MUSCLE_GROUPS } from '../../core/model';
 import type { DateKey } from '../../core/dates';
 import { useToday } from '../../app/useToday';
@@ -33,6 +33,21 @@ import './gymHub.css';
  * Nothing is computed here: the states, the count of rated groups and the
  * trend are `shownPerformance()`'s — what `GymProgress` shows for the same
  * loaded history, by the one rule in `muscleState.ts`.
+ *
+ * **What the card says never changes under its glass** (the tidy-up of
+ * WP3, D199). The card is there before its history, so that the hub holds
+ * its layout (D168) — and it was the one card of the hub whose text then
+ * changed inside a living sheet of glass: two lines that held their place
+ * became words. On an iPhone, on a first load now and then, the picture
+ * kept only part of that: «Noch nicht trainiert» cut through the middle and
+ * the hint under it missing, right on the next load — the second finding of
+ * this kind on this card (the first was the title standing twice, D168).
+ * No runner shows it; what the phone showed is a repaint of only the part
+ * of the layer that had held ink before. So the card does what every other
+ * card of the hub does: it is put there whole. Whenever its words change,
+ * the button is a new element (`key`), which a browser paints from
+ * nothing; its place, its height and its title's place are the same, and a
+ * keyboard's focus goes with it.
  */
 export function MuscleEntryCard({
   history,
@@ -97,11 +112,35 @@ export function MuscleEntryCard({
   const overallTone =
     trend === null || trend.trend === 'unchanged' ? '' : `gym-hub__musclesOverall--${trend.trend}`;
 
+  const rangeLine =
+    history === null
+      ? NBSP
+      : hasData
+        ? t('gymHub.muscles.range', { days: rangeDays })
+        : gap?.kind === 'outsideRange'
+          ? t('gymHub.muscles.outsideShort', { count: gap.daysAgo })
+          : gap?.kind === 'unscored'
+            ? t('gymHub.muscles.range', { days: rangeDays })
+            : t('gymHub.muscles.noneHint');
+
+  // One element for one wording (above): the lines the card prints, and
+  // the states its ten markers stand in.
+  const wording = [summary, overall ?? '', overallTone, rangeLine, states.map((view) => view.state).join(',')].join('\u0001');
+  const button = useRef<HTMLButtonElement>(null);
+  // Read before the commit takes the old element away: was the focus on it?
+  const focused = useRef(false);
+  focused.current = button.current !== null && typeof document !== 'undefined' && document.activeElement === button.current;
+  useLayoutEffect(() => {
+    if (focused.current && document.activeElement !== button.current) button.current?.focus({ preventScroll: true });
+  }, [wording]);
+
   return (
     // No section label: the card names itself, and it is the section's only
     // card, so a grey "Muskelgruppen" above a bold one was the same word twice.
     <Section>
       <button
+        key={wording}
+        ref={button}
         type="button"
         className="card gym-hub__muscles"
         data-card
@@ -122,17 +161,7 @@ export function MuscleEntryCard({
           {overall ? (
             <span className={`gym-hub__musclesOverall ${overallTone}`.trim()}>{overall}</span>
           ) : null}
-          <span className="gym-hub__musclesRange">
-            {history === null
-              ? NBSP
-              : hasData
-              ? t('gymHub.muscles.range', { days: rangeDays })
-              : gap?.kind === 'outsideRange'
-                ? t('gymHub.muscles.outsideShort', { count: gap.daysAgo })
-                : gap?.kind === 'unscored'
-                  ? t('gymHub.muscles.range', { days: rangeDays })
-                  : t('gymHub.muscles.noneHint')}
-          </span>
+          <span className="gym-hub__musclesRange">{rangeLine}</span>
         </span>
         <span className="gym-hub__chevron" aria-hidden="true">
           <ChevronRightIcon size={20} />
