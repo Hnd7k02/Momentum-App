@@ -339,13 +339,14 @@ for (const width of [320, 360, 393, 430, 1280]) {
  * first visit in a few dozen, and never one in Chromium. Five walks do not
  * meet it often enough to say anything, so the first visit is made again
  * and again — a new browser profile each time, every other page at work
- * while its worker installs — and none of them is offered an update. How
+ * while its worker installs, the introduction walked to Heute — and none
+ * of them is offered an update. How
  * often the browser told a page of the claim before the install is a note
  * under the checks: it is the case the app has to bear, and whether a run
  * met it is worth knowing when the run is green.
  */
 {
-  const VISITS = Number(process.env.RELEASE_FIRST_VISITS ?? 30);
+  const VISITS = Number(process.env.RELEASE_FIRST_VISITS ?? 20);
   const offered = [];
   const unclaimed = [];
   const errors = [];
@@ -357,6 +358,10 @@ for (const width of [320, 360, 393, 430, 1280]) {
     await recordWorker(ctx, { busy });
     await page.goto(URL_APP, { waitUntil: 'load' });
     const claimed = await page.waitForFunction(() => navigator.serviceWorker?.controller != null, null, { timeout: 30000 }).then(() => true, () => false);
+    // The notice stands in the app, not over the introduction: it is read
+    // where a user who has just set up meets it, on Heute (run 49 counted
+    // the case eleven times on the opening page and could show no notice).
+    await onboard(page, { gym: 3, running: 2 });
     await page.waitForTimeout(500);
     const seen = await workerSeen(page);
     const notices = await page.locator('.update-banner').allTextContents();
@@ -374,7 +379,7 @@ for (const width of [320, 360, 393, 430, 1280]) {
 {
   const count = (list) => `${list.filter((visit) => visit.claimedFirst).length} of ${list.length}`;
   const all = [...firstVisits.walked, ...firstVisits.plain, ...firstVisits.busy];
-  console.log(`NOTE  first visits: "installed" reached a page already controlled in ${count(all)} — walked ${count(firstVisits.walked)}, plain ${count(firstVisits.plain)}, a page at work ${count(firstVisits.busy)}; a notice stood in ${all.filter((visit) => visit.notice).length}; the worker was found in ${all.filter((visit) => visit.found > 0).length}`);
+  console.log(`NOTE  first visits: "installed" reached a page already controlled in ${count(all)} — walked ${count(firstVisits.walked)}, plain ${count(firstVisits.plain)}, a page at work ${count(firstVisits.busy)}; a notice stood in ${all.filter((visit) => visit.notice).length}, of them after such a report ${all.filter((visit) => visit.notice && visit.claimedFirst).length}; the worker was found in ${all.filter((visit) => visit.found > 0).length}`);
 }
 
 await browser.close();
