@@ -299,6 +299,8 @@ export const en: Translations = {
   'onboarding.hero.week': 'Week',
   'onboarding.worlds.scale': 'Scale from 1 to 10, not answered yet',
   'onboarding.worlds.note': 'Both count towards the same rank.',
+  'onboarding.worlds.sessions': 'Sessions',
+  'onboarding.worlds.sessionsGoal': 'You choose your weekly target in a moment.',
   'onboarding.worlds.runs': 'Runs',
   'onboarding.worlds.runsOptional': 'A weekly target of their own, if you want one.',
   'onboarding.rank.start': 'This is where you start',
@@ -315,6 +317,7 @@ export const en: Translations = {
   'onboarding.sport.body': 'Gym and running each have their own target. You pick the days.',
   'onboarding.sport.gym': 'Gym sessions per week',
   'onboarding.sport.running': 'Runs per week',
+  'onboarding.sport.needGym': 'Choose a weekly target for Gym. Running is optional.',
   'onboarding.summary.gym': '{count} gym sessions per week',
   'onboarding.summary.running': '{count} runs per week',
 

@@ -259,6 +259,8 @@ const report = {};
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: /^Mind/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
+  // No question is chosen for the user since D197; the import replaces it.
+  await page.getByRole('button', { name: /Wie gut hast du gesch/ }).first().click();
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: 'Starten' }).click();
   await page.getByRole('button', { name: 'Bereiche' }).click();

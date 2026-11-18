@@ -56,8 +56,8 @@ async function fresh(opts = {}) {
     await page.getByRole('heading', { name: 'Alltag' }).isVisible() &&
     await page.getByRole('heading', { name: 'Eigene' }).isVisible());
 
-  // Mind opens with three starter questions chosen since block 7E (D191);
-  // the walk ends with the two it always chose.
+  // The walk ends with the two it always chose, whatever the step opened
+  // with (three starters from D191, none since D197).
   await chooseQuestions(page, [/Wie gut hast du gesch/, /Wie war deine Stimmung/]);
   await page.getByRole('button', { name: 'Weiter' }).click();
 
@@ -105,7 +105,7 @@ async function fresh(opts = {}) {
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.getByRole('button', { name: /^Mind/ }).click();
   await page.getByRole('button', { name: 'Weiter' }).click();
-  // Mind opens with three starter questions chosen (D191): taken off, the
+  // No question of the library chosen (the step opens so since D197): the
   // question of the user's own is the one stored, as before.
   await chooseQuestions(page, []);
 

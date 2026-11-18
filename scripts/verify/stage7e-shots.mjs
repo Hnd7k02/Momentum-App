@@ -10,7 +10,7 @@ import { CHROMIUM, URL_APP, chooseQuestions, passOpening, setLanguage } from './
  * targets and the summary. Every step at 393; the first slide and the
  * weekly targets at 320 and 430 as well (`ALL=1` pictures every step at
  * every width). Since STOP 7E-a2 (D191) also the question step as it
- * opens — the three starter questions chosen — and with none chosen, and,
+ * opens — with no question chosen since D197 — and,
  * given `URL_PREVIEW`, the preview's row «Einführung ansehen».
  *
  *   OUT=docs/design/wp3/stage7e-b node scripts/verify/stage7e-shots.mjs
@@ -88,12 +88,17 @@ for (const width of WIDTHS) {
   await page.getByRole('button', { name: /^Gym/ }).click();
   await shot('4-bereiche');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
+  // The questions open with none chosen since D197: the start is the empty step.
   await shot('5a-fragen-start');
-  await chooseQuestions(page, []);
-  await shot('5b-fragen-keine');
   await chooseQuestions(page, [/Wie gut hast du gesch|How well did you sleep/, /Wie war deine Stimmung|How was your mood/, /frischen Luft|get outside/]);
   await shot('5-fragen');
   await next(LANGUAGE === 'de' ? 'Weiter' : 'Continue');
+  // No target chosen, «Weiter» held (D197); then three sessions and two runs.
+  await shot('6a-wochenziele-leer');
+  await page
+    .getByRole('group', { name: /Gym-Sessions pro Woche|Gym sessions per week/ })
+    .getByRole('button', { name: /^3 (pro Woche|per week)$/ })
+    .click();
   await page
     .getByRole('group', { name: /Läufe pro Woche|Runs per week/ })
     .getByRole('button', { name: /^2 (pro Woche|per week)$/ })
@@ -113,7 +118,9 @@ if (URL_PREVIEW) {
   await page.getByRole('button', { name: /Los geht/ }).click();
   for (let index = 0; index < 2; index += 1) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
   await page.getByRole('button', { name: /^Mind/ }).click();
-  for (let index = 0; index < 2; index += 1) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+  await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+  await chooseQuestions(page, [/Wie gut hast du gesch/]);
+  await page.getByRole('button', { name: 'Weiter', exact: true }).click();
   await page.getByRole('button', { name: 'Starten' }).click();
   await page.locator('.tab-bar').waitFor();
   await page.locator('.tab-bar button', { hasText: 'Bereiche' }).click();

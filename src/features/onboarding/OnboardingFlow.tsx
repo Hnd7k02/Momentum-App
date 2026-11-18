@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { GYM, RANKS } from '../../core/config/constants';
+import { RANKS } from '../../core/config/constants';
 import { Button, Figure, SelectionMark } from '../../components';
 import {
   ChevronLeftIcon,
@@ -46,11 +46,18 @@ import './onboarding.css';
  * one dark surface a screen — always Gym or the rank. The first slide's
  * picture is the one place with example values and coloured data marks
  * (`OnboardingHero`). What the flow asks, in which order, and what it hands
- * to storage did not change with the look — but for one thing the owner
- * decided at STOP 7E-a2 (D191): Mind opens with three questions chosen,
- * and its «Weiter» waits while none is. At STOP 7E-b (D192) two more: an
- * opening page before the first slide, and no area chosen until the user
- * chooses one.
+ * to storage did not change with the look — but for what the owner
+ * decided since. At STOP 7E-a2 (D191) Mind's «Weiter» began to wait while
+ * no question is chosen; at STOP 7E-b (D192) came an opening page before
+ * the first slide, and no area chosen until the user chooses one.
+ *
+ * **Nothing is chosen for the user** (the owner after STOP 9, D197): no
+ * area, no question, no weekly target. The three starter questions of
+ * D191 and Gym's default target of three are gone from the flow — the
+ * user chooses, and «Weiter» waits, saying why, until Mind has a question
+ * and Gym a weekly target. Laufen stays optional. The constant
+ * `GYM.DEFAULT_TARGET_PER_WEEK` is untouched: it is still what the
+ * settings fall back on, only the introduction no longer starts from it.
  */
 
 type Step = 'momentum' | 'worlds' | 'rank' | 'domains' | 'questions' | 'sport' | 'summary';
@@ -88,15 +95,6 @@ const RANK_START = RANKS[0];
 const RANK_NEXT = RANKS[1];
 const RANKS_BEYOND = RANKS.slice(2);
 const RANK_TOP = RANKS[RANKS.length - 1]!;
-
-/**
- * The questions a new user starts with (the owner at STOP 7E-a2, D191):
- * one from each category, so the day's value weighs the three alike — it
- * is the mean within a category before the mean across them (D17). They
- * are chosen, not fixed: any of them can be taken off, and «Weiter» waits
- * until at least one question is chosen, or Mind is taken off.
- */
-export const STARTER_QUESTIONS = ['routine', 'sleep', 'mood'] as const;
 
 /** The question the worlds slide shows: a real one, from the library. */
 const SAMPLE_QUESTION = 'mood';
@@ -153,10 +151,11 @@ export function OnboardingFlow({
     focusOnOpen.current = false;
     footer.current?.querySelector<HTMLButtonElement>('button')?.focus();
   }, [opened]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([...STARTER_QUESTIONS]);
+  // No question and no target is chosen until the user chooses (D197).
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [customQuestions, setCustomQuestions] = useState<QuestionDraft[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [gymTarget, setGymTarget] = useState<number | null>(GYM.DEFAULT_TARGET_PER_WEEK);
+  const [gymTarget, setGymTarget] = useState<number | null>(null);
   const [runningTarget, setRunningTarget] = useState<number | null>(null);
 
   /**
@@ -254,17 +253,24 @@ export function OnboardingFlow({
             <span className="onboarding-card__meta">{t('sports.thisWeek')}</span>
           </div>
           {/* Nothing is done yet, and a number stands only where the flow
-              holds one: Gym opens on its default target, Laufen on none
-              (the setup step leaves it unchosen), so Laufen says that it
-              can have one rather than borrowing an example (contract §16 d). */}
+              holds one. Neither target is chosen when the slide is first
+              seen (D197), so each says in a sentence that it will have
+              one rather than borrowing an example (contract §16 d); a
+              user who comes back from the setup step sees what they chose. */}
           <div className="onboarding-worlds__goal">
-            <p className="world-tile__figure">
-              <Figure
-                text={t('gym.attendance.value', { sessions: 0, target: gymTarget ?? GYM.DEFAULT_TARGET_PER_WEEK })}
-                figure={0}
-              />
-            </p>
-            <Segments done={0} of={gymTarget ?? GYM.DEFAULT_TARGET_PER_WEEK} />
+            {gymTarget === null ? (
+              <>
+                <p className="onboarding-worlds__goalName">{t('onboarding.worlds.sessions')}</p>
+                <p className="onboarding-card__meta">{t('onboarding.worlds.sessionsGoal')}</p>
+              </>
+            ) : (
+              <>
+                <p className="world-tile__figure">
+                  <Figure text={t('gym.attendance.value', { sessions: 0, target: gymTarget })} figure={0} />
+                </p>
+                <Segments done={0} of={gymTarget} />
+              </>
+            )}
           </div>
           <div className="onboarding-worlds__goal">
             {runningTarget === null ? (
@@ -489,22 +495,16 @@ export function OnboardingFlow({
         </section>
       </div>
     );
-    note = <p className="onboarding__note">{t('onboarding.domains.hint')}</p>;
+    // Gym's weekly target is the user's to choose (D197): nothing stands
+    // in for it, and «Weiter» waits until it is chosen. Laufen stays
+    // optional — off until it is asked for.
+    note = (
+      <p className="onboarding__note" aria-live="polite">
+        {gymTarget === null ? t('onboarding.sport.needGym') : t('onboarding.domains.hint')}
+      </p>
+    );
     action = (
-      <Button
-        variant="primary"
-        block
-        onClick={() => {
-          // Choosing neither is a real answer: the user wants the Gym
-          // world but has not decided a number yet. Gym takes its
-          // default so the area is usable; Running stays off until it
-          // is asked for.
-          if (gymTarget === null && runningTarget === null) {
-            setGymTarget(GYM.DEFAULT_TARGET_PER_WEEK);
-          }
-          go(1);
-        }}
-      >
+      <Button variant="primary" block disabled={gymTarget === null} onClick={() => go(1)}>
         {t('common.continue')}
       </Button>
     );

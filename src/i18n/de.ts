@@ -309,6 +309,8 @@ export const de = {
   'onboarding.hero.week': 'Woche',
   'onboarding.worlds.scale': 'Skala von 1 bis 10, noch nicht beantwortet',
   'onboarding.worlds.note': 'Beides zählt für denselben Rang.',
+  'onboarding.worlds.sessions': 'Sessions',
+  'onboarding.worlds.sessionsGoal': 'Dein Wochenziel wählst du gleich.',
   'onboarding.worlds.runs': 'Läufe',
   'onboarding.worlds.runsOptional': 'Ein eigenes Wochenziel, wenn du willst.',
   'onboarding.rank.start': 'Hier startest du',
@@ -325,6 +327,7 @@ export const de = {
   'onboarding.sport.body': 'Gym und Laufen haben je ein eigenes Ziel. Die Tage wählst du selbst.',
   'onboarding.sport.gym': 'Gym-Sessions pro Woche',
   'onboarding.sport.running': 'Läufe pro Woche',
+  'onboarding.sport.needGym': 'Wähl ein Wochenziel fürs Gym. Laufen ist freiwillig.',
   'onboarding.summary.gym': '{count} Gym-Sessions pro Woche',
   'onboarding.summary.running': '{count} Läufe pro Woche',
 

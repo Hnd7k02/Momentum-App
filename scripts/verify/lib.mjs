@@ -53,10 +53,10 @@ export async function passOpening(page) {
 
 /**
  * Sets the onboarding's question selection to exactly these (block 7E,
- * D191). Mind opens with three starter questions chosen — one per
- * category — so a click on one of them would take it off; each row is set
- * by its own pressed state instead, and a walk that names two questions
- * ends with those two, as it always did.
+ * D191). Each row is set by its own pressed state, so a walk that names
+ * two questions ends with those two whatever the step opened with — three
+ * starter questions from D191 until the owner's word after STOP 9, none
+ * since (D197).
  */
 export async function chooseQuestions(page, wanted) {
   const rows = page.locator('.category-group .question-pick[aria-pressed]');
@@ -95,7 +95,10 @@ export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie
     // Each target is a group named for what it counts. Since block 7E the
     // two stand in one card, so they are found by that name, not by card.
     const target = (name, count) => page.getByRole('group', { name }).getByRole('button', { name: `${count} pro Woche`, exact: true });
-    if (gym) await target('Gym-Sessions pro Woche', gym).click();
+    // Gym's target is the user's to choose since D197 and «Weiter» waits
+    // for it. Until then the flow opened on three, so a walk that names
+    // no Gym target (`gym: 0` with runs) ended with three — and still does.
+    await target('Gym-Sessions pro Woche', gym || 3).click();
     if (running) await target('Läufe pro Woche', running).click();
     await page.getByRole('button', { name: 'Weiter' }).click();
   }

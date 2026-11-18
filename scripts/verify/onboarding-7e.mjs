@@ -14,13 +14,19 @@ import { CHROMIUM, URL_APP, check, chooseQuestions, clipped, passOpening, smallT
  *                           whose focus goes on to «Los geht’s» — then the
  *                           areas with nothing chosen and «Weiter» held
  *                           until a world is (D192);
- *                           the three starter questions, one per category,
- *                           reach storage; Gym and Laufen stay off
+ *                           the second slide names Gym's target in a
+ *                           sentence, not as «0 von 3»; the questions
+ *                           open with none chosen and «Weiter» held
+ *                           (D197); three chosen reach storage; Gym and
+ *                           Laufen stay off
  *   B  Gym alone            five sessions and two runs; no question step,
  *                           no question stored
- *   C  Mind and Gym         every starter taken off: «Weiter» waits with the
+ *   C  Mind and Gym         no question chosen: «Weiter» waits with the
  *                           owner's words; one question of the library and
- *                           one of the user's own carry the step; three runs
+ *                           one of the user's own carry the step; no
+ *                           weekly target chosen: «Weiter» waits for
+ *                           Gym's, and a target for Laufen alone does not
+ *                           open the way (D197); three sessions, three runs
  *   D  Mind taken off       from the question step back to the areas, Mind
  *                           off, and on without a question
  *   every step, every path  no page wider than the screen, nothing cut off
@@ -49,6 +55,7 @@ import { CHROMIUM, URL_APP, check, chooseQuestions, clipped, passOpening, smallT
 const URL_PREVIEW = process.env.URL_PREVIEW ?? 'http://127.0.0.1:4174/Momentum-App/';
 const WIDTHS = (process.env.WIDTHS ?? '320,360,393,430').split(',').map(Number);
 const HEIGHT = { 320: 693, 360: 780, 393: 852, 430: 932 };
+// The three the walk chooses: one per category, in the library's order.
 const STARTERS = ['Wie gut hat dein Alltag heute funktioniert?', 'Wie gut hast du geschlafen?', 'Wie war deine Stimmung heute?'];
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
@@ -268,6 +275,10 @@ for (const width of WIDTHS) {
       tall.ok && short.ok && short.fitted && short.height < tall.height && back.ok && back.height === tall.height,
       JSON.stringify({ tall, short, back }));
     await page.getByRole('button', { name: /Los geht/ }).click();
+    const worlds = (await page.locator('.onboarding-worlds__gym').innerText()).replace(/\s+/g, ' ');
+    check(`${W} A: the second slide names Gym's target in a sentence, as Laufen's — no «0 von 3» (D197)`,
+      /Dein Wochenziel wählst du gleich\./.test(worlds) && /Ein eigenes Wochenziel, wenn du willst\./.test(worlds) && !/\d von \d/.test(worlds) &&
+        (await page.locator('.onboarding-worlds__gym .segments').count()) === 0, worlds);
     problems.push(await look(page, `${W} A worlds`));
     await next(page);
     problems.push(await look(page, `${W} A rank`));
@@ -280,8 +291,14 @@ for (const width of WIDTHS) {
     await area(page, 'Mind').click();
     problems.push(await look(page, `${W} A domains`));
     await next(page);
+    const preset = await page.locator('.category-group .question-pick[aria-pressed="true"] .question-pick__text').allTextContents();
+    check(`${W} A: Mind opens with no question chosen, and «Weiter» waits and says why (D197)`,
+      preset.length === 0 && (await page.getByRole('button', { name: 'Weiter', exact: true }).isDisabled()) &&
+        (await page.locator('.onboarding__note').textContent())?.trim() === 'Wähl mindestens eine Frage oder nimm Mind ab.', preset.join(' | '));
+    problems.push(await look(page, `${W} A questions, none chosen`));
+    await chooseQuestions(page, [/Wie gut hat dein Alltag/, /Wie gut hast du gesch/, /Wie war deine Stimmung/]);
     const chosen = await page.locator('.category-group .question-pick[aria-pressed="true"] .question-pick__text').allTextContents();
-    check(`${W} A: Mind opens with the three starter questions chosen, one per category`, JSON.stringify(chosen) === JSON.stringify(STARTERS), chosen.join(' | '));
+    check(`${W} A: three chosen, one per category`, JSON.stringify(chosen) === JSON.stringify(STARTERS), chosen.join(' | '));
     problems.push(await look(page, `${W} A questions`));
     await next(page);
     check(`${W} A: Mind alone goes from the questions straight to the summary`, (await step(page)) === 'summary');
@@ -289,7 +306,7 @@ for (const width of WIDTHS) {
     await page.getByRole('button', { name: 'Starten' }).click();
     await page.locator('.tab-bar').waitFor();
     const result = await stored(page);
-    check(`${W} A: storage holds the three starter questions and Mind alone`,
+    check(`${W} A: storage holds the three chosen questions and Mind alone`,
       JSON.stringify(result.questions) === JSON.stringify(STARTERS) && JSON.stringify(result.domains.map((d) => d.type)) === '["mental"]',
       JSON.stringify(result));
     if (width === 393) {
@@ -325,7 +342,7 @@ for (const width of WIDTHS) {
     await ctx.close();
   }
 
-  // C: Mind and Gym; every starter off, then one of the library and one of the user's own.
+  // C: Mind and Gym; no question chosen, then one of the library and one of the user's own.
   {
     const { ctx, page } = await device(URL_APP, width);
     await page.getByRole('button', { name: /Los geht/ }).click();
@@ -348,7 +365,15 @@ for (const width of WIDTHS) {
     check(`${W} C: one of the library and one of the user's own: two chosen, «Weiter» free`,
       (await page.locator('.onboarding__note').textContent())?.trim() === '2 ausgewählt' && !(await button.isDisabled()));
     await next(page);
+    const none = (await page.locator('.week-goals [aria-pressed="true"]').count()) === 0;
+    check(`${W} C: no weekly target is chosen for the user, and «Weiter» waits and says why (D197)`,
+      none && (await button.isDisabled()) &&
+        (await page.locator('.onboarding__note').textContent())?.trim() === 'Wähl ein Wochenziel fürs Gym. Laufen ist freiwillig.');
+    problems.push(await look(page, `${W} C sport, none chosen`));
     await target(page, 'Läufe pro Woche', 3).click();
+    check(`${W} C: a target for Laufen alone does not open the way`, await button.isDisabled());
+    await target(page, 'Gym-Sessions pro Woche', 3).click();
+    check(`${W} C: with Gym's target chosen «Weiter» is free`, !(await button.isDisabled()));
     await next(page);
     problems.push(await look(page, `${W} C summary`));
     await page.getByRole('button', { name: 'Starten' }).click();
@@ -377,11 +402,12 @@ for (const width of WIDTHS) {
     await area(page, 'Mind').click();
     await next(page);
     check(`${W} D: with Mind off the questions are skipped`, (await step(page)) === 'sport');
+    await target(page, 'Gym-Sessions pro Woche', 3).click();
     await next(page);
     await page.getByRole('button', { name: 'Starten' }).click();
     await page.locator('.tab-bar').waitFor();
     const result = await stored(page);
-    check(`${W} D: storage holds Gym alone, at its default`,
+    check(`${W} D: storage holds Gym alone, at the three chosen`,
       JSON.stringify(result) === JSON.stringify({ domains: [{ type: 'gym', target: 3 }], questions: [] }), JSON.stringify(result));
     await ctx.close();
   }
@@ -402,7 +428,10 @@ for (const width of WIDTHS) {
   await area(page, 'Mind').click();
   await area(page, 'Gym').click();
   await next(page);
+  // Nothing is chosen for the user (D197): three questions and Gym at three.
+  await chooseQuestions(page, [/Wie gut hat dein Alltag/, /Wie gut hast du gesch/, /Wie war deine Stimmung/]);
   await next(page);
+  await target(page, 'Gym-Sessions pro Woche', 3).click();
   await next(page);
   await page.getByRole('button', { name: 'Starten' }).click();
   await page.locator('.tab-bar').waitFor();

@@ -7,7 +7,7 @@ import { translate, type Language } from '../../i18n';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import type { OnboardingSelection } from '../../storage/services/configurationService';
 import { mount, type Mounted } from '../../test/dom';
-import { OnboardingFlow, STARTER_QUESTIONS } from './OnboardingFlow';
+import { OnboardingFlow } from './OnboardingFlow';
 
 /**
  * The onboarding, every way through it.
@@ -99,13 +99,11 @@ async function toAreas(language: Language = 'de', { choose = ['Mind'] }: { choos
 
 const next = (language: Language = 'de') => click(buttonNamed(translate(language, 'common.continue')));
 
-/** What the library says a starter question is, as the flow hands it on. */
-function starters(language: Language) {
-  const library = suggestedQuestions(language);
-  return STARTER_QUESTIONS.map((id) => {
-    const entry = library.find((suggestion) => suggestion.id === id)!;
-    return { text: entry.text, type: entry.type, category: entry.category };
-  });
+/** What the library says a question is, as the flow hands it on — in the library's order. */
+function picked(language: Language, ids: readonly string[]) {
+  return suggestedQuestions(language)
+    .filter((suggestion) => ids.includes(suggestion.id))
+    .map((entry) => ({ text: entry.text, type: entry.type, category: entry.category }));
 }
 
 /** Elements a keyboard or a screen reader could operate. */
@@ -150,6 +148,7 @@ describe('the onboarding picker', () => {
     await next();
     expect(document.body.textContent).toContain(translate('de', 'onboarding.sport.gym'));
     expect(document.body.textContent).toContain(translate('de', 'onboarding.sport.running'));
+    await click(target('Gym-Sessions pro Woche', 3));
     await next();
     await click(buttonNamed(translate('de', 'onboarding.summary.start')));
 
@@ -158,8 +157,8 @@ describe('the onboarding picker', () => {
   });
 });
 
-describe('every way through it (block 7E, D191)', () => {
-  it('Mind alone: three slides, the areas, the questions, the summary — and the three starter questions', async () => {
+describe('every way through it (block 7E, D191; nothing chosen for the user, D197)', () => {
+  it('Mind alone: three slides, the areas, the questions, the summary — and the questions the user chose', async () => {
     const finished: OnboardingSelection[] = [];
     await open('de', (selection) => finished.push(selection));
     const seen: (string | null | undefined)[] = [step()];
@@ -176,28 +175,55 @@ describe('every way through it (block 7E, D191)', () => {
     expect(document.querySelectorAll('.onboarding__dot')).toHaveLength(6);
     await next();
     seen.push(step());
+    // No question is chosen for the user (D197).
+    expect(chosenQuestions()).toEqual([]);
+    await click(question('Wie gut hast du geschlafen'));
+    await click(question('Wie war deine Stimmung'));
     await next();
     seen.push(step());
     await click(buttonNamed('Starten'));
 
     expect(seen).toEqual(['momentum', 'worlds', 'rank', 'domains', 'questions', 'summary']);
-    expect(finished).toEqual([{ questions: starters('de'), gymTargetPerWeek: null, runningTargetPerWeek: null }]);
+    expect(finished).toEqual([{ questions: picked('de', ['sleep', 'mood']), gymTargetPerWeek: null, runningTargetPerWeek: null }]);
   });
 
-  it('Mind and Gym: seven steps; Gym on its default target, Laufen on none unless chosen', async () => {
+  it('Mind and Gym: seven steps; no target chosen for the user, «Weiter» waits for Gym\'s, Laufen stays optional', async () => {
     const finished: OnboardingSelection[] = [];
     await open('de', (selection) => finished.push(selection));
     await toAreas();
     await click(area('Gym'));
     expect(document.querySelectorAll('.onboarding__dot')).toHaveLength(7);
     await next();
+    await click(question('Wie gut hat dein Alltag'));
     await next();
     expect(step()).toBe('sport');
-    expect(target('Gym-Sessions pro Woche', GYM.DEFAULT_TARGET_PER_WEEK)?.getAttribute('aria-pressed')).toBe('true');
+    // Nothing stands in for the user's choice (D197): not Gym's default
+    // target of three, and no number for Laufen.
+    expect(document.querySelectorAll('[aria-label="Gym-Sessions pro Woche"] [aria-pressed="true"]')).toHaveLength(0);
     expect(document.querySelectorAll('[aria-label="Läufe pro Woche"] [aria-pressed="true"]')).toHaveLength(0);
+    expect(primary().disabled).toBe(true);
+    expect(note()).toBe('Wähl ein Wochenziel fürs Gym. Laufen ist freiwillig.');
+    // A target for Laufen alone does not open the way: Gym's is the one asked for.
+    await click(target('Läufe pro Woche', 2));
+    expect(primary().disabled).toBe(true);
+    await click(target('Gym-Sessions pro Woche', 4));
+    expect(primary().disabled).toBe(false);
+    expect(note()).toBe(translate('de', 'onboarding.domains.hint'));
     await next();
     await click(buttonNamed('Starten'));
-    expect(finished).toEqual([{ questions: starters('de'), gymTargetPerWeek: 3, runningTargetPerWeek: null }]);
+    expect(finished).toEqual([{ questions: picked('de', ['routine']), gymTargetPerWeek: 4, runningTargetPerWeek: 2 }]);
+  });
+
+  it('Gym without Laufen: the target chosen, and no run target handed on', async () => {
+    const finished: OnboardingSelection[] = [];
+    await open('de', (selection) => finished.push(selection));
+    await toAreas('de', { choose: ['Gym'] });
+    await next();
+    expect(step()).toBe('sport');
+    await click(target('Gym-Sessions pro Woche', GYM.DEFAULT_TARGET_PER_WEEK));
+    await next();
+    await click(buttonNamed('Starten'));
+    expect(finished).toEqual([{ questions: [], gymTargetPerWeek: 3, runningTargetPerWeek: null }]);
   });
 
   it('Gym alone, two runs a week and five sessions: no question step, and both targets handed on', async () => {
@@ -230,15 +256,18 @@ describe('every way through it (block 7E, D191)', () => {
     expect(primary().disabled).toBe(false);
   });
 
-  it('the three starter questions are one per category, and any of them can be taken off', async () => {
+  it('no question is chosen for the user: the step opens empty, counts what is picked, and any can be taken off', async () => {
     await open();
     await toAreas();
     await next();
     expect(step()).toBe('questions');
-    const library = suggestedQuestions('de');
-    const chosen = library.filter((suggestion) => (STARTER_QUESTIONS as readonly string[]).includes(suggestion.id));
-    expect(new Set(chosen.map((suggestion) => suggestion.category))).toEqual(new Set(['alltag', 'gesundheit', 'mental']));
-    expect(chosenQuestions()).toEqual(chosen.map((suggestion) => suggestion.text));
+    // Every question of the library is offered, and none is pressed (D197).
+    const rows = [...document.querySelectorAll('.category-group .question-pick[aria-pressed]')];
+    expect(rows.length).toBe(suggestedQuestions('de').length);
+    expect(chosenQuestions()).toEqual([]);
+    await click(question('Wie gut hat dein Alltag'));
+    await click(question('Wie gut hast du geschlafen'));
+    await click(question('Wie war deine Stimmung'));
     expect(note()).toBe('3 ausgewählt');
     await click(question('Wie gut hast du geschlafen'));
     expect(chosenQuestions()).toHaveLength(2);
@@ -250,9 +279,7 @@ describe('every way through it (block 7E, D191)', () => {
     await open('de', (selection) => finished.push(selection));
     await toAreas();
     await next();
-    for (const start of ['Wie gut hat dein Alltag', 'Wie gut hast du geschlafen', 'Wie war deine Stimmung']) {
-      await click(question(start));
-    }
+    // As the step opens: nothing chosen, and «Weiter» waits.
     expect(chosenQuestions()).toEqual([]);
     expect(primary().disabled).toBe(true);
     expect(note()).toBe('Wähl mindestens eine Frage oder nimm Mind ab.');
@@ -275,15 +302,13 @@ describe('every way through it (block 7E, D191)', () => {
     await toAreas();
     await click(area('Gym'));
     await next();
-    for (const start of ['Wie gut hat dein Alltag', 'Wie gut hast du geschlafen', 'Wie war deine Stimmung']) {
-      await click(question(start));
-    }
     expect(primary().disabled).toBe(true);
     await click(buttonNamed('Zurück') ?? document.querySelector('.onboarding__back'));
     expect(step()).toBe('domains');
     await click(area('Mind'));
     await next();
     expect(step()).toBe('sport');
+    await click(target('Gym-Sessions pro Woche', 3));
     await next();
     await click(buttonNamed('Starten'));
     expect(finished).toEqual([{ questions: [], gymTargetPerWeek: 3, runningTargetPerWeek: null }]);
@@ -301,13 +326,10 @@ describe('every way through it (block 7E, D191)', () => {
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
     await click(buttonNamed('Hinzufügen'));
-    expect(note()).toBe('4 ausgewählt');
-    // Without the three starters, the own question alone carries the step.
-    for (const start of ['Wie gut hat dein Alltag', 'Wie gut hast du geschlafen', 'Wie war deine Stimmung']) {
-      await click(question(start));
-    }
+    // With nothing chosen from the library, the own question alone carries the step.
+    expect(note()).toBe('1 ausgewählt');
     expect(primary().disabled).toBe(false);
-    // A starter chosen again after it: the library's questions come first.
+    // One of the library's chosen after it: the library's questions come first.
     await click(question('Wie war deine Stimmung'));
     await next();
     await click(buttonNamed('Starten'));
@@ -323,6 +345,7 @@ describe('every way through it (block 7E, D191)', () => {
     await click(question('Hast du heute selbst gekocht'));
     await next();
     await click(target('Läufe pro Woche', 4));
+    await click(target('Gym-Sessions pro Woche', 3));
     await next();
     expect(step()).toBe('summary');
     for (const expected of ['sport', 'questions', 'domains', 'rank', 'worlds', 'momentum']) {
@@ -336,13 +359,14 @@ describe('every way through it (block 7E, D191)', () => {
     expect(area('Mind')?.getAttribute('aria-pressed')).toBe('true');
     expect(area('Gym')?.getAttribute('aria-pressed')).toBe('true');
     await next();
-    expect(chosenQuestions()).toHaveLength(4);
+    expect(chosenQuestions()).toEqual(['Hast du heute selbst gekocht?']);
     await next();
+    expect(target('Gym-Sessions pro Woche', 3)?.getAttribute('aria-pressed')).toBe('true');
     expect(target('Läufe pro Woche', 4)?.getAttribute('aria-pressed')).toBe('true');
     await next();
     await click(buttonNamed('Starten'));
     expect(finished[0]).toMatchObject({ gymTargetPerWeek: 3, runningTargetPerWeek: 4 });
-    expect(finished[0]!.questions).toHaveLength(4);
+    expect(finished[0]!.questions.map((q) => q.text)).toEqual(['Hast du heute selbst gekocht?']);
   });
 
   it('names its step for a screen reader, as a picture of the marks', async () => {
@@ -360,6 +384,7 @@ describe('every way through it (block 7E, D191)', () => {
     await open('de', () => undefined, true);
     await toAreas();
     await next();
+    await click(question('Wie gut hast du geschlafen'));
     await next();
     expect(step()).toBe('summary');
     expect(document.querySelector('[role="alert"]')?.textContent).toBe(translate('de', 'error.action'));
@@ -370,9 +395,6 @@ describe('every way through it (block 7E, D191)', () => {
     await open('en', (selection) => finished.push(selection));
     await toAreas('en');
     await next('en');
-    for (const start of ['How well did your day run', 'How well did you sleep', 'How was your mood']) {
-      await click(question(start));
-    }
     expect(note()).toBe('Choose at least one question, or switch Mind off.');
     await click(question('How well did you sleep'));
     await next('en');
@@ -510,29 +532,36 @@ describe('what each step shows (contract §16)', () => {
         await click(area('Mind'));
         await click(area('Gym'));
       }
+      if (step() === 'questions') await click(question('Wie gut hast du geschlafen'));
+      if (step() === 'sport') await click(target('Gym-Sessions pro Woche', 4));
       await next();
     }
     expect(text()).not.toMatch(examples);
     expect(visited).toEqual(['worlds', 'rank', 'domains', 'questions', 'sport']);
   });
 
-  it('the second slide names Laufen without a number until a target is chosen', async () => {
+  it('the second slide names Gym and Laufen without a number until a target is chosen', async () => {
     await open();
     await click(buttonNamed('Los geht’s'));
-    expect(text()).toContain('0 von 3 Sessions');
+    // Neither target is chosen yet (D197): each is a sentence, as Laufen
+    // always was, and no «0 von 3» stands in for a choice not made.
+    expect(text()).toContain('Dein Wochenziel wählst du gleich.');
     expect(text()).toContain('Ein eigenes Wochenziel, wenn du willst.');
+    expect(text()).not.toMatch(/von \d+ Sessions/);
     expect(text()).not.toMatch(/von \d+ Läufen/);
-    // Choose two runs, and walk back to the slide.
+    expect(document.querySelectorAll('.onboarding-worlds__gym .segments')).toHaveLength(0);
+    // Choose four sessions and two runs, and walk back to the slide.
     await next();
     await next();
-    await click(area('Mind'));
     await click(area('Gym'));
     await next();
-    await next();
+    await click(target('Gym-Sessions pro Woche', 4));
     await click(target('Läufe pro Woche', 2));
-    for (let index = 0; index < 4; index += 1) await click(document.querySelector('.onboarding__back'));
+    for (let index = 0; index < 3; index += 1) await click(document.querySelector('.onboarding__back'));
     expect(step()).toBe('worlds');
+    expect(text()).toContain('0 von 4 Sessions');
     expect(text()).toContain('0 von 2 Läufen');
+    expect(text()).not.toContain('Dein Wochenziel wählst du gleich.');
   });
 
   it('the rank slide is the start, the way to the next rank, and the ranks beyond — no milestones', async () => {
@@ -571,8 +600,10 @@ describe('what each step shows (contract §16)', () => {
     record();
     await next();
     record();
+    await click(question('Wie gut hast du geschlafen'));
     await next();
     record();
+    await click(target('Gym-Sessions pro Woche', 3));
     await next();
     record();
     expect(counts).toEqual({ momentum: 1, worlds: 1, rank: 1, domains: 1, questions: 0, sport: 1, summary: 1 });
