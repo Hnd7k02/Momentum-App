@@ -7464,3 +7464,67 @@ branch together, by **one** fast-forward, made only once
 `verify-wp3.yml` is green on exactly their commit — his rule of D196,
 restated by him here. The single fast-forward D202 had planned for the
 licence and the record alone was not made.
+
+## D204 — A first visit offers no update: an update is a worker other than the one that runs the page
+
+**Finding (2026-11-18, after the release).** The owner had asked that the
+WebKit suites run three times on GitHub and that, should the notice
+appear again, its text, suite and step be named (D196). It appeared in
+run 47 on `ef8f38c`, the commit meant for the fast-forward of D203:
+**«Neue Version verfügbar» with «Neu laden», in `release.mjs`, in the
+walk at 360px, on all four tabs** — on a first visit, in a browser that
+had never seen the app. Nothing waited; the button could do nothing.
+
+**Cause, shown and not assumed.** `release.mjs` was given a recorder
+(before any script of the app: every state the installing worker
+reports, and whether the page had a controller at that moment, and
+whose). Run 48, the app unchanged, met the notice again at 1280px and
+wrote beside it: one worker found, *"installed" reached a page already
+controlled — by this very worker*. A worker claims its page as it
+activates (`clients.claim()`), and WebKit sets `controller` the moment
+the claim arrives while it delivers "installed", which came before, as
+a task of its own. A page busy in between hears of a first install with
+a controller already in place. The app asked only *whether* the page had
+a controller (`navigator.serviceWorker.controller`), and took the first
+install for an update. Run 49 made the first visit thirty times, every
+other page kept at work while its worker installed: the late report came
+in **11 of 15** busy visits and in none of the others; Chromium never
+reports so (0 of 35 here). Run 50, the app still unchanged and every
+visit walked to Heute, where the notice stands: the late report in 9 of
+25 first visits, and **a notice in exactly those nine and in no other**
+(`docs/wp3/aufraeumen/README.md`).
+
+**Decision.** An update is a worker **other than** the one that controls
+the page: `isUpdate(worker, controller)` in `app/serviceWorker.ts`, asked
+when a waiting worker is found at registration and when an installing one
+reports "installed" — the controller read at that moment, never before.
+Nothing else changes: no `skipWaiting`, the reload only on «Neu laden»,
+once. A real update is offered as before — `update-in-place.mjs` (16 of
+16) — and so is one found later on a page its first worker claimed while
+it ran. `serviceWorker.test.ts` (10 tests; 4 of them red under the old
+rule) holds both orders of the browser's reports.
+
+**The check.** `release.mjs` keeps the recorder, says beside a notice
+what the browser reported, and makes the first visit twenty times more —
+every other page at work, each walked to Heute — with a note under the
+checks (into the job's log through `run-all.mjs`, green or not): how
+often the report came late, and how many notices followed it.
+
+**What it means for the live app.** The live app (`a8c5f95`) has the old
+rule; on an iPhone the case needs a first visit with a busy page — the
+owner's phone met none that anyone saw. The repair changes a script, so
+the worker's revision changes and an installed app is offered this
+version once: «Neue Version verfügbar», «Neu laden», the data as it was.
+It reaches the default branch with `LICENSE`, the record of D202 and the
+icon of D203, by the one fast-forward of D203, once `verify-wp3.yml` is
+green on exactly that commit.
+
+**And one check of the harness** (`body.mjs`, "withholding animation
+frames really lowers the frame rate"): run 47's Chromium job counted 26,
+26 and 20 frames for the coast with every, every second and every third
+frame. A renderer that draws only every third refresh loses nothing when
+every second frame is withheld, and the rule that the second run draw
+fewer than the first was red on a machine that had done nothing wrong.
+The second run may now draw as many as the first; the third must still
+draw fewer than the second and at most four fifths of the first. Nothing
+of the motion's own checks changes.

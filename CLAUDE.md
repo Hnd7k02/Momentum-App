@@ -683,6 +683,12 @@ Never conflate them.
   language, its numbers may be called what they are.
 - German is the source of truth for strings; English is typed against it and
   placeholder parity is enforced by `src/i18n/catalogue.test.ts`.
+- **An update is a worker other than the one that runs the page** (D204):
+  `isUpdate()` in `app/serviceWorker.ts`, with the controller read when
+  the worker reports, never before. A worker claims its page as it
+  activates, and WebKit can tell the page of the claim before it tells it
+  of the install — asking only *whether* there is a controller turned a
+  first visit into «Neue Version verfügbar».
 
 ## Migrations
 

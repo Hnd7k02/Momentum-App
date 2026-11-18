@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D203). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D204). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -2879,6 +2879,15 @@ own history; no population norms, ever.
 
 ## Verification status
 
+**A first visit offers no update (D204, 2026-11-18):** WebKit on GitHub
+offered «Neue Version verfügbar» on a first visit (run 47, `release`, the
+360px walk); the recorder in `release.mjs` showed why — "installed"
+reported to a page its own worker had already claimed — and the app now
+offers an update only for a worker other than the one that controls the
+page. Here: `tsc -b` exit 0; `npm run test` exit 0 — 150 files, 2546
+tests; `release`, `update-in-place`, `release-proof` 134 of 134 and
+`body` 97 of 97 in Chromium. The whole check is GitHub's, on the commit.
+
 **After the release — the icon of D203, with `LICENSE` and the record of
 the merge (2026-11-18):** `tsc -b` exit 0; `npm run test` exit 0 — 149
 files, 2536 tests; the build; `node tools/render-icons.mjs --check` —
@@ -2984,7 +2993,7 @@ fast-forwarded from `e30becd` at the owner's word, published by
    body stands (D163). Offline and the update were not rehearsed on the
    device before the go-live, at his word: this is the check. His backup
    from before the update is the way back (D195).
-2. **`LICENSE`, this record and the icon of D203 on the default branch**,
+2. **`LICENSE`, this record, the icon of D203 and the repair of D204 on the default branch**,
    by one fast-forward — made only once `verify-wp3.yml` is green on
    exactly their commit (the owner's word, D203). They were committed
    after the merge, because the merged commit had to be the one GitHub

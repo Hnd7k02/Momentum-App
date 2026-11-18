@@ -15,6 +15,48 @@ export interface UpdateHandle {
 /** Guards against a reload loop if `controllerchange` fires more than once. */
 let reloading = false;
 
+/**
+ * Whether a worker that has installed is an update of what runs this page:
+ * it is one when the page is controlled by **another** worker.
+ *
+ * Asking only whether the page has a controller is not enough. On a very
+ * first install the page has none while the worker installs — but the
+ * worker claims its page as it activates, and a browser may tell a page of
+ * that claim before the page has heard that the worker is installed.
+ * WebKit does: it sets `controller` the moment the claim arrives and
+ * delivers "installed", which arrived before it, as a task of its own. A
+ * page that was busy in between then learns of a first install with a
+ * controller already in place — this very worker — and the app offered
+ * "Neue Version verfügbar" on a first visit, with a button that could do
+ * nothing, because nothing was waiting.
+ */
+export function isUpdate(worker: ServiceWorker, controller: ServiceWorker | null): boolean {
+  return controller !== null && controller !== worker;
+}
+
+/**
+ * Says when a registration holds an update: at once if a version installed
+ * on a previous visit is still waiting, and whenever a worker found later
+ * has installed. `container` is asked for the controller at that moment,
+ * never before — a page is claimed by its first worker while it runs.
+ */
+export function watchForUpdate(
+  container: Pick<ServiceWorkerContainer, 'controller'>,
+  registration: ServiceWorkerRegistration,
+  onUpdate: () => void,
+): void {
+  // A version installed on a previous visit and never accepted.
+  if (registration.waiting && isUpdate(registration.waiting, container.controller)) onUpdate();
+
+  registration.addEventListener('updatefound', () => {
+    const installing = registration.installing;
+    if (!installing) return;
+    installing.addEventListener('statechange', () => {
+      if (installing.state === 'installed' && isUpdate(installing, container.controller)) onUpdate();
+    });
+  });
+}
+
 export function registerServiceWorker(onUpdateReady: (handle: UpdateHandle) => void): void {
   if (!import.meta.env.PROD) return;
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
@@ -35,21 +77,8 @@ export function registerServiceWorker(onUpdateReady: (handle: UpdateHandle) => v
     void navigator.serviceWorker
       .register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
       .then((registration) => {
-        // A version installed on a previous visit and never accepted.
-        if (registration.waiting && navigator.serviceWorker.controller) {
+        watchForUpdate(navigator.serviceWorker, registration, () => {
           onUpdateReady({ apply: applyFrom(registration) });
-        }
-
-        registration.addEventListener('updatefound', () => {
-          const installing = registration.installing;
-          if (!installing) return;
-          installing.addEventListener('statechange', () => {
-            // `controller` is null on the very first install; that is not an
-            // update and must not prompt.
-            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-              onUpdateReady({ apply: applyFrom(registration) });
-            }
-          });
         });
 
         // Check again when the app is brought back to the foreground, which

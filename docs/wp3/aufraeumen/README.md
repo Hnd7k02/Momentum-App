@@ -400,3 +400,22 @@ leaves the two lines that held it.
   the same and no notice follows; the icon files keep their names and an
   installed app keeps the ones in its cache. The Home Screen keeps the
   icon the app was added with.
+
+## The notice on a first visit (D204)
+
+The owner had asked: should the notice appear again in WebKit, name its
+text, suite and step. **Run 47** on `ef8f38c`: «Neue Version verfügbar»
+with «Neu laden», `release.mjs`, the walk at 360px, on all four tabs —
+on a first visit. No fast-forward was made.
+
+| Run | Commit | The app | What it showed |
+|---|---|---|---|
+| 47 | `ef8f38c` | old rule | the notice at 360px; Chromium: `body` red on its own self-check (26, 26, 20 frames) |
+| 48 | `9d0eb08` | old rule | the notice at 1280px, and beside it: one worker found, "installed" reached a page already controlled — by this worker |
+| 49 | `5ba9602` | old rule | 35 first visits: the late report in 11 of 15 busy ones, 0 otherwise; no notice — the series looked on the introduction, where none stands |
+| 50 | `b2cd2b9` | old rule | red, as it had to be: the late report in 9 of 25 first visits (busy 7 of 10, plain 1 of 10, walked 1 of 5) — and **a notice in exactly those 9**, at 1280px and in visits 2, 6, … of the series |
+
+The repair, the test and the relaxed self-check of `body.mjs` are
+D204's. Here, before the push: `tsc -b`, `npm run test` (150 files,
+2546 tests), `release`, `update-in-place`, `release-proof`, `body`.
+

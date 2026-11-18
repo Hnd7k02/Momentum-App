@@ -876,13 +876,19 @@ const travelMs = (deg) => {
   const [full, half, third] = runs;
   // The software renderer needs two or three refreshes for a frame even of
   // this small canvas, so one withheld frame is less than half the rate —
-  // but each step down draws fewer frames in the same time, and the third
-  // run at most four fifths of the first. (0.85 and 0.7 of the first until
-  // the end of block 7B: numbers of the machine they were written on. On a
-  // slower one the renderer, not the withheld frame, sets the pace.)
+  // but no step down draws more frames in the same time, the third run
+  // draws fewer than the second, and at most four fifths of the first.
+  // (0.85 and 0.7 of the first until the end of block 7B: numbers of the
+  // machine they were written on. On a slower one the renderer, not the
+  // withheld frame, sets the pace — and where it draws only every third
+  // refresh, withholding every second frame takes nothing away: GitHub's
+  // run 47 counted 26, 26 and 20 frames for the coast, and the rule that
+  // the second run must draw fewer than the first was red on a machine
+  // that had done nothing wrong. What the checks below need is three runs
+  // that are not all at one rate, and the third still says that.)
   check('withholding animation frames really lowers the frame rate',
-    half.travel.frames < full.travel.frames && third.travel.frames < half.travel.frames && third.travel.frames <= full.travel.frames * 0.8
-      && half.coast.frames < full.coast.frames && third.coast.frames < half.coast.frames && third.coast.frames <= full.coast.frames * 0.8, text);
+    half.travel.frames <= full.travel.frames && third.travel.frames < half.travel.frames && third.travel.frames <= full.travel.frames * 0.8
+      && half.coast.frames <= full.coast.frames && third.coast.frames < half.coast.frames && third.coast.frames <= full.coast.frames * 0.8, text);
   // What a motion must take is its equation's to say, and the same at any
   // frame rate: a travel over 180° runs until the spring is near enough
   // and slow enough, a coast from 275° a second until its speed has
