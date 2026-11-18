@@ -410,11 +410,15 @@ Never conflate them.
   `src/` for one. The exceptions are the rank badge, a fixed graphic
   (`RankBadge.tsx`), the dev harness `BodyDevPage.tsx`, and **the app
   icon, a fixed graphic like the badge** (D198): its colours stand in its
-  SVG files under `public/` and nowhere else. `public/icon-full.svg` is
-  the owner's drawing, byte for byte; `tools/render-icons.mjs` makes the
-  rounded and the small drawing and the four PNGs from it (`--check` says
-  whether they still are what it makes) — change the icon there, never a
-  file by hand.
+  SVG files under `public/` and nowhere else. The owner's first drawing
+  is kept byte for byte (`docs/wp3/prompts/aufraeumen-icon/icon-full.svg`)
+  and never edited; `tools/icon-source.mjs` holds the values he chose for
+  it afterwards (D203) — the star larger and sharper, the sheen clearer,
+  each a number of his own SVG — and `tools/render-icons.mjs` makes
+  `public/icon-full.svg`, the rounded and the small drawing and the four
+  PNGs from the two (`--check` says whether all seven still are what it
+  makes). Change the icon there, never a file by hand, and never redraw
+  it: a change to it is a number of his drawing, and his to choose.
   `contrast.test.ts` parses the token file and will fail a colour that does
   not clear its promise.
 - **Two worlds, one system** (D145, D148). `:root` is Mind, light, and the

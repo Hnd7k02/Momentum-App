@@ -2,7 +2,7 @@
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D202). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D203). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -595,7 +595,9 @@ merged into the default branch on 2026-11-18; the choice between the variants is
     address does not load, so such an app can never update itself), and plan
     the move by backup — export, install anew from the new address, import,
     and remove the old app only after the check.
-  - *The licence file:* Dario Moffa, 2026 (tidy-up block, D157).
+  - *The licence file:* the owner, 2026 (tidy-up block, D157). *(His name
+    stood here; replaced by «the owner» at his word on 2026-11-18, D203.
+    The licence itself names the account, D202.)*
   - *Readings 5–9 and the resolution of the contradictions,* as the prompt
     session put them to him at its STOP: agreed. (Their wording is in that
     session's report, not in the repository; the prompts as committed in
@@ -2877,6 +2879,16 @@ own history; no population norms, ever.
 
 ## Verification status
 
+**After the release — the icon of D203, with `LICENSE` and the record of
+the merge (2026-11-18):** `tsc -b` exit 0; `npm run test` exit 0 — 149
+files, 2536 tests; the build; `node tools/render-icons.mjs --check` —
+seven of seven icon files are what the owner's first drawing and his
+values make. Here, the suites that meet the icon or the worker's list of
+files (`release`, `release-proof`, `onboarding-7e`, `phase2`,
+`wp3-stage4`, `update-in-place`, `design-system`, `terminal`): 8 suites,
+1941 of 1941. The whole check is GitHub's, on the commit, and the
+fast-forward waits for it (D203); its result stands at that commit.
+
 **WP3 as it was merged and released (2026-11-18, `a8c5f95`)** — application
 source `f9848b6`; record `docs/wp3/aufraeumen/README.md`:
 
@@ -2972,20 +2984,27 @@ fast-forwarded from `e30becd` at the owner's word, published by
    body stands (D163). Offline and the update were not rehearsed on the
    device before the go-live, at his word: this is the check. His backup
    from before the update is the way back (D195).
-2. **`LICENSE` and this record on the default branch.** They were
-   committed after the merge, because the merged commit had to be the one
-   GitHub had run green. They follow by a second fast-forward once
-   `verify-wp3.yml` is green on their commit; the app's files do not
-   change by it, and no update notice follows from it (the worker's
-   revision is the names of the built files).
+2. **`LICENSE`, this record and the icon of D203 on the default branch**,
+   by one fast-forward — made only once `verify-wp3.yml` is green on
+   exactly their commit (the owner's word, D203). They were committed
+   after the merge, because the merged commit had to be the one GitHub
+   had run green. The scripts and styles of the app do not change by it,
+   so no update notice follows (the worker's revision is their names);
+   the icon files do, and an installed app keeps the ones it has.
 3. **The tag `live-before-wp3` on `e30becd`**: the owner sets it — a push
    of a tag is refused to the session (HTTP 403). `git push origin
    e30becd:refs/tags/live-before-wp3`, or a tag from GitHub's own page.
-4. **The app icon, as the owner meant it** (D202): "Cover Bild anhand
-   Daten marginal verbessern" was about the icon, not about the first
-   slide — his picture of 18 November is the target: the star larger and
-   stronger, the sheen clearer. Not in the release: a small block with a
-   preview of its own and his ✅.
+4. **The app icon, as the owner meant it** (D202, D203): "Cover Bild
+   anhand Daten marginal verbessern" was about the icon, not about the
+   first slide. Built the same day as he chose it — the second of two
+   proposals, without a preview: the star larger and sharper, its line
+   stronger, the sheen clearer, the colours deeper, every change a number
+   of his own drawing (`tools/icon-source.mjs`). It goes live with the
+   fast-forward of point 2. **On his phone the Home Screen keeps the icon
+   the app was added with**; removing and adding the live app again
+   needs a backup before and an import after — an iPhone deletes a Home
+   Screen app's data with the app, and it is to be treated so in any
+   case.
 5. **After the go-live, as small blocks of their own** (his words, D202):
    the status bar from edge to edge **together with the backup
    protection** ("Backup-Schutz" — its scope is his to say; nothing in

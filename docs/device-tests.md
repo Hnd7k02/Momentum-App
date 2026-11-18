@@ -135,7 +135,7 @@ card's finding was on a device without training.
 | 6 | Back on a sheet with fields: Bereiche → Mind → «Frage hinzufügen», type half a question, swipe back; open «Frage hinzufügen» again. Then the same with «Übung hinzufügen» in a workout: type into the search, swipe back, open it again | The text stands there again. Closed with the cross instead, the field opens empty, as always | |
 | 7 | Import the check file of the day. A sample that nothing else moved: Heute, Muskelgruppen with one sheet, a workout with a warm-up set | As at the gate: the same number in row, sheet and body | |
 | 8 | The Home Screen | The icon is the new one, as in `docs/wp3/prompts/aufraeumen-icon/vorschau-icon.png` | |
-| 9 | On GitHub, in the browser, the branch `claude/momentum-wp3` | The zip, the copy of the backup and the three pictures are gone from the tree; the front page describes the app of today. `LICENSE` follows by a second fast-forward: it was committed after the merge (D202) | |
+| 9 | On GitHub, in the browser, the branch `claude/momentum-wp3` | The zip, the copy of the backup and the three pictures are gone from the tree; the front page describes the app of today. `LICENSE` follows by one further fast-forward, with the record of the merge and the icon: it was committed after the merge (D202, D203) | |
 | 10 | **After the go-live only:** the live app shows «Neue Version verfügbar», «Neu laden» reloads once, the data is there. Then flight mode: Heute appears, and in Muskelgruppen the body stands (D163). Then delete the repository `Momentum-preview`, if you no longer need it | | |
 
 **Result (the owner, 2026-11-18, on his iPhone, the preview `65207c1`,
@@ -143,6 +143,16 @@ with the check file of 18 November):** "Prüfliste mit der Prüfdatei vom
 18.11.: 1 bis 9 ✅". And: "Backup gemacht" — the backup of the live app
 from before the update, the way back. Point 10 is open: it is the live
 app's.
+
+**After the release (D203), the icon:** the owner chose a stronger
+drawing of the icon from a picture, without a preview; it is published
+with the fast-forward that carries `LICENSE`. Nothing to check in the
+app. **The Home Screen keeps the icon the app was added with.** To see
+the new one, the app is removed and added again — and an iPhone deletes
+a Home Screen app's data with the app (treat it so in any case):
+**export a backup first
+(Bereiche → Einstellungen → «Backup exportieren»), add the app again,
+import the backup.**
 
 Not to be repeated from the checklist of the gate: points 1 and 2 (the
 live app did not change), 5 (D194), 8 and 9 (VoiceOver, less motion and

@@ -40,6 +40,12 @@ had run green (run 45: Chromium 44 suites, 5989 of 5989; WebKit green),
 and published by `deploy.yml`. **Open:** his check of the live app —
 the update notice, one reload, the data, flight mode.
 
+**After the release, the same day** (D203): the app icon with the values
+he chose from a picture — graphics only, seven files under `public/` —
+goes out with `LICENSE` and the record of the merge by one further
+fast-forward, once `verify-wp3.yml` is green on exactly that commit. The
+app's scripts and styles are those of the release.
+
 ---
 
 ## WP3 RC — app source `1d28b5b`

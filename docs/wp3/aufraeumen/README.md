@@ -356,7 +356,7 @@ the tracked tree, no edits by them): in the commit that was merged,
 placeholders — `%(app)s` and nine of its kind — where the block's last
 record should have printed its figures: the session's script wrote the
 templates and never filled them. Documents only; the merged commit shows
-them on the default branch until the second fast-forward. They are filled
+them on the default branch until the next fast-forward. They are filled
 in the commit that carries this section. Also found, and corrected there:
 `CLAUDE.md` named `core/gym/rating.ts`, a file renamed to
 `core/scoring/trainingRating.ts` in Phase 5. Not found: an e-mail
@@ -365,8 +365,38 @@ text files. Found and left for the owner to decide: his full name, in
 two lines that record his answer of 11 November about the licence.
 
 **After the merge, on `claude/momentum-wp3`:** `LICENSE`, this section,
-D202, and the documents that said "not merged". They reach the default
-branch by a second fast-forward once the workflow is green on their
-commit. The application's files are the same in both; the service
-worker's revision is made of the names of the built files, so that
-second publication changes nothing an installed app can see.
+D202, and the documents that said "not merged" (`783a84b`). The built app
+of that commit is, file for file, the one that was merged. It was to
+reach the default branch by a fast-forward of its own; the owner's next
+word put it together with the icon (below), and that fast-forward was
+not made.
+
+## The same day, after the release (D203)
+
+The session laid the owner's picture beside the icon as released and two
+proposals made of his own SVG. **He chose the second, without a
+preview**; the first slide's picture stays as D201 left it; and his name
+leaves the two lines that held it.
+
+- **The icon.** `tools/icon-source.mjs` holds nine values and applies
+  them to his first drawing, which stays untouched under `docs/`;
+  `tools/render-icons.mjs` makes all seven icon files from the two. The
+  built files are, byte for byte, the proposal he saw.
+  `docs/wp3/aufraeumen/icon-d203-vergleich.png`: his picture, the icon as
+  released, and the built files at 180, 60 and 28px.
+- **His name.** `HANDOVER.md` and `docs/decisions.md`, one line each: «the
+  owner». No tracked file holds his family name any more.
+- **Checked here before the push:** `tsc -b`, `npm run test`, `npm run
+  build`, `node tools/render-icons.mjs --check`, and the suites that meet
+  the icon or the worker's list of files — `release`, `release-proof`,
+  `onboarding-7e`, `phase2`, `wp3-stage4`, `update-in-place`,
+  `design-system`, `terminal`. The whole check is GitHub's, on the commit.
+- **One fast-forward for all of it** — the licence, the record of the
+  merge and the icon — made only once `verify-wp3.yml` is green on exactly
+  that commit. Its result stands on GitHub at the commit; a record of it
+  in the repository would be another commit and another run.
+- **What it changes for an installed app:** nothing it can see. The
+  scripts and styles are the same, so the service worker's revision is
+  the same and no notice follows; the icon files keep their names and an
+  installed app keeps the ones in its cache. The Home Screen keeps the
+  icon the app was added with.

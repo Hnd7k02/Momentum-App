@@ -141,7 +141,7 @@ Mint verlässt Gym (festgelegt, D154). Im Code steht Mint an 41 Stellen in 17 Da
 ### 2.6 Ausnahmen
 
 - Das Rang-Abzeichen ist eine festgelegte Grafik (D48). Seine Farben bleiben in `RankBadge.tsx`.
-- Das App-Icon ist eine festgelegte Grafik wie das Rang-Abzeichen (D198). Seine Farben stehen nur in seinen SVG-Dateien unter `public/` (`icon-full.svg` und die zwei daraus gebauten, `icon.svg` und `icon-small.svg`), nicht in `tokens.css`. Die App zeigt es an einer Stelle: als Marke im Kopf der Einführung, als Bild neben dem Namen.
+- Das App-Icon ist eine festgelegte Grafik wie das Rang-Abzeichen (D198). Seine Farben stehen nur in seinen SVG-Dateien unter `public/` (`icon-full.svg` und die zwei daraus gebauten, `icon.svg` und `icon-small.svg`), nicht in `tokens.css`. Die App zeigt es an einer Stelle: als Marke im Kopf der Einführung, als Bild neben dem Namen. `icon-full.svg` entsteht aus der ersten Zeichnung des Eigentümers und den Werten, die er danach gewählt hat (D203, `tools/icon-source.mjs`): Am Icon wird nichts neu gezeichnet, es ändern sich nur Zahlen seiner Zeichnung.
 - Die dunkle Bühne des Rangs (D16) und die Boss-Karte auf Heute bleiben dunkel, bekommen ihre Werte aber aus Tokens.
 - Die Entwicklerseite `BodyDevPage.tsx` ist kein Produkt-Screen.
 

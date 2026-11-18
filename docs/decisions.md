@@ -3936,8 +3936,9 @@ of block 7A.
 a database of its own (`VITE_MOMENTUM_DB`, `storage/db.ts`): the live app
 is at `hnd7k02.github.io/Momentum-App/`, the same origin as the preview,
 and pages of one origin share their databases. It is the one change the
-block made under `src/storage`. The licence names Dario Moffa, 2026 (D157,
-tidy-up block). Block 9 checks which address the installed app comes from
+block made under `src/storage`. The licence names the owner, 2026 (D157,
+tidy-up block). *(His name stood here; replaced by «the owner» at his word
+on 2026-11-18, D203. The licence itself names the account, D202.)* Block 9 checks which address the installed app comes from
 and plans the move by backup.
 
 **No golden file changed — the prompt expected one to.** The block's
@@ -7036,6 +7037,11 @@ left and are gone; `--brand-mark-halo` and `--shadow-brand-mark`, which
 nothing ever read, are gone at the owner's word (D196). `SparkIcon`
 stays: Heute and Bereiche use it.
 
+*(After the release, D203: the source is his first drawing with the values
+he chose for it — `public/icon-full.svg` is made from the drawing kept
+under `docs/`, and the large star's line is 38, not 30. The rule of this
+decision stands.)*
+
 **Checked.** `docs/wp3/aufraeumen/icon-vergleich.png` lays the built files
 at 180, 60 and 28px beside his preview. The new files lie under `public/`
 and so stand in the service worker's list, as intended.
@@ -7289,6 +7295,8 @@ example values, and nothing of its look changed: colours, sizes, the chip
    release: he had seen and ticked the icon as built (point 8), and a
    picture he has not seen does not go live on a word that says "merge".
    It is the next small block, with a preview of its own and his ✅.
+   *(The same day, D203: he saw two proposals, chose the second and
+   waived the preview.)*
 4. **The inventory**: as proposed — the stage pictures into an archive
    and `tsconfig.node.tsbuildinfo` out of the tree, after the go-live.
 5. **The measuring display's two wishes** (D184): a small block of their
@@ -7322,7 +7330,9 @@ was `a8c5f95`. So that one was merged at once, and `LICENSE` and the
 record follow by a second fast-forward when their run is green. The
 application's files are the same in both, and the service worker's
 revision is the names of the built files (`vite.config.ts`), so the
-second publication is nothing an installed app can notice.
+second publication is nothing an installed app can notice. *(So it was
+planned. The same day, D203: that fast-forward was not made by itself —
+the licence, the record and the icon go out in one.)*
 
 **The tag was not set on GitHub**, against his answer 2. The session set
 `live-before-wp3` on `e30becd` in its clone; the push was refused with
@@ -7345,7 +7355,7 @@ session's.
   tidy-up's last record was written by a script that held the templates
   and never filled them, and the session checked the record's own file
   for leftovers and not those two. Documents only. Filled in the commit
-  that carries this decision; until the second fast-forward the default
+  that carries this decision; until the next fast-forward the default
   branch shows them.
 - `CLAUDE.md` named `core/gym/rating.ts`; the file has been
   `core/scoring/trainingRating.ts` since Phase 5. Corrected.
@@ -7363,5 +7373,94 @@ session's.
 ### Open after this
 
 His check of the live app (the update notice, one reload, the data,
-flight mode); the second fast-forward; the tag; the icon; and the small
+flight mode); the fast-forward that carries the licence and this record
+— and, since D203, the icon with them; the tag; and the small
 blocks after the go-live named above. Then, as its own gate, D158.
+
+## D203 — After the release: the app icon with the values the owner chose, his name out of two lines, and one further fast-forward
+
+**Decision (owner, 2026-11-18, after the go-live).** The session had laid
+his picture of the icon beside the icon as released and two proposals
+made of his own SVG — A, careful; C, closer to his picture — and asked
+three things (D202). His words: "Antworten: 1 C, ohne Vorschau. Nimm C
+zusammen mit LICENSE und dem Nachtrag in einen gemeinsamen Fast-Forward,
+sobald der GitHub-Lauf auf genau diesem Stand grün ist. 2 Titelbild
+lassen. 3 Ja, ersetze meinen Namen in beiden Zeilen durch «the owner»."
+
+### 1 — The icon is proposal C
+
+What "Cover Bild anhand Daten marginal verbessern, dass es einen
+Top-Eindruck macht, aber Fingerprint behält" (D196) asked for: the same
+icon, a little better by its own data. **Nothing is redrawn.** Every
+change is a number of his first drawing:
+
+| | His first drawing | D203 |
+|---|---|---|
+| The star's reach from the centre | 212 of 1024 | 264 — a quarter larger |
+| Its sides | control points at 0.49 of the reach | 0.44 — deeper, so the tips are sharper |
+| Its line | 30 | 38 |
+| The two glows behind it | 56 and 36 wide, 0.55 and 0.75 | 71 and 46, with the line; 0.42 and 0.62, a little fainter |
+| The sheen, top left | 0.16 fading to 0.03 | 0.25 fading to 0.06 |
+| The sheen's edge | 0.2 | 0.4 |
+| The light, top left | 0.5 | 0.58 |
+| The light, bottom left | 0.42 | 0.5 |
+| The depth, bottom right | 0.4 | 0.47 |
+
+Every element, every colour and their order are his: with the numbers
+taken out, the first drawing and the source are one text, and a test
+says so.
+
+**How it is built.** His first drawing stays in the repository as he sent
+it (`docs/wp3/prompts/aufraeumen-icon/icon-full.svg`), and nothing edits
+it. `tools/icon-source.mjs` holds the values above and applies them —
+each to exactly one place of the drawing, or it throws.
+`tools/render-icons.mjs` makes `public/icon-full.svg` from the two and
+every other icon file from that, as before (D198), and `--check` now
+covers all seven files. The built files are, byte for byte, the proposal
+he chose. `render-icons.test.mjs` (7 tests): the first drawing is kept
+and its star is the one the numbers describe; the source is that drawing
+with these values and nothing else changed; the star stays inside what a
+system may cut from a maskable icon.
+
+**D198 stands**: a fixed graphic, its colours in its SVG files and
+nowhere else. Its sentence "`public/icon-full.svg` is the owner's
+drawing, byte for byte" is now true of the drawing under `docs/`, and
+`CLAUDE.md` says so.
+
+**Without a preview**, at his word: he saw the proposal as a picture —
+`docs/wp3/aufraeumen/icon-d203-vergleich.png` lays the built files beside
+his picture and the icon as released — and the preview repository is not
+published again.
+
+**What an installed app sees of it: nothing, until it is added again.**
+The service worker's revision is the names of the built scripts and
+styles; the icon files keep their names, so this publication is no new
+version to an installed app — no notice, and its cache keeps the icon
+files it has. The icon on a Home Screen is the one the app was added
+with. To see the new one the app is removed and added again, **and an iPhone
+deletes a Home Screen app's data with the app** (to be treated so in
+any case): for the live app that means a backup exported before and
+imported after. That is his to
+do when he wants it, and the report says so. A new installation gets the
+new icon at once, and so does the mark at the head of the onboarding.
+
+### 2 — The first slide's picture stays
+
+The values D201 gave it by a misreading — +12 %, Mind 9 of 10, Gym 3 of
+3, the line a tenth steeper — are now his choice.
+
+### 3 — His name is out of two lines
+
+`HANDOVER.md` and this file (the entry of the colour-rules block) each
+recorded his answer of 11 November about the licence with his full name.
+Both lines say «the owner» now, with a note that a name stood there. No
+tracked file holds his family name; the history does, as it holds
+everything that was ever removed (D157).
+
+### One further fast-forward
+
+`LICENSE`, the record of the merge (D202) and the icon reach the default
+branch together, by **one** fast-forward, made only once
+`verify-wp3.yml` is green on exactly their commit — his rule of D196,
+restated by him here. The single fast-forward D202 had planned for the
+licence and the record alone was not made.
