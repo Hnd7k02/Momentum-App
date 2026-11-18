@@ -144,7 +144,10 @@ Never conflate them.
   back leads to where the user came from — Heute, or the hub; after a link
   straight to the address, the hub. The hub stays the place for training,
   plans and running and is one tap from Muskelgruppen. Heute loads neither
-  the viewer nor the model.
+  the viewer nor the model. **A move to the hub can say what it is made
+  for** (`app/hubIntent.ts`, D200): «Pläne verwalten» on Heute and on
+  Muskelgruppen arrives at the training plans, in view and in focus. The
+  intent is taken once and is not a place — the address is the hub's.
 - **A tap on a muscle or on a row opens the group's sheet, and the
   selection is the open sheet** (D185, contract §9): one group is chosen
   while its sheet stands and none once it has gone. A row is a button that
@@ -390,17 +393,28 @@ Never conflate them.
   antippen» in `--text-tertiary` says so, a real button for a keyboard
   (D193). That hint is the opening page's own exception, beside the four:
   an operable thing in grey, outside "Colour has three jobs" and "One
-  order of buttons", on that page only — and **the areas open with
-  nothing chosen**, «Weiter» waiting for a world. **Mind opens with
-  three starter questions**, one per category (`STARTER_QUESTIONS`), and
-  «Weiter» waits while none is chosen. **Only a preview build replays
-  it** (`app/preview.ts`: a database of its own): Einstellungen →
+  order of buttons", on that page only. **Nothing is chosen for the
+  user** (D192, D197): the areas, Mind's questions and the weekly targets
+  all open empty, and «Weiter» waits, saying why, for a world, for one
+  question, and for Gym's weekly target — Laufen stays optional. The
+  three starter questions of D191 came and went; do not bring a default
+  back into the flow. `GYM.DEFAULT_TARGET_PER_WEEK` is what the settings
+  fall back on, never what the introduction starts from, and the second
+  slide names a target not yet chosen in a sentence, never as «0 von 3».
+  **Only a preview build replays it** (`app/preview.ts`: a database of
+  its own): Einstellungen →
   «Einführung ansehen» walks the flow as a rehearsal that hands nothing to
   storage — never in the live app.
 - Design tokens only (`src/styles/tokens.css`): no colour, font size, layer
   or duration is written anywhere else, and `designRules.test.ts` walks
-  `src/` for one. The two exceptions are the rank badge, a fixed graphic
-  (`RankBadge.tsx`), and the dev harness `BodyDevPage.tsx`.
+  `src/` for one. The exceptions are the rank badge, a fixed graphic
+  (`RankBadge.tsx`), the dev harness `BodyDevPage.tsx`, and **the app
+  icon, a fixed graphic like the badge** (D198): its colours stand in its
+  SVG files under `public/` and nowhere else. `public/icon-full.svg` is
+  the owner's drawing, byte for byte; `tools/render-icons.mjs` makes the
+  rounded and the small drawing and the four PNGs from it (`--check` says
+  whether they still are what it makes) — change the icon there, never a
+  file by hand.
   `contrast.test.ts` parses the token file and will fail a colour that does
   not clear its promise.
 - **Two worlds, one system** (D145, D148). `:root` is Mind, light, and the
@@ -446,8 +460,15 @@ Never conflate them.
   that changes the height. Do not give a sheet with fields a drag, and do
   not draw a grabber on a sheet that cannot be dragged.
 - **A layer that Back closes owns a history entry with the address of the
-  screen it lies on** (D185, `app/backLayer.ts`): the muscle sheet and the
-  exercise detail opened from it. A sheet is still not a place — no link
+  screen it lies on** (D185, `app/backLayer.ts`): the exercise detail, and
+  **every sheet** (D187, D200) — `Sheet` registers itself, and a host that
+  owns the layer already, as Muskelgruppen does for the muscle sheet, says
+  so with `hostsBack`. **A sheet with fields loses nothing typed when
+  Back closes it**: what stood in its fields stands again when it opens
+  next for the same thing (`components/sheetDraft.ts`; in memory, handed
+  back once, never stored), while its cross, the ground behind it, Escape
+  and its buttons discard as they always did. A new sheet with a field
+  keeps its draft the same way. A sheet is still not a place — no link
   names it and none is restored from an address — and `route.ts` knows of
   layers only that a move from a layer's entry takes that entry over. Do
   not write a layer into the hash, and do not call `history.back()` for one
@@ -623,10 +644,15 @@ Never conflate them.
   says so and can be retried (`LoadFailure`). The hub's "Muskelgruppen"
   card is as tall before its history arrives as after and its title stands
   in the same place (D168): its text begins at the picture's top and grows
-  downwards only — do not centre it again. The body is there before its
-  history: the stage stands from the first render with the body's still in
-  it, and the viewer's code and the model load beside the history, not
-  after it (D182).
+  downwards only — do not centre it again. **What a glass card says never
+  changes under its glass** (D199): that card was the one on the hub whose
+  text changed after its first picture, and an iPhone now and then kept
+  only part of the new one. A card whose words arrive later is put there
+  whole — mounted with them, or, where it must stand before them, a new
+  element when they change (`key`), which a browser paints from nothing.
+  The body is there before its history: the stage stands from the first
+  render with the body's still in it, and the viewer's code and the model
+  load beside the history, not after it (D182).
 - **An empty state says why it is empty and what is missing** (contract
   §11, D163), and offers the one action that supplies it. An empty *range*
   is not "never": Muskelgruppen reads 30 or 90 days while the hub's figures
@@ -679,7 +705,13 @@ in version order and applies the chain in one pass.
   for that reason.
 - Browser and accessibility verification live in
   [`scripts/verify/`](scripts/verify/README.md) and are part of finishing a
-  phase, not an optional extra.
+  phase, not an optional extra. `npm run verify` serves the builds **as
+  GitHub Pages serves them** (`scripts/verify/pages-server.mjs`), never
+  through `vite preview`: its `Vary: Origin` made the service worker's
+  cache refuse a precached chunk to its own import and kept one check red
+  for months (D163, D200). A check that depends on the weekday it runs on
+  is a broken check — say what the rule gives for the day, as
+  `muscle-sheet.mjs` does for the volume's first week.
 
 ## What this app does not do
 

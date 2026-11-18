@@ -6906,3 +6906,321 @@ today: `muscle-map-v1`, named in HANDOVER, does not exist in it.
 backup format, `deploy.yml` and the default branch. The new files under
 `.github/fixtures/wp3-update/` are an invented profile lived through the
 live build's screens and the readings of both builds; no one's own data.
+
+## D196 — STOP 9: go; the tidy-up before the merge, with four things the owner added to it
+
+**Decision (owner, 2026-11-18).** His words: "Go für STOP 9. Antworten:
+1a, 2a, 3a, 4a, 5a. Alles in einem run." And on the checklist of the
+gate: "Bis auf die zwei Punkte unten ist alles in Ordnung."
+
+**The answers.** The five questions of the gate are named in `HANDOVER.md`
+as block 9 left them: whether the tidy-up runs before the merge, who sets
+the tag `live-before-wp3` on `e30becd`, who merges, whether offline and
+the update are rehearsed on the device before the go-live, and D111 —
+whether a domain's day closes on its own obligations. He took option a of
+each. Two of them are written down with their recommendation and stand so:
+**the tidy-up runs before the merge** (question 1), and **D111 does not
+change in this release** (question 5). The wording of option a for
+questions 2 to 4 was in the STOP report of block 9, which is a chat and
+not in the repository; the session that ran the tidy-up could not read
+it and does not guess it here. Nothing in the tidy-up depends on them —
+they are about the merge — and its STOP asks him to say them once more.
+
+**The checklist of the gate** (`docs/device-tests.md`, on his iPhone, the
+preview `0d741de`): in order, but for two points, which he gave to the
+tidy-up:
+
+1. **The onboarding chooses for the user** — three questions and a Gym
+   target of three stood chosen before he chose. D197.
+2. **The hub's Muskelgruppen card on a first load** — «Noch nicht
+   trainiert» cut through the middle, the hint under it missing, right on
+   the next load; with two screenshots. D199.
+
+**Added to the tidy-up by him, in the same message:**
+
+- the first slide's picture, "anhand Daten marginal verbessern, dass es
+  einen Top-Eindruck macht, aber Fingerprint behält" (D201);
+- the tokens `--brand-mark-halo` and `--shadow-brand-mark`, which nothing
+  read, may go (the tidy-up's prompt had left them for him to decide);
+- the WebKit suites run three times on GitHub; if a notice stands again in
+  the middle of a journey, its text, the suite and the step are named;
+- at the end, which points of the checklist he has to repeat on the new
+  preview, with new check files for them.
+
+**The order of the merge, in his words:** "Gemergt wird erst nach meinem
+✅ auf der neuen Vorschau und wenn der GitHub-Lauf auf genau dem Stand
+grün ist, der gemergt wird." Nothing is merged before both.
+
+## D197 — The onboarding chooses nothing for the user
+
+**Decision (owner, 2026-11-18, after STOP 9).** His words: "In der
+Einrichtung ist nichts vorausgewählt. Heute startet sie mit drei
+Mind-Fragen (STARTER_QUESTIONS, D191) und dem Gym-Ziel 3
+(GYM.DEFAULT_TARGET_PER_WEEK). Neu ist alles leer, und ich wähle selbst.
+«Weiter» bleibt mit Hinweis gesperrt, bis ich mindestens eine Frage und
+ein Gym-Ziel gewählt habe; Laufen bleibt freiwillig. Slide 2 zeigt für
+Gym dann wie bei Laufen einen Satz statt «0 von 3». Die Konstante selbst
+bleibt, nur die Einführung startet ohne Wert."
+
+**This takes back answer 3 A of STOP 7E-a2** (D191: "Mind opens with three
+questions chosen") and the default the Gym step had carried since
+iteration 2. What D191 added beside it stays: Mind's «Weiter» waits while
+no question is chosen, with his sentence.
+
+**As built** (`OnboardingFlow.tsx`):
+
+- **No question is chosen** when the question step opens. `STARTER_QUESTIONS`
+  is gone. «Weiter» waits under "Wähl mindestens eine Frage oder nimm Mind
+  ab." until one is — from the library or the user's own.
+- **No weekly target is chosen** when the Gym step opens. «Weiter» waits
+  under a new sentence, "Wähl ein Wochenziel fürs Gym. Laufen ist
+  freiwillig." ("Choose a weekly target for Gym. Running is optional."),
+  until Gym has one. A target for Laufen alone does not open the way.
+  The step used to give Gym its default when the user chose neither; that
+  is gone with the default.
+- **The second slide** names Gym's target in a sentence — "Sessions" over
+  "Dein Wochenziel wählst du gleich." — as it names Laufen's, and draws no
+  segments; a user who comes back from the Gym step sees what they chose,
+  "0 von 4 Sessions". A step still never shows a number the flow does not
+  hold (contract §16 d).
+- **`GYM.DEFAULT_TARGET_PER_WEEK` is untouched**: the settings fall back on
+  it as before (`configurationService.ts`, `core/domains`). Only the
+  introduction no longer starts from it. Nothing that computes or stores
+  changed; what the flow hands to storage has the same three fields.
+
+With D192 the flow now chooses nothing at all: no area, no question, no
+target.
+
+**Tests.** `OnboardingFlow.test.tsx` walks every path as before, restated
+for an empty start (32 tests where it had 31): the questions and the
+targets open with nothing pressed, each «Weiter» waits with its sentence,
+Laufen alone does not open the Gym step, the second slide prints no "von"
+until a target is chosen. `onboarding-7e.mjs` holds the same in the build
+at four widths (120 checks where it had 100). The suites that walk the
+flow on their way somewhere else choose what they used to be given
+(`lib.mjs`: a walk that names no Gym target still ends with three).
+
+## D198 — The app icon is a fixed graphic: its colours stand in its SVG files
+
+**Context.** The owner's new app icon (after STOP 9, step 4c of the
+tidy-up): graphics only. His drawing is one SVG, full bleed.
+
+**Decision.** The icon is a fixed graphic, as the rank badge is (D48). Its
+colours stand in its SVG files under `public/` and nowhere else — not in
+`tokens.css`, which holds what the interface is drawn with. It is the
+third exception to "design tokens only", beside the badge and the dev
+harness, and it is named where they are: contract §2.6 and `CLAUDE.md`.
+`designRules.test.ts` reads `src/`; the files in `public/` are outside its
+field.
+
+**One source.** `public/icon-full.svg` is his drawing, byte for byte
+(`docs/wp3/prompts/aufraeumen-icon/icon-full.svg`; a test compares the
+two). `tools/render-icons.mjs` makes everything else from it and can say
+whether the files still are what it makes (`--check`):
+
+| File | From | |
+|---|---|---|
+| `icon.svg` | the source | clipped to rounded corners (`rx` 229 of 1024), a fine light rim as its last element |
+| `icon-small.svg` | the source | for anything under 48px: no sheen, no glow, no rim, the star's stroke 64 where the large one has 30 |
+| `apple-touch-icon.png` (180), `icon-maskable-512.png` | `icon-full.svg` | opaque, no corners: iOS and Android round it themselves |
+| `icon-192.png`, `icon-512.png` | `icon.svg` | corners transparent |
+
+File names, the manifest and `index.html` are as they were. The PNGs are
+drawn by Chromium, the browser the suites use.
+
+**In the app** the icon stands in one place: the 28px mark at the head of
+the onboarding's first slide, as an image with `alt=""` beside the name
+(`icon-small.svg`). It was a CSS gradient from `--brand-mark` with the
+spark icon on it. `--brand-mark` and `--brand-mark-ink` have no reader
+left and are gone; `--brand-mark-halo` and `--shadow-brand-mark`, which
+nothing ever read, are gone at the owner's word (D196). `SparkIcon`
+stays: Heute and Bereiche use it.
+
+**Checked.** `docs/wp3/aufraeumen/icon-vergleich.png` lays the built files
+at 180, 60 and 28px beside his preview. The new files lie under `public/`
+and so stand in the service worker's list, as intended.
+
+## D199 — What a glass card says never changes under its glass: the hub's Muskelgruppen card is put there whole
+
+**The owner's finding** (his iPhone, after STOP 9, two screenshots): on a
+first load the Muskelgruppen card on the Gym hub shows «Noch nicht
+trainiert» only to half its height, and the hint under it is missing. On
+the next load everything is right. Not every time. His suspicion: the
+hint line changes from a no-break space to its text once the history has
+loaded, and Safari does not paint the content of the glass card anew in
+full. His order: reproduce it first and name the cause, then fix it, with
+a test.
+
+**Reproduced: no.** The suite of the card got a check made for it
+(`muscle-card.mjs`): each of the card's six states is photographed once
+its history has arrived — with the load held back, so the change happens
+after the first picture, as on a cold start — then the card is taken out
+of the page and put back, which paints it from nothing, and the two
+pictures are compared pixel by pixel. **Before any fix** the pictures were
+the same in all thirty cases in Chromium here and in all thirty in WebKit
+on GitHub (run 40, `9b0b216`: `muscle-card` 240 of 240). WebKit on Linux
+does not composite as Safari on an iPhone does, and no runner has that
+Safari; this session cannot hold the phone. The finding is the phone's,
+and it says so in the suite.
+
+**The cause, as far as it can be named without the phone.** It is not
+proven; it is what the evidence points at, and it agrees with his
+suspicion:
+
+1. **It is the one card of the hub whose text changes after its first
+   picture.** The Training card, the rating board and the plans are put
+   there with their content; this card stands before its history (D168)
+   and its two placeholder lines then become words.
+2. **It is the second finding of this kind on this card.** At STOP 7B the
+   title stood there twice, "the upper copy cut in half" (D168). That was
+   answered by keeping the title in place — and the same card now shows a
+   line cut in half.
+3. **Where the cut runs.** In his screenshot the text is painted from the
+   title's top for about thirty points and no further. While it loads,
+   the card's only ink is the title: the two lines under it are no-break
+   spaces. What the phone kept is the part of the layer that had held ink
+   before — a repaint of the old region, not of the new one.
+
+A card with `backdrop-filter` is a layer of its own to the compositor.
+What the phone showed is that layer repainted in part.
+
+**Decision.** The card does what every other card of the hub does: it is
+put there whole. Whenever what it says changes — its lines, the colour of
+its trend, the states of its ten markers — the button is a **new
+element** (`key` in `MuscleEntryCard.tsx`). A browser paints a new
+element's layer from nothing; there is no old region to repaint. What
+D168 holds stays as it was and is still measured: the card is as tall
+before as after, it does not move, and its title stands in the same
+place. A keyboard's focus goes along to the new element; a card that had
+no focus is given none.
+
+**The rule, for every glass card:** what it says does not change under
+its glass. A card whose words arrive later is mounted with them, or,
+where it must stand before them, becomes a new element when they change.
+(`CLAUDE.md`, "A screen that loads holds its layout".)
+
+**Tests.** `muscleCardFresh.test.tsx`: the card with its words is another
+element than the loading one, also when the load fails; the same facts in
+a new object leave the element alone; the focus goes along. It fails
+without the `key`. `muscle-card.mjs`: in the built app, in each state at
+four widths, the card that stands once the history has arrived is not the
+element that was loading, and its text is what a fresh paint shows — in
+Chromium and, since this block, in WebKit on GitHub.
+
+**What only the phone can say:** whether the finding is gone. It is on
+the list of what he checks again. If he still sees it with a card that is
+a new element, the cause is another, and the next thing to try is taking
+the card's text out of the element that carries the blur.
+
+**Not done, and why:** a delay before the card appears, or a forced
+repaint by script. Both would paper over a paint the browser owes, and
+neither can be shown to work here.
+
+## D200 — The tidy-up: what left the tree, the licence, «Pläne verwalten», Back for every sheet, and the offline check
+
+**Context.** The last block of WP3 (`docs/wp3/prompts/prompt-aufraeumen.md`,
+D157, D163, D187), run in one session with what D196 added. It removes
+and corrects; the history is not rewritten; nothing that computes or
+stores changed. Its record is `docs/wp3/aufraeumen/README.md`.
+
+**Out of the tree** (D157): `momentumpreview 2.zip`,
+`.github/Claude I6 backup request` and the three iPad screenshots under
+`docs/design/muscle-map/qa/device/`. They stay visible in the history.
+What named them says so now.
+
+**The licence.** `package.json` says `"license": "UNLICENSED"`. `LICENSE`
+— all rights reserved for the app, the body model's own licence in
+`THIRD-PARTY-NOTICES.md`, the owner's drawings excluded — is prepared and
+**not committed**: the copyright line needs a name and a year the owner
+has not given this session, and no name is invented. The notices and the
+credits in the app were brought to the shipped model by block 7A and say
+the same thing; nothing in them needed changing.
+
+**«Pläne verwalten» leads to the plans.** The plans stand on the Gym hub.
+From Heute and from the empty Muskelgruppen the link led to the hub and
+arrived at its top: whoever arrives there did not bring what they came
+for. Fixed once (`app/hubIntent.ts`): the screen that sends the user says
+what the move is for, and the hub, when its plans and the board above
+them have loaded, brings the plans into view — at once, without a travel
+— and puts the focus on their heading. **No new place in the address**:
+the intent is taken once, a reload forgets it, and the hub opened by its
+tab starts at its top. Back leads to where the user came from, since
+both moves push. `hubPlans.test.tsx`; `wp2-2-shots.mjs` walks both ways.
+
+**Back closes every sheet** (D187). `Sheet` registers itself as a layer
+(`useBackLayer`, D185): one line, and an opt-out for the muscle sheet,
+whose host owns its layer. **A sheet with fields loses nothing typed** —
+his condition — by the quieter of the two ways: Back closes the sheet,
+and what stood in its fields stands there again when it opens next for
+the same thing (`components/sheetDraft.ts`: in memory, handed back once).
+The other way, a question before closing, was not taken: the browser has
+already stepped back when the app learns of it, so the sheet would have
+to be held open against that step and a second layer put on it, for a
+gesture that on an iPhone is as often an accident as a decision. The
+sheet's own ways out — cross, ground, Escape, its buttons — discard as
+before. Three sheets have fields: the question sheet (a draft per
+question, and one for a new one), the run sheet (per run), and the
+exercise picker (its search and the form of an exercise of one's own,
+for as long as the workout or the plan editor it was opened in).
+`sheetBack.test.tsx`; `back-sheets.mjs` types into each, goes back and
+finds the text, and closes each sheet without fields.
+
+**The offline check was the test server's** (D163).
+`release-proof.mjs`, "offline, Gym still shows the 3D body", red since
+before Stage 6b. The suites read the build from `vite preview`, which
+answers every file with `Vary: Origin`. A cache keeps that header with a
+stored response and refuses the response to a request with another
+`Origin`. The worker precaches with a plain request, which carries none;
+a module import carries one even on the same origin (read off the
+requests). So the cache refused the body's chunk to its own import,
+unless Muskelgruppen had been opened online before. GitHub Pages sends
+no such header. `scripts/verify/pages-server.mjs` answers as Pages does;
+against it the suite is 28 of 28 in three runs of three, and against the
+same server with `--vary Origin` the check is red again. **The app was
+not changed.** `npm run verify` serves all three builds that way now, and
+there is no known red check left. The headers are from GitHub's
+documentation: the session's network rules close `github.io`, so no live
+answer could be read. The owner's check in flight mode after the go-live
+stays (D163).
+
+**Found on the way, in the harness.** `muscle-sheet.mjs` held the first
+bar of the work volume to 1020 kg. A week only partly inside the range at
+its start is left out (`rangeWeeks`), and from Wednesday to Friday that
+is the week of the seeded first day: the first bar is then 600 kg. The
+check was green on the Monday and Tuesday of block 9 and red on GitHub on
+Wednesday 18 November, before this block's first commit and after it. It
+now holds what the rule gives for the day it runs on. **A check that
+depends on the weekday is a broken check.**
+
+**Not built, and said:** two wishes for the measuring display from D184
+(the number of frames drawn in all; a file checked over the network and
+taken from the cache named as that). `HANDOVER.md` had left them "for the
+tidy-up", the tidy-up's prompt does not name them, and the block changes
+behaviour only where its prompt says. They stay open.
+
+## D201 — The first slide's picture: its example values a little higher, its line as it was
+
+**Decision (owner, 2026-11-18, D196).** His words: "Cover Bild anhand
+Daten marginal verbessern, dass es einen Top-Eindruck macht, aber
+Fingerprint behält."
+
+**Read as:** the picture on the onboarding's first slide — the one place
+with example values (contract §16 d) — is to look a little better by its
+data, and stay recognisably the same picture. That reading is the
+session's; it is said at the STOP, with the picture before and after, so
+that he can say if he meant another.
+
+**As built** (`OnboardingHero.tsx`, the two catalogues):
+
+| | Before | After |
+|---|---|---|
+| The change | +9 % | +12 % |
+| The line | from 78 to 20 of 116 | every height a tenth further from its start: from 78 to 14 — the same shape, its three small dips included |
+| The bars | tops 58 … 4 | tops 58 … 2, with the line |
+| Mind, today | 8 of 10 | 9 of 10 |
+| Gym, this week | 2 of 3 | 3 of 3 |
+
+The picture's description for a screen reader says the new values. It is
+still one image with nothing to operate, still the only place with
+example values, and nothing of its look changed: colours, sizes, the chip
+"steigend", the axis.

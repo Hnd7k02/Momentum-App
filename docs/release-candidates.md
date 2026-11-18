@@ -242,7 +242,10 @@ from, so the build needs no deployment-specific configuration.
 Pages must be enabled once by hand — repository → Settings → Pages → Build and
 deployment → Source → **GitHub Actions**. A commit cannot set it.
 
-**Live at <https://dario02king.github.io/Momentum-App/>**
+**Live at <https://hnd7k02.github.io/Momentum-App/>** (the owner, 2026-11-17). When
+this candidate was released the address was `dario02king.github.io/Momentum-App/`;
+the account was renamed since, GitHub does not redirect Pages after a
+rename, and the old address no longer loads.
 
 ## Two places the app deliberately departs from the specification
 

@@ -1,88 +1,78 @@
 # Momentum
 
-A mobile-first PWA that answers one question: **is my life currently moving in the
-right direction?**
+A mobile-first web app for the iPhone that answers one question: **am I
+moving in the right direction?** It has two worlds and one rank.
 
-Everything stays on the device. No backend, no accounts, no analytics, no third-party
-services. Data leaves the phone only when the user exports a backup themselves.
+- **Mind** — a few questions of your own choosing, answered once a day.
+- **Gym** — workouts logged set by set, training plans, a weekly target, a
+  3D body that shows how each muscle group is developing, and **Laufen**
+  (running) with a weekly target of its own.
+- **One rank, the Boss**, moved by both and confirmed over seven days.
 
-## Stack
+Everything stays on the device. There is no backend, no account, no cloud
+sync, no analytics and no third-party service. Data leaves the phone only
+when the user exports a backup themselves. The app is German first
+(de-CH), English second, and works offline once installed.
 
-- React + TypeScript + Vite
-- IndexedDB behind a typed repository layer (components never touch the database)
-- Deployed to GitHub Pages from a repository subpath (`base: '/Momentum-App/'`)
+It measures a person against their own history, never against anyone else.
 
-## Commands
+## Build, test, check
 
 ```bash
-npm install
-npm run dev        # local development server
-npm run test       # domain logic tests (two time zones, see vitest.workspace.ts)
-npm run build      # typecheck + production build
-npm run typecheck  # types only, no output
+npm ci
+npm run dev         # development server
+npm run typecheck   # tsc -b — never tsc --noEmit
+npm run test        # unit and component tests; read the exit code, not the summary
+npm run build       # validates the body model, typechecks, builds dist/
+npm run verify      # builds, serves and runs every browser suite
 ```
 
-`typecheck` deliberately emits nothing. Compiled JavaScript written next to
-its own source shadows it — Vite resolves `./useDay` to `useDay.js` before
-`useDay.ts`, and `vite.config.js` before `vite.config.ts` — so a stray
-artefact makes the bundle stop matching the repository, silently.
+`npm run verify` (`scripts/verify/run-all.mjs`) builds the app, serves it
+the way GitHub Pages does and drives it in Chromium — every screen at four
+phone widths, the accessibility tree, the rendered contrast of text, the
+update from the live state, the app offline. It takes hours; `ONLY=a,b`
+runs a choice. [`scripts/verify/README.md`](scripts/verify/README.md) lists
+every suite. The same checks run on GitHub for the release branch, with a
+selection in WebKit.
 
-## Build stages
+Stack: React, TypeScript and Vite; IndexedDB behind a typed repository
+layer; three.js for the body; a service worker written by hand. It is
+published to GitHub Pages from the default branch, under `/Momentum-App/`.
 
-The app is built in reviewed stages. Current status:
+## Where things are written down
 
-| # | Stage | Status |
-|---|---|---|
-| 1 | Project setup, storage abstraction, schema v1, date and week logic | done |
-| 2 | Onboarding, domain and question configuration | done |
-| 3 | Today screen and daily check-in | done |
-| 4 | Progress screen: heatmap and trend curve | done |
-| 5 | Rating engine, rank ladder, rank badges | done |
-| 6 | Sports domain: weekly target tracking | done |
-| 7 | Backup export/import, PWA behaviour, service worker updates | done |
-| 8 | Product review pass and fixes | done |
+| | |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | The rules that stay true: the architecture, the product rules that are settled, the interface rules |
+| [`HANDOVER.md`](HANDOVER.md) | Where things stand: the state of the repository, what was built when, what is verified, what comes next |
+| [`docs/decisions.md`](docs/decisions.md) | Every decision with its reasoning, numbered |
+| [`docs/wp3/vertrag.md`](docs/wp3/vertrag.md) | The visual contract: how every screen looks and speaks (German) |
+| [`docs/release-candidates.md`](docs/release-candidates.md) | Each release candidate, what it contains and how it was checked |
+| [`docs/device-tests.md`](docs/device-tests.md) | What only the phone can show, and what it has shown |
 
-Stage 8 closed with a combined walkthrough of the §25 acceptance questions,
-a copy review and a §6 design-conformance review against the real app.
-
-**`c3e8b7f` is V1 Release Candidate 2** — RC1 (`ae8b479`) plus a fix for an
-unhandled promise rejection in `runTransaction` that made the test suite exit
-non-zero and blocked deployment. It is a candidate, not a release: it has
-never run on a real device and has never been driven by a real screen reader.
-
-[`docs/release-candidates.md`](docs/release-candidates.md) records both
-candidates, what is frozen, what was verified and what is still outstanding.
-[`docs/device-tests.md`](docs/device-tests.md) is the manual checklist that
-closes the gap.
-
-Decisions taken during the build that the specification did not settle are
-recorded in [`docs/decisions.md`](docs/decisions.md). Two of them override
-the specification at the product owner's direction: D13 replaces §6's
-"dark interface only" with a single light theme, and D16 gives the rank
-badge its own dark hero inside that light screen.
-
-## Architecture
+The one rule everything else follows: **store what happened, derive
+everything else, every time.** Answers, sessions, sets and configuration
+snapshots are stored; scores, ratings, the rank and every figure on screen
+are replayed from them on each load.
 
 ```
 src/
-  app/        application shell, tab bar, storage binding
-  components/ shared surfaces, controls and original SVG icons
-  domains/    domain-specific UI (mental questions, sports target)
-  features/   onboarding, areas
-  core/
-    config/   every tunable constant, and config snapshots (§18)
-    dates/    local-date and Monday-to-Sunday week logic
-    model/    schema v1 record types
-    scoring/  day and domain scoring (§11), scale bands, lifetime XP
-    trends/   rolling averages, direction and annotations (§12)
-    rating/   the 0-1000 rating engine (§13), replayed from history
-    ranks/    the eight-rank ladder and boundary hysteresis (§15)
-    streaks/  check-in and training streaks (§16)
-  i18n/       key-based string layer, German by default
-  storage/    IndexedDB, migrations, typed repositories, backup and restore
-  sw/         the service worker template, filled in at build time
-  styles/     light design tokens
+  app/        the shell, navigation, the service worker's registration
+  components/ shared surfaces and controls
+  core/       everything that computes — no React, no storage
+  domains/    the question and training controls
+  features/   the screens: today, progress, rank, areas, gym, body, onboarding
+  i18n/       both languages, German as the source
+  storage/    IndexedDB, migrations, repositories, services, backup
+  styles/     the design tokens — the one place a colour or a size is written
+  sw/         the service worker
+tools/        what builds the body model and the app icon
+scripts/verify/  the browser suites
 ```
 
-Domain logic never imports from `app/` or `features/`. Storage is reached only
-through `storage/repositories`.
+## Licence
+
+The app — its code, its design and its texts — is all rights reserved; see
+[`LICENSE`](LICENSE). The 3D body is built from MakeHuman data released
+under CC0; that, and what is kept in the repository from an earlier model,
+is in [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).

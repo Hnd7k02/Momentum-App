@@ -1,8 +1,8 @@
-# Handover — Momentum V1, released
+# Handover — Momentum: WP2 is live, WP3 is the release candidate
 
 Current state, status and next work. Durable rules are in
 [`CLAUDE.md`](CLAUDE.md); the reasoning behind individual choices is in
-[`docs/decisions.md`](docs/decisions.md) (D1–D195). This file does not repeat
+[`docs/decisions.md`](docs/decisions.md) (D1–D201). This file does not repeat
 either — it says where things stand.
 
 ## Repository state
@@ -140,7 +140,8 @@ records (answers, sessions, sets, snapshots)
   door.
 
 **WP2-1 — exercise catalogue and training plans** (branch
-`claude/momentum-gym-plans`, not merged)
+`claude/momentum-gym-plans`; merged into the default branch with `e30becd`
+and live since)
 - The catalogue has 48 entries (`src/core/gym/catalogue.ts`): the 29 from
   iteration 2 with their roles and English record names unchanged, plus 19
   approved ids. It is now the **presentation source** for a built-in — a
@@ -168,7 +169,7 @@ records (answers, sessions, sets, snapshots)
   not a plan invariant under the current engine — see the determinism debt
   below.
 
-**WP2-2 — Gym navigation** (same branch, not merged)
+**WP2-2 — Gym navigation** (same branch; merged with `e30becd` and live since)
 - `#/areas/gym` is the **Gym hub** (`features/areas/GymTerminal.tsx`):
   Training (this week, last session, *Training erfassen*, the plan count
   with *Pläne verwalten*) → the *Muskelgruppen* entry card → the rating board → the
