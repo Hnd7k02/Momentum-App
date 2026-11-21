@@ -63,6 +63,9 @@ beforeEach(async () => {
   freezeAt(MONDAY);
   await applyOnboarding({ questions: [], gymTargetPerWeek: 3 });
   await ensureExerciseCatalogue();
+  // This file is about the plans a user writes: the two a device starts
+  // with (D205, `starterPlans.test.ts`) are deleted here, as a user may.
+  for (const plan of await listTrainingPlans()) await deleteTrainingPlan(plan.id);
 });
 
 afterEach(async () => {
@@ -81,7 +84,8 @@ describe('the catalogue on an existing device', () => {
     const old = catalogueRecords('2025-11-03T08:00:00.000Z').filter((record) =>
       ['ex_bench_press', 'ex_squat', 'ex_dip', 'ex_pull_up', 'ex_wrist_curl'].includes(record.id),
     );
-    await exercisesRepository.putMany(old);
+    // Only those: the load above seeded today's catalogue (D205).
+    await exercisesRepository.replaceAll(old);
     const before = canonicalJson(await exercisesRepository.getAll());
 
     freezeAt(MONDAY);

@@ -430,6 +430,15 @@ export interface SettingsRecord {
    * record.
    */
   warmUpMarkUsed?: true;
+  /**
+   * When this device was given its two starter plans, Push A and Push B
+   * (D205) — or, after a backup import, when the import settled that it
+   * gets none. It records that the seed has had its one turn and nothing
+   * else: a starter plan the user renames or deletes never comes back.
+   * No config snapshot, and nothing scored reads it. Absent means the seed
+   * has not run on this record.
+   */
+  starterPlansSeededAt?: string;
   onboardingCompletedAt: string | null;
   /**
    * The highest rank the user has already been shown.

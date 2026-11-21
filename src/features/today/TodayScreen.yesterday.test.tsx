@@ -15,6 +15,7 @@ import { addQuestion, applyOnboarding, loadConfiguration } from '../../storage/s
 import { enableLegacyFood } from '../../storage/services/fixtures/legacyFood';
 import { createPause } from '../../storage/services/pauseService';
 import { ensureExerciseCatalogue } from '../../storage/services/gymService';
+import { deleteTrainingPlan, listTrainingPlans } from '../../storage/services/trainingPlanService';
 import { mount, type Mounted } from '../../test/dom';
 import { TodayScreen } from './TodayScreen';
 
@@ -50,6 +51,9 @@ beforeEach(async () => {
     runningTargetPerWeek: 2,
   });
   await ensureExerciseCatalogue();
+  // A device without plans, where «Session eintragen» starts a free workout
+  // at once: the two starter plans (D205) are deleted, as a user may.
+  for (const plan of await listTrainingPlans()) await deleteTrainingPlan(plan.id);
   at(TODAY);
   refreshToday();
 });

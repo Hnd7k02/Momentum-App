@@ -13,8 +13,9 @@ import { exercisesRepository, gymPlansRepository } from '../repositories';
  * The user's training plans (WP2-1).
  *
  * A plan is a named, ordered list of exercises the user trains together. It
- * is configuration: Momentum creates none, suggests none, and never changes
- * one without the user. A session started from a plan copies the lines into
+ * is configuration: Momentum suggests none and never changes one without
+ * the user, and creates exactly two, once per device — the starter plans
+ * of D205 (`starterPlanService.ts`), through `createTrainingPlan` below. A session started from a plan copies the lines into
  * its own snapshot (`gymService.startSessionFromDraft`), so nothing here can
  * reach a workout already done — edit, reorder, rename or delete a plan and
  * every past session renders exactly as before.
@@ -105,11 +106,18 @@ function validateDraft(input: PlanDraftInput): string {
   return name;
 }
 
-export async function createTrainingPlan(input: PlanDraftInput): Promise<TrainingPlanRecord> {
+/**
+ * `createdAt` is now unless the caller names it — the starter plans do, a
+ * millisecond apart, because the list is ordered by it (D205).
+ */
+export async function createTrainingPlan(
+  input: PlanDraftInput,
+  createdAt?: string,
+): Promise<TrainingPlanRecord> {
   const name = validateDraft(input);
   const existing = await listTrainingPlans();
   if (!planSlotsOf(existing.length).free) throw new PlanLimitError();
-  const stamp = nowIso();
+  const stamp = createdAt ?? nowIso();
   const record: TrainingPlanRecord = {
     id: createId('plan'),
     kind: TRAINING_PLAN_KIND,

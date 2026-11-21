@@ -7,11 +7,12 @@ import { GYM_METRIC } from '../../core/config/constants';
 import { canonical, canonicalJson } from '../../testing/canonical';
 import { closeDatabase, deleteDatabase } from '../db';
 import { ensureFoodRetired, ensureGymMetricEra, ensureSessionWindowEra } from '../configService';
-import { configSnapshotsRepository } from '../repositories';
+import { configSnapshotsRepository, settingsRepository } from '../repositories';
 import { exportBackup, importBackup } from './backupService';
 import { loadBossProgression } from './bossService';
 import { applyOnboarding, loadConfiguration } from './configurationService';
 import { updateOutputs, type UpdateOutputs } from './fixtures/updateOutputs';
+import { STARTER_PLANS } from './starterPlanService';
 
 /**
  * The update from the live build, rehearsed as a whole (block 9, step 4).
@@ -93,8 +94,15 @@ async function liveDevice(): Promise<Record<string, unknown[]>> {
   at(UPDATE_DAY, 8);
   const result = await importBackup(BACKUP);
   if (!result.ok) throw new Error(result.details.join('; '));
+  // The live build knew no starter plans (D205): the mark an import leaves
+  // — "this device has had its turn" — is not on a device that was updated.
+  const { starterPlansSeededAt: _mark, ...settings } = (await settingsRepository.get())!;
+  await settingsRepository.replaceAll(settings);
   return stores();
 }
+
+const STARTER_NAMES = STARTER_PLANS.map((plan) => plan.name);
+const isStarter = (row: unknown) => STARTER_NAMES.includes((row as { name: string }).name);
 
 function frozen(name: string, actual: unknown) {
   if (FREEZE) {
@@ -153,6 +161,18 @@ describe('the update from the live build, as a whole (block 9, step 4)', () => {
         expect((after[name] as unknown[]).length, name).toBe(rows.length);
         continue;
       }
+      if (name === 'gymPlans') {
+        // Its plan as it was, and the two starter plans after it (D205).
+        expect((after[name] as unknown[]).filter((row) => !isStarter(row)), name).toEqual(rows);
+        expect((after[name] as { name: string }[]).filter(isStarter).map((row) => row.name).sort()).toEqual(STARTER_NAMES);
+        continue;
+      }
+      if (name === 'exercises') {
+        // The records it held as they were; the seed brought the catalogue's others.
+        const held = new Set((rows as { id: string }[]).map((row) => row.id));
+        expect((after[name] as { id: string }[]).filter((row) => held.has(row.id)), name).toEqual(rows);
+        continue;
+      }
       expect(after[name], name).toEqual(rows);
     }
     const food = (after.domains as { type: string; enabled: boolean; settings: unknown }[]).find((domain) => domain.type === 'food')!;
@@ -172,11 +192,29 @@ describe('the update from the live build, as a whole (block 9, step 4)', () => {
     expect(canonical(before(now))).toEqual(canonical(before(live.days)));
   });
 
-  it('ends, by way of the backup into a fresh install, in the same state as the update in place', async () => {
+  it('ends, by way of the backup into a fresh install, in the same state as the update in place — but for the starter plans, which an import does not bring', async () => {
+    /*
+     * The one difference between the two ways (D205): the device updated in
+     * place is given Push A and Push B, with the catalogue they are made of;
+     * the device that imports holds the backup's plans and exercises and
+     * nothing else — an import never seeds. Left out of both, with the mark
+     * and the instant it was written, the states are the same.
+     */
+    const withoutSeed = async () => {
+      const data = (await state()) as Record<string, unknown[]>;
+      const held = new Set((JSON.parse(BACKUP) as { data: { exercises: { id: string }[] } }).data.exercises.map((row) => row.id));
+      return {
+        ...data,
+        gymPlans: (data.gymPlans ?? []).filter((row) => !isStarter(row)),
+        exercises: (data.exercises ?? []).filter((row) => held.has((row as { id: string }).id)),
+        settings: (data.settings as unknown as Record<string, unknown> | null) && { ...(data.settings as unknown as Record<string, unknown>), starterPlansSeededAt: 'set', updatedAt: 'the seed wrote the mark' },
+      };
+    };
     await liveDevice();
     at(UPDATE_DAY);
     await loadConfiguration();
-    const inPlace = await state();
+    expect(((await stores()).gymPlans as { name: string }[]).filter(isStarter)).toHaveLength(2);
+    const inPlace = await withoutSeed();
     const inPlaceDays = updateOutputs(await loadBossProgression(UPDATE_DAY));
     await closeDatabase();
     await deleteDatabase();
@@ -189,7 +227,8 @@ describe('the update from the live build, as a whole (block 9, step 4)', () => {
     if (!result.ok) throw new Error(result.details.join('; '));
     at(UPDATE_DAY);
     await loadConfiguration();
-    expect(await state()).toEqual(inPlace);
+    expect(((await stores()).gymPlans as { name: string }[]).filter(isStarter)).toHaveLength(0);
+    expect(await withoutSeed()).toEqual(inPlace);
     expect(canonical(updateOutputs(await loadBossProgression(UPDATE_DAY)))).toEqual(canonical(inPlaceDays));
   });
 

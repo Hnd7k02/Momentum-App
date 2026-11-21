@@ -76,7 +76,7 @@ export async function chooseQuestions(page, wanted) {
  * not offered (D139), so asking for it fails at once rather than after a
  * click times out; a device that had Food is `seedLegacyFood`'s job.
  */
-export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie war deine Stimmung/], gym = 3, running = 2, food = false, wellbeing = true } = {}) {
+export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie war deine Stimmung/], gym = 3, running = 2, food = false, wellbeing = true, starterPlans = false } = {}) {
   if (food) throw new Error('onboard: Food is not offered (D139) — use seedLegacyFood for a device that had it');
   await passOpening(page);
   await page.getByRole('button', { name: /Los geht/ }).click();
@@ -104,6 +104,55 @@ export async function onboard(page, { questions = [/Wie gut hast du gesch/, /Wie
   }
   await page.getByRole('button', { name: 'Starten' }).click();
   await page.waitForTimeout(900);
+  if (!starterPlans) await removeStarterPlans(page);
+}
+
+/** Every stored training plan, in the order the app lists them. */
+export async function storedPlans(page, database = 'momentum') {
+  return page.evaluate(async (name) => {
+    const db = await new Promise((res, rej) => {
+      const r = indexedDB.open(name);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    const rows = await new Promise((res, rej) => {
+      const r = db.transaction(['gymPlans'], 'readonly').objectStore('gymPlans').getAll();
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    db.close();
+    return rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
+  }, database);
+}
+
+/**
+ * Deletes Push A and Push B, the two plans a device starts with (D205), as
+ * their user may — for good, since the seed has had its turn.
+ *
+ * `onboard` does this unless asked not to (`starterPlans: true`): the walks
+ * of these suites were written for a device without a plan, where «Session
+ * eintragen» starts a free workout at once and the plans begin empty. What
+ * a device starts with is held by `release.mjs`, which keeps them.
+ */
+export async function removeStarterPlans(page, database = 'momentum') {
+  await page.evaluate(async (name) => {
+    const db = await new Promise((res, rej) => {
+      const r = indexedDB.open(name);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    await new Promise((res, rej) => {
+      const tx = db.transaction(['gymPlans'], 'readwrite');
+      const store = tx.objectStore('gymPlans');
+      const all = store.getAll();
+      all.onsuccess = () => {
+        for (const row of all.result) if (row.name === 'Push A' || row.name === 'Push B') store.delete(row.id);
+      };
+      tx.oncomplete = () => res(undefined);
+      tx.onerror = () => rej(tx.error);
+    });
+    db.close();
+  }, database);
 }
 
 /**

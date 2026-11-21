@@ -130,7 +130,8 @@ describe('the exercise catalogue', () => {
     const before = catalogueRecords('2026-01-05T08:00:00.000Z').filter((record) => ids49.has(record.id));
     const renamed = { ...before.find((record) => record.id === 'ex_lat_pulldown')!, name: 'Latzug breit', updatedAt: '2026-02-01T08:00:00.000Z' };
     const stored = before.map((record) => (record.id === renamed.id ? renamed : record));
-    await exercisesRepository.putMany(stored);
+    // Only those: the load in `beforeEach` seeded today's catalogue (D205).
+    await exercisesRepository.replaceAll(stored);
     const bytes = JSON.stringify([...(await exercisesRepository.getAll())].sort((a, b) => a.id.localeCompare(b.id)));
 
     const after = await ensureExerciseCatalogue();

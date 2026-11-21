@@ -185,10 +185,24 @@ const report = {};
     return ids(rows).filter((id) => !now.includes(id)).map((id) => `${name}:${id}`);
   });
   check('A: every collection holds every record it held', lost.length === 0, lost.slice(0, 5).join(', '));
-  const unchanged = ['answers', 'gymSessions', 'gymSets', 'runs', 'gymPlans', 'weightEntries', 'foodDays', 'foodEntries', 'questions', 'exercises']
+  const unchanged = ['answers', 'gymSessions', 'gymSets', 'runs', 'weightEntries', 'foodDays', 'foodEntries', 'questions']
     .filter((name) => name in before)
     .filter((name) => JSON.stringify(ids(after[name])) !== JSON.stringify(ids(before[name])) || JSON.stringify(after[name]) !== JSON.stringify(before[name]));
-  check('A: and every answer, session, set, run, plan, weight and Food rating is as it was', unchanged.length === 0, unchanged.join(', '));
+  check('A: and every answer, session, set, run, weight and Food rating is as it was', unchanged.length === 0, unchanged.join(', '));
+  // The starter plans (D205): the first load adds Push A and Push B, with
+  // the catalogue they are made of, to a device that has neither — and
+  // every plan and exercise it held is as it was.
+  const kept = (name) => {
+    const held = new Set(ids(before[name] ?? []));
+    return JSON.stringify(after[name].filter((row) => held.has(row.id))) === JSON.stringify(before[name] ?? []);
+  };
+  const heldPlans = new Set(ids(before.gymPlans ?? []));
+  const newPlans = after.gymPlans.filter((plan) => !heldPlans.has(plan.id)).map((plan) => plan.name).sort();
+  const hadStarter = (before.gymPlans ?? []).some((plan) => plan.name === 'Push A' || plan.name === 'Push B');
+  check('A: every plan and exercise it held is as it was, and the first load added Push A and Push B, once',
+    kept('gymPlans') && kept('exercises') && !hadStarter && JSON.stringify(newPlans) === '["Push A","Push B"]' &&
+      typeof after.settings[0]?.starterPlansSeededAt === 'string',
+    JSON.stringify({ plans: after.gymPlans.map((plan) => plan.name), added: newPlans }));
   const added = after.configSnapshots.filter((snapshot) => !before.configSnapshots.some((old) => old.id === snapshot.id));
   const inForce = [...after.configSnapshots].sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom) || a.createdAt.localeCompare(b.createdAt)).filter((s) => s.effectiveFrom <= UPDATE_DAY).at(-1);
   check('A: the first load wrote the three eras, dated on the update day',

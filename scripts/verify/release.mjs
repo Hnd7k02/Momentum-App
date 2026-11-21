@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, launch, settle } from './lib.mjs';
+import { URL_APP, check, summary, phone, onboard, clipped, smallTargets, launch, settle, storedPlans, openGymHub } from './lib.mjs';
 
 /**
  * The V1 release smoke test, against the **production build**.
@@ -107,6 +107,32 @@ const tally = (kind, seen, notices) => firstVisits[kind].push({ found: seen?.fou
   // A new device opens on the onboarding's opening page (D192).
   check('the app renders on a cold load',
     await page.locator('.onboarding').isVisible());
+  // The one thing a new device holds before its introduction (D205).
+  const seeded = await storedPlans(page);
+  check('a new device holds Push A and Push B, six built-in exercises each, and no other plan',
+    JSON.stringify(seeded.map((plan) => plan.name)) === '["Push A","Push B"]' &&
+      seeded.every((plan) => plan.exercises.length === 6 && plan.exercises.every((line) => line.exerciseId.startsWith('ex_'))),
+    JSON.stringify(seeded.map((plan) => [plan.name, plan.exercises.length])));
+  const beside = await page.evaluate(async () => {
+    const db = await new Promise((res, rej) => {
+      const r = indexedDB.open('momentum');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    const counts = {};
+    for (const name of [...db.objectStoreNames]) {
+      counts[name] = await new Promise((res, rej) => {
+        const r = db.transaction([name], 'readonly').objectStore(name).count();
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    }
+    db.close();
+    return counts;
+  });
+  const others = Object.entries(beside).filter(([name, count]) => count > 0 && !['settings', 'exercises', 'gymPlans'].includes(name));
+  check('and nothing else beside its settings and the exercise catalogue: no area, question, session, set or snapshot',
+    others.length === 0 && beside.settings === 1, JSON.stringify(beside));
   check('every asset loads from the project base path',
     errors.filter((e) => e.startsWith('requestfailed')).length === 0,
     errors.filter((e) => e.startsWith('requestfailed')).slice(0, 2).join(' | '));
@@ -124,9 +150,11 @@ const tally = (kind, seen, notices) => firstVisits[kind].push({ found: seen?.fou
   await page.goto(URL_APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
 
-  await onboard(page, { gym: 3, running: 2 });
+  await onboard(page, { gym: 3, running: 2, starterPlans: true });
   check('onboarding lands on Today, with no dead end',
     await page.getByRole('heading', { name: 'Heute' }).isVisible());
+  check('the introduction made no plan and took none: Push A and Push B, as before it (D205)',
+    JSON.stringify((await storedPlans(page)).map((plan) => plan.name)) === '["Push A","Push B"]');
 
   // Mind.
   const yes = page.locator('.answer-boolean__option--yes');
@@ -142,7 +170,14 @@ const tally = (kind, seen, notices) => firstVisits[kind].push({ found: seen?.fou
 
   // Training: one gym session and one run.
   // A workout is stored with its first saved set (D128), so log one.
+  // With plans on the device «Session eintragen» asks which — the two
+  // starter plans (D205) — and a free session is one of the answers.
   await page.locator('.week__log', { hasText: 'Session eintragen' }).click();
+  await page.waitForTimeout(700);
+  const offered = (await page.getByRole('dialog').textContent().catch(() => '')) ?? '';
+  check('«Session eintragen» offers Push A, Push B and a free session',
+    offered.includes('Push A') && offered.includes('Push B') && offered.includes('Freie Session'), offered.slice(0, 160));
+  await page.getByRole('button', { name: 'Freie Session' }).click();
   await page.waitForTimeout(900);
   await page.locator('.gym-session__bar').getByRole('button', { name: 'Übung hinzufügen' }).click();
   await page.waitForTimeout(500);
@@ -205,6 +240,28 @@ const tally = (kind, seen, notices) => firstVisits[kind].push({ found: seen?.fou
     check(`${name} renders with real data`,
       (await page.locator('.screen__title').count()) > 0);
   }
+
+  // Gym › Trainingspläne: the two starter plans, once (D205).
+  const plansCard = page.locator('.plans__slots').locator('xpath=..');
+  const planRows = async () => {
+    await openGymHub(page);
+    await page.locator('.plans__slots').waitFor({ state: 'visible' });
+    return ((await plansCard.textContent()) ?? '').replace(/\s+/g, ' ');
+  };
+  let listed = await planRows();
+  check('Gym › Trainingspläne lists Push A and Push B, six exercises each, two of five',
+    /Push A\s*6 Übungen/.test(listed) && /Push B\s*6 Übungen/.test(listed) && listed.includes('2 von 5 Plänen'), listed.slice(0, 200));
+  await plansCard.getByRole('button', { name: /Push A/ }).click();
+  await page.getByRole('button', { name: 'Plan löschen' }).click();
+  await page.getByRole('button', { name: 'Wirklich löschen?' }).click();
+  await page.waitForTimeout(600);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  listed = await planRows();
+  check('a deleted starter plan stays gone after a reload, and the other stays',
+    !listed.includes('Push A') && listed.includes('Push B') && listed.includes('1 von 5 Plänen') &&
+      JSON.stringify((await storedPlans(page)).map((plan) => plan.name)) === '["Push B"]', listed.slice(0, 200));
+  await tab(page, 'Heute');
 
   check('no console error anywhere in the journey', errors.length === 0,
     errors.slice(0, 3).join(' | '));

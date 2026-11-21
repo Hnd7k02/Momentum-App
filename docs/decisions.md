@@ -7528,3 +7528,95 @@ fewer than the first was red on a machine that had done nothing wrong.
 The second run may now draw as many as the first; the third must still
 draw fewer than the second and at most four fifths of the first. Nothing
 of the motion's own checks changes.
+
+## D205 — Push A and Push B: two training plans a device starts with, once
+
+**The owner's instruction (2026-11-21).** A fresh install is to open
+exactly as it does — the introduction from its opening page, nothing
+chosen (D192, D197), no data — with one exception: the two training plans
+**Push A** and **Push B** already stand under Gym › Trainingspläne when
+the introduction is done.
+
+- **Push A:** `ex_bench_press`, `ex_incline_press`,
+  `ex_high_to_low_cable_fly`, `ex_cable_lateral_raise`,
+  `ex_overhead_cable_extension`, `ex_triceps_pushdown`
+- **Push B:** `ex_overhead_cable_extension`, `ex_lateral_raise_machine`,
+  `ex_incline_press_machine`, `ex_chest_press_machine`,
+  `ex_cable_fly_low_to_high`, `ex_triceps_pushdown`
+
+**Decision.** `ensureStarterPlans()` (`storage/services/starterPlanService.ts`)
+is the last step of every configuration load. Where the settings record
+carries no `starterPlansSeededAt`, it makes sure the catalogue is there
+(`ensureExerciseCatalogue`) and creates the two plans through
+`trainingPlanService.createTrainingPlan` — as a plan the user writes is
+made: same record, same name snapshot per line, same limit — and then
+writes the instant into `settings.starterPlansSeededAt`.
+
+- **Once is a recorded fact, not a thing derived from the plans** — the
+  way `warmUpMarkUsed` is (D175). A starter plan its user deletes or
+  renames is theirs and never comes back; a second load writes nothing.
+  Two loads at once share one run.
+- **No duplicate, never over the limit.** A device that holds a plan
+  named "Push A" or "Push B" (trimmed, whatever its case) gets no second
+  one of that name and still gets the other. A device with one slot left
+  of `GYM.MAX_PLANS` gets Push A, a full one gets none — and both are
+  marked as done: a slot freed later brings nothing.
+- **An existing install** is given the plans on its first load after the
+  update, beside the plans it has; every record it held is as it was.
+- **A backup import does not seed.** The import replaces everything as
+  before and writes the mark where the file's settings carry none, so a
+  file written before D205 does not bring Push A and Push B in after it:
+  the device's plans are the file's. A file of this build carries the
+  mark with its settings — a field older builds do not read — and goes
+  there and back as the same file. `BACKUP_FORMAT_VERSION` stays 3 and
+  `SCHEMA_VERSION` stays 5. (A file with no settings record at all leaves
+  a device that starts as a new one, and is seeded as one.)
+- **Plans are configuration, not history.** No session, no set, no
+  snapshot and nothing scored arises; nothing under `core/` changed.
+  `createTrainingPlan` takes an optional creation instant, used only
+  here, a millisecond apart, because the list is ordered by it and A
+  stands before B.
+- **The introduction is unchanged** and still chooses nothing: it neither
+  shows the plans nor asks about them. What D192 and D197 say stays true
+  of the flow; this is the one thing put on a device for its user, and
+  nothing of its kind follows without a decision.
+
+**What follows from it, and is not new behaviour.** A device with plans
+is asked which when «Session eintragen» is tapped (WP2-1): on a new
+device that is now the chooser — Push A, Push B, «Freie Session» — where
+a device without a plan started a free workout at once. And the
+catalogue's records are written on the first load, where they were
+written when Gym was first opened: the same records by the same step.
+
+**Tests.** `starterPlans.test.ts` (11): the two lists; a fresh install
+still before its introduction, nothing chosen, holding the two plans, its
+settings and the catalogue and no other record; exactly the two after the
+introduction; a second load writes nothing; two loads at once seed once;
+a deleted plan stays gone and a renamed one renamed; the live profile of
+block 9 (`.github/fixtures/wp3-update/live-profile.json`) is given both
+beside its own, every other collection equal and every rating the same as
+without the seed; an existing "push a" gets no duplicate; the limit; an
+old backup imported into a seeded device is not seeded again, in the same
+format; a file of this build there and back. `updateRehearsal.test.ts`:
+its live device is now one without the mark, as the live build left it;
+"loses nothing" says that its plan and its exercises are as they were
+with the two plans added, and the way by the backup ends in the same
+state as the update in place *but for the starter plans*, which an import
+does not bring — stated, not weakened. Three files whose subject is a
+device without a plan (`trainingPlans.test.ts`,
+`TodayScreen.yesterday.test.tsx`, two catalogue tests) delete the two
+plans or clear the catalogue first, and say so.
+
+**Browser suites.** `release.mjs`: a new device holds Push A and Push B
+with six built-in exercises each and nothing else beside its settings and
+the catalogue; the introduction changes neither; «Session eintragen»
+offers both and a free session; Gym › Trainingspläne lists both, «2 von 5
+Plänen»; one deleted stays gone after a reload. `update-in-place.mjs`:
+the live build's device is given both on the first load of this build,
+every plan and exercise it held unchanged, and a second load writes
+nothing. `lib.mjs`'s `onboard()` deletes the two plans unless asked to
+keep them (`starterPlans: true`): the walks of the other suites were
+written for a device without a plan, and no check of theirs was removed.
+
+**Unchanged, checked.** `git diff f42823f -- .github/fixtures` is empty;
+every fingerprint and `domainOutputs.test.ts` as they were.

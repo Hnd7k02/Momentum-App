@@ -189,7 +189,12 @@ export async function importBackup(
 
   const { data } = result.backup;
   const contents: Partial<Record<StoreName, unknown[]>> = {
-    [STORES.settings]: data.settings ? [{ ...data.settings, id: 'settings' }] : [],
+    // A device that takes a backup has had the starter plans' one turn
+    // (D205): its plans are the backup's, and a file written before the
+    // seed existed must not bring Push A and Push B in after it.
+    [STORES.settings]: data.settings
+      ? [{ ...data.settings, id: 'settings', starterPlansSeededAt: data.settings.starterPlansSeededAt ?? nowIso() }]
+      : [],
     [STORES.domains]: data.domains,
     [STORES.questions]: data.questions,
     [STORES.answers]: data.answers,

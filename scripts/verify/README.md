@@ -495,6 +495,28 @@ The opening page has no «Weiter»: a tap anywhere goes on, and a faint
   the page takes the click itself instead, and the measurement is as it
   was.
 
+## Checks restated for the starter plans (D205)
+
+A device starts with the training plans Push A and Push B. No check was
+removed or weakened.
+
+- **`onboard()`** (`lib.mjs`) deletes the two plans after the walk unless
+  asked to keep them (`starterPlans: true`), as their user may
+  (`removeStarterPlans`): the walks of the suites were written for a
+  device without a plan, where «Session eintragen» starts a free workout
+  at once and the plans begin empty. The mark stays, so they do not
+  return.
+- **`release.mjs`** keeps them. *New:* a new device holds Push A and Push
+  B, six built-in exercises each, and nothing else beside its settings and
+  the catalogue; the introduction changes neither; Gym › Trainingspläne
+  lists both; one deleted stays gone after a reload. *Old:* «Session
+  eintragen» opens a workout. *New:* it offers Push A, Push B and a free
+  session, and the walk takes the free one.
+- **`update-in-place.mjs`**, «every answer, session, set, run, plan,
+  weight and Food rating is as it was». *New:* the same without the plans
+  and the exercises, and beside it: every plan and exercise the device
+  held is as it was, and the first load added Push A and Push B, once.
+
 ## Conventions
 
 `lib.mjs` holds the shared pieces: `CHROMIUM` (the one place the browser
@@ -514,6 +536,7 @@ how a 31px iOS switch is a 45px target — and a hairline separator is also an
 absolutely positioned `::before`, which must not be counted. Visually hidden
 controls, such as the file input behind an import button, are operated through
 the visible control that labels them and are skipped.
+
 
 ## What they do not cover
 

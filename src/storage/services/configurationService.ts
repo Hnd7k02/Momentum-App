@@ -16,6 +16,7 @@ import type {
   SettingsRecord,
 } from '../../core/model';
 import { normaliseWeights, type BossWeights } from '../../core/boss';
+import { ensureStarterPlans } from './starterPlanService';
 import { ensureCurrentSnapshot, ensureFoodRetired, ensureGymMetricEra, ensureSessionWindowEra } from '../configService';
 import { ensurePromotionConfirmation } from './promotionConfirmationService';
 import { legacySportPrompt, type LegacySportPrompt } from './legacySportService';
@@ -79,6 +80,9 @@ export async function loadConfiguration(): Promise<AppConfiguration> {
   // today (D150). After the steps above, so the snapshot they wrote for
   // today is the one that takes the field.
   await ensureGymMetricEra();
+  // Push A and Push B, once per device (D205). Plans only: nothing above
+  // and nothing scored reads them.
+  await ensureStarterPlans();
   const [settings, domains, questions, legacySportChoice] = await Promise.all([
     settingsRepository.getOrCreate(),
     domainsRepository.list(),

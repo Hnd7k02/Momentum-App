@@ -223,6 +223,16 @@ Never conflate them.
   performance keeps moving daily. An abstinence charge waits for its day to
   close, and the break tiles say it is pending. A legal write may never
   reverse a charge (`p8Reversal.test.ts`).
+- **A device starts with two training plans, once** (D205): Push A and
+  Push B, made by `ensureStarterPlans()` on a load through
+  `createTrainingPlan`, after the catalogue. That it has happened is a
+  recorded fact (`settings.starterPlansSeededAt`), never derived from the
+  plans: one the user deletes or renames never comes back, a plan of the
+  same name gets no twin, and `GYM.MAX_PLANS` holds. A backup import
+  writes the mark and seeds nothing. Plans are configuration — no
+  session, set, snapshot or scored value arises — and the onboarding
+  neither shows nor chooses them. Nothing else is put on a device for its
+  user without a decision.
 - **`finishedAt` is a fact nothing scores** (D129): a timestamp after
   "Fertig", `null` while a workout started in the app is running, absent for
   a session recorded before the field — which is finished. Never backfill it.
