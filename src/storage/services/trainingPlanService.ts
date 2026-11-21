@@ -105,11 +105,15 @@ function validateDraft(input: PlanDraftInput): string {
   return name;
 }
 
-export async function createTrainingPlan(input: PlanDraftInput): Promise<TrainingPlanRecord> {
+/** `createdAt` is now unless named: the starter plans name it, because the list is ordered by it. */
+export async function createTrainingPlan(
+  input: PlanDraftInput,
+  createdAt?: string,
+): Promise<TrainingPlanRecord> {
   const name = validateDraft(input);
   const existing = await listTrainingPlans();
   if (!planSlotsOf(existing.length).free) throw new PlanLimitError();
-  const stamp = nowIso();
+  const stamp = createdAt ?? nowIso();
   const record: TrainingPlanRecord = {
     id: createId('plan'),
     kind: TRAINING_PLAN_KIND,

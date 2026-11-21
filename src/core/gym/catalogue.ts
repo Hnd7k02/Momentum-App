@@ -123,6 +123,8 @@ export const EXERCISE_CATALOGUE: CatalogueExercise[] = [
 
   /* ── Back ──────────────────────────────────────────────────────────── */
   { id: 'ex_lat_pulldown', names: de('Latzug', 'Lat Pulldown'), detail: de('Latissimus', 'Latissimus'), muscles: ['back', 'biceps'], primary: ['back'], equipment: 'cable', movement: ['pull'] },
+  // A starter plan's exercise (Pull B): one arm at the cable from above.
+  { id: 'ex_single_arm_cable_pulldown', names: de('Latzug einarmig Kabel', 'Single-Arm Cable Pulldown'), detail: de('Latissimus', 'Latissimus'), muscles: ['back', 'biceps'], primary: ['back'], equipment: 'cable', movement: ['pull'] },
   { id: 'ex_lat_pulldown_wide', names: de('Latzug weit', 'Wide-Grip Lat Pulldown'), detail: de('Latissimus', 'Latissimus'), muscles: ['back', 'biceps'], primary: ['back'], equipment: 'cable', movement: ['pull'] },
   { id: 'ex_lat_pulldown_close', names: de('Latzug eng von oben', 'Close-Grip Lat Pulldown'), detail: de('Latissimus', 'Latissimus'), muscles: ['back', 'biceps'], primary: ['back'], equipment: 'cable', movement: ['pull'] },
   { id: 'ex_lat_pulldown_neutral', names: de('Latzug neutraler Griff', 'Neutral-Grip Lat Pulldown'), detail: de('Latissimus', 'Latissimus'), muscles: ['back', 'biceps'], primary: ['back'], equipment: 'cable', movement: ['pull'] },

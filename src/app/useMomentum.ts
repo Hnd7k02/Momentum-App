@@ -21,6 +21,7 @@ import {
   type OnboardingSelection,
 } from '../storage/services/configurationService';
 import { applyLegacySportChoice } from '../storage/services/legacySportService';
+import { ensureStarterPlans } from '../storage/services/starterPlanService';
 import type { LegacySportChoice } from '../core/migration/legacySport';
 import type { AreasActions } from '../features/areas/AreasScreen';
 import type { WeightUnit } from '../core/gym/weight';
@@ -53,6 +54,8 @@ export function useMomentum() {
 
   const refresh = useCallback(async () => {
     try {
+      // The starter training plans, once per device. Plans only.
+      await ensureStarterPlans();
       const configuration = await loadConfiguration();
       setState({ status: 'ready', configuration });
     } catch (error: unknown) {

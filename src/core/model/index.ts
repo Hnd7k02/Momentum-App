@@ -430,6 +430,13 @@ export interface SettingsRecord {
    * record.
    */
   warmUpMarkUsed?: true;
+  /**
+   * When this device was given its starter training plans. It records that
+   * the seed has had its one turn and nothing else: a starter plan the user
+   * deletes never comes back. Nothing scored reads it. Absent means the
+   * seed has not run on this record.
+   */
+  starterPlansSeededAt?: string;
   onboardingCompletedAt: string | null;
   /**
    * The highest rank the user has already been shown.

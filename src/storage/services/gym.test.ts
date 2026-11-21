@@ -125,7 +125,8 @@ describe('the exercise catalogue', () => {
   it('brings the entries of block 7D to a device that holds the 49 before it, and leaves those 49 as they were', async () => {
     // A device seeded before block 7D: the 49 entries as that build wrote
     // them, on its own day, and one of them renamed by its user since.
-    const ids49 = new Set(EXERCISE_CATALOGUE.map((entry) => entry.id).filter((id) => !BLOCK_7D_IDS.has(id)));
+    // (The one-arm cable pulldown came later still, with the starter plans.)
+    const ids49 = new Set(EXERCISE_CATALOGUE.map((entry) => entry.id).filter((id) => !BLOCK_7D_IDS.has(id) && id !== 'ex_single_arm_cable_pulldown'));
     expect(ids49.size).toBe(49);
     const before = catalogueRecords('2026-01-05T08:00:00.000Z').filter((record) => ids49.has(record.id));
     const renamed = { ...before.find((record) => record.id === 'ex_lat_pulldown')!, name: 'Latzug breit', updatedAt: '2026-02-01T08:00:00.000Z' };

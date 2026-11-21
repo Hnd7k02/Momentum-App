@@ -87,6 +87,11 @@ const WP3: Pinned[] = [
   ['ex_front_raise', 'Front Raise', ['shoulders'], ['shoulders']],
 ];
 
+/** Added with the starter plans: Pull B's one-arm pulldown. */
+const STARTER: Pinned[] = [
+  ['ex_single_arm_cable_pulldown', 'Single-Arm Cable Pulldown', ['back', 'biceps'], ['back']],
+];
+
 /**
  * The 85 ids block 7D adds (D171, D188) — 84 at its STOP and the Bayesian
  * cable curl the owner asked for after it — with the mapping he sees on the
@@ -192,12 +197,29 @@ const BRIEF_NAMES_DE = [
 ];
 
 describe('the catalogue after WP2-1', () => {
-  it('has 134 entries with unique ids', () => {
+  it('has 135 entries with unique ids', () => {
     // 49 until block 7D, which adds 85 (D171, D188): 84 at its STOP and
-    // the Bayesian cable curl the owner asked for after it.
-    expect(EXERCISE_CATALOGUE).toHaveLength(134);
-    expect(new Set(EXERCISE_CATALOGUE.map((entry) => entry.id)).size).toBe(134);
-    expect(EXERCISE_CATALOGUE).toHaveLength(ITERATION_2.length + WP2_1.length + WP3.length + BLOCK_7D.length);
+    // the Bayesian cable curl the owner asked for after it — and the
+    // one-arm cable pulldown of the starter plans.
+    expect(EXERCISE_CATALOGUE).toHaveLength(135);
+    expect(new Set(EXERCISE_CATALOGUE.map((entry) => entry.id)).size).toBe(135);
+    expect(EXERCISE_CATALOGUE).toHaveLength(ITERATION_2.length + WP2_1.length + WP3.length + BLOCK_7D.length + STARTER.length);
+  });
+
+  it('adds the one-arm cable pulldown with its mapping (starter plans)', () => {
+    for (const [id, en, muscles, primary, loadType] of STARTER) {
+      const entry = catalogueEntry(id);
+      expect(entry, id).toBeDefined();
+      expect(entry!.names.en, id).toBe(en);
+      expect(entry!.muscles, id).toEqual(muscles);
+      expect(entry!.primary, id).toEqual(primary);
+      expect(entry!.loadType, id).toBe(loadType);
+    }
+    const pulldown = catalogueEntry('ex_single_arm_cable_pulldown')!;
+    expect(pulldown.names.de).toBe('Latzug einarmig Kabel');
+    expect(pulldown.detail).toEqual({ de: 'Latissimus', en: 'Latissimus' });
+    expect(pulldown.equipment).toBe('cable');
+    expect(pulldown.movement).toEqual(['pull']);
   });
 
   it('adds the front raise with the approved mapping (WP3, B12)', () => {
@@ -294,7 +316,7 @@ describe('the catalogue after block 7D (D171)', () => {
       expect(entry!.loadType, id).toBe(loadType);
     }
     // No id is in two tables, and every entry is in one.
-    const pinned = [...ITERATION_2, ...WP2_1, ...WP3, ...BLOCK_7D].map(([id]) => id);
+    const pinned = [...ITERATION_2, ...WP2_1, ...WP3, ...BLOCK_7D, ...STARTER].map(([id]) => id);
     expect(new Set(pinned).size).toBe(pinned.length);
     expect([...pinned].sort()).toEqual(EXERCISE_CATALOGUE.map((entry) => entry.id).sort());
   });
